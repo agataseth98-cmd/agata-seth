@@ -50,7 +50,68 @@
         "gratis": null
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.458,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 4.86,
+          "amostra": 13
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 36.33,
+          "amostra": 13
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.8,
+          "amostra": 5
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-2.5-flash",
+          "versao_resolvida": "gemini-2.5-flash",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     },
     "gemini/gemini-3-flash-preview": {
@@ -73,7 +134,68 @@
         "gratis": null
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.25,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 4.44,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 28.64,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 5
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3-flash-preview",
+          "versao_resolvida": "gemini-3-flash-preview",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     },
     "gemini/gemini-3.1-flash-lite": {
@@ -96,7 +218,78 @@
         "gratis": null
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 7.66,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 16.03,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     },
     "gemini/gemini-3.5-flash-lite": {
@@ -106,7 +299,78 @@
         "janela": 1048576,
         "saida_max": 65536
       },
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 10.8,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 16.42,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.5-flash-lite",
+          "versao_resolvida": "gemini-3.5-flash-lite",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     },
     "mistral/codestral-latest": {
@@ -124,7 +388,198 @@
         "gratis": null
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 1.08,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 2.41,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 1.58,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 43.46,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_conversa",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_ferramenta",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/codestral-latest",
+          "versao_resolvida": "codestral-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_json",
+          "valor": 0.917,
+          "amostra": 6
+        }
+      ],
       "observado": []
     },
     "mistral/ministral-14b-latest": {
@@ -134,13 +589,485 @@
         "janela": 256000,
         "saida_max": null
       },
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 2.1,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 4.56,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 0.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.857,
+          "amostra": 7
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:c49138b1ce26 rodada:20261024-120228",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 2.11,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 3.56,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 2.83,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 4.74,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.75,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_conversa",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_ferramenta",
+          "valor": 0.917,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_json",
+          "valor": 0.583,
+          "amostra": 6
+        }
+      ],
       "observado": []
     },
     "ollama-local/qwen3-30b-a3b-64k:latest": {
       "catalogo": null,
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 5.15,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 167.85,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.583,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_contexto_longo",
+          "valor": 0.5,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 6.19,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 177.84,
+          "amostra": 30
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 0.75,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_contexto_longo",
+          "valor": 0.667,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_conversa",
+          "valor": 0.583,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_ferramenta",
+          "valor": 0.917,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a727b4f692ed rodada:20261024-185841 rotulo-humano-ou-criterio",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3-30b-a3b-64k:latest",
+          "versao_resolvida": "qwen3-30b-a3b-64k:latest",
+          "data": "2026-10-24",
+          "metrica": "qualidade_json",
+          "valor": 0.667,
+          "amostra": 6
+        }
+      ],
       "observado": []
     },
     "openrouter/cohere/north-mini-code:free": {
@@ -162,7 +1089,78 @@
         "gratis": true
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 5.48,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 17.42,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     },
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
@@ -184,13 +1182,145 @@
         "gratis": true
       },
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.25,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 5.07,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 15.87,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 5
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 1.0,
+          "amostra": 6
+        }
+      ],
       "observado": []
     },
     "zai/glm-4.7-flash": {
       "catalogo": null,
       "declarado": null,
-      "medido": [],
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.042,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 6.4,
+          "amostra": 23
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 31.87,
+          "amostra": 23
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
       "observado": []
     }
   }
