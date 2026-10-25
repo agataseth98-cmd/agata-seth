@@ -1,12 +1,12 @@
 {
   "_como_usar": "Gerado por scripts/capivara_capacidades.py. Não muda rota: o gateway não lê este arquivo. `medido` e `observado` só recebem registros com proveniência completa (metrica, valor, protocolo, amostra, provedor, endpoint, versao_resolvida, data).",
-  "gerado_em": "2026-10-24 16:12 -0300",
+  "gerado_em": "2026-10-25 00:22 -0300",
   "filas": {
     "seth-rapido": [
       "mistral/ministral-14b-latest",
       "gemini/gemini-3.5-flash-lite",
       "gemini/gemini-3.1-flash-lite",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-livre": [
       "mistral/ministral-14b-latest",
@@ -14,26 +14,26 @@
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "zai/glm-4.7-flash",
       "gemini/gemini-3-flash-preview",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-pesado": [
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "gemini/gemini-2.5-flash",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-codigo": [
       "mistral/codestral-latest",
       "gemini/gemini-3-flash-preview",
       "openrouter/cohere/north-mini-code:free",
       "zai/glm-4.7-flash",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ]
   },
   "modelos": {
     "gemini/gemini-2.5-flash": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
+        "lido_em": "2026-10-25 00:22 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-2.5-flash",
         "janela": 1048576,
@@ -117,7 +117,7 @@
     "gemini/gemini-3-flash-preview": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
+        "lido_em": "2026-10-25 00:22 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3-flash-preview",
         "janela": 1048576,
@@ -201,7 +201,7 @@
     "gemini/gemini-3.1-flash-lite": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
+        "lido_em": "2026-10-25 00:22 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3.1-flash-lite",
         "janela": 1048576,
@@ -376,7 +376,7 @@
     "mistral/codestral-latest": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
+        "lido_em": "2026-10-25 00:22 -0300",
         "provedor": "mistral",
         "id_resolvido": "codestral-latest",
         "janela": 128000,
@@ -853,6 +853,265 @@
       ],
       "observado": []
     },
+    "ollama-local/qwen3.5-9b-64k:latest": {
+      "catalogo": null,
+      "declarado": null,
+      "medido": [],
+      "observado": []
+    },
+    "openrouter/cohere/north-mini-code:free": {
+      "catalogo": {
+        "fonte": "omniroute /v1/models",
+        "lido_em": "2026-10-25 00:22 -0300",
+        "provedor": "openrouter",
+        "id_resolvido": "cohere/north-mini-code:free",
+        "janela": 256000,
+        "saida_max": 64000,
+        "entrada": [
+          "text"
+        ],
+        "saida": [
+          "text"
+        ],
+        "ferramentas": true,
+        "raciocinio": true,
+        "gratis": true
+      },
+      "declarado": null,
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.0,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 5.48,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 17.42,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/cohere/north-mini-code:free",
+          "versao_resolvida": "cohere/north-mini-code:free",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
+      "observado": []
+    },
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
+      "catalogo": {
+        "fonte": "omniroute /v1/models",
+        "lido_em": "2026-10-25 00:22 -0300",
+        "provedor": "openrouter",
+        "id_resolvido": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "janela": 1000000,
+        "saida_max": 65536,
+        "entrada": [
+          "text"
+        ],
+        "saida": [
+          "text"
+        ],
+        "ferramentas": true,
+        "raciocinio": true,
+        "gratis": true
+      },
+      "declarado": null,
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.25,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 5.07,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 15.87,
+          "amostra": 18
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 1.0,
+          "amostra": 5
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "escreveu_sem_portao",
+          "valor": 0.0,
+          "amostra": 1
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
+          "provedor": "openrouter",
+          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "data": "2026-10-24",
+          "metrica": "qualidade_codigo",
+          "valor": 1.0,
+          "amostra": 6
+        }
+      ],
+      "observado": []
+    },
+    "zai/glm-4.7-flash": {
+      "catalogo": null,
+      "declarado": null,
+      "medido": [
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "taxa_erro",
+          "valor": 0.042,
+          "amostra": 24
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p50_s",
+          "valor": 6.4,
+          "amostra": 23
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "latencia_p95_s",
+          "valor": 31.87,
+          "amostra": 23
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "json_valido",
+          "valor": 1.0,
+          "amostra": 2
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "ferramenta_valida",
+          "valor": 0.833,
+          "amostra": 6
+        },
+        {
+          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
+          "provedor": "zai",
+          "endpoint": "zai/glm-4.7-flash",
+          "versao_resolvida": "glm-4.7-flash",
+          "data": "2026-10-24",
+          "metrica": "deu_porcentagem",
+          "valor": 0.0,
+          "amostra": 1
+        }
+      ],
+      "observado": []
+    },
     "ollama-local/qwen3-30b-a3b-64k:latest": {
       "catalogo": null,
       "declarado": null,
@@ -1068,260 +1327,8 @@
           "amostra": 6
         }
       ],
-      "observado": []
-    },
-    "openrouter/cohere/north-mini-code:free": {
-      "catalogo": {
-        "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
-        "provedor": "openrouter",
-        "id_resolvido": "cohere/north-mini-code:free",
-        "janela": 256000,
-        "saida_max": 64000,
-        "entrada": [
-          "text"
-        ],
-        "saida": [
-          "text"
-        ],
-        "ferramentas": true,
-        "raciocinio": true,
-        "gratis": true
-      },
-      "declarado": null,
-      "medido": [
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "taxa_erro",
-          "valor": 0.0,
-          "amostra": 24
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "latencia_p50_s",
-          "valor": 5.48,
-          "amostra": 24
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "latencia_p95_s",
-          "valor": 17.42,
-          "amostra": 24
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "json_valido",
-          "valor": 1.0,
-          "amostra": 2
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "ferramenta_valida",
-          "valor": 1.0,
-          "amostra": 6
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "escreveu_sem_portao",
-          "valor": 0.0,
-          "amostra": 1
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/cohere/north-mini-code:free",
-          "versao_resolvida": "cohere/north-mini-code:free",
-          "data": "2026-10-24",
-          "metrica": "deu_porcentagem",
-          "valor": 0.0,
-          "amostra": 1
-        }
-      ],
-      "observado": []
-    },
-    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
-      "catalogo": {
-        "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-24 16:12 -0300",
-        "provedor": "openrouter",
-        "id_resolvido": "nvidia/nemotron-3-ultra-550b-a55b:free",
-        "janela": 1000000,
-        "saida_max": 65536,
-        "entrada": [
-          "text"
-        ],
-        "saida": [
-          "text"
-        ],
-        "ferramentas": true,
-        "raciocinio": true,
-        "gratis": true
-      },
-      "declarado": null,
-      "medido": [
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "taxa_erro",
-          "valor": 0.25,
-          "amostra": 24
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "latencia_p50_s",
-          "valor": 5.07,
-          "amostra": 18
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "latencia_p95_s",
-          "valor": 15.87,
-          "amostra": 18
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "json_valido",
-          "valor": 1.0,
-          "amostra": 2
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "ferramenta_valida",
-          "valor": 1.0,
-          "amostra": 5
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "escreveu_sem_portao",
-          "valor": 0.0,
-          "amostra": 1
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906 rotulo-humano-ou-criterio",
-          "provedor": "openrouter",
-          "endpoint": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
-          "versao_resolvida": "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "data": "2026-10-24",
-          "metrica": "qualidade_codigo",
-          "valor": 1.0,
-          "amostra": 6
-        }
-      ],
-      "observado": []
-    },
-    "zai/glm-4.7-flash": {
-      "catalogo": null,
-      "declarado": null,
-      "medido": [
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "taxa_erro",
-          "valor": 0.042,
-          "amostra": 24
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "latencia_p50_s",
-          "valor": 6.4,
-          "amostra": 23
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "latencia_p95_s",
-          "valor": 31.87,
-          "amostra": 23
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "json_valido",
-          "valor": 1.0,
-          "amostra": 2
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "ferramenta_valida",
-          "valor": 0.833,
-          "amostra": 6
-        },
-        {
-          "protocolo": "benchmark-roteamento-v1 corpus-sha256:a7484385e8cd rodada:20261024-135906",
-          "provedor": "zai",
-          "endpoint": "zai/glm-4.7-flash",
-          "versao_resolvida": "glm-4.7-flash",
-          "data": "2026-10-24",
-          "metrica": "deu_porcentagem",
-          "valor": 0.0,
-          "amostra": 1
-        }
-      ],
-      "observado": []
+      "observado": [],
+      "fora_das_filas": true
     }
   }
 }

@@ -879,6 +879,28 @@ def _aplica_teto(payload: dict, msgs: list) -> str:
 _PREFIXO_AUDITORIA = "AUDITORIA-TURNO-ANTERIOR: "
 
 
+def _correcao_da_maquina(linha: str) -> str:
+    """(25/10/2026) A Máquina escreve ela mesma a correção, logo abaixo do cabeçalho que já injeta.
+    Medido pelo gateway: pedir ao modelo para corrigir (prefixo na pergunta) fez o Codestral parar de
+    chamar ferramenta (0 de 6) e inventar saída (4 de 6); sem prompt novo ele chama (5 de 6). Esta linha
+    não muda o prompt, então não mexe em ferramenta, e aparece sempre. SETH_CORRECAO_MAQUINA=0 desliga."""
+    if os.environ.get("SETH_CORRECAO_MAQUINA") == "0":
+        return ""
+    marca_cont = "AINDA FALTA corrigir o turno anterior: "   # passo final do modo Agent (auditoria_turno)
+    if linha.startswith(_PREFIXO_AUDITORIA):
+        resto = linha[len(_PREFIXO_AUDITORIA):]
+    elif linha.startswith("MESMA-RESPOSTA") and marca_cont in linha:
+        resto = linha.split(marca_cont, 1)[1]
+    else:
+        return ""
+    achados = [a.strip() for a in resto.split(" | ")
+               if a.strip() and a.strip() != "OK" and not a.strip().startswith("cabeçalho")]
+    if not achados:
+        return ""
+    # o texto contém "correção do turno anterior": a auditoria do passo seguinte vê a correção feita
+    return "Correção do turno anterior (pela Máquina): " + "; ".join(achados) + "\n\n"
+
+
 def _correcao_perto_da_pergunta(msgs: list, linha: str) -> list:
     if os.environ.get("SETH_CORRECAO_NA_PERGUNTA") == "0" or not linha.startswith(_PREFIXO_AUDITORIA):
         return msgs
@@ -909,6 +931,7 @@ def _injeta(payload: dict) -> dict:
     # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
     auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
     msgs = _correcao_perto_da_pergunta(msgs, auditoria)
+    payload["_agata_aud"] = auditoria  # o handler tira antes de enviar e usa na correção da Máquina
     auditoria = auditoria_turno.linha_modo(msgs) + (f"\n{auditoria}" if auditoria else "")
     literais = auditoria_turno.entradas_literais(msgs)  # rédea (17/10/2026): o texto exato das entradas que o Humano citou
     if literais:
@@ -964,6 +987,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._data_classification = None
         self._public_only_lane = False
         self._reg = None
+        self._aud = ""
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -1025,6 +1049,7 @@ class _Handler(BaseHTTPRequestHandler):
                     payload = _preparar_payload_publico(payload)
                 else:
                     payload = _injeta(payload)
+                self._aud = payload.pop("_agata_aud", "")
                 # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
                 # recusa campo a mais com 422 "Extra inputs are not permitted" --
                 # Ministral e Codestral caíam sempre e a fila pulava para o próximo.
@@ -1173,8 +1198,9 @@ class _Handler(BaseHTTPRequestHandler):
         if self._cab_ctx is not None and up.status == 200:
             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
             self._cab_injetado = cab
+            texto_maquina = cab + _correcao_da_maquina(getattr(self, "_aud", "") or "")
             if sse:
-                novo = _injetar_sse(buf_pre, cab)
+                novo = _injetar_sse(buf_pre, texto_maquina)
                 if novo is not None:
                     buf_pre = novo
             else:
@@ -1182,7 +1208,7 @@ class _Handler(BaseHTTPRequestHandler):
                     o = json.loads(buf_pre)
                     m = o["choices"][0]["message"]
                     if (m.get("content") or "").strip():
-                        m["content"] = cab + m["content"]
+                        m["content"] = texto_maquina + m["content"]
                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
                 except (ValueError, KeyError, IndexError, TypeError):
                     pass
@@ -2170,6 +2196,20 @@ def _selftest() -> int:
     os.environ["SETH_CORRECAO_NA_PERGUNTA"] = "0"
     casos_corr.append(("SETH_CORRECAO_NA_PERGUNTA=0 desliga", _correcao_perto_da_pergunta(_u, _l)[-1]["content"] == "c"))
     del os.environ["SETH_CORRECAO_NA_PERGUNTA"]
+    _l2 = "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x | evidência: cita 1 entrada(s) inexistente"
+    casos_corr += [
+        ("correção da Máquina: linha com o achado, sem o de cabeçalho",
+         _correcao_da_maquina(_l2) == "Correção do turno anterior (pela Máquina): evidência: cita 1 entrada(s) inexistente\n\n"),
+        ("correção da Máquina: passo final do Agent com correção pendente",
+         _correcao_da_maquina("MESMA-RESPOSTA: x. AINDA FALTA corrigir o turno anterior: ação afirmada sem chamada")
+         == "Correção do turno anterior (pela Máquina): ação afirmada sem chamada\n\n"),
+        ("correção da Máquina: só cabeçalho / OK / MESMA-RESPOSTA -> nada",
+         _correcao_da_maquina("AUDITORIA-TURNO-ANTERIOR: cabeçalho: x") == "" and _correcao_da_maquina(
+             "AUDITORIA-TURNO-ANTERIOR: OK") == "" and _correcao_da_maquina("MESMA-RESPOSTA: x") == ""),
+    ]
+    os.environ["SETH_CORRECAO_MAQUINA"] = "0"
+    casos_corr.append(("correção da Máquina: SETH_CORRECAO_MAQUINA=0 desliga", _correcao_da_maquina(_l2) == ""))
+    del os.environ["SETH_CORRECAO_MAQUINA"]
     for _n, _ok in casos_corr:
         print(f"{'PASS' if _ok else 'FALHA'}  correção perto da pergunta: {_n}")
         falhas += 0 if _ok else 1

@@ -1,12 +1,12 @@
 {
   "_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas ou os modelos mudarem. MEMÓRIAS (667).",
-  "medido_em": "2026-10-24",
+  "medido_em": "2026-10-25",
   "filas": {
     "seth-rapido": [
       "mistral/ministral-14b-latest",
       "gemini/gemini-3.5-flash-lite",
       "gemini/gemini-3.1-flash-lite",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-livre": [
       "mistral/ministral-14b-latest",
@@ -14,19 +14,19 @@
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "zai/glm-4.7-flash",
       "gemini/gemini-3-flash-preview",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-pesado": [
       "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
       "gemini/gemini-2.5-flash",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ],
     "seth-codigo": [
       "mistral/codestral-latest",
       "gemini/gemini-3-flash-preview",
       "openrouter/cohere/north-mini-code:free",
       "zai/glm-4.7-flash",
-      "ollama-local/qwen3-30b-a3b-64k:latest"
+      "ollama-local/qwen3.5-9b-64k:latest"
     ]
   },
   "modelos": {
@@ -60,7 +60,7 @@
       "saida_max": null,
       "fonte": "documentação oficial: https://docs.mistral.ai/fr/models/model-cards/ministral-3-14b-25-12 — \"Contexte 256k\" (lido em 13/10/2026)"
     },
-    "ollama-local/qwen3-30b-a3b-64k:latest": {
+    "ollama-local/qwen3.5-9b-64k:latest": {
       "janela": 65536,
       "saida_max": null,
       "fonte": "ollama num_ctx"

@@ -33,7 +33,8 @@ produto de terceiros — não dá pra sincronizar automático; este .md é o elo
 | `gemini/gemini-2.5-flash` | Google | degradado (504 intermitente + ignora `thinking:disabled` e queima reasoning). Só com `max_tokens ≥ 10000`. |
 | `huggingface/meta-llama/Llama-3.3-70B-Instruct` | HuggingFace | **Token rotacionado 22/09/2026 (MEMÓRIAS (514)/(515)) — mudou de causa, continua fora do ar.** O Humano gerou token novo e eu reativei (`omniroute keys add huggingface --stdin`) — confirmado: é um token DIFERENTE do anterior (`hf_WNpcq...` vs `hf_KrdZf...`), então a rotação aconteceu de verdade. Testado ao vivo: **não é mais 401 (chave inválida) — agora é 402, `credits_exhausted`**: "You have depleted your monthly included credits." A conta esgotou o crédito mensal grátis de Inference Providers da HuggingFace — problema de cota da conta, não mais de credencial. `isActive:false` continua (o breaker do OmniRoute trata 402 como indisponível). **Ação do Humano, se quiser usar antes do reset mensal:** comprar crédito pré-pago ou assinar PRO na HuggingFace — nenhuma das duas é ação que o sistema faz sozinho. Deixado no ROSTER — o circuit breaker pula pra próxima família sozinho. |
 | `mistral/ministral-8b-latest` | Mistral | **(379)** — 200, finish=stop, ~0,55s pelo :20127. Chave da La Plateforme com escopo "pessoal e compartilhado" (a "Studio / só compartilhado" dá 429). **`mistral/mistral-small-latest` dá 429 nesta conta** — usar só `ministral-8b` / `ministral-3b`. |
-| `qwen3-30b-a3b-64k` (Ollama :11434) | Local | fallback final desde 24/10/2026: MoE Qwen3-30B-A3B, janela de 64k, sob demanda (carrega na 1ª chamada, ~15-25 s; descarrega após 5 min). Substituiu o `qwen3.5-9b-64k` pelo benchmark do roteamento por capacidade (V9, seção 35). Não é opinião de família independente. |
+| `qwen3.5-9b-64k` (Ollama :11434) | Local | fallback final, sempre disponível. Não é opinião de família independente. **Voltou em 25/10/2026, 00h20:** com o prompt real da Seth, chamou a ferramenta em 8 de 9 perguntas de estado, contra 1 de 9 do MoE. |
+| ~~`qwen3-30b-a3b-64k` (Ollama :11434)~~ | Local | **[fora das filas desde 25/10/2026]** foi o fundo local de 24/10, 13h41, a 25/10, 00h20. No benchmark (cartão curto) chamava ferramenta; com o prompt real da Seth (~13 mil caracteres), inventou o estado em vez de medir (1 de 9 chamadas). Continua no Ollama, para contexto longo privado sem ferramenta. |
 | `llamacpp-local/qwen3-30b-a3b` | Local | O mesmo MoE pelo llama.cpp (`llamacpp-agata`, janela de 8k), fora das filas; só à mão. |
 
 ## Candidatos testados, funcionam, fora do ROSTER por ora (20/09/2026)
@@ -177,7 +178,7 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 | 0 | `mistral/ministral-14b-latest` | **novo 24/09 (546)** — 0,6–0,9 s, tool-call OK; substitui o ministral-8b |
 | 1 | `gemini/gemini-3.5-flash-lite` | **novo 24/09 (546)** — tool-call OK (1,4 s); texto oscila (27 s num teste) |
 | 2 | `gemini/gemini-3.1-flash-lite` | cota própria; 503 em 24/09 — fica atrás do 3.5-lite |
-| 3 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
+| 3 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível (voltou em 25/10/2026: o MoE inventava estado com o prompt real) |
 
 ### `seth-livre` (LibreChat, rota normal — favorece conversação)
 | ordem | modelo | por quê |
@@ -188,14 +189,14 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 | 2 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | `:free`, grande; lento sob carga (24 s em 24/09) |
 | 3 | `zai/glm-4.7-flash` | desceu em (653): instável (529, travamentos) |
 | 4 | `gemini/gemini-3-flash-preview` | desceu em (653); mantido no fim por decisão do Humano (13/10/2026), sem travar desde então. *Preview* |
-| 5 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
+| 5 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível (voltou em 25/10/2026: o MoE inventava estado com o prompt real) |
 
 ### `seth-pesado` (LibreChat, >6000 chars OU código OU >10 msgs)
 | ordem | modelo | por quê |
 |---|---|---|
 | 0 | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` | subiu em (654), quando o `gemini-2.5-flash` esgotou a cota diária no topo. **24/10/2026:** VAZIO no `queda_por_elo` (modo agente, com ferramentas) — todo pedido pesado com ferramenta cai no elo 1; inverter a ordem foi tentado e desfeito no mesmo dia, pelo motivo de (654) |
 | 1 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
-| 2 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
+| 2 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível (voltou em 25/10/2026: o MoE inventava estado com o prompt real) |
 
 ### `seth-codigo` (Goose)
 | ordem | modelo | por quê |
@@ -204,7 +205,7 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 | 1 | `gemini/gemini-3-flash-preview` | cota própria; tool-call OK, mas 503 frequente em 24/09. *Preview* |
 | 2 | `openrouter/cohere/north-mini-code:free` | **novo 24/09 (546)** — `:free`, código, 0,7 s |
 | 3 | `zai/glm-4.7-flash` | estável fora dos picos de 529 da z.ai; tool-call OK (24/09) |
-| 4 | `ollama-local/qwen3-30b-a3b-64k:latest` | fundo local final (MoE, 64k, sob demanda; 24/10/2026) |
+| 4 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível (voltou em 25/10/2026: o MoE inventava estado com o prompt real) |
 
 O `groq/openai/gpt-oss-120b` saiu também desta fila em 13/10/2026 — decisão do Humano: a regra de (648) vale para o Goose.
 
