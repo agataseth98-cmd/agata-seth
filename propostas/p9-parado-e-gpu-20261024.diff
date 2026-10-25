@@ -1,0 +1,136 @@
+diff --git a/scripts/perimetro/p09_servicos_declarados.sh b/scripts/perimetro/p09_servicos_declarados.sh
+index 7283cae..dd4ce57 100644
+--- a/scripts/perimetro/p09_servicos_declarados.sh
++++ b/scripts/perimetro/p09_servicos_declarados.sh
+@@ -20,7 +20,12 @@ p9_servicos_declarados() {
+   done
+   for u in "${P9_UNIDADES_USUARIO[@]}"; do
+     estado="$(systemctl --user is-active "$u" 2>/dev/null)"
+-    if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; }; then
++    # (24/10/2026) serviço parado do jeito normal fica 'inactive', não 'failed': no teste de queda
++    # e volta o gateway, o OmniRoute e o Laya caíram e o P-9 não disse nada. Agora 'inactive' também
++    # avisa, menos o oneshot (termina sozinho e fica parado de propósito, ex.: agata-manutencao.service).
++    if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
++        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] \
++             && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
+       echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+       avisos=1
+     fi
+@@ -54,7 +59,13 @@ p9_servicos_declarados() {
+ # P9_OLLAMA_PS_URL existe só para o teste isolado apontar um servidor falso.
+ _p9_ollama_na_gpu() {
+   local url="${P9_OLLAMA_PS_URL:-http://127.0.0.1:11434/api/ps}" saida
+-  saida="$(python3 - "$url" <<'PYEOF' 2>/dev/null
++  # (24/10/2026) modelo maior que a GPU (o MoE de 19,8 GB numa 4060 de 8 GB) nunca cabe inteiro:
++  # dividido é o normal dele. Só avisa se ele usa menos que P9_GPU_FRACAO da VRAM total da placa.
++  local gpu_mib="${P9_GPU_TOTAL_MIB:-}"
++  if [ -z "$gpu_mib" ] && command -v nvidia-smi >/dev/null 2>&1; then
++    gpu_mib="$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -dc '0-9')"
++  fi
++  saida="$(python3 - "$url" "${gpu_mib:-0}" "${P9_GPU_FRACAO:-0.75}" <<'PYEOF' 2>/dev/null
+ import json, sys, urllib.request
+ sem_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))  # localhost nunca via proxy
+ try:
+@@ -69,6 +80,9 @@ for m in modelos:
+         total, vram = int(m.get("size") or 0), int(m.get("size_vram") or 0)
+     except (TypeError, ValueError):
+         continue
++    gpu = int(sys.argv[2] or 0) * 1024 * 1024
++    if total > gpu > 0 and vram >= float(sys.argv[3]) * gpu:
++        continue  # maior que a placa e usando o que cabe nela: normal
+     if total > 0 and vram < total:
+         print(f"{m.get('name') or m.get('model') or '?'}\t{100 * vram // total}")
+ PYEOF
+diff --git a/scripts/testar_p9.sh b/scripts/testar_p9.sh
+new file mode 100755
+index 0000000..3fe6ced
+--- /dev/null
++++ b/scripts/testar_p9.sh
+@@ -0,0 +1,66 @@
++#!/usr/bin/env bash
++# Contraprovas offline do P-9 (24/10/2026): serviço parado ('inactive') avisa, oneshot não;
++# modelo maior que a GPU usando o que cabe nela não avisa, o que cabe e está dividido avisa.
++# Sem systemd nem Ollama de verdade: `systemctl`, `docker` e `nvidia-smi` falsos no PATH e um
++# /api/ps falso servido por um python local. Saída 0 = todos os casos passaram.
++set -u
++RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++TMP="$(mktemp -d)"; trap 'kill "$PID_PS" 2>/dev/null; rm -rf "$TMP"' EXIT
++mkdir -p "$TMP/bin"
++cat > "$TMP/bin/systemctl" <<'EOF'
++#!/usr/bin/env bash
++# estado por unidade: lido de $P9F_ESTADOS ("unidade=estado:tipo ...")
++u=""; for a in "$@"; do case "$a" in *.service|*.timer) u="$a";; esac; done
++for par in $P9F_ESTADOS; do
++  nome="${par%%=*}"; resto="${par#*=}"; est="${resto%%:*}"; tipo="${resto#*:}"
++  if [ "$nome" = "$u" ]; then
++    case " $* " in *" is-active "*) echo "$est";; *" is-enabled "*) echo enabled;; *"Type"*) echo "$tipo";; esac
++    exit 0
++  fi
++done
++case " $* " in *" is-active "*) echo active;; *" is-enabled "*) echo enabled;; *"Type"*) echo simple;; esac
++EOF
++printf '#!/usr/bin/env bash\nexit 1\n' > "$TMP/bin/docker"
++printf '#!/usr/bin/env bash\ncase " $* " in *memory.total*) echo 8188;; *) echo "1, llama-server, 7000 MiB";; esac\n' > "$TMP/bin/nvidia-smi"
++chmod +x "$TMP/bin/"*
++PORTA=$((20000 + RANDOM % 9000))
++cat > "$TMP/ps.py" <<EOF
++import http.server, json, os
++class H(http.server.BaseHTTPRequestHandler):
++    def log_message(self, *a): pass
++    def do_GET(self):
++        corpo = open("$TMP/ps.json", "rb").read()
++        self.send_response(200); self.end_headers(); self.wfile.write(corpo)
++http.server.HTTPServer(("127.0.0.1", $PORTA), H).serve_forever()
++EOF
++echo '{"models": []}' > "$TMP/ps.json"
++python3 "$TMP/ps.py" & PID_PS=$!
++sleep 0.5
++# shellcheck source=/dev/null
++source "$RAIZ/scripts/perimetro/p09_servicos_declarados.sh"
++P9_UNIDADES_SISTEMA=(); P9_CONTAINERS_DOCKER=()
++P9_UNIDADES_USUARIO=("seth-gateway.service" "agata-manutencao.service")
++export P9_OLLAMA_PS_URL="http://127.0.0.1:$PORTA/api/ps"
++falhas=0
++caso() { if eval "$2"; then echo "PASS  $1"; else echo "FALHA $1"; falhas=$((falhas + 1)); fi; }
++rodar() { PATH="$TMP/bin:$PATH" p9_servicos_declarados 2>/dev/null; }
++
++export P9F_ESTADOS="seth-gateway.service=inactive:simple agata-manutencao.service=inactive:oneshot"
++out="$(rodar)"
++caso "serviço simple parado ('inactive') avisa" '[[ "$out" == *"seth-gateway.service"* ]]'
++caso "oneshot parado não avisa" '[[ "$out" != *"agata-manutencao.service"* ]]'
++export P9F_ESTADOS="seth-gateway.service=active:simple agata-manutencao.service=inactive:oneshot"
++caso "tudo no ar: nenhum aviso de unidade" '[[ "$(rodar)" != *"unidade de usuário"* ]]'
++
++G=$((1024 * 1024 * 1024))
++echo "{\"models\": [{\"name\": \"moe\", \"size\": $((198 * G / 10)), \"size_vram\": $((7 * G))}]}" > "$TMP/ps.json"
++caso "modelo maior que a GPU usando o que cabe: não avisa" '[[ "$(rodar)" != *"GPU"* ]]'
++echo "{\"models\": [{\"name\": \"moe\", \"size\": $((198 * G / 10)), \"size_vram\": $((2 * G))}]}" > "$TMP/ps.json"
++caso "modelo maior que a GPU com pouca VRAM (intruso): avisa" '[[ "$(rodar)" == *"moe"* ]]'
++echo "{\"models\": [{\"name\": \"9b\", \"size\": $((66 * G / 10)), \"size_vram\": $((3 * G))}]}" > "$TMP/ps.json"
++caso "modelo que cabe na GPU e está dividido: avisa (como antes)" '[[ "$(rodar)" == *"9b"* ]]'
++echo "{\"models\": [{\"name\": \"9b\", \"size\": $((66 * G / 10)), \"size_vram\": $((66 * G / 10))}]}" > "$TMP/ps.json"
++caso "modelo inteiro na GPU: não avisa" '[[ "$(rodar)" != *"GPU"* ]]'
++
++[ "$falhas" -eq 0 ] && echo "P-9: OK" || echo "P-9: $falhas FALHA(S)"
++exit "$falhas"
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index a08a20b..01406dd 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -694,6 +694,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ||
+   fi
+ fi
+ 
++# (24/10/2026) P-9: serviço parado avisa (menos oneshot); modelo maior que a GPU usando o que cabe não avisa.
++if [[ -z "$FILTRO" || "$FILTRO" == P-9 || "$FILTRO" == L2 || "$FILTRO" == "__AGREGADOS__" ]]; then
++  if bash "$RAIZ/scripts/testar_p9.sh" >/dev/null 2>&1; then
++    OK=$((OK + 1))
++  else
++    FALHOU=$((FALHOU + 1))
++    falhas_detalhe+=("P-9: contraprovas offline de serviço parado e de GPU (scripts/testar_p9.sh)")
++  fi
++fi
++
+ # Contraprovas estruturais do fluxo de escrita, classificação externa,
+ # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
+ # dispara quando qualquer uma dessas provas ou seus controles muda.
