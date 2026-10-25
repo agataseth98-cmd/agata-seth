@@ -694,6 +694,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-4 || "$FILTRO" == P-9 || "$FILTRO" == L2 ||
   fi
 fi
 
+# (24/10/2026) P-9: serviço parado avisa (menos oneshot); modelo maior que a GPU usando o que cabe não avisa.
+if [[ -z "$FILTRO" || "$FILTRO" == P-9 || "$FILTRO" == L2 || "$FILTRO" == "__AGREGADOS__" ]]; then
+  if bash "$RAIZ/scripts/testar_p9.sh" >/dev/null 2>&1; then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("P-9: contraprovas offline de serviço parado e de GPU (scripts/testar_p9.sh)")
+  fi
+fi
+
 # Contraprovas estruturais do fluxo de escrita, classificação externa,
 # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
 # dispara quando qualquer uma dessas provas ou seus controles muda.
