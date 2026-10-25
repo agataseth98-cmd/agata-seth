@@ -929,6 +929,22 @@ def _resgate_chunk(estado: dict, prefixo: str = "") -> bytes | None:
     return b"data: " + json.dumps(ev, ensure_ascii=False).encode("utf-8") + b"\n\n"
 
 
+def _resgate_json(corpo: bytes) -> bytes:
+    """O mesmo resgate na resposta sem stream: `content` vazio, sem ferramenta e com raciocínio ->
+    o raciocínio vira `content`. Independe do cabeçalho (25/10: na volta depois da ferramenta de
+    um turno já começado não há cabeçalho, e o resgate ficava de fora)."""
+    try:
+        o = json.loads(corpo)
+        m = o["choices"][0]["message"]
+    except (ValueError, KeyError, IndexError, TypeError):
+        return corpo
+    r = m.get("reasoning") or m.get("reasoning_content") or ""
+    if (m.get("content") or "").strip() or m.get("tool_calls") or not isinstance(r, str) or not r.strip():
+        return corpo
+    m["content"] = r.strip()
+    return json.dumps(o, ensure_ascii=False).encode("utf-8")
+
+
 def _correcao_da_maquina(linha: str) -> str:
     """(25/10/2026) A Máquina escreve ela mesma a correção, logo abaixo do cabeçalho que já injeta.
     Medido pelo gateway: pedir ao modelo para corrigir (prefixo na pergunta) fez o Codestral parar de
@@ -1245,6 +1261,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._log(f"upstream parou de responder ({e})", t0)
             up.close()
             return self._erro(504, f"upstream parou de responder: {e}")
+        if up.status == 200 and not sse and _resgate_ligado():
+            buf_pre = _resgate_json(buf_pre)
         if self._cab_ctx is not None and up.status == 200:
             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
             self._cab_injetado = cab
@@ -1260,9 +1278,6 @@ class _Handler(BaseHTTPRequestHandler):
                 try:
                     o = json.loads(buf_pre)
                     m = o["choices"][0]["message"]
-                    if (_resgate_ligado() and not (m.get("content") or "").strip() and not m.get("tool_calls")
-                            and (m.get("reasoning") or m.get("reasoning_content") or "").strip()):
-                        m["content"] = (m.get("reasoning") or m.get("reasoning_content")).strip()
                     if (m.get("content") or "").strip():
                         m["content"] = texto_maquina + m["content"]
                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
@@ -2281,6 +2296,12 @@ def _selftest() -> int:
         ("resgate: com texto do modelo -> nada", _resgate_chunk(_e2) is None),
         ("resgate: com chamada de ferramenta -> nada", _resgate_chunk(_e3) is None),
         ("resgate: sem raciocínio -> nada", _resgate_chunk({}) is None),
+        ("resgate sem stream: só raciocínio vira content", json.loads(_resgate_json(
+            b'{"choices":[{"message":{"content":"","reasoning":" ativo. "}}]}'))["choices"][0]["message"]["content"] == "ativo."),
+        ("resgate sem stream: com texto, com ferramenta ou corpo inválido -> intacto",
+         _resgate_json(b'{"choices":[{"message":{"content":"x","reasoning":"r"}}]}') == b'{"choices":[{"message":{"content":"x","reasoning":"r"}}]}'
+         and _resgate_json(b'{"choices":[{"message":{"content":"","tool_calls":[{}],"reasoning":"r"}}]}')
+         == b'{"choices":[{"message":{"content":"","tool_calls":[{}],"reasoning":"r"}}]}' and _resgate_json(b"nao") == b"nao"),
     ]
     _l2 = "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x | evidência: cita 1 entrada(s) inexistente"
     casos_corr += [
