@@ -871,6 +871,34 @@ def _aplica_teto(payload: dict, msgs: list) -> str:
             "o que faltou medir, escreva \"não medido\".")
 
 
+# (24/10/2026) A correção do turno anterior perto da pergunta. Medido: com a linha
+# AUDITORIA-TURNO-ANTERIOR só no fim do system de ~13 mil caracteres, Codestral, Ministral e o
+# MoE local corrigiram 1 vez em 9; com a mesma linha como prefixo curto da última pergunta do
+# Humano, 9 em 9 (Codestral, Ministral, Gemini 3.1 Flash-Lite). Achado só de cabeçalho fica de
+# fora (é com a Máquina). SETH_CORRECAO_NA_PERGUNTA=0 desliga.
+_PREFIXO_AUDITORIA = "AUDITORIA-TURNO-ANTERIOR: "
+
+
+def _correcao_perto_da_pergunta(msgs: list, linha: str) -> list:
+    if os.environ.get("SETH_CORRECAO_NA_PERGUNTA") == "0" or not linha.startswith(_PREFIXO_AUDITORIA):
+        return msgs
+    achados = [a.strip() for a in linha[len(_PREFIXO_AUDITORIA):].split(" | ")
+               if a.strip() and a.strip() != "OK" and not a.strip().startswith("cabeçalho")]
+    if not achados or not msgs or not isinstance(msgs[-1], dict) or msgs[-1].get("role") != "user":
+        return msgs
+    aviso = ("[Máquina, antes da pergunta: a sua resposta anterior foi conferida e tem erro. Comece com "
+             "\"Correção do turno anterior: …\" e não repita o erro. " + " | ".join(achados) + "]\n\n")
+    ultima = dict(msgs[-1])
+    c = ultima.get("content")
+    if isinstance(c, str):
+        ultima["content"] = aviso + c
+    elif isinstance(c, list):
+        ultima["content"] = [{"type": "text", "text": aviso}] + c
+    else:
+        return msgs
+    return msgs[:-1] + [ultima]
+
+
 def _injeta(payload: dict) -> dict:
     msgs = payload.get("messages")
     if not isinstance(msgs, list):
@@ -880,6 +908,7 @@ def _injeta(payload: dict) -> dict:
         return payload
     # resposta anterior do assistente conferida aqui, antes de mexer em `msgs` (662)
     auditoria = auditoria_turno.linha_estado(msgs, str(payload.get("model", "")))
+    msgs = _correcao_perto_da_pergunta(msgs, auditoria)
     auditoria = auditoria_turno.linha_modo(msgs) + (f"\n{auditoria}" if auditoria else "")
     literais = auditoria_turno.entradas_literais(msgs)  # rédea (17/10/2026): o texto exato das entradas que o Humano citou
     if literais:
@@ -2123,6 +2152,27 @@ def _selftest() -> int:
     falhas += 0 if ok17d else 1
     up.shutdown()
     gw.shutdown()
+    _u = [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}, {"role": "user", "content": "c"}]
+    _l = "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x | evidência: cita 1 entrada(s) inexistente | ação afirmada sem chamada"
+    _r = _correcao_perto_da_pergunta(_u, _l)
+    casos_corr = [
+        ("correção vira prefixo da última pergunta", _r[-1]["content"].startswith("[Máquina") and _r[-1]["content"].endswith("c")),
+        ("achado de cabeçalho fica de fora do prefixo", "cabeçalho: x" not in _r[-1]["content"]),
+        ("a mensagem original não é alterada", _u[-1]["content"] == "c"),
+        ("só cabeçalho -> nada", _correcao_perto_da_pergunta(_u, "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x")[-1]["content"] == "c"),
+        ("OK -> nada", _correcao_perto_da_pergunta(_u, "AUDITORIA-TURNO-ANTERIOR: OK")[-1]["content"] == "c"),
+        ("MESMA-RESPOSTA -> nada", _correcao_perto_da_pergunta(_u, "MESMA-RESPOSTA: x")[-1]["content"] == "c"),
+        ("conteúdo em lista recebe parte de texto na frente", _correcao_perto_da_pergunta(
+            [{"role": "user", "content": [{"type": "text", "text": "c"}]}], _l)[-1]["content"][0]["text"].startswith("[Máquina")),
+        ("última mensagem não é do usuário -> nada", _correcao_perto_da_pergunta(
+            _u + [{"role": "tool", "content": "t"}], _l)[-1]["content"] == "t"),
+    ]
+    os.environ["SETH_CORRECAO_NA_PERGUNTA"] = "0"
+    casos_corr.append(("SETH_CORRECAO_NA_PERGUNTA=0 desliga", _correcao_perto_da_pergunta(_u, _l)[-1]["content"] == "c"))
+    del os.environ["SETH_CORRECAO_NA_PERGUNTA"]
+    for _n, _ok in casos_corr:
+        print(f"{'PASS' if _ok else 'FALHA'}  correção perto da pergunta: {_n}")
+        falhas += 0 if _ok else 1
     print(f"\n{'SELFTEST OK' if not falhas else f'SELFTEST FALHOU ({falhas})'}")
     return 0 if not falhas else 1
 
