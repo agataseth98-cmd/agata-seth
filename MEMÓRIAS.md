@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 22e215e93a4d16dc8230ce3c90d5d715d1c11218
-  Escrito em: 26/10/2026 09:11 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18decd35595365b446eb0ab512721c0d6cf483bb
+  Escrito em: 26/10/2026 09:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18decd35595365b446eb0ab512721c0d6cf483bb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18decd35595365b446eb0ab512721c0d6cf483bb/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18decd35595365b446eb0ab512721c0d6cf483bb/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18decd35595365b446eb0ab512721c0d6cf483bb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18decd35595365b446eb0ab512721c0d6cf483bb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(849) DIÁRIO — 26/10/2026 · **Decisão do Humano: memória compartilhada do Conselho. Cache append-only comum a todos, não canônico; dele, uma vez por semana, sai uma Memória Canônica; o cache reinicia a cada 15 dias.** Nas palavras do Humano (09h40): "todos os modelos que fizerem parte do conselho devem compartilhar uma memória append only, Um Cache compartilhado não canônico, do qual uma vez por semana será gerado uma Memória Canônica, a cada semana as memorias vão para morno e depois para frio e depois para backup isso foi descidido, a cache se apaga e reinicia a cada 15 dias, isso foi o que propus e era para estar na V9 não é frente nova". Parâmetros confirmados às 09h50: (1) Memória Canônica semanal; um modelo propõe, a Máquina confere cada fato contra o cache e o Humano assina; (2) quente → morno a cada 15 dias, mantida a D3; (3) todos do Conselho leem tudo, com o filtro de segredo e de dado pessoal (P-20) na gravação, o que muda a regra "cada modelo só lê o que é seu" do C0 na V9 §4; (4) o cache se apaga a cada 15 dias, mas só se a memória semanal correspondente estiver no canon e o backup tiver passado no `restic check`. Faz parte da V9 (C0/F7, F8, §3 e §7), não é frente nova. O Claude Code tinha chamado isso de frente nova, e errou. Auditorias do Jev e do Laya: mecânicas, sem modelo julgando modelo. Implementação em fases, cada uma por proposta.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: V9 §0 (D3, D5), §3, §4, §7 e §13, e a lista de controle (linha 623) · Autorização: Humano — "confirmo os quatro parâmetros"
+
 (848) DIÁRIO — 26/10/2026 · **A voz da Seth fala o cabeçalho em português: sem hashes nem identificadores de modelo.** Aplica `voz-cabecalho-falavel-20261026`, assinado pelo Humano, depois da queixa dele: "falando em inglês com sotaque PT-BR". Medido: as respostas, a transcrição da fala dele e as vozes do Piper estão em pt-br. A causa era o que a voz lia. No 1º turno, o bloco de prontidão (sync, hashes, "Última entrada", "pronto.") não casava com `_CAB_RE` e era lido inteiro; nos outros turnos, era lido o identificador técnico do modelo. Agora `_nome_falavel` troca o identificador por um nome falável ("Nemotron", "Ministral"), e o bloco de prontidão vira "Agata Seth, <nome>, pronta.". Na resposta real das 08h54, o áudio caiu de 59,6 s para 5,1 s. Termos técnicos no corpo da resposta continuam soando inglês; tratá-los pede um dicionário de pronúncia, frente nova.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: registro de pedidos; whisper com fala pt-br do Piper; `.onnx.json` das vozes; servidor de teste `:8899`; selftest 33/33; clone com hooks; PR 555 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
