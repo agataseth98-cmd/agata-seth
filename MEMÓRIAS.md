@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 875bf04c0a60b2f67cecfca96ec55b2f4272a436
-  Escrito em: 26/10/2026 14:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0c178d036d176708d9bf930ff7e76f5af040a5c1
+  Escrito em: 26/10/2026 14:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/875bf04c0a60b2f67cecfca96ec55b2f4272a436/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/875bf04c0a60b2f67cecfca96ec55b2f4272a436/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/875bf04c0a60b2f67cecfca96ec55b2f4272a436/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/875bf04c0a60b2f67cecfca96ec55b2f4272a436/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/875bf04c0a60b2f67cecfca96ec55b2f4272a436/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0c178d036d176708d9bf930ff7e76f5af040a5c1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0c178d036d176708d9bf930ff7e76f5af040a5c1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0c178d036d176708d9bf930ff7e76f5af040a5c1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0c178d036d176708d9bf930ff7e76f5af040a5c1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0c178d036d176708d9bf930ff7e76f5af040a5c1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(858) DIÁRIO — 26/10/2026 · **Memória Canônica da semana 20/10 a 26/10/2026: 5 tópico(s) de 5 entrada(s) do cache do Conselho.** Texto em `extras/memoria-semanal/semana-2026-10-26.md`, assinado pelo Humano (V9 §37, M3; (849)). Origem: extração direta: nenhum tópico do modelo passou na conferência. A Máquina cortou 8 tópico(s) sem sustentação nas entradas citadas.
+Modelo: nenhum (extração direta); a Máquina conferiu (`scripts/memoria_semanal.py`) · vetor: cache do Conselho, cadeia íntegra · Autorização: Humano (assinatura do par)
+
 (857) DIÁRIO — 26/10/2026 · **Memória Canônica semanal: a conferência aceita pontuação depois da citação (`[c1].`), e os tópicos do 9b deixam de ser cortados.** Aplica `memoria-semanal-pontuacao-20261026`, assinado pelo Humano. Na 2ª geração da memória da semana, os 8 tópicos do 9b foram cortados porque ele termina com ponto depois da citação, e a memória saiu por extração direta. Agora o bloco da citação aceita espaço e `. ; : ! ,` depois do "]" (classe simples, sem quantificador aninhado). O pedido ao modelo também diz que a Seth é tratada no feminino. Com o 9b real sobre as 5 entradas do cache: 8 tópicos aceitos, 0 cortados.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest 13 (sem SETH_REPO); textos hostis em 0,000 s; geração real; clone com hooks; PR 576 com CI verde · Autorização: Humano — "assinei"
 
