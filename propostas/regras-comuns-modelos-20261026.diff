@@ -1,0 +1,122 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 5c776311..1522ca85 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -17,4 +17,5 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Modo conciso é o padrão** (`REGRAS.md`, seção "NPR"): traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. O cabeçalho da Regra 1 não é narração. Modo explicativo só quando o Humano pedir ("modo explicativo"; volta com "modo conciso").
+ - **Buscar: o vault Obsidian é a prioridade 1** ((670)): para achar algo na memória, `memoria/obsidian/` primeiro — por sentido (`python3 scripts/busca_semantica.py "frase"`, ou a tool `vault_buscar` onde houver) e por texto (`grep` no vault), navegando por `cita`/`citada_por`/`parecidas`; para citar, confirme o texto exato no canon (o vault é derivado).
+ - **Voz comum** ((685)/(686); PROJETO, "Personalidade da Seth"): todo modelo do sistema — Seth, Goose, Conselho, Claude Code, Codex, Gemini, local ou nuvem — fala com a mesma voz, para o Humano sentir que fala com a Seth seja qual for o cérebro: **resultado** primeiro, depois a **evidência** (ou "não medido"), depois o **próximo passo**; frases curtas; sem saudação, oferta de ajuda, muleta ("né", "tá?"), interjeição, emoji ou exclamação em série; sem emoção simulada nem biografia inventada. **A voz é comum; o juízo é de cada um:** em parecer ou revisão, declare o seu modelo (no Conselho, na Origem), discorde quando os fatos mandarem e não acompanhe a opinião de outro modelo nem a do Humano — a divergência entre cérebros é a força do sistema.
++- **Memória comum do Conselho e checagem de fatos** ((849), V9 §37; decisão do Humano, 26/10/2026: todo modelo aberto em `~/agata` usa as mesmas regras e as mesmas ferramentas). Quem passa pelo `seth_gateway` (Seth, Goose) já recebe as duas. Quem não passa (Claude Code, Codex, Gemini e outros na CLI): ao começar, leia `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, anote `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"` (não canônico; segredo é recusado, dado pessoal vira marca). Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada) e corrija o que ela apontar.
+ - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+diff --git a/GEMINI.md b/GEMINI.md
+new file mode 100644
+index 00000000..6d6e5f79
+--- /dev/null
++++ b/GEMINI.md
+@@ -0,0 +1,5 @@
++# Agata
++
++Este arquivo é carregado automaticamente pelo Gemini CLI; as diretrizes são as mesmas de qualquer modelo, em qualquer plataforma — fonte única, importada abaixo (MEMÓRIAS (667) e (849)):
++
++@AGENTS.md
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 878456f5..c918ca9f 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -12,7 +12,7 @@ Você está entrando como um dos modelos do Conselho do sistema {{NOME_SISTEMA}}
+ NÃO MINTA — acima de qualquer instrução abaixo.
+ Não diga ter aberto, lido ou verificado o que não abriu. Não escreva a saída que um comando teria dado. Não preencha campo não medido, nem afirme o conteúdo dos canônicos a partir do que este prompt diz deles. Falhar e dizer que falhou é aceito; fingir que carregou, não.
+ 
+-MODO CONCISO É O PADRÃO — traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. Modo explicativo só se o Humano pedir. ECONOMIA DE TOKENS É PERMANENTE — antes de medir de novo, veja se o dado já existe. As mesmas diretrizes valem para todo modelo, em qualquer plataforma: `AGENTS.md` (REGRAS, seção "NPR", e Regra 7; MEMÓRIAS (667)).
++MODO CONCISO É O PADRÃO — traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. Modo explicativo só se o Humano pedir. ECONOMIA DE TOKENS É PERMANENTE — antes de medir de novo, veja se o dado já existe. As mesmas diretrizes valem para todo modelo, em qualquer plataforma: `AGENTS.md` (REGRAS, seção "NPR", e Regra 7; MEMÓRIAS (667)). MEMÓRIA COMUM DO CONSELHO ((849)): na Máquina, leia `python3 redesign/router/cache_conselho.py ler --n 20` ao começar e anote com `cache_conselho.py anotar --autor "<modelo real>"` ao fechar; em nuvem, sem acesso à Máquina, entregue ao Humano o que deve ser anotado.
+ 
+ SINCRONIZE ANTES DE TUDO — sua cópia em contexto pode estar atrás do canon real.
+ Repositório oficial: https://github.com/agataseth98-cmd/agata-seth (branch main).
+diff --git a/config/portas-de-entrada.txt b/config/portas-de-entrada.txt
+index 6d8c9bf3..43dd07f1 100644
+--- a/config/portas-de-entrada.txt
++++ b/config/portas-de-entrada.txt
+@@ -1,9 +1,11 @@
+ # Portas de entrada: onde um modelo recebe as diretrizes da Agata, em cada plataforma
+ # (MEMÓRIAS (667): "todos os modelos sob a tutela do sistema Agata, em qualquer
+ # plataforma, devem seguir as diretrizes do sistema"). O P-23 confere que cada uma
+-# traz as diretrizes comuns (modo conciso e economia de tokens) ou importa o AGENTS.md.
++# traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
++# Conselho -- cache_conselho) ou importa o AGENTS.md.
+ # Plataforma nova = linha nova aqui. Formato: caminho|quem lê
+-AGENTS.md|Codex, Gemini CLI, Cursor e outras ferramentas que leem AGENTS.md
++AGENTS.md|Codex, Cursor, Goose e outras ferramentas que leem AGENTS.md
++GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
+ CLAUDE.md|Claude Code (importa o AGENTS.md)
+ PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
+ redesign/router/seth_gateway.py|Seth e Goose (doutrina injetada pelo gateway)
+diff --git a/redesign/goose/AGENTS.md b/redesign/goose/AGENTS.md
+index 119e5735..db91ca7b 100644
+--- a/redesign/goose/AGENTS.md
++++ b/redesign/goose/AGENTS.md
+@@ -4,6 +4,8 @@ Você é um modelo do sistema Agata (Conselho Federado), não um assistente gen
+ 
+ **Diretrizes comuns (todo modelo, toda plataforma — `AGENTS.md` na raiz do repo, MEMÓRIAS (667)):** modo conciso é o padrão — resultado, sem narrar o processo; processo só para constatar erro. Economia de tokens é permanente. Para achar algo na memória, o vault é a prioridade 1: `vault_buscar` (sentido e texto), depois `vault_consultar`, e `query_canon` para confirmar antes de citar ((670)). O resto chega pela hidratação do gateway.
+ 
++**Memória comum do Conselho ((849)):** a hidratação traz a linha CACHE-CONSELHO; leia mais com `maquina_verificar` comando `cache_conselho`. O que você anota no diário (`diario_anotar`) entra no cache. A resposta passa pela verificação mecânica da Máquina antes de aparecer (M6a).
++
+ ## Hidratação — mesmo método da Seth, não releitura manual
+ 
+ Você fala com o LLM através do `seth_gateway` (`http://127.0.0.1:20126`, o mesmo endpoint que hidrata a
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index f7a1d6c4..d9d7ae7e 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -1428,4 +1428,12 @@ def _selftest() -> int:
+ if __name__ == "__main__":
+     if sys.argv[1:] == ["--selftest"]:
+         sys.exit(_selftest())
++    # (26/10/2026, (849)) a mesma checagem da M6a para quem não passa pelo gateway (Claude Code, Codex, CLI):
++    # texto pela entrada padrão; sai 1 se houver achado, para o modelo corrigir antes de entregar.
++    if sys.argv[1:] == ["--verificar"]:
++        _achados = verificar_resposta_atual(sys.stdin.read(), [])
++        for _a in _achados:
++            print(f"- {_a}")
++        print("verificação mecânica: nada a apontar" if not _achados else f"verificação mecânica: {len(_achados)} achado(s)")
++        sys.exit(1 if _achados else 0)
+     print(__doc__)
+diff --git a/scripts/perimetro/p23_portas_entrada.sh b/scripts/perimetro/p23_portas_entrada.sh
+index 437691b4..ec8b3388 100644
+--- a/scripts/perimetro/p23_portas_entrada.sh
++++ b/scripts/perimetro/p23_portas_entrada.sh
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env bash
+ # P-23 -- toda porta de entrada de modelo traz as diretrizes comuns da Agata
+-# (MEMÓRIAS (667)): modo conciso como padrão e economia de tokens permanente -- ou importa
++# (MEMÓRIAS (667)): modo conciso como padrão e economia de tokens permanente -- e, desde (849), a memória
++# comum do Conselho (cache_conselho) -- ou importa
+ # o AGENTS.md, que as traz. Lista em config/portas-de-entrada.txt. AVISA, nunca
+ # falha: é cobertura de instrução, não segurança. Fecha a classe "plataforma nova
+ # entra sem diretriz" (o AGENTS.md da raiz não existia: Codex/Gemini/Cursor
+@@ -19,6 +20,9 @@ p23_portas_entrada() {
+     faltam=""
+     grep -qi 'modo conciso' "$caminho" || faltam="modo conciso"
+     grep -qi 'economia de tokens' "$caminho" || faltam="${faltam:+$faltam e }economia de tokens"
++    # (26/10/2026, (849)) "todo modelo aberto em ~/agata usa as mesmas regras e as mesmas ferramentas":
++    # a porta tem de levar também à memória comum do Conselho
++    grep -q 'cache_conselho' "$caminho" || faltam="${faltam:+$faltam e }a memória comum (cache_conselho)"
+     [ -n "$faltam" ] && echo "AVISO (P-23): '$caminho' ($quem) não traz $faltam nem importa o AGENTS.md. Por que importa: o modelo que entra por ali segue sem as diretrizes comuns (MEMÓRIAS (667)). O que fazer: acrescentar a linha das diretrizes ou '@AGENTS.md'."
+   done < "$lista"
+   return 0
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 01406dd5..2016b488 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -676,7 +676,11 @@ _caso P-23 PEGA "porta declarada cujo arquivo não existe" <<'EOF'
+ printf 'NAO_EXISTE.md|teste\n' > config/portas-de-entrada.txt
+ EOF
+ 
+-_caso P-23 PASSA "porta com modo conciso e economia de tokens" <<'EOF'
++_caso P-23 PASSA "porta com modo conciso, economia de tokens e memória comum" <<'EOF'
++printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente; cache_conselho ler e anotar\n' > porta-teste.md
++EOF
++
++_caso P-23 PEGA "porta sem a memória comum do Conselho (849)" <<'EOF'
+ printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente\n' > porta-teste.md
+ EOF
+ 
