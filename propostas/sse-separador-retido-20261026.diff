@@ -1,0 +1,50 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 12c1fc4b..29928e48 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -37,6 +37,7 @@ Env:
+ from __future__ import annotations
+ 
+ import hashlib
++import io
+ import json
+ import queue
+ import os
+@@ -1007,8 +1008,14 @@ def _chunk_texto(texto: str, modelo: str = "") -> bytes:
+ 
+ 
+ def _so_comentario(saida: bytes) -> bool:
+-    """Chunk só de comentários SSE (keepalive) ou linhas vazias: pode passar mesmo com a resposta retida."""
+-    return all((not l.strip()) or l.startswith(b":") for l in saida.split(b"\n"))
++    """Chunk com comentário SSE (keepalive) e nada além de comentários e linhas vazias: pode passar mesmo
++    com a resposta retida. Linha vazia SOZINHA não passa: ela é o separador que fecha o evento `data:`
++    anterior. (26/10/2026) Soltá-la na hora e reter o `data:` mandava todos os separadores na frente
++    e os dados colados no fim, sem linha vazia entre eles: para o cliente SSE, um evento só, nunca
++    fechado -> nenhum chunk -> "'tool_calls' in undefined" no Agent do LibreChat (a mesma classe de
++    (635))."""
++    linhas = saida.split(b"\n")
++    return any(l.startswith(b":") for l in linhas) and all((not l.strip()) or l.startswith(b":") for l in linhas)
+ 
+ 
+ def _correcao_da_maquina(linha: str) -> str:
+@@ -2409,7 +2416,20 @@ def _selftest() -> int:
+     _e3 = {}
+     _resgate_observar(b'data: {"choices":[{"delta":{"reasoning":"vou chamar"}}]}', _e3)
+     _resgate_observar(b'data: {"choices":[{"delta":{"tool_calls":[{"index":0}]}}]}', _e3)
++    # M6a pelo caminho real (_enviar + _liberar_retidos), na ordem em que o stream chega linha a linha.
++    _h = _Handler.__new__(_Handler)
++    _h.wfile, _h._reter, _h._retidos, _h._texto_maquina, _h._msgs_pedido = io.BytesIO(), True, [], "", []
++    for _l in (b'data: {"choices":[{"delta":{"content":"ok"}}]}\n', b"\n", b": ka\n", b"\n", b"data: [DONE]\n", b"\n"):
++        _h._enviar(_l)
++    _h._liberar_retidos()
++    _sse, _resto = b"", _h.wfile.getvalue()
++    while _resto:
++        _tam, _resto = _resto.split(b"\r\n", 1)
++        _sse, _resto = _sse + _resto[:int(_tam, 16)], _resto[int(_tam, 16) + 2:]
+     casos_corr += [
++        ("M6a: dado retido sai com o separador colado (evento fechado antes do [DONE])",
++         b'"ok"}}]}\n\n' in _sse and _sse.endswith(b"data: [DONE]\n\n") and _sse.startswith(b": ka\n")),
++        ("M6a: linha vazia sozinha fica retida; keepalive passa", not _so_comentario(b"\n") and _so_comentario(b": ka\n")),
+         ("resgate: só raciocínio vira texto (com o cabeçalho pendente)", _ch is not None and
+          json.loads(_ch[6:].decode())["choices"][0]["delta"]["content"] == "CAB\n\nResultado: ativo."),
+         ("resgate: com texto do modelo -> nada", _resgate_chunk(_e2) is None),
