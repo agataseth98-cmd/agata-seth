@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Agata — estado local</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="wordmark" href="/" aria-label="Agata, início"><span class="mark">A</span> AGATA <span class="edition">/ LOCAL</span></a>
+      <span class="read-only"><span class="read-dot"></span> SOMENTE LEITURA</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">ESTADO OPERACIONAL <span class="rule"></span> MÁQUINA LOCAL</p>
+        <h1 id="page-title">O que está no ar.</h1>
+        <p class="lede">Uma leitura curta do núcleo de conversa e do repositório. Sem ações de controle.</p>
+      </div>
+      <div class="refresh-box">
+        <button id="refresh" type="button">
+          <span class="refresh-icon" aria-hidden="true">↻</span>
+          Atualizar
+        </button>
+        <span id="refresh-note">Leitura automática a cada 60 s</span>
+      </div>
+    </section>
+
+    <section class="summary" aria-describedby="summary-detail">
+      <div class="summary-label">SAÚDE DAS UNIDADES</div>
+      <div class="summary-status">
+        <span id="overall-indicator" class="indicator unknown"></span>
+        <strong id="overall-state">Sem leitura</strong>
+      </div>
+      <div class="summary-detail" id="summary-detail">Aguardando a primeira coleta.</div>
+      <div class="summary-time"><span>OBSERVADO</span><time id="observed-at">—</time></div>
+    </section>
+
+    <div class="section-heading">
+      <h2>Núcleo de conversa</h2>
+      <p>Quatro unidades de usuário consultadas pelo verificador local.</p>
+    </div>
+    <section id="services" class="service-grid" aria-label="Estado das unidades de conversa"></section>
+
+    <section class="git-card" aria-labelledby="git-title">
+      <div class="git-heading">
+        <div>
+          <p class="eyebrow">REPOSITÓRIO LOCAL</p>
+          <h2 id="git-title">Git</h2>
+        </div>
+        <span id="git-state" class="state-tag unknown">SEM LEITURA</span>
+      </div>
+      <div class="git-facts">
+        <div><span>BRANCH</span><strong id="git-branch">—</strong></div>
+        <div><span>HEAD</span><strong id="git-head" class="mono">—</strong></div>
+        <div><span>ALTERAÇÕES</span><strong id="git-dirty">—</strong></div>
+        <div><span>REFERÊNCIA LOCAL</span><strong id="git-tracking">—</strong></div>
+      </div>
+      <p class="source-note" id="git-source">Fonte: git status e HEAD local.</p>
+    </section>
+
+    <section class="wiki-card" aria-labelledby="wiki-title">
+      <div class="git-heading">
+        <div>
+          <p class="eyebrow">MEMÓRIA DERIVADA · CONSULTA READ-ONLY</p>
+          <h2 id="wiki-title">Wiki da Agata</h2>
+        </div>
+        <a class="wiki-link" href="obsidian://open?vault=agata&file=INICIO">Abrir no Obsidian ↗</a>
+      </div>
+      <p class="wiki-intro">Busque por texto, assunto ou ambos. O resultado ajuda a encontrar a fonte; confirme afirmações no canon antes de citar.</p>
+      <form id="wiki-search-form" class="wiki-search">
+        <label for="wiki-query">O que você procura?</label>
+        <div class="wiki-controls">
+          <input id="wiki-query" name="query" maxlength="200" autocomplete="off" required>
+          <select id="wiki-mode" name="mode" aria-label="Modo de busca">
+            <option value="ambos">Texto e sentido</option>
+            <option value="texto">Texto</option>
+            <option value="sentido">Por sentido</option>
+          </select>
+          <button id="wiki-submit" type="submit">Buscar</button>
+        </div>
+      </form>
+      <p id="wiki-status" class="wiki-status" role="status" aria-live="polite">Busca sob demanda. Nenhuma consulta foi feita.</p>
+      <div id="wiki-results" class="wiki-results" aria-label="Resultados da busca"></div>
+      <p class="source-note">Fonte: seth-verificador · comandos fixos de busca_texto e busca_semantica · resultados não alteram o vault.</p>
+    </section>
+
+    <footer class="footer">
+      <p id="collection-note">Cada bloco informa sua fonte e o horário da coleta.</p>
+      <p>Esta tela não representa todos os serviços da Agata.</p>
+    </footer>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+  </main>
+</body>
+</html>
