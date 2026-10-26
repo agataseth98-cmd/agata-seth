@@ -93,13 +93,31 @@ FORMATOS = {
 
 
 _CAB_RE = None
+_PRONTIDAO_RE = __import__("re").compile(
+    r"^\s*(?:\*\*)?(?:Agata|agata-seth|agata)\s*·\s*(?P<modelo>[^·\n]+?)\s*·[^\n]*(?:sync|HEAD|REGRAS)[^\n]*\n"
+    r"(?:[^\n]*\n){0,8}?[ \t]*pronto\.[ \t]*(?:\n|$)")
 _MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")
+
+
+def _nome_falavel(modelo):
+    """(26/10/2026) O identificador técnico vira nome falável: 'nvidia/nemotron-3-ultra-550b-a55b:free
+    (NVIDIA, nuvem; ...)' -> 'Nemotron'; 'modelo: ministral-14b-latest' -> 'Ministral'. Nome com espaço e
+    sem barra nem hífen ('Claude Sonnet 5.5') fica como está. A voz pt-BR lendo o id soava inglês (Humano)."""
+    import re
+    m = re.sub(r"\([^)]*\)", " ", modelo or "").strip()
+    m = re.sub(r"^modelo:\s*", "", m, flags=re.I).strip()
+    if " " in m and "/" not in m and "-" not in m:
+        return m
+    m = m.split("/")[-1].split(":")[0]
+    base = re.split(r"[-_\s]", m, maxsplit=1)[0]
+    base = re.sub(r"[\d.]+$", "", base) or base
+    return base[:1].upper() + base[1:] if base else "modelo"
 
 
 def _cabecalho_natural(modelo, turno, resto):
     """'Agata · Claude Sonnet 5.5 · t=125 (...) · 17/10/2026 11:56 -03' -> frase falável."""
     import re
-    partes = ["Agata Seth", modelo.strip(), f"turno {turno}"]
+    partes = ["Agata Seth", _nome_falavel(modelo), f"turno {turno}"]
     d = re.search(r"(\d{1,2})/(\d{1,2})(?:/(\d{4}))?", resto)
     h = re.search(r"(\d{1,2}):(\d{2})", resto)
     if d and 1 <= int(d.group(2)) <= 12:
@@ -135,7 +153,14 @@ def preparar_fala(texto):
         _CAB_RE = re.compile(r"^\s*(?:\*\*)?(?:Agata|agata-seth)\s*·\s*(?:modelo:\s*)?(?P<modelo>[^·\n]+?)\s*·\s*t\s*=\s*(?P<t>\d+)[^·\n]*·[ \t]*(?P<resto>[^\n]*)")
     m = _CAB_RE.match(texto)
     if not m:
-        return texto
+        # (26/10/2026) bloco de prontidão do 1º turno: cabeçalho sem t= (sync, hashes, HEAD), "Última
+        # entrada: ..." e "pronto.". A voz lia tudo -- soava inglês. Vira "Agata Seth, <nome>, pronta."
+        p = _PRONTIDAO_RE.match(texto)
+        if not p:
+            return texto
+        corpo = texto[p.end():].lstrip("\n")
+        frase = f"Agata Seth, {_nome_falavel(p.group('modelo'))}, pronta."
+        return frase + ("\n" + corpo if corpo.strip() else "")
     corpo = texto[m.end():].lstrip("\n")
     if _deve_falar_cabecalho(int(m.group("t"))) or not corpo.strip():
         return _cabecalho_natural(m.group("modelo"), m.group("t"), m.group("resto")) + "\n" + corpo
@@ -381,6 +406,20 @@ def _selftest():
             res["10f texto sem cabeçalho passa intacto"] = preparar_fala("Olá. Tudo certo.") == "Olá. Tudo certo."
             res["10g forma nova agata-seth · é reconhecida e falada como Agata Seth"] = preparar_fala(
                 cab.replace("Agata ·", "agata-seth ·").replace("t=125", "t=250")).startswith("Agata Seth, Claude Sonnet 5.5, turno 250")
+            pront = ("agata-seth · modelo: ministral-14b-latest (Mistral, nuvem; medido pela Máquina neste turno) · sync: PASS · "
+                     "REGRAS=5093c7a4 · HEAD=f3eea23 · 2026-10-26 08:54 -0300 (relógio da Máquina)\nÚltima entrada: (847) DIÁRIO — "
+                     "26/10/2026 · **A pesquisa semanal.** Aplica `pesquisa-modelos-filas-v2-20261026`.\npronto.\n\nOlá. Tudo certo.")
+            res["10h prontidão do 1º turno: sem hashes, sync nem entrada; nome falável"] = (
+                preparar_fala(pront) == "Agata Seth, Ministral, pronta.\nOlá. Tudo certo.")
+            res["10i id técnico vira nome falável no cabeçalho com t="] = preparar_fala(
+                "agata-seth · nvidia/nemotron-3-ultra-550b-a55b:free (NVIDIA, nuvem; medido) · t=2 (x) · 2026-10-26 08:55 -0300\nCorpo."
+            ).startswith("Agata Seth, Nemotron, turno 2")
+            res["10j nomes faláveis"] = [_nome_falavel(x) for x in (
+                "modelo: ministral-14b-latest (Mistral)", "codestral-latest", "qwen3.5-9b-64k:latest",
+                "gemini-3.5-flash-lite", "Claude Sonnet 5.5", "ollama-local/qwen3.5-9b-64k:latest")] == [
+                "Ministral", "Codestral", "Qwen", "Gemini", "Claude Sonnet 5.5", "Qwen"]
+            res["10k linha agata sem sync/HEAD e sem pronto. passa intacta"] = preparar_fala(
+                "agata · sem dados · nada\nTexto.") == "agata · sem dados · nada\nTexto."
         ESTADO_CABECALHO = _est
         res["11a separadores · e - viram pausa; guarda-chuva e 5.5 ficam"] = limpar_markdown(
             "um · dois - três — quatro • cinco guarda-chuva 5.5") == "um, dois, três, quatro, cinco guarda-chuva 5.5"

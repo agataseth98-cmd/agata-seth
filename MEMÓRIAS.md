@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f3eea232a2354c1f50dcba5300aedc72345433fc
-  Escrito em: 26/10/2026 09:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 22e215e93a4d16dc8230ce3c90d5d715d1c11218
+  Escrito em: 26/10/2026 09:11 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3eea232a2354c1f50dcba5300aedc72345433fc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3eea232a2354c1f50dcba5300aedc72345433fc/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3eea232a2354c1f50dcba5300aedc72345433fc/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3eea232a2354c1f50dcba5300aedc72345433fc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3eea232a2354c1f50dcba5300aedc72345433fc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/22e215e93a4d16dc8230ce3c90d5d715d1c11218/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(848) DIÁRIO — 26/10/2026 · **A voz da Seth fala o cabeçalho em português: sem hashes nem identificadores de modelo.** Aplica `voz-cabecalho-falavel-20261026`, assinado pelo Humano, depois da queixa dele: "falando em inglês com sotaque PT-BR". Medido: as respostas, a transcrição da fala dele e as vozes do Piper estão em pt-br. A causa era o que a voz lia. No 1º turno, o bloco de prontidão (sync, hashes, "Última entrada", "pronto.") não casava com `_CAB_RE` e era lido inteiro; nos outros turnos, era lido o identificador técnico do modelo. Agora `_nome_falavel` troca o identificador por um nome falável ("Nemotron", "Ministral"), e o bloco de prontidão vira "Agata Seth, <nome>, pronta.". Na resposta real das 08h54, o áudio caiu de 59,6 s para 5,1 s. Termos técnicos no corpo da resposta continuam soando inglês; tratá-los pede um dicionário de pronúncia, frente nova.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: registro de pedidos; whisper com fala pt-br do Piper; `.onnx.json` das vozes; servidor de teste `:8899`; selftest 33/33; clone com hooks; PR 555 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
+
 (847) DIÁRIO — 26/10/2026 · **A pesquisa semanal de modelos gratuitos deixa de listar como "candidato" quem já está nas filas da Seth.** Aplica `pesquisa-modelos-filas-v2-20261026`, assinado pelo Humano. A v1 foi assinada, mas a aplicação (PR 552) reprovou no CI: o selftest novo dependia de `AGATA_REPO`. O PR foi fechado sem juntar e a v1 foi para `propostas/rejeitadas/`; a v2 lê o registro do próprio checkout. O relatório de 25/10 (22h, o primeiro desde que a descoberta só lê; não gastou cota) listou o Gemini 3.1 Flash-Lite e o Gemini 3 Flash como candidatos, mas os dois já estão nas filas. A lista de conhecidos só olhava a tabela "Confirmado funcionando" e o ROSTER do Conselho. Agora `_modelos_das_filas` soma a ela as filas de `config/capivara/capacidades.json`. Na descoberta real a partir do worktree (só leitura), os candidatos caíram de 13 para 11, e saíram exatamente os dois Gemini. Testar os que restam gasta cota e é frente nova, para depois de 29/10.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: journal de `agata-pesquisa-modelos` de 25/10; relatório `modelos-gratuitos-2026-10-25.md`; descoberta no worktree; selftest; clone com hooks; PRs 551 e 553 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
