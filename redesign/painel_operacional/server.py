@@ -42,6 +42,7 @@ _ASSETS = {
     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+    "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
 }
 _STATUS_CACHE: dict | None = None
 _STATUS_CACHE_AT: float | None = None

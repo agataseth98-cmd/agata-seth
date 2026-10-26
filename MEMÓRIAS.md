@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cd2e655bb271d8e973f7a75c252e52ef8189834a
-  Escrito em: 26/10/2026 18:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): be6719c071558880a779127d1c3d08f1eb65b870
+  Escrito em: 26/10/2026 18:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cd2e655bb271d8e973f7a75c252e52ef8189834a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cd2e655bb271d8e973f7a75c252e52ef8189834a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cd2e655bb271d8e973f7a75c252e52ef8189834a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cd2e655bb271d8e973f7a75c252e52ef8189834a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cd2e655bb271d8e973f7a75c252e52ef8189834a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be6719c071558880a779127d1c3d08f1eb65b870/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be6719c071558880a779127d1c3d08f1eb65b870/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be6719c071558880a779127d1c3d08f1eb65b870/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be6719c071558880a779127d1c3d08f1eb65b870/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/be6719c071558880a779127d1c3d08f1eb65b870/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(864) DIÁRIO — 26/10/2026 · **Painel: retrato original da Seth servido em /assets/agata-portrait.png.** Aplica `retrato-original-r2-20261026`, assinado pelo Humano. O protótipo referenciava o arquivo e recebia 404. A versão original (1024×1536, 2,3 MB) passa a ser servida pelo painel. Refeita sobre o main depois de `prototipo-csp-20261026`, porque a primeira versão deixou de aplicar.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: git apply --check contra o main, teste HTTP da rota (200, image/png, 2324325 bytes) numa cópia · Autorização: Humano, assinatura de retrato-original-r2-20261026.
+
 (863) DIÁRIO — 26/10/2026 · **Painel: protótipo separado em HTML, CSS e JS (CSP) e retrato original da Seth.** Aplica `prototipo-csp-20261026` e `retrato-original-20261026`, assinados pelo Humano. O CSP do painel bloqueia CSS e JS embutidos; o protótipo passa a usar prototipo.css e prototipo.js. O retrato original (2,3 MB) passa a ser servido em /assets/agata-portrait.png, porque o protótipo o referenciava e dava 404.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: teste em cópia na porta 20147 e 20148, selftest do painel, git apply --check · Autorização: Humano, assinaturas das duas propostas.
 
