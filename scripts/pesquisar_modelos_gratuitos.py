@@ -46,6 +46,7 @@ ULTIMA_DESCOBERTA = ESTADO_DIR / "ultima-descoberta.json"
 LOG = ESTADO_DIR / "runs.log"
 POOL_MD = REPO / "config" / "modelos-gratuitos.md"
 CONSELHO = REPO / "scripts" / "conselho_remoto.py"
+CAPACIDADES = REPO / "config" / "capivara" / "capacidades.json"
 
 # Reaproveita os MESMOS parâmetros da chamada real (achado 22/09/2026: com
 # max_tokens fixo baixo, a sonda reportava Gemini como VAZIO -- na verdade só
@@ -142,6 +143,16 @@ def _roster_conselho():
     return re.findall(r'"([^"]+/[^"]+)"', m.group(1)) if m else []
 
 
+def _modelos_das_filas():
+    """(26/10/2026) Os modelos que já estão nas filas da Seth (registro de capacidades). Sem eles,
+    o relatório de 25/10 listou como 'candidatos' o Gemini 3.1 Flash-Lite e o 3 Flash, já nas filas."""
+    try:
+        reg = json.loads(CAPACIDADES.read_text(encoding="utf-8"))
+        return sorted({m for fila in (reg.get("filas") or {}).values() for m in fila})
+    except (OSError, ValueError, AttributeError):
+        return []
+
+
 def _modelos_omniroute_nao_no_pool(ja_conhecidos):
     try:
         d = _http(f"{OMNIROUTE}/api/models")
@@ -179,7 +190,7 @@ def _ler_json(caminho):
 
 def descobrir():
     """Modo DESCOBERTA: só GET, nenhuma chamada a modelo. Devolve o estado comparável."""
-    conhecidos = set(_pool_confirmado()) | set(_roster_conselho())
+    conhecidos = set(_pool_confirmado()) | set(_roster_conselho()) | set(_modelos_das_filas())
     candidatos = sorted(_modelos_omniroute_nao_no_pool(conhecidos))
     disc = _discovery(False)
     return {"quando": date.today().isoformat(), "candidatos": candidatos}, disc
@@ -196,7 +207,7 @@ def _escrever_descoberta(atual, disc):
         "quer dizer disponível no catálogo do OmniRoute, nunca 'funciona': para testar,",
         "rode à mão `--ensaio` (gasta cota). MEMÓRIAS (377)._",
         "",
-        "## Candidatos fora do pool e do ROSTER (catálogo do OmniRoute)",
+        "## Candidatos fora do pool, do ROSTER e das filas (catálogo do OmniRoute)",
         "",
     ] + ([f"- `{m}`" for m in atual["candidatos"]] or ["- (nenhum)"]) + [
         "",
@@ -212,7 +223,7 @@ def _escrever_descoberta(atual, disc):
 
 
 def _selftest():
-    global _http, _pool_confirmado, _roster_conselho
+    global _http, _pool_confirmado, _roster_conselho, _modelos_das_filas, CAPACIDADES
     chamadas = []
 
     def falso_http(url, metodo="GET", body=None, timeout=45, classification=None):
@@ -220,17 +231,19 @@ def _selftest():
         if url.endswith("/api/models"):
             return {"models": [{"fullModel": "a/novo", "available": True},
                                {"fullModel": "b/pool", "available": True},
-                               {"fullModel": "c/fora", "available": False}]}
+                               {"fullModel": "c/fora", "available": False},
+                               {"fullModel": "d/fila", "available": True}]}
         return {"ok": True}
 
-    orig = (_http, _pool_confirmado, _roster_conselho)
+    orig = (_http, _pool_confirmado, _roster_conselho, _modelos_das_filas)
     _http, _pool_confirmado, _roster_conselho = falso_http, lambda: ["b/pool"], lambda: []
+    _modelos_das_filas = lambda: ["d/fila"]  # noqa: E731
     try:
         atual, _ = descobrir()
         casos = [
             ("descoberta não chama modelo", not any("/chat/completions" in u for _, u in chamadas)),
             ("descoberta não escreve no OmniRoute (só GET)", all(m == "GET" for m, _ in chamadas)),
-            ("candidato = disponível e fora do pool", atual["candidatos"] == ["a/novo"]),
+            ("candidato = disponível e fora do pool, do ROSTER e das filas", atual["candidatos"] == ["a/novo"]),
             ("descoberta lê os resultados do Discovery", any(u.endswith("/api/discovery/results")
                                                             for _, u in chamadas)),
         ]
@@ -239,7 +252,13 @@ def _selftest():
         casos.append(("só o --scan dispara varredura (POST)", ("POST", f"{OMNIROUTE}/api/discovery/scan")
                       in chamadas))
     finally:
-        _http, _pool_confirmado, _roster_conselho = orig
+        _http, _pool_confirmado, _roster_conselho, _modelos_das_filas = orig
+    _cap = CAPACIDADES
+    CAPACIDADES = Path(__file__).resolve().parents[1] / "config" / "capivara" / "capacidades.json"  # o do checkout, não o de AGATA_REPO (o CI não tem ~/agata)
+    try:
+        casos.append(("filas lidas do registro do checkout", any(m.startswith("ollama-local/") for m in _modelos_das_filas())))
+    finally:
+        CAPACIDADES = _cap
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)
