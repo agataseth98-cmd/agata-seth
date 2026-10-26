@@ -86,7 +86,11 @@ def main() -> int:
         diary.write_text(diary_before, encoding="utf-8")
         nonce_db = root / ".cache/agata/approval-capabilities/used.sqlite3"
 
+        sys.path.insert(0, str(ROOT / "redesign" / "router"))
+        import cache_conselho  # (M2) o espelho do /diario vai para um cache temporário, nunca o real
+        cache_teste = root / "cache-conselho" / "cache.jsonl"
         with patch.object(escriba, "MEMORIAS", memories), patch.object(escriba, "DIARIO", diary), \
+             patch.object(cache_conselho, "ARQ", cache_teste), \
              patch.object(escriba.Path, "home", return_value=root), \
              patch.dict(os.environ, {
                  "AGATA_PROJETO_RAIZ": str(project),
@@ -151,6 +155,10 @@ def main() -> int:
                         and "entrada limpa de teste" in diary_after
                         and diary_after.startswith("# diário fixture\n\n<!-- ENTRADAS-NOVAS:AQUI -- fixture -->\n"),
                         "gravação e verificação pós-escrita passaram")
+                _report("espelho do /diario no cache do Conselho (M2)", status,
+                        (response.get("cache_conselho") or {}).get("ok") is True and cache_teste.exists()
+                        and "entrada limpa de teste" in cache_teste.read_text(encoding="utf-8"),
+                        "a anotação entrou no cache temporário, com autor Seth")
             finally:
                 server.shutdown()
                 server.server_close()
