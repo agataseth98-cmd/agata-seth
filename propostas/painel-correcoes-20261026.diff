@@ -1,0 +1,1232 @@
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 454c9bb4..6fb19958 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -53,6 +53,7 @@
+ 20143|llamacpp-qwen3coder|127.0.0.1
+ 20144|llamacpp-gptoss20b|127.0.0.1
+ 20145|llamacpp-phi4mini|127.0.0.1
++20146|painel-operacional|127.0.0.1
+ 20131|omniroute-embed-ws|127.0.0.1
+ 20132|omniroute-live-ws|127.0.0.1
+ 11435|ollaya|127.0.0.1
+diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
+new file mode 100644
+index 00000000..19da70bf
+--- /dev/null
++++ b/redesign/painel_operacional/README.md
+@@ -0,0 +1,38 @@
++# Painel operacional local
++
++Interface dinâmica somente de leitura para quatro unidades de usuário e o estado local do Git, consultados pelo seth-verificador.
++Inclui busca do wiki sob demanda, usando somente os comandos fixos `busca_texto` e `busca_semantica` do mesmo verificador. As fontes são `memoria/obsidian/` e `extras/`, conforme as implementações versionadas; o índice por sentido é local.
++
++## Executar
++
++Na raiz do repositório:
++
++~~~sh
++python3 redesign/painel_operacional/server.py
++~~~
++
++Abra http://127.0.0.1:20146/. O servidor encerra com Ctrl-C. Ele não instala nem inicia unidade systemd.
++
++## Escopo
++
++- Consulta somente as quatro unidades fixas em server.py, pelo comando allowlisted unidade do seth-verificador.
++- Lê branch, HEAD e quantidade de alterações por git_status e git_log do seth-verificador; não envia nomes de arquivo ao navegador.
++- Atualiza a cada 60 segundos e pelo botão da página; pausa em aba oculta.
++- Deduplica GETs sequenciais por 3 segundos e registra observação/validade ao concluir cada fonte.
++- Entrega origem, referência e horário por unidade; Git traz origem, referência local, commit e validade próprios.
++- O sinal geral considera apenas unidades systemd. Git permanece separado; árvore modificada não é falha de serviço.
++- Usa desconhecido quando não há leitura válida e desatualizado para valor anterior que venceu; preserva a última leitura no navegador após falha.
++- A região acessível anuncia apenas mudança, expiração ou falha, sem reler o painel inteiro a cada minuto.
++- Verifica Host e rejeita requisições à API marcadas como cross-site ou com Origin alheira. É defesa adicional; loopback não autentica o solicitante.
++- Não aceita comandos livres, escrita, assinatura ou acesso ao /live-ws. O único POST permitido envia uma consulta de busca local ao verificador.
++- A busca do wiki aceita apenas texto de até 200 caracteres e os modos texto, sentido ou ambos; a consulta é dado de comandos allowlisted, sem execução livre, histórico ou persistência. Cada resultado é limitado a 12.000 caracteres e sinaliza total e corte.
++- O resultado de busca é guia de navegação, não evidência final. Confirme o conteúdo no canon antes de citar; a interface apresenta fonte e hora de observação.
++- Escuta apenas em 127.0.0.1; serve apenas três arquivos fixos da própria pasta.
++
++A página não instala o protótipo da Área de trabalho nem seus assets. Essa cópia permanece independente e estática.
++
++## Limites desta primeira fatia
++
++O sinal não representa todos os serviços da Agata. Não inclui containers, timers, propostas ou saúde dos modelos. A comparação de Git usa apenas a referência local do último fetch; não consulta a rede. O relógio exibido vem do relógio local. O prazo de frescor de 60 segundos é inicial e ainda não foi ajustado por medição de carga.
++
++A tela não altera o vault nem escreve no canon. A esfera pessoal não está na busca. A exposição permanente via systemd ou acesso remoto fica fora deste recorte e exige proposta própria pelo fluxo de mudança segura.
+diff --git a/redesign/painel_operacional/app.js b/redesign/painel_operacional/app.js
+new file mode 100644
+index 00000000..9c194bf3
+--- /dev/null
++++ b/redesign/painel_operacional/app.js
+@@ -0,0 +1,314 @@
++"use strict";
++
++const SERVICE_LABELS = {
++  "omniroute.service": "OmniRoute",
++  "omniroute-sanitizer.service": "Sanitizador",
++  "seth-gateway.service": "Gateway da Seth",
++  "seth-verificador.service": "Verificador",
++};
++const STATE_LABELS = {
++  ok: "ATIVO",
++  warning: "ATENÇÃO",
++  unknown: "DESCONHECIDO",
++  stale: "DESATUALIZADO",
++};
++let lastSnapshot = null;
++let lastUnitSignature = null;
++let collectionUnavailable = false;
++let lastNoticeKey = null;
++let busy = false;
++let pollTimer = null;
++
++function byId(id) {
++  return document.getElementById(id);
++}
++
++function stateLabel(state) {
++  return STATE_LABELS[state] || STATE_LABELS.unknown;
++}
++
++function formatTime(value) {
++  if (!value) return "não disponível";
++  const date = new Date(value);
++  if (Number.isNaN(date.getTime())) return "não disponível";
++  return new Intl.DateTimeFormat("pt-BR", {
++    dateStyle: "short",
++    timeStyle: "medium",
++  }).format(date);
++}
++
++function expired(item) {
++  const deadline = Date.parse(item && item.fresh_until);
++  return !Number.isFinite(deadline) || deadline < Date.now();
++}
++
++function effectiveState(item, forcedStale = false) {
++  if (!item || item.state === "unknown") return "unknown";
++  return forcedStale || expired(item) ? "stale" : item.state;
++}
++
++function makeTag(state, text) {
++  const tag = document.createElement("span");
++  tag.className = "state-tag " + state;
++  tag.textContent = text || stateLabel(state);
++  return tag;
++}
++
++function renderServices(services, forcedStale = false) {
++  const root = byId("services");
++  root.replaceChildren();
++  for (const service of services || []) {
++    const state = effectiveState(service, forcedStale);
++    const card = document.createElement("article");
++    card.className = "service-card";
++
++    const titleGroup = document.createElement("div");
++    const title = document.createElement("h3");
++    title.className = "service-name";
++    title.textContent = SERVICE_LABELS[service.unit] || "Unidade";
++    const unit = document.createElement("div");
++    unit.className = "service-unit";
++    unit.textContent = service.unit || "unidade não informada";
++    titleGroup.append(title, unit);
++
++    card.append(titleGroup, makeTag(state));
++    const meta = document.createElement("div");
++    meta.className = "service-meta";
++    const detail = document.createElement("span");
++    detail.textContent = service.active_state
++      ? service.active_state + "/" + (service.sub_state || "?") +
++        (service.last_error ? " · última coleta falhou" : "")
++      : (service.error || "estado sem leitura");
++    const source = document.createElement("span");
++    source.textContent =
++      "Fonte: " + (service.source || "não informada") +
++      " · ref. " + (service.source_ref || "não informada");
++    const observed = document.createElement("span");
++    observed.textContent = "Observado: " + formatTime(service.observed_at);
++    const validity = document.createElement("span");
++    validity.textContent = "Válido até: " + formatTime(service.fresh_until);
++    meta.append(detail, source, observed, validity);
++    if (service.last_attempt_at) {
++      const attempt = document.createElement("span");
++      attempt.textContent = "Última tentativa sem resposta: " + formatTime(service.last_attempt_at);
++      meta.append(attempt);
++    }
++    card.append(meta);
++    root.append(card);
++  }
++  if (!services || !services.length) {
++    const empty = document.createElement("p");
++    empty.className = "service-card";
++    empty.textContent = "Nenhum estado de unidade foi recebido.";
++    root.append(empty);
++  }
++}
++
++function trackingLabel(value) {
++  if (value === "tracking_up_to_date") return "referência local do último fetch: alinhada";
++  if (value === "tracking_diverged") return "referência local do último fetch: divergente";
++  if (value === "no_upstream") return "sem referência local";
++  return "sem leitura";
++}
++
++function renderGit(git, forcedStale = false) {
++  const state = effectiveState(git, forcedStale);
++  byId("git-state").className = "state-tag " + state;
++  byId("git-state").textContent = stateLabel(state);
++  byId("git-branch").textContent = git.branch || "—";
++  byId("git-head").textContent = git.head || "—";
++  byId("git-dirty").textContent = Number.isInteger(git.dirty_count)
++    ? (git.dirty_count === 0 ? "árvore limpa" : String(git.dirty_count) + " item(ns)")
++    : "—";
++  byId("git-tracking").textContent = trackingLabel(git.tracking);
++  byId("git-source").textContent =
++    "Fonte: " + (git.source || "não informada") +
++    " · ref. " + (git.source_ref || "não informada") +
++    " · commit " + (git.commit || git.head || "não disponível") +
++    " · observado " + formatTime(git.observed_at) +
++    " · válido até " + formatTime(git.fresh_until) +
++    (git.last_attempt_at ? " · última tentativa falhou " + formatTime(git.last_attempt_at) : "") +
++    " · sem consulta à rede.";
++}
++
++function aggregateUnitState(services) {
++  const states = services.map((service) => effectiveState(service));
++  if (states.includes("unknown")) return "unknown";
++  if (states.includes("warning")) return "warning";
++  if (states.includes("stale")) return "stale";
++  return "ok";
++}
++
++function preserveLastKnown(snapshot) {
++  if (!lastSnapshot) return snapshot;
++  const previousUnits = new Map((lastSnapshot.services || []).map((service) => [service.unit, service]));
++  const services = (snapshot.services || []).map((service) => {
++    if (service.state !== "unknown") return service;
++    const previous = previousUnits.get(service.unit);
++    if (!previous || previous.state === "unknown") return service;
++    return {
++      ...previous,
++      state: "stale",
++      last_error: service.error || "leitura indisponível",
++      last_attempt_at: service.observed_at,
++    };
++  });
++  let git = snapshot.git || {};
++  if (git.state === "unknown" && lastSnapshot.git && lastSnapshot.git.state !== "unknown") {
++    git = {
++      ...lastSnapshot.git,
++      state: "stale",
++      last_error: git.error || "leitura indisponível",
++      last_attempt_at: git.observed_at,
++    };
++  }
++  return { ...snapshot, services, git, state: aggregateUnitState(services) };
++}
++
++function unitSignature(snapshot) {
++  return (snapshot.services || []).map((service) =>
++    service.unit + ":" + effectiveState(service)
++  ).join("|");
++}
++
++function announce(key, message) {
++  if (key === lastNoticeKey) return;
++  lastNoticeKey = key;
++  byId("notice").textContent = message;
++}
++
++function render(snapshot, forcedStale = false) {
++  const services = snapshot.services || [];
++  const states = services.map((service) => effectiveState(service, forcedStale));
++  const overall = states.includes("unknown") ? "unknown"
++    : states.includes("warning") ? "warning"
++      : states.includes("stale") ? "stale" : "ok";
++  byId("overall-indicator").className = "indicator " + overall;
++  byId("overall-state").textContent = stateLabel(overall);
++  byId("summary-detail").textContent = overall === "stale"
++    ? "Último estado de serviço preservado; leitura fora do prazo."
++    : overall === "unknown"
++      ? "Sem leitura válida para pelo menos uma unidade; estado atual não verificável."
++      : snapshot.scope;
++  byId("observed-at").textContent = formatTime(snapshot.observed_at);
++  byId("collection-note").textContent =
++    "Resumo calculado só das quatro unidades · leitura concluída " +
++    formatTime(snapshot.observed_at) + " · validade até " + formatTime(snapshot.fresh_until) + ".";
++  renderServices(services, forcedStale);
++  renderGit(snapshot.git || {}, forcedStale);
++}
++
++function showFirstFailure() {
++  byId("overall-indicator").className = "indicator unknown";
++  byId("overall-state").textContent = "Sem leitura";
++  byId("summary-detail").textContent = "A coleta local ainda não respondeu.";
++  renderServices([]);
++  renderGit({});
++}
++
++async function refresh(manual = false) {
++  if (busy || document.visibilityState === "hidden") return;
++  busy = true;
++  byId("refresh").disabled = true;
++  try {
++    const response = await fetch("/api/status", {
++      method: "GET",
++      cache: "no-store",
++      credentials: "same-origin",
++      headers: { Accept: "application/json" },
++    });
++    if (!response.ok) throw new Error("HTTP " + response.status);
++    const snapshot = await response.json();
++    if (snapshot.schema_version !== 1) throw new Error("versão de dados incompatível");
++
++    const mergedSnapshot = preserveLastKnown(snapshot);
++    const nextSignature = unitSignature(mergedSnapshot);
++    const previousSignature = lastUnitSignature;
++    const recovered = collectionUnavailable;
++    lastSnapshot = mergedSnapshot;
++    lastUnitSignature = nextSignature;
++    collectionUnavailable = false;
++    render(mergedSnapshot);
++
++    if (manual) {
++      announce("manual:" + formatTime(snapshot.observed_at), "Leitura manual concluída.");
++    } else if (recovered) {
++      announce("recovered:" + nextSignature, "Coleta das unidades retomada.");
++    } else if ((mergedSnapshot.services || []).some((service) => effectiveState(service) === "stale")) {
++      announce("stale:" + nextSignature, "Leitura das unidades desatualizada.");
++    } else if (previousSignature !== null && previousSignature !== nextSignature) {
++      announce("changed:" + nextSignature, "Estado das unidades alterado.");
++    }
++  } catch (_error) {
++    collectionUnavailable = true;
++    if (lastSnapshot) {
++      render(lastSnapshot, true);
++      announce("unavailable", "Coleta indisponível; última leitura preservada.");
++    } else {
++      showFirstFailure();
++      announce("unavailable", "Coleta local indisponível.");
++    }
++  } finally {
++    busy = false;
++    byId("refresh").disabled = false;
++  }
++}
++
++function syncPollingWithVisibility() {
++  if (pollTimer !== null) {
++    window.clearInterval(pollTimer);
++    pollTimer = null;
++  }
++  if (document.visibilityState === "visible") {
++    refresh(false);
++    pollTimer = window.setInterval(() => refresh(false), 60000);
++  }
++}
++
++async function searchWiki(event) {
++  event.preventDefault();
++  const query = byId("wiki-query").value.trim();
++  const mode = byId("wiki-mode").value;
++  const button = byId("wiki-submit");
++  const status = byId("wiki-status");
++  const root = byId("wiki-results");
++  if (!query || query.length > 200) {
++    status.textContent = "Informe uma busca com até 200 caracteres.";
++    return;
++  }
++  button.disabled = true;
++  root.replaceChildren();
++  status.textContent = "Buscando no vault e no índice local…";
++  try {
++    const response = await fetch("/api/wiki/search", {
++      method: "POST",
++      cache: "no-store",
++      credentials: "same-origin",
++      headers: { "Content-Type": "application/json", Accept: "application/json" },
++      body: JSON.stringify({ query, mode }),
++    });
++    if (!response.ok) throw new Error("HTTP " + response.status);
++    const data = await response.json();
++    if (data.schema_version !== 1 || !Array.isArray(data.results)) throw new Error("resposta incompatível");
++    for (const item of data.results) {
++      const article = document.createElement("article");
++      article.className = "wiki-result";
++      const heading = document.createElement("h3");
++      heading.textContent = item.command === "busca_semantica" ? "Busca por sentido" : "Busca por texto";
++      const output = document.createElement("pre");
++      output.textContent = item.error ? "Busca indisponível: " + item.error : item.output || "Sem conteúdo retornado.";
++      article.append(heading, output);
++      root.append(article);
++    }
++    status.textContent = "Fonte: " + data.source + " · observado " + formatTime(data.observed_at) + " · " + data.source_ref;
++  } catch (_error) {
++    status.textContent = "Busca indisponível. O painel não preserva resultados anteriores.";
++  } finally {
++    button.disabled = false;
++  }
++}
++
++byId("refresh").addEventListener("click", () => refresh(true));
++byId("wiki-search-form").addEventListener("submit", searchWiki);
++document.addEventListener("visibilitychange", syncPollingWithVisibility);
++syncPollingWithVisibility();
+diff --git a/redesign/painel_operacional/index.html b/redesign/painel_operacional/index.html
+new file mode 100644
+index 00000000..27656143
+--- /dev/null
++++ b/redesign/painel_operacional/index.html
+@@ -0,0 +1,99 @@
++<!doctype html>
++<html lang="pt-BR">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1">
++  <meta name="color-scheme" content="light">
++  <title>Agata — estado local</title>
++  <link rel="stylesheet" href="/styles.css">
++  <script src="/app.js" defer></script>
++</head>
++<body>
++  <main class="shell">
++    <header class="topbar">
++      <a class="wordmark" href="/" aria-label="Agata, início"><span class="mark">A</span> AGATA <span class="edition">/ LOCAL</span></a>
++      <span class="read-only"><span class="read-dot"></span> SOMENTE LEITURA</span>
++    </header>
++
++    <section class="intro" aria-labelledby="page-title">
++      <div>
++        <p class="eyebrow">ESTADO OPERACIONAL <span class="rule"></span> MÁQUINA LOCAL</p>
++        <h1 id="page-title">O que está no ar.</h1>
++        <p class="lede">Uma leitura curta do núcleo de conversa e do repositório. Sem ações de controle.</p>
++      </div>
++      <div class="refresh-box">
++        <button id="refresh" type="button">
++          <span class="refresh-icon" aria-hidden="true">↻</span>
++          Atualizar
++        </button>
++        <span id="refresh-note">Leitura automática a cada 60 s</span>
++      </div>
++    </section>
++
++    <section class="summary" aria-describedby="summary-detail">
++      <div class="summary-label">SAÚDE DAS UNIDADES</div>
++      <div class="summary-status">
++        <span id="overall-indicator" class="indicator unknown"></span>
++        <strong id="overall-state">Sem leitura</strong>
++      </div>
++      <div class="summary-detail" id="summary-detail">Aguardando a primeira coleta.</div>
++      <div class="summary-time"><span>OBSERVADO</span><time id="observed-at">—</time></div>
++    </section>
++
++    <div class="section-heading">
++      <h2>Núcleo de conversa</h2>
++      <p>Quatro unidades de usuário consultadas pelo verificador local.</p>
++    </div>
++    <section id="services" class="service-grid" aria-label="Estado das unidades de conversa"></section>
++
++    <section class="git-card" aria-labelledby="git-title">
++      <div class="git-heading">
++        <div>
++          <p class="eyebrow">REPOSITÓRIO LOCAL</p>
++          <h2 id="git-title">Git</h2>
++        </div>
++        <span id="git-state" class="state-tag unknown">SEM LEITURA</span>
++      </div>
++      <div class="git-facts">
++        <div><span>BRANCH</span><strong id="git-branch">—</strong></div>
++        <div><span>HEAD</span><strong id="git-head" class="mono">—</strong></div>
++        <div><span>ALTERAÇÕES</span><strong id="git-dirty">—</strong></div>
++        <div><span>REFERÊNCIA LOCAL</span><strong id="git-tracking">—</strong></div>
++      </div>
++      <p class="source-note" id="git-source">Fonte: git status e HEAD local.</p>
++    </section>
++
++    <section class="wiki-card" aria-labelledby="wiki-title">
++      <div class="git-heading">
++        <div>
++          <p class="eyebrow">MEMÓRIA DERIVADA · CONSULTA READ-ONLY</p>
++          <h2 id="wiki-title">Wiki da Agata</h2>
++        </div>
++        <a class="wiki-link" href="obsidian://open?vault=agata&file=INICIO">Abrir no Obsidian ↗</a>
++      </div>
++      <p class="wiki-intro">Busque por texto, assunto ou ambos. O resultado ajuda a encontrar a fonte; confirme afirmações no canon antes de citar.</p>
++      <form id="wiki-search-form" class="wiki-search">
++        <label for="wiki-query">O que você procura?</label>
++        <div class="wiki-controls">
++          <input id="wiki-query" name="query" maxlength="200" autocomplete="off" required>
++          <select id="wiki-mode" name="mode" aria-label="Modo de busca">
++            <option value="ambos">Texto e sentido</option>
++            <option value="texto">Texto</option>
++            <option value="sentido">Por sentido</option>
++          </select>
++          <button id="wiki-submit" type="submit">Buscar</button>
++        </div>
++      </form>
++      <p id="wiki-status" class="wiki-status" role="status" aria-live="polite">Busca sob demanda. Nenhuma consulta foi feita.</p>
++      <div id="wiki-results" class="wiki-results" aria-label="Resultados da busca"></div>
++      <p class="source-note">Fonte: seth-verificador · comandos fixos de busca_texto e busca_semantica · resultados não alteram o vault.</p>
++    </section>
++
++    <footer class="footer">
++      <p id="collection-note">Cada bloco informa sua fonte e o horário da coleta.</p>
++      <p>Esta tela não representa todos os serviços da Agata.</p>
++    </footer>
++    <div id="notice" class="notice" role="status" aria-live="polite"></div>
++  </main>
++</body>
++</html>
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+new file mode 100644
+index 00000000..3a9eb4f1
+--- /dev/null
++++ b/redesign/painel_operacional/server.py
+@@ -0,0 +1,517 @@
++#!/usr/bin/env python3
++"""Painel operacional local da Agata. HTTP de leitura, preso a loopback."""
++from __future__ import annotations
++
++import argparse
++import json
++import time
++import urllib.error
++import urllib.request
++from datetime import datetime, timedelta
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from zoneinfo import ZoneInfo
++
++ROOT = Path(__file__).resolve().parents[2]
++WEB = Path(__file__).resolve().parent
++BIND = "127.0.0.1"
++PORT = 20146
++VERIFIER_URL = "http://127.0.0.1:20141/verificar"
++REFRESH_SECONDS = 60
++FRESH_SECONDS = 60
++CACHE_SECONDS = 3
++LIMITE_RESPOSTA_VERIFICADOR = 262144
++ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
++WIKI_RESULT_MAX = 12000
++
++# Allowlist de unidades de usuário. A API não aceita nome de unidade do cliente.
++SERVICE_ALLOWLIST = (
++    "omniroute.service",
++    "omniroute-sanitizer.service",
++    "seth-gateway.service",
++    "seth-verificador.service",
++)
++
++_ASSETS = {
++    "/": ("index.html", "text/html; charset=utf-8"),
++    "/index.html": ("index.html", "text/html; charset=utf-8"),
++    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
++    "/styles.css": ("styles.css", "text/css; charset=utf-8"),
++}
++_STATUS_CACHE: dict | None = None
++_STATUS_CACHE_AT: float | None = None
++
++
++def _now() -> datetime:
++    return datetime.now(ZoneInfo("America/Sao_Paulo"))
++
++
++def _stamp(value: datetime) -> str:
++    return value.isoformat(timespec="seconds")
++
++
++def _reading_window() -> tuple[str, str]:
++    observed = _now()
++    return _stamp(observed), _stamp(observed + timedelta(seconds=FRESH_SECONDS))
++
++
++def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
++    if fetch_site and fetch_site not in {"same-origin", "none"}:
++        return False
++    return not origin or origin == ALLOWED_ORIGIN
++
++
++def _verify(command: str, **arguments: object) -> str:
++    """Consulta comandos fixos do verificador; argumentos nunca vêm do navegador."""
++    allowed = {"unidade", "git_status", "git_log", "busca_texto", "busca_semantica"}
++    if command not in allowed:
++        raise ValueError("comando não permitido pelo painel")
++    payload = {"comando": command, **arguments}
++    request = urllib.request.Request(
++        VERIFIER_URL,
++        data=json.dumps(payload).encode("utf-8"),
++        headers={"Content-Type": "application/json", "Accept": "application/json"},
++        method="POST",
++    )
++    timeout = 95 if command == "busca_semantica" else 5
++    with urllib.request.urlopen(request, timeout=timeout) as response:
++        raw = response.read(LIMITE_RESPOSTA_VERIFICADOR + 1)
++        if len(raw) > LIMITE_RESPOSTA_VERIFICADOR:
++            raise ValueError("resposta do verificador acima do limite")
++        result = json.loads(raw.decode("utf-8"))
++    output = result.get("saida")
++    if not isinstance(output, str):
++        raise ValueError("o verificador não retornou uma saída")
++    return output
++
++
++def _command_body(output: str) -> str:
++    if "[CORTADO" in output:
++        raise ValueError("a saída do verificador foi cortada")
++    _, separator, body = output.partition("\n\n")
++    if not separator:
++        raise ValueError("a saída do verificador está incompleta")
++    return body
++
++
++def _parse_pairs(text: str) -> dict[str, str]:
++    pairs: dict[str, str] = {}
++    for line in text.splitlines():
++        key, sep, value = line.partition("=")
++        if sep:
++            pairs[key] = value
++    return pairs
++
++
++def _parse_git_status(status_text: str, branch: str, head: str) -> dict:
++    lines = status_text.splitlines()
++    header = lines[0] if lines and lines[0].startswith("## ") else ""
++    changed = [line for line in lines[1:] if line.strip()] if header else [
++        line for line in lines if line.strip()
++    ]
++    relation = "no_upstream"
++    if "..." in header:
++        relation = "tracking_up_to_date"
++        if "ahead " in header or "behind " in header:
++            relation = "tracking_diverged"
++
++    dirty = len(changed)
++    return {
++        "branch": branch or "detached",
++        "head": head,
++        "dirty_count": dirty,
++        "working_tree": "dirty" if dirty else "clean",
++        "tracking": relation,
++        "state": "warning" if dirty or relation == "tracking_diverged" else "ok",
++        "source": "git",
++        "source_ref": "git status --porcelain=v1 -b; git rev-parse HEAD",
++    }
++
++
++def _git_snapshot() -> dict:
++    try:
++        status_output = _verify("git_status")
++        status_body = _command_body(status_output)
++        log_body = _command_body(_verify("git_log", n=1))
++    except (OSError, TimeoutError, ValueError, urllib.error.URLError):
++        observed_at, fresh_until = _reading_window()
++        return {
++            "state": "unknown",
++            "source": "seth-verificador",
++            "source_ref": "git_status + git_log n=1",
++            "observed_at": observed_at,
++            "fresh_until": fresh_until,
++            "error": "leitura local do Git indisponível",
++        }
++
++    first = next((line for line in log_body.splitlines() if line.strip()), "")
++    head = first.split(maxsplit=1)[0] if first else ""
++    if not head or any(char not in "0123456789abcdef" for char in head.lower()):
++        observed_at, fresh_until = _reading_window()
++        return {
++            "state": "unknown",
++            "source": "seth-verificador",
++            "source_ref": "git_status + git_log n=1",
++            "observed_at": observed_at,
++            "fresh_until": fresh_until,
++            "error": "HEAD não veio na leitura do verificador",
++        }
++
++    status_lines = status_body.splitlines()
++    header = status_lines[0] if status_lines else ""
++    branch = header[3:].partition("...")[0] if header.startswith("## ") else "detached"
++    value = _parse_git_status(status_body, branch, head)
++    observed_at, fresh_until = _reading_window()
++    value.update(
++        {
++            "observed_at": observed_at,
++            "fresh_until": fresh_until,
++            "commit": head,
++            "source": "seth-verificador",
++            "source_ref": "git_status + git_log n=1",
++        }
++    )
++    return value
++
++
++def _service_snapshot(unit: str) -> dict:
++    try:
++        output = _verify("unidade", consulta=unit)
++        values = _parse_pairs(_command_body(output))
++    except (OSError, TimeoutError, ValueError, urllib.error.URLError):
++        observed_at, fresh_until = _reading_window()
++        values = {}
++    else:
++        observed_at, fresh_until = _reading_window()
++
++    required = ("LoadState", "ActiveState", "SubState")
++    if any(key not in values for key in required):
++        return {
++            "unit": unit,
++            "state": "unknown",
++            "source": "seth-verificador",
++            "source_ref": "unidade:" + unit,
++            "observed_at": observed_at,
++            "fresh_until": fresh_until,
++            "error": "leitura da unidade indisponível",
++        }
++
++    active = values["ActiveState"]
++    load = values["LoadState"]
++    state = "ok" if load == "loaded" and active == "active" else "warning"
++    return {
++        "unit": unit,
++        "state": state,
++        "load_state": load,
++        "active_state": active,
++        "sub_state": values["SubState"],
++        "source": "seth-verificador",
++        "source_ref": "unidade:" + unit,
++        "observed_at": observed_at,
++        "fresh_until": fresh_until,
++    }
++
++
++def _overall_state(states: list[str]) -> str:
++    if any(state == "unknown" for state in states):
++        return "unknown"
++    if any(state == "warning" for state in states):
++        return "warning"
++    return "ok"
++
++
++def collect() -> dict:
++    services = [_service_snapshot(unit) for unit in SERVICE_ALLOWLIST]
++    git = _git_snapshot()
++    observed_at, fresh_until = _reading_window()
++    overall = _overall_state([item["state"] for item in services])
++    return {
++        "schema_version": 1,
++        "state": overall,
++        "scope": "quatro unidades fixas e Git local via seth-verificador",
++        "commit": git.get("commit"),
++        "observed_at": observed_at,
++        "fresh_until": fresh_until,
++        "refresh_seconds": REFRESH_SECONDS,
++        "services": services,
++        "git": git,
++    }
++
++
++def _cached_status() -> dict:
++    """Reusa por poucos segundos respostas GET sequenciais do HTTPServer simples."""
++    global _STATUS_CACHE, _STATUS_CACHE_AT
++    now = time.monotonic()
++    if (
++        _STATUS_CACHE is not None
++        and _STATUS_CACHE_AT is not None
++        and now - _STATUS_CACHE_AT < CACHE_SECONDS
++    ):
++        return _STATUS_CACHE
++    _STATUS_CACHE = collect()
++    _STATUS_CACHE_AT = time.monotonic()
++    return _STATUS_CACHE
++
++
++def _wiki_search(query: str, mode: str) -> dict:
++    """Executa apenas os dois comandos de busca aprovados, com a consulta como dado."""
++    if not isinstance(query, str) or not query.strip() or len(query) > 200:
++        raise ValueError("query must contain 1-200 characters")
++    if not isinstance(mode, str) or mode not in {"texto", "sentido", "ambos"}:
++        raise ValueError("invalid search mode")
++    commands = ("busca_texto", "busca_semantica") if mode == "ambos" else (
++        ("busca_texto",) if mode == "texto" else ("busca_semantica",)
++    )
++    results = []
++    for command in commands:
++        try:
++            output = _verify(command, consulta=query.strip(), **(
++                {"n": 8} if command == "busca_semantica" else {}
++            ))
++            if len(output) > WIKI_RESULT_MAX:
++                total = len(output)
++                percent = round(WIKI_RESULT_MAX / total * 100)
++                output = output[:WIKI_RESULT_MAX] + (
++                    f"\n\n[TRUNCADO: mostrando {WIKI_RESULT_MAX} de {total} caracteres "
++                    f"(~{percent}%). O restante não foi lido; não conclua nada sobre ele.]"
++                )
++            results.append({"command": command, "output": output, "error": None})
++        except (OSError, TimeoutError, ValueError, urllib.error.URLError) as error:
++            results.append({"command": command, "output": "", "error": str(error)})
++    return {
++        "schema_version": 1,
++        "observed_at": _stamp(_now()),
++        "source": "seth-verificador",
++        "source_ref": "busca_texto/busca_semantica · vault prioritário e extras/",
++        "results": results,
++    }
++
++
++class Handler(BaseHTTPRequestHandler):
++    server_version = "AgataPainel/1"
++
++    def log_message(self, _format: str, *args) -> None:
++        # Não grava conteúdo de requisição em log.
++        return
++
++    def _send(
++        self,
++        status: int,
++        content_type: str,
++        body: bytes,
++        extra_headers: tuple[tuple[str, str], ...] = (),
++    ) -> None:
++        self.send_response(status)
++        self.send_header("Content-Type", content_type)
++        self.send_header("Content-Length", str(len(body)))
++        self.send_header("Cache-Control", "no-store")
++        self.send_header("X-Content-Type-Options", "nosniff")
++        self.send_header("Referrer-Policy", "no-referrer")
++        for name, value in extra_headers:
++            self.send_header(name, value)
++        self.send_header(
++            "Content-Security-Policy",
++            "default-src 'none'; script-src 'self'; style-src 'self'; "
++            "connect-src 'self'; img-src 'self'; base-uri 'none'; "
++            "frame-ancestors 'none'",
++        )
++        self.end_headers()
++        self.wfile.write(body)
++
++    def do_GET(self) -> None:
++        if self.headers.get("Host") != f"{BIND}:{PORT}":
++            return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path == "/api/status":
++            if not _same_origin_request(
++                self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
++            ):
++                return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++            body = json.dumps(_cached_status(), ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
++
++        asset = _ASSETS.get(self.path)
++        if asset is None:
++            return self._send(404, "text/plain; charset=utf-8", b"not found")
++        name, content_type = asset
++        try:
++            body = (WEB / name).read_bytes()
++        except OSError:
++            return self._send(500, "text/plain; charset=utf-8", b"asset unavailable")
++        self._send(200, content_type, body)
++
++    def do_POST(self) -> None:
++        if self.headers.get("Host") != f"{BIND}:{PORT}":
++            return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path != "/api/wiki/search":
++            return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
++        if not _same_origin_request(
++            self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
++        ):
++            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > 4096:
++            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++        try:
++            payload = json.loads(self.rfile.read(int(raw_length)))
++        except (json.JSONDecodeError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        if not isinstance(payload, dict):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid search")
++        query = payload.get("query")
++        mode = payload.get("mode", "ambos")
++        if not isinstance(query, str) or not query.strip() or len(query) > 200:
++            return self._send(400, "text/plain; charset=utf-8", b"query must contain 1-200 characters")
++        if not isinstance(mode, str) or mode not in {"texto", "sentido", "ambos"}:
++            return self._send(400, "text/plain; charset=utf-8", b"invalid search mode")
++        try:
++            result = _wiki_search(query, mode)
++        except ValueError:
++            return self._send(400, "text/plain; charset=utf-8", b"invalid search")
++        body = json.dumps(result, ensure_ascii=False).encode("utf-8")
++        return self._send(200, "application/json; charset=utf-8", body)
++
++    def do_PUT(self) -> None:
++        return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
++
++    def do_DELETE(self) -> None:
++        return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
++
++
++def _selftest() -> int:
++    global _STATUS_CACHE, _STATUS_CACHE_AT, _verify, collect
++    sample = "## main...origin/main\n M PROJETO.md\n?? reports/\n"
++    git = _parse_git_status(sample, "main", "abc123def456")
++    assert git["branch"] == "main"
++    assert git["head"] == "abc123def456"
++    assert git["dirty_count"] == 2
++    assert git["state"] == "warning"
++    assert "PROJETO.md" not in json.dumps(git)
++    assert git["tracking"] == "tracking_up_to_date"
++
++    diverged = _parse_git_status(
++        "## main...origin/main [ahead 1, behind 2]\n", "main", "def456"
++    )
++    assert diverged["tracking"] == "tracking_diverged"
++    assert diverged["state"] == "warning"
++
++    pairs = _parse_pairs("LoadState=loaded\nActiveState=active\nSubState=running\n")
++    assert pairs == {
++        "LoadState": "loaded",
++        "ActiveState": "active",
++        "SubState": "running",
++    }
++    assert SERVICE_ALLOWLIST == (
++        "omniroute.service",
++        "omniroute-sanitizer.service",
++        "seth-gateway.service",
++        "seth-verificador.service",
++    )
++    assert all(unit.endswith(".service") for unit in SERVICE_ALLOWLIST)
++    assert _overall_state(["ok", "ok"]) == "ok"
++    assert _overall_state(["ok", "warning"]) == "warning"
++    assert _overall_state(["ok", "unknown"]) == "unknown"
++    assert _same_origin_request("same-origin", ALLOWED_ORIGIN)
++    assert _same_origin_request(None, None)
++    assert not _same_origin_request("cross-site", ALLOWED_ORIGIN)
++    assert not _same_origin_request("same-origin", "https://example.com")
++
++    original_verify = _verify
++
++    def fake_verify(command: str, **arguments: object) -> str:
++        if command == "unidade":
++            body = "LoadState=loaded\nActiveState=active\nSubState=running\n"
++        elif command == "git_status":
++            body = "## main...origin/main\n M README.md\n"
++        elif command == "git_log":
++            body = "abc123def456 mensagem de exemplo\n"
++        elif command == "busca_texto":
++            assert arguments == {"consulta": "wiki"}
++            body = "resultado textual demonstrativo " + ("x" * (WIKI_RESULT_MAX + 1))
++        elif command == "busca_semantica":
++            assert arguments == {"consulta": "wiki", "n": 8}
++            body = "resultado semântico demonstrativo"
++        else:
++            raise AssertionError("comando inesperado no selftest")
++        return "comando permitido\n\n" + body
++
++    _verify = fake_verify
++    try:
++        snapshot = collect()
++        wiki = _wiki_search("wiki", "ambos")
++        assert [item["command"] for item in wiki["results"]] == ["busca_texto", "busca_semantica"]
++        assert all(item["error"] is None for item in wiki["results"])
++        assert "resultado textual" in wiki["results"][0]["output"]
++        total_textual = len("comando permitido\n\nresultado textual demonstrativo " + ("x" * (WIKI_RESULT_MAX + 1)))
++        assert f"TRUNCADO: mostrando {WIKI_RESULT_MAX} de {total_textual} caracteres" in wiki["results"][0]["output"]
++        assert "resultado semântico" in wiki["results"][1]["output"]
++        try:
++            _wiki_search("x" * 201, "texto")
++        except ValueError:
++            pass
++        else:
++            raise AssertionError("busca acima de 200 caracteres não foi recusada")
++        try:
++            _wiki_search("wiki", "livre")
++        except ValueError:
++            pass
++        else:
++            raise AssertionError("modo de busca arbitrário não foi recusado")
++    finally:
++        _verify = original_verify
++
++    assert snapshot["state"] == "ok"
++    assert snapshot["git"]["state"] == "warning"
++    assert snapshot["commit"] == "abc123def456"
++    for reading in [*snapshot["services"], snapshot["git"]]:
++        observed = datetime.fromisoformat(reading["observed_at"])
++        valid_until = datetime.fromisoformat(reading["fresh_until"])
++        assert valid_until - observed == timedelta(seconds=FRESH_SECONDS)
++        assert reading.get("source_ref")
++    assert "README.md" not in json.dumps(snapshot)
++
++    original_collect = collect
++    call_count = 0
++
++    def fake_collect() -> dict:
++        nonlocal call_count
++        call_count += 1
++        return {"schema_version": 1}
++
++    collect = fake_collect
++    _STATUS_CACHE = None
++    _STATUS_CACHE_AT = None
++    try:
++        cached_first = _cached_status()
++        cached_second = _cached_status()
++        assert cached_first is cached_second
++        assert call_count == 1
++    finally:
++        collect = original_collect
++        _STATUS_CACHE = None
++        _STATUS_CACHE_AT = None
++    print("painel_operacional selftest: OK")
++    return 0
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--selftest", action="store_true")
++    args = parser.parse_args()
++    if args.selftest:
++        return _selftest()
++
++    server = ThreadingHTTPServer((BIND, PORT), Handler)
++    server.daemon_threads = True
++    print(f"Painel somente leitura: http://{BIND}:{PORT}/")
++    print("Parar com Ctrl-C. Nenhuma unidade systemd é instalada ou iniciada.")
++    try:
++        server.serve_forever()
++    except KeyboardInterrupt:
++        pass
++    finally:
++        server.server_close()
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/redesign/painel_operacional/styles.css b/redesign/painel_operacional/styles.css
+new file mode 100644
+index 00000000..e68340d9
+--- /dev/null
++++ b/redesign/painel_operacional/styles.css
+@@ -0,0 +1,222 @@
++:root {
++  --ink: #18251f;
++  --muted: #68746d;
++  --paper: #f4f3ed;
++  --panel: #fffefa;
++  --line: #d9ddd4;
++  --forest: #183c31;
++  --forest-soft: #e4eee8;
++  --ok: #176b4b;
++  --ok-bg: #e3f2e9;
++  --warn: #a86113;
++  --warn-bg: #fbefd9;
++  --unknown: #69736e;
++  --unknown-bg: #edf0ec;
++  --stale: #7a5b91;
++  --stale-bg: #efe8f5;
++  --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
++  --mono: "Iosevka", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
++}
++* { box-sizing: border-box; }
++body {
++  margin: 0;
++  min-width: 320px;
++  background:
++    radial-gradient(ellipse at 85% 4%, rgba(214, 226, 215, .55), transparent 31rem),
++    var(--paper);
++  color: var(--ink);
++  font-family: ui-sans-serif, "Segoe UI", sans-serif;
++}
++.shell { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
++.topbar {
++  height: 72px;
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  border-bottom: 1px solid var(--line);
++}
++.wordmark {
++  display: inline-flex;
++  align-items: center;
++  gap: 11px;
++  color: var(--forest);
++  font: 700 12px var(--mono);
++  letter-spacing: .16em;
++  text-decoration: none;
++}
++.mark {
++  display: grid;
++  place-items: center;
++  width: 29px;
++  height: 29px;
++  border: 1px solid var(--forest);
++  border-radius: 50%;
++  font: 600 16px var(--serif);
++  letter-spacing: 0;
++}
++.edition { color: #87928a; font-size: 10px; letter-spacing: .11em; }
++.read-only {
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  color: var(--forest);
++  font: 700 10px var(--mono);
++  letter-spacing: .09em;
++}
++.read-dot { width: 7px; height: 7px; border-radius: 50%; background: #52866e; }
++.intro {
++  display: flex;
++  justify-content: space-between;
++  align-items: end;
++  gap: 32px;
++  padding: 54px 0 35px;
++}
++.eyebrow, .summary-label, .git-facts span, .summary-time span {
++  margin: 0;
++  color: var(--muted);
++  font: 700 10px var(--mono);
++  letter-spacing: .11em;
++}
++.eyebrow { display: flex; align-items: center; gap: 12px; }
++.rule { width: 27px; height: 1px; background: #aab6ac; }
++h1, h2, p { margin-top: 0; }
++h1 {
++  margin: 15px 0 9px;
++  color: var(--forest);
++  font: 500 clamp(36px, 5vw, 58px)/1.02 var(--serif);
++  letter-spacing: -.035em;
++}
++.lede { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
++.refresh-box { display: flex; flex-direction: column; align-items: end; gap: 9px; padding-bottom: 2px; }
++button {
++  min-height: 42px;
++  border: 1px solid var(--forest);
++  border-radius: 4px;
++  padding: 0 15px;
++  background: var(--forest);
++  color: white;
++  font: 650 12px ui-sans-serif, "Segoe UI", sans-serif;
++  cursor: pointer;
++  transition: background .16s ease, transform .16s ease;
++}
++button:hover { background: #245546; transform: translateY(-1px); }
++button:focus-visible { outline: 3px solid #c27a31; outline-offset: 3px; }
++button:disabled { cursor: wait; opacity: .7; transform: none; }
++.refresh-icon { margin-right: 7px; font-size: 16px; vertical-align: -1px; }
++#refresh-note { color: var(--muted); font: 10px var(--mono); }
++.summary {
++  display: grid;
++  grid-template-columns: 140px 180px 1fr auto;
++  align-items: center;
++  gap: 20px;
++  min-height: 78px;
++  padding: 16px 22px;
++  border: 1px solid #ccd8ce;
++  border-left: 4px solid var(--forest);
++  background: rgba(255, 254, 250, .82);
++}
++.summary-label { color: var(--forest); }
++.summary-status { display: flex; align-items: center; gap: 9px; }
++.summary-status strong { font: 600 15px var(--serif); }
++.indicator { width: 9px; height: 9px; border-radius: 50%; background: #aab2ac; }
++.indicator.ok { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
++.indicator.warning { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-bg); }
++.indicator.unknown { background: var(--unknown); box-shadow: 0 0 0 3px var(--unknown-bg); }
++.indicator.stale { background: var(--stale); box-shadow: 0 0 0 3px var(--stale-bg); }
++.summary-detail { color: var(--muted); font-size: 12px; }
++.summary-time { display: flex; flex-direction: column; gap: 5px; text-align: right; }
++.summary-time time { font: 11px var(--mono); color: var(--ink); }
++.section-heading {
++  display: flex;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: 16px;
++  margin: 42px 0 15px;
++}
++.section-heading h2, .git-heading h2 { margin: 0; color: var(--forest); font: 500 25px var(--serif); }
++.section-heading p { margin: 0; color: var(--muted); font-size: 12px; }
++.service-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
++.service-card {
++  min-height: 115px;
++  display: grid;
++  grid-template-columns: 1fr auto;
++  gap: 12px;
++  align-items: start;
++  padding: 18px 20px 15px;
++  border: 1px solid var(--line);
++  border-radius: 4px;
++  background: var(--panel);
++}
++.service-name { margin: 1px 0 10px; color: var(--ink); font: 600 16px var(--serif); }
++.service-unit { color: var(--muted); font: 10px var(--mono); }
++.service-meta { grid-column: 1 / -1; display: grid; gap: 5px; border-top: 1px solid #eceee8; padding-top: 10px; color: var(--muted); font: 10px var(--mono); }
++.service-meta span { overflow-wrap: anywhere; }
++.wiki-card { margin-top: 14px; padding: 22px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
++.wiki-intro { max-width: 760px; margin: 8px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
++.wiki-link { color: var(--forest); font-size: 11px; text-decoration-thickness: 1px; text-underline-offset: 3px; }
++.wiki-search { display: grid; gap: 7px; }
++.wiki-search label { color: var(--forest); font: 600 11px var(--mono); }
++.wiki-controls { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 8px; }
++.wiki-controls input, .wiki-controls select { min-height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 3px; background: #fffefa; color: var(--ink); font: 12px var(--sans); }
++.wiki-controls button { min-height: 40px; padding: 0 17px; border: 0; border-radius: 3px; background: var(--forest); color: white; cursor: pointer; font: 600 11px var(--sans); }
++.wiki-controls button:disabled { opacity: .55; cursor: wait; }
++.wiki-status { margin: 12px 0 0; color: var(--muted); font: 10px var(--mono); overflow-wrap: anywhere; }
++.wiki-results { display: grid; gap: 9px; margin-top: 10px; }
++.wiki-result { padding: 13px 15px; border: 1px solid #e6e8e1; border-radius: 3px; background: #fffefa; }
++.wiki-result h3 { margin: 0 0 8px; color: var(--forest); font: 600 12px var(--sans); }
++.wiki-result pre { max-height: 320px; margin: 0; overflow: auto; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font: 10px/1.6 var(--mono); }
++.state-tag {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  padding: 6px 8px;
++  border-radius: 3px;
++  font: 700 9px var(--mono);
++  letter-spacing: .055em;
++  white-space: nowrap;
++}
++.state-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
++.state-tag.ok { background: var(--ok-bg); color: var(--ok); }
++.state-tag.warning { background: var(--warn-bg); color: var(--warn); }
++.state-tag.unknown { background: var(--unknown-bg); color: var(--unknown); }
++.state-tag.stale { background: var(--stale-bg); color: var(--stale); }
++.git-card {
++  margin-top: 34px;
++  padding: 22px 24px 18px;
++  border-radius: 4px;
++  background: var(--forest);
++  color: #f7f5ec;
++}
++.git-heading { display: flex; align-items: center; justify-content: space-between; }
++.git-heading .eyebrow { color: #a9c1b2; }
++.git-heading h2 { margin-top: 7px; color: #fffefa; }
++.git-card .state-tag.ok { background: #285544; color: #d4eddd; }
++.git-card .state-tag.warning { background: #68491e; color: #ffe2ad; }
++.git-card .state-tag.unknown { background: #394e45; color: #d3dbd4; }
++.git-card .state-tag.stale { background: #59456b; color: #eee0f6; }
++.git-facts { display: grid; grid-template-columns: 1fr 1fr 1fr 1.6fr; gap: 14px; margin-top: 22px; }
++.git-facts div { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
++.git-facts span { color: #a9c1b2; font-size: 9px; }
++.git-facts strong { overflow-wrap: anywhere; color: #fffefa; font-size: 13px; font-weight: 550; }
++.git-facts .mono { font-family: var(--mono); font-size: 12px; }
++.source-note { margin: 19px 0 0; padding-top: 11px; border-top: 1px solid rgba(255,255,255,.18); color: #bdd0c4; font: 10px var(--mono); }
++.footer { display: flex; justify-content: space-between; gap: 16px; padding: 22px 0 32px; color: var(--muted); font-size: 11px; }
++.footer p { margin: 0; }
++.notice { min-height: 18px; color: var(--warn); font-size: 11px; }
++@media (max-width: 760px) {
++  .shell { width: min(100% - 32px, 560px); }
++  .intro { align-items: start; flex-direction: column; padding-top: 40px; gap: 22px; }
++  .refresh-box { align-items: start; }
++  .summary { grid-template-columns: 1fr auto; gap: 11px 16px; }
++  .summary-label { grid-column: 1 / -1; }
++  .summary-detail { grid-column: 1 / -1; grid-row: 3; }
++  .summary-time { grid-column: 2; grid-row: 2; }
++  .section-heading { align-items: start; flex-direction: column; gap: 5px; }
++  .service-grid { grid-template-columns: 1fr; }
++  .git-facts { grid-template-columns: 1fr 1fr; row-gap: 20px; }
++  .wiki-controls { grid-template-columns: 1fr; }
++  .footer { flex-direction: column; }
++}
++@media (prefers-reduced-motion: reduce) {
++  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
++}
