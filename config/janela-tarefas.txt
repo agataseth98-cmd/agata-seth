@@ -3,5 +3,8 @@
 # Soma dos orcamentos <= 3600 s. Comandos copiados das units atuais (agata-avaliacao-decisor, agata-consolidacao, agata-laya-treino).
 # pesquisa-modelos (dom 22h) fica FORA ate o Codex separar descoberta publica de ensaio autorizado.
 avaliar-decisor|daily|300|||/usr/bin/python3 %h/agata/scripts/avaliar_decisor.py
+# memoria-semanal (V9 §37 M3, (849)): Memória Canônica da semana, do cache do Conselho; modelo local (GPU), ~2 s a 2 min.
+# Só escreve o par para assinatura em propostas/; semana sem entradas não escreve nada.
+memoria-semanal|weekly|300|||/usr/bin/python3 %h/agata/scripts/memoria_semanal.py gerar --repo %h/agata
 consolidacao|daily|1200||/usr/bin/bash %h/agata/scripts/esperar_servico.sh http://127.0.0.1:20128/|%h/agata/redesign/grafo/.venv/bin/python %h/agata/redesign/grafo/flows/consolidacao.py --repo %h/agata
 laya-treino|daily|1800|HF_HOME=%h/.local/share/agata-laya/hf,HF_HUB_OFFLINE=1||%h/.local/share/agata-laya/.venv/bin/python %h/agata/scripts/laya_treino.py
