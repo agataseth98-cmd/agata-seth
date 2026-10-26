@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): dc1c591999f2c36a187cf676ad015da754604b4b
-  Escrito em: 26/10/2026 08:13 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ecd4ac76e2013455e4c5e339813528293382fde8
+  Escrito em: 26/10/2026 08:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1c591999f2c36a187cf676ad015da754604b4b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1c591999f2c36a187cf676ad015da754604b4b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1c591999f2c36a187cf676ad015da754604b4b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1c591999f2c36a187cf676ad015da754604b4b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dc1c591999f2c36a187cf676ad015da754604b4b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd4ac76e2013455e4c5e339813528293382fde8/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd4ac76e2013455e4c5e339813528293382fde8/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd4ac76e2013455e4c5e339813528293382fde8/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd4ac76e2013455e4c5e339813528293382fde8/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecd4ac76e2013455e4c5e339813528293382fde8/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(847) DIÁRIO — 26/10/2026 · **A pesquisa semanal de modelos gratuitos deixa de listar como "candidato" quem já está nas filas da Seth.** Aplica `pesquisa-modelos-filas-20261026`, assinado pelo Humano. O relatório de 25/10 (22h, o primeiro desde que a descoberta só lê; não gastou cota) listou o Gemini 3.1 Flash-Lite e o Gemini 3 Flash como candidatos, mas os dois já estão nas filas. A lista de conhecidos só olhava a tabela "Confirmado funcionando" e o ROSTER do Conselho. Agora `_modelos_das_filas` soma a ela as filas de `config/capivara/capacidades.json`. Na descoberta real a partir do worktree (só leitura), os candidatos caíram de 13 para 11, e saíram exatamente os dois Gemini. Testar os que restam gasta cota e é frente nova, para depois de 29/10.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: journal de `agata-pesquisa-modelos` de 25/10; relatório `modelos-gratuitos-2026-10-25.md`; descoberta no worktree; selftest; clone com hooks; PR 551 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
+
 (846) DIÁRIO — 25/10/2026 · **O resgate do raciocínio passa a valer só para modelos locais: os Gemini mandam um raciocínio separado, em inglês, que poderia chegar ao Humano como resposta.** Aplica `resgate-so-local-20261025`, assinado pelo Humano. Medido com o prompt real, em stream, direto no proxy: Gemini 3.5 Flash-Lite, 3.1 Flash-Lite e 2.5 Flash mandam raciocínio em inglês; o Mistral não manda. Em conversa e JSON, 1 de 18 respostas do Gemini 3.5 Flash-Lite terminou só com raciocínio; depois de ferramenta, 0 de 12. Quando o Gemini 3.1 volta vazio, volta também sem raciocínio, e quem cuida é a (695). `_modelo_local` tira a lista de locais das chaves `ollama-local/`, `llamacpp-local/` e `local/` de `config/capivara/capacidades.json`, porque o upstream devolve o nome sem o prefixo do provedor. Teste pelo gateway de teste com o 9b forçado: 3/3 sem stream e 3/3 em stream, ou seja, o resgate do modelo local continua.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: 57 pedidos de medição (Gemini e Mistral, nenhum ao OpenRouter); gateway de teste `:20199`; selftest; clone com hooks; PR 549 com CI verde · Autorização: Humano — "assinei no terminal, aplique"
 
