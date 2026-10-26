@@ -96,3 +96,24 @@ setDemoScenario('stale');
   set("timer-panel-state", "NÃO LIBERADO");
   set("timer-intro", "Agenda ainda não liberada: os horários abaixo são exemplos locais, sem leitura da Máquina.");
 })();
+
+/* Cartão do Panorama: leitura viva do Git; o snapshot de 23/10 fica como referência histórica. */
+(async function () {
+  const put = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  try {
+    const r = await fetch("/api/status", { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    put("hero-sync-label", "Git local · " + (d.git.state === "ok" ? "alinhado" : "atenção"));
+    put("hero-sync-head", d.git.head);
+    const note = document.getElementById("hero-sync-note");
+    if (note) note.innerHTML = "";
+    if (note) {
+      note.append("Leitura real · " + new Date(d.observed_at).toLocaleTimeString("pt-BR"), document.createElement("br"),
+        "Referência histórica: 65f76af (23 out 2026 · 10:01 -03)");
+    }
+  } catch (erro) {
+    put("hero-sync-label", "Git local · sem leitura");
+    put("hero-sync-head", "—");
+  }
+})();
