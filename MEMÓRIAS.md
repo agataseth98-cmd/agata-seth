@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4
-  Escrito em: 26/10/2026 16:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0d738458afb5fe6a65c93dbe6e5a3633ab0143a6
+  Escrito em: 26/10/2026 16:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cdf7e0fd20dedddf3bd3312b8be5fcf2194824b4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d738458afb5fe6a65c93dbe6e5a3633ab0143a6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d738458afb5fe6a65c93dbe6e5a3633ab0143a6/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d738458afb5fe6a65c93dbe6e5a3633ab0143a6/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d738458afb5fe6a65c93dbe6e5a3633ab0143a6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d738458afb5fe6a65c93dbe6e5a3633ab0143a6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(861) DIÁRIO — 26/10/2026 · **Painel: formação em recortes, Wiki fechada até o contrato de busca.** Aplica `painel-formacao-20261026`, assinado pelo Humano. O primeiro recorte do plano reconciliado lê só unidades e Git. Por isso `WIKI_LIBERADA = False`: `busca_texto` e `busca_semantica` saem da lista de comandos e a rota `/api/wiki/search` responde 405. O painel tinha sido subido antes com a Wiki aberta; foi parado. Medido com o selftest do painel antes da aplicação.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: plano reconciliado (26/10), selftest do painel, `git apply --check` contra o `main` · Autorização: Humano, assinatura de `painel-formacao-20261026`.
+
 (860) DIÁRIO — 26/10/2026 · **Painel de orientação: correções de servidor (threads e teto de leitura) aplicadas ao protótipo operacional.** Aplica `painel-correcoes-20261026`, assinado pelo Humano. O servidor passa a `ThreadingHTTPServer` com `daemon_threads`, para que uma busca por sentido de até 95 s não trave `/api/status` nem os assets. A resposta do verificador tem teto de 256 KiB antes do corte da Wiki. Ficam pendentes: o estado "pulado por condição" e o cache local do último valor válido no `app.js`. A revisão cruzada com o Codex está no canal (`codex-2026-10-26-2766c350` e `claude-2026-10-26-e8076464`). A porta 20146 entra em `config/portas-agata.txt`, como declarado na proposta.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check` contra o `main`, selftest do painel e revisão cruzada no canal · Autorização: Humano, assinatura de `painel-correcoes-20261026` no terminal.
 
