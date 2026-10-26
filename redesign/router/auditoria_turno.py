@@ -1428,4 +1428,12 @@ def _selftest() -> int:
 if __name__ == "__main__":
     if sys.argv[1:] == ["--selftest"]:
         sys.exit(_selftest())
+    # (26/10/2026, (849)) a mesma checagem da M6a para quem não passa pelo gateway (Claude Code, Codex, CLI):
+    # texto pela entrada padrão; sai 1 se houver achado, para o modelo corrigir antes de entregar.
+    if sys.argv[1:] == ["--verificar"]:
+        _achados = verificar_resposta_atual(sys.stdin.read(), [])
+        for _a in _achados:
+            print(f"- {_a}")
+        print("verificação mecânica: nada a apontar" if not _achados else f"verificação mecânica: {len(_achados)} achado(s)")
+        sys.exit(1 if _achados else 0)
     print(__doc__)

@@ -1,9 +1,11 @@
 # Portas de entrada: onde um modelo recebe as diretrizes da Agata, em cada plataforma
 # (MEMÓRIAS (667): "todos os modelos sob a tutela do sistema Agata, em qualquer
 # plataforma, devem seguir as diretrizes do sistema"). O P-23 confere que cada uma
-# traz as diretrizes comuns (modo conciso e economia de tokens) ou importa o AGENTS.md.
+# traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
+# Conselho -- cache_conselho) ou importa o AGENTS.md.
 # Plataforma nova = linha nova aqui. Formato: caminho|quem lê
-AGENTS.md|Codex, Gemini CLI, Cursor e outras ferramentas que leem AGENTS.md
+AGENTS.md|Codex, Cursor, Goose e outras ferramentas que leem AGENTS.md
+GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
 CLAUDE.md|Claude Code (importa o AGENTS.md)
 PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
 redesign/router/seth_gateway.py|Seth e Goose (doutrina injetada pelo gateway)

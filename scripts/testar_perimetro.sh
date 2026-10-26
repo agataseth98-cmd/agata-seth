@@ -676,7 +676,11 @@ _caso P-23 PEGA "porta declarada cujo arquivo não existe" <<'EOF'
 printf 'NAO_EXISTE.md|teste\n' > config/portas-de-entrada.txt
 EOF
 
-_caso P-23 PASSA "porta com modo conciso e economia de tokens" <<'EOF'
+_caso P-23 PASSA "porta com modo conciso, economia de tokens e memória comum" <<'EOF'
+printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente; cache_conselho ler e anotar\n' > porta-teste.md
+EOF
+
+_caso P-23 PEGA "porta sem a memória comum do Conselho (849)" <<'EOF'
 printf 'porta-teste.md|teste\n' > config/portas-de-entrada.txt && printf 'modo conciso padrão; economia de tokens permanente\n' > porta-teste.md
 EOF
 
