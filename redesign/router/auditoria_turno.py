@@ -821,6 +821,80 @@ def _acao_sem_chamada(texto: str, msgs: list) -> list[str]:
             "propõe fazer, não o que fez"]
 
 
+# (26/10/2026, decisão do Humano em (849): auditoria mecânica do Jev; V9 §37, M1 e M6a)
+# Jev citado sem consulta: em 26/10, 09:15, a Seth pôs entre aspas uma "Opinião do decisor local (Jev)" com
+# risco 0.85 sem nenhuma chamada a opiniao_jev (último registro do decisor: 25/10, 17:24); a checagem de
+# ferramenta não pegou porque a frase não nomeia a ferramenta. A consulta ao Jev é `maquina_verificar` com
+# comando opiniao_jev: conta a chamada cujo argumento ou cuja saída traz "opiniao".
+_JEV = re.compile(r"\bJev\b|decisor|opiniao_jev", re.IGNORECASE)
+# atribuição, não menção: "o Jev fica em sombra" é fato do canon; "opinião do Jev", "segundo o decisor",
+# "o Jev recomenda" atribuem um resultado que só existe com a consulta
+_ATRIBUI = re.compile(
+    r"(?:opini[ãa]o|recomenda[çc][ãa]o|parecer|probabilidade|confian[çc]a|risco|decis[ãa]o sugerida)\W+(?:\w+\W+){0,3}?"
+    r"(?:do|de|da|por)\W+(?:\w+\W+){0,2}?(?:Jev|decisor)\b|"
+    r"\b(?:segundo|conforme)\s+o\s+(?:Jev|decisor)\b|"
+    r"(?:\bJev\b|\bdecisor(?: local)?\b|opiniao_jev)\W+(?:\([^)]*\)\W+)?(?:recomend|suger|avali|diz\b|disse|respond|devolv|retorn|aponta|considera|estima|classific)",
+    re.IGNORECASE)
+# isenção própria (a _SUGERE geral tem "recomend" e isentava "Recomendação do decisor: ...")
+_ISENTA_JEV = re.compile(r"\bposso\b|\bpodemos\b|poderia|\bvou\b|sugiro|se quiser|\bconsult(?:e|ar|amos)\b|\bcham(?:e|ar)\b|"
+                         r"\bpe[çc]a\b|\bpedir\b|sem (?:a )?(?:chamada|consulta)|n[ãa]o (?:consultei|chamei|foi consultado)", re.IGNORECASE)
+
+
+def _consultou_jev(msgs: list) -> bool:
+    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
+    ini = usuarios[-2] + 1 if len(usuarios) >= 2 else 0
+    fim = usuarios[-1] if usuarios else len(msgs)
+    for m in msgs[ini:fim]:
+        if not isinstance(m, dict):
+            continue
+        for tc in m.get("tool_calls") or []:
+            if "opiniao" in str((tc.get("function") or {}).get("arguments") or tc.get("arguments") or ""):
+                return True
+        if m.get("role") == "tool" and "opiniao" in _texto(m.get("content")).lower():
+            return True
+    return False
+
+
+def _jev_sem_consulta(texto: str, msgs: list) -> list[str]:
+    if _consultou_jev(msgs):
+        return []
+    em_codigo = False
+    for l in texto.splitlines():
+        if l.strip().startswith("```"):
+            em_codigo = not em_codigo
+            continue
+        if em_codigo or _CABECALHO.match(l) or not _JEV.search(l):
+            continue
+        if _ATRIBUI.search(l) and not _ISENTA_JEV.search(l):
+            return [f"opinião atribuída ao Jev ou ao decisor local sem consulta neste turno ('{l.strip()[:80]}') — "
+                    "só cite o Jev depois de `maquina_verificar` com `opiniao_jev`; sem a chamada, é invenção (849)"]
+    return []
+
+
+_PCTL = re.compile(r"\bP-(\d{1,3})\b")
+
+
+def _controles_existentes() -> set[int] | None:
+    try:
+        sh = (RAIZ / "scripts" / "perimetro.sh").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    nums = {int(n) for n in re.findall(r'^\s*cabecalho\s+"P-(\d+)', sh, re.MULTILINE)}  # a mesma fonte de _controles_reais
+    return nums or None
+
+
+def _controle_inexistente(texto: str) -> list[str]:
+    """P-n citado que o perímetro não tem (26/10: "P-40" para o Ollama; o perímetro vai até P-26)."""
+    existentes = _controles_existentes()
+    if not existentes:
+        return []
+    faltam = sorted({int(n) for n in _PCTL.findall(texto)} - existentes)
+    if not faltam:
+        return []
+    return [f"cita controle inexistente: {', '.join(f'P-{n}' for n in faltam)} — o perímetro tem P-1 a "
+            f"P-{max(existentes)}; confira com `maquina_verificar perimetro` antes de citar"]
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
@@ -834,6 +908,8 @@ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     out += _citacao_inventada(texto)
     out += _entrada_inexistente(texto)
     out += _acao_sem_chamada(texto, msgs)
+    out += _jev_sem_consulta(texto, msgs)
+    out += _controle_inexistente(texto)
     out += _det.achados(texto)
     if modo_atual == "conciso":
         narradas = _narracao(texto)
@@ -1247,6 +1323,23 @@ def _selftest() -> int:
         ("ação com chamada no turno -> nada", _acao_sem_chamada("Gravei a nota.", [u("anote"),
          {"role": "assistant", "tool_calls": [{"function": {"name": "diario_anotar"}}]},
          {"role": "tool", "content": "ok"}, a("Gravei a nota."), u("ok")]) == []),
+        # (849) M1: opinião do Jev sem consulta; P-n inexistente
+        ("opinião do Jev sem consulta no turno -> acusa (caso de 26/10, 09:15)",
+         len(_jev_sem_consulta("**Opinião do decisor local (Jev):**\n> Recomendação: não implementar (risco 0.85).",
+                               [u("x"), a("y"), u("ok")])) == 1),
+        ("confiança atribuída ao Jev sem consulta -> acusa",
+         len(_jev_sem_consulta("Confiança: 80% (probabilidade do Jev).", [u("x"), a("y"), u("ok")])) == 1),
+        ("Jev consultado no turno (opiniao_jev nos argumentos) -> nada",
+         _jev_sem_consulta("Opinião do Jev: reversível, risco baixo.", [u("x"),
+            {"role": "assistant", "tool_calls": [{"function": {"name": "maquina_verificar_mcp_canon",
+                                                              "arguments": '{"comando": "opiniao_jev"}'}}]},
+            {"role": "tool", "content": "recomendacao: ..."}, a("Opinião do Jev: reversível."), u("ok")]) == []),
+        ("fato do canon sobre o Jev e sugestão de consulta -> nada",
+         _jev_sem_consulta("O Jev fica em sombra do Laya, (718)/(719). Se quiser, posso consultar o Jev.",
+                           [u("x"), a("y"), u("ok")]) == []),
+        ("P-40 (inexistente) -> acusa; P-4 e P-24 -> nada",
+         len(_controle_inexistente("restrito a 127.0.0.1 (P-40)")) == 1
+         and _controle_inexistente("o P-4 cobre o Ollama e o P-24 avisa") == []),
     ]
     casos = casos + casos_citacao + casos_redea + casos_lacunas
     for nome, ok in casos:
