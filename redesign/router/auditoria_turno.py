@@ -895,6 +895,72 @@ def _controle_inexistente(texto: str) -> list[str]:
             f"P-{max(existentes)}; confira com `maquina_verificar perimetro` antes de citar"]
 
 
+# (26/10/2026, V9 §37 M6a) Caminho citado que não existe: em 26/10, 09:15, a Seth citou
+# `~/.cache/agata/openvino/embeddings/bge-small-en-v1.5-int8` -- o instalado é o multilingual-e5-small.
+# Só caminhos verificáveis na Máquina: relativos ao repo (pastas de topo conhecidas) ou ~/.cache/agata e
+# ~/.local/share/agata. Existência apenas; nunca lê o conteúdo.
+_RAIZES_REPO = ("scripts/", "redesign/", "config/", "propostas/", "extras/", "memoria/", ".github/", ".githooks/")
+_CAMINHO = re.compile(r"`((?:~/\.(?:cache|local/share)/agata/|(?:" + "|".join(re.escape(r) for r in _RAIZES_REPO)
+                      + r"))[^`\s*<>{}]+)`")
+
+
+def _caminho_inexistente(texto: str) -> list[str]:
+    faltam = []
+    for c in dict.fromkeys(_CAMINHO.findall(texto)):
+        c = re.sub(r":\d+(?:-\d+)?$", "", c).rstrip(".,;:)")
+        alvo = Path(os.path.expanduser(c)) if c.startswith("~") else RAIZ / c
+        if not alvo.exists():
+            faltam.append(c)
+    if not faltam:
+        return []
+    return [f"cita caminho que não existe na Máquina: {', '.join('`' + f + '`' for f in faltam[:3])} — "
+            "confira o nome antes de citar"]
+
+
+# (26/10/2026, M6a) "Citação" da resposta anterior que não está nela: na T=4 de 26/10, 09:46, a Seth pôs
+# entre aspas, como "linha 10 da resposta anterior", uma frase que a T=3 não tinha (dizia o contrário).
+def _sem_marca(t: str) -> str:
+    return re.sub(r"[\s*`_>]+", " ", unicodedata.normalize("NFC", t)).strip().lower().rstrip(".")
+
+
+def _citacao_da_anterior(texto: str, msgs: list) -> list[str]:
+    anteriores = [_texto(m.get("content")) for m in msgs if isinstance(m, dict) and m.get("role") == "assistant"]
+    if len(anteriores) < 2:
+        return []
+    anterior = _sem_marca(anteriores[-2])
+    linhas = texto.splitlines()
+    falsas = []
+    for i, l in enumerate(linhas):
+        if not re.search(r"resposta anterior", l, re.IGNORECASE):
+            continue
+        for viz in linhas[i:i + 3]:
+            for q in re.findall(r'["“]([^"”\n]{20,300})["”]', viz):
+                if _sem_marca(q) not in anterior and q not in falsas:
+                    falsas.append(q)
+    if not falsas:
+        return []
+    return [f"atribui à resposta anterior {len(falsas)} frase(s) entre aspas que ela não contém — "
+            "cite o texto exato ou não use aspas"]
+
+
+def verificar_resposta_atual(texto: str, msgs_pedido: list) -> list[str]:
+    """(M6a) Só as checagens de FATO, sobre a resposta que vai ao Humano, antes de ela aparecer. O turno é o
+    pedido atual mais esta resposta; estilo e narração ficam para a correção do turno seguinte."""
+    msgs = list(msgs_pedido) + [{"role": "assistant", "content": texto}, {"role": "user", "content": ""}]
+    out = []
+    for f in (lambda: _jev_sem_consulta(texto, msgs), lambda: _controle_inexistente(texto),
+              lambda: _entrada_inexistente(texto), lambda: _citacao_inventada(texto),
+              lambda: _ferramenta_sem_chamada(texto, msgs), lambda: _acao_sem_chamada(texto, msgs),
+              lambda: _desmentidas(texto), lambda: _estado_desatualizado(texto),
+              lambda: _negacao_contradita(texto, msgs), lambda: _det.achados(texto),
+              lambda: _caminho_inexistente(texto), lambda: _citacao_da_anterior(texto, msgs)):
+        try:
+            out += f()
+        except Exception:  # noqa: BLE001 -- checagem quebrada nunca segura a resposta
+            continue
+    return list(dict.fromkeys(out))
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
@@ -1337,6 +1403,16 @@ def _selftest() -> int:
         ("fato do canon sobre o Jev e sugestão de consulta -> nada",
          _jev_sem_consulta("O Jev fica em sombra do Laya, (718)/(719). Se quiser, posso consultar o Jev.",
                            [u("x"), a("y"), u("ok")]) == []),
+        ("M6a: caminho inexistente -> acusa; caminho que existe -> nada",
+         len(_caminho_inexistente("veja `scripts/nao_existe_xyz.py`")) == 1
+         and _caminho_inexistente("veja `scripts/perimetro.sh:12`") == []),
+        ("M6a: frase atribuída à resposta anterior que ela não tem -> acusa; texto exato -> nada",
+         len(_citacao_da_anterior('Na resposta anterior: "uma frase que nunca foi escrita lá"',
+             [u("a"), a("outra coisa inteiramente diferente"), u("b"), a("x"), u("")])) == 1
+         and _citacao_da_anterior('Na resposta anterior: "outra coisa inteiramente diferente"',
+             [u("a"), a("outra coisa inteiramente diferente"), u("b"), a("x"), u("")]) == []),
+        ("M6a: verificação da resposta atual junta Jev e P-n", len(verificar_resposta_atual(
+            "Opinião do decisor local (Jev): risco 0.85. Ver P-40.", [u("x")])) >= 2),
         ("P-40 (inexistente) -> acusa; P-4 e P-24 -> nada",
          len(_controle_inexistente("restrito a 127.0.0.1 (P-40)")) == 1
          and _controle_inexistente("o P-4 cobre o Ollama e o P-24 avisa") == []),
