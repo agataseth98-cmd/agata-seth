@@ -146,6 +146,12 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "O nome do arquivo também conta. Use o parâmetro `consulta` (até 200 "
         "caracteres). Devolve caminho:linha:trecho, até 3 por nota.",
     ),
+    "cache_conselho": (
+        ["python3", "redesign/router/cache_conselho.py", "ler", "--n"], 20,
+        "Últimas entradas do cache do Conselho: memória comum de todos os modelos, append-only, NÃO "
+        "canônica (MEMÓRIAS (849)). Use `n` para quantas (1 a 50; padrão 20). Confira no canon antes de "
+        "citar como fato.",
+    ),
     "opiniao_jev": (
         ["python3", "redesign/router/decisor.py", "--opinar"], 45,
         "Segunda opinião do decisor local (modelo Jev, na CPU, sem custo de token): "
@@ -206,11 +212,11 @@ def _argv(nome: str, n: int | None, prop_nome: str | None = None,
             raise ValueError(f"'consulta' inválida -- até {_CONSULTA_MAX} caracteres, uma linha só")
         base += [str(int(n)), "--", consulta.strip()]
         return base
-    if nome == "git_log":
+    if nome in ("git_log", "cache_conselho"):
         if prop_nome is not None:
-            raise ValueError("'git_log' não aceita o parâmetro nome")
+            raise ValueError(f"'{nome}' não aceita o parâmetro nome")
         if n is None:
-            n = 10
+            n = 10 if nome == "git_log" else 20
         if not isinstance(n, int) or isinstance(n, bool) or not (1 <= n <= 50):
             raise ValueError("n tem de ser inteiro entre 1 e 50")
         base.append(str(int(n)))

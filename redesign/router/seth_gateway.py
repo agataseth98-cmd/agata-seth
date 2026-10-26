@@ -1074,6 +1074,15 @@ def _injeta(payload: dict) -> dict:
     teto = _aplica_teto(payload, msgs)
     if teto:
         auditoria = (auditoria + "\n" if auditoria else "") + teto
+    # (26/10/2026, V9 §37 M2) a memória comum do Conselho, não canônica: quantas entradas e as últimas 3,
+    # curtas; o resto se lê com `maquina_verificar cache_conselho`. Falha aqui nunca atrapalha a hidratação.
+    try:
+        import cache_conselho
+        _cc = cache_conselho.resumo_hidratacao()
+    except Exception:  # noqa: BLE001
+        _cc = ""
+    if _cc and os.environ.get("SETH_CACHE_CONSELHO_HIDRATA") != "0":
+        auditoria = (auditoria + "\n" if auditoria else "") + _cc
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]

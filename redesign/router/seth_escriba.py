@@ -427,7 +427,17 @@ class _H(BaseHTTPRequestHandler):
                 _recusar_segredo([texto])
                 _validar_capability(self.headers.get("Authorization", "").removeprefix("Bearer "),
                                     "diario_anotar", {"texto": texto})
-                return self._j(200, _anota_diario(data.get("texto", "")))
+                res = _anota_diario(data.get("texto", ""))
+                # (26/10/2026, V9 §37 M2) o diário da Seth também entra no cache do Conselho, a memória
+                # comum; falha do espelho nunca desfaz nem bloqueia o diário -- só vai na resposta.
+                try:
+                    if str(Path(__file__).resolve().parent) not in sys.path:
+                        sys.path.insert(0, str(Path(__file__).resolve().parent))
+                    import cache_conselho
+                    res["cache_conselho"] = cache_conselho.anotar("Seth", texto, "diario")
+                except Exception as e:  # noqa: BLE001
+                    res["cache_conselho"] = {"ok": False, "erro": str(e)[:200]}
+                return self._j(200, res)
             return self._j(404, {"error": f"rota {self.path} inexistente"})
         except PermissionError:
             return self._j(403, {"error": "capability de aprovação ausente, inválida ou já consumida"})
