@@ -1,0 +1,24 @@
+diff --git a/scripts/memoria_semanal.py b/scripts/memoria_semanal.py
+index 7f67f97..2d2af2e 100755
+--- a/scripts/memoria_semanal.py
++++ b/scripts/memoria_semanal.py
+@@ -12,7 +12,9 @@ Memória Canônica; "um modelo propõe, a Máquina confere cada fato contra o ca
+      citadas; o que não passa é CORTADO e listado com o motivo. Se o modelo falhar ou nada passar, a
+      memória sai por extração direta (um tópico por entrada, encurtado);
+   4. escreve em propostas/ o par para assinatura: `memoria-semanal-<fim>.diff` (cria
+-     memoria/semanal/semana-<fim>.md) e `memoria-semanal-<fim>.registro.txt` (a entrada de MEMÓRIAS,
++     extras/memoria-semanal/semana-<fim>.md -- fora de memoria/, que o P-3 reserva a escritor automático
++     não rastreado; a v3 gravava em memoria/semanal/ e o pre-commit barrou a 1ª aplicação, 26/10) e
++     `memoria-semanal-<fim>.registro.txt` (a entrada de MEMÓRIAS,
+      para `aplicar.py --registro`). Nunca escreve no canon, nunca faz commit.
+ 
+ Quando: na janela de manutenção (12h15-13h15), tarefa `memoria-semanal` com cadência weekly em
+@@ -178,7 +180,7 @@ def gerar(ate: date, dias: int = 7, modelo: str | None = MODELO, repo: Path = RA
+                   not cortados[0][0].startswith("(o modelo") else "o modelo não respondeu")) if modelo else origem
+     nome = f"memoria-semanal-{ate.isoformat()}"
+     doc = documento(aceitos, cortados, entradas, ini, ate, origem)
+-    caminho = f"memoria/semanal/semana-{ate.isoformat()}.md"
++    caminho = f"extras/memoria-semanal/semana-{ate.isoformat()}.md"
+     reg = (f"({{N}}) DIÁRIO — {ate.strftime('%d/%m/%Y')} · **Memória Canônica da semana {ini.strftime('%d/%m')} a "
+            f"{ate.strftime('%d/%m/%Y')}: {len(aceitos)} tópico(s) de {len(entradas)} entrada(s) do cache do "
+            f"Conselho.** Texto em `{caminho}`, assinado pelo Humano (V9 §37, M3; (849)). Origem: {origem}. "
