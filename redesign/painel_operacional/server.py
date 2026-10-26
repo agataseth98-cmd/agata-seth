@@ -20,8 +20,6 @@ VERIFIER_URL = "http://127.0.0.1:20141/verificar"
 REFRESH_SECONDS = 60
 FRESH_SECONDS = 60
 CACHE_SECONDS = 3
-# Formação em recortes: a Wiki só é liberada depois do contrato de busca (plano reconciliado, dependências 1-6).
-WIKI_LIBERADA = False
 LIMITE_RESPOSTA_VERIFICADOR = 262144
 ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
 WIKI_RESULT_MAX = 12000
@@ -65,9 +63,7 @@ def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
 
 def _verify(command: str, **arguments: object) -> str:
     """Consulta comandos fixos do verificador; argumentos nunca vêm do navegador."""
-    allowed = {"unidade", "git_status", "git_log"}
-    if WIKI_LIBERADA:
-        allowed |= {"busca_texto", "busca_semantica"}
+    allowed = {"unidade", "git_status", "git_log", "busca_texto", "busca_semantica"}
     if command not in allowed:
         raise ValueError("comando não permitido pelo painel")
     payload = {"comando": command, **arguments}
@@ -346,7 +342,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
-        if self.path != "/api/wiki/search" or not WIKI_LIBERADA:
+        if self.path != "/api/wiki/search":
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if not _same_origin_request(
             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -441,26 +437,25 @@ def _selftest() -> int:
     _verify = fake_verify
     try:
         snapshot = collect()
-        if WIKI_LIBERADA:
-            wiki = _wiki_search("wiki", "ambos")
-            assert [item["command"] for item in wiki["results"]] == ["busca_texto", "busca_semantica"]
-            assert all(item["error"] is None for item in wiki["results"])
-            assert "resultado textual" in wiki["results"][0]["output"]
-            total_textual = len("comando permitido\n\nresultado textual demonstrativo " + ("x" * (WIKI_RESULT_MAX + 1)))
-            assert f"TRUNCADO: mostrando {WIKI_RESULT_MAX} de {total_textual} caracteres" in wiki["results"][0]["output"]
-            assert "resultado semântico" in wiki["results"][1]["output"]
-            try:
-                _wiki_search("x" * 201, "texto")
-            except ValueError:
-                pass
-            else:
-                raise AssertionError("busca acima de 200 caracteres não foi recusada")
-            try:
-                _wiki_search("wiki", "livre")
-            except ValueError:
-                pass
-            else:
-                raise AssertionError("modo de busca arbitrário não foi recusado")
+        wiki = _wiki_search("wiki", "ambos")
+        assert [item["command"] for item in wiki["results"]] == ["busca_texto", "busca_semantica"]
+        assert all(item["error"] is None for item in wiki["results"])
+        assert "resultado textual" in wiki["results"][0]["output"]
+        total_textual = len("comando permitido\n\nresultado textual demonstrativo " + ("x" * (WIKI_RESULT_MAX + 1)))
+        assert f"TRUNCADO: mostrando {WIKI_RESULT_MAX} de {total_textual} caracteres" in wiki["results"][0]["output"]
+        assert "resultado semântico" in wiki["results"][1]["output"]
+        try:
+            _wiki_search("x" * 201, "texto")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("busca acima de 200 caracteres não foi recusada")
+        try:
+            _wiki_search("wiki", "livre")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("modo de busca arbitrário não foi recusado")
     finally:
         _verify = original_verify
 
