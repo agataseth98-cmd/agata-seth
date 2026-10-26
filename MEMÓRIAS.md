@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 801660d7defc650de9818ede2874c3de2531fdb0
-  Escrito em: 26/10/2026 13:39 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ca3dfb415a4ae33c3b87d51f2167aa40269552b2
+  Escrito em: 26/10/2026 13:48 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/801660d7defc650de9818ede2874c3de2531fdb0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/801660d7defc650de9818ede2874c3de2531fdb0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/801660d7defc650de9818ede2874c3de2531fdb0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/801660d7defc650de9818ede2874c3de2531fdb0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/801660d7defc650de9818ede2874c3de2531fdb0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca3dfb415a4ae33c3b87d51f2167aa40269552b2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca3dfb415a4ae33c3b87d51f2167aa40269552b2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca3dfb415a4ae33c3b87d51f2167aa40269552b2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca3dfb415a4ae33c3b87d51f2167aa40269552b2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ca3dfb415a4ae33c3b87d51f2167aa40269552b2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(855) DIÁRIO — 26/10/2026 · **M3, v4: a Memória Canônica semanal passa a ser gravada em `extras/memoria-semanal/`, fora de `memoria/`.** Aplica `memoria-semanal-v4-20261026`, assinado pelo Humano. A 1ª memória da semana, assinada, parou no pre-commit: o P-3 reserva `memoria/*.md` a escritor automático não rastreado (classe do Hermes, (181)/(189)), e só `memoria/frio/` tem exceção. O erro foi de lugar, do Claude Code; o controle estava certo e não foi afrouxado. Nada chegou a ser enviado. A memória no caminho antigo foi para `propostas/rejeitadas/`; a Máquina a gera de novo e ela volta para assinatura.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: saída do P-3 no worktree de aplicação; clone com o fluxo completo e `p3_publicacao` OK; selftest 12; PR 571 com CI verde · Autorização: Humano — "assinado"
+
 (854) DIÁRIO — 26/10/2026 · **M3: Memória Canônica semanal na janela de manutenção. Toda semana, um modelo local propõe a memória da semana a partir do cache do Conselho, a Máquina confere cada tópico contra as entradas citadas e o Humano assina.** Aplica `memoria-semanal-v3-20261026`, assinado pelo Humano. A v1 (timer próprio de domingo, 20h) foi rejeitada a pedido dele ("tem que ser no horário de manutenção"). A v2 foi assinada, mas o CodeQL barrou a aplicação (PR 567, fechado) por ReDoS na regex de citação; a v3 lê a citação em duas etapas. As duas estão em `propostas/rejeitadas/`. A tarefa `memoria-semanal` (weekly, 300 s) entrou em `config/janela-tarefas.txt`. `scripts/memoria_semanal.py` corta o tópico sem citação ou com número, entrada, P-n ou trecho que não esteja nas entradas citadas; se o modelo falhar, a memória sai por extração direta. Grava em `propostas/` o par para assinatura (`.diff`, que cria `memoria/semanal/semana-<data>.md`, e `.registro.txt`); semana sem entradas não gera nada. O canon só muda com a assinatura.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftests (gerador 12, janela 18/18); `ciclo()` real com relógio fixado; teste real com o 9b; clone com hooks; PRs 566 e 568 com CI verde · Autorização: Humano — "assinado"
 
