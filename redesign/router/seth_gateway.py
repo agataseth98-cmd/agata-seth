@@ -970,6 +970,47 @@ def _resgate_json(corpo: bytes) -> bytes:
     return json.dumps(o, ensure_ascii=False).encode("utf-8")
 
 
+# (26/10/2026, V9 §37 M6a, decisão do Humano: "bloqueia para o humano é mais compreensível") Verificação
+# de fatos ANTES de a resposta aparecer: nas rotas seth-*, as linhas de dados do stream ficam retidas (os
+# comentários SSE de keepalive passam, para a conexão não cair); no fim, a Máquina roda as checagens
+# mecânicas de fato (auditoria_turno.verificar_resposta_atual) sobre o texto -- sem o cabeçalho e a
+# correção que ela mesma injetou -- e entrega tudo de uma vez, com a "Verificação da Máquina" no fim se houver
+# achado. Fora do stream, o mesmo no `content`. SETH_VERIFICACAO_BLOQUEIA=0 desliga.
+def _verificacao_ligada() -> bool:
+    return os.environ.get("SETH_VERIFICACAO_BLOQUEIA") != "0"
+
+
+def _texto_do_sse(chunks: list) -> str:
+    """O texto (`delta.content`) de uma lista de chunks SSE retidos."""
+    partes = []
+    for ch in chunks:
+        for linha in ch.split(b"\n"):
+            if not linha.startswith(b"data:") or linha.strip() == b"data: [DONE]":
+                continue
+            try:
+                for c in json.loads(linha[5:]).get("choices") or []:
+                    partes.append((c.get("delta") or {}).get("content") or "")
+            except (ValueError, AttributeError, TypeError):
+                continue
+    return "".join(partes)
+
+
+def _bloco_verificacao(achados: list) -> str:
+    itens = "\n".join(f"- {a.strip()[:300]}" for a in achados[:8])
+    return f"\n\n---\n**Verificação da Máquina** (antes de você ler; mecânica, sem modelo):\n{itens}"
+
+
+def _chunk_texto(texto: str, modelo: str = "") -> bytes:
+    ev = {"id": "seth-verificacao", "object": "chat.completion.chunk", "created": 0, "model": modelo,
+          "choices": [{"index": 0, "delta": {"content": texto}, "finish_reason": None}]}
+    return b"data: " + json.dumps(ev, ensure_ascii=False).encode("utf-8") + b"\n\n"
+
+
+def _so_comentario(saida: bytes) -> bool:
+    """Chunk só de comentários SSE (keepalive) ou linhas vazias: pode passar mesmo com a resposta retida."""
+    return all((not l.strip()) or l.startswith(b":") for l in saida.split(b"\n"))
+
+
 def _correcao_da_maquina(linha: str) -> str:
     """(25/10/2026) A Máquina escreve ela mesma a correção, logo abaixo do cabeçalho que já injeta.
     Medido pelo gateway: pedir ao modelo para corrigir (prefixo na pergunta) fez o Codestral parar de
@@ -1074,6 +1115,9 @@ class _Handler(BaseHTTPRequestHandler):
         # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
         self._rota = ""
         self._cab_ctx = None
+        self._verificar = False
+        self._msgs_pedido = []
+        self._texto_maquina = ""
         self._cab_injetado = None
         self._data_classification = None
         self._public_only_lane = False
@@ -1125,6 +1169,9 @@ class _Handler(BaseHTTPRequestHandler):
                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
                 msgs0 = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+                self._msgs_pedido = list(msgs0)
+                self._verificar = (not self._public_only_lane and str(payload.get("model", "")).startswith("seth-")
+                                   and not _e_chamada_utilitaria(payload))
                 if (not self._public_only_lane and str(payload.get("model", "")).startswith("seth-")
                         and not _e_chamada_utilitaria(payload)
                         and not auditoria_turno._em_andamento(msgs0).strip()):
@@ -1292,6 +1339,7 @@ class _Handler(BaseHTTPRequestHandler):
             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
             self._cab_injetado = cab
             texto_maquina = cab + _correcao_da_maquina(getattr(self, "_aud", "") or "")
+            self._texto_maquina = texto_maquina
             self._cab_pendente = ""
             if sse:
                 novo = _injetar_sse(buf_pre, texto_maquina)
@@ -1303,6 +1351,13 @@ class _Handler(BaseHTTPRequestHandler):
                 try:
                     o = json.loads(buf_pre)
                     m = o["choices"][0]["message"]
+                    if (m.get("content") or "").strip() and _verificacao_ligada() and self._verificar:
+                        try:
+                            _ach = auditoria_turno.verificar_resposta_atual(m["content"], self._msgs_pedido)
+                        except Exception:  # noqa: BLE001
+                            _ach = []
+                        if _ach:
+                            m["content"] = m["content"] + _bloco_verificacao(_ach)
                     if (m.get("content") or "").strip():
                         m["content"] = texto_maquina + m["content"]
                         buf_pre = json.dumps(o, ensure_ascii=False).encode("utf-8")
@@ -1396,6 +1451,8 @@ class _Handler(BaseHTTPRequestHandler):
         self._laco_estados = {}
         self._laco_cortou = False
         self._resgate = {}
+        self._retidos = []
+        self._reter = bool(_verificacao_ligada() and getattr(self, "_verificar", False))
         buf = self._escrever_linhas_completas(buf)
         while not self._laco_cortou:
             try:
@@ -1418,9 +1475,8 @@ class _Handler(BaseHTTPRequestHandler):
             if _trava_laco_ligada():
                 saida, self._laco_cortou = limpa_laco.limpar_sse(saida, self._laco_estados, _trava_laco_repeticoes())
             if saida:
-                self.wfile.write(f"{len(saida):X}\r\n".encode())
-                self.wfile.write(saida)
-                self.wfile.write(b"\r\n")
+                self._enviar(saida)
+        self._liberar_retidos()
         if _emoji_ligado():
             _registrar_emoji(self._rota, getattr(self, "_modelo_para_log", ""),
                              [c for est in self._emoji_estados.values() for c in est.removidos])
@@ -1429,6 +1485,39 @@ class _Handler(BaseHTTPRequestHandler):
                                  sum(est.removidas for est in self._cab_estados.values()))
         if _trava_laco_ligada():
             _registrar_laco(self._rota, getattr(self, "_modelo_para_log", ""), self._laco_estados)
+
+    def _enviar(self, saida: bytes) -> None:
+        """Escreve um chunk HTTP -- ou o retém, se a verificação bloqueante está ativa nesta resposta."""
+        if getattr(self, "_reter", False) and not _so_comentario(saida):
+            self._retidos.append(saida)
+            return
+        self.wfile.write(f"{len(saida):X}\r\n".encode())
+        self.wfile.write(saida)
+        self.wfile.write(b"\r\n")
+
+    def _liberar_retidos(self) -> None:
+        """Fim da resposta retida: verifica o texto e entrega tudo, com o bloco antes do [DONE]."""
+        if not getattr(self, "_reter", False):
+            return
+        self._reter = False
+        retidos, self._retidos = self._retidos, []
+        texto = _texto_do_sse(retidos)
+        for prefixo in (getattr(self, "_texto_maquina", "") or "",):
+            if prefixo and texto.startswith(prefixo):
+                texto = texto[len(prefixo):]
+        achados = []
+        if texto.strip():
+            try:
+                achados = auditoria_turno.verificar_resposta_atual(texto, getattr(self, "_msgs_pedido", []) or [])
+            except Exception as e:  # noqa: BLE001 -- verificação quebrada nunca segura a resposta
+                print(f"gateway: verificação falhou ({e})", file=sys.stderr, flush=True)
+        if achados:
+            bloco = _chunk_texto(_bloco_verificacao(achados), getattr(self, "_modelo_para_log", "") or "")
+            i = next((k for k, ch in enumerate(retidos) if b"data: [DONE]" in ch), len(retidos))  # como o resgate
+            retidos.insert(i, bloco)
+            self._log_verificacao = achados
+        for ch in retidos:
+            self._enviar(ch)
 
     def _escrever_linhas_completas(self, buf: bytes) -> bytes:
         """Escreve (filtradas, em chunk HTTP) todas as linhas COMPLETAS de `buf`;
@@ -1442,9 +1531,7 @@ class _Handler(BaseHTTPRequestHandler):
                 if linha.strip() == b"data: [DONE]":
                     resg = _resgate_chunk(self._resgate, getattr(self, "_cab_pendente", "") or "")
                     if resg:
-                        self.wfile.write(f"{len(resg):X}\r\n".encode())
-                        self.wfile.write(resg)
-                        self.wfile.write(b"\r\n")
+                        self._enviar(resg)
                         if getattr(self, "_reg", None) is not None:
                             registro_pedidos.acumular_sse(resg.split(b"\n")[0], self._reg)
                 else:
@@ -1460,9 +1547,7 @@ class _Handler(BaseHTTPRequestHandler):
                 registro_pedidos.acumular_sse(saida, self._reg)
             if not saida:
                 continue  # chunk HTTP de tamanho 0 encerraria a resposta
-            self.wfile.write(f"{len(saida):X}\r\n".encode())
-            self.wfile.write(saida)
-            self.wfile.write(b"\r\n")
+            self._enviar(saida)
         return buf
 
     def _erro(self, code: int, msg: str):
@@ -2321,6 +2406,12 @@ def _selftest() -> int:
         ("resgate: com texto do modelo -> nada", _resgate_chunk(_e2) is None),
         ("resgate: com chamada de ferramenta -> nada", _resgate_chunk(_e3) is None),
         ("resgate: sem raciocínio -> nada", _resgate_chunk({}) is None),
+        ("M6a: texto juntado do SSE retido, sem o [DONE]", _texto_do_sse([
+            b'data: {"choices":[{"delta":{"content":"Ol"}}]}\n\n', b': ka\n',
+            b'data: {"choices":[{"delta":{"content":"\xc3\xa1"}}]}\n\ndata: [DONE]\n\n']) == "Olá"),
+        ("M6a: keepalive passa, dado fica retido", _so_comentario(b": ka\n\n") and not _so_comentario(b"data: {}\n\n")),
+        ("M6a: bloco com os achados e chunk válido", "Verificação da Máquina" in _bloco_verificacao(["x"])
+         and json.loads(_chunk_texto("t")[6:].decode())["choices"][0]["delta"]["content"] == "t"),
         ("resgate sem stream: só raciocínio vira content", json.loads(_resgate_json(
             b'{"model":"qwen3.5-9b-64k:latest","choices":[{"message":{"content":"","reasoning":" ativo. "}}]}'))["choices"][0]["message"]["content"] == "ativo."),
         ("resgate: modelo remoto (Gemini, raciocínio em inglês) -> nada, no stream e fora dele",

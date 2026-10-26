@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 352e8547424931d67a413d450d89dbd7b28df87e
-  Escrito em: 26/10/2026 10:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): faaa01b1d502c2a1e2ebb75adf3938452b925659
+  Escrito em: 26/10/2026 10:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/352e8547424931d67a413d450d89dbd7b28df87e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/352e8547424931d67a413d450d89dbd7b28df87e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/352e8547424931d67a413d450d89dbd7b28df87e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/352e8547424931d67a413d450d89dbd7b28df87e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/352e8547424931d67a413d450d89dbd7b28df87e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/faaa01b1d502c2a1e2ebb75adf3938452b925659/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/faaa01b1d502c2a1e2ebb75adf3938452b925659/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/faaa01b1d502c2a1e2ebb75adf3938452b925659/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/faaa01b1d502c2a1e2ebb75adf3938452b925659/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/faaa01b1d502c2a1e2ebb75adf3938452b925659/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(852) DIÁRIO — 26/10/2026 · **M6a: verificação de fatos que segura a resposta da Seth até a Máquina conferir; achado aparece como "Verificação da Máquina" no fim.** Aplica `verificacao-bloqueante-20261026`, assinado pelo Humano ("bloqueia para o humano é mais compreensível"; V9 §37). O gateway retém os dados do stream nas rotas seth-*, deixando passar só o keepalive, roda `verificar_resposta_atual` sobre o texto, já sem o cabeçalho que a própria Máquina injeta, e entrega tudo de uma vez. Checagens: Jev sem consulta, P-n e entrada inexistentes, citação inventada, ferramenta e ação sem chamada, afirmação desmentida, estado desatualizado, componente removido e duas novas, caminho inexistente (3 alarmes em 1.279 respostas, todos reais) e frase atribuída à resposta anterior que ela não contém. Nas respostas reais de hoje, teria mostrado 4 das 5 falhas da T=3 e duas da T=4. `SETH_VERIFICACAO_BLOQUEIA=0` desliga. O checador por modelo (M6b) espera um candidato que passe na medição.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: gateway de teste `:20199` com upstream falso e com o 9b pelo relé; selftests; clone com hooks; PR 561 com CI verde · Autorização: Humano — "assinado"
+
 (851) DIÁRIO — 26/10/2026 · **M1 da memória compartilhada (V9 §37): auditoria mecânica de opinião do Jev sem consulta e de controle P-n inexistente.** Aplica `auditoria-jev-mecanica-20261026`, assinado pelo Humano, conforme a decisão (849): auditorias do Jev e do Laya mecânicas. Origem: em 26/10, às 09h15, a Seth atribuiu ao Jev uma opinião entre aspas sem tê-lo consultado e citou um P-40 que não existe; a auditoria anterior não pegou. `_jev_sem_consulta` acusa atribuição ao Jev ou ao decisor sem chamada com `opiniao_jev` no turno; menção a fato e sugestão de consulta não contam. `_controle_inexistente` acusa o P-n que o `perimetro.sh` não declara. Medido sobre 1.278 respostas gravadas: 8 alarmes do Jev, todos invenção real, e 0 falsos; 1 alarme de P-n (o P-40), 0 falsos. Medição paralela do checador por modelo (M6b), com 15 respostas: nenhum candidato serve para bloquear. Codestral: 5 a 6 de 10 falhas, 2 de 5 boas acusadas, e endossou os erros da T=4. GLM: 7 de 10, mas acusou todas as boas. Gemini Flash-Lite: 14 a 92 s, com timeouts. 9b: timeout. Cerebras: 401. A M6a (checagem mecânica que bloqueia antes de imprimir) vem antes.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: registro de pedidos; `opiniao.jsonl`; respostas do benchmark; selftest 173 PASS, também sem `SETH_REPO`; clone com hooks; PR 559 com CI verde · Autorização: Humano — "assinei no terminal"
 
