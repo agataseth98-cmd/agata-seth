@@ -1,0 +1,32 @@
+diff --git a/scripts/memoria_semanal.py b/scripts/memoria_semanal.py
+index 2d2af2e8..e03b8f90 100755
+--- a/scripts/memoria_semanal.py
++++ b/scripts/memoria_semanal.py
+@@ -42,7 +42,8 @@ PROXY = os.environ.get("AGATA_PROXY", "http://127.0.0.1:20127")
+ MAX_TOPICOS = 15
+ # Citação no fim do tópico: "[c12]" ou "[c12, c15]". Lida em duas etapas sem quantificador aninhado (o CodeQL
+ # apontou retrocesso exponencial na regex única da v2, PR 567): o colchete final, limitado, e depois cada parte.
+-_CIT_BLOCO = re.compile(r"\[([^\[\]\n]{1,80})\]\s*$")
++# pontuação depois da citação é aceita: o 9b escreve "[c1]." e, sem isso, todo tópico dele era cortado (26/10)
++_CIT_BLOCO = re.compile(r"\[([^\[\]\n]{1,80})\][\s.;:!,]*$")
+ _CIT_PARTE = re.compile(r"c?\s?(\d{1,6})", re.IGNORECASE)
+ 
+ 
+@@ -78,7 +79,7 @@ def _prompt(entradas: list[dict]) -> str:
+             "das entradas abaixo (o cache do Conselho). Regras: no máximo 15 tópicos, um por linha, começando "
+             "com '- '; cada tópico termina com as entradas de onde saiu, assim: [c12] ou [c12, c15]; junte o "
+             "que se repete; escreva na 3ª pessoa e diga de quem é a anotação quando for diário ou nota (ex.: 'A Seth "
+-            "anotou que...'); não invente nada que não esteja nas entradas; não acrescente opinião; copie números, "
++            "anotou que...'; a Seth é tratada no feminino); não invente nada que não esteja nas entradas; não acrescente opinião; copie números, "
+             "nomes de arquivo e números de entrada exatamente como estão. Responda só com os tópicos.\n\n"
+             f"ENTRADAS:\n{linhas}")
+ 
+@@ -219,6 +220,8 @@ def _selftest() -> int:
+         ("entrada (999) e P-40 inexistentes na fonte são cortados", any("(999)" in t for t, _ in cortes)),
+         ("citação fora da semana é cortada", "fora da semana" in motivos),
+         ("extração direta cita a própria entrada", extrair(ents)[0].endswith("[c3]")),
++        ("ponto depois da citação é aceito: [c3]. e [c3, c4];", _citacao("x [c3].") == (2, [3])
++         and _citacao("x [c3, c4];")[1] == [3, 4] and conferir("- A M6a foi registrada na (852) [c3].", ents)[0]),
+         ("citação lida sem regex aninhada: [c3, c4], [ C3 ], malformada e longa", _citacao("x [c3, c4]") == (2, [3, 4])
+          and _citacao("x [ C3 ]")[1] == [3] and _citacao("x [c3,, c4]") is None
+          and _citacao("x [c0," + " 0," * 5000 + "]") is None),
