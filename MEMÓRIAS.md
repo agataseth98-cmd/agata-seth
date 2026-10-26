@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f
-  Escrito em: 26/10/2026 16:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e283b4bfc0049657b8d09911dad8f9192c7dfc1e
+  Escrito em: 26/10/2026 16:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a81ae6fc53d45c09fa0529a1f3bc41b4c0e30a3f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e283b4bfc0049657b8d09911dad8f9192c7dfc1e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e283b4bfc0049657b8d09911dad8f9192c7dfc1e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e283b4bfc0049657b8d09911dad8f9192c7dfc1e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e283b4bfc0049657b8d09911dad8f9192c7dfc1e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e283b4bfc0049657b8d09911dad8f9192c7dfc1e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(860) DIÁRIO — 26/10/2026 · **Painel de orientação: correções de servidor (threads e teto de leitura) aplicadas ao protótipo operacional.** Aplica `painel-correcoes-20261026`, assinado pelo Humano. O servidor passa a `ThreadingHTTPServer` com `daemon_threads`, para que uma busca por sentido de até 95 s não trave `/api/status` nem os assets. A resposta do verificador tem teto de 256 KiB antes do corte da Wiki. Ficam pendentes: o estado "pulado por condição" e o cache local do último valor válido no `app.js`. A revisão cruzada com o Codex está no canal (`codex-2026-10-26-2766c350` e `claude-2026-10-26-e8076464`). A porta 20146 entra em `config/portas-agata.txt`, como declarado na proposta.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check` contra o `main`, selftest do painel e revisão cruzada no canal · Autorização: Humano, assinatura de `painel-correcoes-20261026` no terminal.
+
 (859) DIÁRIO — 26/10/2026 · **O Agent da Seth no LibreChat voltou a quebrar com "'tool_calls' in undefined": a M6a soltava as linhas vazias do SSE antes dos dados retidos. Correção aplicada.** Aplica `sse-separador-retido-20261026`, assinado pelo Humano. Depois do reboot das 14h50, o Agent "Seth (cascata livre)" não respondia. Duas causas, nesta ordem. Primeira: `discord-mcp`, `navegador-mcp` e `seth-verificador` estavam parados, porque o atalho `seth` não rodou após o reboot; subidos à mão. Segunda, a que mantinha o erro: o OmniRoute entregava a resposta (`call_logs` às 18:22:48Z, HTTP 200, content "ok"), mas `_so_comentario`, da M6a (852), deixava passar linha vazia sozinha. O stream é escrito linha a linha, então os separadores de evento saíam na frente e as linhas `data:` saíam coladas no fim. Para o cliente SSE é um evento só, sem parse e sem fechamento: `finalChunk` undefined no `@librechat/agents`, a mesma classe de (634)/(635). Medido em `:20126` com um parser por evento: 1 evento, JSON quebrado, sem `[DONE]`. Num gateway de teste do worktree em `:20197`, com a correção: eventos válidos e `[DONE]` fechado, com texto e com ferramenta. Agora linha vazia sozinha fica retida, na ordem, junto do dado que fecha; o keepalive continua passando. Dois casos novos no `--selftest`, que falham com o código antigo. A mitigação por `SETH_VERIFICACAO_BLOQUEIA=0` foi negada pelo classificador de segurança da sessão e não foi usada. Lição, a mesma de (635): quem retém ou espia um stream testa a saída como o cliente lê, por evento, não por linha.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: memória (634)/(635) achada no vault; `call_logs` do OmniRoute; parser SSE por evento contra produção e contra gateway de teste; selftest com e sem a correção; PR 579 com CI verde · Autorização: Humano — "assinado"
 

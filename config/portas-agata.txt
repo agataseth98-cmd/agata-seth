@@ -53,6 +53,7 @@
 20143|llamacpp-qwen3coder|127.0.0.1
 20144|llamacpp-gptoss20b|127.0.0.1
 20145|llamacpp-phi4mini|127.0.0.1
+20146|painel-operacional|127.0.0.1
 20131|omniroute-embed-ws|127.0.0.1
 20132|omniroute-live-ws|127.0.0.1
 11435|ollaya|127.0.0.1
