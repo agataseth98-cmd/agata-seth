@@ -40,6 +40,8 @@ _ASSETS = {
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
+    "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+    "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
 }
 _STATUS_CACHE: dict | None = None
 _STATUS_CACHE_AT: float | None = None
