@@ -431,6 +431,11 @@ async function loadCapacidades() {
   let dados = null;
   try { dados = await fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
   const porId = new Map(((dados && dados.items) || []).map((i) => [i.id, i]));
+  const rotuloVivo = {ok: "ativo", warning: "sem resposta", unknown: "sem leitura"};
+  document.querySelectorAll("[data-live]").forEach((el) => {
+    const item = porId.get(el.dataset.live);
+    el.textContent = item ? (rotuloVivo[item.state] || "sem leitura") : "sem leitura";
+  });
   document.querySelectorAll("#page-capacidades .cap-card").forEach((cartao) => {
     const chip = cartao.querySelector(".chip");
     const probe = cartao.dataset.probe;
