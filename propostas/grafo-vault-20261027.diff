@@ -1,0 +1,167 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 3e7bc0a7..dc73fe1b 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -15,6 +15,7 @@
+     <button data-page="panorama" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h8V4H3zM13 20h8v-8h-8zM13 4h8v4h-8zM3 16h8v4H3z"/></svg>Panorama</button>
+     <button data-page="operacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18" r="1.5" fill="currentColor"/></svg>Estado operacional</button>
+     <button data-page="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa com a Seth</button>
++    <button data-page="grafo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="m7 7 3 3.5M17 7l-3 3.5M7 17l3-3.5M17 17l-3-3.5"/></svg>Grafo do vault</button>
+     <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
+     <button data-page="integracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.3 10.8 7.3-3.6M8.3 13.2l7.3 3.6"/></svg>Integrações</button>
+     <button data-page="memoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Memória & mapas</button>
+@@ -45,6 +46,12 @@
+ <div id="seth-transcript" role="log" aria-live="polite" style="min-height:220px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:6px 2px"></div>
+ <form id="seth-form" style="display:flex;gap:8px;margin-top:12px"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required style="flex:1;resize:vertical" placeholder="Escreva para a Seth"></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+ <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></article></section>
++<section class="page" id="page-grafo" data-title="Grafo do vault"><div class="section-heading"><div><div class="eyebrow">Vault derivado · só leitura</div><h1>Grafo do vault</h1><p>Relações entre entradas da memória, lidas do vault a cada abertura. Clique num nó de entrada para trocar o centro.</p></div></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button></div></div>
++<form id="grafo-form" style="display:flex;gap:8px;margin:10px 0"><label for="grafo-entrada" class="sr-only">Número da entrada</label><input id="grafo-entrada" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="0850" style="width:7em"><button class="btn" type="submit">Ver</button></form>
++<p class="subnote" id="grafo-fonte" role="status" aria-live="polite">Lendo o vault…</p>
++<svg id="grafo-svg" viewBox="0 0 480 360" role="img" aria-label="Grafo de relações do vault" style="width:100%;max-height:60vh"></svg>
++</article></section>
+ <section class="page" id="page-capacidades" data-title="O que posso fazer">
+     <p class="subnote">Catálogo documental: os rótulos dos cartões não são uma leitura ao vivo. Consulte Estado operacional e Integrações para o estado medido.</p>
+     <div class="section-heading"><div><div class="eyebrow">Mapa de capacidades</div><h1>O que a Agata pode fazer</h1><p>Funções existentes, integrações preparadas e ideias futuras aparecem separadas. Os cartões planejados são placeholders, não ferramentas ativas.</p></div></div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 7ba974db..48df2863 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -60,6 +60,7 @@ function showPage(name) {
+   filterSearch("");
+   if (name === "integracoes" || name === "memoria") loadDetails();
+   if (name === "capacidades") loadCapacidades();
++  if (name === "grafo") carregarGrafo();
+ }
+ nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+ document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
+@@ -541,3 +542,56 @@ function ligarConversaSeth() {
+   });
+ }
+ window.addEventListener("load", ligarConversaSeth);
++
++/* (27/10/2026) Grafo do vault: lê /api/grafo (só leitura). Modos: Relações (cita, citada_por, parecidas) e Regiões (tags regiao/). */
++let grafoModo = "citacoes", grafoCentro = "0850";
++const CORES_GRAFO = {centro: "var(--teal)", cita: "var(--blue)", citada_por: "var(--violet)", parecida: "var(--gold)", entrada: "var(--blue)", regiao: "var(--rose)"};
++function desenharGrafo(dados) {
++  const svg = byId("grafo-svg"); const NS = "http://www.w3.org/2000/svg";
++  svg.replaceChildren();
++  const nos = dados.nodes || []; const pos = new Map();
++  const centro = nos.find((n) => n.kind === "centro");
++  const outros = nos.filter((n) => n.kind !== "centro");
++  pos.set(centro ? centro.id : "", [240, 180]);
++  outros.forEach((n, i) => { const a = (2 * Math.PI * i) / Math.max(outros.length, 1) - Math.PI / 2; pos.set(n.id, [240 + 150 * Math.cos(a), 180 + 130 * Math.sin(a)]); });
++  (dados.edges || []).forEach(([a, b]) => {
++    const pa = pos.get(a), pb = pos.get(b); if (!pa || !pb) return;
++    const l = document.createElementNS(NS, "line"); l.setAttribute("x1", pa[0]); l.setAttribute("y1", pa[1]); l.setAttribute("x2", pb[0]); l.setAttribute("y2", pb[1]);
++    l.setAttribute("stroke", "var(--line)"); l.setAttribute("stroke-width", "1.5"); svg.append(l);
++  });
++  nos.forEach((n) => {
++    const [x, y] = pos.get(n.id); const g = document.createElementNS(NS, "g");
++    const c = document.createElementNS(NS, "circle"); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", n.kind === "centro" ? 18 : 12);
++    c.setAttribute("fill", CORES_GRAFO[n.kind] || "var(--muted)"); c.setAttribute("opacity", "0.85");
++    const tx = document.createElementNS(NS, "text"); tx.setAttribute("x", x); tx.setAttribute("y", y + 30); tx.setAttribute("text-anchor", "middle");
++    tx.setAttribute("font-size", "10"); tx.setAttribute("fill", "var(--ink)"); tx.textContent = n.label;
++    g.append(c, tx);
++    if (n.kind === "entrada" || n.kind === "cita" || n.kind === "citada_por" || n.kind === "parecida") {
++      g.style.cursor = "pointer"; g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
++      const ir = () => { grafoCentro = n.id; byId("grafo-entrada").value = n.id; carregarGrafo(); };
++      g.addEventListener("click", ir); g.addEventListener("keydown", (e) => { if (e.key === "Enter") ir(); });
++    }
++    svg.append(g);
++  });
++}
++async function carregarGrafo() {
++  const fonte = byId("grafo-fonte");
++  fonte.textContent = "Lendo o vault…";
++  try {
++    const dados = await fetchJson("/api/grafo?entrada=" + encodeURIComponent(grafoCentro) + "&modo=" + grafoModo, {headers: {Accept: "application/json"}});
++    byId("grafo-titulo").textContent = "Entrada " + grafoCentro;
++    desenharGrafo(dados);
++    fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
++  } catch (erro) {
++    byId("grafo-svg").replaceChildren();
++    fonte.textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
++  }
++}
++function ligarGrafo() {
++  const form = byId("grafo-form"); if (!form || form.dataset.ligado) return; form.dataset.ligado = "1";
++  form.addEventListener("submit", (e) => { e.preventDefault(); const v = byId("grafo-entrada").value.trim(); if (/^\d{4}$/.test(v)) { grafoCentro = v; carregarGrafo(); } });
++  const alternar = (modo) => { grafoModo = modo; byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes")); byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes")); carregarGrafo(); };
++  byId("grafo-modo-relacoes").addEventListener("click", () => alternar("citacoes"));
++  byId("grafo-modo-regioes").addEventListener("click", () => alternar("regioes"));
++}
++window.addEventListener("load", () => { ligarGrafo(); });
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index e4667f8b..ebb99859 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -684,6 +684,8 @@ class Handler(BaseHTTPRequestHandler):
+     def do_GET(self) -> None:
+         if self.headers.get("Host") != f"{BIND}:{PORT}":
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path.startswith("/api/grafo"):
++            return self._grafo()
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
+@@ -796,6 +798,59 @@ class Handler(BaseHTTPRequestHandler):
+         finally:
+             _SEM_CONVERSA_EM_CURSO.release()
+ 
++
++    def _grafo(self) -> None:
++        """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
++        from urllib.parse import urlparse, parse_qs
++        q = parse_qs(urlparse(self.path).query)
++        entrada = (q.get("entrada") or ["0850"])[0]
++        modo = (q.get("modo") or ["citacoes"])[0]
++        if not re.fullmatch(r"\d{4}", entrada) or modo not in ("citacoes", "regioes"):
++            return self._send(400, "text/plain; charset=utf-8", b"entrada ou modo invalido")
++        pasta = ROOT / "memoria/obsidian/entradas"
++        arq = pasta / (entrada + ".md")
++        if not arq.is_file() or arq.stat().st_size > 65536:
++            return self._send(404, "text/plain; charset=utf-8", b"entrada indisponivel")
++        def ler_campo(texto: str, campo: str) -> str:
++            m = re.search(r"^" + campo + r":\s*(.*)$", texto, re.M)
++            return m.group(1) if m else ""
++        def ids(valor: str) -> list:
++            return re.findall(r"\[\[(\d{4})\]\]", valor)
++        def titulo_de(num: str) -> str:
++            f = pasta / (num + ".md")
++            if not f.is_file() or f.stat().st_size > 65536: return num
++            m = re.search(r'^titulo:\s*"?(.*?)"?$', f.read_text(encoding="utf-8", errors="replace"), re.M)
++            return (m.group(1)[:60] if m else num)
++        corpo = arq.read_text(encoding="utf-8", errors="replace")
++        nos = {entrada: {"id": entrada, "label": entrada + " · " + titulo_de(entrada)[:40], "kind": "centro"}}
++        arestas = []
++        if modo == "citacoes":
++            citas = [c for c in ids(ler_campo(corpo, "cita")) if c != entrada][:12]
++            cits = [c for c in ids(ler_campo(corpo, "citada_por")) if c != entrada][:12]
++            parec = [c for c in ids(ler_campo(corpo, "parecidas")) if c != entrada][:8]
++            for c in citas:
++                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "cita"}; arestas.append([entrada, c])
++            for c in cits:
++                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "citada_por"}; arestas.append([c, entrada])
++            for c in parec:
++                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "parecida"}; arestas.append([entrada, c])
++        else:
++            regioes = re.findall(r"regiao/[\w-]+", corpo)[:3]
++            for r in dict.fromkeys(regioes):
++                nos[r] = {"id": r, "label": r, "kind": "regiao"}; arestas.append([entrada, r])
++                alvos = []
++                for f in sorted(pasta.glob("*.md")):
++                    if f.stem == entrada: continue
++                    if f.stat().st_size > 65536: continue
++                    if r in f.read_text(encoding="utf-8", errors="replace"):
++                        alvos.append(f.stem)
++                    if len(alvos) >= 8: break
++                for a in alvos:
++                    nos[a] = {"id": a, "label": a + " · " + titulo_de(a)[:40], "kind": "entrada"}; arestas.append([r, a])
++        body = json.dumps({"schema_version": 1, "modo": modo, "centro": entrada, "nodes": list(nos.values()), "edges": arestas},
++                          ensure_ascii=False).encode("utf-8")
++        return self._send(200, "application/json; charset=utf-8", body)
++
+     def do_PUT(self) -> None:
+         return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
+ 
