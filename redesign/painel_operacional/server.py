@@ -421,8 +421,14 @@ def _capacidades_snapshot() -> dict:
             estado = "ok"
         else:
             estado = "warning"
+        partes = []
+        for u, e in zip(sondas["units"], estados[:len(sondas["units"])]):
+            partes.append(f"{u} {'ativo' if e else ('inativo ou ausente' if e is False else 'sem leitura')}")
+        for h, e in zip(sondas["http"], estados[len(sondas["units"]):]):
+            partes.append(f"{h} {'responde 200' if e else 'sem resposta 200'}")
         itens.append({"id": nome, "state": estado, "source": "systemctl --user show; HTTP local",
                       "source_ref": ", ".join(sondas["units"] + sondas["http"]),
+                      "evidencia": "Medido agora (" + observed_at + "): " + "; ".join(partes) + ".",
                       "observed_at": observed_at, "fresh_until": fresh_until})
     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
 

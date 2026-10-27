@@ -434,10 +434,19 @@ async function loadCapacidades() {
     const chip = cartao.querySelector(".chip");
     const probe = cartao.dataset.probe;
     if (!chip) return;
-    if (probe === "documento") { chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura"; return; }
+    if (probe === "documento") {
+      chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura";
+      const botao = cartao.querySelector("button.evidence");
+      if (botao) { botao.dataset.body = "Esta capacidade é documento: não há sonda de leitura. O texto descreve o desenho e não é medição do sistema."; botao.dataset.source = "documento do canon"; }
+      return;
+    }
     const item = porId.get(probe);
     if (!item) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
     const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
     chip.className = rotulo[0]; chip.textContent = rotulo[1];
+    const botao = cartao.querySelector("button.evidence");
+    if (botao) { botao.dataset.body = item.evidencia || "Sem leitura nesta medição."; botao.dataset.source = item.source + " · " + item.source_ref; }
   });
 }
+/* F5: ao carregar a página, atualiza todas as leituras (não só a aba aberta). */
+window.addEventListener("load", () => { loadDetails(); loadCapacidades(); });
