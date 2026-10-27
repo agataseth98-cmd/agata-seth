@@ -1,0 +1,102 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index dc73fe1b..536cb7b1 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -47,7 +47,7 @@
+ <form id="seth-form" style="display:flex;gap:8px;margin-top:12px"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required style="flex:1;resize:vertical" placeholder="Escreva para a Seth"></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+ <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></article></section>
+ <section class="page" id="page-grafo" data-title="Grafo do vault"><div class="section-heading"><div><div class="eyebrow">Vault derivado · só leitura</div><h1>Grafo do vault</h1><p>Relações entre entradas da memória, lidas do vault a cada abertura. Clique num nó de entrada para trocar o centro.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button></div></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button><button class="btn secondary" type="button" id="grafo-modo-atlas" aria-pressed="false">Brain Atlas</button></div></div>
+ <form id="grafo-form" style="display:flex;gap:8px;margin:10px 0"><label for="grafo-entrada" class="sr-only">Número da entrada</label><input id="grafo-entrada" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="0850" style="width:7em"><button class="btn" type="submit">Ver</button></form>
+ <p class="subnote" id="grafo-fonte" role="status" aria-live="polite">Lendo o vault…</p>
+ <svg id="grafo-svg" viewBox="0 0 480 360" role="img" aria-label="Grafo de relações do vault" style="width:100%;max-height:60vh"></svg>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 48df2863..63cb980a 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -581,7 +581,8 @@ async function carregarGrafo() {
+     const dados = await fetchJson("/api/grafo?entrada=" + encodeURIComponent(grafoCentro) + "&modo=" + grafoModo, {headers: {Accept: "application/json"}});
+     byId("grafo-titulo").textContent = "Entrada " + grafoCentro;
+     desenharGrafo(dados);
+-    fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
++    if (grafoModo === "atlas") { byId("grafo-titulo").textContent = "Brain Atlas"; fonte.textContent = "Fonte: memoria/obsidian · contagem de notas por região, medida agora em " + dados.total + " notas (cabeçalho de cada nota)."; }
++    else fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
+   } catch (erro) {
+     byId("grafo-svg").replaceChildren();
+     fonte.textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
+@@ -590,8 +591,16 @@ async function carregarGrafo() {
+ function ligarGrafo() {
+   const form = byId("grafo-form"); if (!form || form.dataset.ligado) return; form.dataset.ligado = "1";
+   form.addEventListener("submit", (e) => { e.preventDefault(); const v = byId("grafo-entrada").value.trim(); if (/^\d{4}$/.test(v)) { grafoCentro = v; carregarGrafo(); } });
+-  const alternar = (modo) => { grafoModo = modo; byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes")); byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes")); carregarGrafo(); };
++  const alternar = (modo) => {
++    grafoModo = modo;
++    byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes"));
++    byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes"));
++    byId("grafo-modo-atlas").setAttribute("aria-pressed", String(modo === "atlas"));
++    byId("grafo-form").style.display = modo === "atlas" ? "none" : "flex";
++    carregarGrafo();
++  };
+   byId("grafo-modo-relacoes").addEventListener("click", () => alternar("citacoes"));
+   byId("grafo-modo-regioes").addEventListener("click", () => alternar("regioes"));
++  byId("grafo-modo-atlas").addEventListener("click", () => alternar("atlas"));
+ }
+ window.addEventListener("load", () => { ligarGrafo(); });
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index ebb99859..a07daf1a 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -5,6 +5,7 @@ from __future__ import annotations
+ import argparse
+ import hashlib
+ import http.client
++import collections
+ import json
+ import re
+ import subprocess
+@@ -805,6 +806,8 @@ class Handler(BaseHTTPRequestHandler):
+         q = parse_qs(urlparse(self.path).query)
+         entrada = (q.get("entrada") or ["0850"])[0]
+         modo = (q.get("modo") or ["citacoes"])[0]
++        if modo == "atlas":
++            return self._atlas()
+         if not re.fullmatch(r"\d{4}", entrada) or modo not in ("citacoes", "regioes"):
+             return self._send(400, "text/plain; charset=utf-8", b"entrada ou modo invalido")
+         pasta = ROOT / "memoria/obsidian/entradas"
+@@ -851,6 +854,35 @@ class Handler(BaseHTTPRequestHandler):
+                           ensure_ascii=False).encode("utf-8")
+         return self._send(200, "application/json; charset=utf-8", body)
+ 
++
++    def _atlas(self) -> None:
++        """Brain Atlas: contagem de notas por região, medida agora no vault (só leitura, só o cabeçalho de cada nota)."""
++        vault = ROOT / "memoria/obsidian"
++        contagem = collections.Counter(); total = 0
++        if not vault.is_dir():
++            return self._send(503, "text/plain; charset=utf-8", b"vault indisponivel")
++        for arq in vault.rglob("*.md"):
++            if any(parte.startswith(".") for parte in arq.relative_to(vault).parts):
++                continue
++            total += 1
++            try:
++                with arq.open("rb") as f:
++                    bruto = f.read(8192).decode("utf-8", errors="replace")
++            except OSError:
++                continue
++            partes = bruto.split("---", 2)
++            cabeca = partes[1] if bruto.startswith("---") and len(partes) >= 3 else ""
++            regioes = set(r for r in re.findall(r"regiao/([\w-]{3,})", cabeca))
++            for r in regioes: contagem[r] += 1
++        nos = [{"id": "cerebro", "label": "Brain Atlas · " + str(total) + " notas", "kind": "centro"}]
++        arestas = []
++        for r, n in sorted(contagem.items(), key=lambda kv: -kv[1]):
++            nos.append({"id": "regiao/" + r, "label": r + " · " + str(n) + " notas", "kind": "regiao"})
++            arestas.append(["cerebro", "regiao/" + r])
++        body = json.dumps({"schema_version": 1, "modo": "atlas", "centro": "cerebro", "total": total,
++                           "nodes": nos, "edges": arestas}, ensure_ascii=False).encode("utf-8")
++        return self._send(200, "application/json; charset=utf-8", body)
++
+     def do_PUT(self) -> None:
+         return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
+ 
