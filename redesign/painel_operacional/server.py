@@ -684,6 +684,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path.startswith("/api/grafo"):
+            return self._grafo()
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
@@ -795,6 +797,59 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
         finally:
             _SEM_CONVERSA_EM_CURSO.release()
+
+
+    def _grafo(self) -> None:
+        """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
+        from urllib.parse import urlparse, parse_qs
+        q = parse_qs(urlparse(self.path).query)
+        entrada = (q.get("entrada") or ["0850"])[0]
+        modo = (q.get("modo") or ["citacoes"])[0]
+        if not re.fullmatch(r"\d{4}", entrada) or modo not in ("citacoes", "regioes"):
+            return self._send(400, "text/plain; charset=utf-8", b"entrada ou modo invalido")
+        pasta = ROOT / "memoria/obsidian/entradas"
+        arq = pasta / (entrada + ".md")
+        if not arq.is_file() or arq.stat().st_size > 65536:
+            return self._send(404, "text/plain; charset=utf-8", b"entrada indisponivel")
+        def ler_campo(texto: str, campo: str) -> str:
+            m = re.search(r"^" + campo + r":\s*(.*)$", texto, re.M)
+            return m.group(1) if m else ""
+        def ids(valor: str) -> list:
+            return re.findall(r"\[\[(\d{4})\]\]", valor)
+        def titulo_de(num: str) -> str:
+            f = pasta / (num + ".md")
+            if not f.is_file() or f.stat().st_size > 65536: return num
+            m = re.search(r'^titulo:\s*"?(.*?)"?$', f.read_text(encoding="utf-8", errors="replace"), re.M)
+            return (m.group(1)[:60] if m else num)
+        corpo = arq.read_text(encoding="utf-8", errors="replace")
+        nos = {entrada: {"id": entrada, "label": entrada + " · " + titulo_de(entrada)[:40], "kind": "centro"}}
+        arestas = []
+        if modo == "citacoes":
+            citas = [c for c in ids(ler_campo(corpo, "cita")) if c != entrada][:12]
+            cits = [c for c in ids(ler_campo(corpo, "citada_por")) if c != entrada][:12]
+            parec = [c for c in ids(ler_campo(corpo, "parecidas")) if c != entrada][:8]
+            for c in citas:
+                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "cita"}; arestas.append([entrada, c])
+            for c in cits:
+                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "citada_por"}; arestas.append([c, entrada])
+            for c in parec:
+                nos[c] = {"id": c, "label": c + " · " + titulo_de(c)[:40], "kind": "parecida"}; arestas.append([entrada, c])
+        else:
+            regioes = re.findall(r"regiao/[\w-]+", corpo)[:3]
+            for r in dict.fromkeys(regioes):
+                nos[r] = {"id": r, "label": r, "kind": "regiao"}; arestas.append([entrada, r])
+                alvos = []
+                for f in sorted(pasta.glob("*.md")):
+                    if f.stem == entrada: continue
+                    if f.stat().st_size > 65536: continue
+                    if r in f.read_text(encoding="utf-8", errors="replace"):
+                        alvos.append(f.stem)
+                    if len(alvos) >= 8: break
+                for a in alvos:
+                    nos[a] = {"id": a, "label": a + " · " + titulo_de(a)[:40], "kind": "entrada"}; arestas.append([r, a])
+        body = json.dumps({"schema_version": 1, "modo": modo, "centro": entrada, "nodes": list(nos.values()), "edges": arestas},
+                          ensure_ascii=False).encode("utf-8")
+        return self._send(200, "application/json; charset=utf-8", body)
 
     def do_PUT(self) -> None:
         return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))

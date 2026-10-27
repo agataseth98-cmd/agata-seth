@@ -60,6 +60,7 @@ function showPage(name) {
   filterSearch("");
   if (name === "integracoes" || name === "memoria") loadDetails();
   if (name === "capacidades") loadCapacidades();
+  if (name === "grafo") carregarGrafo();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
 document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
@@ -541,3 +542,56 @@ function ligarConversaSeth() {
   });
 }
 window.addEventListener("load", ligarConversaSeth);
+
+/* (27/10/2026) Grafo do vault: lê /api/grafo (só leitura). Modos: Relações (cita, citada_por, parecidas) e Regiões (tags regiao/). */
+let grafoModo = "citacoes", grafoCentro = "0850";
+const CORES_GRAFO = {centro: "var(--teal)", cita: "var(--blue)", citada_por: "var(--violet)", parecida: "var(--gold)", entrada: "var(--blue)", regiao: "var(--rose)"};
+function desenharGrafo(dados) {
+  const svg = byId("grafo-svg"); const NS = "http://www.w3.org/2000/svg";
+  svg.replaceChildren();
+  const nos = dados.nodes || []; const pos = new Map();
+  const centro = nos.find((n) => n.kind === "centro");
+  const outros = nos.filter((n) => n.kind !== "centro");
+  pos.set(centro ? centro.id : "", [240, 180]);
+  outros.forEach((n, i) => { const a = (2 * Math.PI * i) / Math.max(outros.length, 1) - Math.PI / 2; pos.set(n.id, [240 + 150 * Math.cos(a), 180 + 130 * Math.sin(a)]); });
+  (dados.edges || []).forEach(([a, b]) => {
+    const pa = pos.get(a), pb = pos.get(b); if (!pa || !pb) return;
+    const l = document.createElementNS(NS, "line"); l.setAttribute("x1", pa[0]); l.setAttribute("y1", pa[1]); l.setAttribute("x2", pb[0]); l.setAttribute("y2", pb[1]);
+    l.setAttribute("stroke", "var(--line)"); l.setAttribute("stroke-width", "1.5"); svg.append(l);
+  });
+  nos.forEach((n) => {
+    const [x, y] = pos.get(n.id); const g = document.createElementNS(NS, "g");
+    const c = document.createElementNS(NS, "circle"); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", n.kind === "centro" ? 18 : 12);
+    c.setAttribute("fill", CORES_GRAFO[n.kind] || "var(--muted)"); c.setAttribute("opacity", "0.85");
+    const tx = document.createElementNS(NS, "text"); tx.setAttribute("x", x); tx.setAttribute("y", y + 30); tx.setAttribute("text-anchor", "middle");
+    tx.setAttribute("font-size", "10"); tx.setAttribute("fill", "var(--ink)"); tx.textContent = n.label;
+    g.append(c, tx);
+    if (n.kind === "entrada" || n.kind === "cita" || n.kind === "citada_por" || n.kind === "parecida") {
+      g.style.cursor = "pointer"; g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
+      const ir = () => { grafoCentro = n.id; byId("grafo-entrada").value = n.id; carregarGrafo(); };
+      g.addEventListener("click", ir); g.addEventListener("keydown", (e) => { if (e.key === "Enter") ir(); });
+    }
+    svg.append(g);
+  });
+}
+async function carregarGrafo() {
+  const fonte = byId("grafo-fonte");
+  fonte.textContent = "Lendo o vault…";
+  try {
+    const dados = await fetchJson("/api/grafo?entrada=" + encodeURIComponent(grafoCentro) + "&modo=" + grafoModo, {headers: {Accept: "application/json"}});
+    byId("grafo-titulo").textContent = "Entrada " + grafoCentro;
+    desenharGrafo(dados);
+    fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
+  } catch (erro) {
+    byId("grafo-svg").replaceChildren();
+    fonte.textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
+  }
+}
+function ligarGrafo() {
+  const form = byId("grafo-form"); if (!form || form.dataset.ligado) return; form.dataset.ligado = "1";
+  form.addEventListener("submit", (e) => { e.preventDefault(); const v = byId("grafo-entrada").value.trim(); if (/^\d{4}$/.test(v)) { grafoCentro = v; carregarGrafo(); } });
+  const alternar = (modo) => { grafoModo = modo; byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes")); byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes")); carregarGrafo(); };
+  byId("grafo-modo-relacoes").addEventListener("click", () => alternar("citacoes"));
+  byId("grafo-modo-regioes").addEventListener("click", () => alternar("regioes"));
+}
+window.addEventListener("load", () => { ligarGrafo(); });
