@@ -61,6 +61,7 @@ function showPage(name) {
   if (name === "integracoes" || name === "memoria") loadDetails();
   if (name === "capacidades") loadCapacidades();
   if (name === "grafo") carregarGrafo();
+  if (name === "lacunas") calcularLacunas();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
 document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
@@ -609,3 +610,29 @@ function ligarGrafo() {
   byId("grafo-modo-atlas").addEventListener("click", () => alternar("atlas"));
 }
 window.addEventListener("load", () => { ligarGrafo(); });
+
+/* (27/10/2026) Mapa de lacunas: cada item do painel sem fonte medida agora vira LACUNA, com o motivo. Lido do próprio DOM. */
+function calcularLacunas() {
+  const itens = [];
+  document.querySelectorAll("#page-capacidades .cap-card").forEach((cartao) => {
+    const titulo = cartao.querySelector("h3").textContent;
+    const probe = cartao.dataset.probe;
+    if (probe === "documento") itens.push({nome: titulo, motivo: "sem sonda: é documento, não leitura do sistema", onde: "O que posso fazer"});
+  });
+  document.querySelectorAll("[data-live]").forEach((el) => {
+    if (el.textContent === "sem leitura") itens.push({nome: el.dataset.live, motivo: "sem leitura agora", onde: "texto vivo"});
+  });
+  const lista = byId("lacunas-lista");
+  if (lista) {
+    lista.replaceChildren();
+    itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo + " (" + i.onde + ")"; lista.append(li); });
+    byId("lacunas-total").textContent = itens.length + " lacuna(s) agora";
+  }
+  return itens.length;
+}
+function marcarLacunasNosCartoes() {
+  document.querySelectorAll("#page-capacidades .cap-card[data-probe='documento'] .chip").forEach((chip) => {
+    chip.className = "chip horizon"; chip.textContent = "LACUNA · sem sonda";
+  });
+}
+window.addEventListener("load", () => setTimeout(() => { marcarLacunasNosCartoes(); }, 1200));
