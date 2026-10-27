@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f
-  Escrito em: 27/10/2026 18:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d22dc86a9e6122622f4d03b9ff01d63e52bc2f47
+  Escrito em: 27/10/2026 19:01 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/50676f8eadc37ea658d6e6f99534d1c4ed1fbe0f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d22dc86a9e6122622f4d03b9ff01d63e52bc2f47/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d22dc86a9e6122622f4d03b9ff01d63e52bc2f47/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d22dc86a9e6122622f4d03b9ff01d63e52bc2f47/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d22dc86a9e6122622f4d03b9ff01d63e52bc2f47/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d22dc86a9e6122622f4d03b9ff01d63e52bc2f47/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(887) DIÁRIO — 27/10/2026 · **Painel: telas internas do vault, sem link externo.** Aplica `vault-telas-internas-20261027`, assinado pelo Humano. Os 22 links obsidian:// viram botões que abrem tela própria do painel, lida de uma lista fechada de 9 itens do vault, só leitura. Canvas vira lista de nós; Brain Atlas abre a aba Grafo. Nenhum link externo ou nova aba no painel. Item ausente vira lacuna.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, leitura real dos 9 itens do vault, git apply --check contra o main · Autorização: Humano, assinatura de vault-telas-internas-20261027.
+
 (886) DIÁRIO — 27/10/2026 · **Painel: correções da auditoria.** Aplica `auditoria-painel-20261027`, assinado pelo Humano. Estado do cartão de capacidade vem da leitura viva; contador de lacuna separado (tela e canon); hora legível; H1 iguais aos nomes do menu; Panorama, Operação, Memória e Modelos e rota; link da conversa abre a página do painel; botão Ver do grafo vira Abrir nota. Item de imagem sem alt descartado: já tinha alt vazio.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: sintaxe do JavaScript, testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de auditoria-painel-20261027.
 

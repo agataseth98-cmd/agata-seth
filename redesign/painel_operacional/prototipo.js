@@ -704,3 +704,36 @@ async function carregarVisaoSistema() {
     const p = document.createElement("p"); p.textContent = "Visão indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
   }
 }
+
+/* (27/10/2026) Vault dentro do painel: cada botão de vault abre a própria tela, lida de /api/vault/item (lista fechada, só leitura). */
+async function abrirVault(id) {
+  const dlg = byId("vault-dialog");
+  if (!dlg) return;
+  byId("vault-title").textContent = "Carregando…";
+  byId("vault-fonte").textContent = "";
+  byId("vault-texto").textContent = "";
+  byId("vault-canvas").replaceChildren();
+  dlg.showModal();
+  try {
+    const d = await fetchJson("/api/vault/item?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
+    byId("vault-title").textContent = d.titulo || d.id;
+    if (d.state !== "ok") {
+      byId("vault-fonte").textContent = "Fonte: " + d.fonte;
+      byId("vault-texto").textContent = "Sem leitura: " + (d.motivo || "item indisponível") + ".";
+      return;
+    }
+    byId("vault-fonte").textContent = "Fonte: " + d.fonte + " · medido em " + niceTime(d.observed_at) + " · modificado em " + niceTime(d.modificado) + (d.truncado ? " · mostrados os primeiros 64 KB" : "");
+    if (d.canvas) {
+      const cab = document.createElement("li");
+      cab.textContent = d.canvas.nos.length + " nós e " + d.canvas.arestas + " ligações no mapa:";
+      byId("vault-canvas").append(cab);
+      d.canvas.nos.forEach((n) => { const li = document.createElement("li"); li.textContent = (n.tipo || "nó") + " · " + (n.texto || "(sem texto)"); byId("vault-canvas").append(li); });
+    }
+    byId("vault-texto").textContent = d.texto;
+  } catch (erro) {
+    byId("vault-texto").textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
+  }
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-vault]"); if (b) abrirVault(b.dataset.vault); });
+document.querySelectorAll(".close-vault").forEach((b) => b.addEventListener("click", () => byId("vault-dialog").close()));
+byId("vault-dialog").addEventListener("click", (e) => { if (e.target === byId("vault-dialog")) byId("vault-dialog").close(); });
