@@ -73,8 +73,8 @@ class PainelTests(unittest.TestCase):
             with mock.patch.object(panel, "ROOT", root):
                 data = panel._proposal_snapshot()
             self.assertEqual(data["total"], 2)
-            self.assertEqual(data["items"], [{"name": "primeira", "marker_present": False},
-                                             {"name": "segunda", "marker_present": True}])
+            self.assertEqual(data["items"], [{"name": "primeira", "marker_present": False, "versionada": None},
+                                             {"name": "segunda", "marker_present": True, "versionada": None}])
             self.assertNotIn("signature_valid", json.dumps(data))
 
     def test_verificacao_da_proposta_distingue_etapa_e_arquivo_alterado(self):
