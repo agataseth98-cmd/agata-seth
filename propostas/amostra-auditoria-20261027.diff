@@ -1,0 +1,50 @@
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index d9d7ae7e..d925ae57 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -1016,10 +1016,45 @@ def linha_estado(msgs: list, cliente: str = "") -> str:
+     if achados is None:
+         return ""
+     _registrar(cliente, achados, None)
++    _amostrar(cliente, msgs, achados)
+     _avisar_humano(achados)
+     return "AUDITORIA-TURNO-ANTERIOR: " + (" | ".join(achados) if achados else "OK")
+ 
+ 
++
++# (27/10/2026) Amostra para medir a precisão dos alarmes. Desligada por padrão (AGATA_AUDITORIA_AMOSTRA=1
++# liga). Guarda o texto da resposta anterior e as saídas de ferramenta do mesmo turno, truncados, em arquivo
++# próprio com permissão 0600. O log de achados continua sem texto (regra de privacidade do topo deste arquivo).
++AMOSTRA = Path(os.environ.get("AGATA_AMOSTRA_LOG", "~/.cache/agata/auditoria-amostra.jsonl")).expanduser()
++_LIMITE_AMOSTRA = 4000
++
++
++def _texto_turno_anterior(msgs: list) -> str:
++    """Texto do assistente entre o penúltimo e o último pedido do usuário."""
++    usuarios = [i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"]
++    if len(usuarios) < 2:
++        return ""
++    return "\n".join(_texto(m.get("content")) for m in msgs[usuarios[-2] + 1:usuarios[-1]]
++                     if isinstance(m, dict) and m.get("role") == "assistant")
++
++
++def _amostrar(cliente, msgs, achados) -> None:
++    if os.environ.get("AGATA_AUDITORIA_AMOSTRA") != "1":
++        return
++    try:
++        AMOSTRA.parent.mkdir(parents=True, exist_ok=True)
++        novo = not AMOSTRA.exists()
++        registro = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "cliente": cliente, "achados": achados,
++                    "resposta": _texto_turno_anterior(msgs)[:_LIMITE_AMOSTRA],
++                    "saidas_ferramenta": _saidas_turno_anterior(msgs)[:_LIMITE_AMOSTRA]}
++        fd = os.open(AMOSTRA, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
++        with os.fdopen(fd, "a", encoding="utf-8") as f:
++            f.write(json.dumps(registro, ensure_ascii=False) + "\n")
++        if novo:
++            os.chmod(AMOSTRA, 0o600)
++    except OSError:
++        pass
++
+ def _registrar(cliente, achados, erro):
+     try:
+         LOG.parent.mkdir(parents=True, exist_ok=True)
