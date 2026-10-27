@@ -690,10 +690,12 @@ async function carregarVisaoSistema() {
     cartao("Capacidades com leitura", cap.filter((x) => x.state === "ok").length + " de " + cap.length, "capacidades");
     cartao("Lacunas agora", String((lac.items || []).length), "lacunas");
     const props = (status.proposals && status.proposals.items) || [];
-    const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present);
+    const naoVersionadas = props.filter((p) => p.versionada === false);
+    const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present && p.versionada !== false);
     cartao("Propostas sem assinatura", String(pendentes.length), "plano");
     (lac.items || []).forEach((i) => melhoria("Lacuna · " + i.nome + " — " + i.motivo, "lacunas"));
     pendentes.forEach((p) => melhoria("Proposta sem assinatura · " + p.name, "plano"));
+    naoVersionadas.forEach((p) => melhoria("LACUNA · não versionada · " + p.name + " — existe só no checkout local, sem commit no git", "plano"));
     cap.filter((x) => x.state !== "ok").forEach((x) => melhoria("Capacidade sem leitura ok · " + x.id, "capacidades"));
     if (!lista.children.length) melhoria("Nada pendente nas leituras de agora.", null);
   } catch (erro) {

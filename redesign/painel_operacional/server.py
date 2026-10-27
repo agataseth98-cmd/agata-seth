@@ -498,6 +498,18 @@ def _lacunas_snapshot() -> dict:
             "total_declaradas": declaradas, "items": itens}
 
 
+def _propostas_versionadas() -> set | None:
+    """Nomes de propostas/*.diff que estão no git (fonte do canon). None se o git não responder."""
+    try:
+        proc = subprocess.run(["/usr/bin/git", "-C", str(ROOT), "ls-files", "propostas"], capture_output=True,
+                              text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0:
+        return None
+    return {Path(l).stem for l in proc.stdout.splitlines() if l.endswith(".diff")}
+
+
 def _proposal_snapshot() -> dict:
     observed_at, fresh_until = _reading_window()
     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
@@ -507,10 +519,12 @@ def _proposal_snapshot() -> dict:
         if not directory.is_dir():
             raise OSError("diretório indisponível")
         paths = sorted(directory.glob("*.diff"))
+        versionadas = _propostas_versionadas()
         for path in paths[:100]:
             if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", path.stem):
                 continue
-            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()}
+            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file(),
+                    "versionada": path.stem in versionadas if versionadas is not None else None}
             if path.stem in _substituidas(directory):
                 item["substituida_por"] = _substituidas(directory)[path.stem]
             value["items"].append(item)
