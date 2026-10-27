@@ -14,6 +14,7 @@
   <div><p class="nav-label">Seu espaço</p><nav class="nav">
     <button data-page="panorama" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h8V4H3zM13 20h8v-8h-8zM13 4h8v4h-8zM3 16h8v4H3z"/></svg>Panorama</button>
     <button data-page="operacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18" r="1.5" fill="currentColor"/></svg>Estado operacional</button>
+    <button data-page="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa com a Seth</button>
     <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
     <button data-page="integracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.3 10.8 7.3-3.6M8.3 13.2l7.3 3.6"/></svg>Integrações</button>
     <button data-page="memoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Memória & mapas</button>
@@ -39,7 +40,12 @@
 
   </section>
 
-  <section class="page" id="page-capacidades" data-title="O que posso fazer">
+  <section class="page" id="page-conversa" data-title="Conversa com a Seth"><div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
+<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Uma conversa por vez</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
+<div id="seth-transcript" role="log" aria-live="polite" style="min-height:220px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:6px 2px"></div>
+<form id="seth-form" style="display:flex;gap:8px;margin-top:12px"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required style="flex:1;resize:vertical" placeholder="Escreva para a Seth"></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+<p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></article></section>
+<section class="page" id="page-capacidades" data-title="O que posso fazer">
     <p class="subnote">Catálogo documental: os rótulos dos cartões não são uma leitura ao vivo. Consulte Estado operacional e Integrações para o estado medido.</p>
     <div class="section-heading"><div><div class="eyebrow">Mapa de capacidades</div><h1>O que a Agata pode fazer</h1><p>Funções existentes, integrações preparadas e ideias futuras aparecem separadas. Os cartões planejados são placeholders, não ferramentas ativas.</p></div></div>
     <div class="filterbar"><button class="selected" data-filter="all">Tudo</button><button data-filter="active">Disponível ou implementado</button><button data-filter="partial">Parcial / confirmar</button><button data-filter="planned">Planejado</button><button data-filter="horizon">Horizonte</button></div>

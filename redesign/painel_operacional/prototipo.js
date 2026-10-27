@@ -501,3 +501,43 @@ function ligarCartoesClicaveis() {
     cartao.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrirEvidenciaDoCartao(cartao); } });
   });
 }
+
+/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
+const sethHistorico = [];
+function sethEscrever(papel, texto) {
+  const linha = document.createElement("p");
+  linha.style.margin = "0";
+  const quem = document.createElement("strong");
+  quem.textContent = papel === "user" ? "Você: " : "Seth: ";
+  linha.append(quem, document.createTextNode(texto));
+  byId("seth-transcript").append(linha);
+  linha.scrollIntoView({block: "end"});
+}
+function ligarConversaSeth() {
+  const form = byId("seth-form");
+  if (!form || form.dataset.ligado) return;
+  form.dataset.ligado = "1";
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const campo = byId("seth-input"); const botao = byId("seth-send"); const estado = byId("seth-status");
+    const texto = campo.value.trim();
+    if (!texto || botao.disabled) return;
+    sethHistorico.push({role: "user", content: texto});
+    sethEscrever("user", texto); campo.value = "";
+    botao.disabled = true; estado.textContent = "PENSANDO"; estado.className = "chip partial";
+    try {
+      const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+        body: JSON.stringify({messages: sethHistorico.slice(-20)})});
+      if (!r.ok) throw new Error(r.status === 429 ? "outra conversa em curso" : "HTTP " + r.status);
+      const dados = await r.json();
+      sethHistorico.push({role: "assistant", content: dados.content});
+      sethEscrever("assistant", dados.content);
+      estado.textContent = "PRONTA"; estado.className = "chip planned";
+    } catch (erro) {
+      sethHistorico.pop();
+      sethEscrever("assistant", "Não consegui responder agora: " + erro.message + ".");
+      estado.textContent = "INDISPONÍVEL"; estado.className = "chip horizon";
+    } finally { botao.disabled = false; campo.focus(); }
+  });
+}
+window.addEventListener("load", ligarConversaSeth);
