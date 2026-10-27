@@ -7,6 +7,7 @@ import hashlib
 import http.client
 import collections
 import json
+import socket
 import re
 import subprocess
 import threading
@@ -435,6 +436,68 @@ def _capacidades_snapshot() -> dict:
     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
 
 
+def _unidade_de_sistema_ativa(unit: str) -> bool | None:
+    """Unidade de sistema (sem --user), para units como ollama.service que o canon declara no boot."""
+    try:
+        proc = subprocess.run(["/usr/bin/systemctl", "show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    valores = _parse_pairs(proc.stdout)
+    if valores.get("LoadState") != "loaded":
+        return None
+    return valores.get("ActiveState") == "active"
+
+
+def _porta_responde(porta: int) -> bool:
+    try:
+        with socket.create_connection(("127.0.0.1", porta), timeout=1):
+            return True
+    except OSError:
+        return False
+
+
+def _lacunas_snapshot() -> dict:
+    """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
+    - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
+    - item com porta declarada (`:NNNN`) que não responde em 127.0.0.1 vira lacuna."""
+    observed_at, fresh_until = _reading_window()
+    try:
+        texto = (ROOT / "PROJETO.md").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {"schema_version": 1, "state": "unknown", "observed_at": observed_at, "fresh_until": fresh_until,
+                "total_declaradas": 0, "items": [{"nome": "PROJETO.md", "motivo": "fonte do canon indisponível", "fonte": "PROJETO.md"}]}
+    inicio = texto.find("## Serviços (boot)")
+    fim = texto.find("**Não recriar", inicio)
+    secao = texto[inicio:fim] if (inicio >= 0 and fim > inicio) else ""
+    itens = []
+    if not secao:
+        itens.append({"nome": "seção Serviços (boot)", "motivo": "seção não encontrada em PROJETO.md", "fonte": "PROJETO.md"})
+    vistas = set(); declaradas = 0
+    for linha in secao.splitlines():
+        if linha.startswith("**Manuais") or linha.startswith("**Consolidação") or linha.startswith("**Não recriar"):
+            continue
+        for unit in re.findall(r"`([a-z0-9@._-]+\.(?:service|timer))`", linha):
+            if unit in vistas: continue
+            vistas.add(unit); declaradas += 1
+            ativo = _unidade_ativa(unit)
+            if ativo is None:
+                ativo = _unidade_de_sistema_ativa(unit)
+            if ativo is None:
+                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (ausente ou não consultada)", "fonte": "PROJETO.md · Serviços (boot)"})
+            elif ativo is False:
+                itens.append({"nome": unit, "motivo": "declarada no boot e inativa agora", "fonte": "PROJETO.md · Serviços (boot)"})
+        if not linha.lstrip().startswith("- "):
+            continue
+        m = re.search(r"`([a-z][a-z0-9-]+)`.{0,40}?:(\d{4,5})\b", linha)
+        if m and not re.search(r"\.(service|timer)$", m.group(1)):
+            declaradas += 1
+            if not _porta_responde(int(m.group(2))):
+                itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "PROJETO.md · Serviços (boot)"})
+    return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until,
+            "total_declaradas": declaradas, "items": itens}
+
+
 def _proposal_snapshot() -> dict:
     observed_at, fresh_until = _reading_window()
     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
@@ -687,6 +750,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
         if self.path.startswith("/api/grafo"):
             return self._grafo()
+        if self.path == "/api/lacunas":
+            body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)

@@ -61,7 +61,7 @@ function showPage(name) {
   if (name === "integracoes" || name === "memoria") loadDetails();
   if (name === "capacidades") loadCapacidades();
   if (name === "grafo") carregarGrafo();
-  if (name === "lacunas") calcularLacunas();
+  if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
 document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
@@ -636,3 +636,20 @@ function marcarLacunasNosCartoes() {
   });
 }
 window.addEventListener("load", () => setTimeout(() => { marcarLacunasNosCartoes(); }, 1200));
+
+/* (27/10/2026) Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora em /api/lacunas. */
+async function carregarLacunasCanon() {
+  const lista = byId("lacunas-canon");
+  if (!lista) return;
+  lista.replaceChildren();
+  try {
+    const dados = await fetchJson("/api/lacunas", {headers: {Accept: "application/json"}});
+    const itens = dados.items || [];
+    const cab = document.createElement("p");
+    cab.textContent = (dados.total_declaradas || 0) + " itens declarados no canon; " + itens.length + " lacuna(s) agora. Fonte: PROJETO.md · Serviços (boot), medido em " + (dados.observed_at || "—") + ".";
+    lista.append(cab);
+    itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo; lista.append(li); });
+  } catch (erro) {
+    const p = document.createElement("p"); p.textContent = "Leitura do canon indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
+  }
+}
