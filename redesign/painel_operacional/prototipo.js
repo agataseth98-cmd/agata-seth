@@ -59,6 +59,7 @@ function showPage(name) {
   search.value = "";
   filterSearch("");
   if (name === "integracoes" || name === "memoria") loadDetails();
+  if (name === "capacidades") loadCapacidades();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
 document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
@@ -423,3 +424,20 @@ setInterval(() => {
   if (lastDetails && detailsStateKey(lastDetails, detailsFailed) !== renderedDetailsState) renderDetails(lastDetails, detailsFailed);
 }, 5000);
 refresh();
+
+/* (27/10/2026) Selo de cada capacidade vem de /api/capacidades; sem sonda, o cartão é documento. */
+async function loadCapacidades() {
+  let dados = null;
+  try { dados = await fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
+  const porId = new Map(((dados && dados.items) || []).map((i) => [i.id, i]));
+  document.querySelectorAll("#page-capacidades .cap-card").forEach((cartao) => {
+    const chip = cartao.querySelector(".chip");
+    const probe = cartao.dataset.probe;
+    if (!chip) return;
+    if (probe === "documento") { chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura"; return; }
+    const item = porId.get(probe);
+    if (!item) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
+    const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
+    chip.className = rotulo[0]; chip.textContent = rotulo[1];
+  });
+}
