@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import http.client
+import collections
 import json
 import re
 import subprocess
@@ -805,6 +806,8 @@ class Handler(BaseHTTPRequestHandler):
         q = parse_qs(urlparse(self.path).query)
         entrada = (q.get("entrada") or ["0850"])[0]
         modo = (q.get("modo") or ["citacoes"])[0]
+        if modo == "atlas":
+            return self._atlas()
         if not re.fullmatch(r"\d{4}", entrada) or modo not in ("citacoes", "regioes"):
             return self._send(400, "text/plain; charset=utf-8", b"entrada ou modo invalido")
         pasta = ROOT / "memoria/obsidian/entradas"
@@ -849,6 +852,35 @@ class Handler(BaseHTTPRequestHandler):
                     nos[a] = {"id": a, "label": a + " · " + titulo_de(a)[:40], "kind": "entrada"}; arestas.append([r, a])
         body = json.dumps({"schema_version": 1, "modo": modo, "centro": entrada, "nodes": list(nos.values()), "edges": arestas},
                           ensure_ascii=False).encode("utf-8")
+        return self._send(200, "application/json; charset=utf-8", body)
+
+
+    def _atlas(self) -> None:
+        """Brain Atlas: contagem de notas por região, medida agora no vault (só leitura, só o cabeçalho de cada nota)."""
+        vault = ROOT / "memoria/obsidian"
+        contagem = collections.Counter(); total = 0
+        if not vault.is_dir():
+            return self._send(503, "text/plain; charset=utf-8", b"vault indisponivel")
+        for arq in vault.rglob("*.md"):
+            if any(parte.startswith(".") for parte in arq.relative_to(vault).parts):
+                continue
+            total += 1
+            try:
+                with arq.open("rb") as f:
+                    bruto = f.read(8192).decode("utf-8", errors="replace")
+            except OSError:
+                continue
+            partes = bruto.split("---", 2)
+            cabeca = partes[1] if bruto.startswith("---") and len(partes) >= 3 else ""
+            regioes = set(r for r in re.findall(r"regiao/([\w-]{3,})", cabeca))
+            for r in regioes: contagem[r] += 1
+        nos = [{"id": "cerebro", "label": "Brain Atlas · " + str(total) + " notas", "kind": "centro"}]
+        arestas = []
+        for r, n in sorted(contagem.items(), key=lambda kv: -kv[1]):
+            nos.append({"id": "regiao/" + r, "label": r + " · " + str(n) + " notas", "kind": "regiao"})
+            arestas.append(["cerebro", "regiao/" + r])
+        body = json.dumps({"schema_version": 1, "modo": "atlas", "centro": "cerebro", "total": total,
+                           "nodes": nos, "edges": arestas}, ensure_ascii=False).encode("utf-8")
         return self._send(200, "application/json; charset=utf-8", body)
 
     def do_PUT(self) -> None:

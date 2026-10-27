@@ -581,7 +581,8 @@ async function carregarGrafo() {
     const dados = await fetchJson("/api/grafo?entrada=" + encodeURIComponent(grafoCentro) + "&modo=" + grafoModo, {headers: {Accept: "application/json"}});
     byId("grafo-titulo").textContent = "Entrada " + grafoCentro;
     desenharGrafo(dados);
-    fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
+    if (grafoModo === "atlas") { byId("grafo-titulo").textContent = "Brain Atlas"; fonte.textContent = "Fonte: memoria/obsidian · contagem de notas por região, medida agora em " + dados.total + " notas (cabeçalho de cada nota)."; }
+    else fonte.textContent = "Fonte: memoria/obsidian/entradas · " + (grafoModo === "citacoes" ? "relações cita, citada_por e parecidas" : "tags de região") + " · " + (dados.nodes || []).length + " nós, medido agora.";
   } catch (erro) {
     byId("grafo-svg").replaceChildren();
     fonte.textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
@@ -590,8 +591,16 @@ async function carregarGrafo() {
 function ligarGrafo() {
   const form = byId("grafo-form"); if (!form || form.dataset.ligado) return; form.dataset.ligado = "1";
   form.addEventListener("submit", (e) => { e.preventDefault(); const v = byId("grafo-entrada").value.trim(); if (/^\d{4}$/.test(v)) { grafoCentro = v; carregarGrafo(); } });
-  const alternar = (modo) => { grafoModo = modo; byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes")); byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes")); carregarGrafo(); };
+  const alternar = (modo) => {
+    grafoModo = modo;
+    byId("grafo-modo-relacoes").setAttribute("aria-pressed", String(modo === "citacoes"));
+    byId("grafo-modo-regioes").setAttribute("aria-pressed", String(modo === "regioes"));
+    byId("grafo-modo-atlas").setAttribute("aria-pressed", String(modo === "atlas"));
+    byId("grafo-form").style.display = modo === "atlas" ? "none" : "flex";
+    carregarGrafo();
+  };
   byId("grafo-modo-relacoes").addEventListener("click", () => alternar("citacoes"));
   byId("grafo-modo-regioes").addEventListener("click", () => alternar("regioes"));
+  byId("grafo-modo-atlas").addEventListener("click", () => alternar("atlas"));
 }
 window.addEventListener("load", () => { ligarGrafo(); });
