@@ -944,7 +944,9 @@ class Handler(BaseHTTPRequestHandler):
             f = pasta / (num + ".md")
             if not f.is_file() or f.stat().st_size > 65536: return num
             m = re.search(r'^titulo:\s*"?(.*?)"?$', f.read_text(encoding="utf-8", errors="replace"), re.M)
-            return (m.group(1)[:60] if m else num)
+            if not m: return num
+            limpo = re.sub(r"\*\*|`", "", m.group(1)).strip()
+            return limpo[:60] or num
         corpo = arq.read_text(encoding="utf-8", errors="replace")
         nos = {entrada: {"id": entrada, "label": entrada + " · " + titulo_de(entrada)[:40], "kind": "centro"}}
         arestas = []
