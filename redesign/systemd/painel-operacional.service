@@ -1,0 +1,16 @@
+[Unit]
+Description=Agata -- painel operacional (leitura local, :20146), sobe e cai com a Seth
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/agata/redesign/painel_operacional/server.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadOnlyPaths=%h/agata
+ReadWritePaths=%h/.cache/agata
+
+# Sem [Install]: sobe e cai pelos atalhos `seth` e `seth-parar`, como os demais serviços da Seth.
