@@ -1,0 +1,44 @@
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 11c2686c..64f3a2c5 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -434,10 +434,19 @@ async function loadCapacidades() {
+     const chip = cartao.querySelector(".chip");
+     const probe = cartao.dataset.probe;
+     if (!chip) return;
+-    if (probe === "documento") { chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura"; return; }
++    if (probe === "documento") {
++      chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura";
++      const botao = cartao.querySelector("button.evidence");
++      if (botao) { botao.dataset.body = "Esta capacidade é documento: não há sonda de leitura. O texto descreve o desenho e não é medição do sistema."; botao.dataset.source = "documento do canon"; }
++      return;
++    }
+     const item = porId.get(probe);
+     if (!item) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
+     const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
+     chip.className = rotulo[0]; chip.textContent = rotulo[1];
++    const botao = cartao.querySelector("button.evidence");
++    if (botao) { botao.dataset.body = item.evidencia || "Sem leitura nesta medição."; botao.dataset.source = item.source + " · " + item.source_ref; }
+   });
+ }
++/* F5: ao carregar a página, atualiza todas as leituras (não só a aba aberta). */
++window.addEventListener("load", () => { loadDetails(); loadCapacidades(); });
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index a8112c80..31011b9f 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -421,8 +421,14 @@ def _capacidades_snapshot() -> dict:
+             estado = "ok"
+         else:
+             estado = "warning"
++        partes = []
++        for u, e in zip(sondas["units"], estados[:len(sondas["units"])]):
++            partes.append(f"{u} {'ativo' if e else ('inativo ou ausente' if e is False else 'sem leitura')}")
++        for h, e in zip(sondas["http"], estados[len(sondas["units"]):]):
++            partes.append(f"{h} {'responde 200' if e else 'sem resposta 200'}")
+         itens.append({"id": nome, "state": estado, "source": "systemctl --user show; HTTP local",
+                       "source_ref": ", ".join(sondas["units"] + sondas["http"]),
++                      "evidencia": "Medido agora (" + observed_at + "): " + "; ".join(partes) + ".",
+                       "observed_at": observed_at, "fresh_until": fresh_until})
+     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
+ 
