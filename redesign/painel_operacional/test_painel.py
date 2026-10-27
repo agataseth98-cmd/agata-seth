@@ -241,5 +241,24 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("POST", "/api/proposals/verify", '{"name":"exemplo"}', {"Content-Type":"application/json"})[0], 403)
 
 
+    def test_vault_so_abre_itens_da_lista_fechada_e_nao_tem_link_externo(self):
+        for nome in panel.VAULT_ITENS.values():
+            self.assertNotIn("..", nome)
+            self.assertNotIn("/", nome)
+        html = (Path(__file__).parent / "prototipo.html").read_text(encoding="utf-8")
+        self.assertNotIn("obsidian://", html)
+        self.assertNotIn('target="_blank"', html)
+
+    def test_vault_item_mede_ausente_como_lacuna(self):
+        raiz = panel.ROOT
+        with tempfile.TemporaryDirectory() as tmp:
+            panel.ROOT = Path(tmp)
+            try:
+                data = panel._vault_item("inicio")
+            finally:
+                panel.ROOT = raiz
+        self.assertEqual(data["state"], "unknown")
+        self.assertIn("ausente", data["motivo"])
+
 if __name__ == "__main__":
     unittest.main()
