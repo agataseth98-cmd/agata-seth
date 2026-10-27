@@ -1,0 +1,141 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index e5ec6dd6..3e7bc0a7 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -14,6 +14,7 @@
+   <div><p class="nav-label">Seu espaço</p><nav class="nav">
+     <button data-page="panorama" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h8V4H3zM13 20h8v-8h-8zM13 4h8v4h-8zM3 16h8v4H3z"/></svg>Panorama</button>
+     <button data-page="operacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18" r="1.5" fill="currentColor"/></svg>Estado operacional</button>
++    <button data-page="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa com a Seth</button>
+     <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
+     <button data-page="integracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.3 10.8 7.3-3.6M8.3 13.2l7.3 3.6"/></svg>Integrações</button>
+     <button data-page="memoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Memória & mapas</button>
+@@ -39,7 +40,12 @@
+ 
+   </section>
+ 
+-  <section class="page" id="page-capacidades" data-title="O que posso fazer">
++  <section class="page" id="page-conversa" data-title="Conversa com a Seth"><div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Uma conversa por vez</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
++<div id="seth-transcript" role="log" aria-live="polite" style="min-height:220px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:6px 2px"></div>
++<form id="seth-form" style="display:flex;gap:8px;margin-top:12px"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required style="flex:1;resize:vertical" placeholder="Escreva para a Seth"></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
++<p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></article></section>
++<section class="page" id="page-capacidades" data-title="O que posso fazer">
+     <p class="subnote">Catálogo documental: os rótulos dos cartões não são uma leitura ao vivo. Consulte Estado operacional e Integrações para o estado medido.</p>
+     <div class="section-heading"><div><div class="eyebrow">Mapa de capacidades</div><h1>O que a Agata pode fazer</h1><p>Funções existentes, integrações preparadas e ideias futuras aparecem separadas. Os cartões planejados são placeholders, não ferramentas ativas.</p></div></div>
+     <div class="filterbar"><button class="selected" data-filter="all">Tudo</button><button data-filter="active">Disponível ou implementado</button><button data-filter="partial">Parcial / confirmar</button><button data-filter="planned">Planejado</button><button data-filter="horizon">Horizonte</button></div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 4ca0d79f..7ba974db 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -501,3 +501,43 @@ function ligarCartoesClicaveis() {
+     cartao.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrirEvidenciaDoCartao(cartao); } });
+   });
+ }
++
++/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
++const sethHistorico = [];
++function sethEscrever(papel, texto) {
++  const linha = document.createElement("p");
++  linha.style.margin = "0";
++  const quem = document.createElement("strong");
++  quem.textContent = papel === "user" ? "Você: " : "Seth: ";
++  linha.append(quem, document.createTextNode(texto));
++  byId("seth-transcript").append(linha);
++  linha.scrollIntoView({block: "end"});
++}
++function ligarConversaSeth() {
++  const form = byId("seth-form");
++  if (!form || form.dataset.ligado) return;
++  form.dataset.ligado = "1";
++  form.addEventListener("submit", async (e) => {
++    e.preventDefault();
++    const campo = byId("seth-input"); const botao = byId("seth-send"); const estado = byId("seth-status");
++    const texto = campo.value.trim();
++    if (!texto || botao.disabled) return;
++    sethHistorico.push({role: "user", content: texto});
++    sethEscrever("user", texto); campo.value = "";
++    botao.disabled = true; estado.textContent = "PENSANDO"; estado.className = "chip partial";
++    try {
++      const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++        body: JSON.stringify({messages: sethHistorico.slice(-20)})});
++      if (!r.ok) throw new Error(r.status === 429 ? "outra conversa em curso" : "HTTP " + r.status);
++      const dados = await r.json();
++      sethHistorico.push({role: "assistant", content: dados.content});
++      sethEscrever("assistant", dados.content);
++      estado.textContent = "PRONTA"; estado.className = "chip planned";
++    } catch (erro) {
++      sethHistorico.pop();
++      sethEscrever("assistant", "Não consegui responder agora: " + erro.message + ".");
++      estado.textContent = "INDISPONÍVEL"; estado.className = "chip horizon";
++    } finally { botao.disabled = false; campo.focus(); }
++  });
++}
++window.addEventListener("load", ligarConversaSeth);
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 31011b9f..e4667f8b 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -51,6 +51,7 @@ INTEGRATION_ALLOWLIST = (
+ )
+ _STATUS_LOCK = threading.Lock()
+ _WIKI_LOCK = threading.BoundedSemaphore(1)
++_SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
+ _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
+ _DETAILS_LOCK = threading.Lock()
+ _DETAILS_CACHE: dict | None = None
+@@ -708,6 +709,8 @@ class Handler(BaseHTTPRequestHandler):
+     def do_POST(self) -> None:
+         if self.headers.get("Host") != f"{BIND}:{PORT}":
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path == "/api/seth/chat":
++            return self._seth_chat()
+         if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
+         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+@@ -754,6 +757,45 @@ class Handler(BaseHTTPRequestHandler):
+         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+         return self._send(200, "application/json; charset=utf-8", body)
+ 
++
++    def _seth_chat(self) -> None:
++        """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
++        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > 16384:
++            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++        try:
++            corpo = json.loads(self.rfile.read(int(raw_length)))
++        except (json.JSONDecodeError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        mensagens = corpo.get("messages") if isinstance(corpo, dict) else None
++        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > 20:
++            return self._send(400, "text/plain; charset=utf-8", b"messages must be 1-20 items")
++        limpas = []
++        for m in mensagens:
++            if not isinstance(m, dict) or m.get("role") not in ("user", "assistant"):
++                return self._send(400, "text/plain; charset=utf-8", b"invalid message")
++            conteudo = m.get("content")
++            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > 4000:
++                return self._send(400, "text/plain; charset=utf-8", b"content must be 1-4000 characters")
++            limpas.append({"role": m["role"], "content": conteudo})
++        if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
++            return self._send(429, "text/plain; charset=utf-8", b"busy")
++        try:
++            pedido = {"model": "seth-livre", "stream": False, "messages": limpas, "max_tokens": 1024}
++            req = urllib.request.Request("http://127.0.0.1:20126/v1/chat/completions", data=json.dumps(pedido).encode("utf-8"),
++                                         headers={"Content-Type": "application/json"}, method="POST")
++            with urllib.request.urlopen(req, timeout=120) as resposta:
++                dados = json.loads(resposta.read().decode("utf-8"))
++            texto = dados["choices"][0]["message"].get("content") or ""
++            body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
++        except (OSError, KeyError, IndexError, ValueError):
++            return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
++        finally:
++            _SEM_CONVERSA_EM_CURSO.release()
++
+     def do_PUT(self) -> None:
+         return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
+ 
