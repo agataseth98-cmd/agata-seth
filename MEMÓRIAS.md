@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1fa7b619f5a5a3378905a54920b1cceddd02e95f
-  Escrito em: 27/10/2026 13:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0
+  Escrito em: 27/10/2026 13:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fa7b619f5a5a3378905a54920b1cceddd02e95f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fa7b619f5a5a3378905a54920b1cceddd02e95f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fa7b619f5a5a3378905a54920b1cceddd02e95f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fa7b619f5a5a3378905a54920b1cceddd02e95f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fa7b619f5a5a3378905a54920b1cceddd02e95f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e61f8db1eba4fe04b3e8c4ead9ea68c9c8d15ef0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `texto-websocket-20261027`, assinado pelo Humano. O cartão dizia que o painel tinha WebSocket em /live-ws (:20132). A registry define 20132 como omniroute-live-ws, do OmniRoute; o painel lê por HTTP.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: registry de portas (config/portas-agata.txt), portas em escuta (ss), busca de uso de live-ws no painel, git apply --check contra o main · Autorização: Humano, assinatura de texto-websocket-20261027.
+
 (874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitura do momento.** Aplica `evidencia-timers-20261027`, assinado pelo Humano. Janela de manutenção e Rotinas locais leem o timer no momento; Navegador e Discord lê as unidades. Rotinas locais avisa que o timer do inbox está ativo e que a MEMÓRIAS (804) registra parada pelo Humano; a decisão segue com o Humano.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest do painel, sintaxe do JavaScript, git apply --check contra o main · Autorização: Humano, assinatura de evidencia-timers-20261027.
 
