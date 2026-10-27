@@ -51,6 +51,7 @@ INTEGRATION_ALLOWLIST = (
 )
 _STATUS_LOCK = threading.Lock()
 _WIKI_LOCK = threading.BoundedSemaphore(1)
+_SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
 _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
 _DETAILS_LOCK = threading.Lock()
 _DETAILS_CACHE: dict | None = None
@@ -708,6 +709,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path == "/api/seth/chat":
+            return self._seth_chat()
         if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
@@ -753,6 +756,45 @@ class Handler(BaseHTTPRequestHandler):
             _WIKI_LOCK.release()
         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
         return self._send(200, "application/json; charset=utf-8", body)
+
+
+    def _seth_chat(self) -> None:
+        """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
+        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > 16384:
+            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        try:
+            corpo = json.loads(self.rfile.read(int(raw_length)))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+        mensagens = corpo.get("messages") if isinstance(corpo, dict) else None
+        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > 20:
+            return self._send(400, "text/plain; charset=utf-8", b"messages must be 1-20 items")
+        limpas = []
+        for m in mensagens:
+            if not isinstance(m, dict) or m.get("role") not in ("user", "assistant"):
+                return self._send(400, "text/plain; charset=utf-8", b"invalid message")
+            conteudo = m.get("content")
+            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > 4000:
+                return self._send(400, "text/plain; charset=utf-8", b"content must be 1-4000 characters")
+            limpas.append({"role": m["role"], "content": conteudo})
+        if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
+            return self._send(429, "text/plain; charset=utf-8", b"busy")
+        try:
+            pedido = {"model": "seth-livre", "stream": False, "messages": limpas, "max_tokens": 1024}
+            req = urllib.request.Request("http://127.0.0.1:20126/v1/chat/completions", data=json.dumps(pedido).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=120) as resposta:
+                dados = json.loads(resposta.read().decode("utf-8"))
+            texto = dados["choices"][0]["message"].get("content") or ""
+            body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
+        except (OSError, KeyError, IndexError, ValueError):
+            return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
+        finally:
+            _SEM_CONVERSA_EM_CURSO.release()
 
     def do_PUT(self) -> None:
         return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET"),))
