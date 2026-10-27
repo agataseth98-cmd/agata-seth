@@ -42,7 +42,6 @@ class PainelTests(unittest.TestCase):
                      "maintenance-tasks", "proposal-list", "model-list", "integration-list", "memory-total"):
             self.assertIn(name, parser.ids)
 
-    @unittest.skip("timers pausados (TIMER_ALLOWLIST vazia) até decisão do Humano")
 
     def test_timer_limita_comando_e_nao_confunde_disparo_com_execucao(self):
         output = ("Id=agata-manutencao.timer\nLoadState=loaded\nActiveState=active\n"
@@ -206,7 +205,6 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/prototipo", headers={"Host": "exemplo.invalid"})[0], 421)
         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
 
-    @unittest.skip("Wiki pausada pela formação (WIKI_LIBERADA = False)")
 
     def test_busca_exige_origem_json_e_entrada_valida(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
@@ -223,7 +221,6 @@ class HttpTests(unittest.TestCase):
         self.assertIsNone(json.loads(body)["results"][0]["error"])
         self.assertEqual(self.request("PUT", "/api/wiki/search")[0], 405)
 
-    @unittest.skip("Wiki pausada pela formação (WIKI_LIBERADA = False)")
 
     def test_busca_simultanea_recebe_ocupado(self):
         self.assertTrue(panel._WIKI_LOCK.acquire(blocking=False))

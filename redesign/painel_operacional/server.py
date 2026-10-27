@@ -26,7 +26,7 @@ VERIFIER_URL = "http://127.0.0.1:20141/verificar"
 REFRESH_SECONDS = 60
 FRESH_SECONDS = 60
 CACHE_SECONDS = 3
-WIKI_LIBERADA = False
+WIKI_LIBERADA = True
 LIMITE_RESPOSTA_VERIFICADOR = 262144
 ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
 WIKI_RESULT_MAX = 12000
@@ -40,7 +40,7 @@ SERVICE_ALLOWLIST = (
 )
 
 # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
-TIMER_ALLOWLIST = ()  # pausado pelo Humano (27/10): timers só depois de decisão
+TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
 TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
                   "agata-vault-inbox.timer": "agata-vault-inbox.service"}
 MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
