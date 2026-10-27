@@ -376,6 +376,57 @@ def _substituidas(directory: Path) -> dict:
     return out
 
 
+# (27/10/2026) Capacidades do painel com leitura real. Só sondas de leitura: estado de unidades e HTTP local.
+# Capacidade sem sonda (documento) não tem estado, e não é listada aqui.
+CAPACIDADES = {
+    "conversar": {"units": ["seth-gateway.service"], "http": ["http://127.0.0.1:3080/"]},
+    "ouvir": {"units": ["piper-tts.service"], "http": []},
+    "buscar": {"units": ["seth-verificador.service"], "http": []},
+    "verificar": {"units": ["seth-verificador.service"], "http": ["http://127.0.0.1:20141/"]},
+    "navegar": {"units": ["navegador-mcp.service", "discord-mcp.service"], "http": []},
+    "rota": {"units": ["seth-gateway.service"], "http": []},
+    "manutencao": {"units": ["agata-manutencao.timer"], "http": []},
+    "acrescentar": {"units": ["seth-escriba.service"], "http": []},
+}
+
+
+def _unidade_ativa(unit: str) -> bool | None:
+    try:
+        proc = subprocess.run(["/usr/bin/systemctl", "--user", "show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    valores = _parse_pairs(proc.stdout)
+    if valores.get("LoadState") != "loaded":
+        return None
+    return valores.get("ActiveState") == "active"
+
+
+def _http_ok(url: str) -> bool:
+    try:
+        with urllib.request.urlopen(url, timeout=3) as resposta:
+            return resposta.status == 200
+    except (OSError, ValueError):
+        return False
+
+
+def _capacidades_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    itens = []
+    for nome, sondas in CAPACIDADES.items():
+        estados = [_unidade_ativa(u) for u in sondas["units"]] + [_http_ok(h) for h in sondas["http"]]
+        if any(e is None for e in estados):
+            estado = "unknown"
+        elif all(estados):
+            estado = "ok"
+        else:
+            estado = "warning"
+        itens.append({"id": nome, "state": estado, "source": "systemctl --user show; HTTP local",
+                      "source_ref": ", ".join(sondas["units"] + sondas["http"]),
+                      "observed_at": observed_at, "fresh_until": fresh_until})
+    return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
+
+
 def _proposal_snapshot() -> dict:
     observed_at, fresh_until = _reading_window()
     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
@@ -626,6 +677,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path == "/api/capacidades":
+            body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path in {"/api/status", "/api/details"}:
             if not _same_origin_request(
                 self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")

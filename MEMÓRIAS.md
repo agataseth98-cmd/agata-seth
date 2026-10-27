@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 19ffe44d60a02fc24b544904283ae0729c2579e7
-  Escrito em: 27/10/2026 11:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c
+  Escrito em: 27/10/2026 11:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19ffe44d60a02fc24b544904283ae0729c2579e7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19ffe44d60a02fc24b544904283ae0729c2579e7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19ffe44d60a02fc24b544904283ae0729c2579e7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19ffe44d60a02fc24b544904283ae0729c2579e7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/19ffe44d60a02fc24b544904283ae0729c2579e7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef94a5356da3dc3967aa9a4d2554dc5bd5b2dd1c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco viram documento.** Aplica `capacidades-leitura-20261027`, assinado pelo Humano. Sondas só de leitura: estado de unidades (systemctl --user show) e HTTP local. Cartões sem sonda deixam de mostrar estado. Limite registrado: escolher rota só confirma que o gateway está ativo.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest e 13 testes do painel, sondas medidas (8 de 8 ok), git apply --check contra o main · Autorização: Humano, assinatura de capacidades-leitura-20261027.
+
 (871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBSTITUÍDA.** Aplica `propostas-substituidas-20261027`, assinado pelo Humano. Cria propostas/SUBSTITUIDAS.txt e a leitura que mostra SUBSTITUÍDA no Plano de trabalho. O painel listava retrato-original-20261026 como REGISTRADA, embora não tenha sido aplicada.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: selftest e 13 testes do painel, git apply --check contra o main, sintaxe do JavaScript · Autorização: Humano, assinatura de propostas-substituidas-20261027.
 
