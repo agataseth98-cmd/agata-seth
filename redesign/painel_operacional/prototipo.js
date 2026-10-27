@@ -213,9 +213,11 @@ function renderProposals(value, forced) {
   const state = stateOf(value, forced);
   chip("proposal-state", state, state === "ok" ? "LEITURA LOCAL" : null);
   const rows = (value && value.items || []).map((item) => {
+    const substituida = Boolean(item.substituida_por);
     const element = row(item.name, state,
-      item.marker_present ? "Marcador presente; confira assinatura e aplicabilidade." : "Sem marcador de assinatura.",
-      state === "ok" ? "REGISTRADA" : null);
+      substituida ? "Substituída por " + item.substituida_por + ". Não vale mais."
+        : (item.marker_present ? "Marcador presente; confira assinatura e aplicabilidade." : "Sem marcador de assinatura."),
+      state === "ok" ? (substituida ? "SUBSTITUÍDA" : "REGISTRADA") : null);
     const result = proposalChecks.get(item.name);
     const note = document.createElement("small"); note.setAttribute("role", "status");
     if (result) {

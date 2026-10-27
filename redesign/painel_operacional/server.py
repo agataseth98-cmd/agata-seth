@@ -361,6 +361,21 @@ def _chat_snapshot() -> dict:
     return result
 
 
+def _substituidas(directory: Path) -> dict:
+    """Propostas substituídas, lidas de propostas/SUBSTITUIDAS.txt (nome | substituída por | motivo)."""
+    arquivo = directory / "SUBSTITUIDAS.txt"
+    if not arquivo.is_file() or arquivo.stat().st_size > 16384:
+        return {}
+    out = {}
+    for linha in arquivo.read_text(encoding="utf-8").splitlines():
+        if not linha.strip() or linha.lstrip().startswith("#"):
+            continue
+        partes = [p.strip() for p in linha.split("|")]
+        if len(partes) >= 2 and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", partes[0]):
+            out[partes[0]] = partes[1][:200]
+    return out
+
+
 def _proposal_snapshot() -> dict:
     observed_at, fresh_until = _reading_window()
     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
@@ -373,7 +388,10 @@ def _proposal_snapshot() -> dict:
         for path in paths[:100]:
             if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", path.stem):
                 continue
-            value["items"].append({"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()})
+            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()}
+            if path.stem in _substituidas(directory):
+                item["substituida_por"] = _substituidas(directory)[path.stem]
+            value["items"].append(item)
         value.update({"state": "ok", "total": len(paths), "truncated": len(paths) > 100})
     except OSError:
         value["error"] = "lista local de propostas indisponível"
