@@ -444,6 +444,7 @@ async function loadCapacidades() {
     if (!item) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
     const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
     chip.className = rotulo[0]; chip.textContent = rotulo[1];
+    ligarCartoesClicaveis();
     const botao = cartao.querySelector("button.evidence");
     if (botao) { botao.dataset.body = item.evidencia || "Sem leitura nesta medição."; botao.dataset.source = item.source + " · " + item.source_ref; }
   });
@@ -480,3 +481,23 @@ function aplicarEvidenciasVivas() {
   }).catch(() => {});
 }
 window.addEventListener("load", () => setTimeout(aplicarEvidenciasVivas, 1500));
+
+/* (27/10/2026) Cartões com sonda abrem o mesmo popup da EVIDÊNCIA, sobre a tela. Teclado: Enter ou Espaço. */
+function abrirEvidenciaDoCartao(cartao) {
+  const botao = cartao.querySelector("button.evidence");
+  const dialogo = document.getElementById("evidence-dialog");
+  if (!botao || !dialogo) return;
+  document.getElementById("dialog-title").textContent = cartao.querySelector("h3").textContent;
+  document.getElementById("dialog-body").textContent = botao.dataset.body || "";
+  document.getElementById("dialog-source").textContent = botao.dataset.source || "Fonte não informada";
+  dialogo.showModal();
+}
+function ligarCartoesClicaveis() {
+  document.querySelectorAll("#page-capacidades .cap-card[data-probe]:not([data-probe='documento'])").forEach((cartao) => {
+    if (cartao.dataset.ligado) return;
+    cartao.dataset.ligado = "1";
+    cartao.tabIndex = 0; cartao.setAttribute("role", "button");
+    cartao.addEventListener("click", (e) => { if (!e.target.closest("button")) abrirEvidenciaDoCartao(cartao); });
+    cartao.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrirEvidenciaDoCartao(cartao); } });
+  });
+}

@@ -277,3 +277,7 @@ body{font-family:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;font-synthe
 .live-wiki-result a { display: inline-block; margin: 4px 6px 0 0; }
 @media (max-width: 850px) { .wiki-demo-tools { grid-template-columns: minmax(0, 1fr) minmax(150px, 1fr); } }
 @media (max-width: 540px) { .wiki-demo-tools { grid-template-columns: 1fr; } .live-row-top { align-items: flex-start; flex-direction: column; } }
+
+/* Cartões com sonda são clicáveis (abrem a evidência em popup). */
+.cap-card[data-probe]:not([data-probe='documento']){cursor:pointer}
+.cap-card[data-probe]:not([data-probe='documento']):focus-visible{outline:2px solid var(--teal);outline-offset:3px}
