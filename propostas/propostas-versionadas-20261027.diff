@@ -1,0 +1,70 @@
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index f4b785f9..1d3aace5 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -690,10 +690,12 @@ async function carregarVisaoSistema() {
+     cartao("Capacidades com leitura", cap.filter((x) => x.state === "ok").length + " de " + cap.length, "capacidades");
+     cartao("Lacunas agora", String((lac.items || []).length), "lacunas");
+     const props = (status.proposals && status.proposals.items) || [];
+-    const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present);
++    const naoVersionadas = props.filter((p) => p.versionada === false);
++    const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present && p.versionada !== false);
+     cartao("Propostas sem assinatura", String(pendentes.length), "plano");
+     (lac.items || []).forEach((i) => melhoria("Lacuna · " + i.nome + " — " + i.motivo, "lacunas"));
+     pendentes.forEach((p) => melhoria("Proposta sem assinatura · " + p.name, "plano"));
++    naoVersionadas.forEach((p) => melhoria("LACUNA · não versionada · " + p.name + " — existe só no checkout local, sem commit no git", "plano"));
+     cap.filter((x) => x.state !== "ok").forEach((x) => melhoria("Capacidade sem leitura ok · " + x.id, "capacidades"));
+     if (!lista.children.length) melhoria("Nada pendente nas leituras de agora.", null);
+   } catch (erro) {
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8944179f..c7a5465b 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -498,6 +498,18 @@ def _lacunas_snapshot() -> dict:
+             "total_declaradas": declaradas, "items": itens}
+ 
+ 
++def _propostas_versionadas() -> set | None:
++    """Nomes de propostas/*.diff que estão no git (fonte do canon). None se o git não responder."""
++    try:
++        proc = subprocess.run(["/usr/bin/git", "-C", str(ROOT), "ls-files", "propostas"], capture_output=True,
++                              text=True, timeout=5, check=False)
++    except (OSError, subprocess.TimeoutExpired):
++        return None
++    if proc.returncode != 0:
++        return None
++    return {Path(l).stem for l in proc.stdout.splitlines() if l.endswith(".diff")}
++
++
+ def _proposal_snapshot() -> dict:
+     observed_at, fresh_until = _reading_window()
+     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
+@@ -507,10 +519,12 @@ def _proposal_snapshot() -> dict:
+         if not directory.is_dir():
+             raise OSError("diretório indisponível")
+         paths = sorted(directory.glob("*.diff"))
++        versionadas = _propostas_versionadas()
+         for path in paths[:100]:
+             if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", path.stem):
+                 continue
+-            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()}
++            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file(),
++                    "versionada": path.stem in versionadas if versionadas is not None else None}
+             if path.stem in _substituidas(directory):
+                 item["substituida_por"] = _substituidas(directory)[path.stem]
+             value["items"].append(item)
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 00bdfe79..b4811789 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -73,8 +73,8 @@ class PainelTests(unittest.TestCase):
+             with mock.patch.object(panel, "ROOT", root):
+                 data = panel._proposal_snapshot()
+             self.assertEqual(data["total"], 2)
+-            self.assertEqual(data["items"], [{"name": "primeira", "marker_present": False},
+-                                             {"name": "segunda", "marker_present": True}])
++            self.assertEqual(data["items"], [{"name": "primeira", "marker_present": False, "versionada": None},
++                                             {"name": "segunda", "marker_present": True, "versionada": None}])
+             self.assertNotIn("signature_valid", json.dumps(data))
+ 
+     def test_verificacao_da_proposta_distingue_etapa_e_arquivo_alterado(self):
