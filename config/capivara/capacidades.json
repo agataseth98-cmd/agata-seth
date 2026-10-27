@@ -438,6 +438,72 @@
           "metrica": "qualidade_json",
           "valor": 1.0,
           "amostra": 6
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (sem campo thinking)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 1
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (sem campo thinking)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 2
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (sem campo thinking)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 3
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (thinking=disabled)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 1
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (thinking=disabled)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 2
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final') gemini-3.1-flash-lite (thinking=disabled)",
+          "provedor": "gemini",
+          "endpoint": "gemini/gemini-3.1-flash-lite",
+          "versao_resolvida": "gemini-3.1-flash-lite",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 2.0,
+          "amostra": 1,
+          "repeticao": 3
         }
       ],
       "observado": []
@@ -1329,6 +1395,39 @@
           "metrica": "qualidade_json",
           "valor": 0.917,
           "amostra": 6
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 3.0,
+          "amostra": 1,
+          "repeticao": 1
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 3.0,
+          "amostra": 1,
+          "repeticao": 2
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "mistral",
+          "endpoint": "mistral/ministral-14b-latest",
+          "versao_resolvida": "ministral-14b-latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 3.0,
+          "amostra": 1,
+          "repeticao": 3
         }
       ],
       "observado": []
@@ -1576,6 +1675,39 @@
           "metrica": "qualidade_json",
           "valor": 0.917,
           "amostra": 6
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 0.5,
+          "amostra": 1,
+          "repeticao": 1
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 0.5,
+          "amostra": 1,
+          "repeticao": 2
+        },
+        {
+          "protocolo": "ensaio-seguir-protocolo-v2 (26-27/10/2026; revisão cega Codex e5 'pontuacao_final')",
+          "provedor": "ollama-local",
+          "endpoint": "ollama-local/qwen3.5-9b-64k:latest",
+          "versao_resolvida": "qwen3.5-9b-64k:latest",
+          "data": "2026-10-27",
+          "metrica": "ensaio_seguir_protocolo_v2_pontos_de_3",
+          "valor": 0.5,
+          "amostra": 1,
+          "repeticao": 3
         }
       ],
       "observado": []
