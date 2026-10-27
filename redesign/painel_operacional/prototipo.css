@@ -258,3 +258,22 @@ body{font-family:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;font-synthe
 .mt14{margin-top:14px}
 .orbit-150{width:150px;height:150px}
 .wiki-spacer{margin:14px 0}
+
+/* Leituras reais: mesmo vocabulário visual da prévia, com texto de origem. */
+.live-row { display: grid; gap: 5px; padding: 12px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.live-row:last-child { border-bottom: 0; }
+.live-row-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.live-row-top strong { color: #edf4ff; overflow-wrap: anywhere; }
+.live-row small, .live-model p, .live-model li { color: #b5c5d9; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.live-model { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.live-model summary { color: #edf4ff; cursor: pointer; overflow-wrap: anywhere; }
+.live-model summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.text-link[type="button"] { padding: 0; background: transparent; border: 0; border-bottom: 1px solid rgba(97,217,237,.35); cursor: pointer; }
+.text-link[type="button"]:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.live-model ul { padding-left: 20px; }
+.wiki-demo-tools { grid-template-columns: minmax(0, 1fr) minmax(150px, 190px) minmax(150px, 190px) auto; }
+.live-wiki-result { display: block; }
+.live-wiki-result pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow: auto; color: #c8d8e8; font: 13px/1.5 var(--mono); }
+.live-wiki-result a { display: inline-block; margin: 4px 6px 0 0; }
+@media (max-width: 850px) { .wiki-demo-tools { grid-template-columns: minmax(0, 1fr) minmax(150px, 1fr); } }
+@media (max-width: 540px) { .wiki-demo-tools { grid-template-columns: 1fr; } .live-row-top { align-items: flex-start; flex-direction: column; } }
