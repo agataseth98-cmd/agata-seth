@@ -7,6 +7,7 @@
 LC=~/librechat/docker-compose.yml
 docker compose -f "$LC" stop >/dev/null 2>&1 || true
 systemctl --user stop piper-tts.service 2>/dev/null || true
+systemctl --user stop painel-operacional.service 2>/dev/null || true
 systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
 systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
 # descarrega os modelos ativos do Ollama de producao (:11434) -- sem sudo, nao
