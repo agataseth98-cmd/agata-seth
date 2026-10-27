@@ -450,3 +450,33 @@ async function loadCapacidades() {
 }
 /* F5: ao carregar a página, atualiza todas as leituras (não só a aba aberta). */
 window.addEventListener("load", () => { loadDetails(); loadCapacidades(); });
+
+/* (27/10/2026) Textos de evidência com data antiga viram leitura do momento (timers e unidades). */
+function evidenciaDe(botao, texto, fonte) {
+  if (!botao) return;
+  botao.dataset.body = texto;
+  botao.dataset.source = fonte;
+}
+function aplicarEvidenciasVivas() {
+  const timers = (lastSnapshot && lastSnapshot.timers) || [];
+  const porUnidade = new Map(timers.map((t) => [t.unit, t]));
+  const hora = (valor) => (valor ? valor.replace(/ -03$/, "") : "não informada");
+  const manutencao = porUnidade.get("agata-manutencao.timer");
+  const inbox = porUnidade.get("agata-vault-inbox.timer");
+  if (manutencao) {
+    const botao = document.querySelector('button.evidence[data-title="Janela de manutenção"]');
+    evidenciaDe(botao, "Medido agora: agata-manutencao.timer " + (manutencao.active_state || "sem estado") + "; próxima execução " + hora(manutencao.next_trigger) + "; última " + hora(manutencao.last_trigger) + ". O resultado da tarefa não é inferido do disparo.", "systemctl --user show · agata-manutencao.timer");
+  }
+  if (inbox) {
+    const botao = document.querySelector('button.evidence[data-title="Rotinas locais"]');
+    evidenciaDe(botao, "Medido agora: agata-vault-inbox.timer " + (inbox.active_state || "sem estado") + "; última execução " + hora(inbox.last_trigger) + ". Atenção: a MEMÓRIAS (804, 22/10) registra que o timer foi parado pelo Humano. Estado atual e decisão divergem; quem decide é o Humano.", "systemctl --user show · agata-vault-inbox.timer · MEMÓRIAS (804)");
+  }
+  fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}).then((dados) => {
+    const navegar = ((dados && dados.items) || []).find((i) => i.id === "navegar");
+    if (!navegar) return;
+    document.querySelectorAll('button.evidence[data-title="Navegador e Discord"]').forEach((botao) => {
+      evidenciaDe(botao, navegar.evidencia, "systemctl --user show · navegador-mcp e discord-mcp");
+    });
+  }).catch(() => {});
+}
+window.addEventListener("load", () => setTimeout(aplicarEvidenciasVivas, 1500));
