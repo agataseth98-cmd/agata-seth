@@ -259,8 +259,8 @@ function render(snapshot, forced = false) {
   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + services.length);
   set("overview-alert", overall === "ok" ? "Quatro unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
   replaceRows("live-services", unitRows(services, forced), "Nenhum estado recebido.");
-  replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");
-  set("overview-source", "Coleta concluída " + niceTime(snapshot.observed_at) + " · válida até " + niceTime(snapshot.fresh_until));
+  if (byId("overview-services")) replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");
+  if (byId("overview-source")) set("overview-source", "Coleta concluída " + niceTime(snapshot.observed_at) + " · válida até " + niceTime(snapshot.fresh_until));
   set("overview-updated", collectionFailed ? "Coleta indisponível; última leitura preservada." : "Leitura local observada " + niceTime(snapshot.observed_at));
   const git = snapshot.git || {}; const gitState = stateOf(git, forced);
   chip("git-panel-state", gitState, gitState === "ok" ? "LEITURA VÁLIDA" : null);
