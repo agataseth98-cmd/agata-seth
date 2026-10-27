@@ -1,0 +1,50 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8033b498..13014019 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -26,7 +26,7 @@ VERIFIER_URL = "http://127.0.0.1:20141/verificar"
+ REFRESH_SECONDS = 60
+ FRESH_SECONDS = 60
+ CACHE_SECONDS = 3
+-WIKI_LIBERADA = False
++WIKI_LIBERADA = True
+ LIMITE_RESPOSTA_VERIFICADOR = 262144
+ ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
+ WIKI_RESULT_MAX = 12000
+@@ -40,7 +40,7 @@ SERVICE_ALLOWLIST = (
+ )
+ 
+ # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
+-TIMER_ALLOWLIST = ()  # pausado pelo Humano (27/10): timers só depois de decisão
++TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
+ TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
+                   "agata-vault-inbox.timer": "agata-vault-inbox.service"}
+ MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index dd47537c..00bdfe79 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -42,7 +42,6 @@ class PainelTests(unittest.TestCase):
+                      "maintenance-tasks", "proposal-list", "model-list", "integration-list", "memory-total"):
+             self.assertIn(name, parser.ids)
+ 
+-    @unittest.skip("timers pausados (TIMER_ALLOWLIST vazia) até decisão do Humano")
+ 
+     def test_timer_limita_comando_e_nao_confunde_disparo_com_execucao(self):
+         output = ("Id=agata-manutencao.timer\nLoadState=loaded\nActiveState=active\n"
+@@ -206,7 +205,6 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(self.request("GET", "/prototipo", headers={"Host": "exemplo.invalid"})[0], 421)
+         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
+ 
+-    @unittest.skip("Wiki pausada pela formação (WIKI_LIBERADA = False)")
+ 
+     def test_busca_exige_origem_json_e_entrada_valida(self):
+         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
+@@ -223,7 +221,6 @@ class HttpTests(unittest.TestCase):
+         self.assertIsNone(json.loads(body)["results"][0]["error"])
+         self.assertEqual(self.request("PUT", "/api/wiki/search")[0], 405)
+ 
+-    @unittest.skip("Wiki pausada pela formação (WIKI_LIBERADA = False)")
+ 
+     def test_busca_simultanea_recebe_ocupado(self):
+         self.assertTrue(panel._WIKI_LOCK.acquire(blocking=False))
