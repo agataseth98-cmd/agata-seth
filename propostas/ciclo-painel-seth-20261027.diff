@@ -1,0 +1,46 @@
+diff --git a/redesign/systemd/painel-operacional.service b/redesign/systemd/painel-operacional.service
+new file mode 100644
+index 00000000..0f74077f
+--- /dev/null
++++ b/redesign/systemd/painel-operacional.service
+@@ -0,0 +1,16 @@
++[Unit]
++Description=Agata -- painel operacional (leitura local, :20146), sobe e cai com a Seth
++After=network-online.target
++
++[Service]
++Type=simple
++ExecStart=/usr/bin/python3 %h/agata/redesign/painel_operacional/server.py
++Restart=on-failure
++RestartSec=3
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ReadOnlyPaths=%h/agata
++ReadWritePaths=%h/.cache/agata
++
++# Sem [Install]: sobe e cai pelos atalhos `seth` e `seth-parar`, como os demais serviços da Seth.
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 2fee95cb..e85a287c 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -8,6 +8,7 @@ LC=~/librechat/docker-compose.yml
+ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+ systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
++systemctl --user start painel-operacional.service 2>/dev/null || true
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 11d2557b..7cbb93f7 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -7,6 +7,7 @@
+ LC=~/librechat/docker-compose.yml
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
++systemctl --user stop painel-operacional.service 2>/dev/null || true
+ systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
+ systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
+ # descarrega os modelos ativos do Ollama de producao (:11434) -- sem sudo, nao
