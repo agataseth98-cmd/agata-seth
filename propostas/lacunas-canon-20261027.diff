@@ -1,0 +1,139 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 5bc97636..c781e989 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -54,7 +54,8 @@
+ <svg id="grafo-svg" viewBox="0 0 480 360" role="img" aria-label="Grafo de relações do vault" style="width:100%;max-height:60vh"></svg>
+ </article></section>
+ <section class="page" id="page-lacunas" data-title="Lacunas"><div class="section-heading"><div><div class="eyebrow">Disciplina · o que falta</div><h1>Lacunas</h1><p>Tudo que o painel mostra e não tem fonte medida agora aparece aqui, com o motivo. Calculado a cada abertura.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Mapa</div><h2 class="panel-title" id="lacunas-total">Calculando…</h2></div></div><ul id="lacunas-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Mapa</div><h2 class="panel-title" id="lacunas-total">Calculando…</h2></div></div><ul id="lacunas-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Canon</div><h2 class="panel-title">Declarado e não confirmado</h2></div></div><div id="lacunas-canon"></div></article></section>
+ <section class="page" id="page-capacidades" data-title="O que posso fazer">
+     <p class="subnote">Catálogo documental: os rótulos dos cartões não são uma leitura ao vivo. Consulte Estado operacional e Integrações para o estado medido.</p>
+     <div class="section-heading"><div><div class="eyebrow">Mapa de capacidades</div><h1>O que a Agata pode fazer</h1><p>Funções existentes, integrações preparadas e ideias futuras aparecem separadas. Os cartões planejados são placeholders, não ferramentas ativas.</p></div></div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 9f1f1d00..8b80c5b5 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -61,7 +61,7 @@ function showPage(name) {
+   if (name === "integracoes" || name === "memoria") loadDetails();
+   if (name === "capacidades") loadCapacidades();
+   if (name === "grafo") carregarGrafo();
+-  if (name === "lacunas") calcularLacunas();
++  if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
+ }
+ nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+ document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
+@@ -636,3 +636,20 @@ function marcarLacunasNosCartoes() {
+   });
+ }
+ window.addEventListener("load", () => setTimeout(() => { marcarLacunasNosCartoes(); }, 1200));
++
++/* (27/10/2026) Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora em /api/lacunas. */
++async function carregarLacunasCanon() {
++  const lista = byId("lacunas-canon");
++  if (!lista) return;
++  lista.replaceChildren();
++  try {
++    const dados = await fetchJson("/api/lacunas", {headers: {Accept: "application/json"}});
++    const itens = dados.items || [];
++    const cab = document.createElement("p");
++    cab.textContent = (dados.total_declaradas || 0) + " itens declarados no canon; " + itens.length + " lacuna(s) agora. Fonte: PROJETO.md · Serviços (boot), medido em " + (dados.observed_at || "—") + ".";
++    lista.append(cab);
++    itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo; lista.append(li); });
++  } catch (erro) {
++    const p = document.createElement("p"); p.textContent = "Leitura do canon indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
++  }
++}
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index a07daf1a..8944179f 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -7,6 +7,7 @@ import hashlib
+ import http.client
+ import collections
+ import json
++import socket
+ import re
+ import subprocess
+ import threading
+@@ -435,6 +436,68 @@ def _capacidades_snapshot() -> dict:
+     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
+ 
+ 
++def _unidade_de_sistema_ativa(unit: str) -> bool | None:
++    """Unidade de sistema (sem --user), para units como ollama.service que o canon declara no boot."""
++    try:
++        proc = subprocess.run(["/usr/bin/systemctl", "show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
++                              capture_output=True, text=True, timeout=5, check=False)
++    except (OSError, subprocess.TimeoutExpired):
++        return None
++    valores = _parse_pairs(proc.stdout)
++    if valores.get("LoadState") != "loaded":
++        return None
++    return valores.get("ActiveState") == "active"
++
++
++def _porta_responde(porta: int) -> bool:
++    try:
++        with socket.create_connection(("127.0.0.1", porta), timeout=1):
++            return True
++    except OSError:
++        return False
++
++
++def _lacunas_snapshot() -> dict:
++    """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
++    - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
++    - item com porta declarada (`:NNNN`) que não responde em 127.0.0.1 vira lacuna."""
++    observed_at, fresh_until = _reading_window()
++    try:
++        texto = (ROOT / "PROJETO.md").read_text(encoding="utf-8", errors="replace")
++    except OSError:
++        return {"schema_version": 1, "state": "unknown", "observed_at": observed_at, "fresh_until": fresh_until,
++                "total_declaradas": 0, "items": [{"nome": "PROJETO.md", "motivo": "fonte do canon indisponível", "fonte": "PROJETO.md"}]}
++    inicio = texto.find("## Serviços (boot)")
++    fim = texto.find("**Não recriar", inicio)
++    secao = texto[inicio:fim] if (inicio >= 0 and fim > inicio) else ""
++    itens = []
++    if not secao:
++        itens.append({"nome": "seção Serviços (boot)", "motivo": "seção não encontrada em PROJETO.md", "fonte": "PROJETO.md"})
++    vistas = set(); declaradas = 0
++    for linha in secao.splitlines():
++        if linha.startswith("**Manuais") or linha.startswith("**Consolidação") or linha.startswith("**Não recriar"):
++            continue
++        for unit in re.findall(r"`([a-z0-9@._-]+\.(?:service|timer))`", linha):
++            if unit in vistas: continue
++            vistas.add(unit); declaradas += 1
++            ativo = _unidade_ativa(unit)
++            if ativo is None:
++                ativo = _unidade_de_sistema_ativa(unit)
++            if ativo is None:
++                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (ausente ou não consultada)", "fonte": "PROJETO.md · Serviços (boot)"})
++            elif ativo is False:
++                itens.append({"nome": unit, "motivo": "declarada no boot e inativa agora", "fonte": "PROJETO.md · Serviços (boot)"})
++        if not linha.lstrip().startswith("- "):
++            continue
++        m = re.search(r"`([a-z][a-z0-9-]+)`.{0,40}?:(\d{4,5})\b", linha)
++        if m and not re.search(r"\.(service|timer)$", m.group(1)):
++            declaradas += 1
++            if not _porta_responde(int(m.group(2))):
++                itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "PROJETO.md · Serviços (boot)"})
++    return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until,
++            "total_declaradas": declaradas, "items": itens}
++
++
+ def _proposal_snapshot() -> dict:
+     observed_at, fresh_until = _reading_window()
+     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
+@@ -687,6 +750,9 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+         if self.path.startswith("/api/grafo"):
+             return self._grafo()
++        if self.path == "/api/lacunas":
++            body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
