@@ -1,0 +1,66 @@
+diff --git a/propostas/SUBSTITUIDAS.txt b/propostas/SUBSTITUIDAS.txt
+new file mode 100644
+index 00000000..19b87ae6
+--- /dev/null
++++ b/propostas/SUBSTITUIDAS.txt
+@@ -0,0 +1,4 @@
++# Propostas substituídas (lido pelo painel). Uma por linha: nome | substituída por | motivo.
++# Não aplica nada; só diz à leitura local que a proposta deste nome não vale mais.
++painel-dinamico-leitura-wiki-20261023 | painel-correcoes-20261026, painel-formacao-20261026 | proposta original sem assinatura; partes aplicadas por outras propostas
++retrato-original-20261026 | retrato-original-r2-20261026 | falha de aplicação por conflito com prototipo-csp-20261026 (27/10/2026)
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index abeec1b0..18b9fa3e 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -213,9 +213,11 @@ function renderProposals(value, forced) {
+   const state = stateOf(value, forced);
+   chip("proposal-state", state, state === "ok" ? "LEITURA LOCAL" : null);
+   const rows = (value && value.items || []).map((item) => {
++    const substituida = Boolean(item.substituida_por);
+     const element = row(item.name, state,
+-      item.marker_present ? "Marcador presente; confira assinatura e aplicabilidade." : "Sem marcador de assinatura.",
+-      state === "ok" ? "REGISTRADA" : null);
++      substituida ? "Substituída por " + item.substituida_por + ". Não vale mais."
++        : (item.marker_present ? "Marcador presente; confira assinatura e aplicabilidade." : "Sem marcador de assinatura."),
++      state === "ok" ? (substituida ? "SUBSTITUÍDA" : "REGISTRADA") : null);
+     const result = proposalChecks.get(item.name);
+     const note = document.createElement("small"); note.setAttribute("role", "status");
+     if (result) {
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 13014019..5dcb0037 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -361,6 +361,21 @@ def _chat_snapshot() -> dict:
+     return result
+ 
+ 
++def _substituidas(directory: Path) -> dict:
++    """Propostas substituídas, lidas de propostas/SUBSTITUIDAS.txt (nome | substituída por | motivo)."""
++    arquivo = directory / "SUBSTITUIDAS.txt"
++    if not arquivo.is_file() or arquivo.stat().st_size > 16384:
++        return {}
++    out = {}
++    for linha in arquivo.read_text(encoding="utf-8").splitlines():
++        if not linha.strip() or linha.lstrip().startswith("#"):
++            continue
++        partes = [p.strip() for p in linha.split("|")]
++        if len(partes) >= 2 and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", partes[0]):
++            out[partes[0]] = partes[1][:200]
++    return out
++
++
+ def _proposal_snapshot() -> dict:
+     observed_at, fresh_until = _reading_window()
+     value = {"state": "unknown", "source": "propostas/ local", "observed_at": observed_at,
+@@ -373,7 +388,10 @@ def _proposal_snapshot() -> dict:
+         for path in paths[:100]:
+             if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,80}", path.stem):
+                 continue
+-            value["items"].append({"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()})
++            item = {"name": path.stem, "marker_present": (directory / ("APROVADO-" + path.stem)).is_file()}
++            if path.stem in _substituidas(directory):
++                item["substituida_por"] = _substituidas(directory)[path.stem]
++            value["items"].append(item)
+         value.update({"state": "ok", "total": len(paths), "truncated": len(paths) > 100})
+     except OSError:
+         value["error"] = "lista local de propostas indisponível"
