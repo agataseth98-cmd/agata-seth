@@ -1,0 +1,4 @@
+# Propostas substituídas (lido pelo painel). Uma por linha: nome | substituída por | motivo.
+# Não aplica nada; só diz à leitura local que a proposta deste nome não vale mais.
+painel-dinamico-leitura-wiki-20261023 | painel-correcoes-20261026, painel-formacao-20261026 | proposta original sem assinatura; partes aplicadas por outras propostas
+retrato-original-20261026 | retrato-original-r2-20261026 | falha de aplicação por conflito com prototipo-csp-20261026 (27/10/2026)
