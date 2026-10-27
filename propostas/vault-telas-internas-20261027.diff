@@ -1,0 +1,188 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index cf37c3ee..083eec7b 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -37,7 +37,7 @@
+     <div class="callout"><span><strong id="overview-alert">Aguardando leitura local.</strong> Serviços, Git e agenda são fontes independentes.</span><button class="btn secondary" id="refresh-main" type="button">Atualizar</button></div>
+     <div class="kpis"><div class="kpi teal"><div class="label">Unidades monitoradas</div><div class="value" id="overview-health">—</div><div class="note">Quatro unidades · seth-verificador</div></div><div class="kpi"><div class="label">Git local</div><div class="value" id="overview-git">—</div><div class="note">Referência do último fetch</div></div><div class="kpi violet"><div class="label">Agenda</div><div class="value" id="overview-timers">—</div><div class="note">Timers · não prova execução</div></div><div class="kpi gold"><div class="label">Propostas</div><div class="value" id="overview-proposals">—</div><div class="note">Assinaturas não verificadas nesta leitura</div></div></div>
+     <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Detalhe</div><h2 class="panel-title">Serviços, Git e agenda</h2></div><button class="text-link" type="button" data-open-page="operacao">Abrir Estado operacional ↗</button></div><p class="subnote">Unidades, Git e timers ficam só em Estado operacional, para não repetir a leitura nesta tela.</p></article>
+-    <div class="stack"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orientação</div><h2 class="panel-title">A memória tem caminhos</h2></div><a class="text-link" href="obsidian://open?vault=agata&amp;file=INICIO">Abrir vault ↗</a></div><div class="memory-links"><a href="obsidian://open?vault=agata&amp;file=timeline">Linha do tempo</a><a href="obsidian://open?vault=agata&amp;file=mapa-do-sistema">Mapa do sistema</a><a href="obsidian://open?vault=agata&amp;file=cerebro">Brain Atlas</a><a href="obsidian://open?vault=agata&amp;file=memorias.base">Base de memórias</a></div><p class="subnote">O vault é derivado; confirme afirmações no canon.</p></article>
++    <div class="stack"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orientação</div><h2 class="panel-title">A memória tem caminhos</h2></div><button type="button" class="text-link" data-vault="inicio">Abrir vault</button></div><div class="memory-links"><button type="button" data-vault="timeline">Linha do tempo</button><button type="button" data-vault="mapa">Mapa do sistema</button><button type="button" data-open-page="grafo">Brain Atlas</button><button type="button" data-vault="memorias">Base de memórias</button></div><p class="subnote">O vault é derivado; confirme afirmações no canon.</p></article>
+     <article class="panel chat-card"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Conversa com a Seth</h2></div><span id="chat-state" class="chip horizon">SEM LEITURA</span></div><p id="chat-source">Aguardando leitura HTTP. A saúde do endpoint não garante cada função do chat.</p><button class="btn" type="button" data-open-page="conversa">Abrir conversa da Seth</button></article></div></div>
+     <div class="footer-note"><span>LEITURA LOCAL · SEM AÇÕES DE CONTROLE</span><span id="overview-updated" role="status" aria-live="polite"></span></div>
+ 
+@@ -107,7 +107,7 @@
+   <section class="page" id="page-memoria" data-title="Memória & mapas">
+ 
+     <div class="section-heading"><div><div class="eyebrow">Consciência situacional</div><h1>Memória</h1><p>A memória relaciona decisões, funções, limites e mudanças.</p></div></div>
+-    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Vault derivado</div><h2 class="panel-title">A memória como mapa</h2></div><span class="chip horizon" id="memory-state">SEM LEITURA</span></div><div class="memory-orbit"><div class="orbit orbit-150"><div class="orbit-center"><strong id="memory-total">—</strong>entradas</div></div><div class="layer-list"><div class="layer">Quente · decisões recentes</div><div class="layer">Morna · contexto consultável</div><div class="layer">Fria · história selada</div><div class="layer">Mapas · regras, scripts e propostas</div></div></div><div class="memory-links"><a href="obsidian://open?vault=agata&amp;file=INICIO">Começar no vault</a><a href="obsidian://open?vault=agata&amp;file=cerebro">Brain Atlas</a><a href="obsidian://open?vault=agata&amp;file=mapa-do-sistema">Canvas 2D</a><a href="obsidian://open?vault=agata&amp;file=memorias.base">Vistas da Base</a><a href="obsidian://open?vault=agata&amp;file=timeline">Linha do tempo</a></div><p class="subnote" id="memory-source">Aguardando leitura do vault.</p></article>
++    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Vault derivado</div><h2 class="panel-title">A memória como mapa</h2></div><span class="chip horizon" id="memory-state">SEM LEITURA</span></div><div class="memory-orbit"><div class="orbit orbit-150"><div class="orbit-center"><strong id="memory-total">—</strong>entradas</div></div><div class="layer-list"><div class="layer">Quente · decisões recentes</div><div class="layer">Morna · contexto consultável</div><div class="layer">Fria · história selada</div><div class="layer">Mapas · regras, scripts e propostas</div></div></div><div class="memory-links"><button type="button" data-vault="inicio">Começar no vault</button><button type="button" data-open-page="grafo">Brain Atlas</button><button type="button" data-vault="mapa">Canvas 2D</button><button type="button" data-vault="memorias">Vistas da Base</button><button type="button" data-vault="timeline">Linha do tempo</button></div><p class="subnote" id="memory-source">Aguardando leitura do vault.</p></article>
+     <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fontes</div><h2 class="panel-title">Navegar e confirmar</h2></div></div><p>O vault é derivado. As notas levam a relações e fontes; confirme o texto exato no canon antes de citá-lo.</p><button class="text-link" type="button" data-open-page="documentacao">Buscar na documentação ↗</button></article></div>
+ 
+   </section>
+@@ -122,9 +122,9 @@
+       <p id="wiki-status" class="wiki-demo-status" role="status" aria-live="polite">Nenhuma consulta foi feita.</p><div class="wiki-demo-results" id="wiki-results"></div><p class="subnote">Resultados podem estar incompletos; falha da fonte é diferente de busca sem resultados. Sem histórico de consultas.</p>
+     </article>
+     <div class="doc-grid">
+-      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Começar pelo presente</div><h2 class="panel-title">Estado e mudanças</h2></div><span class="chip planned">OBSIDIAN</span></div><p class="route-foot">A orientação começa pelo estado resumido, segue para o ponto de entrada do vault e chega à linha do tempo para explicar como o sistema mudou.</p><div class="doc-file-list"><a class="doc-file" href="obsidian://open?vault=agata&file=estado">Estado do sistema <span>estado.md ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=INICIO">Início do vault <span>INICIO.md ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=timeline">Linha do tempo <span>timeline.md ↗</span></a></div></article>
+-      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Percorrer por assunto</div><h2 class="panel-title">Memórias e documentos</h2></div><span class="chip active">NAVEGÁVEL</span></div><p class="route-foot">Os mapas de conteúdo agrupam decisões e fontes relacionadas. A busca e os vínculos entre notas continuam no Obsidian.</p><div class="doc-file-list"><a class="doc-file" href="obsidian://open?vault=agata&file=moc-projeto">Projeto e arquitetura <span>MOC ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=moc-memoria">Memórias <span>MOC ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=moc-documentos">Documentos-fonte <span>MOC ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=moc-scripts">Scripts e ferramentas <span>MOC ↗</span></a></div></article>
+-      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ver as relações</div><h2 class="panel-title">Mapas navegáveis</h2></div><span class="chip active">VAULT</span></div><p class="route-foot">O Canvas e o Brain Atlas ajudam a enxergar relações entre componentes; a Base oferece uma vista tabular das entradas.</p><div class="doc-file-list"><a class="doc-file" href="obsidian://open?vault=agata&file=mapa-do-sistema">Mapa do sistema <span>Canvas ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=cerebro">Brain Atlas <span>nota ↗</span></a><a class="doc-file" href="obsidian://open?vault=agata&file=memorias.base">Base de memórias <span>Base ↗</span></a></div></article>
++      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Começar pelo presente</div><h2 class="panel-title">Estado e mudanças</h2></div><span class="chip planned">OBSIDIAN</span></div><p class="route-foot">A orientação começa pelo estado resumido, segue para o ponto de entrada do vault e chega à linha do tempo para explicar como o sistema mudou.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="estado">Estado do sistema <span>estado.md</span></button><button type="button" class="doc-file" data-vault="inicio">Início do vault <span>INICIO.md</span></button><button type="button" class="doc-file" data-vault="timeline">Linha do tempo <span>timeline.md</span></button></div></article>
++      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Percorrer por assunto</div><h2 class="panel-title">Memórias e documentos</h2></div><span class="chip active">NAVEGÁVEL</span></div><p class="route-foot">Os mapas de conteúdo agrupam decisões e fontes relacionadas. A busca e os vínculos entre notas continuam no Obsidian.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="moc-projeto">Projeto e arquitetura <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-memoria">Memórias <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-documentos">Documentos-fonte <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-scripts">Scripts e ferramentas <span>MOC</span></button></div></article>
++      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ver as relações</div><h2 class="panel-title">Mapas navegáveis</h2></div><span class="chip active">VAULT</span></div><p class="route-foot">O Canvas e o Brain Atlas ajudam a enxergar relações entre componentes; a Base oferece uma vista tabular das entradas.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="mapa">Mapa do sistema <span>Canvas</span></button><button type="button" class="doc-file" data-open-page="grafo">Brain Atlas <span>nota</span></button><button type="button" class="doc-file" data-vault="memorias">Base de memórias <span>Base</span></button></div></article>
+     </div>
+     <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Como a documentação viva deverá atualizar</div><h2 class="panel-title">Da mudança confirmada à navegação</h2></div><span class="chip planned">BACKEND PENDENTE</span></div><div class="doc-flow"><div class="doc-step"><small>01 · FONTE</small><b>Canon e repositório</b><p>Arquivos, commits e estado da máquina fornecem a evidência. A conversa sozinha não altera a memória.</p></div><div class="doc-step"><small>02 · GERAÇÃO</small><b>Derivados do vault</b><p>Após uma mudança integrada, regenerar índices, mapas e links a partir das fontes autorizadas.</p></div><div class="doc-step"><small>03 · ÍNDICE</small><b>Obsidian navegável</b><p>Atualizar notas, MOCs e relações; manter caminho de volta até o arquivo de origem.</p></div><div class="doc-step"><small>04 · PAINEL</small><b>Estado e frescor</b><p>Mostrar último commit lido, horário, fontes desatualizadas e lacunas sem inventar estado.</p></div></div><p class="subnote">Critério de produção: toda afirmação dinâmica aponta para a fonte, o horário da leitura e o commit correspondente; quando a geração falhar, a interface mantém o último estado identificado como desatualizado.</p></article>
+     <div class="footer-note"><span>PROTÓTIPO DE LEITURA · SEM ESCRITA NO CANON</span><span>As notas do Obsidian são derivadas; os arquivos-fonte prevalecem.</span></div>
+@@ -149,7 +149,7 @@
+ 
+     <div class="section-heading"><div><div class="eyebrow">Decisão humana · dados locais</div><h1>Plano de trabalho</h1><p>Propostas locais e caminhos para consultar o estado. Um marcador presente não comprova assinatura válida.</p></div></div>
+     <article class="panel"><div class="panel-head"><div><div class="panel-kicker">propostas/ · leitura local</div><h2 class="panel-title">Propostas para examinar</h2></div><span class="chip horizon" id="proposal-state">SEM LEITURA</span></div><div class="action-list" id="proposal-list"><p>Sem leitura.</p></div><p class="subnote" id="proposal-source">Verifique assinatura e aplicabilidade em cada proposta. A verificação não aplica a mudança.</p></article>
+-    <article class="panel mt14"><h2 class="panel-title">Estado e próximos passos</h2><p>Consulte o registro atual para distinguir trabalho em curso, próxima decisão e horizonte.</p><div class="memory-links"><a href="obsidian://open?vault=agata&amp;file=estado">Estado do sistema</a><a href="obsidian://open?vault=agata&amp;file=INICIO">Início do vault</a></div></article>
++    <article class="panel mt14"><h2 class="panel-title">Estado e próximos passos</h2><p>Consulte o registro atual para distinguir trabalho em curso, próxima decisão e horizonte.</p><div class="memory-links"><button type="button" data-vault="estado">Estado do sistema</button><button type="button" data-vault="inicio">Início do vault</button></div></article>
+ 
+   </section>
+   <section class="page" id="page-operacao" data-title="Estado operacional">
+@@ -164,6 +164,7 @@
+   </section>
+ </main>
+ </div>
++<dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" style="white-space:pre-wrap;max-height:55vh;overflow:auto;margin:0;font:13px/1.5 ui-monospace,monospace"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+ <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
+ <script src="prototipo.js"></script>
+ </body>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 8c144dea..713ff02b 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -704,3 +704,36 @@ async function carregarVisaoSistema() {
+     const p = document.createElement("p"); p.textContent = "Visão indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
+   }
+ }
++
++/* (27/10/2026) Vault dentro do painel: cada botão de vault abre a própria tela, lida de /api/vault/item (lista fechada, só leitura). */
++async function abrirVault(id) {
++  const dlg = byId("vault-dialog");
++  if (!dlg) return;
++  byId("vault-title").textContent = "Carregando…";
++  byId("vault-fonte").textContent = "";
++  byId("vault-texto").textContent = "";
++  byId("vault-canvas").replaceChildren();
++  dlg.showModal();
++  try {
++    const d = await fetchJson("/api/vault/item?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
++    byId("vault-title").textContent = d.titulo || d.id;
++    if (d.state !== "ok") {
++      byId("vault-fonte").textContent = "Fonte: " + d.fonte;
++      byId("vault-texto").textContent = "Sem leitura: " + (d.motivo || "item indisponível") + ".";
++      return;
++    }
++    byId("vault-fonte").textContent = "Fonte: " + d.fonte + " · medido em " + niceTime(d.observed_at) + " · modificado em " + niceTime(d.modificado) + (d.truncado ? " · mostrados os primeiros 64 KB" : "");
++    if (d.canvas) {
++      const cab = document.createElement("li");
++      cab.textContent = d.canvas.nos.length + " nós e " + d.canvas.arestas + " ligações no mapa:";
++      byId("vault-canvas").append(cab);
++      d.canvas.nos.forEach((n) => { const li = document.createElement("li"); li.textContent = (n.tipo || "nó") + " · " + (n.texto || "(sem texto)"); byId("vault-canvas").append(li); });
++    }
++    byId("vault-texto").textContent = d.texto;
++  } catch (erro) {
++    byId("vault-texto").textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
++  }
++}
++document.addEventListener("click", (e) => { const b = e.target.closest("[data-vault]"); if (b) abrirVault(b.dataset.vault); });
++document.querySelectorAll(".close-vault").forEach((b) => b.addEventListener("click", () => byId("vault-dialog").close()));
++byId("vault-dialog").addEventListener("click", (e) => { if (e.target === byId("vault-dialog")) byId("vault-dialog").close(); });
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index c7a5465b..a30cbedc 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -14,6 +14,7 @@ import threading
+ import time
+ import urllib.error
+ import urllib.request
++from urllib.parse import parse_qs, urlparse
+ from concurrent.futures import ThreadPoolExecutor
+ from datetime import datetime, timedelta
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -457,6 +458,40 @@ def _porta_responde(porta: int) -> bool:
+         return False
+ 
+ 
++VAULT_ITENS = {"inicio": "INICIO.md", "timeline": "timeline.md", "estado": "estado.md",
++               "mapa": "mapa-do-sistema.canvas", "memorias": "memorias.base", "moc-projeto": "moc-projeto.md",
++               "moc-memoria": "moc-memoria.md", "moc-documentos": "moc-documentos.md", "moc-scripts": "moc-scripts.md"}
++VAULT_LIMITE = 65536
++
++
++def _vault_item(item_id: str) -> dict:
++    """Um item do vault, só leitura, de uma lista fechada. Texto cru; canvas também vira lista de nós."""
++    observed_at, fresh_until = _reading_window()
++    nome = VAULT_ITENS[item_id]
++    arq = ROOT / "memoria/obsidian" / nome
++    base = {"schema_version": 1, "id": item_id, "fonte": "memoria/obsidian/" + nome,
++            "observed_at": observed_at, "fresh_until": fresh_until}
++    if not arq.is_file():
++        return {**base, "state": "unknown", "titulo": nome, "motivo": "arquivo ausente no vault"}
++    st = arq.stat()
++    with arq.open("rb") as f:
++        bruto = f.read(VAULT_LIMITE)
++    texto = bruto.decode("utf-8", errors="replace")
++    titulo = next((l[2:].strip() for l in texto.splitlines() if l.startswith("# ")), nome)
++    out = {**base, "state": "ok", "titulo": titulo, "texto": texto, "tamanho": st.st_size,
++           "truncado": st.st_size > VAULT_LIMITE,
++           "modificado": datetime.fromtimestamp(st.st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds")}
++    if nome.endswith(".canvas") and not out["truncado"]:
++        try:
++            dados = json.loads(texto)
++            out["canvas"] = {"nos": [{"tipo": n.get("type", ""), "texto": str(n.get("text") or n.get("file") or "")[:200]}
++                                     for n in dados.get("nodes", [])[:200]],
++                             "arestas": len(dados.get("edges", []))}
++        except ValueError:
++            out["canvas"] = None
++    return out
++
++
+ def _lacunas_snapshot() -> dict:
+     """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
+     - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
+@@ -764,6 +799,12 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+         if self.path.startswith("/api/grafo"):
+             return self._grafo()
++        if self.path.startswith("/api/vault/item"):
++            item_id = (parse_qs(urlparse(self.path).query).get("id") or [""])[0]
++            if item_id not in VAULT_ITENS:
++                return self._send(400, "text/plain; charset=utf-8", b"item fora da lista")
++            body = json.dumps(_vault_item(item_id), ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/lacunas":
+             body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index b4811789..598dd9e8 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -241,5 +241,24 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(self.request("POST", "/api/proposals/verify", '{"name":"exemplo"}', {"Content-Type":"application/json"})[0], 403)
+ 
+ 
++    def test_vault_so_abre_itens_da_lista_fechada_e_nao_tem_link_externo(self):
++        for nome in panel.VAULT_ITENS.values():
++            self.assertNotIn("..", nome)
++            self.assertNotIn("/", nome)
++        html = (Path(__file__).parent / "prototipo.html").read_text(encoding="utf-8")
++        self.assertNotIn("obsidian://", html)
++        self.assertNotIn('target="_blank"', html)
++
++    def test_vault_item_mede_ausente_como_lacuna(self):
++        raiz = panel.ROOT
++        with tempfile.TemporaryDirectory() as tmp:
++            panel.ROOT = Path(tmp)
++            try:
++                data = panel._vault_item("inicio")
++            finally:
++                panel.ROOT = raiz
++        self.assertEqual(data["state"], "unknown")
++        self.assertIn("ausente", data["motivo"])
++
+ if __name__ == "__main__":
+     unittest.main()
