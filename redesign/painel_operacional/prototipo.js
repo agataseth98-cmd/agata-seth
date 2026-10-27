@@ -443,13 +443,15 @@ async function loadCapacidades() {
     const probe = cartao.dataset.probe;
     if (!chip) return;
     if (probe === "documento") {
+      cartao.dataset.state = "documento";
       chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura";
       const botao = cartao.querySelector("button.evidence");
       if (botao) { botao.dataset.body = "Esta capacidade é documento: não há sonda de leitura. O texto descreve o desenho e não é medição do sistema."; botao.dataset.source = "documento do canon"; }
       return;
     }
     const item = porId.get(probe);
-    if (!item) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
+    if (!item) { cartao.dataset.state = "planned"; chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
+    cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned"}[item.state] || "planned";
     const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
     chip.className = rotulo[0]; chip.textContent = rotulo[1];
     ligarCartoesClicaveis();
@@ -627,7 +629,7 @@ function calcularLacunas() {
   if (lista) {
     lista.replaceChildren();
     itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo + " (" + i.onde + ")"; lista.append(li); });
-    byId("lacunas-total").textContent = itens.length + " lacuna(s) agora";
+    byId("lacunas-total").textContent = itens.length + " lacuna(s) na tela agora";
   }
   return itens.length;
 }
@@ -647,7 +649,7 @@ async function carregarLacunasCanon() {
     const dados = await fetchJson("/api/lacunas", {headers: {Accept: "application/json"}});
     const itens = dados.items || [];
     const cab = document.createElement("p");
-    cab.textContent = (dados.total_declaradas || 0) + " itens declarados no canon; " + itens.length + " lacuna(s) agora. Fonte: PROJETO.md · Serviços (boot), medido em " + (dados.observed_at || "—") + ".";
+    cab.textContent = (dados.total_declaradas || 0) + " itens declarados no canon; " + itens.length + " lacuna(s) no canon agora. Fonte: PROJETO.md · Serviços (boot), medido em " + niceTime(dados.observed_at) + ".";
     lista.append(cab);
     itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo; lista.append(li); });
   } catch (erro) {
