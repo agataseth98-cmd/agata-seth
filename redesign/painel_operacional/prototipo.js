@@ -62,9 +62,10 @@ function showPage(name) {
   if (name === "capacidades") loadCapacidades();
   if (name === "grafo") carregarGrafo();
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
+  if (name === "visao") carregarVisaoSistema();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
-document.querySelectorAll("[data-open-page]").forEach((button) => button.addEventListener("click", () => showPage(button.dataset.openPage)));
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-open-page]"); if (b) showPage(b.dataset.openPage); });
 search.addEventListener("input", () => filterSearch(search.value.trim()));
 document.querySelectorAll(".filterbar button").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".filterbar button").forEach((item) => item.classList.remove("selected"));
@@ -651,5 +652,51 @@ async function carregarLacunasCanon() {
     itens.forEach((i) => { const li = document.createElement("li"); li.textContent = "LACUNA · " + i.nome + " — " + i.motivo; lista.append(li); });
   } catch (erro) {
     const p = document.createElement("p"); p.textContent = "Leitura do canon indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
+  }
+}
+
+/* (27/10/2026) Visão do sistema: junta as leituras já existentes (status, capacidades, lacunas). Nada novo é medido aqui. */
+async function carregarVisaoSistema() {
+  const kpis = byId("visao-kpis"); const lista = byId("visao-melhorias");
+  if (!kpis || !lista) return;
+  kpis.replaceChildren(); lista.replaceChildren();
+  const cartao = (rotulo, valor, aba) => {
+    const d = document.createElement("div"); d.className = "kpi"; d.tabIndex = 0; d.setAttribute("role", "button");
+    const l = document.createElement("div"); l.className = "label"; l.textContent = rotulo;
+    const v = document.createElement("div"); v.className = "value"; v.textContent = valor;
+    d.append(l, v); if (aba) { d.dataset.openPage = aba; }
+    kpis.append(d);
+  };
+  const melhoria = (texto, aba) => {
+    const li = document.createElement("li"); li.textContent = texto;
+    if (aba) { const b = document.createElement("button"); b.className = "text-link"; b.type = "button"; b.dataset.openPage = aba; b.textContent = " ver aba ↗"; li.append(b); }
+    lista.append(li);
+  };
+  try {
+    const [status, caps, lac] = await Promise.all([
+      fetchJson("/api/status", {headers: {Accept: "application/json"}}),
+      fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}),
+      fetchJson("/api/lacunas", {headers: {Accept: "application/json"}}),
+    ]);
+    const servicos = status.services || [];
+    const ativos = servicos.filter((x) => x.state === "ok").length;
+    cartao("Serviços ativos", ativos + " de " + servicos.length, "operacao");
+    cartao("Timers", String((status.timers || []).filter((x) => x.state === "ok").length) + " ok", "operacao");
+    cartao("Git", status.git ? status.git.head : "—", "operacao");
+    cartao("Conversa (LibreChat)", status.chat && status.chat.http_status === 200 ? "responde" : "sem resposta", "operacao");
+    const modelos = (status.models && status.models.models) || [];
+    cartao("Modelos registrados", String(modelos.length), "modelos");
+    const cap = caps.items || [];
+    cartao("Capacidades com leitura", cap.filter((x) => x.state === "ok").length + " de " + cap.length, "capacidades");
+    cartao("Lacunas agora", String((lac.items || []).length), "lacunas");
+    const props = (status.proposals && status.proposals.items) || [];
+    const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present);
+    cartao("Propostas sem assinatura", String(pendentes.length), "plano");
+    (lac.items || []).forEach((i) => melhoria("Lacuna · " + i.nome + " — " + i.motivo, "lacunas"));
+    pendentes.forEach((p) => melhoria("Proposta sem assinatura · " + p.name, "plano"));
+    cap.filter((x) => x.state !== "ok").forEach((x) => melhoria("Capacidade sem leitura ok · " + x.id, "capacidades"));
+    if (!lista.children.length) melhoria("Nada pendente nas leituras de agora.", null);
+  } catch (erro) {
+    const p = document.createElement("p"); p.textContent = "Visão indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
   }
 }
