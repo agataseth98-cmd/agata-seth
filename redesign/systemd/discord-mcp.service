@@ -4,7 +4,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=%h/agata/redesign/mcp/.venv/bin/python %h/agata/redesign/mcp/discord/servidor.py --http 20135
+ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/discord/servidor.py --http 20135
 Restart=on-failure
 RestartSec=3
 # Baseline de hardening (item 6 do plano de mitigação da auditoria do

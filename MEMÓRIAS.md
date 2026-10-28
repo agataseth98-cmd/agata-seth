@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b
-  Escrito em: 28/10/2026 14:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8de1866b0ee6ed258f3dc84b3c6520d2294a481b
+  Escrito em: 28/10/2026 14:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ebc770ea6afa76d3b5cfd7b7c558fb5e4a642a7b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8de1866b0ee6ed258f3dc84b3c6520d2294a481b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8de1866b0ee6ed258f3dc84b3c6520d2294a481b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8de1866b0ee6ed258f3dc84b3c6520d2294a481b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8de1866b0ee6ed258f3dc84b3c6520d2294a481b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8de1866b0ee6ed258f3dc84b3c6520d2294a481b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(910) DIÁRIO — 28/10/2026 · **Discord usa a venv do navegador.** Aplica `discord-venv-unica-20261028`, assinado pelo Humano. A unit `discord-mcp` passa a rodar com `redesign/mcp/navegador/.venv`, que tem as mesmas versões de fastmcp e cryptography; a venv própria do Discord deixa de ser usada. Só a linha ExecStart muda.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR; base do diff igual ao arquivo (auditoria de 28/10, grupo F); import do servidor do Discord na venv do navegador sem erro · Autorização: Humano, assinatura de discord-venv-unica-20261028 ("feito").
+
 (909) DIÁRIO — 28/10/2026 · **aplicar.py refaz a base quando o main anda antes do merge.** Aplica `aplicar-refazer-base-20261028`, assinado pelo Humano. Se o PR de aplicação fica atrás do main ou em conflito com ele, o script refaz a branch sobre o main novo: assinatura conferida de novo, apply de novo, número da entrada recalculado, push com `--force-with-lease` e CI de novo. Antes, juntava o main na branch e travava em conflito no MEMÓRIAS.md.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR; testar_auxiliares 20/20 · Autorização: Humano, assinatura de aplicar-refazer-base-20261028 ("feito").
 
