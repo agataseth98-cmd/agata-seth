@@ -60,12 +60,13 @@ def montar(wt, a, coautor):
 def main():
   ap = argparse.ArgumentParser(); ap.add_argument("nomes", nargs="+"); ap.add_argument("--registro", default=None, help="entrada de MEMÓRIAS; NÃO usar se o .diff já mexe em MEMÓRIAS.md")
   ap.add_argument("--onde")
-  ap.add_argument("--coautor", default=None, help="linha Co-Authored-By; padrão: Claude Haiku 5.5 para claude, nenhuma para codex")
-  ap.add_argument("--agente", default=os.environ.get("DUPLA_AGENTE", "claude"), choices=("claude", "codex"),
-                  help="quem aplica: dá o nome da worktree (.<agente>/worktrees) e da autoria")
+  ap.add_argument("--coautor", default=os.environ.get("EQUIPE_COAUTOR"), help="linha Co-Authored-By (nome do modelo REAL, medido; padrão: $EQUIPE_COAUTOR ou nenhuma)")
+  ap.add_argument("--agente", default=os.environ.get("EQUIPE_AGENTE") or os.environ.get("DUPLA_AGENTE") or "claude",
+                  help="membro da Equipe que aplica (claude, codex, gemini...): dá o nome da worktree (.<membro>/worktrees)")
   ap.add_argument("--sem-pull", action="store_true", help="não atualiza o checkout compartilhado (para trabalhar só em worktree própria)")
   a = ap.parse_args()
-  coautor = a.coautor if a.coautor is not None else ("Claude Haiku 5.5 <noreply@anthropic.com>" if a.agente == "claude" else "")
+  if not re.match(r"^[a-z][a-z0-9-]{0,30}$", a.agente): sys.exit(f"membro inválido: {a.agente!r}")
+  coautor = a.coautor or ""  # nunca um nome de modelo fixo no código: o modelo muda de sessão para sessão
   if not a.sem_pull:
       sh(R, "git", "pull", "-q", "--ff-only")
   for n in a.nomes:

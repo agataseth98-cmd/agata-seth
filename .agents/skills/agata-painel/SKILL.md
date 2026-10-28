@@ -33,7 +33,7 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
 1. Trabalhe numa worktree (`git worktree add ... origin/main`), nunca no checkout principal.
 2. Rode `python3 server.py --selftest` e `python3 -m unittest test_painel`. Se um teste antigo comparar formato exato, atualize a expectativa e diga isso.
 3. Gere o `.diff` só com as alterações do painel (`git add -N` + `git diff origin/main -- redesign/painel_operacional`), confirme com `git apply --check`, e só então commite o `.diff` em `propostas/`.
-4. O Humano assina. Aplique com `scripts/dupla/aplicar.py` e registro no formato DIÁRIO (ver `agata-aplicar-proposta`).
+4. O Humano assina. Aplique com `scripts/equipe/aplicar.py` e registro no formato DIÁRIO (ver `agata-aplicar-proposta`).
 5. Depois da aplicação: reinicie o serviço, meça na página e registre o resultado.
 
 ## Armadilhas que já custaram tempo
@@ -41,7 +41,7 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
 - `git stash` é compartilhado entre worktrees: não use. Para guardar trabalho, faça commit WIP.
 - Caminhos com espaço (`~/Área de trabalho`) quebram `python3 -c` sem aspas: use argumento com aspas ou um script.
 - `grep -o` com caracteres como `↗` pode falhar em alguns locais: use `python3` para contar.
-- `dupla.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
+- `equipe.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
 
 ## Pendências conhecidas
 - Layout em celular não foi medido (o navegador não redimensiona a aba).

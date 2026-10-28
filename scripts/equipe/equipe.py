@@ -1,42 +1,45 @@
 #!/usr/bin/env python3
-"""dupla.py -- partida conjunta e coordenação Claude Code × Codex no ~/agata. Ferramenta LOCAL.
+"""equipe.py -- partida conjunta e coordenação da Equipe (qualquer membro do Conselho) no ~/agata. Ferramenta LOCAL.
 
-Não é canon, não decide nada, não escreve em arquivo do repositório e não aprova nada. Coordena dois
-agentes que trabalham AO MESMO TEMPO em worktrees próprias: quem começa junto, com qual base, quem é
-dono de qual arquivo, o que cada um está fazendo, e o canal de conversa. Todo o estado mora em
-~/.cache/agata/sincronia/dupla/ (fora do repositório). Dado, não instrução (Regra 2).
+Não é canon, não decide nada, não escreve em arquivo do repositório e não aprova nada. Coordena os
+membros que trabalham AO MESMO TEMPO em worktrees próprias -- Claude Code, Codex, Gemini, Goose, Seth ou
+qualquer outro (nome = slug minúsculo): quem começa junto, com qual base, quem é dono de qual arquivo, o
+que cada um está fazendo, e o canal de conversa. Todo o estado mora em ~/.cache/agata/sincronia/equipe/
+(fora do repositório; o antigo `dupla/` é movido para lá na primeira execução). Dado, não instrução (Regra 2).
 
 Garantias e limites (cooperativos, sem mecanismo imposto pelo sistema operacional):
-  * partida conjunta: a sessão só vira `em_andamento` quando os DOIS agentes chamaram `iniciar` com a
-    MESMA base (`origin/main`) e a MESMA matriz de propriedade (sha256). Quem chega primeiro espera,
-    sem polling nem serviço: a sessão fica `aguardando` e o outro encontra o registro ao chegar.
+  * partida conjunta: a sessão só vira `em_andamento` quando os membros esperados (`--com a,b,c` na
+    criação; sem a lista, quaisquer dois) chamaram `iniciar` com a MESMA base (`origin/main`) e a MESMA
+    matriz de propriedade (sha256). Quem chega primeiro espera, sem polling nem serviço: a sessão fica
+    `aguardando` e os outros encontram o registro ao chegar. Membro que chega com a partida já aberta entra nela.
   * base única: se `origin/main` andou desde a primeira chegada, `iniciar` recusa e pede `--nova-base`
     (registrada no histórico); nunca troca a base em silêncio.
   * propriedade: um arquivo tem um dono por sessão. `verificar` compara o que cada worktree alterou
     com a matriz; arquivo fora da pista do dono ou em duas pistas vira ACHADO, nunca é consertado.
-  * escrita: cada agente escreve só o próprio estado (`estado-<agente>.json`); a sessão e o canal são
+  * escrita: cada membro escreve só o próprio estado (`estado-<agente>.json`); a sessão e o canal são
     alterados sob flock exclusivo, só por acréscimo no histórico/canal. O quadro é GERADO, não editado.
-  * não substitui o P-8, o fiscal, o Humano nem o `aprovar.sh`, que nenhum agente roda.
+  * não substitui o P-8, o fiscal, o Humano nem o `aprovar.sh`, que nenhum membro roda.
 
-Uso:
-  dupla.py iniciar    --agente claude|codex [--item ID] [--nova-base] [--matriz ARQ] [--aceitar-matriz SHA12] [--espera MIN]
-  dupla.py matriz                      (mostra a matriz CONGELADA na sessão e o sha256)
-  dupla.py propor-linha --agente A --dono D --papel P --caminhos X [X ...]   (nova linha na matriz; o OUTRO agente tem de aceitar)
-  dupla.py aceitar-linha --agente B                                         (aceita a proposta pendente do outro)
-  dupla.py status
-  dupla.py reivindicar --agente A --item ID --caminhos P [P ...]
-  dupla.py estado     --agente A --item ID --estado em_andamento|em_revisao|bloqueado|pronto [--bloqueio T]
-  dupla.py verificar  [--repo DIR]
-  dupla.py quadro
-  dupla.py dizer      --agente A --assunto T --texto T [--resposta-a ID] [--estado T] [--proximo A]
-  dupla.py ler        --agente A
-  dupla.py encerrar   --agente A
-  dupla.py --selftest
+Uso (A, B = nome do membro: claude, codex, gemini, goose, seth...):
+  equipe.py iniciar    --agente A [--com A,B,...] [--item ID] [--nova-base] [--matriz ARQ] [--aceitar-matriz SHA12] [--espera MIN]
+  equipe.py matriz                      (mostra a matriz CONGELADA na sessão e o sha256)
+  equipe.py propor-linha --agente A --dono D --papel P --caminhos X [X ...]   (nova linha; TODOS os outros presentes aceitam)
+  equipe.py aceitar-linha --agente B                                         (aceita a proposta pendente de outro membro)
+  equipe.py status
+  equipe.py reivindicar --agente A --item ID --caminhos P [P ...]
+  equipe.py estado     --agente A --item ID --estado em_andamento|em_revisao|bloqueado|pronto [--bloqueio T]
+  equipe.py verificar  [--repo DIR]
+  equipe.py quadro
+  equipe.py dizer      --agente A --assunto T --texto T [--resposta-a ID] [--estado T] [--proximo A]
+  equipe.py ler        --agente A
+  equipe.py ausente | presente | encerrar --agente A
+  equipe.py --selftest
 """
 import argparse
 import datetime
 import fcntl
 import fnmatch
+import glob
 import hashlib
 import json
 import os
@@ -47,11 +50,28 @@ import tempfile
 import zoneinfo
 
 TZ = zoneinfo.ZoneInfo("America/Sao_Paulo")
-AGENTES = ("claude", "codex")
-RAIZ_SINC = os.environ.get("DUPLA_DIR", os.path.expanduser("~/.cache/agata/sincronia"))
-D = os.path.join(RAIZ_SINC, "dupla")
+# Membro = slug minúsculo; qualquer modelo do Conselho entra sem mudar código. NOMES só dá o nome por extenso no canal.
+MEMBRO = re.compile(r"^[a-z][a-z0-9-]{0,30}$")
+NOMES = {"claude": "Claude Code", "codex": "Codex", "gemini": "Gemini CLI", "goose": "Goose", "seth": "Seth", "cursor": "Cursor"}
+_env = lambda k, padrao: os.environ.get(f"EQUIPE_{k}") or os.environ.get(f"DUPLA_{k}") or padrao  # DUPLA_* = nome antigo
+RAIZ_SINC = _env("DIR", os.path.expanduser("~/.cache/agata/sincronia"))
+D = os.path.join(RAIZ_SINC, "equipe")
 CANAL = os.path.join(RAIZ_SINC, "conversa.md")
-REPO = os.environ.get("DUPLA_REPO", os.path.expanduser("~/agata"))
+REPO = _env("REPO", os.path.expanduser("~/agata"))
+
+
+def membro(v):
+    """argparse type: recusa nome que não seja slug (vira nome de arquivo e de branch)."""
+    if not MEMBRO.match(v or ""):
+        raise argparse.ArgumentTypeError(f"membro inválido: {v!r} (use minúsculas, dígitos e hífen; ex.: claude, codex, gemini)")
+    return v
+
+
+def _migrar_dupla():
+    """Uma vez só: o estado antigo em sincronia/dupla/ passa a sincronia/equipe/ (rename atômico, nada se copia nem se perde)."""
+    antigo = os.path.join(os.path.dirname(D), "dupla")
+    if not os.path.exists(D) and os.path.isdir(antigo):
+        os.rename(antigo, D)
 
 # Matriz de propriedade PROPOSTA (parecer do Claude sobre o v4, anexo A). Só vale quando os dois a aceitam
 # (mesmo sha256 em `iniciar`). Padrão com `/` no fim = prefixo de diretório; senão, glob de fnmatch.
@@ -100,6 +120,7 @@ def _git(repo, *a):
 class Trava:
     """flock exclusivo no arquivo de trava da sessão. Cooperativo."""
     def __enter__(self):
+        _migrar_dupla()
         os.makedirs(D, exist_ok=True)
         self.f = open(_p("sessao.lock"), "a")
         fcntl.flock(self.f, fcntl.LOCK_EX)
@@ -124,7 +145,7 @@ def _gravar_json(nome, obj):
         json.dump(obj, f, ensure_ascii=False, indent=1, sort_keys=True)
         f.flush()
         os.fsync(f.fileno())
-    os.replace(tmp, _p(nome))   # só nos arquivos de estado da dupla; o canal NUNCA é substituído
+    os.replace(tmp, _p(nome))   # só nos arquivos de estado da equipe; o canal NUNCA é substituído
 
 
 def _historico(evento, **kw):
@@ -133,6 +154,24 @@ def _historico(evento, **kw):
         f.write(json.dumps({"quando": agora(), "evento": evento, **kw}, ensure_ascii=False) + "\n")
         f.flush()
         os.fsync(f.fileno())
+
+
+def _membros_com_estado():
+    """Membros que já deixaram estado nesta sessão (estado-<membro>.json)."""
+    return sorted(os.path.basename(f)[7:-5] for f in glob.glob(_p("estado-*.json")))
+
+
+def _outros(s, eu):
+    """Os demais membros presentes na sessão, em ordem."""
+    return sorted(m for m in (s or {}).get("presentes", {}) if m != eu)
+
+
+def _faltam(s):
+    """Quem ainda falta para abrir a partida: os esperados ausentes; sem lista, falta alguém até haver dois."""
+    esperados = s.get("esperados") or []
+    if esperados:
+        return [m for m in esperados if m not in s["presentes"]]
+    return [] if len(s["presentes"]) >= 2 else ["outro membro"]
 
 
 def sha_matriz(matriz):
@@ -186,8 +225,8 @@ def cmd_iniciar(a):
         s = _ler_json("sessao.json", None)
         if s is None or s.get("estado") == "encerrada":
             s = {"estado": "aguardando", "base": base, "matriz_sha256": hm, "matriz": matriz, "criada_em": agora(),
-                 "presentes": {}, "versao": 2}
-            _historico("sessao_criada", agente=a.agente, base=base, matriz=hm[:12])
+                 "presentes": {}, "versao": 3, "esperados": sorted(set(getattr(a, "com", None) or []) | ({a.agente} if getattr(a, "com", None) else set()))}
+            _historico("sessao_criada", agente=a.agente, base=base, matriz=hm[:12], esperados=s["esperados"])
         if s["base"] != base and not a.nova_base:
             print(f"RECUSADO: origin/main andou desde a primeira chegada (sessão {s['base'][:7]}, agora {base[:7]}). "
                   "Se ambos concordam, rode de novo com --nova-base (fica no histórico).", file=sys.stderr)
@@ -218,12 +257,12 @@ def cmd_iniciar(a):
                 print("  só na sessão:", *so_sessao, sep="\n    ", file=sys.stderr)
             if so_agente:
                 print(f"  só em {a.agente}:", *so_agente, sep="\n    ", file=sys.stderr)
-            print(f"  Para adotar a matriz da sessão, leia `dupla.py matriz` e rode `iniciar ... --aceitar-matriz {s['matriz_sha256'][:12]}`. "
+            print(f"  Para adotar a matriz da sessão, leia `equipe.py matriz` e rode `iniciar ... --aceitar-matriz {s['matriz_sha256'][:12]}`. "
                   "Para mudar a matriz da sessão, é decisão do Humano.", file=sys.stderr)
             return 1
         s["presentes"][a.agente] = {"chegou_em": agora(), "item": a.item, "base": base}
         _historico("chegada", agente=a.agente, item=a.item)
-        faltam = [x for x in AGENTES if x not in s["presentes"]]
+        faltam = _faltam(s)
         if not faltam and s["estado"] in ("aguardando", "solo"):
             s["estado"] = "em_andamento"
             s["iniciada_em"] = agora()
@@ -231,11 +270,11 @@ def cmd_iniciar(a):
         _gravar_json("sessao.json", s)
         _gravar_json(f"estado-{a.agente}.json", _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}}))
     if s["estado"] == "em_andamento":
-        print(f"PARTIDA CONJUNTA: base {base[:7]}, matriz {hm[:12]}, ambos presentes. Podem trabalhar em paralelo.")
+        print(f"PARTIDA CONJUNTA: base {base[:7]}, matriz {hm[:12]}, presentes: {', '.join(sorted(s['presentes']))}. Podem trabalhar em paralelo.")
         return 0
     print(f"AGUARDANDO {', '.join(faltam)}: base {base[:7]} registrada, matriz {hm[:12]}. "
           f"Quem chegar depois encontra este registro; nada fica em segundo plano. "
-          f"(Se o outro não vier em {a.espera} min, rode `status` e decida com o Humano; não há relógio automático.)")
+          f"(Se ninguém vier em {a.espera} min, rode `status` e decida com o Humano; não há relógio automático.)")
     return 0
 
 
@@ -247,13 +286,14 @@ def cmd_status(_a):
     rc, base, _ = _git(REPO, "rev-parse", "origin/main")
     print(f"estado: {s['estado']} | base da sessão: {s['base'][:7]} | origin/main agora: {base[:7] if not rc else '?'}"
           + ("  <-- DERIVA" if not rc and base != s["base"] else ""))
-    for ag in AGENTES:
+    for ag in sorted(set(s["presentes"]) | set(s.get("esperados") or [])):
         pr = s["presentes"].get(ag)
         print(f"  {ag}: {'presente desde ' + pr['chegou_em'] if pr else 'ausente'}")
     for ag, info in _ausentes().items():
-        outro = [x for x in AGENTES if x != ag][0]
+        outros = [x for x in _outros(s, ag) if x not in _ausentes()]
         print(f"  AUSENTE: {ag} desde {info['desde']}" + (f" até {info['ate']}" if info.get('ate') else "")
-              + (f" ({info['motivo']})" if info.get('motivo') else "") + f" -> {outro} cobre a pista dele (fallback mútuo)")
+              + (f" ({info['motivo']})" if info.get('motivo') else "")
+              + f" -> cobrem a pista dele (fallback): {', '.join(outros) or 'ninguém presente'}")
     if s.get("divergencia"):
         print("  divergência:", s["divergencia"])
     return 0
@@ -261,16 +301,20 @@ def cmd_status(_a):
 
 def _ausentes():
     """{agente: {desde, motivo, ate}} dos agentes declarados ausentes (cota esgotada, sessão fechada, etc.)."""
-    return {ag: _ler_json(f"ausencia-{ag}.json", None) for ag in AGENTES if _ler_json(f"ausencia-{ag}.json", None)}
+    r = {}
+    for f in sorted(glob.glob(_p("ausencia-*.json"))):
+        info = _ler_json(os.path.basename(f), None)
+        if info:
+            r[os.path.basename(f)[9:-5]] = info
+    return r
 
 
 def cmd_ausente(a):
-    """FALLBACK MÚTUO: declara que `agente` não está disponível. A pista dele pode ser assumida pelo outro SEM alerta de
+    """FALLBACK: declara que `agente` não está disponível. A pista dele pode ser assumida pelos outros SEM alerta de
     FORA DA PISTA; o trabalho feito assim fica listado como ASSUMIDA e vale revisão do titular ao voltar (autor != revisor)."""
     _gravar_json(f"ausencia-{a.agente}.json", {"desde": agora(), "motivo": a.motivo or "", "ate": a.ate or ""})
     _historico("ausente", agente=a.agente, motivo=a.motivo or "", ate=a.ate or "")
-    outro = [x for x in AGENTES if x != a.agente][0]
-    print(f"OK: {a.agente} ausente" + (f" até {a.ate}" if a.ate else "") + f". {outro} pode assumir a pista de {a.agente}; "
+    print(f"OK: {a.agente} ausente" + (f" até {a.ate}" if a.ate else "") + f". Os outros membros podem assumir a pista de {a.agente}; "
           f"volte com `presente --agente {a.agente}`.")
     return 0
 
@@ -280,8 +324,7 @@ def cmd_presente(a):
     if os.path.exists(p):
         os.unlink(p)
     _historico("presente", agente=a.agente)
-    outro = [x for x in AGENTES if x != a.agente][0]
-    print(f"OK: {a.agente} presente de novo. O que {outro} fez na pista dele (ASSUMIDA) espera a revisão de {a.agente}.")
+    print(f"OK: {a.agente} presente de novo. O que outro membro fez na pista dele (ASSUMIDA) espera a revisão de {a.agente}.")
     return 0
 
 
@@ -290,12 +333,12 @@ def cmd_matriz(_a):
     m = (s or {}).get("matriz") or MATRIZ_PADRAO
     print(f"matriz {sha_matriz(m)[:12]} ({'congelada na sessão' if s and s.get('matriz') else 'padrão da ferramenta; sessão antiga sem congelamento'})")
     for l in m:
-        print(f"  {l['dono']:6s} {l['papel']}: {', '.join(l['caminhos'])}")
+        print(f"  {l['dono']:8s} {l['papel']}: {', '.join(l['caminhos'])}")
     return 0
 
 
 def cmd_propor_linha(a):
-    """Acrescenta UMA linha nova à matriz da sessão, por consentimento mútuo (o outro agente aceita). Nunca
+    """Acrescenta UMA linha nova à matriz da sessão, por consentimento de TODOS os outros membros presentes. Nunca
     altera nem remove linha existente; a linha nova não pode sobrepor pista já existente."""
     with Trava():
         s = _ler_json("sessao.json", None)
@@ -313,9 +356,13 @@ def cmd_propor_linha(a):
         if conflitos:
             print("RECUSADO: a linha sobrepõe pista existente:", *[f"  {c}" for c in conflitos], sep="\n", file=sys.stderr)
             return 1
-        _gravar_json("proposta-matriz.json", {"proposta_por": a.agente, "linha": linha, "em": agora()})
+        precisam = _outros(s, a.agente)
+        if not precisam:
+            print("RECUSADO: nenhum outro membro presente para aceitar (quem propõe não aceita a própria proposta).", file=sys.stderr)
+            return 1
+        _gravar_json("proposta-matriz.json", {"proposta_por": a.agente, "linha": linha, "em": agora(), "aceites": []})
         _historico("proposta_de_linha", agente=a.agente, linha=linha)
-    print(f"OK: proposta registrada; {[x for x in AGENTES if x != a.agente][0]} precisa rodar `aceitar-linha`.")
+    print(f"OK: proposta registrada; precisam rodar `aceitar-linha`: {', '.join(precisam)}.")
     return 0
 
 
@@ -329,6 +376,17 @@ def cmd_aceitar_linha(a):
         if prop["proposta_por"] == a.agente:
             print("RECUSADO: quem propõe não aceita a própria proposta (Regra 3).", file=sys.stderr)
             return 1
+        if a.agente not in s.get("presentes", {}):
+            print(f"RECUSADO: {a.agente} não está presente na sessão (rode `iniciar` antes).", file=sys.stderr)
+            return 1
+        aceites = sorted(set(prop.get("aceites", [])) | {a.agente})
+        faltam = [m for m in _outros(s, prop["proposta_por"]) if m not in aceites]
+        if faltam:
+            prop["aceites"] = aceites
+            _gravar_json("proposta-matriz.json", prop)
+            _historico("linha_aceite_parcial", agente=a.agente, faltam=faltam)
+            print(f"OK: aceite de {a.agente} registrado; faltam: {', '.join(faltam)}.")
+            return 0
         nova = (s.get("matriz") or MATRIZ_PADRAO) + [prop["linha"]]
         if disjunta(nova):
             print("RECUSADO: a linha passou a sobrepor outra pista.", file=sys.stderr)
@@ -338,7 +396,7 @@ def cmd_aceitar_linha(a):
         _gravar_json("sessao.json", s)
         os.replace(_p("proposta-matriz.json"), _p(f"proposta-matriz.aceita-{datetime.datetime.now(TZ):%H%M%S}.json"))
         _historico("linha_aceita", agente=a.agente, linha=prop["linha"], matriz=s["matriz_sha256"][:12])
-    print(f"OK: matriz agora {s['matriz_sha256'][:12]} (linha de {prop['proposta_por']}, aceita por {a.agente}).")
+    print(f"OK: matriz agora {s['matriz_sha256'][:12]} (linha de {prop['proposta_por']}, aceita por {', '.join(aceites)}).")
     return 0
 
 
@@ -350,9 +408,8 @@ def cmd_reivindicar(a):
             print("RECUSADO: sem partida conjunta em andamento.", file=sys.stderr)
             return 1
         est = _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}})
-        outro = [x for x in AGENTES if x != a.agente][0]
-        est_o = _ler_json(f"estado-{outro}.json", {"agente": outro, "itens": {}})
-        usados = {c: (outro, i) for i, v in est_o["itens"].items() for c in v.get("caminhos", [])}
+        usados = {c: (outro, i) for outro in _membros_com_estado() if outro != a.agente
+                  for i, v in _ler_json(f"estado-{outro}.json", {"itens": {}})["itens"].items() for c in v.get("caminhos", [])}
         ruins = []
         for c in a.caminhos:
             for (d, _papel) in dono_de(c, matriz) or [(None, None)]:
@@ -395,8 +452,6 @@ _IGNORAR = ("reports/", "research_notes/", ".hidrata.md", "INDICE_MEMORIAS.md", 
 
 def _so_ancora(wt, base_wt, caminho):
     """True se o arquivo (versão da worktree) só difere da base dentro do bloco ANCORA-SHA gerado pelo pre-commit."""
-    rc, antigo, _ = subprocess.run(["git", "-C", wt, "show", f"{base_wt}:{caminho}"], stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE).returncode, None, None
     a = subprocess.run(["git", "-C", wt, "show", f"{base_wt}:{caminho}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if a.returncode:
         return False
@@ -409,23 +464,24 @@ def _so_ancora(wt, base_wt, caminho):
 
 
 def cmd_verificar(a):
-    """Compara o que cada worktree (ramos claude/* e codex/*) alterou frente ao ponto em que saiu da base da
-    sessão com a matriz de propriedade. Só RELATA: nada é corrigido."""
+    """Compara o que cada worktree de membro (ramo `<membro>/*`, para todo membro presente, com estado ou dono na
+    matriz) alterou frente ao ponto em que saiu da base da sessão com a matriz de propriedade. Só RELATA: nada é corrigido."""
     repo = a.repo or REPO
     s = _ler_json("sessao.json", None)
     if not s:
         print("sem sessão.")
         return 1
     rc, saida, _ = _git(repo, "worktree", "list", "--porcelain")
+    membros = set(s.get("presentes", {})) | set(_membros_com_estado()) | {l["dono"] for l in (s.get("matriz") or MATRIZ_PADRAO)}
     pistas = []
     for bloco in saida.split("\n\n"):
         d = dict(l.split(" ", 1) for l in bloco.splitlines() if " " in l)
-        if "worktree" in d and d.get("branch", "").startswith(("refs/heads/claude/", "refs/heads/codex/")):
-            pistas.append((d["worktree"], d["branch"]))
+        partes = d.get("branch", "").split("/")
+        if "worktree" in d and len(partes) > 3 and partes[:2] == ["refs", "heads"] and partes[2] in membros:
+            pistas.append((d["worktree"], d["branch"], partes[2]))
     achados, vistos, assumidas = [], {}, []
     ausentes = set(_ausentes())
-    for caminho, ramo in pistas:
-        quem = "claude" if ramo.startswith("refs/heads/claude/") else "codex"
+    for caminho, ramo, quem in pistas:
         rc, mb, _ = _git(caminho, "merge-base", "HEAD", s["base"])
         if rc:
             mb = s["base"]
@@ -447,8 +503,8 @@ def cmd_verificar(a):
             vistos.setdefault(f, set()).add(quem)
     for f, qs in vistos.items():
         if len(qs) > 1:
-            achados.append(f"DUPLO: {f} alterado pelos dois ({', '.join(sorted(qs))})")
-    print(f"worktrees examinadas: {len(pistas)} ({', '.join(os.path.basename(c) for c, _ in pistas) or 'nenhuma'})")
+            achados.append(f"DUPLO: {f} alterado por mais de um membro ({', '.join(sorted(qs))})")
+    print(f"worktrees examinadas: {len(pistas)} ({', '.join(os.path.basename(c) for c, _, _ in pistas) or 'nenhuma'})")
     if assumidas:
         print("FALLBACK (não é achado):", *sorted(assumidas), sep="\n  ")
     if achados:
@@ -462,7 +518,7 @@ def cmd_quadro(_a):
     s = _ler_json("sessao.json", {})
     print(f"# Quadro (gerado em {agora()}; sessão {s.get('estado', '-')}, base {s.get('base', '-')[:7]})\n")
     print("| item | dono | estado | caminhos | bloqueio |\n|---|---|---|---|---|")
-    for ag in AGENTES:
+    for ag in _membros_com_estado():
         for i, v in sorted(_ler_json(f"estado-{ag}.json", {"itens": {}})["itens"].items()):
             print(f"| {i} | {ag} | {v.get('estado', '-')} | {', '.join(v.get('caminhos', [])) or '-'} | {v.get('bloqueio', '')} |")
     return 0
@@ -480,7 +536,7 @@ def _acrescentar_canal(texto):
 
 def cmd_dizer(a):
     ident = f"{a.agente}-{datetime.datetime.now(TZ):%Y-%m-%d}-{hashlib.sha256((agora() + a.texto).encode()).hexdigest()[:8]}"
-    nome = {"claude": "Claude Code", "codex": "Codex"}[a.agente]
+    nome = NOMES.get(a.agente, a.agente.capitalize())
     msg = (f"\n## {ident}\n- Autor: {nome} (modelo exato não medido por esta ferramenta).\n- Hora: {agora()} (relógio da Máquina).\n"
            + (f"- Resposta-a: {a.resposta_a}.\n" if a.resposta_a else "")
            + f"- Assunto: {a.assunto}.\n" + (f"- Estado: {a.estado}.\n" if a.estado else "")
@@ -528,7 +584,7 @@ def _selftest():
     import threading
     global D, CANAL, RAIZ_SINC
     res = {}
-    tmp = tempfile.mkdtemp(prefix="dupla-t-")
+    tmp = tempfile.mkdtemp(prefix="equipe-t-")
     repo = os.path.join(tmp, "repo")
     os.makedirs(repo)
     env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
@@ -542,7 +598,7 @@ def _selftest():
     bare = os.path.join(tmp, "origin.git")
     sh("git", "clone", "-q", "--bare", repo, bare, cwd=tmp)
     sh("git", "remote", "add", "origin", bare); sh("git", "fetch", "-q", "origin")
-    D = os.path.join(tmp, "sinc", "dupla"); RAIZ_SINC = os.path.join(tmp, "sinc"); CANAL = os.path.join(RAIZ_SINC, "conversa.md")
+    D = os.path.join(tmp, "sinc", "equipe"); RAIZ_SINC = os.path.join(tmp, "sinc"); CANAL = os.path.join(RAIZ_SINC, "conversa.md")
     ns = lambda **k: argparse.Namespace(**{"repo": repo, "matriz": None, "nova_base": False, "item": None, "espera": 20,
                                            "aceitar_matriz": None, **k})
     try:
@@ -606,7 +662,7 @@ def _selftest():
             os.path.exists(_p(k)) and os.unlink(_p(k))
         ts = []
         for i in range(12):
-            ag = AGENTES[i % 2]
+            ag = ("claude", "codex")[i % 2]
             ts.append(threading.Thread(target=cmd_dizer, args=(argparse.Namespace(
                 agente=ag, assunto=f"a{i}", texto=f"mensagem {i}", resposta_a=None, estado=None, proximo=None),)))
         [t.start() for t in ts]; [t.join() for t in ts]
@@ -616,7 +672,7 @@ def _selftest():
         cmd_dizer(argparse.Namespace(agente="claude", assunto="x", texto="y", resposta_a=None, estado=None, proximo=None))
         res["12 o canal só cresce (o texto anterior segue intacto)"] = open(CANAL).read().startswith(before)
         # chegada simultânea: abre uma única partida
-        threads = [threading.Thread(target=cmd_iniciar, args=(ns(agente=ag, item="Z"),)) for ag in AGENTES]
+        threads = [threading.Thread(target=cmd_iniciar, args=(ns(agente=ag, item="Z"),)) for ag in ("claude", "codex")]
         [t.start() for t in threads]; [t.join() for t in threads]
         hist = open(_p("historico.jsonl")).read()
         res["13 chegada simultânea: exatamente 1 partida conjunta"] = hist.count("partida_conjunta") == 1 \
@@ -641,11 +697,11 @@ def _selftest():
             open(os.path.join(wt, rel), "w").write(txt)
         escreve(wc, "scripts/p8_integral.py", "x\n"); escreve(wx, "redesign/router/seth_escriba.py", "y\n")
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
         res["15 cada um na própria pista: verificar OK"] = o.returncode == 0 and "OK:" in o.stdout
         escreve(wx, "scripts/p8_integral.py", "z\n")
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
         res["16 o Codex mexe na pista do Claude: FORA DA PISTA e DUPLO"] = o.returncode == 1 and "FORA DA PISTA: scripts/p8_integral.py" in o.stdout and "DUPLO" in o.stdout
         os.unlink(os.path.join(wx, "scripts/p8_integral.py"))
         bloco = "<!-- ANCORA-SHA:INICIO (x) -->\n  sha\n<!-- ANCORA-SHA:FIM -->\n"
@@ -659,35 +715,58 @@ def _selftest():
             subprocess.run(["git", "-C", w, "merge", "-q", "--ff-only", s0["base"]], check=True, capture_output=True)
         escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo\n")
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
         res["17 só o bloco de âncora mudou em REGRAS.md: não é achado"] = "REGRAS.md" not in o.stdout
         escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo ALTERADO\n")
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
         res["18a REGRAS.md mudou fora da âncora pelo integrador (Claude): sem achado"] = "FORA DA PISTA: REGRAS.md" not in o.stdout
         escreve(wx, "REGRAS.md", bloco.replace("sha", "ccc") + "corpo DO CODEX\n")
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
         res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
         if not res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"]:
             print("DEBUG 18b:", o.returncode, o.stdout, o.stderr[-300:])
         # 19-21: fallback mútuo. Claude é o dono de REGRAS.md; o Codex a alterou (18b). Se o CLAUDE for declarado ausente, vira ASSUMIDA.
-        env19 = dict(os.environ, DUPLA_DIR=RAIZ_SINC)
+        env19 = dict(os.environ, EQUIPE_DIR=RAIZ_SINC)
         subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "ausente", "--agente", "claude", "--motivo", "teste"], capture_output=True, text=True, env=env19)
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
         res["19 titular ausente: o outro mexer na pista vira ASSUMIDA, não FORA DA PISTA"] = \
             "ASSUMIDA: REGRAS.md por codex" in o.stdout and "FORA DA PISTA: REGRAS.md alterado por codex" not in o.stdout
         st = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=env19)
-        res["20 status mostra o ausente e quem cobre"] = "AUSENTE: claude" in st.stdout and "codex cobre a pista" in st.stdout
+        res["20 status mostra o ausente e quem cobre"] = "AUSENTE: claude" in st.stdout and "cobrem a pista dele (fallback): codex" in st.stdout
         subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "presente", "--agente", "claude"], capture_output=True, text=True, env=env19)
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
         res["21 titular de volta: volta o alerta FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
+        # 22-27: Equipe universal (qualquer membro do Conselho, não só Claude e Codex)
+        res["22 terceiro membro (gemini) entra na partida já aberta"] = cmd_iniciar(ns(agente="gemini", item="G1")) == 0 \
+            and "gemini" in _ler_json("sessao.json", {})["presentes"] and _ler_json("sessao.json", {})["estado"] == "em_andamento"
+        p3 = argparse.Namespace(agente="gemini", dono="gemini", papel="pesquisa", caminhos=["research_notes/g.md"])
+        res["23 com 3 presentes, a linha só entra quando os 2 outros aceitam"] = cmd_propor_linha(p3) == 0 \
+            and cmd_aceitar_linha(argparse.Namespace(agente="claude")) == 0 and os.path.exists(_p("proposta-matriz.json")) \
+            and cmd_aceitar_linha(argparse.Namespace(agente="codex")) == 0 and not os.path.exists(_p("proposta-matriz.json")) \
+            and dono_de("research_notes/g.md", _ler_json("sessao.json", {})["matriz"]) == [("gemini", "pesquisa")]
+        sh("git", "branch", "gemini/it"); wg = os.path.join(tmp, "wg"); sh("git", "worktree", "add", "-q", wg, "gemini/it")
+        escreve(wg, "research_notes/g.md", "g\n")
+        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
+        res["24 verificar enxerga a worktree do terceiro membro (gemini/*)"] = "wg" in o.stdout and "research_notes/g.md" not in o.stdout.split("ACHADOS")[-1]
+        try:
+            membro("Codex X"); res["25 nome de membro fora do slug é recusado"] = False
+        except argparse.ArgumentTypeError:
+            res["25 nome de membro fora do slug é recusado"] = True
+        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "dizer", "--agente", "goose", "--assunto", "a", "--texto", "b"],
+                           capture_output=True, text=True, env=env19)
+        res["26 membro sem nome cadastrado fala no canal (Goose)"] = o.returncode == 0 and "- Autor: Goose" in open(CANAL).read()
+        velho = os.path.join(tmp, "velho"); os.makedirs(os.path.join(velho, "dupla")); json.dump({"estado": "x"}, open(os.path.join(velho, "dupla", "sessao.json"), "w"))
+        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=dict(os.environ, EQUIPE_DIR=velho))
+        res["27 estado antigo em dupla/ migra para equipe/ sem perda"] = os.path.exists(os.path.join(velho, "equipe", "sessao.json")) \
+            and not os.path.exists(os.path.join(velho, "dupla"))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     for k, v in res.items():
         print(("OK    " if v else "FALHOU"), k)
     ruins = [k for k, v in res.items() if not v]
-    print(f"dupla selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
+    print(f"equipe selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
     return 1 if ruins else 0
 
 
@@ -700,11 +779,12 @@ def main(argv=None):
         for k, v in args.items():
             p.add_argument(f"--{k.replace('_', '-')}", **v)
         return p
-    ag = {"required": True, "choices": AGENTES}
+    ag = {"required": True, "type": membro}
     p = com("iniciar", agente=ag, item={}, nova_base={"action": "store_true"}, matriz={}, aceitar_matriz={},
-            espera={"type": int, "default": 20}, repo={})
+            espera={"type": int, "default": 20}, repo={},
+            com={"type": lambda v: [membro(x.strip()) for x in v.split(",") if x.strip()], "help": "membros esperados (só na criação)"})
     sp.add_parser("matriz")
-    p = com("propor-linha", agente=ag, dono={"required": True, "choices": AGENTES}, papel={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
+    p = com("propor-linha", agente=ag, dono={"required": True, "type": membro}, papel={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
     com("aceitar-linha", agente=ag)
     sp.add_parser("status")
     p = com("reivindicar", agente=ag, item={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
@@ -719,6 +799,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.selftest:
         return _selftest()
+    _migrar_dupla()
     f = {"iniciar": cmd_iniciar, "status": cmd_status, "reivindicar": cmd_reivindicar, "estado": cmd_estado,
          "verificar": cmd_verificar, "quadro": cmd_quadro, "matriz": cmd_matriz, "propor-linha": cmd_propor_linha, "aceitar-linha": cmd_aceitar_linha, "dizer": cmd_dizer, "ler": cmd_ler, "ausente": cmd_ausente, "presente": cmd_presente, "encerrar": cmd_encerrar}.get(a.cmd)
     if not f:
