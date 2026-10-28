@@ -384,7 +384,7 @@ function renderWiki() {
       const path = match[1].slice("memoria/obsidian/".length).replace(/\.md$/, "");
       if (path.split("/").includes("..") || links.has(path) || links.size >= 10) continue;
       links.add(path);
-      const link = document.createElement("a"); link.href = "obsidian://open?vault=agata&file=" + encodeURIComponent(path); link.textContent = "Abrir " + path + " ↗"; card.append(link);
+      const botao = document.createElement("button"); botao.type = "button"; botao.className = "text-link"; botao.dataset.vaultCaminho = path + ".md"; botao.textContent = "Abrir " + path; card.append(botao);
     }
     root.append(card);
   }
@@ -673,7 +673,7 @@ async function carregarVisaoSistema() {
   };
   const melhoria = (texto, aba) => {
     const li = document.createElement("li"); li.textContent = texto;
-    if (aba) { const b = document.createElement("button"); b.className = "text-link"; b.type = "button"; b.dataset.openPage = aba; b.textContent = " ver aba ↗"; li.append(b); }
+    if (aba) { const b = document.createElement("button"); b.className = "text-link"; b.type = "button"; b.dataset.openPage = aba; b.textContent = " ver aba"; li.append(b); }
     lista.append(li);
   };
   try {
@@ -708,7 +708,7 @@ async function carregarVisaoSistema() {
 }
 
 /* (27/10/2026) Vault dentro do painel: cada botão de vault abre a própria tela, lida de /api/vault/item (lista fechada, só leitura). */
-async function abrirVault(id) {
+async function abrirVault(alvo, porCaminho = false) {
   const dlg = byId("vault-dialog");
   if (!dlg) return;
   byId("vault-title").textContent = "Carregando…";
@@ -717,8 +717,9 @@ async function abrirVault(id) {
   byId("vault-canvas").replaceChildren();
   dlg.showModal();
   try {
-    const d = await fetchJson("/api/vault/item?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
-    byId("vault-title").textContent = d.titulo || d.id;
+    const consulta = porCaminho ? "caminho=" + encodeURIComponent(alvo) : "id=" + encodeURIComponent(alvo);
+    const d = await fetchJson("/api/vault/item?" + consulta, {headers: {Accept: "application/json"}});
+    byId("vault-title").textContent = d.titulo || d.id || alvo;
     if (d.state !== "ok") {
       byId("vault-fonte").textContent = "Fonte: " + d.fonte;
       byId("vault-texto").textContent = "Sem leitura: " + (d.motivo || "item indisponível") + ".";
@@ -736,6 +737,10 @@ async function abrirVault(id) {
     byId("vault-texto").textContent = "Leitura indisponível (" + erro.message + "). Nada anterior foi mantido como atual.";
   }
 }
-document.addEventListener("click", (e) => { const b = e.target.closest("[data-vault]"); if (b) abrirVault(b.dataset.vault); });
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-vault], [data-vault-caminho]");
+  if (!b) return;
+  if (b.dataset.vaultCaminho) abrirVault(b.dataset.vaultCaminho, true); else abrirVault(b.dataset.vault);
+});
 document.querySelectorAll(".close-vault").forEach((b) => b.addEventListener("click", () => byId("vault-dialog").close()));
 byId("vault-dialog").addEventListener("click", (e) => { if (e.target === byId("vault-dialog")) byId("vault-dialog").close(); });

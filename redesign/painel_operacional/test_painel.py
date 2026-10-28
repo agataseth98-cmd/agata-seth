@@ -260,5 +260,9 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(data["state"], "unknown")
         self.assertIn("ausente", data["motivo"])
 
+    def test_vault_caminho_recusa_saida_do_vault(self):
+        for ruim in ("../../etc/passwd.md", "/etc/passwd.md", "entradas/../../../x.md", "naoexiste.txt"):
+            self.assertIsNone(panel._vault_caminho(ruim), ruim)
+
 if __name__ == "__main__":
     unittest.main()

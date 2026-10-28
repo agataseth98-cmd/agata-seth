@@ -281,3 +281,18 @@ body{font-family:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;font-synthe
 /* Cartões com sonda são clicáveis (abrem a evidência em popup). */
 .cap-card[data-probe]:not([data-probe='documento']){cursor:pointer}
 .cap-card[data-probe]:not([data-probe='documento']):focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+/* (28/10/2026) Revisão: barras de rolagem discretas no tom da identidade; popups que cabem inteiros, com o corpo rolando dentro deles. */
+*{scrollbar-width:thin;scrollbar-color:rgba(97,217,237,.32) transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(97,217,237,.28);border-radius:8px}
+*::-webkit-scrollbar-thumb:hover{background:rgba(97,217,237,.5)}
+dialog{width:min(680px,calc(100vw - 32px));max-width:none;max-height:min(86vh,820px);overflow:hidden;padding:0}
+dialog>.dialog-inner{display:flex;flex-direction:column;max-height:min(86vh,820px);min-height:0;overflow:hidden;padding:20px 22px}
+dialog>.dialog-inner>*{flex:none;min-width:0}
+dialog .dialog-texto,dialog .dialog-body{flex:1 1 auto;min-height:0;overflow:auto;overflow-wrap:anywhere;white-space:pre-wrap;margin:0;font:13px/1.55 ui-monospace,Consolas,monospace}
+dialog .dialog-body{font:inherit;white-space:normal}
+dialog #vault-canvas{max-height:28vh;overflow:auto;overflow-wrap:anywhere}
+dialog .dialog-source{overflow-wrap:anywhere}
+dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
