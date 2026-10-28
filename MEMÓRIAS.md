@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aea208018d9481083880e5f64339904fc6489c07
-  Escrito em: 28/10/2026 09:19 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): db0309881c08819410a03c757736033040ad8b4a
+  Escrito em: 28/10/2026 09:23 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aea208018d9481083880e5f64339904fc6489c07/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aea208018d9481083880e5f64339904fc6489c07/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aea208018d9481083880e5f64339904fc6489c07/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aea208018d9481083880e5f64339904fc6489c07/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aea208018d9481083880e5f64339904fc6489c07/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0309881c08819410a03c757736033040ad8b4a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0309881c08819410a03c757736033040ad8b4a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0309881c08819410a03c757736033040ad8b4a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0309881c08819410a03c757736033040ad8b4a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/db0309881c08819410a03c757736033040ad8b4a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(899) DIÁRIO — 28/10/2026 · **Painel: refino do Panorama.** Aplica `painel-refino-20261028`, assinado pelo Humano. Cartão de propostas conta só as pendentes de assinatura, a mesma regra da linha de status. Nota de unidades lida, sem número fixo. Sombra de texto na linha de status.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de painel-refino-20261028.
+
 (898) DIÁRIO — 28/10/2026 · **Painel: segunda passada de textos.** Aplica `textos-revisao2-20261028`, assinado pelo Humano. Doze parágrafos longos viram frases de até 120 caracteres, com os mesmos fatos. Oito aberturas de aba passam a dizer o que o leitor pode fazer ali.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de textos-revisao2-20261028.
 
