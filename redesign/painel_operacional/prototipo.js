@@ -517,15 +517,72 @@ function ligarCartoesClicaveis() {
 }
 
 /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
-const sethHistorico = [];
+let sethAtual = {id: null, titulo: "", mensagens: []};
 const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
 const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
 function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
-function sethVazio() {
+function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
+function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
+function sethInline(container, texto) {
+  const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
+  for (const p of partes) {
+    if (!p) continue;
+    if (p.startsWith("**") && p.endsWith("**")) { const b = document.createElement("strong"); b.textContent = p.slice(2, -2); container.append(b); }
+    else if (p.startsWith("`") && p.endsWith("`")) { const c = document.createElement("code"); c.textContent = p.slice(1, -1); container.append(c); }
+    else container.append(document.createTextNode(p));
+  }
+}
+function sethMarkdown(texto, destino) {
+  const linhas = String(texto).split("\n");
+  let lista = null, codigo = null;
+  for (const linha of linhas) {
+    if (linha.trim().startsWith("```")) {
+      if (codigo) { codigo = null; continue; }
+      codigo = document.createElement("pre"); const c = document.createElement("code"); codigo.append(c); destino.append(codigo); lista = null; continue;
+    }
+    if (codigo) { codigo.firstChild.textContent += linha + "\n"; continue; }
+    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = linha.trim(); destino.append(aside); lista = null; continue; }
+    const cabeca = linha.match(/^(#{1,3})\s+(.*)$/);
+    if (cabeca) { const h = document.createElement("h4"); sethInline(h, cabeca[2]); destino.append(h); lista = null; continue; }
+    const item = linha.match(/^\s*[-*]\s+(.*)$/);
+    if (item) { if (!lista) { lista = document.createElement("ul"); destino.append(lista); } const li = document.createElement("li"); sethInline(li, item[1]); lista.append(li); continue; }
+    if (!linha.trim()) { lista = null; continue; }
+    const p = document.createElement("p"); sethInline(p, linha); destino.append(p); lista = null;
+  }
+}
+function sethMensagem(m, indice) {
   const log = byId("seth-transcript");
-  if (!log || log.children.length || sethHistorico.length) return;
-  const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa ainda. Pergunte sobre o estado, uma decisão ou uma proposta.";
-  log.append(vazio);
+  const msg = document.createElement("article"); msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant");
+  const cab = document.createElement("div"); cab.className = "msg-head";
+  const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
+  const hora = document.createElement("span"); hora.textContent = m.hora || "";
+  cab.append(quem, hora);
+  const corpo = document.createElement("div"); corpo.className = "msg-body";
+  if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
+  msg.append(cab, corpo);
+  if (m.role === "assistant") {
+    const acoes = document.createElement("div"); acoes.className = "msg-acoes";
+    const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
+    copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
+    acoes.append(copiar);
+    if (indice === sethAtual.mensagens.length - 1) {
+      const regerar = document.createElement("button"); regerar.type = "button"; regerar.className = "text-link"; regerar.textContent = "Regenerar";
+      regerar.addEventListener("click", () => sethRegerar());
+      acoes.append(regerar);
+    }
+    msg.append(acoes);
+  }
+  log.append(msg);
+}
+function sethDesenhar() {
+  const log = byId("seth-transcript"); log.replaceChildren();
+  if (!sethAtual.mensagens.length) {
+    const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
+    log.append(vazio);
+  }
+  sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
+  log.scrollTop = log.scrollHeight;
+  sethTitulo(sethAtual.titulo);
 }
 function sethExemplos() {
   const box = byId("seth-exemplos"); if (!box) return;
@@ -536,65 +593,114 @@ function sethExemplos() {
     box.append(b);
   });
 }
-function sethEscrever(papel, texto, modelo = "") {
-  const log = byId("seth-transcript");
-  const vazio = log.querySelector(".seth-vazio"); if (vazio) vazio.remove();
-  const msg = document.createElement("article"); msg.className = "msg msg-" + (papel === "user" ? "user" : "assistant");
-  const cab = document.createElement("div"); cab.className = "msg-head";
-  const quem = document.createElement("strong"); quem.textContent = papel === "user" ? "Você" : "Seth" + (modelo ? " · " + modelo : "");
-  const hora = document.createElement("span"); hora.textContent = sethHora();
-  cab.append(quem, hora);
-  const corpo = document.createElement("div"); corpo.className = "msg-body";
-  const notas = [];
-  for (const linha of String(texto).split("\n")) {
-    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { notas.push(linha.trim()); continue; }
-    corpo.append(linha + "\n");
-  }
-  msg.append(cab, corpo);
-  notas.forEach((n) => { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = n; msg.append(aside); });
-  log.append(msg);
-  log.scrollTop = log.scrollHeight;
+async function sethListar() {
+  const box = byId("seth-conversas"); if (!box) return;
+  try {
+    const dados = await fetchJson("/api/seth/conversas", {headers: {Accept: "application/json"}});
+    box.replaceChildren();
+    (dados.items || []).forEach((c) => {
+      const linha = document.createElement("div"); linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "");
+      const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
+      abrir.title = c.mensagens + " mensagens · " + c.atualizada;
+      abrir.addEventListener("click", () => sethAbrir(c.id));
+      const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
+      const renomear = document.createElement("button"); renomear.type = "button"; renomear.className = "text-link"; renomear.textContent = "Renomear";
+      renomear.addEventListener("click", () => sethRenomear(c, linha));
+      const apagar = document.createElement("button"); apagar.type = "button"; apagar.className = "text-link"; apagar.textContent = "Apagar";
+      apagar.addEventListener("click", () => {
+        if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
+        sethApagar(c.id);
+      });
+      acoes.append(renomear, apagar);
+      linha.append(abrir, acoes);
+      box.append(linha);
+    });
+    if (!(dados.items || []).length) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = "Nenhuma conversa salva."; box.append(p); }
+  } catch (erro) { box.textContent = "Lista indisponível (" + erro.message + ")."; }
+}
+async function sethAbrir(id) {
+  try {
+    const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
+    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens};
+    sethDesenhar(); sethListar();
+  } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
+}
+async function sethSalvar() {
+  if (!sethAtual.mensagens.length) return;
+  if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
+  try {
+    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map((m) => ({role: m.role, content: m.content}))})});
+    if (r.ok) { const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar(); }
+  } catch (_) { /* a conversa continua na aba; o aviso fica no status */ }
+}
+async function sethApagar(id) {
+  await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
+  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); }
+  sethListar();
+}
+function sethRenomear(c, linha) {
+  const campo = document.createElement("input"); campo.type = "text"; campo.value = c.titulo; campo.maxLength = 80; campo.className = "seth-renomear"; campo.setAttribute("aria-label", "Novo nome da conversa");
+  linha.replaceChildren(campo); campo.focus();
+  const confirmar = async () => {
+    const novo = campo.value.trim() || c.titulo;
+    if (c.id === sethAtual.id) { sethAtual.titulo = novo; sethSalvar(); return; }
+    const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(c.id), {headers: {Accept: "application/json"}});
+    await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, mensagens: dados.mensagens})});
+    sethListar();
+  };
+  campo.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmar(); if (e.key === "Escape") sethListar(); });
+  campo.addEventListener("blur", () => sethListar());
 }
 function sethErro(status, erro) {
   if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
   return erro && erro.message ? erro.message : "falha desconhecida";
 }
+async function sethEnviar(textoUsuario, reaproveitar) {
+  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input");
+  if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
+  sethDesenhar();
+  botao.disabled = true; sethStatus("PENSANDO", "partial");
+  const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+  byId("seth-transcript").append(pensando);
+  try {
+    const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify({messages: sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}))})});
+    if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+    const dados = await r.json();
+    sethAtual.mensagens.push({role: "assistant", content: dados.content, hora: sethHora(), modelo: dados.model || ""});
+    sethDesenhar(); sethStatus("PRONTA", "planned");
+    sethSalvar();
+  } catch (erro) {
+    if (!reaproveitar) sethAtual.mensagens.pop();
+    sethDesenhar();
+    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
+    byId("seth-transcript").append(aviso);
+    sethStatus("INDISPONÍVEL", "horizon");
+  } finally { botao.disabled = false; campo.focus(); }
+}
+function sethRegerar() {
+  const ultimo = sethAtual.mensagens[sethAtual.mensagens.length - 1];
+  if (!ultimo || ultimo.role !== "assistant") return;
+  sethAtual.mensagens.pop();
+  const pergunta = sethAtual.mensagens[sethAtual.mensagens.length - 1];
+  if (pergunta && pergunta.role === "user") sethEnviar(pergunta.content, true);
+}
 function ligarConversaSeth() {
   const form = byId("seth-form");
   if (!form || form.dataset.ligado) return;
   form.dataset.ligado = "1";
-  sethExemplos(); sethVazio();
+  sethExemplos(); sethDesenhar(); sethListar();
   const campo = byId("seth-input");
   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  byId("seth-nova").addEventListener("click", () => {
-    sethHistorico.length = 0; byId("seth-transcript").replaceChildren(); sethVazio();
-    byId("seth-status").textContent = "PRONTA"; byId("seth-status").className = "chip planned"; campo.focus();
-  });
-  form.addEventListener("submit", async (e) => {
+  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const estado = byId("seth-status"); const botao = byId("seth-send");
     const texto = campo.value.trim();
-    if (!texto || botao.disabled) return;
-    sethHistorico.push({role: "user", content: texto});
-    sethEscrever("user", texto); campo.value = "";
-    botao.disabled = true; estado.textContent = "PENSANDO"; estado.className = "chip partial";
-    const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
-    byId("seth-transcript").append(pensando);
-    try {
-      const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
-        body: JSON.stringify({messages: sethHistorico.slice(-20)})});
-      if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
-      const dados = await r.json();
-      sethHistorico.push({role: "assistant", content: dados.content});
-      pensando.remove();
-      sethEscrever("assistant", dados.content, dados.model || "");
-      estado.textContent = "PRONTA"; estado.className = "chip planned";
-    } catch (erro) {
-      sethHistorico.pop(); pensando.remove();
-      sethEscrever("assistant", "Não consegui responder agora: " + sethErro(erro.status, erro) + ".");
-      estado.textContent = "INDISPONÍVEL"; estado.className = "chip horizon";
-    } finally { botao.disabled = false; campo.focus(); }
+    if (!texto || byId("seth-send").disabled) return;
+    campo.value = "";
+    sethEnviar(texto, false);
   });
 }
 window.addEventListener("load", ligarConversaSeth);

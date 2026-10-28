@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(901) DIÁRIO — 28/10/2026 · **Painel: histórico de conversas com a Seth.** Aplica `conversas-historico-20261028`, assinado pelo Humano. Lista de conversas salvas em ~/.cache, fora do canon; abrir, renomear e apagar com confirmação em dois cliques; Markdown seguro; copiar e regenerar. Streaming fica para a etapa seguinte.
+  palavras-chave: painel, histórico, conversas, seth, aplica, historico, assinado, humano, lista, salvas, cache, fora, canon, abrir, renomear, apagar, confirmação, cliques, markdown, seguro, copiar, regenerar, streaming, fica, etapa, seguinte
 (900) DIÁRIO — 28/10/2026 · **Painel: refino da conversa com a Seth.** Aplica `conversa-painel-20261028`, assinado pelo Humano. Falas separadas com modelo e hora; quebras de linha preservadas; notas de verificação em tom discreto; exemplos de pergunta; botão Nova conversa; Enter envia; erros com causa. Texto puro, sem HTML da Seth.
   palavras-chave: painel, refino, conversa, seth, aplica, assinado, humano, falas, separadas, modelo, hora, quebras, linha, preservadas, notas, verificação, tom, discreto, exemplos, pergunta, botão, nova, enter, envia, erros, causa, texto, puro, html
 (899) DIÁRIO — 28/10/2026 · **Painel: refino do Panorama.** Aplica `painel-refino-20261028`, assinado pelo Humano. Cartão de propostas conta só as pendentes de assinatura, a mesma regra da linha de status. Nota de unidades lida, sem número fixo. Sombra de texto na linha de status.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, evidência, viva, recarga, total, aplica, evidencia, assinado, humano, botão, capacidade, mostra, resultado, medido, carregamento, horário, cartões, documento, dizem, medição, carregar, página, atualiza, agenda, capacidades
 (872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco viram documento.** Aplica `capacidades-leitura-20261027`, assinado pelo Humano. Sondas só de leitura: estado de unidades (systemctl --user show) e HTTP local. Cartões sem sonda deixam de mostrar estado. Limite registrado: escolher rota só confirma que o gateway está ativo.
   palavras-chave: painel, leitura, real, oito, capacidades, cinco, viram, documento, aplica, assinado, humano, sondas, estado, unidades, systemctl, user, show, http, local, cartões, sonda, deixam, mostrar, limite, registrado, escolher, rota, confirma, gateway, ativo
-(871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBSTITUÍDA.** Aplica `propostas-substituidas-20261027`, assinado pelo Humano. Cria propostas/SUBSTITUIDAS.txt e a leitura que mostra SUBSTITUÍDA no Plano de trabalho. O painel listava retrato-original-20261026 como REGISTRADA, embora não tenha sido aplicada.
-  palavras-chave: painel, propostas, substituídas, aparecem, substituída, aplica, substituidas, assinado, humano, cria, txt, leitura, mostra, plano, trabalho, listava, retrato, original, registrada, embora, tenha, sido, aplicada
+(871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBST …
+  palavras-chave: painel, propostas, substituídas, aparecem, subst
 (870) DIÁRIO — 27/10/2026 · **Painel: Wiki e timers reabertos.** Aplica `wiki-ti …
   palavras-chave: painel, wiki, timers, reabertos, aplica
 (869) DIÁRIO — 27/10/2026 · **Painel: parte funcional sem Wiki e sem timers.** A …

@@ -7,6 +7,7 @@ import hashlib
 import http.client
 import collections
 import json
+import os
 import socket
 import re
 import subprocess
@@ -511,6 +512,73 @@ def _vault_caminho(caminho: str) -> dict | None:
             "observed_at": observed_at, "fresh_until": fresh_until}
 
 
+CONVERSAS_DIR = Path.home() / ".cache/agata/painel-conversas"
+CONVERSA_ID = re.compile(r"[0-9a-f]{12}")
+CONVERSA_LIMITE_BYTES = 262144
+
+
+def _conversa_caminho(conversa_id: str) -> Path | None:
+    if not isinstance(conversa_id, str) or not CONVERSA_ID.fullmatch(conversa_id):
+        return None
+    return CONVERSAS_DIR / (conversa_id + ".json")
+
+
+def _conversas_listar() -> dict:
+    itens = []
+    if CONVERSAS_DIR.is_dir():
+        for arq in sorted(CONVERSAS_DIR.glob("*.json"), key=lambda a: a.stat().st_mtime, reverse=True)[:200]:
+            if not CONVERSA_ID.fullmatch(arq.stem):
+                continue
+            try:
+                dados = json.loads(arq.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            itens.append({"id": arq.stem, "titulo": dados.get("titulo", "Sem título"),
+                          "atualizada": datetime.fromtimestamp(arq.stat().st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds"),
+                          "mensagens": len(dados.get("mensagens", []))})
+    return {"schema_version": 1, "state": "ok", "items": itens}
+
+
+def _conversa_validar(dados: dict) -> dict | None:
+    if not isinstance(dados, dict):
+        return None
+    titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
+    mensagens = dados.get("mensagens")
+    if not isinstance(mensagens, list) or len(mensagens) > 200:
+        return None
+    limpas = []
+    for m in mensagens:
+        if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
+            return None
+        if len(m["content"]) > 8000:
+            return None
+        limpas.append({"role": m["role"], "content": m["content"]})
+    return {"titulo": titulo, "mensagens": limpas}
+
+
+def _conversa_gravar(dados: dict) -> dict | None:
+    limpo = _conversa_validar(dados)
+    if limpo is None:
+        return None
+    conversa_id = dados.get("id") or os.urandom(6).hex()
+    arq = _conversa_caminho(conversa_id)
+    if arq is None:
+        return None
+    CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = arq.with_suffix(".tmp")
+    tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, arq)
+    return {"id": conversa_id, **limpo}
+
+
+def _conversa_apagar(conversa_id: str) -> bool:
+    arq = _conversa_caminho(conversa_id)
+    if arq is None or not arq.is_file():
+        return False
+    arq.unlink()
+    return True
+
+
 def _lacunas_snapshot() -> dict:
     """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
     - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
@@ -818,6 +886,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
         if self.path.startswith("/api/grafo"):
             return self._grafo()
+        if self.path == "/api/seth/conversas":
+            return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
+        if self.path.startswith("/api/seth/conversa?"):
+            arq = _conversa_caminho((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
+            if arq is None or not arq.is_file():
+                return self._send(404, "text/plain; charset=utf-8", b"conversa indisponivel")
+            return self._send(200, "application/json; charset=utf-8", arq.read_bytes())
         if self.path.startswith("/api/vault/item"):
             q = parse_qs(urlparse(self.path).query)
             if q.get("caminho"):
@@ -861,6 +936,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
         if self.path == "/api/seth/chat":
             return self._seth_chat()
+        if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
+            return self._seth_conversa(self.path.endswith("/apagar"))
         if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
@@ -907,6 +984,25 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
         return self._send(200, "application/json; charset=utf-8", body)
 
+
+    def _seth_conversa(self, apagar: bool) -> None:
+        """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia."""
+        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > CONVERSA_LIMITE_BYTES:
+            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        try:
+            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid json")
+        if apagar:
+            ok = _conversa_apagar(dados.get("id") if isinstance(dados, dict) else "")
+            return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
+        salvo = _conversa_gravar(dados)
+        if salvo is None:
+            return self._send(400, "text/plain; charset=utf-8", b"conversa invalida")
+        return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
 
     def _seth_chat(self) -> None:
         """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
