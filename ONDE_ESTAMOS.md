@@ -10,11 +10,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Navegador do Conselho:** o Chromium do projeto volta a conectar ao painel oficial. Antes, a extensão falava com o painel errado e a página mostrava "sem poll". A porta de controle do navegador, que qualquer programa local podia usar, foi fechada. Confirmado nesta sessão; falta testar com provedores reais. Registro em MEMÓRIAS (919).
+**Conselho em Rede:** página e fila oficiais estão no painel `127.0.0.1:20146/conselho-rede`; serviço ativo e extensão oficial fazendo poll. O catálogo tem 17 provedores e há 9 adaptadores de envio. Prompts, debates e ferramentas aguardam aprovação humana; histórico visível. Selftest e 33 testes passaram. Provedor real após a publicação não foi testado.
 
-**Conselho em Rede:** proposta P-8 `conselho-em-rede-parser-estrito-20261028` (PR #695) integrada ao main e assinada. Aplicação em `aplica/conselho-em-rede-parser-estrito-20261028`; 37 testes e selftest passaram. PR de aplicação aguarda revisão/merge humano. Runtime não reiniciado; provedores reais não testados.
+**Runtime do Conselho:** drop-in do `painel-operacional.service` concede escrita só a `~/.local/share/agata/painel-conselho/official`. Backup e comando de rollback estão na entrada (920) de MEMÓRIAS.
 
-**Conselho de Modelos em Rede:** proposta `relay-council-panel-ui-rebase3-20261028` assinada e validada por P-8. A aplicação está na branch própria, com selftest e 22 testes do painel passando; aguarda merge humano. O serviço não foi reiniciado e a página real ainda não foi medida.
+**Navegador do Conselho:** a extensão oficial está carregada no Chromium persistente e a porta de depuração 9222 está fechada. Registro em MEMÓRIAS (919).
 
 **Proposta publicada:** PR #689 integrado em `2d5b0acc`; o diff e o registro da proposta estão em `propostas/aplicadas/` na branch de aplicação, junto do marcador assinado.
 
@@ -22,7 +22,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **Equipe universal e auditoria encadeada:** PRs #687 e #688 integrados.
 
-**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). O endpoint local tem proposta/aplicação em etapa separada; nenhuma chamada externa a provedores está ativa.
+**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). O envio está integrado ao painel; adaptadores e termos variam por provedor.
 
 ## Hoje, 22 e 23/10
 
