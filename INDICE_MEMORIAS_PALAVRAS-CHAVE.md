@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(899) DIÁRIO — 28/10/2026 · **Painel: refino do Panorama.** Aplica `painel-refino-20261028`, assinado pelo Humano. Cartão de propostas conta só as pendentes de assinatura, a mesma regra da linha de status. Nota de unidades lida, sem número fixo. Sombra de texto na linha de status.
+  palavras-chave: painel, refino, panorama, aplica, assinado, humano, cartão, propostas, conta, pendentes, assinatura, mesma, regra, linha, status, nota, unidades, lida, número, fixo, sombra, texto
 (898) DIÁRIO — 28/10/2026 · **Painel: segunda passada de textos.** Aplica `textos-revisao2-20261028`, assinado pelo Humano. Doze parágrafos longos viram frases de até 120 caracteres, com os mesmos fatos. Oito aberturas de aba passam a dizer o que o leitor pode fazer ali.
   palavras-chave: painel, segunda, passada, textos, aplica, revisao, assinado, humano, doze, parágrafos, longos, viram, frases, caracteres, mesmos, fatos, oito, aberturas, aba, passam, dizer, leitor, pode, fazer, ali
 (897) DIÁRIO — 28/10/2026 · **Painel: revisão de textos longos.** Aplica `textos-revisao-20261028`, assinado pelo Humano. Nove textos longos viram frases curtas, com os mesmos fatos: portas, comandos, regras e limites preservados.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, propostas, substituídas, aparecem, substituída, aplica, substituidas, assinado, humano, cria, txt, leitura, mostra, plano, trabalho, listava, retrato, original, registrada, embora, tenha, sido, aplicada
 (870) DIÁRIO — 27/10/2026 · **Painel: Wiki e timers reabertos.** Aplica `wiki-timers-liberar-20261027`, assinado pelo Humano. Muda a formação de 26/10 (PR 584): WIKI_LIBERADA = True e TIMER_ALLOWLIST com agata-manutencao.timer e agata-vault-inbox.timer; os três testes que estavam pulados voltam a rodar. Medido no verificador: busca_texto 0,32 s, busca_semantica 0,21 s.
   palavras-chave: painel, wiki, timers, reabertos, aplica, liberar, assinado, humano, muda, formação, liberada, true, timer, allowlist, agata, manutencao, vault, inbox, três, testes, estavam, pulados, voltam, rodar, medido, verificador, busca, texto, semantica
-(869) DIÁRIO — 27/10/2026 · **Painel: parte funcional sem Wiki e sem timers.** Aplica `painel-funcional-retomada-20261027`, assinado pelo Humano. Retoma o trabalho do Codex com `WIKI_LIBERADA = False` e lista de timers vazia, até decisão do Humano. Três testes da Wiki e dos timers ficam pulados com o motivo. Selftest OK; 13 testes, 3 pulados.
-  palavras-chave: painel, parte, funcional, wiki, timers, aplica, retomada, assinado, humano, retoma, trabalho, codex, liberada, false, lista, vazia, decisão, três, testes, ficam, pulados, motivo, selftest
+(869) DIÁRIO — 27/10/2026 · **Painel: parte funcional sem Wiki e sem timers.** A …
+  palavras-chave: painel, parte, funcional, wiki, timers
 (868) DIÁRIO — 27/10/2026 · **Painel: sobe e cai junto com a Seth.** Aplica `cic …
   palavras-chave: painel, sobe, cai, junto, seth, aplica, cic
 (867) DIÁRIO — 27/10/2026 · **Verificador: amostra opcional para medir a precisã …

@@ -250,7 +250,8 @@ function renderProposals(value, forced) {
   });
   replaceRows("proposal-list", rows, state === "unknown" ? "Lista indisponível." : "Nenhuma proposta nesta leitura.");
   set("proposal-source", sourceLine(value) + (value && value.truncated ? " · lista limitada a 100 propostas." : "") + " A assinatura exige verificação própria.");
-  set("overview-proposals", state === "unknown" ? "—" : String(value.total));
+  const pendentes = (value && value.items || []).filter((p) => !p.marker_present && !p.substituida_por && p.versionada !== false).length;
+  set("overview-proposals", state === "unknown" ? "—" : String(pendentes));
 }
 function render(snapshot, forced = false) {
   renderedSnapshotState = snapshotStateKey(snapshot, forced);
@@ -260,6 +261,7 @@ function render(snapshot, forced = false) {
   const active = services.filter((item) => stateOf(item, forced) === "ok").length;
   chip("units-panel-state", overall);
   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + services.length);
+  set("overview-units-note", services.length + " unidades observadas · seth-verificador");
   set("overview-alert", overall === "ok" ? active + " de " + services.length + " unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
   replaceRows("live-services", unitRows(services, forced), "Nenhum estado recebido.");
   if (byId("overview-services")) replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");

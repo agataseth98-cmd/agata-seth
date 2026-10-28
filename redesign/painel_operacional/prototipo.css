@@ -296,3 +296,6 @@ dialog .dialog-body{font:inherit;white-space:normal}
 dialog #vault-canvas{max-height:28vh;overflow:auto;overflow-wrap:anywhere}
 dialog .dialog-source{overflow-wrap:anywhere}
 dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+
+/* (28/10/2026) Refino: a linha de status do topo fica legível sobre a imagem. */
+.hero-line{text-shadow:0 1px 12px rgba(0,0,0,.75)}
