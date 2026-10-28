@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(905) DIÁRIO — 28/10/2026 · **Discord usa a venv do navegador.** Aplica `discord-venv-unica-20261028`, assinado pelo Humano. A unidade do discord-mcp aponta para redesign/mcp/navegador/.venv, que contém todos os pacotes do Discord. Libera 86 MB. A venv antiga fica para reversão.
+  palavras-chave: discord, usa, venv, navegador, aplica, unica, assinado, humano, unidade, mcp, aponta, redesign, contém, pacotes, libera, antiga, fica, reversão
 (904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
   palavras-chave: relaycouncil, proposta, fronteira, integração, contrato, catálogo, provedores, estão, propostos, entrada, api, oficial, manual, automação, dom, ficou, fora, painel, chamadas, externas, foram, feitas
 (903) DIÁRIO — 28/10/2026 · **Skills do Agata: painel, memória do Conselho e índice.** Aplica `skills-agata-20261028`, assinado pelo Humano. Duas skills novas com o que a frente mediu (agata-painel e agata-conselho-memoria), índice para o Conselho com dono e escopo, e ponteiros em agata-fluxo-dupla e agata-carregar. Caminhos citados conferidos.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, panorama, repetir, lista, serviços, aplica, redundancia, assinado, humano, bloco, rotinas, vira, link, estado, operacional, unidades, ficam
 (876) DIÁRIO — 27/10/2026 · **Painel: cartões clicáveis abrem a evidência em popup.** Aplica `cards-popup-20261027`, assinado pelo Humano. Os oito cartões com sonda abrem o popup do botão EVIDÊNCIA, sobre a tela; teclado Enter e Espaço. Cartões de documento não são clicáveis.
   palavras-chave: painel, cartões, clicáveis, abrem, evidência, popup, aplica, cards, assinado, humano, oito, sonda, botão, tela, teclado, enter, espaço, documento
-(875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `texto-websocket-20261027`, assinado pelo Humano. O cartão dizia que o painel tinha WebSocket em /live-ws (:20132). A registry define 20132 como omniroute-live-ws, do OmniRoute; o painel lê por HTTP.
-  palavras-chave: painel, texto, websocket, corrigido, aplica, assinado, humano, cartão, dizia, tinha, live, registry, define, omniroute, http
+(875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `te …
+  palavras-chave: painel, texto, websocket, corrigido, aplica
 (874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitur …
   palavras-chave: painel, evidências, timers, unidades, leitur
 (873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Ap …

@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1c0b25fce4d0392b67f7927c335351694c4de74d
-  Escrito em: 28/10/2026 13:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a
+  Escrito em: 28/10/2026 13:15 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c0b25fce4d0392b67f7927c335351694c4de74d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c0b25fce4d0392b67f7927c335351694c4de74d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c0b25fce4d0392b67f7927c335351694c4de74d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c0b25fce4d0392b67f7927c335351694c4de74d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c0b25fce4d0392b67f7927c335351694c4de74d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ade26ec4c06fea831a897e2b5a8ca45dfe43a5a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(905) DIÁRIO — 28/10/2026 · **Discord usa a venv do navegador.** Aplica `discord-venv-unica-20261028`, assinado pelo Humano. A unidade do discord-mcp aponta para redesign/mcp/navegador/.venv, que contém todos os pacotes do Discord. Libera 86 MB. A venv antiga fica para reversão.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: import do servidor do Discord com a venv do navegador, git apply --check contra o main · Autorização: Humano, assinatura de discord-venv-unica-20261028.
+
 (904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
 Modelo: Codex (Codex desktop, na Máquina) · vetor: 14 testes, compilação, diff aplicado e conferido em cópia descartável baseada em `ef9c794` · Autorização: Humano — "Vamos incorporar".
 
