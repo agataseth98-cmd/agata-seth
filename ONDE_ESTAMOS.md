@@ -10,9 +10,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Em proposta, aguardando sua assinatura:**
-- RelayCouncil: a primeira etapa define como receber resultados por API oficial ou entrada manual e lista 17 provedores. A automação do navegador fica fora.
-- O painel oficial e os serviços não foram alterados. Depois da assinatura e aplicação desta etapa, a interface e as chamadas de API serão propostas separadamente.
+**Assinada; PR de aplicação aguarda seu merge:**
+- RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
+- O painel oficial e os serviços ainda não foram alterados. Interface e chamadas de API exigem uma etapa própria depois deste PR.
 
 ## Hoje, 22 e 23/10
 
