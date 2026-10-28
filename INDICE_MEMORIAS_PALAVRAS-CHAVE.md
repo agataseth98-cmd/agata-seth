@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(920) DIÁRIO — 28/10/2026 · **O serviço oficial do Conselho tem permissão de escrita restrita à fila dedicada.** O drop-in `~/.config/systemd/user/painel-operacional.service.d/relay-council-data.conf` libera escrita somente em `~/.local/share/agata/painel-conselho/official`, usada pela fila e pelo SQLite. O serviço reiniciou e permanece ativo em `127.0.0.1:20146`; o painel respondeu HTTP 200 e o poll da extensão oficial tinha 2,6 s de idade na medição. Banco `state.sqlite3` em modo `0600`; histórico legado não foi movido. Selftest, 33 testes, sintaxe Python/JS e manifesto passaram. Porta 9222 sem listener. Provedores reais não foram testados após a publicação.
+  palavras-chave: serviço, oficial, tem, permissão, escrita, restrita, fila, dedicada, drop, config, systemd, user, painel, operacional, service, relay, council, data, conf, libera, somente, local, share, agata, official, usada, sqlite, reiniciou, permanece, ativo, respondeu, http, poll, extensão, tinha, idade, medição, banco, state, modo, histórico, legado, movido, selftest, testes, sintaxe, python, manifesto, passaram, porta, listener, provedores, reais, foram, testados, após, publicação
 (919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel oficial; porta de depuração 9222 fechada.**
   palavras-chave: chromium, projeto, volta, fazer, poll, painel, oficial, porta, depuração, fechada
 (918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, luz, sombra, estilo, caravaggio, aplica, assinado, humano, sombras, terra, luzes, marfim, violeta, ciano, acentos, saturação, média, partiu, css, original, paleta, referência, memória, consulta, fonte, contraste, medir, página, real, após, aplicação
 (891) DIÁRIO — 27/10/2026 · **Painel: paleta 80/20.** Aplica `paleta-80-20-20261027`, assinado pelo Humano. Cada cor fria recebe 80% do deslocamento para o quente e mantém 20% do tom original, com a claridade intacta. Gerada a partir do CSS original. Alvo: contraste WCAG 2.2 AA, a medir na página real após a aplicação.
   palavras-chave: painel, paleta, aplica, assinado, humano, cor, fria, recebe, deslocamento, quente, mantém, tom, original, claridade, intacta, gerada, partir, css, alvo, contraste, wcag, medir, página, real, após, aplicação
-(890) DIÁRIO — 27/10/2026 · **Painel: Panorama com status medido.** Aplica `panorama-status-20261027`, assinado pelo Humano. Pelo canon (resultado primeiro, sem saudação), a frase fixa do Panorama sai. Entra linha de status: serviços ativos, Git e propostas aguardando assinatura, lidos agora. O alerta de unidades deixa de ter contagem fixa.
-  palavras-chave: painel, panorama, status, medido, aplica, assinado, humano, canon, resultado, primeiro, saudação, frase, fixa, sai, entra, linha, serviços, ativos, git, propostas, aguardando, assinatura, lidos, agora, alerta, unidades, deixa, ter, contagem
+(890) DIÁRIO — 27/10/2026 · **Painel: Panorama com status medido.** Aplica `pano …
+  palavras-chave: painel, panorama, status, medido, aplica, pano
 (889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica …
   palavras-chave: painel, experiência, sala, paleta, quente, aplica
 (888) DIÁRIO — 27/10/2026 · **Painel: markdown cru fora dos rótulos.** Aplica `m …
