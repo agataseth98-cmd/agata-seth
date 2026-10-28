@@ -240,6 +240,116 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(json.loads(body)["failed_check"], 4)
         self.assertEqual(self.request("POST", "/api/proposals/verify", '{"name":"exemplo"}', {"Content-Type":"application/json"})[0], 403)
 
+    def test_relay_catalog_and_evaluation_boundary(self):
+        code, body, headers = self.request("GET", "/api/relay-council/catalog")
+        self.assertEqual(code, 200)
+        providers = json.loads(body)["providers"]
+        self.assertEqual(len(providers), 17)
+        self.assertNotIn("perplexity", {provider["id"] for provider in providers})
+        self.assertIn("no-store", headers["Cache-Control"])
+
+        payload = {
+            "task_id": "task-1", "provider": "gemini", "site": "gemini",
+            "access_mode": "official_api", "state": "green", "ok": True,
+            "text": "resposta formal", "latency_ms": 1234,
+            "timestamp": "2026-10-28T10:00:00-03:00",
+        }
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json"}
+        with mock.patch.object(panel, "_relay_store", return_value={"n": 42, "h": "abc123"}) as store:
+            code, body, _ = self.request("POST", "/api/relay-council/evaluations", json.dumps(payload), base)
+        self.assertEqual(code, 201)
+        self.assertEqual(json.loads(body), {"schema_version": 1, "stored": True, "entry": 42,
+                                            "hash": "abc123", "duplicate": False})
+        store.assert_called_once_with(payload)
+
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(payload),
+                                      {"Content-Type": "application/json"})[0], 403)
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(payload),
+                                      {**base, "Content-Type": "text/plain"})[0], 415)
+        dom = {**payload, "access_mode": "browser_dom"}
+        code, _, _ = self.request("POST", "/api/relay-council/evaluations", json.dumps(dom), base)
+        self.assertEqual(code, 400)
+        mismatched = {**payload, "provider": "copilot", "access_mode": "official_api"}
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(mismatched), base)[0], 400)
+
+    def test_relay_evaluation_rejects_oversized_body_and_busy_cache(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json"}
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", "x" * 65537, base)[0], 413)
+        payload = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
+                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
+        large = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
+                            "access_mode": "official_api", "state": "green", "ok": True,
+                            "text": "r" * 5000, "timestamp": "2026-10-28T10:00:00-03:00"})
+        self.assertTrue(panel._RELAY_LOCK.acquire(blocking=False))
+        try:
+            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 429)
+        finally:
+            panel._RELAY_LOCK.release()
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", large, base)[0], 413)
+        deeply_nested = "{" + '"a":{' * 1500 + '"x":0' + "}" * 1501
+        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", deeply_nested, base)[0], 400)
+
+    def test_relay_quota_and_idempotent_receipts(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json"}
+        payload = json.dumps({"task_id": "task-3", "provider": "gemini", "site": "gemini",
+                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
+        with mock.patch.object(panel, "_relay_store", return_value={"n": 8, "h": "hash", "duplicate": True}):
+            code, body, _ = self.request("POST", "/api/relay-council/evaluations", payload, base)
+        self.assertEqual(code, 200)
+        self.assertTrue(json.loads(body)["duplicate"])
+        with mock.patch.object(panel, "_relay_store", side_effect=panel.RelayDailyQuotaExceeded):
+            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 429)
+        with mock.patch.object(panel, "_relay_store", side_effect=panel.RelayIdempotencyConflict):
+            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 409)
+
+    def test_relay_rate_limit_returns_retry_after(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json"}
+        payload = json.dumps({"task_id": "task-rate", "provider": "gemini", "site": "gemini",
+                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
+        with panel._RELAY_RATE_LOCK:
+            panel._RELAY_REQUESTS.clear()
+        try:
+            with mock.patch.object(panel, "_RELAY_RATE_LIMIT", 1), \
+                    mock.patch.object(panel, "_relay_store", return_value={"n": 1, "h": "hash"}):
+                self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 201)
+                code, _, headers = self.request("POST", "/api/relay-council/evaluations", payload, base)
+                self.assertEqual(code, 429)
+                self.assertEqual(headers["Retry-After"], "60")
+        finally:
+            with panel._RELAY_RATE_LOCK:
+                panel._RELAY_REQUESTS.clear()
+
+    def test_relay_store_validates_sanitizes_and_appends_to_isolated_common_cache(self):
+        cache, _catalog, _contract, _sanitizer = panel._relay_modules()
+        payload = {"task_id": "task-2", "provider": "gemini", "site": "gemini",
+                   "access_mode": "official_api", "state": "green", "ok": True,
+                   "text": "resposta formal", "timestamp": "2026-10-28T10:00:00-03:00"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch.object(cache, "ARQ", root / "cache" / "cache.jsonl"), \
+                    mock.patch.object(cache, "LISTA_P20", root / "p20.txt"):
+                receipt = panel._relay_store(payload)
+                self.assertEqual(receipt["n"], 1)
+                self.assertTrue(cache.verificar()[0])
+                self.assertNotIn("task-2", cache.ler()[0]["texto"])
+                retry = panel._relay_store(payload)
+                self.assertEqual((retry["n"], retry["duplicate"]), (1, True))
+                next_attempt = panel._relay_store({
+                    **payload, "timestamp": "2026-10-28T10:01:00-03:00"
+                })
+                self.assertEqual(next_attempt["n"], 2)
+                secret = "".join(("sk", "-", "d" * 20))
+                with self.assertRaises(ValueError):
+                    panel._relay_store({**payload, "text": secret})
+                self.assertEqual(len(cache.ler()), 2)
+
 
     def test_vault_so_abre_itens_da_lista_fechada_e_nao_tem_link_externo(self):
         for nome in panel.VAULT_ITENS.values():

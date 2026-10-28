@@ -11,6 +11,7 @@ import os
 import socket
 import re
 import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -55,6 +56,11 @@ INTEGRATION_ALLOWLIST = (
 )
 _STATUS_LOCK = threading.Lock()
 _WIKI_LOCK = threading.BoundedSemaphore(1)
+_RELAY_LOCK = threading.BoundedSemaphore(1)
+_RELAY_RATE_LOCK = threading.Lock()
+_RELAY_REQUESTS: collections.deque[float] = collections.deque()
+_RELAY_RATE_WINDOW_SECONDS = 60
+_RELAY_RATE_LIMIT = 60
 _SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
 _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
 _DETAILS_LOCK = threading.Lock()
@@ -92,6 +98,82 @@ def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
     if fetch_site and fetch_site not in {"same-origin", "none"}:
         return False
     return not origin or origin == ALLOWED_ORIGIN
+
+
+def _relay_modules():
+    """Carrega contrato e persistência locais; nenhum módulo faz chamada externa."""
+    for directory in (ROOT / "redesign/router", WEB):
+        path = str(directory)
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    import cache_conselho
+    import relay_catalog
+    import relay_council_contract
+    import sanitizar
+    return cache_conselho, relay_catalog, relay_council_contract, sanitizar
+
+
+def _relay_rate_limited() -> bool:
+    now = time.monotonic()
+    with _RELAY_RATE_LOCK:
+        while (_RELAY_REQUESTS
+               and now - _RELAY_REQUESTS[0] >= _RELAY_RATE_WINDOW_SECONDS):
+            _RELAY_REQUESTS.popleft()
+        if len(_RELAY_REQUESTS) >= _RELAY_RATE_LIMIT:
+            return True
+        _RELAY_REQUESTS.append(now)
+        return False
+
+
+class RelayEvaluationTooLarge(ValueError):
+    """Avaliação excede o limite de uma entrada do cache compartilhado."""
+
+
+class RelayDailyQuotaExceeded(ValueError):
+    """Cache comum atingiu a quota diária de escrita."""
+
+
+class RelayIdempotencyConflict(ValueError):
+    """Uma reentrega reutilizou a chave com conteúdo diferente."""
+
+
+def _relay_store(payload: dict) -> dict:
+    cache, _catalog, contract, sanitizer = _relay_modules()
+    if "timestamp" not in payload:
+        raise ValueError("timestamp is required for idempotent result delivery")
+    try:
+        normalized = contract.normalize_evaluation(payload)
+    except RecursionError as exc:
+        raise ValueError("evaluation nesting limit exceeded") from exc
+    provider = _catalog.PROVIDER_BY_ID[normalized["provider"]]
+    expected_mode = {"official_api_only": "official_api", "manual_only": "manual"}.get(
+        provider["access_mode"]
+    )
+    if normalized["access_mode"] != expected_mode:
+        raise ValueError("access mode does not match provider catalog")
+    try:
+        sanitizer.sanitizar_payload(normalized)
+    except sanitizer.SegredoNoPayload as exc:
+        raise ValueError("sensitive content rejected") from exc
+    task_key = hashlib.sha256(
+        f"{normalized['provider']}:{normalized['task_id']}:{normalized['timestamp']}".encode("utf-8")
+    ).hexdigest()
+    persisted = {**normalized, "task_id": task_key}
+    record = json.dumps(persisted, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    if len(record) > cache.MAX_TEXTO:
+        raise RelayEvaluationTooLarge("evaluation exceeds shared-cache entry limit")
+    try:
+        return cache.anotar(
+            autor=f"relay:{normalized['provider']}",
+            texto=record,
+            tipo="nota",
+            fonte="RelayCouncil",
+            idempotency_key=f"relay-{task_key}",
+        )
+    except cache.LimiteDiarioAtingido as exc:
+        raise RelayDailyQuotaExceeded from exc
+    except cache.ConflitoIdempotencia as exc:
+        raise RelayIdempotencyConflict from exc
 
 
 def _verify(command: str, **arguments: object) -> str:
@@ -912,6 +994,13 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/relay-council/catalog":
+            _cache, catalog, _contract, _sanitizer = _relay_modules()
+            body = json.dumps(
+                {"schema_version": 1, "providers": catalog.snapshot()},
+                ensure_ascii=False,
+            ).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path in {"/api/status", "/api/details"}:
             if not _same_origin_request(
                 self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -934,6 +1023,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path == "/api/relay-council/evaluations":
+            return self._relay_evaluation()
         if self.path == "/api/seth/chat":
             return self._seth_chat()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
@@ -951,7 +1042,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(413, "text/plain; charset=utf-8", b"request too large")
         try:
             payload = json.loads(self.rfile.read(int(raw_length)))
-        except (json.JSONDecodeError, UnicodeDecodeError):
+        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
         if not isinstance(payload, dict):
             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
@@ -983,6 +1074,50 @@ class Handler(BaseHTTPRequestHandler):
             _WIKI_LOCK.release()
         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
         return self._send(200, "application/json; charset=utf-8", body)
+
+    def _relay_evaluation(self) -> None:
+        if (self.headers.get("Origin") != ALLOWED_ORIGIN
+                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}):
+            return self._send(403, "text/plain; charset=utf-8", b"same-origin request required")
+        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+            return self._send(415, "text/plain; charset=utf-8", b"JSON required")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > 65_536:
+            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        try:
+            payload = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+        if not isinstance(payload, dict):
+            return self._send(400, "text/plain; charset=utf-8", b"evaluation must be an object")
+        if not _RELAY_LOCK.acquire(blocking=False):
+            return self._send(429, "text/plain; charset=utf-8", b"relay busy")
+        try:
+            if _relay_rate_limited():
+                return self._send(429, "text/plain; charset=utf-8", b"relay rate limit reached",
+                                  (("Retry-After", str(_RELAY_RATE_WINDOW_SECONDS)),))
+            try:
+                receipt = _relay_store(payload)
+            except RelayDailyQuotaExceeded:
+                return self._send(429, "text/plain; charset=utf-8", b"local council daily quota reached")
+            except RelayIdempotencyConflict:
+                return self._send(409, "text/plain; charset=utf-8", b"task result conflicts with stored result")
+            except RelayEvaluationTooLarge:
+                return self._send(413, "text/plain; charset=utf-8", b"evaluation too large for local council cache")
+            except ValueError:
+                return self._send(400, "text/plain; charset=utf-8", b"invalid evaluation")
+            except OSError:
+                return self._send(503, "text/plain; charset=utf-8", b"local council cache unavailable")
+        finally:
+            _RELAY_LOCK.release()
+        body = json.dumps({
+            "schema_version": 1,
+            "stored": True,
+            "entry": receipt["n"],
+            "hash": receipt["h"],
+            "duplicate": receipt.get("duplicate", False),
+        }).encode("utf-8")
+        return self._send(200 if receipt.get("duplicate") else 201, "application/json; charset=utf-8", body)
 
 
     def _seth_conversa(self, apagar: bool) -> None:
