@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(903) DIÁRIO — 28/10/2026 · **Skills do Agata: painel, memória do Conselho e índice.** Aplica `skills-agata-20261028`, assinado pelo Humano. Duas skills novas com o que a frente mediu (agata-painel e agata-conselho-memoria), índice para o Conselho com dono e escopo, e ponteiros em agata-fluxo-dupla e agata-carregar. Caminhos citados conferidos.
+  palavras-chave: skills, agata, painel, memória, índice, aplica, assinado, humano, novas, frente, mediu, memoria, dono, escopo, ponteiros, fluxo, dupla, carregar, caminhos, citados, conferidos
 (902) DIÁRIO — 28/10/2026 · **Contexto automático para sessões do Claude Code.** Aplica `sessao-claude-contexto-20261028`, assinado pelo Humano. Hook SessionStart do projeto entrega estado da Máquina, memória comum do Conselho e estado da sessão conjunta. Só leitura. Garante a entrega do contexto; o cumprimento das regras segue medido pela auditoria.
   palavras-chave: contexto, automático, sessões, claude, code, aplica, sessao, assinado, humano, hook, sessionstart, projeto, entrega, estado, máquina, memória, comum, sessão, conjunta, leitura, garante, cumprimento, regras, segue, medido, auditoria
 (901) DIÁRIO — 28/10/2026 · **Painel: histórico de conversas com a Seth.** Aplica `conversas-historico-20261028`, assinado pelo Humano. Lista de conversas salvas em ~/.cache, fora do canon; abrir, renomear e apagar com confirmação em dois cliques; Markdown seguro; copiar e regenerar. Streaming fica para a etapa seguinte.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, texto, websocket, corrigido, aplica, assinado, humano, cartão, dizia, tinha, live, registry, define, omniroute, http
 (874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitura do momento.** Aplica `evidencia-timers-20261027`, assinado pelo Humano. Janela de manutenção e Rotinas locais leem o timer no momento; Navegador e Discord lê as unidades. Rotinas locais avisa que o timer do inbox está ativo e que a MEMÓRIAS (804) registra parada pelo Humano; a decisão segue com o Humano.
   palavras-chave: painel, evidências, timers, unidades, leitura, momento, aplica, evidencia, assinado, humano, janela, manutenção, rotinas, locais, leem, timer, navegador, discord, avisa, inbox, ativo, memórias, registra, parada, decisão, segue
-(873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Aplica `evidencia-viva-20261027`, assinado pelo Humano. O botão EVIDÊNCIA de cada capacidade mostra o resultado medido no carregamento, com horário. Cartões de documento dizem que não são medição. Ao carregar a página, atualiza agenda e capacidades.
-  palavras-chave: painel, evidência, viva, recarga, total, aplica, evidencia, assinado, humano, botão, capacidade, mostra, resultado, medido, carregamento, horário, cartões, documento, dizem, medição, carregar, página, atualiza, agenda, capacidades
+(873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Ap …
+  palavras-chave: painel, evidência, viva, recarga, total
 (872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco vi …
   palavras-chave: painel, leitura, real, oito, capacidades, cinco
 (871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBST …

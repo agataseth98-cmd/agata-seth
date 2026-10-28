@@ -32,3 +32,6 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, 
 Depois do carregar, toda resposta começa com a linha de turno:
 `agata-seth · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
 Hora nunca é copiada da resposta anterior.
+
+## Contexto automático (28/10/2026)
+Desde a proposta `sessao-claude-contexto-20261028`, o hook `SessionStart` do projeto entrega o estado da Máquina, as últimas entradas do cache do Conselho e o estado da sessão conjunta. Se esse bloco não aparecer, rode os mesmos comandos à mão. Ver `agata-conselho-memoria`.
