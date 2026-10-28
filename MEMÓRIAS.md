@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a085be61019ba214bed195c49b6148c5f2f2c5ff
-  Escrito em: 28/10/2026 14:51 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 268ce275b2e57857bbdbfd822c22da8b7c647d55
+  Escrito em: 28/10/2026 15:00 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a085be61019ba214bed195c49b6148c5f2f2c5ff/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a085be61019ba214bed195c49b6148c5f2f2c5ff/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a085be61019ba214bed195c49b6148c5f2f2c5ff/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a085be61019ba214bed195c49b6148c5f2f2c5ff/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a085be61019ba214bed195c49b6148c5f2f2c5ff/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(912) DIÁRIO — 28/10/2026 · **Log de auditoria encadeado por hash.** Aplica `auditoria-encadeada-20261028`, assinado pelo Humano. Cada registro do log de auditoria de turno passa a levar o SHA-256 do registro anterior; alterar ou apagar uma linha quebra a cadeia, e `auditoria_turno.py --verificar-cadeia` mostra a quebra. Limite declarado: a cadeia não prova que nenhum turno deixou de ser gravado.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR · Autorização: Humano, assinatura de auditoria-encadeada-20261028 ("feito").
+
 (911) DIÁRIO — 28/10/2026 · **A dupla agora se chama Equipe e aceita qualquer membro do Conselho.** Aplica `equipe-universal-20261028`, assinado pelo Humano. As ferramentas mudam de `scripts/dupla/` para `scripts/equipe/`, e `dupla.py` vira `equipe.py`; a skill passa a ser `agata-fluxo-equipe`. Claude, Codex, Gemini, Goose, Seth ou outro membro entram pelo nome. A partida abre com os membros esperados, ou com quaisquer dois. Linha nova na matriz exige o aceite de todos os outros presentes. O estado antigo migra sozinho para a pasta nova. No mesmo pacote: a vigia não quebra mais com canal sem bloco de outro membro, e o `aplicar.py` não grava mais um nome de modelo fixo como coautor.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR; equipe.py --selftest 34/34; testar_auxiliares 25/25 · Autorização: Humano, assinatura de equipe-universal-20261028 ("feito").
 
