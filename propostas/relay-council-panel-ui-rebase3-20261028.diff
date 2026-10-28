@@ -1,0 +1,253 @@
+diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
+index 9ad074cc..2289f379 100644
+--- a/redesign/painel_operacional/README.md
++++ b/redesign/painel_operacional/README.md
+@@ -1,6 +1,6 @@
+ # Painel operacional local
+ 
+-O painel oferece leitura local do estado da Agata. O caminho `/prototipo` contém as nove áreas da interface; `/` mantém a tela operacional compacta. O servidor escuta apenas em `127.0.0.1:20146` e não instala nem inicia uma unidade systemd.
++O painel oferece leitura local do estado da Agata e um registro manual limitado de avaliações do Conselho. O caminho `/prototipo` contém as áreas da interface; `/` mantém a tela operacional compacta. O servidor escuta apenas em `127.0.0.1:20146` e não instala nem inicia uma unidade systemd.
+ 
+ ## Executar
+ 
+@@ -22,12 +22,13 @@ Abra `http://127.0.0.1:20146/prototipo`. Para encerrar uma execução manual, us
+ - `/api/details` consulta sob demanda oito unidades de integração e conta notas de entradas do vault derivado. Unidade ativa não prova funcionamento completo da integração, e contagem de notas não prova sincronia com o canon.
+ - `/api/wiki/search` consulta somente `busca_texto` e `busca_semantica` pelo verificador. A consulta é limitada a 200 caracteres e uma linha, e o retorno é limitado e redigido pelo verificador. Falha, índice semântico ausente e índice parcial são identificados; ausência de resultado não prova ausência no canon. Há apenas uma busca em andamento por vez. A interface não guarda histórico.
+ - A integração RelayCouncil usa o mesmo servidor loopback e a mesma origem do painel: `GET /api/relay-council/catalog` expõe o roster tipado; `POST /api/relay-council/evaluations` valida um resultado com `relay_council_contract.py`, exige timestamp explícito para retry idempotente, confere o modo de acesso contra o provedor, aplica a régua de segredo e acrescenta a avaliação ao cache comum do Conselho. O POST exige `Origin` exata, `Sec-Fetch-Site` same-origin/none e JSON; o corpo tem teto de 65.536 bytes, cada avaliação cabe nos 4.000 caracteres por entrada do cache, e o processo aceita até 60 POSTs por minuto. O identificador da tarefa é resumido por SHA-256 com provedor e timestamp no cache. A mesma tarefa, provedor e timestamp devolvem o recibo existente em retries; conteúdo diferente com essa chave retorna conflito. Limite de frequência e quota diária retornam HTTP 429 com `Retry-After` no primeiro caso. Nenhuma rota chama provedores, lê sessões/cookies ou automatiza DOM.
++- A página **Conselho de Modelos em Rede** lê o catálogo e envia somente avaliações preenchidas manualmente por uma pessoa. Para provedores cujo modo registrado exige API oficial, o formulário marca a origem como `official_api`; o painel não armazena nem usa chaves e não faz a chamada ao provedor. Em falha de rede ou limite temporário, a repetição reutiliza o mesmo payload e timestamp para preservar a idempotência. A página não controla abas nem acessa cookies, sessões ou DOM.
+ - A referência do Git é local, correspondente ao último fetch; a API não consulta o remoto. Estado Git não altera a saúde das unidades. Cada leitura informa origem, observação e validade. Se uma coleta falhar, o navegador conserva o último valor válido como vencido e anuncia a falha; sem valor anterior, exibe ausência de leitura.
+ - A interface atualiza a cada 60 segundos, permite atualização manual, agrupa pedidos de status próximos e pausa consultas quando a aba está oculta. Os dados complementares são consultados ao abrir Memória ou Integrações.
+ 
+ ## Fronteiras
+ 
+-Host, `Origin` e `Sec-Fetch-Site` são verificados nas consultas da interface; POST exige origem local e JSON. Loopback e essas verificações não autenticam outros processos locais. O RelayCouncil acrescenta somente ao cache comum validado; não altera arquivos canônicos ou histórico do painel. O servidor não recebe comandos livres, assinatura, reinício de serviço ou credenciais. Nenhum endereço público ou acesso remoto é configurado. As buscas ajudam a localizar fontes; confirme o texto no canon antes de citar.
++Host, `Origin` e `Sec-Fetch-Site` são verificados nas consultas da interface; POST exige origem local e JSON. Loopback e essas verificações não autenticam outros processos locais. O Conselho em Rede acrescenta somente avaliações sanitizadas ao cache comum; não altera arquivos canônicos ou histórico do painel. O servidor não recebe comandos livres, assinatura, reinício de serviço ou credenciais. Nenhum endereço público ou acesso remoto é configurado. As buscas ajudam a localizar fontes; confirme o texto no canon antes de citar.
+ 
+ Links para Obsidian e LibreChat dependem dos aplicativos existentes. A interface mostra recursos e planos documentados com identificação histórica quando não há leitura viva. `active` do systemd não comprova saúde funcional, e HTTP 200 de `/health` não comprova cada função do chat. A coleta não inclui todos os serviços, resultados internos das tarefas, preços, quota de provedores ou todo o perímetro.
+ 
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index e44cb5fa..0c6a1751 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -30,6 +30,25 @@ dialog{border:1px solid var(--line);border-radius:14px;max-width:min(530px,calc(
+ @media(max-width:690px){.shell{display:block}.sidebar{height:auto;position:relative;padding:12px 14px;gap:10px;overflow:visible}.brand{padding:0 2px 10px;border:0}.brand-mark{width:30px;height:30px;font-size:18px}.brand-name{font-size:18px}.brand-sub{font-size:8px}.nav-label,.side-bottom{display:none}.nav{display:flex;overflow-x:auto;gap:5px;padding-bottom:2px}.nav button{white-space:nowrap;padding:8px 9px;font-size:12px}.nav svg{width:14px;height:14px}.sidebar .nav button[aria-current="page"]{box-shadow:inset 0 -2px #d3a552}.side-foot{display:none}main{padding:12px 14px 32px}.topbar{height:auto;align-items:center;margin-bottom:15px}.snapshot{display:none}.searchbox{width:42vw}.hero{margin-top:7px}.hero h1{font-size:39px}.hero-stamp{flex-wrap:wrap}.kpis{gap:7px}.kpi{padding:11px;min-height:88px}.kpi .value{font-size:23px}.service-list{grid-template-columns:1fr}.memory-orbit{grid-template-columns:100px 1fr}.orbit{height:100px;width:100px}.orbit-center strong{font-size:18px}.cards{grid-template-columns:1fr}.roadmap-lane{grid-template-columns:1fr}.section-heading h1{font-size:34px}.footer-note{display:block}.footer-note span{display:block;margin:4px 0}.callout{align-items:flex-start}.callout .right{display:none}}
+ @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+ 
++/* Conselho de Modelos em Rede */
++.relay-boundary{margin-top:14px;line-height:1.55}
++.relay-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
++.relay-provider{min-width:0;padding:13px;border:1px solid var(--line);border-radius:9px;background:rgba(16,26,42,.55)}
++.relay-provider-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
++.relay-provider h3{margin:0;font:17px var(--serif);font-weight:400;overflow-wrap:anywhere}
++.relay-provider p{margin:7px 0 0;color:var(--muted);font-size:12px}
++.relay-provider small{display:block;margin-top:9px;color:var(--muted);font:10px/1.45 var(--mono);overflow-wrap:anywhere}
++.relay-form{display:grid;grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr);gap:10px 14px;align-items:center;margin-top:16px}
++.relay-form>label{font-size:13px;color:var(--ink)}
++.relay-form input,.relay-form select,.relay-form textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans)}
++.relay-form textarea{resize:vertical;min-height:66px}
++.relay-form input:focus,.relay-form select:focus,.relay-form textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
++.relay-form input:disabled,.relay-form textarea:disabled{opacity:.55}
++.relay-form-actions{grid-column:2;display:flex;gap:9px;flex-wrap:wrap}
++.relay-form [hidden]{display:none}
++@media(max-width:1060px){.relay-roster{grid-template-columns:repeat(2,minmax(0,1fr))}}
++@media(max-width:690px){.relay-roster{grid-template-columns:1fr}.relay-form{grid-template-columns:1fr;gap:6px}.relay-form>label{margin-top:6px}.relay-form-actions{grid-column:1;margin-top:8px}}
++
+ /* Identidade visual Agata · inspirada no artefato “Sistema Agata” e na imagem local */
+ :root{
+   --paper:#080d18;--sheet:#101a2a;--ink:#edf4ff;--muted:#a3b3ca;--line:#273750;
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index dcc80847..00834596 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -20,6 +20,7 @@
+     <button data-page="visao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/></svg>Visão do sistema</button>
+     <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
+     <button data-page="integracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.3 10.8 7.3-3.6M8.3 13.2l7.3 3.6"/></svg>Integrações</button>
++    <button data-page="conselho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><path d="M9.8 9 6.5 14M14.2 9l3.3 5M7.5 17h9"/></svg>Conselho de Modelos em Rede</button>
+     <button data-page="memoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Memória & mapas</button>
+     <button data-page="documentacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5h9l5 5v12H5z"/><path d="M14 3.5v5h5M8 13h8M8 16.5h8"/></svg>Documentação viva</button>
+     <button data-page="manutencao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18.5V5.5M4 18.5h16"/><path d="m7 15 3-4 3 2 5-7"/><circle cx="18" cy="6" r="1"/></svg>Manutenção</button>
+@@ -27,10 +28,10 @@
+     <button data-page="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h4"/></svg>Plano de trabalho</button>
+   </nav></div>
+   <div class="side-bottom"><div class="human-note"><strong>O Humano no centro</strong>O painel reúne contexto e evidência. A decisão e a autorização continuam suas.</div></div>
+-  <div class="side-foot">LOCAL · SOMENTE LEITURA</div>
++  <div class="side-foot">LOCAL · LEITURA + REGISTRO LIMITADO</div>
+ </aside>
+ <main>
+-  <header class="topbar"><div class="crumb" id="crumb">Agata / Panorama</div><div class="top-actions"><div class="snapshot"><b>LEITURA LOCAL</b> · cada fonte mostra seu horário</div><label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.4 4.4"/></svg><span class="sr-only">Buscar capacidades neste protótipo</span><input id="search" type="search" placeholder="Buscar neste mapa…"></label></div></header>
++  <header class="topbar"><div class="crumb" id="crumb">Agata / Panorama</div><div class="top-actions"><div class="snapshot"><b>LOCAL</b> · leitura + registro manual limitado</div><label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.4 4.4"/></svg><span class="sr-only">Buscar capacidades neste protótipo</span><input id="search" type="search" placeholder="Buscar neste mapa…"></label></div></header>
+   <section class="page active" id="page-panorama" data-title="Panorama">
+ 
+     <div class="hero"><div><div class="eyebrow">Leitura local · fonte em cada cartão</div><h1>Panorama</h1><p><strong class="hero-line" id="hero-status" role="status">Lendo o estado do sistema.</strong></p></div><div class="hero-stamp"><div><div class="stamp-row"><i class="dot"></i> <span id="hero-sync-label">Git local · aguardando leitura</span></div><strong id="hero-sync-head">—</strong></div><div id="hero-sync-note">Fonte: Git local</div></div></div>
+@@ -106,6 +107,25 @@
+     <div class="footer-note"><span>FONTES: PROJETO.md · PROJETO_REFERENCIA.md · MEMÓRIAS</span><span>Snapshot documental; integrações não foram testadas ao vivo nesta passada.</span></div>
+   </section>
+ 
++  <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
++    <div class="section-heading"><div><div class="eyebrow">Catálogo e evidência manual</div><h1>Conselho de Modelos em Rede</h1><p>Consulte o catálogo e registre um resultado que você observou. O painel não envia prompts aos provedores.</p></div></div>
++    <div class="callout relay-boundary"><span><strong>Fronteira ativa</strong> · Esta tela não automatiza DOM, não lê abas, cookies, sessões ou credenciais, e não chama APIs de provedores. Para modos API oficial, registre somente uma resposta obtida por uso autorizado externo.</span></div>
++    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">17 provedores tipados</div><h2 class="panel-title">Roster do Conselho</h2></div><button class="btn secondary" id="relay-refresh" type="button">Atualizar catálogo</button></div><p id="relay-catalog-status" class="wiki-demo-status" role="status" aria-live="polite">Carregando catálogo…</p><div class="relay-roster" id="relay-roster"></div></article>
++    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Entrada humana</div><h2 class="panel-title">Registrar resultado observado</h2></div><span class="chip planned">SEM ENVIO AO PROVEDOR</span></div>
++      <form id="relay-evaluation-form" class="relay-form">
++        <label for="relay-provider">Provedor</label><select id="relay-provider" required disabled><option value="">Aguardando catálogo…</option></select>
++        <label for="relay-state">Resultado</label><select id="relay-state" required><option value="green">Resposta concluída (verde)</option><option value="candidate">Resposta em avaliação</option><option value="monitoring">Em monitoramento</option><option value="provider_busy">Provedor ocupado</option><option value="excluded">Fora do teste</option></select>
++        <label for="relay-text">Resposta observada</label><textarea id="relay-text" maxlength="60000" rows="5" placeholder="Cole apenas a resposta necessária para a avaliação. Não inclua dados pessoais, credenciais ou conteúdo de sessão."></textarea>
++        <label for="relay-error">Falha ou motivo (quando aplicável)</label><textarea id="relay-error" maxlength="2000" rows="2" placeholder="Ex.: limite do provedor, timeout ou motivo da exclusão"></textarea>
++        <label for="relay-latency">Latência em milissegundos (opcional)</label><input id="relay-latency" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex.: 4200">
++        <div class="relay-form-actions"><button class="btn" id="relay-submit" type="submit" disabled>Registrar no cache do Conselho</button><button class="btn secondary" id="relay-retry" type="button" hidden>Repetir o mesmo envio</button></div>
++      </form>
++      <p id="relay-submit-status" class="wiki-demo-status" role="status" aria-live="polite">O envio grava uma avaliação sanitizada no cache local do Conselho.</p>
++      <p class="subnote">Não cole senhas, tokens, cookies, identificadores de sessão, dados pessoais ou prompts confidenciais. A gravação é local e não altera o canon. Em erro de rede, o botão de repetição reutiliza a mesma chave idempotente.</p>
++    </article>
++    <div class="footer-note"><span>CONSELHO EM REDE · CATÁLOGO + REGISTRO MANUAL</span><span>Sem chamadas a provedores · sem automação de navegador</span></div>
++  </section>
++
+   <section class="page" id="page-memoria" data-title="Memória & mapas">
+ 
+     <div class="section-heading"><div><div class="eyebrow">Consciência situacional</div><h1>Memória</h1><p>Abra uma entrada ou um mapa para ver como decisões, funções e limites se ligam.</p></div></div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 8d08ff06..4e333b3d 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -63,6 +63,7 @@ function showPage(name) {
+   if (name === "grafo") carregarGrafo();
+   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
+   if (name === "visao") carregarVisaoSistema();
++  if (name === "conselho") loadRelayCatalog();
+ }
+ nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+ document.addEventListener("click", (e) => { const b = e.target.closest("[data-open-page]"); if (b) showPage(b.dataset.openPage); });
+@@ -322,6 +323,132 @@ async function fetchJson(url, options = {}, timeoutMs = 30000) {
+     return data;
+   } finally { clearTimeout(timeout); }
+ }
++let relayProviders = [];
++let relayPendingPayload = null;
++function renderRelayRoster(providers) {
++  const root = byId("relay-roster");
++  root.replaceChildren();
++  const termsLabels = {
++    api_terms_required: "condições da API a revisar",
++    web_automation_restricted: "automação na web restrita",
++    web_automation_prohibited: "automação na web proibida",
++    web_output_extraction_prohibited: "extração via navegador proibida",
++    unverified: "ainda não verificado"
++  };
++  providers.forEach((provider) => {
++    const card = document.createElement("article"); card.className = "relay-provider";
++    const head = document.createElement("div"); head.className = "relay-provider-head";
++    const name = document.createElement("h3"); name.textContent = provider.name;
++    const availability = document.createElement("span"); availability.className = "chip " + (provider.availability === "in_roster" ? "active" : "planned");
++    availability.textContent = provider.availability === "in_roster" ? "NO CATÁLOGO" : "CANDIDATO";
++    head.append(name, availability);
++    const kind = document.createElement("p"); kind.textContent = provider.kind === "model-service" ? "Serviço de modelo" : "Roteador de modelos";
++    const access = document.createElement("p"); access.textContent = provider.access_mode === "manual_only" ? "Acesso registrado: manual" : "Acesso registrado: API oficial";
++    const terms = document.createElement("small"); terms.textContent = "Revisão de termos: " + (termsLabels[provider.terms_review] || "não informada");
++    card.append(head, kind, access, terms); root.append(card);
++  });
++}
++async function loadRelayCatalog() {
++  const status = byId("relay-catalog-status");
++  const refreshButton = byId("relay-refresh");
++  refreshButton.disabled = true;
++  status.textContent = "Lendo catálogo local…";
++  try {
++    const data = await fetchJson("/api/relay-council/catalog", {headers: {Accept: "application/json"}});
++    if (!Array.isArray(data.providers) || data.providers.some((item) => !item || typeof item.id !== "string" || typeof item.name !== "string")) throw new Error("catálogo inválido");
++    relayProviders = data.providers;
++    renderRelayRoster(relayProviders);
++    const select = byId("relay-provider");
++    const selected = select.value;
++    select.replaceChildren();
++    const prompt = document.createElement("option"); prompt.value = ""; prompt.textContent = "Selecione um provedor"; select.append(prompt);
++    relayProviders.forEach((provider) => {
++      const option = document.createElement("option"); option.value = provider.id; option.textContent = provider.name; select.append(option);
++    });
++    select.disabled = false;
++    if (relayProviders.some((item) => item.id === selected)) select.value = selected;
++    byId("relay-submit").disabled = !select.value;
++    status.textContent = "Catálogo lido: " + relayProviders.length + " provedores · fonte: API local do painel.";
++  } catch (_) {
++    status.textContent = "Catálogo indisponível. Atualize quando o servidor local estiver acessível.";
++    byId("relay-submit").disabled = true;
++  } finally { refreshButton.disabled = false; }
++}
++function relayStateChanged() {
++  const positive = ["green", "candidate", "monitoring"].includes(byId("relay-state").value);
++  byId("relay-text").required = positive;
++  byId("relay-error").required = !positive;
++  byId("relay-text").disabled = !positive;
++  byId("relay-error").disabled = positive;
++}
++function relayPayload() {
++  const providerId = byId("relay-provider").value;
++  const provider = relayProviders.find((item) => item.id === providerId);
++  if (!provider) throw new Error("Selecione um provedor do catálogo.");
++  const state = byId("relay-state").value;
++  const ok = ["green", "candidate", "monitoring"].includes(state);
++  const latencyValue = byId("relay-latency").value;
++  const payload = {
++    task_id: "ui-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12),
++    provider: provider.id,
++    site: provider.id,
++    access_mode: provider.access_mode === "manual_only" ? "manual" : "official_api",
++    state,
++    ok,
++    text: ok ? byId("relay-text").value.trim() : null,
++    error: ok ? null : byId("relay-error").value.trim(),
++    latency_ms: latencyValue ? Number(latencyValue) : null,
++    timestamp: new Date().toISOString()
++  };
++  return payload;
++}
++async function sendRelayPayload(payload) {
++  const status = byId("relay-submit-status");
++  byId("relay-submit").disabled = true;
++  byId("relay-retry").disabled = true;
++  status.textContent = "Registrando no cache local do Conselho…";
++  try {
++    const response = await fetch("/api/relay-council/evaluations", {
++      method: "POST", credentials: "same-origin", cache: "no-store",
++      headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify(payload)
++    });
++    if (!response.ok) {
++      const retryable = response.status === 429 || response.status >= 500;
++      relayPendingPayload = retryable ? payload : null;
++      byId("relay-retry").hidden = !retryable;
++      const message = response.status === 429 ? "Limite local atingido; aguarde e repita o mesmo envio." : response.status === 409 ? "Conflito de idempotência; o registro não foi repetido." : response.status >= 500 ? "Servidor local indisponível; você pode repetir o mesmo envio." : "O servidor recusou o registro (HTTP " + response.status + "). Confira os campos e o catálogo.";
++      status.textContent = message;
++      return;
++    }
++    const receipt = await response.json();
++    if (!receipt || receipt.schema_version !== 1 || receipt.stored !== true || !Number.isInteger(receipt.entry)) throw new Error("recibo inválido");
++    relayPendingPayload = null;
++    byId("relay-retry").hidden = true;
++    status.textContent = "Registrado no cache local · entrada (" + receipt.entry + ")" + (receipt.duplicate ? " · repetição idempotente" : "") + ".";
++    byId("relay-evaluation-form").reset();
++    relayStateChanged();
++    byId("relay-submit").disabled = !byId("relay-provider").value;
++  } catch (_) {
++    relayPendingPayload = payload;
++    byId("relay-retry").hidden = false;
++    status.textContent = "Falha de rede ou resposta inválida. Repita o mesmo envio para preservar a chave idempotente.";
++  } finally {
++    byId("relay-retry").disabled = false;
++    if (!relayPendingPayload) byId("relay-submit").disabled = !byId("relay-provider").value;
++  }
++}
++byId("relay-refresh").addEventListener("click", loadRelayCatalog);
++byId("relay-provider").addEventListener("change", () => { byId("relay-submit").disabled = !byId("relay-provider").value; });
++byId("relay-state").addEventListener("change", relayStateChanged);
++relayStateChanged();
++byId("relay-evaluation-form").addEventListener("submit", (event) => {
++  event.preventDefault();
++  if (!event.currentTarget.reportValidity()) return;
++  try { relayPendingPayload = relayPayload(); sendRelayPayload(relayPendingPayload); }
++  catch (error) { byId("relay-submit-status").textContent = error.message; }
++});
++byId("relay-retry").addEventListener("click", () => { if (relayPendingPayload) sendRelayPayload(relayPendingPayload); });
+ async function refresh(manual = false) {
+   if (busy || document.visibilityState === "hidden") return;
+   busy = true;

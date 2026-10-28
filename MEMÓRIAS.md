@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 268ce275b2e57857bbdbfd822c22da8b7c647d55
-  Escrito em: 28/10/2026 15:00 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8519794574a15207a4afe98f12307c3302f23269
+  Escrito em: 28/10/2026 15:09 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/268ce275b2e57857bbdbfd822c22da8b7c647d55/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8519794574a15207a4afe98f12307c3302f23269/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8519794574a15207a4afe98f12307c3302f23269/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8519794574a15207a4afe98f12307c3302f23269/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8519794574a15207a4afe98f12307c3302f23269/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8519794574a15207a4afe98f12307c3302f23269/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(913) DIÁRIO — 28/10/2026 · **Proposta P-8 da interface do Conselho refeita sobre o main 8519794.** O patch da página Conselho de Modelos em Rede foi regenerado e `git apply --check` passou na base atual. A proposta registra catálogo local de 17 provedores e registro manual via endpoint local; não chama provedores nem automatiza o navegador. Testes visuais e de painel da versão anterior não foram repetidos após o rebase. O PR anterior #684 permanece aberto e conflitante; esta proposta não o modifica. Aguarda publicação da proposta e assinatura humana própria.
+Modelo: Codex · vetor: git apply --check sobre 8519794; testes/runtime nesta base não medidos.
+
 (912) DIÁRIO — 28/10/2026 · **Log de auditoria encadeado por hash.** Aplica `auditoria-encadeada-20261028`, assinado pelo Humano. Cada registro do log de auditoria de turno passa a levar o SHA-256 do registro anterior; alterar ou apagar uma linha quebra a cadeia, e `auditoria_turno.py --verificar-cadeia` mostra a quebra. Limite declarado: a cadeia não prova que nenhum turno deixou de ser gravado.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR · Autorização: Humano, assinatura de auditoria-encadeada-20261028 ("feito").
 
