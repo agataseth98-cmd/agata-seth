@@ -264,5 +264,20 @@ class HttpTests(unittest.TestCase):
         for ruim in ("../../etc/passwd.md", "/etc/passwd.md", "entradas/../../../x.md", "naoexiste.txt"):
             self.assertIsNone(panel._vault_caminho(ruim), ruim)
 
+    def test_conversa_valida_e_grava_so_formato_esperado(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            antes = panel.CONVERSAS_DIR
+            panel.CONVERSAS_DIR = Path(tmp)
+            try:
+                self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "system", "content": "x"}]}))
+                self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "user", "content": "x"}], "id": "../../etc"}))
+                salvo = panel._conversa_gravar({"titulo": "Teste", "mensagens": [{"role": "user", "content": "oi"}]})
+                self.assertIsNotNone(salvo)
+                self.assertEqual(panel._conversa_caminho(salvo["id"]).name, salvo["id"] + ".json")
+                self.assertTrue(panel._conversa_apagar(salvo["id"]))
+                self.assertFalse(panel._conversa_apagar(salvo["id"]))
+            finally:
+                panel.CONVERSAS_DIR = antes
+
 if __name__ == "__main__":
     unittest.main()

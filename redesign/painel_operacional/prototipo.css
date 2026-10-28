@@ -313,3 +313,24 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .seth-exemplos{display:flex;flex-wrap:wrap;gap:8px}
 .seth-exemplo{border:1px solid var(--line);background:transparent;color:inherit;border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
 .seth-exemplo:hover{border-color:#66b2da}
+
+/* (28/10/2026) Conversa com a Seth: lista de conversas, Markdown seguro e ações por resposta. */
+.seth-layout{display:grid;grid-template-columns:minmax(180px,220px) minmax(0,1fr);gap:14px;align-items:start}
+.seth-lista{display:flex;flex-direction:column;gap:10px;min-width:0}
+.seth-conversas{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto}
+.seth-item{display:flex;flex-direction:column;gap:4px;padding:8px 9px;border-radius:10px;border:1px solid transparent}
+.seth-item.ativa,.seth-item:hover{border-color:var(--line);background:rgba(97,217,237,.06)}
+.seth-item-abrir{background:none;border:0;padding:0;text-align:left;color:inherit;cursor:pointer;font:inherit;overflow-wrap:anywhere}
+.seth-item-acoes{display:flex;gap:10px;font-size:12px}
+.seth-renomear{width:100%;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:transparent;color:inherit}
+.seth-main{min-width:0;display:flex;flex-direction:column;gap:8px}
+.seth-form{display:flex;gap:8px;margin-top:4px}
+.seth-form textarea{flex:1;resize:vertical}
+.msg-acoes{display:flex;gap:14px;margin-top:8px;font-size:12px}
+.msg-body p{margin:0 0 .6em}
+.msg-body h4{margin:.4em 0;font-size:14px}
+.msg-body ul{margin:.2em 0 .6em 1.2em;padding:0}
+.msg-body code{font:12px/1.4 ui-monospace,Consolas,monospace;padding:1px 5px;border-radius:5px;background:rgba(97,217,237,.08)}
+.msg-body pre{overflow:auto;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.25);margin:.4em 0}
+.msg-body pre code{padding:0;background:none}
+@media (max-width:760px){.seth-layout{grid-template-columns:1fr}.seth-conversas{max-height:22vh}}
