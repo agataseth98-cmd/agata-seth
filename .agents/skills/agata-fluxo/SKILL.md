@@ -10,30 +10,30 @@ Vale para qualquer modelo da Confederação. Use o cabeçalho exato de `PROTOCOL
 ## Escolha a skill necessária
 - Sessão nova ou sem bloco de estado: `agata-carregar`.
 - Proposta ou aplicação protegida por P-8: `agata-aplicar-proposta`.
-- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-dupla`.
+- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-equipe`.
 - Mudança em serviço, container, rede, energia ou boot: `agata-mudanca-segura`.
 - Leitura ou contato com a Seth, quando solicitado: `agata-conversar-com-seth`.
 
 Use as skills necessárias ao tipo de tarefa. Se ela envolver, por exemplo, runtime e arquivos P-8, use as duas skills correspondentes. Este fluxo define as regras comuns; cada skill especializada define só seu procedimento próprio.
 
-Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-dupla` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
+Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-equipe` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
 
 ## 0. Antes de qualquer ação
 1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`,
-   `python3 scripts/dupla/dupla.py status`. Sem medição, escrever "não medido".
-2. **Canal**: `python3 scripts/dupla/dupla.py presente --agente <eu>`; ler o canal com
-   `python3 scripts/dupla/dupla.py ler --agente <eu>`. Responder com `dizer --assunto ... --texto "$(cat arq)"`.
+   `python3 scripts/equipe/equipe.py status`. Sem medição, escrever "não medido".
+2. **Canal**: `python3 scripts/equipe/equipe.py presente --agente <eu>`; ler o canal com
+   `python3 scripts/equipe/equipe.py ler --agente <eu>`. Responder com `dizer --assunto ... --texto "$(cat arq)"`.
 3. **Não tocar** no checkout compartilhado. Trabalhar em worktree própria a partir de `origin/main`.
 
 ## 1. Divisão de trabalho entre modelos
 - Quem propõe redige a mudança em `propostas/<nome>.diff`; quem audita **executa** os comandos citados
   e reporta a saída literal. Quem audita não aprova.
-- Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `dupla.py`).
+- Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `equipe.py`).
 - Trabalho caro em tokens (suíte completa, varreduras longas) vai para o modelo com mais folga; o relato
   volta pelo canal, sem colar relatório inteiro.
 
 ## 2. Mudança protegida
-Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-dupla`.
+Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-equipe`.
 
 Regras que sempre valem: proposta em worktree própria baseada em `origin/main`; `.diff` verificável e testado; proposta e aplicação são etapas separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Não avance com teste ou assinatura ausente.
 
@@ -58,7 +58,7 @@ Regras que sempre valem: proposta em worktree própria baseada em `origin/main`;
 
 ## Relacionadas
 - `agata-carregar` (abrir sessão), `agata-mudanca-segura` (mudança na Máquina),
-  `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-dupla` (detalhe do canal e da vigia).
+  `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-equipe` (detalhe do canal e da vigia).
 
 ## 8. Comandos padrão (para o Humano colar; todo modelo entrega neste formato)
 Atualizar a checkout principal sem perder nada. Guarda qualquer arquivo rastreado modificado antes de devolvê-lo ao repositório:

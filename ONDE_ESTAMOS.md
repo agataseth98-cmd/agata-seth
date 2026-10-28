@@ -10,6 +10,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
+**Aplicação da Equipe, 28/10:** assinatura verificada; a aplicação está preparada em PR e aguarda o merge humano. Após o merge: atualizar `agata-vigia@.service`, recarregar o systemd do usuário e provar as unidades de Claude e Codex.
+
+
 **Esperando a sua assinatura:**
 - `aplicar-refazer-base-20261028`: quando o main anda antes do merge, o script de aplicação refaz o PR sobre o main novo, em vez de misturar os dois e travar em conflito. Depois dele, o Discord pode ser reaplicado.
 - `equipe-universal-20261028`: a dupla passa a se chamar Equipe e aceita qualquer membro do Conselho, não só Claude e Codex. Assine depois da anterior: as duas mexem no mesmo script.
