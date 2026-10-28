@@ -44,6 +44,10 @@ def main():
         casos.append(("numeração: sem entrada é erro explícito", False))
     except ValueError:
         casos.append(("numeração: sem entrada é erro explícito", True))
+    casos.append(("refazer base: PR DIRTY (conflito com o main) refaz", ap.precisa_refazer("DIRTY", "")))
+    casos.append(("refazer base: PR BEHIND (main andou) refaz", ap.precisa_refazer("BEHIND", "")))
+    casos.append(("refazer base: mensagem 'not up to date' sem estado refaz", ap.precisa_refazer("", "Head branch is not up to date")))
+    casos.append(("refazer base: BLOCKED (check vermelho) não refaz", not ap.precisa_refazer("BLOCKED", "Required status check failed")))
     casos.append(("par: pedido do outro há 12 min sem resposta -> DEVO RESPOSTA", par("claude", ("codex", 12, "claude")).startswith("DEVO RESPOSTA")))
     casos.append(("par: pedido recente (2 min) -> silêncio", par("claude", ("codex", 2, "claude")) == ""))
     casos.append(("par: pedido antigo respondido -> silêncio", par("claude", ("codex", 30, "claude"), ("claude", 20, "codex"), ("codex", 3, "humano")) == ""))
