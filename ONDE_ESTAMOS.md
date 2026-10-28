@@ -10,9 +10,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Assinada; PR de aplicação aguarda seu merge:**
+**Aplicado no PR #674:**
 - RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
-- O painel oficial e os serviços ainda não foram alterados. Interface e chamadas de API exigem uma etapa própria depois deste PR.
+- O painel e os serviços em execução não foram alterados.
+
+**Proposta P-8 do endpoint local, pronta para revisão e assinatura:**
+- Catálogo por GET e registro validado por POST no próprio painel `127.0.0.1:20146`, com sanitização, quota e retry idempotente.
+- Ainda não há interface RelayCouncil nem conexão com provedores; ambas ficam para etapas posteriores.
 
 ## Hoje, 22 e 23/10
 
