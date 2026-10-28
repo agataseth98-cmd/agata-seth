@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(895) DIÁRIO — 28/10/2026 · **Remove proposta de contraste obsoleta.** Aplica `remove-contraste-20261028`, assinado pelo Humano. Remove `propostas/contraste-inversao-20261027.diff`: sem assinatura e sem objeto, porque a paleta invertida foi desfeita pela volta à identidade original.
+  palavras-chave: remove, proposta, contraste, obsoleta, aplica, assinado, humano, propostas, inversao, diff, assinatura, objeto, porque, paleta, invertida, desfeita, volta, identidade, original
 (894) DIÁRIO — 28/10/2026 · **Painel: volta à identidade visual original do Agata.** Aplica `identidade-original-20261027`, assinado pelo Humano. Restaura o CSS anterior às propostas de paleta. Só cores; layout e comportamento intactos. A proposta de contraste sobre a paleta invertida (`contraste-inversao-20261027`) fica sem objeto e não é aplicada.
   palavras-chave: painel, volta, identidade, visual, original, agata, aplica, assinado, humano, restaura, css, anterior, propostas, paleta, cores, layout, comportamento, intactos, proposta, contraste, invertida, inversao, fica, objeto, aplicada
 (893) DIÁRIO — 27/10/2026 · **Painel: paleta invertida com a identidade original.** Aplica `inversao-identidade-20261027`, assinado pelo Humano. Luminância invertida sobre o CSS original; matiz e saturação preservados. Contraste a medir na página real após a aplicação.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: verificador, amostra, opcional, medir, precisão, alarmes, aplica, auditoria, assinado, humano, agata, grava, resposta, anterior, saídas, ferramenta, mesmo, turno, arquivo, próprio, permissão, truncamento, caracteres, desligada, padrão, log, achados, continua, texto, determina, topo, ligar, decisão
 (866) DIÁRIO — 27/10/2026 · **Ensaio de seguir protocolo v2 gravado no medido da capivara.** Aplica `medido-ensaio-v2-20261027`, assinado pelo Humano. Acrescenta 12 registros de pontuação em ministral-14b, gemini-3.1-flash-lite (com e sem o campo thinking) e qwen3.5-9b. Pontuação revisada às cegas pelo Codex (c8e689e7 e e3d92d85). Regra: resposta vazia com HTTP 200 conta como falha. A Seth não entra no medido por não ser modelo da capivara. Limite: três repetições por modelo, amostra pequena; não é prova de adesão ao protocolo.
   palavras-chave: ensaio, seguir, protocolo, gravado, medido, capivara, aplica, assinado, humano, acrescenta, registros, pontuação, ministral, gemini, flash, lite, campo, thinking, qwen, revisada, cegas, codex, regra, resposta, vazia, http, conta, falha, seth, entra, modelo, limite, três, repetições, amostra, pequena, prova, adesão
-(865) DIÁRIO — 26/10/2026 · **Painel: cartão do Panorama com leitura viva do Git.** Aplica `painel-sync-vivo-20261026`, assinado pelo Humano. O cartão do topo mostrava SYNC PASS 65f76af de 23/10 como se fosse atual. Passa a ler o Git de /api/status; o snapshot de 23/10 fica como referência histórica rotulada. Se a leitura falhar, mostra sem leitura, e não o valor antigo.
-  palavras-chave: painel, cartão, panorama, leitura, viva, git, aplica, sync, vivo, assinado, humano, topo, mostrava, pass, fosse, atual, passa, ler, api, status, snapshot, fica, referência, histórica, rotulada, falhar, mostra, valor, antigo
+(865) DIÁRIO — 26/10/2026 · **Painel: cartão do Panorama com leitura viva do Git …
+  palavras-chave: painel, cartão, panorama, leitura, viva, git
 (864) DIÁRIO — 26/10/2026 · **Painel: retrato original da Seth servido em /asset …
   palavras-chave: painel, retrato, original, seth, servido, asset
 (863) DIÁRIO — 26/10/2026 · **Painel: protótipo separado em HTML, CSS e JS (CSP) …
