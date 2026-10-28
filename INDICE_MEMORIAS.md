@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(900) DIÁRIO — 28/10/2026 · **Painel: refino da conversa com a Seth.** Aplica `conversa-painel-20261028`, assinado pelo Humano. Falas separadas com modelo e hora; quebras de linha preservadas; notas de verificação em tom discreto; exemplos de pergunta; botão Nova conversa; Enter envia; erros com causa. Texto puro, sem HTML da Seth.
 (899) DIÁRIO — 28/10/2026 · **Painel: refino do Panorama.** Aplica `painel-refino-20261028`, assinado pelo Humano. Cartão de propostas conta só as pendentes de assinatura, a mesma regra da linha de status. Nota de unidades lida, sem número fixo. Sombra de texto na linha de status.
 (898) DIÁRIO — 28/10/2026 · **Painel: segunda passada de textos.** Aplica `textos-revisao2-20261028`, assinado pelo Humano. Doze parágrafos longos viram frases de até 120 caracteres, com os mesmos fatos. Oito aberturas de aba passam a dizer o que o leitor pode fazer ali.
 (897) DIÁRIO — 28/10/2026 · **Painel: revisão de textos longos.** Aplica `textos-revisao-20261028`, assinado pelo Humano. Nove textos longos viram frases curtas, com os mesmos fatos: portas, comandos, regras e limites preservados.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Aplica `evidencia-viva-20261027`, assinado pelo Humano. O botão EVIDÊNCIA de cada capacidade mostra o resultado medido no carregamento, com horário. Cartões de documento dizem que não são medição. Ao carregar a página, atualiza agenda e capacidades.
 (872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco viram documento.** Aplica `capacidades-leitura-20261027`, assinado pelo Humano. Sondas só de leitura: estado de unidades (systemctl --user show) e HTTP local. Cartões sem sonda deixam de mostrar estado. Limite registrado: escolher rota só confirma que o gateway está ativo.
 (871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBSTITUÍDA.** Aplica `propostas-substituidas-20261027`, assinado pelo Humano. Cria propostas/SUBSTITUIDAS.txt e a leitura que mostra SUBSTITUÍDA no Plano de trabalho. O painel listava retrato-original-20261026 como REGISTRADA, embora não tenha sido aplicada.
-(870) DIÁRIO — 27/10/2026 · **Painel: Wiki e timers reabertos.** Aplica `wiki-timers-liberar-20261027`, assinado pelo Humano. Muda a formação de 26/10 (PR 584): WIKI_LIBERADA = True e TIMER_ALLOWLIST com agata-manutencao.timer e agata-vault-inbox.timer; os três testes que estavam pulados voltam a rodar. Medido no verificador: busca_texto 0,32 s, busca_semantica 0,21 s.
+(870) DIÁRIO — 27/10/2026 · **Painel: Wiki e timers reabertos.** Aplica `wiki-ti …
 (869) DIÁRIO — 27/10/2026 · **Painel: parte funcional sem Wiki e sem timers.** A …
 (868) DIÁRIO — 27/10/2026 · **Painel: sobe e cai junto com a Seth.** Aplica `cic …
 (867) DIÁRIO — 27/10/2026 · **Verificador: amostra opcional para medir a precisã …

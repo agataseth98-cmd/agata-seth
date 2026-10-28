@@ -518,38 +518,81 @@ function ligarCartoesClicaveis() {
 
 /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
 const sethHistorico = [];
-function sethEscrever(papel, texto) {
-  const linha = document.createElement("p");
-  linha.style.margin = "0";
-  const quem = document.createElement("strong");
-  quem.textContent = papel === "user" ? "Você: " : "Seth: ";
-  linha.append(quem, document.createTextNode(texto));
-  byId("seth-transcript").append(linha);
-  linha.scrollIntoView({block: "end"});
+const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
+const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
+function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+function sethVazio() {
+  const log = byId("seth-transcript");
+  if (!log || log.children.length || sethHistorico.length) return;
+  const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa ainda. Pergunte sobre o estado, uma decisão ou uma proposta.";
+  log.append(vazio);
+}
+function sethExemplos() {
+  const box = byId("seth-exemplos"); if (!box) return;
+  box.replaceChildren();
+  SETH_EXEMPLOS.forEach((texto) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "seth-exemplo"; b.textContent = texto;
+    b.addEventListener("click", () => { byId("seth-input").value = texto; byId("seth-input").focus(); });
+    box.append(b);
+  });
+}
+function sethEscrever(papel, texto, modelo = "") {
+  const log = byId("seth-transcript");
+  const vazio = log.querySelector(".seth-vazio"); if (vazio) vazio.remove();
+  const msg = document.createElement("article"); msg.className = "msg msg-" + (papel === "user" ? "user" : "assistant");
+  const cab = document.createElement("div"); cab.className = "msg-head";
+  const quem = document.createElement("strong"); quem.textContent = papel === "user" ? "Você" : "Seth" + (modelo ? " · " + modelo : "");
+  const hora = document.createElement("span"); hora.textContent = sethHora();
+  cab.append(quem, hora);
+  const corpo = document.createElement("div"); corpo.className = "msg-body";
+  const notas = [];
+  for (const linha of String(texto).split("\n")) {
+    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { notas.push(linha.trim()); continue; }
+    corpo.append(linha + "\n");
+  }
+  msg.append(cab, corpo);
+  notas.forEach((n) => { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = n; msg.append(aside); });
+  log.append(msg);
+  log.scrollTop = log.scrollHeight;
+}
+function sethErro(status, erro) {
+  if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
+  if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
+  return erro && erro.message ? erro.message : "falha desconhecida";
 }
 function ligarConversaSeth() {
   const form = byId("seth-form");
   if (!form || form.dataset.ligado) return;
   form.dataset.ligado = "1";
+  sethExemplos(); sethVazio();
+  const campo = byId("seth-input");
+  campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+  byId("seth-nova").addEventListener("click", () => {
+    sethHistorico.length = 0; byId("seth-transcript").replaceChildren(); sethVazio();
+    byId("seth-status").textContent = "PRONTA"; byId("seth-status").className = "chip planned"; campo.focus();
+  });
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const campo = byId("seth-input"); const botao = byId("seth-send"); const estado = byId("seth-status");
+    const estado = byId("seth-status"); const botao = byId("seth-send");
     const texto = campo.value.trim();
     if (!texto || botao.disabled) return;
     sethHistorico.push({role: "user", content: texto});
     sethEscrever("user", texto); campo.value = "";
     botao.disabled = true; estado.textContent = "PENSANDO"; estado.className = "chip partial";
+    const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+    byId("seth-transcript").append(pensando);
     try {
       const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
         body: JSON.stringify({messages: sethHistorico.slice(-20)})});
-      if (!r.ok) throw new Error(r.status === 429 ? "outra conversa em curso" : "HTTP " + r.status);
+      if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
       const dados = await r.json();
       sethHistorico.push({role: "assistant", content: dados.content});
-      sethEscrever("assistant", dados.content);
+      pensando.remove();
+      sethEscrever("assistant", dados.content, dados.model || "");
       estado.textContent = "PRONTA"; estado.className = "chip planned";
     } catch (erro) {
-      sethHistorico.pop();
-      sethEscrever("assistant", "Não consegui responder agora: " + erro.message + ".");
+      sethHistorico.pop(); pensando.remove();
+      sethEscrever("assistant", "Não consegui responder agora: " + sethErro(erro.status, erro) + ".");
       estado.textContent = "INDISPONÍVEL"; estado.className = "chip horizon";
     } finally { botao.disabled = false; campo.focus(); }
   });
