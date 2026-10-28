@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895
-  Escrito em: 28/10/2026 16:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340
+  Escrito em: 28/10/2026 16:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(916) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-paridade-20261028` aplicado em branch própria após assinatura humana validada.** `p8_verificar.sh` confirmou par, hash, assinatura Ed25519 e `git apply --check`; 34 testes do painel e selftest passaram. Prévia isolada mostrou pedido de envio aguardando aprovação humana e identificado como teste local, sem envio a provedor. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
+Modelo: GPT-6 (Codex) · vetor: `p8_verificar.sh`, suíte unitária, selftest e prévia local em diretório temporário · Autorização: assinatura humana P-8 e “feito” para aplicar
+
 (915) DIÁRIO — 28/10/2026 · **Conselho em Rede preparado para incorporação na mesma entrega do painel, em proposta P-8 ainda sem assinatura.** A página, a fila humana, o histórico e a extensão Chromium foram reunidos sob o servidor do painel; nove adaptadores passaram rodada simulada. `git apply --check` e testes em worktree descartável passaram: 34 testes, selftest do painel e sintaxe dos scripts. A prévia local confirmou prompt e ferramenta pendentes. Nenhum provedor real foi chamado; integração em runtime não aplicada.
 Modelo: Codex (Codex desktop, na Máquina) · vetor: unittest 34/34; selftest OK; prévia HTTP local; testes reais de LLM não medidos · Autorização: Humano — "vc vai fazer isso antes de encerrarmos vai testar e me apresentar os resultados ok?"
 

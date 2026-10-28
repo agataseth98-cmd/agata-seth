@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Conselho em Rede:** proposta P-8 `conselho-em-rede-paridade-20261028` preparada para entregar a página e a extensão junto com o painel operacional. Em cópia descartável, 34 testes passaram, selftest e sintaxe passaram; prévia HTTP confirmou pedidos de envio e ferramenta pendentes de aprovação. Nenhum provedor real foi chamado. A proposta ainda não está assinada nem aplicada; o painel em execução não foi alterado.
+**Conselho em Rede:** P-8 `conselho-em-rede-paridade-20261028` assinado e aplicado na branch `aplica/conselho-em-rede-paridade-20261028`. P-8 validou hash, assinatura e aplicabilidade; 34 testes e selftest passaram. Prévia isolada confirmou envio em espera de aprovação humana. PR de aplicação aguarda revisão/merge; runtime não reiniciado e provedores reais não testados.
 
 **Conselho de Modelos em Rede:** proposta `relay-council-panel-ui-rebase3-20261028` assinada e validada por P-8. A aplicação está na branch própria, com selftest e 22 testes do painel passando; aguarda merge humano. O serviço não foi reiniciado e a página real ainda não foi medida.
 

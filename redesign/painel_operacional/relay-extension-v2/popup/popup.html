@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Conselho em Rede · Agata</title>
+  <style>
+    body { font-family: sans-serif; background: #1a1a1a; color: #e8e8e8; padding: 12px; width: 280px; font-size: 12px; }
+    h1 { font-size: 13px; margin: 0 0 8px 0; }
+    .status { padding: 6px; background: #222; border-radius: 3px; margin-bottom: 8px; }
+    .status.connected { color: #66cc66; }
+    .status.disconnected { color: #ff5555; }
+    button { padding: 6px 10px; background: #4a9eff; color: #111; border: none; border-radius: 3px; cursor: pointer; font-size: 11px; width: 100%; }
+    .hint { color: #888; font-size: 10px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Conselho em Rede</h1>
+  <div class="status" id="status">carregando…</div>
+  <button id="btnPoll">Forçar poll agora</button>
+  <p class="hint">Esta extensão consulta o painel Agata em <code>http://127.0.0.1:20146</code>. Os envios só saem após aprovação humana no Conselho em Rede.</p>
+  <script src="popup.js"></script>
+</body>
+</html>

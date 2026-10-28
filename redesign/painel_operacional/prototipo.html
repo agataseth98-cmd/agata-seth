@@ -108,22 +108,8 @@
   </section>
 
   <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
-    <div class="section-heading"><div><div class="eyebrow">Catálogo e evidência manual</div><h1>Conselho de Modelos em Rede</h1><p>Consulte o catálogo e registre um resultado que você observou. O painel não envia prompts aos provedores.</p></div></div>
-    <div class="callout relay-boundary"><span><strong>Fronteira ativa</strong> · Esta tela não automatiza DOM, não lê abas, cookies, sessões ou credenciais, e não chama APIs de provedores. Para modos API oficial, registre somente uma resposta obtida por uso autorizado externo.</span></div>
-    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">17 provedores tipados</div><h2 class="panel-title">Roster do Conselho</h2></div><button class="btn secondary" id="relay-refresh" type="button">Atualizar catálogo</button></div><p id="relay-catalog-status" class="wiki-demo-status" role="status" aria-live="polite">Carregando catálogo…</p><div class="relay-roster" id="relay-roster"></div></article>
-    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Entrada humana</div><h2 class="panel-title">Registrar resultado observado</h2></div><span class="chip planned">SEM ENVIO AO PROVEDOR</span></div>
-      <form id="relay-evaluation-form" class="relay-form">
-        <label for="relay-provider">Provedor</label><select id="relay-provider" required disabled><option value="">Aguardando catálogo…</option></select>
-        <label for="relay-state">Resultado</label><select id="relay-state" required><option value="green">Resposta concluída (verde)</option><option value="candidate">Resposta em avaliação</option><option value="monitoring">Em monitoramento</option><option value="provider_busy">Provedor ocupado</option><option value="excluded">Fora do teste</option></select>
-        <label for="relay-text">Resposta observada</label><textarea id="relay-text" maxlength="60000" rows="5" placeholder="Cole apenas a resposta necessária para a avaliação. Não inclua dados pessoais, credenciais ou conteúdo de sessão."></textarea>
-        <label for="relay-error">Falha ou motivo (quando aplicável)</label><textarea id="relay-error" maxlength="2000" rows="2" placeholder="Ex.: limite do provedor, timeout ou motivo da exclusão"></textarea>
-        <label for="relay-latency">Latência em milissegundos (opcional)</label><input id="relay-latency" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex.: 4200">
-        <div class="relay-form-actions"><button class="btn" id="relay-submit" type="submit" disabled>Registrar no cache do Conselho</button><button class="btn secondary" id="relay-retry" type="button" hidden>Repetir o mesmo envio</button></div>
-      </form>
-      <p id="relay-submit-status" class="wiki-demo-status" role="status" aria-live="polite">O envio grava uma avaliação sanitizada no cache local do Conselho.</p>
-      <p class="subnote">Não cole senhas, tokens, cookies, identificadores de sessão, dados pessoais ou prompts confidenciais. A gravação é local e não altera o canon. Em erro de rede, o botão de repetição reutiliza a mesma chave idempotente.</p>
-    </article>
-    <div class="footer-note"><span>CONSELHO EM REDE · CATÁLOGO + REGISTRO MANUAL</span><span>Sem chamadas a provedores · sem automação de navegador</span></div>
+    <div class="section-heading"><div><div class="eyebrow">Conversa mediada pelo Humano</div><h1>Conselho de Modelos em Rede</h1><p>Abra a página de conversa para preparar prompts, revisar o histórico e aprovar cada envio e solicitação de ferramenta.</p></div></div>
+    <article class="panel mt14"><p class="route-foot">A interface de conversa está em uma página própria para preservar a identidade visual do protótipo e manter visíveis fila, decisões e histórico.</p><a class="btn" href="/conselho-rede">Abrir o Conselho em Rede</a></article>
   </section>
 
   <section class="page" id="page-memoria" data-title="Memória & mapas">
