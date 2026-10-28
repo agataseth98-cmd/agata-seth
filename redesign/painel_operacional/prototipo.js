@@ -260,13 +260,15 @@ function render(snapshot, forced = false) {
   const active = services.filter((item) => stateOf(item, forced) === "ok").length;
   chip("units-panel-state", overall);
   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + services.length);
-  set("overview-alert", overall === "ok" ? "Quatro unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
+  set("overview-alert", overall === "ok" ? active + " de " + services.length + " unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
   replaceRows("live-services", unitRows(services, forced), "Nenhum estado recebido.");
   if (byId("overview-services")) replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");
   if (byId("overview-source")) set("overview-source", "Coleta concluída " + niceTime(snapshot.observed_at) + " · válida até " + niceTime(snapshot.fresh_until));
   set("overview-updated", collectionFailed ? "Coleta indisponível; última leitura preservada." : "Leitura local observada " + niceTime(snapshot.observed_at));
   const git = snapshot.git || {}; const gitState = stateOf(git, forced);
   chip("git-panel-state", gitState, gitState === "ok" ? "LEITURA VÁLIDA" : null);
+  const pendentes = ((snapshot.proposals && snapshot.proposals.items) || []).filter((p) => !p.marker_present && !p.substituida_por && p.versionada !== false).length;
+  set("hero-status", "Serviços: " + active + " de " + services.length + " ativos · Git: " + ({ok: "leitura válida", warning: "atenção", stale: "leitura vencida", unknown: "sem leitura"}[gitState] || "sem leitura") + " · Propostas aguardando assinatura: " + pendentes + ".");
   set("git-branch", git.branch || "—"); set("git-head", git.head || "—");
   set("git-upstream", {tracking_up_to_date:"alinhada no último fetch",tracking_diverged:"divergente no último fetch",no_upstream:"sem referência"}[git.tracking] || "sem leitura");
   set("git-dirty", Number.isInteger(git.dirty_count) ? git.dirty_count + " item(ns)" : "—");

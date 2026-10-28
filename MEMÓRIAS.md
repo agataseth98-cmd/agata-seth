@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2c55e80ba02cfbd4868f860273f5993960917054
-  Escrito em: 27/10/2026 20:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f
+  Escrito em: 27/10/2026 21:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c55e80ba02cfbd4868f860273f5993960917054/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c55e80ba02cfbd4868f860273f5993960917054/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c55e80ba02cfbd4868f860273f5993960917054/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c55e80ba02cfbd4868f860273f5993960917054/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2c55e80ba02cfbd4868f860273f5993960917054/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7bd06c4bc4ea4cd86e7c0f85af0cb414c8d4e56f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(890) DIÁRIO — 27/10/2026 · **Painel: Panorama com status medido.** Aplica `panorama-status-20261027`, assinado pelo Humano. Pelo canon (resultado primeiro, sem saudação), a frase fixa do Panorama sai. Entra linha de status: serviços ativos, Git e propostas aguardando assinatura, lidos agora. O alerta de unidades deixa de ter contagem fixa.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de panorama-status-20261027.
+
 (889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica `sofa-experiencia-20261027`, assinado pelo Humano. Tons frios (azul e ciano) passam para âmbar e nogueira, mantendo a claridade. Só CSS. Medido na pré-visualização: 628 textos visíveis, todos acima de 4,5:1. Sem frases de saudação: decisão separada.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de sofa-experiencia-20261027.
 
