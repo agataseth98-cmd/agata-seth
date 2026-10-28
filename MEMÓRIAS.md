@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ad17195f8782b272807aa52679f20f538782039d
-  Escrito em: 28/10/2026 13:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a4c6073bfb0473e1058dffed8e70556918175124
+  Escrito em: 28/10/2026 14:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad17195f8782b272807aa52679f20f538782039d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad17195f8782b272807aa52679f20f538782039d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad17195f8782b272807aa52679f20f538782039d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad17195f8782b272807aa52679f20f538782039d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ad17195f8782b272807aa52679f20f538782039d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4c6073bfb0473e1058dffed8e70556918175124/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4c6073bfb0473e1058dffed8e70556918175124/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4c6073bfb0473e1058dffed8e70556918175124/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4c6073bfb0473e1058dffed8e70556918175124/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a4c6073bfb0473e1058dffed8e70556918175124/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(907) DIÁRIO — 28/10/2026 · **aplicar.py: refazer a base quando o main anda antes do merge (proposta).** Hoje, quando o PR de aplicação fica atrás do main, o script junta o main na branch (`gh pr update-branch`). Isso conflita em MEMÓRIAS.md, que recebe toda entrada no mesmo ponto, e foi assim que `discord-venv-unica-20261028` ficou DIRTY. A proposta `aplicar-refazer-base-20261028` troca isso por refazer a branch sobre o main novo: verificador da base nova, apply de novo, número da entrada recalculado, push com `--force-with-lease` e CI de novo. Se o diff assinado não aplicar mais na base nova, o verificador para e pede nova assinatura. Nada aplicado.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `testar_auxiliares.py` 20/20 com 4 casos novos; montagem e refazer testados em repositório git temporário (entrada (11) virou (12) com o main andando, commit sobre o origin/main novo); `git apply --check` contra a4c6073 · Autorização: Humano — "Antes de reaplicar, conserte o aplicar.py para refazer a base antes do merge".
+
 (905) DIÁRIO — 28/10/2026 · **RelayCouncil: contrato v3 e catálogo aplicados em PR.** A assinatura humana foi validada; o diff e seu marcador foram movidos para `propostas/aplicadas`. O PR de aplicação contém o contrato e o catálogo de 17 provedores; a interface e as chamadas externas seguem fora desta etapa.
 Modelo: Codex (Codex desktop, na Máquina) · vetor: P-8 validado, 14 testes, compilação e `git diff --check` · Autorização: Humano — "feito".
 
