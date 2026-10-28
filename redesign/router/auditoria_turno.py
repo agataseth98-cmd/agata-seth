@@ -1055,14 +1055,70 @@ def _amostrar(cliente, msgs, achados) -> None:
     except OSError:
         pass
 
+def _hash_registro(registro: dict) -> str:
+    """SHA-256 do registro sem o campo hash. Serialização estável (chaves ordenadas)."""
+    import hashlib
+    base = {k: v for k, v in registro.items() if k != "hash"}
+    return hashlib.sha256(json.dumps(base, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def _ultimo_hash() -> str:
+    """Hash do último registro do log, ou 'inicio' se o log não existe ou não tem registro encadeado."""
+    try:
+        with open(LOG, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            tamanho = f.tell()
+            bloco = min(tamanho, 65536)
+            f.seek(tamanho - bloco)
+            linhas = f.read().decode("utf-8", errors="replace").splitlines()
+        for linha in reversed(linhas):
+            if linha.strip():
+                return json.loads(linha).get("hash", "legado")
+    except (OSError, ValueError):
+        pass
+    return "inicio"
+
+
 def _registrar(cliente, achados, erro):
     try:
         LOG.parent.mkdir(parents=True, exist_ok=True)
+        registro = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "cliente": cliente,
+                    "achados": achados, "erro": erro, "anterior": _ultimo_hash()}
+        registro["hash"] = _hash_registro(registro)
         with open(LOG, "a", encoding="utf-8") as f:
-            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "cliente": cliente,
-                                "achados": achados, "erro": erro}, ensure_ascii=False) + "\n")
+            f.write(json.dumps(registro, ensure_ascii=False) + "\n")
     except OSError:
         pass
+
+
+def verificar_cadeia() -> dict:
+    """Confere o encadeamento do log. Detecta alteração, reordenação e remoção de registros encadeados.
+    Não detecta omissão de um turno que nunca foi gravado (limite declarado: cadeia não prova completude)."""
+    resultado = {"registros": 0, "legado": 0, "encadeados": 0, "quebras": [], "ok": True}
+    if not LOG.is_file():
+        return resultado
+    anterior = None
+    with open(LOG, encoding="utf-8") as f:
+        for n, linha in enumerate(f, 1):
+            if not linha.strip():
+                continue
+            resultado["registros"] += 1
+            try:
+                r = json.loads(linha)
+            except ValueError:
+                resultado["quebras"].append((n, "linha não é JSON"))
+                continue
+            if "hash" not in r:
+                resultado["legado"] += 1
+                continue
+            resultado["encadeados"] += 1
+            if _hash_registro(r) != r["hash"]:
+                resultado["quebras"].append((n, "hash não confere: registro alterado"))
+            if anterior is not None and r.get("anterior") != anterior:
+                resultado["quebras"].append((n, "anterior não confere: reordenado ou removido"))
+            anterior = r["hash"]
+    resultado["ok"] = not resultado["quebras"]
+    return resultado
 
 
 def _selftest() -> int:
@@ -1465,6 +1521,13 @@ if __name__ == "__main__":
         sys.exit(_selftest())
     # (26/10/2026, (849)) a mesma checagem da M6a para quem não passa pelo gateway (Claude Code, Codex, CLI):
     # texto pela entrada padrão; sai 1 se houver achado, para o modelo corrigir antes de entregar.
+    if sys.argv[1:] == ["--verificar-cadeia"]:
+        _r = verificar_cadeia()
+        print(f"registros: {_r['registros']} · legado (sem hash): {_r['legado']} · encadeados: {_r['encadeados']}")
+        for _n, _motivo in _r["quebras"][:20]:
+            print(f"- linha {_n}: {_motivo}")
+        print("cadeia íntegra" if _r["ok"] else f"cadeia com {len(_r['quebras'])} quebra(s)")
+        sys.exit(0 if _r["ok"] else 1)
     if sys.argv[1:] == ["--verificar"]:
         _achados = verificar_resposta_atual(sys.stdin.read(), [])
         for _a in _achados:

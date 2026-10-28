@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Aplicação da Equipe, 28/10:** assinatura verificada; a aplicação está preparada em PR e aguarda o merge humano. Após o merge: atualizar `agata-vigia@.service`, recarregar o systemd do usuário e provar as unidades de Claude e Codex.
+**Equipe universal aplicada (PR #687):** vigias de Claude e Codex atualizadas e verificadas. A aplicação da auditoria encadeada aguarda merge humano; em seguida, libera-se `main` para a proposta da interface.
 
 
 **Esperando a sua assinatura:**
