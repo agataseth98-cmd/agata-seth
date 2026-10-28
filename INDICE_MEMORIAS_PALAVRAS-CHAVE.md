@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(907) DIÁRIO — 28/10/2026 · **Conselho de Modelos em Rede: interface manual proposta.** A tela consulta o catálogo local de 17 provedores e registra no cache do Conselho apenas resultados observados por uma pessoa. Não envia prompts, não chama APIs de provedores, não acessa sessões/cookies e não automatiza DOM. A proposta aguarda assinatura e aplicação; nenhum serviço foi reiniciado.
+  palavras-chave: modelos, rede, interface, manual, proposta, tela, consulta, catálogo, local, provedores, registra, cache, apenas, resultados, observados, pessoa, envia, prompts, chama, apis, acessa, sessões, cookies, automatiza, dom, aguarda, assinatura, aplicação, serviço, reiniciado
 (905) DIÁRIO — 28/10/2026 · **RelayCouncil: contrato v3 e catálogo aplicados em PR.** A assinatura humana foi validada; o diff e seu marcador foram movidos para `propostas/aplicadas`. O PR de aplicação contém o contrato e o catálogo de 17 provedores; a interface e as chamadas externas seguem fora desta etapa.
   palavras-chave: relaycouncil, contrato, catálogo, aplicados, assinatura, humana, validada, diff, marcador, foram, movidos, propostas, aplicadas, aplicação, contém, provedores, interface, chamadas, externas, seguem, fora, desta, etapa
 (906) DIÁRIO — 28/10/2026 · **RelayCouncil: endpoint local proposto na mesma origem do painel.** O GET expõe o catálogo; o POST valida modo por provedor, aplica sanitização e grava no cache comum. Tem retry idempotente por provedor, tarefa e timestamp, ID resumido, limite de 60 POSTs/minuto e quota tipada. Nada foi aplicado ao painel em execução nem chama provedores.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, grafo, vault, dentro, aplica, assinado, humano, rota, get, api, leitura, visões, relações, cita, citada, parecidas, regiões, tags, regiao, clique, nós, trocar, centro, estão, vazias, atual, existem
 (878) DIÁRIO — 27/10/2026 · **Painel: conversa com a Seth dentro do painel.** Aplica `conversa-seth-painel-20261027`, assinado pelo Humano. Nova rota POST /api/seth/chat, só texto, uma conversa por vez, sem ferramentas e sem escrita no canon; mesma origem e recusa de cross-site. Aba Conversa com a Seth, com resposta como texto puro. Autorizado pelo Humano em 27/10.
   palavras-chave: painel, conversa, seth, dentro, aplica, assinado, humano, nova, rota, post, api, chat, texto, ferramentas, escrita, canon, mesma, origem, recusa, cross, site, aba, resposta, puro, autorizado
-(877) DIÁRIO — 27/10/2026 · **Painel: Panorama sem repetir a lista de serviços.** Aplica `redundancia-panorama-20261027`, assinado pelo Humano. O bloco Serviços e rotinas vira um link para Estado operacional, onde as unidades ficam.
-  palavras-chave: painel, panorama, repetir, lista, serviços, aplica, redundancia, assinado, humano, bloco, rotinas, vira, link, estado, operacional, unidades, ficam
+(877) DIÁRIO — 27/10/2026 · **Painel: Panorama sem repetir a lista de serviços.* …
+  palavras-chave: painel, panorama, repetir, lista, serviços
 (876) DIÁRIO — 27/10/2026 · **Painel: cartões clicáveis abrem a evidência em pop …
   palavras-chave: painel, cartões, clicáveis, abrem, evidência, pop
 (875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `te …

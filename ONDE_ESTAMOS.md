@@ -14,9 +14,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 - RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
 - O painel e os serviços em execução não foram alterados.
 
-**Aplicação P-8 do endpoint local, em revisão:**
-- A assinatura foi validada e o endpoint de catálogo e registro entrou na branch de aplicação. O PR aguarda revisão e merge humano.
-- A interface RelayCouncil e a conexão com provedores ainda ficam para etapas posteriores. Os serviços em execução não foram alterados.
+**Aplicado no PR #679:**
+- Endpoint local de catálogo e registro do Conselho, na mesma origem do painel. Nenhum serviço foi reiniciado e nenhuma conexão com provedor foi habilitada.
+
+**Proposta em preparação:**
+- Interface **Conselho de Modelos em Rede** para consultar 17 provedores e registrar resultados observados manualmente. O diff aguarda publicação e assinatura; não chama provedores nem automatiza navegador.
 
 ## Hoje, 22 e 23/10
 
