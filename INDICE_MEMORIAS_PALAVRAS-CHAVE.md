@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(902) DIÁRIO — 28/10/2026 · **Contexto automático para sessões do Claude Code.** Aplica `sessao-claude-contexto-20261028`, assinado pelo Humano. Hook SessionStart do projeto entrega estado da Máquina, memória comum do Conselho e estado da sessão conjunta. Só leitura. Garante a entrega do contexto; o cumprimento das regras segue medido pela auditoria.
+  palavras-chave: contexto, automático, sessões, claude, code, aplica, sessao, assinado, humano, hook, sessionstart, projeto, entrega, estado, máquina, memória, comum, sessão, conjunta, leitura, garante, cumprimento, regras, segue, medido, auditoria
 (901) DIÁRIO — 28/10/2026 · **Painel: histórico de conversas com a Seth.** Aplica `conversas-historico-20261028`, assinado pelo Humano. Lista de conversas salvas em ~/.cache, fora do canon; abrir, renomear e apagar com confirmação em dois cliques; Markdown seguro; copiar e regenerar. Streaming fica para a etapa seguinte.
   palavras-chave: painel, histórico, conversas, seth, aplica, historico, assinado, humano, lista, salvas, cache, fora, canon, abrir, renomear, apagar, confirmação, cliques, markdown, seguro, copiar, regenerar, streaming, fica, etapa, seguinte
 (900) DIÁRIO — 28/10/2026 · **Painel: refino da conversa com a Seth.** Aplica `conversa-painel-20261028`, assinado pelo Humano. Falas separadas com modelo e hora; quebras de linha preservadas; notas de verificação em tom discreto; exemplos de pergunta; botão Nova conversa; Enter envia; erros com causa. Texto puro, sem HTML da Seth.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, evidências, timers, unidades, leitura, momento, aplica, evidencia, assinado, humano, janela, manutenção, rotinas, locais, leem, timer, navegador, discord, avisa, inbox, ativo, memórias, registra, parada, decisão, segue
 (873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Aplica `evidencia-viva-20261027`, assinado pelo Humano. O botão EVIDÊNCIA de cada capacidade mostra o resultado medido no carregamento, com horário. Cartões de documento dizem que não são medição. Ao carregar a página, atualiza agenda e capacidades.
   palavras-chave: painel, evidência, viva, recarga, total, aplica, evidencia, assinado, humano, botão, capacidade, mostra, resultado, medido, carregamento, horário, cartões, documento, dizem, medição, carregar, página, atualiza, agenda, capacidades
-(872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco viram documento.** Aplica `capacidades-leitura-20261027`, assinado pelo Humano. Sondas só de leitura: estado de unidades (systemctl --user show) e HTTP local. Cartões sem sonda deixam de mostrar estado. Limite registrado: escolher rota só confirma que o gateway está ativo.
-  palavras-chave: painel, leitura, real, oito, capacidades, cinco, viram, documento, aplica, assinado, humano, sondas, estado, unidades, systemctl, user, show, http, local, cartões, sonda, deixam, mostrar, limite, registrado, escolher, rota, confirma, gateway, ativo
+(872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco vi …
+  palavras-chave: painel, leitura, real, oito, capacidades, cinco
 (871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBST …
   palavras-chave: painel, propostas, substituídas, aparecem, subst
 (870) DIÁRIO — 27/10/2026 · **Painel: Wiki e timers reabertos.** Aplica `wiki-ti …
