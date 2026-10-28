@@ -44,6 +44,15 @@ LIMITE_DIA = 20 * 1024 * 1024  # D5
 LISTA_P20 = Path(os.environ.get("AGATA_P20_LISTA",
                                 os.path.expanduser("~/.config/agata/identificadores-pessoais.txt")))
 ZERO = "0" * 64
+_IDEMPOTENCY_KEY = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}\Z")
+
+
+class LimiteDiarioAtingido(ValueError):
+    """O teto diário do cache foi atingido; o chamador pode informar retry."""
+
+
+class ConflitoIdempotencia(ValueError):
+    """Uma chave idempotente já foi usada para conteúdo diferente."""
 
 
 def _sha(b: bytes) -> str:
@@ -90,12 +99,16 @@ def _linhas() -> list[bytes]:
         return []
 
 
-def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None) -> dict:
+def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None,
+           idempotency_key: str | None = None) -> dict:
     autor, texto = (autor or "").strip(), (texto or "").strip()
     if not autor or len(autor) > 80:
         raise ValueError("autor obrigatório (até 80 caracteres)")
     if tipo not in TIPOS:
         raise ValueError(f"tipo inválido; use um de {', '.join(TIPOS)}")
+    if idempotency_key is not None and (
+            not isinstance(idempotency_key, str) or not _IDEMPOTENCY_KEY.fullmatch(idempotency_key)):
+        raise ValueError("chave de idempotência inválida")
     if not texto or len(texto) > MAX_TEXTO:
         raise ValueError(f"texto obrigatório (até {MAX_TEXTO} caracteres)")
     texto = filtrar(texto)
@@ -104,16 +117,26 @@ def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None)
     with open(ARQ.with_suffix(".lock"), "a") as trava:
         fcntl.flock(trava, fcntl.LOCK_EX)
         linhas = _linhas()
+        if idempotency_key is not None:
+            for linha_existente in linhas:
+                anterior = json.loads(linha_existente)
+                if anterior.get("idempotency_key") == idempotency_key:
+                    if (anterior.get("autor"), anterior.get("texto"), anterior.get("tipo"), anterior.get("fonte")) != (
+                            autor, texto, tipo, fonte or None):
+                        raise ConflitoIdempotencia("chave de idempotência já usada por outro conteúdo")
+                    return {"ok": True, "n": anterior["n"], "h": anterior["h"][:12], "duplicate": True}
         agora = datetime.now(TZ)
         hoje = agora.strftime("%Y-%m-%d")
         gravado_hoje = sum(len(l) + 1 for l in linhas if json.loads(l).get("ts", "").startswith(hoje))
         reg = {"n": (json.loads(linhas[-1])["n"] + 1) if linhas else 1,
                "ts": agora.strftime("%Y-%m-%dT%H:%M:%S%z"), "autor": autor, "tipo": tipo,
                "texto": texto, "fonte": (fonte or None), "ant": _sha(linhas[-1]) if linhas else ZERO}
+        if idempotency_key is not None:
+            reg["idempotency_key"] = idempotency_key
         reg["h"] = _sha(_canon(reg))
         linha = _canon(reg) + b"\n"
         if gravado_hoje + len(linha) > LIMITE_DIA:
-            raise ValueError("limite diário de 20 MB do cache atingido (D5) — nota não gravada")
+            raise LimiteDiarioAtingido("limite diário de 20 MB do cache atingido (D5) — nota não gravada")
         fd = os.open(ARQ, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
         try:
             os.write(fd, linha)
@@ -125,7 +148,10 @@ def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None)
             os.fsync(dfd)
         finally:
             os.close(dfd)
-    return {"ok": True, "n": reg["n"], "h": reg["h"][:12]}
+    receipt = {"ok": True, "n": reg["n"], "h": reg["h"][:12]}
+    if idempotency_key is not None:
+        receipt["duplicate"] = False
+    return receipt
 
 
 def ler(n: int = 20, autor: str | None = None) -> list[dict]:
@@ -199,8 +225,8 @@ def _cli(argv: list[str]) -> int:
 
 def _selftest() -> int:
     import tempfile
-    global ARQ, LISTA_P20
-    salvo = (ARQ, LISTA_P20)
+    global ARQ, LISTA_P20, LIMITE_DIA
+    salvo = (ARQ, LISTA_P20, LIMITE_DIA)
     casos = []
     with tempfile.TemporaryDirectory() as d:
         ARQ = Path(d) / "c" / "cache.jsonl"
@@ -212,6 +238,7 @@ def _selftest() -> int:
             regs = ler()
             casos += [
                 ("grava e numera em sequência", a["n"] == 1 and b["n"] == 2 and len(regs) == 2),
+                ("retorno legado mantém esquema", set(a) == {"ok", "n", "h"}),
                 ("dado pessoal vira marca (padrão e lista P-20)", "fulano@" not in regs[1]["texto"]
                  and "Zuleica42" not in regs[1]["texto"] and "[pessoal-email removido]" in regs[1]["texto"]),
                 ("cadeia íntegra", verificar()[0]),
@@ -230,11 +257,35 @@ def _selftest() -> int:
                     casos.append((f"recusa entrada inválida {ruim[2]!r}", False))
                 except ValueError:
                     casos.append((f"recusa entrada inválida {ruim[2]!r}", True))
+            arquivo_original, limite_original = ARQ, LIMITE_DIA
+            try:
+                ARQ = Path(d) / "idempotente" / "cache.jsonl"
+                primeiro = anotar("relay:gemini", "resultado", fonte="RelayCouncil:task-1",
+                                  idempotency_key="relay-gemini-task-1")
+                repetido = anotar("relay:gemini", "resultado", fonte="RelayCouncil:task-1",
+                                  idempotency_key="relay-gemini-task-1")
+                casos.append(("retry idempotente retorna a entrada original",
+                              primeiro["n"] == repetido["n"] == 1 and repetido["duplicate"]))
+                try:
+                    anotar("relay:gemini", "outro resultado", fonte="RelayCouncil:task-1",
+                           idempotency_key="relay-gemini-task-1")
+                    casos.append(("chave idempotente com conteúdo divergente é recusada", False))
+                except ConflitoIdempotencia:
+                    casos.append(("chave idempotente com conteúdo divergente é recusada", True))
+                LIMITE_DIA = 1
+                try:
+                    anotar("relay:gemini", "segundo resultado", fonte="RelayCouncil:task-2",
+                           idempotency_key="relay-gemini-task-2")
+                    casos.append(("quota tem exceção tipada", False))
+                except LimiteDiarioAtingido:
+                    casos.append(("quota tem exceção tipada", True))
+            finally:
+                ARQ, LIMITE_DIA = arquivo_original, limite_original
             dados = ARQ.read_bytes().replace(b"11h04", b"11h05")
             ARQ.write_bytes(dados)
             casos.append(("alteração de um byte é detectada", not verificar()[0]))
         finally:
-            ARQ, LISTA_P20 = salvo
+            ARQ, LISTA_P20, LIMITE_DIA = salvo
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)

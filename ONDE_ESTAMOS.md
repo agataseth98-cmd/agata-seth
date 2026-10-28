@@ -14,9 +14,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 - RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
 - O painel e os serviços em execução não foram alterados.
 
-**Proposta P-8 do endpoint local, pronta para revisão e assinatura:**
-- Catálogo por GET e registro validado por POST no próprio painel `127.0.0.1:20146`, com sanitização, quota e retry idempotente.
-- Ainda não há interface RelayCouncil nem conexão com provedores; ambas ficam para etapas posteriores.
+**Aplicação P-8 do endpoint local, em revisão:**
+- A assinatura foi validada e o endpoint de catálogo e registro entrou na branch de aplicação. O PR aguarda revisão e merge humano.
+- A interface RelayCouncil e a conexão com provedores ainda ficam para etapas posteriores. Os serviços em execução não foram alterados.
 
 ## Hoje, 22 e 23/10
 
