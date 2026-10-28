@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0f10513def1ec7902e2414ea629373d70c127b43
-  Escrito em: 28/10/2026 18:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79808309b186cf013f875dd7cdcf0b4c8478cb24
+  Escrito em: 28/10/2026 18:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f10513def1ec7902e2414ea629373d70c127b43/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f10513def1ec7902e2414ea629373d70c127b43/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f10513def1ec7902e2414ea629373d70c127b43/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f10513def1ec7902e2414ea629373d70c127b43/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0f10513def1ec7902e2414ea629373d70c127b43/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
+Modelo: GPT-6 (Codex) · vetor: `p8_verificar.sh` = PODE APLICAR; suíte (37), selftest, `py_compile`, `node --check` e JSON do manifesto · Autorização: Humano — assinatura P-8 e “feito”
+
 (917) DIÁRIO — 28/10/2026 · **Proposta P-8 `conselho-em-rede-parser-estrito-20261028` revisa a integração completa após alerta CodeQL de expansão de entidades XML.** O parser agora aceita só tags planas da allowlist, sem regex nem parser XML; 37 testes e selftest passaram em worktree descartável. A versão anterior da aplicação foi encerrada; esta proposta requer assinatura própria antes de aplicar.
 Modelo: GPT-6 (Codex) · vetor: alertas CodeQL dos PRs #692/#694, `git apply --check`, suíte (37) e selftest em worktree descartável · Autorização: Humano — continuidade após “feito”; mudança revisada aguarda assinatura P-8 própria
 

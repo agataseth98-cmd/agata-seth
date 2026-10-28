@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
+  palavras-chave: rede, parser, estrito, validado, aplicado, branch, após, assinatura, humana, hash, git, apply, check, passaram, testes, selftest, sintaxe, python, manifesto, aplicação, aguarda, revisão, merge, humano, runtime, reiniciado, provedores, reais, testados
 (917) DIÁRIO — 28/10/2026 · **Proposta P-8 `conselho-em-rede-parser-estrito-20261028` revisa a integração completa após alerta CodeQL de expansão de entidades XML.** O parser agora aceita só tags planas da allowlist, sem regex nem parser XML; 37 testes e selftest passaram em worktree descartável. A versão anterior da aplicação foi encerrada; esta proposta requer assinatura própria antes de aplicar.
   palavras-chave: proposta, rede, parser, estrito, revisa, integração, completa, após, alerta, codeql, expansão, entidades, xml, agora, aceita, tags, planas, allowlist, regex, nem, testes, selftest, passaram, worktree, descartável, versão, anterior, aplicação, encerrada, requer, assinatura, própria, aplicar
 (916) DIÁRIO — 28/10/2026 · **Nova proposta P-8 `conselho-em-rede-seguro-20261028` substitui a aplicação inicialmente preparada após alerta CodeQL de alta severidade.** O parser com regex foi trocado por leitura XML linha a linha; 36 testes e selftest passaram numa cópia descartável baseada em `origin/main`. A assinatura do P-8 anterior não cobre esta versão revisada; aguarda assinatura própria antes de aplicação.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, panorama, status, medido, aplica, assinado, humano, canon, resultado, primeiro, saudação, frase, fixa, sai, entra, linha, serviços, ativos, git, propostas, aguardando, assinatura, lidos, agora, alerta, unidades, deixa, ter, contagem
 (889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica `sofa-experiencia-20261027`, assinado pelo Humano. Tons frios (azul e ciano) passam para âmbar e nogueira, mantendo a claridade. Só CSS. Medido na pré-visualização: 628 textos visíveis, todos acima de 4,5:1. Sem frases de saudação: decisão separada.
   palavras-chave: painel, experiência, sala, paleta, quente, aplica, sofa, experiencia, assinado, humano, tons, frios, azul, ciano, passam, âmbar, nogueira, mantendo, claridade, css, medido, pré, visualização, textos, visíveis, acima, frases, saudação, decisão, separada
-(888) DIÁRIO — 27/10/2026 · **Painel: markdown cru fora dos rótulos.** Aplica `markdown-visivel-20261027`, assinado pelo Humano. Título de entrada do vault sai sem ** e crases no servidor, então o grafo mostra texto limpo. Dois textos de Integrações com crases viram código. Testes e selftest do painel passam.
-  palavras-chave: painel, markdown, cru, fora, rótulos, aplica, visivel, assinado, humano, título, entrada, vault, sai, crases, servidor, então, grafo, mostra, texto, limpo, textos, integrações, viram, código, testes, selftest, passam
+(888) DIÁRIO — 27/10/2026 · **Painel: markdown cru fora dos rótulos.** Aplica `m …
+  palavras-chave: painel, markdown, cru, fora, rótulos, aplica
 (887) DIÁRIO — 27/10/2026 · **Painel: telas internas do vault, sem link externo. …
   palavras-chave: painel, telas, internas, vault, link, externo
 (886) DIÁRIO — 27/10/2026 · **Painel: correções da auditoria.** Aplica `auditori …

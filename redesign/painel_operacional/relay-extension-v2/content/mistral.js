@@ -1,0 +1,1 @@
+(function () { window.__relayRegisterGeneric({ siteId: "mistral", input: 'textarea, div[contenteditable="true"]', submit: 'button[aria-label*="Send"], button[type="submit"], [data-testid*="send"]', assistant: '[data-role="assistant"], [class*="assistant"], [class*="message"]' }); })();
