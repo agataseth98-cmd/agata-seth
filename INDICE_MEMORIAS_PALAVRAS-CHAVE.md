@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(906) DIÁRIO — 28/10/2026 · **Discord usa a venv do navegador.** Aplica `discord-venv-unica-20261028`, assinado pelo Humano. A unidade do discord-mcp aponta para redesign/mcp/navegador/.venv, que contém todos os pacotes do Discord. Libera 86 MB. A venv antiga fica para reversão.
+  palavras-chave: discord, usa, venv, navegador, aplica, unica, assinado, humano, unidade, mcp, aponta, redesign, contém, pacotes, libera, antiga, fica, reversão
 (905) DIÁRIO — 28/10/2026 · **RelayCouncil: contrato v3 e catálogo aplicados em PR.** A assinatura humana foi validada; o diff e seu marcador foram movidos para `propostas/aplicadas`. O PR de aplicação contém o contrato e o catálogo de 17 provedores; a interface e as chamadas externas seguem fora desta etapa.
   palavras-chave: relaycouncil, contrato, catálogo, aplicados, assinatura, humana, validada, diff, marcador, foram, movidos, propostas, aplicadas, aplicação, contém, provedores, interface, chamadas, externas, seguem, fora, desta, etapa
 (904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, conversa, seth, dentro, aplica, assinado, humano, nova, rota, post, api, chat, texto, ferramentas, escrita, canon, mesma, origem, recusa, cross, site, aba, resposta, puro, autorizado
 (877) DIÁRIO — 27/10/2026 · **Painel: Panorama sem repetir a lista de serviços.** Aplica `redundancia-panorama-20261027`, assinado pelo Humano. O bloco Serviços e rotinas vira um link para Estado operacional, onde as unidades ficam.
   palavras-chave: painel, panorama, repetir, lista, serviços, aplica, redundancia, assinado, humano, bloco, rotinas, vira, link, estado, operacional, unidades, ficam
-(876) DIÁRIO — 27/10/2026 · **Painel: cartões clicáveis abrem a evidência em popup.** Aplica `cards-popup-20261027`, assinado pelo Humano. Os oito cartões com sonda abrem o popup do botão EVIDÊNCIA, sobre a tela; teclado Enter e Espaço. Cartões de documento não são clicáveis.
-  palavras-chave: painel, cartões, clicáveis, abrem, evidência, popup, aplica, cards, assinado, humano, oito, sonda, botão, tela, teclado, enter, espaço, documento
+(876) DIÁRIO — 27/10/2026 · **Painel: cartões clicáveis abrem a evidência em pop …
+  palavras-chave: painel, cartões, clicáveis, abrem, evidência, pop
 (875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `te …
   palavras-chave: painel, texto, websocket, corrigido, aplica
 (874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitur …
