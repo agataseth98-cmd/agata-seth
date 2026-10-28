@@ -63,6 +63,7 @@ function showPage(name) {
   if (name === "grafo") carregarGrafo();
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
   if (name === "visao") carregarVisaoSistema();
+  if (name === "conselho") loadRelayCatalog();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
 document.addEventListener("click", (e) => { const b = e.target.closest("[data-open-page]"); if (b) showPage(b.dataset.openPage); });
@@ -322,6 +323,132 @@ async function fetchJson(url, options = {}, timeoutMs = 30000) {
     return data;
   } finally { clearTimeout(timeout); }
 }
+let relayProviders = [];
+let relayPendingPayload = null;
+function renderRelayRoster(providers) {
+  const root = byId("relay-roster");
+  root.replaceChildren();
+  const termsLabels = {
+    api_terms_required: "condições da API a revisar",
+    web_automation_restricted: "automação na web restrita",
+    web_automation_prohibited: "automação na web proibida",
+    web_output_extraction_prohibited: "extração via navegador proibida",
+    unverified: "ainda não verificado"
+  };
+  providers.forEach((provider) => {
+    const card = document.createElement("article"); card.className = "relay-provider";
+    const head = document.createElement("div"); head.className = "relay-provider-head";
+    const name = document.createElement("h3"); name.textContent = provider.name;
+    const availability = document.createElement("span"); availability.className = "chip " + (provider.availability === "in_roster" ? "active" : "planned");
+    availability.textContent = provider.availability === "in_roster" ? "NO CATÁLOGO" : "CANDIDATO";
+    head.append(name, availability);
+    const kind = document.createElement("p"); kind.textContent = provider.kind === "model-service" ? "Serviço de modelo" : "Roteador de modelos";
+    const access = document.createElement("p"); access.textContent = provider.access_mode === "manual_only" ? "Acesso registrado: manual" : "Acesso registrado: API oficial";
+    const terms = document.createElement("small"); terms.textContent = "Revisão de termos: " + (termsLabels[provider.terms_review] || "não informada");
+    card.append(head, kind, access, terms); root.append(card);
+  });
+}
+async function loadRelayCatalog() {
+  const status = byId("relay-catalog-status");
+  const refreshButton = byId("relay-refresh");
+  refreshButton.disabled = true;
+  status.textContent = "Lendo catálogo local…";
+  try {
+    const data = await fetchJson("/api/relay-council/catalog", {headers: {Accept: "application/json"}});
+    if (!Array.isArray(data.providers) || data.providers.some((item) => !item || typeof item.id !== "string" || typeof item.name !== "string")) throw new Error("catálogo inválido");
+    relayProviders = data.providers;
+    renderRelayRoster(relayProviders);
+    const select = byId("relay-provider");
+    const selected = select.value;
+    select.replaceChildren();
+    const prompt = document.createElement("option"); prompt.value = ""; prompt.textContent = "Selecione um provedor"; select.append(prompt);
+    relayProviders.forEach((provider) => {
+      const option = document.createElement("option"); option.value = provider.id; option.textContent = provider.name; select.append(option);
+    });
+    select.disabled = false;
+    if (relayProviders.some((item) => item.id === selected)) select.value = selected;
+    byId("relay-submit").disabled = !select.value;
+    status.textContent = "Catálogo lido: " + relayProviders.length + " provedores · fonte: API local do painel.";
+  } catch (_) {
+    status.textContent = "Catálogo indisponível. Atualize quando o servidor local estiver acessível.";
+    byId("relay-submit").disabled = true;
+  } finally { refreshButton.disabled = false; }
+}
+function relayStateChanged() {
+  const positive = ["green", "candidate", "monitoring"].includes(byId("relay-state").value);
+  byId("relay-text").required = positive;
+  byId("relay-error").required = !positive;
+  byId("relay-text").disabled = !positive;
+  byId("relay-error").disabled = positive;
+}
+function relayPayload() {
+  const providerId = byId("relay-provider").value;
+  const provider = relayProviders.find((item) => item.id === providerId);
+  if (!provider) throw new Error("Selecione um provedor do catálogo.");
+  const state = byId("relay-state").value;
+  const ok = ["green", "candidate", "monitoring"].includes(state);
+  const latencyValue = byId("relay-latency").value;
+  const payload = {
+    task_id: "ui-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12),
+    provider: provider.id,
+    site: provider.id,
+    access_mode: provider.access_mode === "manual_only" ? "manual" : "official_api",
+    state,
+    ok,
+    text: ok ? byId("relay-text").value.trim() : null,
+    error: ok ? null : byId("relay-error").value.trim(),
+    latency_ms: latencyValue ? Number(latencyValue) : null,
+    timestamp: new Date().toISOString()
+  };
+  return payload;
+}
+async function sendRelayPayload(payload) {
+  const status = byId("relay-submit-status");
+  byId("relay-submit").disabled = true;
+  byId("relay-retry").disabled = true;
+  status.textContent = "Registrando no cache local do Conselho…";
+  try {
+    const response = await fetch("/api/relay-council/evaluations", {
+      method: "POST", credentials: "same-origin", cache: "no-store",
+      headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      const retryable = response.status === 429 || response.status >= 500;
+      relayPendingPayload = retryable ? payload : null;
+      byId("relay-retry").hidden = !retryable;
+      const message = response.status === 429 ? "Limite local atingido; aguarde e repita o mesmo envio." : response.status === 409 ? "Conflito de idempotência; o registro não foi repetido." : response.status >= 500 ? "Servidor local indisponível; você pode repetir o mesmo envio." : "O servidor recusou o registro (HTTP " + response.status + "). Confira os campos e o catálogo.";
+      status.textContent = message;
+      return;
+    }
+    const receipt = await response.json();
+    if (!receipt || receipt.schema_version !== 1 || receipt.stored !== true || !Number.isInteger(receipt.entry)) throw new Error("recibo inválido");
+    relayPendingPayload = null;
+    byId("relay-retry").hidden = true;
+    status.textContent = "Registrado no cache local · entrada (" + receipt.entry + ")" + (receipt.duplicate ? " · repetição idempotente" : "") + ".";
+    byId("relay-evaluation-form").reset();
+    relayStateChanged();
+    byId("relay-submit").disabled = !byId("relay-provider").value;
+  } catch (_) {
+    relayPendingPayload = payload;
+    byId("relay-retry").hidden = false;
+    status.textContent = "Falha de rede ou resposta inválida. Repita o mesmo envio para preservar a chave idempotente.";
+  } finally {
+    byId("relay-retry").disabled = false;
+    if (!relayPendingPayload) byId("relay-submit").disabled = !byId("relay-provider").value;
+  }
+}
+byId("relay-refresh").addEventListener("click", loadRelayCatalog);
+byId("relay-provider").addEventListener("change", () => { byId("relay-submit").disabled = !byId("relay-provider").value; });
+byId("relay-state").addEventListener("change", relayStateChanged);
+relayStateChanged();
+byId("relay-evaluation-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+  try { relayPendingPayload = relayPayload(); sendRelayPayload(relayPendingPayload); }
+  catch (error) { byId("relay-submit-status").textContent = error.message; }
+});
+byId("relay-retry").addEventListener("click", () => { if (relayPendingPayload) sendRelayPayload(relayPendingPayload); });
 async function refresh(manual = false) {
   if (busy || document.visibilityState === "hidden") return;
   busy = true;
