@@ -2,7 +2,8 @@
 """aplicar.py <nome>... [--registro <arquivo-entrada.txt>] [--onde <arquivo-paragrafo.txt>] [--coautor "Nome <email>"]
 Aplica propostas P-8 JÁ ASSINADAS pelo Humano: worktree nova de origin/main, copia o APROVADO-, p8_verificar.sh (tem de dar
 PODE APLICAR), git apply, move o par para aplicadas/, insere a entrada de MEMÓRIAS (número = topo+1, o texto traz {N}),
-commit (pre-commit real), push, PR, espera CI, junta, pull. Nunca assina; não faz nada se faltar a assinatura."""
+commit (pre-commit real), push, PR, espera CI, junta, pull. Se o main andou antes do merge (BEHIND/DIRTY), refaz a branch sobre
+o origin/main novo (verificador, apply e número de MEMÓRIAS de novo) e empurra com --force-with-lease. Nunca assina; não faz nada se faltar a assinatura."""
 import argparse, os, re, subprocess, sys, shutil, time
 R = os.path.expanduser("~/agata")
 def sh(cwd, *a, ok=True, **k):
@@ -17,6 +18,43 @@ def proximo_numero(texto):
     if not nums:
         raise ValueError("nenhuma entrada numerada encontrada em MEMÓRIAS.md")
     return max(nums) + 1
+
+
+def precisa_refazer(estado, saida):
+    """O merge falhou porque a base andou (BEHIND) ou conflita com ela (DIRTY)? Aí a branch se refaz do zero sobre o
+    origin/main novo. `gh pr update-branch` juntava o main na branch e conflitava em MEMÓRIAS.md (mesmo ponto de inserção):
+    discord-venv-unica-20261028 ficou DIRTY assim em 28/10/2026."""
+    return estado in ("BEHIND", "DIRTY") or any(t in saida for t in ("not up to date", "status checks are expected", "BEHIND", "merge conflict"))
+
+
+def montar(wt, a, coautor):
+    """Sobre o HEAD atual da worktree (= origin/main): verificador congelado, apply, par para aplicadas/, MEMÓRIAS
+    (número = topo+1 DESTA base), ONDE_ESTAMOS, commit. Roda de novo, igual, cada vez que a base é refeita."""
+    for n in a.nomes:
+      shutil.copy(f"{R}/propostas/APROVADO-{n}", f"{wt}/propostas/")
+    # Verificador CONFIÁVEL = o da base, congelado ANTES de qualquer apply (um diff do lote não pode trocar o verificador do próximo).
+    confiavel = f"{wt}/../.verificador-confiavel-{int(time.time())}.sh"
+    shutil.copy(f"{wt}/scripts/p8_verificar.sh", confiavel)
+    for n in a.nomes:  # TODOS os pares conferidos antes de aplicar o primeiro
+      v = sh(wt, "bash", confiavel, n, ok=False)
+      linhas = [l for l in v.stdout.splitlines() if l.strip()]
+      if v.returncode != 0 or not linhas or linhas[-1].strip() != f"PODE APLICAR: {n}":
+          sys.exit(f"FALHA no verificador ({n}) rc={v.returncode}:\n{v.stdout}{v.stderr}")
+    os.remove(confiavel)
+    for n in a.nomes:
+      sh(wt, "git", "apply", f"propostas/{n}.diff"); os.makedirs(f"{wt}/propostas/aplicadas", exist_ok=True)
+      sh(wt, "git", "mv", f"propostas/{n}.diff", "propostas/aplicadas/"); os.rename(f"{wt}/propostas/APROVADO-{n}", f"{wt}/propostas/aplicadas/APROVADO-{n}")
+    if a.registro:
+      t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
+      ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
+      e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
+      open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
+    if a.onde:
+      o = open(f"{wt}/ONDE_ESTAMOS.md", encoding="utf-8").read(); i = o.index("## Hoje")
+      open(f"{wt}/ONDE_ESTAMOS.md", "w", encoding="utf-8").write(o[:i] + open(a.onde, encoding="utf-8").read().rstrip("\n") + "\n\n" + o[i:])
+    sh(wt, "git", "add", "-A")
+    msg = f"Aplica {', '.join(a.nomes)} (assinado pelo Humano)" + (" e registra" if a.registro else "") + (f"\n\nCo-Authored-By: {coautor}" if coautor else "")
+    sh(wt, "git", "commit", "-qm", msg)
 
 
 def main():
@@ -37,31 +75,7 @@ def main():
           sys.exit(f"{n} mexe em MEMÓRIAS.md: a entrada já vem no .diff; --registro duplicaria (rode sem --registro)")
   tag = "-".join(a.nomes)[:60]; wt = f"{R}/.{a.agente}/worktrees/aplica-{a.agente}-{int(time.time())}"; br = f"aplica/{tag}"
   sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
-  for n in a.nomes:
-      shutil.copy(f"{R}/propostas/APROVADO-{n}", f"{wt}/propostas/")
-  # Verificador CONFIÁVEL = o da base, congelado ANTES de qualquer apply (um diff do lote não pode trocar o verificador do próximo).
-  confiavel = f"{wt}/../.verificador-confiavel-{int(time.time())}.sh"
-  shutil.copy(f"{wt}/scripts/p8_verificar.sh", confiavel)
-  for n in a.nomes:  # TODOS os pares conferidos antes de aplicar o primeiro
-      v = sh(wt, "bash", confiavel, n, ok=False)
-      linhas = [l for l in v.stdout.splitlines() if l.strip()]
-      if v.returncode != 0 or not linhas or linhas[-1].strip() != f"PODE APLICAR: {n}":
-          sys.exit(f"FALHA no verificador ({n}) rc={v.returncode}:\n{v.stdout}{v.stderr}")
-  os.remove(confiavel)
-  for n in a.nomes:
-      sh(wt, "git", "apply", f"propostas/{n}.diff"); os.makedirs(f"{wt}/propostas/aplicadas", exist_ok=True)
-      sh(wt, "git", "mv", f"propostas/{n}.diff", "propostas/aplicadas/"); os.rename(f"{wt}/propostas/APROVADO-{n}", f"{wt}/propostas/aplicadas/APROVADO-{n}")
-  if a.registro:
-    t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
-    ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
-    e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
-    open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
-  if a.onde:
-      o = open(f"{wt}/ONDE_ESTAMOS.md", encoding="utf-8").read(); i = o.index("## Hoje")
-      open(f"{wt}/ONDE_ESTAMOS.md", "w", encoding="utf-8").write(o[:i] + open(a.onde, encoding="utf-8").read().rstrip("\n") + "\n\n" + o[i:])
-  sh(wt, "git", "add", "-A")
-  msg = f"Aplica {', '.join(a.nomes)} (assinado pelo Humano)" + (" e registra" if a.registro else "") + (f"\n\nCo-Authored-By: {coautor}" if coautor else "")
-  sh(wt, "git", "commit", "-qm", msg)
+  montar(wt, a, coautor)
   sh(wt, "git", "push", "-q", "-u", "origin", br)
   pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
@@ -88,11 +102,15 @@ def main():
       return False, {"erro": "head mudou durante os checks"}, None
   ok, cs, HEAD = ci_pinado(); print(cs)  # o merge só vale para ESSE head (--match-head-commit)
   if not ok: sys.exit(f"CI não passou ({cs}); não juntei")
-  for _ in range(4):  # main com proteção "strict": se andou, atualiza a branch e espera o CI de novo
+  for _ in range(4):  # main com proteção "strict": se andou, REFAZ a branch sobre o main novo e espera o CI de novo
       m = sh(wt, "gh", "pr", "merge", num, "--repo", "agataseth98-cmd/agata-seth", "--merge", "--match-head-commit", HEAD, ok=False)
       if m.returncode == 0: break
-      if not any(t in (m.stdout + m.stderr) for t in ("not up to date", "status checks are expected", "BEHIND")): sys.exit(f"merge falhou:\n{m.stdout}{m.stderr}")
-      sh(wt, "gh", "pr", "update-branch", num, "--repo", "agataseth98-cmd/agata-seth")
+      estado = json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "mergeStateStatus", ok=False).stdout or "{}").get("mergeStateStatus", "")
+      if not precisa_refazer(estado, m.stdout + m.stderr): sys.exit(f"merge falhou ({estado}):\n{m.stdout}{m.stderr}")
+      print(f"base andou ({estado}): refazendo a branch sobre o origin/main novo", flush=True)
+      sh(wt, "git", "fetch", "-q", "origin"); sh(wt, "git", "reset", "-q", "--hard", "origin/main"); sh(wt, "git", "clean", "-qfd")
+      montar(wt, a, coautor)  # verificador da base NOVA, apply de novo, número de MEMÓRIAS recalculado
+      sh(wt, "git", "push", "-q", "--force-with-lease", "origin", br)
       ok, cs, HEAD = ci_pinado()
       if not ok: sys.exit(f"CI não passou após atualizar ({cs}); não juntei")
   else:
