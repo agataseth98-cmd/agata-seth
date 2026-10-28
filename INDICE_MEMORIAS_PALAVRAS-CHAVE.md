@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(891) DIÁRIO — 27/10/2026 · **Painel: paleta 80/20.** Aplica `paleta-80-20-20261027`, assinado pelo Humano. Cada cor fria recebe 80% do deslocamento para o quente e mantém 20% do tom original, com a claridade intacta. Gerada a partir do CSS original. Alvo: contraste WCAG 2.2 AA, a medir na página real após a aplicação.
+  palavras-chave: painel, paleta, aplica, assinado, humano, cor, fria, recebe, deslocamento, quente, mantém, tom, original, claridade, intacta, gerada, partir, css, alvo, contraste, wcag, medir, página, real, após, aplicação
 (890) DIÁRIO — 27/10/2026 · **Painel: Panorama com status medido.** Aplica `panorama-status-20261027`, assinado pelo Humano. Pelo canon (resultado primeiro, sem saudação), a frase fixa do Panorama sai. Entra linha de status: serviços ativos, Git e propostas aguardando assinatura, lidos agora. O alerta de unidades deixa de ter contagem fixa.
   palavras-chave: painel, panorama, status, medido, aplica, assinado, humano, canon, resultado, primeiro, saudação, frase, fixa, sai, entra, linha, serviços, ativos, git, propostas, aguardando, assinatura, lidos, agora, alerta, unidades, deixa, ter, contagem
 (889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica `sofa-experiencia-20261027`, assinado pelo Humano. Tons frios (azul e ciano) passam para âmbar e nogueira, mantendo a claridade. Só CSS. Medido na pré-visualização: 628 textos visíveis, todos acima de 4,5:1. Sem frases de saudação: decisão separada.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, protótipo, separado, html, css, csp, retrato, original, seth, aplica, prototipo, assinados, humano, bloqueia, embutidos, passa, usar, servido, assets, agata, portrait, png, porque, referenciava, dava
 (862) DIÁRIO — 26/10/2026 · **Painel: protótipo ligado às leituras reais, em /prototipo (mesma origem).** Aplica `prototipo-ligado-20261026`, assinado pelo Humano. O protótipo passa a ser servido pelo painel e lê `/api/status` só para saúde de unidades e Git. Agenda e Wiki aparecem como não liberadas. Se a leitura falhar, a página mostra sem leitura e não mantém o último valor como atual.
   palavras-chave: painel, protótipo, ligado, leituras, reais, prototipo, mesma, origem, aplica, assinado, humano, passa, servido, api, status, saúde, unidades, git, agenda, wiki, aparecem, liberadas, leitura, falhar, página, mostra, mantém, último, valor, atual
-(861) DIÁRIO — 26/10/2026 · **Painel: formação em recortes, Wiki fechada até o contrato de busca.** Aplica `painel-formacao-20261026`, assinado pelo Humano. O primeiro recorte do plano reconciliado lê só unidades e Git. Por isso `WIKI_LIBERADA = False`: `busca_texto` e `busca_semantica` saem da lista de comandos e a rota `/api/wiki/search` responde 405. O painel tinha sido subido antes com a Wiki aberta; foi parado. Medido com o selftest do painel antes da aplicação.
-  palavras-chave: painel, formação, recortes, wiki, fechada, contrato, busca, aplica, formacao, assinado, humano, primeiro, recorte, plano, reconciliado, unidades, git, liberada, false, texto, semantica, saem, lista, comandos, rota, api, search, responde, tinha, sido, subido, aberta, parado, medido, selftest, aplicação
+(861) DIÁRIO — 26/10/2026 · **Painel: formação em recortes, Wiki fechada até o c …
+  palavras-chave: painel, formação, recortes, wiki, fechada
 (860) DIÁRIO — 26/10/2026 · **Painel de orientação: correções de servidor (threa …
   palavras-chave: painel, orientação, correções, servidor, threa
 (859) DIÁRIO — 26/10/2026 · **O Agent da Seth no LibreChat voltou a quebrar com …
