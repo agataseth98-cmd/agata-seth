@@ -9,6 +9,8 @@ Por quê: em 16/10/2026 a dupla entregou ~20 mudanças assinadas num dia, e gast
 modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada pelo shell, número (729) repetido 14 vezes,
 vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/dupla/` (estado fora do repo, em `~/.cache/agata/sincronia/`).
 
+> Protocolo MSG, memória do Conselho e auditoria: ver `agata-conselho-memoria`. Painel: ver `agata-painel`.
+
 ## 0. Antes de tudo
 - Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em dupla.
 - Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
