@@ -1,0 +1,154 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+new file mode 100644
+index 00000000..6fea2ecd
+--- /dev/null
++++ b/.agents/skills/INDICE.md
+@@ -0,0 +1,26 @@
++# Skills do Agata: índice para o Conselho
++
++Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada skill tem um dono e um escopo; quem vai mexer em algo lê a skill certa antes.
++
++## Skills próprias do Agata (`agata-*`)
++
++| Skill | Use quando | Dono de fato |
++|---|---|---|
++| `agata-carregar` | abrir uma sessão ou quando o bloco de estado não aparecer | Claude |
++| `agata-fluxo` | qualquer trabalho que mude o sistema, para qualquer modelo | Codex (doutrina) |
++| `agata-fluxo-dupla` | trabalhar em par Claude × Codex (partida, fila, propriedade) | Claude |
++| `agata-conselho-memoria` | cache do Conselho, canal MSG, auditoria antes de afirmar | Claude |
++| `agata-aplicar-proposta` | criar, verificar e aplicar uma proposta P-8 | Claude |
++| `agata-mudanca-segura` | antes de mexer em serviço, container, firewall ou config que roda | Claude |
++| `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
++| `agata-conversar-com-seth` | conversar com a Seth ou ler a conversa dela | Claude |
++| `agata-relay-provedores` | adaptadores de chats web no RelayCouncil | Codex |
++
++## Skills de terceiros (cópias fixas, não editar aqui)
++- `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
++
++## Regras de manutenção
++1. Cada skill cita só caminhos que existem. Antes de salvar, confira: `python3 -c` com `os.path.exists` sobre os caminhos entre crases.
++2. Uma skill por assunto. Se um assunto já tem skill, acrescente à skill, não crie outra.
++3. Mudança em skill do repositório passa por proposta P-8 (é arquivo versionado).
++4. Medido vai com comando e data. Sem medição, a frase começa com "não medido".
+diff --git a/.agents/skills/agata-carregar/SKILL.md b/.agents/skills/agata-carregar/SKILL.md
+index 23f23538..758796f9 100644
+--- a/.agents/skills/agata-carregar/SKILL.md
++++ b/.agents/skills/agata-carregar/SKILL.md
+@@ -32,3 +32,6 @@ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio,
+ Depois do carregar, toda resposta começa com a linha de turno:
+ `agata-seth · <modelo> · t=<n> (contado no contexto) · <hora medida AGORA com date> (relógio da Máquina)`.
+ Hora nunca é copiada da resposta anterior.
++
++## Contexto automático (28/10/2026)
++Desde a proposta `sessao-claude-contexto-20261028`, o hook `SessionStart` do projeto entrega o estado da Máquina, as últimas entradas do cache do Conselho e o estado da sessão conjunta. Se esse bloco não aparecer, rode os mesmos comandos à mão. Ver `agata-conselho-memoria`.
+diff --git a/.agents/skills/agata-conselho-memoria/SKILL.md b/.agents/skills/agata-conselho-memoria/SKILL.md
+new file mode 100644
+index 00000000..e1f57093
+--- /dev/null
++++ b/.agents/skills/agata-conselho-memoria/SKILL.md
+@@ -0,0 +1,38 @@
++---
++name: agata-conselho-memoria
++description: Trabalhar com a memória comum do Conselho e o canal da dupla no Agata. Use no início de toda sessão (ler o cache do Conselho e o estado da sessão), ao responder no canal com o protocolo MSG, ao anotar fatos ou pendências no cache, e antes de entregar texto com afirmação verificável (auditoria).
++---
++
++# Memória comum e canal do Conselho
++
++Esta skill junta o que o Conselho precisa para não repetir erros. Cada regra abaixo tem um motivo medido.
++
++## No início da sessão
++- O hook `SessionStart` do projeto (`.claude/settings.json` → `scripts/sessao_claude_contexto.sh`) já entrega: estado da Máquina (`scripts/estado_para_eco.sh`), as últimas 10 entradas do cache do Conselho e o estado da sessão conjunta. Se o contexto não chegou, rode isso à mão:
++  - `python3 redesign/router/cache_conselho.py ler --n 20`
++  - `python3 scripts/dupla/dupla.py status`
++
++## Memória comum (cache do Conselho)
++- Ler: `python3 redesign/router/cache_conselho.py ler --n 20`.
++- Anotar ao fechar trabalho relevante: `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"`.
++- Não é canon. Segredo é recusado. Dado pessoal vira marca.
++- Anote **fato medido** com o comando e a hora; anote **pendência** com quem deve agir.
++
++## Canal da dupla (protocolo MSG)
++- Ler o canal como Claude: `bash scripts/dupla/inicio.sh claude`. Ele mostra só um resumo da última entrada. Para ler a mensagem inteira, leia o arquivo `~/.cache/agata/sincronia/conversa.md` (por exemplo com `sed` a partir da última linha `## `).
++- Responder: `python3 scripts/dupla/dupla.py dizer --agente claude --assunto "..." --resposta-a <id> --estado <estado> --proximo <agente> --texto "..."`.
++- "MSG" no fim de uma mensagem do Humano significa: leia o canal, responda, e termine o texto de devolução com `MSG`.
++- Estado da sessão: `dupla.py status`. Deriva (base diferente de `origin/main`) não se corrige sozinho: é decisão do Humano (`iniciar --nova-base`).
++- Matriz congelada: `aceitar-linha` **altera** a matriz. Confirme com o Humano antes. Em 28/10/2026 a matriz foi trocada sem decisão prévia dele; foi registrada no canal, e o Humano decidiu manter a nova.
++
++## Antes de afirmar sobre o sistema
++- Fato do sistema: busque com `python3 scripts/busca_texto.py` ou `python3 scripts/busca_semantica.py` (o vault derivado é prioridade), depois confirme no canon (`PROJETO.md`, `REGRAS.md`, `MEMÓRIAS.md`) e cite o caminho e a linha.
++- Antes de entregar texto com afirmação verificável: `python3 redesign/router/auditoria_turno.py --verificar < arquivo`. Corrija o que ela apontar.
++- Medido é medido; não é "deve funcionar". Se não mediu, escreva "não medido".
++
++## Identidade de modelo
++- O cabeçalho da Regra 1 vai na abertura de cada resposta: `agata · <modelo real> · t=<n> · <data e hora medidas>`. A hora vem de `date`, não de estimativa.
++
++## Proposta e aplicação (resumo)
++- Mudança no canon ou em área protegida: `.diff` em `propostas/`, `APROVADO-<nome>` assinado pelo Humano com `scripts/aprovar.sh`. Só o Humano roda `aprovar.sh`.
++- Antes de dizer "assinado", confira se `propostas/APROVADO-<nome>` existe. Um "ok" do Humano não cria o arquivo.
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+index d33dab51..d6f43e02 100644
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ b/.agents/skills/agata-fluxo-dupla/SKILL.md
+@@ -9,6 +9,8 @@ Por quê: em 16/10/2026 a dupla entregou ~20 mudanças assinadas num dia, e gast
+ modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada pelo shell, número (729) repetido 14 vezes,
+ vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/dupla/` (estado fora do repo, em `~/.cache/agata/sincronia/`).
+ 
++> Protocolo MSG, memória do Conselho e auditoria: ver `agata-conselho-memoria`. Painel: ver `agata-painel`.
++
+ ## 0. Antes de tudo
+ - Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em dupla.
+ - Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
+diff --git a/.agents/skills/agata-painel/SKILL.md b/.agents/skills/agata-painel/SKILL.md
+new file mode 100644
+index 00000000..3aafc632
+--- /dev/null
++++ b/.agents/skills/agata-painel/SKILL.md
+@@ -0,0 +1,48 @@
++---
++name: agata-painel
++description: Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth, rotas de API ou o estado da tela. Use antes de editar server.py, prototipo.js, prototipo.css ou prototipo.html, e antes de medir ou aplicar qualquer mudança visual.
++---
++
++# Painel operacional do Agata
++
++Fatos medidos, não impressões. Antes de mudar qualquer coisa, leia a seção de regras; depois da mudança, meça na página real.
++
++## Onde mora
++- Código: `redesign/painel_operacional/` (`server.py`, `prototipo.html`, `prototipo.js`, `prototipo.css`, `test_painel.py`).
++- Serviço: `painel-operacional.service` (usuário), porta **20146**, bind só em `127.0.0.1`. Depois de aplicar, reinicie: `systemctl --user restart painel-operacional.service`.
++- Página: `http://127.0.0.1:20146/prototipo`. Só o `main` vale: o serviço serve o arquivo do checkout principal.
++
++## Regras que o painel impõe (medidas)
++- **CSP `style-src 'self'`**: `<style>` embutido e `style=` injetado por script são bloqueados em produção. Estilo entra em `prototipo.css`. Teste de estilo por injeção de `<style>` não é teste válido.
++- **Nenhum link para fora**: nada de `obsidian://`, `target="_blank"` ou `href` externo. Vault vira tela própria, lida por `/api/vault/item` (lista fechada de 9 itens, ou `caminho=` restrito a `memoria/obsidian`, sem `..`).
++- **Nenhum texto fixo que afirme estado** (contagens, "ativo", "Quatro…"). Estado vem da leitura do momento, com fonte e hora.
++- **Setas `↗`** só em links que saem do painel. Botão que abre popup ou tela interna não leva seta.
++- **Popup**: `dialog` com largura `min(680px, 100vw-32px)` e altura máxima `86vh`, cabeçalho e botões fixos, corpo com rolagem interna. Conteúdo longo rola dentro do popup; não corta.
++- **Rolagem**: barras finas no tom da identidade (`scrollbar-width: thin` e `::-webkit-scrollbar`). Não esconda a rolagem de conteúdo que precisa ser lido.
++- **Conversa com a Seth**: texto puro e Markdown montado com elementos do DOM. Nunca `innerHTML` com texto vindo da Seth.
++
++## Como medir antes de propor (método que funcionou)
++1. **Pré-visualizar CSS sem tocar no arquivo**: busque o `prototipo.css` atual, transforme no navegador e aplique com folha construída (`new CSSStyleSheet(); sh.replaceSync(css); document.adoptedStyleSheets = [sh]`). Essa via não é bloqueada pela CSP. Confirme que as regras entraram (`getComputedStyle`).
++2. **Contraste**: percorra cada nó com texto visível nas páginas, calcule luminância relativa (WCAG) do texto e do fundo mais próximo com cor opaca, e exija 4,5:1 para texto normal. Meça a contagem de textos e a dos que falham; registre as duas.
++3. **Popups**: abra cada popup e meça `scrollHeight <= clientHeight` e `scrollWidth <= clientWidth` do `dialog`.
++4. **Tela real**: depois de aplicar, meça de novo na página servida. Conte só o que o HTML servido tem (`curl` em `/prototipo`) e o que o navegador mostra.
++
++Números de contraste mudam entre medições por causa da quantidade de elementos visíveis. Registre sempre o total junto com o resultado.
++
++## Como mudar (fluxo de proposta)
++1. Trabalhe numa worktree (`git worktree add ... origin/main`), nunca no checkout principal.
++2. Rode `python3 server.py --selftest` e `python3 -m unittest test_painel`. Se um teste antigo comparar formato exato, atualize a expectativa e diga isso.
++3. Gere o `.diff` só com as alterações do painel (`git add -N` + `git diff origin/main -- redesign/painel_operacional`), confirme com `git apply --check`, e só então commite o `.diff` em `propostas/`.
++4. O Humano assina. Aplique com `scripts/dupla/aplicar.py` e registro no formato DIÁRIO (ver `agata-aplicar-proposta`).
++5. Depois da aplicação: reinicie o serviço, meça na página e registre o resultado.
++
++## Armadilhas que já custaram tempo
++- `pkill -f` derrubou o shell e matou processos alheios: liste com `ps` e mate por PID.
++- `git stash` é compartilhado entre worktrees: não use. Para guardar trabalho, faça commit WIP.
++- Caminhos com espaço (`~/Área de trabalho`) quebram `python3 -c` sem aspas: use argumento com aspas ou um script.
++- `grep -o` com caracteres como `↗` pode falhar em alguns locais: use `python3` para contar.
++- `dupla.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
++
++## Pendências conhecidas
++- Layout em celular não foi medido (o navegador não redimensiona a aba).
++- O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-conselho-memoria`.
