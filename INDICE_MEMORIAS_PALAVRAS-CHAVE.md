@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(898) DIÁRIO — 28/10/2026 · **Painel: segunda passada de textos.** Aplica `textos-revisao2-20261028`, assinado pelo Humano. Doze parágrafos longos viram frases de até 120 caracteres, com os mesmos fatos. Oito aberturas de aba passam a dizer o que o leitor pode fazer ali.
+  palavras-chave: painel, segunda, passada, textos, aplica, revisao, assinado, humano, doze, parágrafos, longos, viram, frases, caracteres, mesmos, fatos, oito, aberturas, aba, passam, dizer, leitor, pode, fazer, ali
 (897) DIÁRIO — 28/10/2026 · **Painel: revisão de textos longos.** Aplica `textos-revisao-20261028`, assinado pelo Humano. Nove textos longos viram frases curtas, com os mesmos fatos: portas, comandos, regras e limites preservados.
   palavras-chave: painel, revisão, textos, longos, aplica, revisao, assinado, humano, nove, viram, frases, curtas, mesmos, fatos, portas, comandos, regras, limites, preservados
 (896) DIÁRIO — 28/10/2026 · **Painel: revisão de links, setas, rolagem e popups.** Aplica `painel-revisao-20261028`, assinado pelo Humano. Último link obsidian:// sai: resultado da busca abre tela própria, com caminho lido só dentro de memoria/obsidian. Setas ↗ saem de botões internos. Barras de rolagem finas. Popups cabem na tela; o corpo rola dentro deles.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, wiki, timers, reabertos, aplica, liberar, assinado, humano, muda, formação, liberada, true, timer, allowlist, agata, manutencao, vault, inbox, três, testes, estavam, pulados, voltam, rodar, medido, verificador, busca, texto, semantica
 (869) DIÁRIO — 27/10/2026 · **Painel: parte funcional sem Wiki e sem timers.** Aplica `painel-funcional-retomada-20261027`, assinado pelo Humano. Retoma o trabalho do Codex com `WIKI_LIBERADA = False` e lista de timers vazia, até decisão do Humano. Três testes da Wiki e dos timers ficam pulados com o motivo. Selftest OK; 13 testes, 3 pulados.
   palavras-chave: painel, parte, funcional, wiki, timers, aplica, retomada, assinado, humano, retoma, trabalho, codex, liberada, false, lista, vazia, decisão, três, testes, ficam, pulados, motivo, selftest
-(868) DIÁRIO — 27/10/2026 · **Painel: sobe e cai junto com a Seth.** Aplica `ciclo-painel-seth-20261027`, assinado pelo Humano. Unit de usuário do painel, sem Install; `seth` sobe o painel e `seth-parar` o derruba, na mesma ordem dos demais serviços. Wiki e timers continuam fora desta mudança.
-  palavras-chave: painel, sobe, cai, junto, seth, aplica, ciclo, assinado, humano, unit, usuário, install, parar, derruba, mesma, ordem, demais, serviços, wiki, timers, continuam, fora, desta, mudança
+(868) DIÁRIO — 27/10/2026 · **Painel: sobe e cai junto com a Seth.** Aplica `cic …
+  palavras-chave: painel, sobe, cai, junto, seth, aplica, cic
 (867) DIÁRIO — 27/10/2026 · **Verificador: amostra opcional para medir a precisã …
   palavras-chave: verificador, amostra, opcional, medir, precisã
 (866) DIÁRIO — 27/10/2026 · **Ensaio de seguir protocolo v2 gravado no medido da …
