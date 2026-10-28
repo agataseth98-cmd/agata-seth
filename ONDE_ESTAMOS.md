@@ -10,20 +10,13 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Equipe universal aplicada (PR #687):** vigias de Claude e Codex atualizadas e verificadas. A aplicação da auditoria encadeada aguarda merge humano; em seguida, libera-se `main` para a proposta da interface.
+**Equipe universal e auditoria encadeada aplicadas:** PRs #687 e #688 foram integrados; `main` está em `8519794`.
 
+**Proposta de interface do Conselho em preparação:** `relay-council-panel-ui-rebase3-20261028` foi refeita sobre o `main` atual. O patch altera os quatro arquivos do painel e passou `git apply --check`; testes de painel e conferência visual não foram repetidos após o rebase. Depois que o PR da proposta entrar no `main` e o CI passar, falta sua assinatura própria.
 
-**Esperando a sua assinatura:**
-- `aplicar-refazer-base-20261028`: quando o main anda antes do merge, o script de aplicação refaz o PR sobre o main novo, em vez de misturar os dois e travar em conflito. Depois dele, o Discord pode ser reaplicado.
-- `equipe-universal-20261028`: a dupla passa a se chamar Equipe e aceita qualquer membro do Conselho, não só Claude e Codex. Assine depois da anterior: as duas mexem no mesmo script.
+**PR anterior #684:** continua aberto e conflitante; esta proposta não o altera.
 
-**Aplicado no PR #674:**
-- RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
-- O painel e os serviços em execução não foram alterados.
-
-**Aplicação P-8 do endpoint local, em revisão:**
-- A assinatura foi validada e o endpoint de catálogo e registro entrou na branch de aplicação. O PR aguarda revisão e merge humano.
-- A interface RelayCouncil e a conexão com provedores ainda ficam para etapas posteriores. Os serviços em execução não foram alterados.
+**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). A proposta do endpoint local aguarda o fluxo de aplicação; a interface e chamadas externas continuam fora do sistema em execução.
 
 ## Hoje, 22 e 23/10
 
