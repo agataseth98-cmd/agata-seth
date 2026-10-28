@@ -1,0 +1,46 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index ba6096e4..236b3142 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -296,3 +296,6 @@ dialog .dialog-body{font:inherit;white-space:normal}
+ dialog #vault-canvas{max-height:28vh;overflow:auto;overflow-wrap:anywhere}
+ dialog .dialog-source{overflow-wrap:anywhere}
+ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
++
++/* (28/10/2026) Refino: a linha de status do topo fica legível sobre a imagem. */
++.hero-line{text-shadow:0 1px 12px rgba(0,0,0,.75)}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 8d1c4a7e..a17bf875 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -35,7 +35,7 @@
+ 
+     <div class="hero"><div><div class="eyebrow">Leitura local · fonte em cada cartão</div><h1>Panorama</h1><p><strong class="hero-line" id="hero-status" role="status">Lendo o estado do sistema.</strong></p></div><div class="hero-stamp"><div><div class="stamp-row"><i class="dot"></i> <span id="hero-sync-label">Git local · aguardando leitura</span></div><strong id="hero-sync-head">—</strong></div><div id="hero-sync-note">Fonte: Git local</div></div></div>
+     <div class="callout"><span><strong id="overview-alert">Aguardando leitura local.</strong> Serviços, Git e agenda são fontes independentes.</span><button class="btn secondary" id="refresh-main" type="button">Atualizar</button></div>
+-    <div class="kpis"><div class="kpi teal"><div class="label">Unidades monitoradas</div><div class="value" id="overview-health">—</div><div class="note">Quatro unidades · seth-verificador</div></div><div class="kpi"><div class="label">Git local</div><div class="value" id="overview-git">—</div><div class="note">Referência do último fetch</div></div><div class="kpi violet"><div class="label">Agenda</div><div class="value" id="overview-timers">—</div><div class="note">Timers · não prova execução</div></div><div class="kpi gold"><div class="label">Propostas</div><div class="value" id="overview-proposals">—</div><div class="note">Assinaturas não verificadas nesta leitura</div></div></div>
++    <div class="kpis"><div class="kpi teal"><div class="label">Unidades monitoradas</div><div class="value" id="overview-health">—</div><div class="note" id="overview-units-note">Unidades observadas · seth-verificador</div></div><div class="kpi"><div class="label">Git local</div><div class="value" id="overview-git">—</div><div class="note">Referência do último fetch</div></div><div class="kpi violet"><div class="label">Agenda</div><div class="value" id="overview-timers">—</div><div class="note">Timers · não prova execução</div></div><div class="kpi gold"><div class="label">Propostas</div><div class="value" id="overview-proposals">—</div><div class="note">Aguardando assinatura do Humano</div></div></div>
+     <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Detalhe</div><h2 class="panel-title">Serviços, Git e agenda</h2></div><button class="text-link" type="button" data-open-page="operacao">Abrir Estado operacional</button></div><p class="subnote">Unidades, Git e timers ficam só em Estado operacional, para não repetir a leitura nesta tela.</p></article>
+     <div class="stack"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orientação</div><h2 class="panel-title">A memória tem caminhos</h2></div><button type="button" class="text-link" data-vault="inicio">Abrir vault</button></div><div class="memory-links"><button type="button" data-vault="timeline">Linha do tempo</button><button type="button" data-vault="mapa">Mapa do sistema</button><button type="button" data-open-page="grafo">Brain Atlas</button><button type="button" data-vault="memorias">Base de memórias</button></div><p class="subnote">O vault é derivado; confirme afirmações no canon.</p></article>
+     <article class="panel chat-card"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Conversa com a Seth</h2></div><span id="chat-state" class="chip horizon">SEM LEITURA</span></div><p id="chat-source">Aguardando leitura HTTP. A saúde do endpoint não garante cada função do chat.</p><button class="btn" type="button" data-open-page="conversa">Abrir conversa da Seth</button></article></div></div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 20c055f3..d3ae53ed 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -250,7 +250,8 @@ function renderProposals(value, forced) {
+   });
+   replaceRows("proposal-list", rows, state === "unknown" ? "Lista indisponível." : "Nenhuma proposta nesta leitura.");
+   set("proposal-source", sourceLine(value) + (value && value.truncated ? " · lista limitada a 100 propostas." : "") + " A assinatura exige verificação própria.");
+-  set("overview-proposals", state === "unknown" ? "—" : String(value.total));
++  const pendentes = (value && value.items || []).filter((p) => !p.marker_present && !p.substituida_por && p.versionada !== false).length;
++  set("overview-proposals", state === "unknown" ? "—" : String(pendentes));
+ }
+ function render(snapshot, forced = false) {
+   renderedSnapshotState = snapshotStateKey(snapshot, forced);
+@@ -260,6 +261,7 @@ function render(snapshot, forced = false) {
+   const active = services.filter((item) => stateOf(item, forced) === "ok").length;
+   chip("units-panel-state", overall);
+   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + services.length);
++  set("overview-units-note", services.length + " unidades observadas · seth-verificador");
+   set("overview-alert", overall === "ok" ? active + " de " + services.length + " unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
+   replaceRows("live-services", unitRows(services, forced), "Nenhum estado recebido.");
+   if (byId("overview-services")) replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");
