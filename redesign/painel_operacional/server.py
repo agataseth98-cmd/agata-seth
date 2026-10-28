@@ -492,6 +492,25 @@ def _vault_item(item_id: str) -> dict:
     return out
 
 
+def _vault_caminho(caminho: str) -> dict | None:
+    """Nota .md do vault pelo caminho relativo, só leitura. Recusa tudo que sair de memoria/obsidian."""
+    if not re.fullmatch(r"[^\x00-\x1f\\]{1,200}\.md", caminho) or caminho.startswith("/") or ".." in caminho.split("/"):
+        return None
+    raiz = (ROOT / "memoria/obsidian").resolve()
+    arq = (raiz / caminho).resolve()
+    if raiz not in arq.parents or not arq.is_file():
+        return None
+    observed_at, fresh_until = _reading_window()
+    st = arq.stat()
+    with arq.open("rb") as f:
+        texto = f.read(VAULT_LIMITE).decode("utf-8", errors="replace")
+    titulo = next((l[2:].strip() for l in texto.splitlines() if l.startswith("# ")), arq.stem)
+    return {"schema_version": 1, "id": caminho, "fonte": "memoria/obsidian/" + caminho, "state": "ok",
+            "titulo": titulo, "texto": texto, "tamanho": st.st_size, "truncado": st.st_size > VAULT_LIMITE,
+            "modificado": datetime.fromtimestamp(st.st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds"),
+            "observed_at": observed_at, "fresh_until": fresh_until}
+
+
 def _lacunas_snapshot() -> dict:
     """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
     - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
@@ -800,10 +819,17 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/grafo"):
             return self._grafo()
         if self.path.startswith("/api/vault/item"):
-            item_id = (parse_qs(urlparse(self.path).query).get("id") or [""])[0]
-            if item_id not in VAULT_ITENS:
-                return self._send(400, "text/plain; charset=utf-8", b"item fora da lista")
-            body = json.dumps(_vault_item(item_id), ensure_ascii=False).encode("utf-8")
+            q = parse_qs(urlparse(self.path).query)
+            if q.get("caminho"):
+                dados = _vault_caminho(q["caminho"][0])
+                if dados is None:
+                    return self._send(400, "text/plain; charset=utf-8", b"caminho fora do vault")
+            else:
+                item_id = (q.get("id") or [""])[0]
+                if item_id not in VAULT_ITENS:
+                    return self._send(400, "text/plain; charset=utf-8", b"item fora da lista")
+                dados = _vault_item(item_id)
+            body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/lacunas":
             body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
