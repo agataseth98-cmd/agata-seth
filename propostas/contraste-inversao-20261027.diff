@@ -1,0 +1,33 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index eddc0e6d..6367c3b8 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -1,9 +1,9 @@
+ 
+ :root{
+-  --paper:#17140c;--sheet:#090804;--ink:#c9dce2;--muted:#859699;--line:#323126;
+-  --teal:#86dad0;--teal-soft:#101c18;--gold:#cc9342;--gold-soft:#261d0a;
+-  --rose:#ae5447;--rose-soft:#1e100b;--violet:#756e94;--violet-soft:#0e0c15;
+-  --blue:#7599aa;--blue-soft:#0f1618;--shadow:0 16px 42px rgba(201,221,227,.07);
++  --paper:#17140c;--sheet:#090804;--ink:#c9dce2;--muted:#2e3638;--line:#3a392c;
++  --teal:#184e48;--teal-soft:#101c18;--gold:#503816;--gold-soft:#261d0a;
++  --rose:#48231e;--rose-soft:#1e100b;--violet:#2e2b3b;--violet-soft:#0e0c15;
++  --blue:#27373f;--blue-soft:#0f1618;--shadow:0 16px 42px rgba(201,221,227,.07);
+   --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+   --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,monospace;
+ }
+@@ -32,10 +32,10 @@ dialog{border:1px solid var(--line);border-radius:14px;max-width:min(530px,calc(
+ 
+ /* Identidade visual Agata · inspirada no artefato “Sistema Agata” e na imagem local */
+ :root{
+-  --paper:#e7ecf7;--sheet:#d5dfef;--ink:#000712;--muted:#35455c;--line:#afbfd8;
+-  --teal:#128a9e;--teal-soft:#bfe1ed;--gold:#894c00;--gold-soft:#dfd2c6;
+-  --rose:#73001c;--rose-soft:#dbc4d2;--violet:#1e0064;--violet-soft:#c2bcda;
+-  --blue:#00347c;--blue-soft:#b6c8e4;--shadow:0 20px 58px rgba(255,255,255,.28);
++  --paper:#e7ecf7;--sheet:#d5dfef;--ink:#000712;--muted:#253141;--line:#afbfd8;
++  --teal:#0a505c;--teal-soft:#bfe1ed;--gold:#613805;--gold-soft:#dfd2c6;
++  --rose:#61051b;--rose-soft:#dbc4d2;--violet:#210561;--violet-soft:#c2bcda;
++  --blue:#052c61;--blue-soft:#b6c8e4;--shadow:0 20px 58px rgba(255,255,255,.28);
+   --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,monospace;
+ }
+ html{background:var(--paper)}
