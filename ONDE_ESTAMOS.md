@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Conselho em Rede:** P-8 `conselho-em-rede-paridade-20261028` assinado e aplicado na branch `aplica/conselho-em-rede-paridade-20261028`. P-8 validou hash, assinatura e aplicabilidade; 34 testes e selftest passaram. Prévia isolada confirmou envio em espera de aprovação humana. PR de aplicação aguarda revisão/merge; runtime não reiniciado e provedores reais não testados.
+**Conselho em Rede:** P-8 `conselho-em-rede-paridade-20261028` assinado e aplicado na branch `aplica/conselho-em-rede-paridade-20261028`. O CodeQL apontou uma regex vulnerável; foi substituída por parser linha a linha sem regex e adicionados dois testes. Agora 36 testes e selftest passam. PR #692 aguarda CI após correção; runtime não reiniciado e provedores reais não testados.
 
 **Conselho de Modelos em Rede:** proposta `relay-council-panel-ui-rebase3-20261028` assinada e validada por P-8. A aplicação está na branch própria, com selftest e 22 testes do painel passando; aguarda merge humano. O serviço não foi reiniciado e a página real ainda não foi medida.
 

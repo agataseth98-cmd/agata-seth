@@ -40,9 +40,6 @@ CONTEXT = (
 )
 MAX_TEXT = 60_000
 EXPIRY = 600
-TAG = re.compile(r'^\s*(<(?:SEARCH|STATE|CACHE|AUDIT|RELAY|DELIVER)\b[^\n]*(?:/>|>[\s\S]*?</(?:SEARCH|STATE|CACHE|AUDIT|RELAY|DELIVER)>))\s*$', re.M)
-
-
 class Conflict(ValueError):
     pass
 
@@ -54,9 +51,14 @@ def digest(value):
 def requests(text):
     """Somente tags completas em linha própria; texto não é código nem comando."""
     found = []
-    for match in TAG.finditer(text):
+    if not isinstance(text, str) or len(text) > MAX_TEXT:
+        return found
+    for line in text.splitlines():
+        candidate = line.strip()
+        if not candidate.startswith("<") or not candidate.endswith(">"):
+            continue
         try:
-            tag = ElementTree.fromstring(match.group(1))
+            tag = ElementTree.fromstring(candidate)
         except ElementTree.ParseError:
             continue
         if tag.tag in TOOLS and not list(tag):

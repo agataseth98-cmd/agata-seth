@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
 import server
-from conselho_rede import Council, Conflict, PROVIDERS
+from conselho_rede import Council, Conflict, PROVIDERS, requests as parse_requests
 
 
 class CouncilTests(unittest.TestCase):
@@ -89,6 +89,14 @@ class CouncilTests(unittest.TestCase):
         self.assertEqual(restarted._row(action)["status"], "unknown")
         self.assertEqual(restarted.claim(), [])
         restarted.db.close()
+
+    def test_tool_requests_require_one_complete_xml_tag_per_line(self):
+        parsed = parse_requests('before <STATE/> after\n<SEARCH canon="Agata"/>\n<DELIVER>review</DELIVER>')
+        self.assertEqual([item["tool"] for item in parsed], ["SEARCH", "DELIVER"])
+
+    def test_tool_request_parser_handles_repeated_delimiters_without_regex(self):
+        self.assertEqual(parse_requests(">" * 60_000), [])
+        self.assertEqual(parse_requests("x" * 60_001 + "\n<STATE/>"), [])
 
 
 class CouncilHTTPTests(unittest.TestCase):

@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340
-  Escrito em: 28/10/2026 16:25 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 99cf1955f455964c8422bc11c208b6c764111dd0
+  Escrito em: 28/10/2026 18:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0d8b9d065ed9f1c3aef9ffb8b6e124a4bf193340/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99cf1955f455964c8422bc11c208b6c764111dd0/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99cf1955f455964c8422bc11c208b6c764111dd0/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99cf1955f455964c8422bc11c208b6c764111dd0/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99cf1955f455964c8422bc11c208b6c764111dd0/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/99cf1955f455964c8422bc11c208b6c764111dd0/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(917) DIÁRIO — 28/10/2026 · **Correção da regex vulnerável apontada pelo CodeQL em `conselho_rede.py`.** O parser agora lê tags XML completas, uma por linha, sem regex sobre texto externo; foram acrescentados casos para delimitadores repetidos e limite máximo de entrada. A suíte passou de 34 para 36 testes; selftest do painel passou. PR #692 recebeu correção e aguarda nova rodada de CI.
+Modelo: GPT-6 (Codex) · vetor: anotação CodeQL do PR #692, suíte (36 testes), selftest e `git diff --check` · Autorização: aplicação sob P-8 assinada `conselho-em-rede-paridade-20261028`
+
 (916) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-paridade-20261028` aplicado em branch própria após assinatura humana validada.** `p8_verificar.sh` confirmou par, hash, assinatura Ed25519 e `git apply --check`; 34 testes do painel e selftest passaram. Prévia isolada mostrou pedido de envio aguardando aprovação humana e identificado como teste local, sem envio a provedor. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
 Modelo: GPT-6 (Codex) · vetor: `p8_verificar.sh`, suíte unitária, selftest e prévia local em diretório temporário · Autorização: assinatura humana P-8 e “feito” para aplicar
 
