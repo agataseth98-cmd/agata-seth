@@ -10,7 +10,9 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Conselho em Rede:** página e fila oficiais estão no painel `127.0.0.1:20146/conselho-rede`; serviço ativo e extensão oficial fazendo poll. O catálogo tem 17 provedores e há 9 adaptadores de envio. Prompts, debates e ferramentas aguardam aprovação humana; histórico visível. Selftest e 33 testes passaram. Provedor real após a publicação não foi testado.
+**Conselho em Rede:** página, fila e histórico oficiais estão no painel `127.0.0.1:20146/conselho-rede`; serviço ativo e extensão fazendo poll. A fila de produção ainda aceita IDs da extensão DOM, incompatíveis com o catálogo oficial. Nenhum provedor real foi testado após a publicação.
+
+**Correção proposta:** P-8 `painel-conselho-api-20261028` troca o executor DOM por OmniRoute/API oficial, limita destinos a cinco mapeamentos ativos, mantém aprovação humana e remove permissões de abas e páginas de provedores. Selftest e 43 testes simulados passaram em worktree descartável. A proposta aguarda CI e assinatura; o runtime continua na versão atual.
 
 **Runtime do Conselho:** drop-in do `painel-operacional.service` concede escrita só a `~/.local/share/agata/painel-conselho/official`. Backup e comando de rollback estão na entrada (920) de MEMÓRIAS.
 
