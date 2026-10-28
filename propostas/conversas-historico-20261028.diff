@@ -1,0 +1,452 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index e4d87480..e44cb5fa 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -313,3 +313,24 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .seth-exemplos{display:flex;flex-wrap:wrap;gap:8px}
+ .seth-exemplo{border:1px solid var(--line);background:transparent;color:inherit;border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
+ .seth-exemplo:hover{border-color:#66b2da}
++
++/* (28/10/2026) Conversa com a Seth: lista de conversas, Markdown seguro e ações por resposta. */
++.seth-layout{display:grid;grid-template-columns:minmax(180px,220px) minmax(0,1fr);gap:14px;align-items:start}
++.seth-lista{display:flex;flex-direction:column;gap:10px;min-width:0}
++.seth-conversas{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto}
++.seth-item{display:flex;flex-direction:column;gap:4px;padding:8px 9px;border-radius:10px;border:1px solid transparent}
++.seth-item.ativa,.seth-item:hover{border-color:var(--line);background:rgba(97,217,237,.06)}
++.seth-item-abrir{background:none;border:0;padding:0;text-align:left;color:inherit;cursor:pointer;font:inherit;overflow-wrap:anywhere}
++.seth-item-acoes{display:flex;gap:10px;font-size:12px}
++.seth-renomear{width:100%;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:transparent;color:inherit}
++.seth-main{min-width:0;display:flex;flex-direction:column;gap:8px}
++.seth-form{display:flex;gap:8px;margin-top:4px}
++.seth-form textarea{flex:1;resize:vertical}
++.msg-acoes{display:flex;gap:14px;margin-top:8px;font-size:12px}
++.msg-body p{margin:0 0 .6em}
++.msg-body h4{margin:.4em 0;font-size:14px}
++.msg-body ul{margin:.2em 0 .6em 1.2em;padding:0}
++.msg-body code{font:12px/1.4 ui-monospace,Consolas,monospace;padding:1px 5px;border-radius:5px;background:rgba(97,217,237,.08)}
++.msg-body pre{overflow:auto;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.25);margin:.4em 0}
++.msg-body pre code{padding:0;background:none}
++@media (max-width:760px){.seth-layout{grid-template-columns:1fr}.seth-conversas{max-height:22vh}}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 64383bb4..dcc80847 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -44,10 +44,12 @@
+   </section>
+ 
+   <section class="page" id="page-conversa" data-title="Conversa com a Seth"><div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Uma conversa por vez</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
+-<div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
+-<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div><button class="btn secondary" type="button" id="seth-nova">Nova conversa</button></div><form id="seth-form" style="display:flex;gap:8px;margin-top:12px"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required style="flex:1;resize:vertical" placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+-<p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></article></section>
++<article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
++<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
++<div class="seth-main"><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
++<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
++<form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
++<p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article></section>
+ <section class="page" id="page-grafo" data-title="Grafo do vault"><div class="section-heading"><div><div class="eyebrow">Vault derivado · só leitura</div><h1>Grafo do vault</h1><p>Escolha um nó para trocar o centro. Relações, Regiões e Brain Atlas mudam a forma de ver a memória.</p></div></div>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button><button class="btn secondary" type="button" id="grafo-modo-atlas" aria-pressed="false">Brain Atlas</button></div></div>
+ <form id="grafo-form" style="display:flex;gap:8px;margin:10px 0"><label for="grafo-entrada" class="sr-only">Número da entrada</label><input id="grafo-entrada" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="0850" style="width:7em"><button class="btn" type="submit">Abrir nota</button></form>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index ca25c7ab..8d08ff06 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -517,15 +517,72 @@ function ligarCartoesClicaveis() {
+ }
+ 
+ /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
+-const sethHistorico = [];
++let sethAtual = {id: null, titulo: "", mensagens: []};
+ const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
+ const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
+ function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+-function sethVazio() {
++function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
++function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
++function sethInline(container, texto) {
++  const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
++  for (const p of partes) {
++    if (!p) continue;
++    if (p.startsWith("**") && p.endsWith("**")) { const b = document.createElement("strong"); b.textContent = p.slice(2, -2); container.append(b); }
++    else if (p.startsWith("`") && p.endsWith("`")) { const c = document.createElement("code"); c.textContent = p.slice(1, -1); container.append(c); }
++    else container.append(document.createTextNode(p));
++  }
++}
++function sethMarkdown(texto, destino) {
++  const linhas = String(texto).split("\n");
++  let lista = null, codigo = null;
++  for (const linha of linhas) {
++    if (linha.trim().startsWith("```")) {
++      if (codigo) { codigo = null; continue; }
++      codigo = document.createElement("pre"); const c = document.createElement("code"); codigo.append(c); destino.append(codigo); lista = null; continue;
++    }
++    if (codigo) { codigo.firstChild.textContent += linha + "\n"; continue; }
++    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = linha.trim(); destino.append(aside); lista = null; continue; }
++    const cabeca = linha.match(/^(#{1,3})\s+(.*)$/);
++    if (cabeca) { const h = document.createElement("h4"); sethInline(h, cabeca[2]); destino.append(h); lista = null; continue; }
++    const item = linha.match(/^\s*[-*]\s+(.*)$/);
++    if (item) { if (!lista) { lista = document.createElement("ul"); destino.append(lista); } const li = document.createElement("li"); sethInline(li, item[1]); lista.append(li); continue; }
++    if (!linha.trim()) { lista = null; continue; }
++    const p = document.createElement("p"); sethInline(p, linha); destino.append(p); lista = null;
++  }
++}
++function sethMensagem(m, indice) {
+   const log = byId("seth-transcript");
+-  if (!log || log.children.length || sethHistorico.length) return;
+-  const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa ainda. Pergunte sobre o estado, uma decisão ou uma proposta.";
+-  log.append(vazio);
++  const msg = document.createElement("article"); msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant");
++  const cab = document.createElement("div"); cab.className = "msg-head";
++  const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
++  const hora = document.createElement("span"); hora.textContent = m.hora || "";
++  cab.append(quem, hora);
++  const corpo = document.createElement("div"); corpo.className = "msg-body";
++  if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
++  msg.append(cab, corpo);
++  if (m.role === "assistant") {
++    const acoes = document.createElement("div"); acoes.className = "msg-acoes";
++    const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
++    copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
++    acoes.append(copiar);
++    if (indice === sethAtual.mensagens.length - 1) {
++      const regerar = document.createElement("button"); regerar.type = "button"; regerar.className = "text-link"; regerar.textContent = "Regenerar";
++      regerar.addEventListener("click", () => sethRegerar());
++      acoes.append(regerar);
++    }
++    msg.append(acoes);
++  }
++  log.append(msg);
++}
++function sethDesenhar() {
++  const log = byId("seth-transcript"); log.replaceChildren();
++  if (!sethAtual.mensagens.length) {
++    const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
++    log.append(vazio);
++  }
++  sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
++  log.scrollTop = log.scrollHeight;
++  sethTitulo(sethAtual.titulo);
+ }
+ function sethExemplos() {
+   const box = byId("seth-exemplos"); if (!box) return;
+@@ -536,65 +593,114 @@ function sethExemplos() {
+     box.append(b);
+   });
+ }
+-function sethEscrever(papel, texto, modelo = "") {
+-  const log = byId("seth-transcript");
+-  const vazio = log.querySelector(".seth-vazio"); if (vazio) vazio.remove();
+-  const msg = document.createElement("article"); msg.className = "msg msg-" + (papel === "user" ? "user" : "assistant");
+-  const cab = document.createElement("div"); cab.className = "msg-head";
+-  const quem = document.createElement("strong"); quem.textContent = papel === "user" ? "Você" : "Seth" + (modelo ? " · " + modelo : "");
+-  const hora = document.createElement("span"); hora.textContent = sethHora();
+-  cab.append(quem, hora);
+-  const corpo = document.createElement("div"); corpo.className = "msg-body";
+-  const notas = [];
+-  for (const linha of String(texto).split("\n")) {
+-    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { notas.push(linha.trim()); continue; }
+-    corpo.append(linha + "\n");
+-  }
+-  msg.append(cab, corpo);
+-  notas.forEach((n) => { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = n; msg.append(aside); });
+-  log.append(msg);
+-  log.scrollTop = log.scrollHeight;
++async function sethListar() {
++  const box = byId("seth-conversas"); if (!box) return;
++  try {
++    const dados = await fetchJson("/api/seth/conversas", {headers: {Accept: "application/json"}});
++    box.replaceChildren();
++    (dados.items || []).forEach((c) => {
++      const linha = document.createElement("div"); linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "");
++      const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
++      abrir.title = c.mensagens + " mensagens · " + c.atualizada;
++      abrir.addEventListener("click", () => sethAbrir(c.id));
++      const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
++      const renomear = document.createElement("button"); renomear.type = "button"; renomear.className = "text-link"; renomear.textContent = "Renomear";
++      renomear.addEventListener("click", () => sethRenomear(c, linha));
++      const apagar = document.createElement("button"); apagar.type = "button"; apagar.className = "text-link"; apagar.textContent = "Apagar";
++      apagar.addEventListener("click", () => {
++        if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
++        sethApagar(c.id);
++      });
++      acoes.append(renomear, apagar);
++      linha.append(abrir, acoes);
++      box.append(linha);
++    });
++    if (!(dados.items || []).length) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = "Nenhuma conversa salva."; box.append(p); }
++  } catch (erro) { box.textContent = "Lista indisponível (" + erro.message + ")."; }
++}
++async function sethAbrir(id) {
++  try {
++    const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
++    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens};
++    sethDesenhar(); sethListar();
++  } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
++}
++async function sethSalvar() {
++  if (!sethAtual.mensagens.length) return;
++  if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
++  try {
++    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map((m) => ({role: m.role, content: m.content}))})});
++    if (r.ok) { const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar(); }
++  } catch (_) { /* a conversa continua na aba; o aviso fica no status */ }
++}
++async function sethApagar(id) {
++  await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
++  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); }
++  sethListar();
++}
++function sethRenomear(c, linha) {
++  const campo = document.createElement("input"); campo.type = "text"; campo.value = c.titulo; campo.maxLength = 80; campo.className = "seth-renomear"; campo.setAttribute("aria-label", "Novo nome da conversa");
++  linha.replaceChildren(campo); campo.focus();
++  const confirmar = async () => {
++    const novo = campo.value.trim() || c.titulo;
++    if (c.id === sethAtual.id) { sethAtual.titulo = novo; sethSalvar(); return; }
++    const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(c.id), {headers: {Accept: "application/json"}});
++    await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, mensagens: dados.mensagens})});
++    sethListar();
++  };
++  campo.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmar(); if (e.key === "Escape") sethListar(); });
++  campo.addEventListener("blur", () => sethListar());
+ }
+ function sethErro(status, erro) {
+   if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
+   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
+   return erro && erro.message ? erro.message : "falha desconhecida";
+ }
++async function sethEnviar(textoUsuario, reaproveitar) {
++  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input");
++  if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
++  sethDesenhar();
++  botao.disabled = true; sethStatus("PENSANDO", "partial");
++  const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
++  byId("seth-transcript").append(pensando);
++  try {
++    const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify({messages: sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}))})});
++    if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
++    const dados = await r.json();
++    sethAtual.mensagens.push({role: "assistant", content: dados.content, hora: sethHora(), modelo: dados.model || ""});
++    sethDesenhar(); sethStatus("PRONTA", "planned");
++    sethSalvar();
++  } catch (erro) {
++    if (!reaproveitar) sethAtual.mensagens.pop();
++    sethDesenhar();
++    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
++    byId("seth-transcript").append(aviso);
++    sethStatus("INDISPONÍVEL", "horizon");
++  } finally { botao.disabled = false; campo.focus(); }
++}
++function sethRegerar() {
++  const ultimo = sethAtual.mensagens[sethAtual.mensagens.length - 1];
++  if (!ultimo || ultimo.role !== "assistant") return;
++  sethAtual.mensagens.pop();
++  const pergunta = sethAtual.mensagens[sethAtual.mensagens.length - 1];
++  if (pergunta && pergunta.role === "user") sethEnviar(pergunta.content, true);
++}
+ function ligarConversaSeth() {
+   const form = byId("seth-form");
+   if (!form || form.dataset.ligado) return;
+   form.dataset.ligado = "1";
+-  sethExemplos(); sethVazio();
++  sethExemplos(); sethDesenhar(); sethListar();
+   const campo = byId("seth-input");
+   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+-  byId("seth-nova").addEventListener("click", () => {
+-    sethHistorico.length = 0; byId("seth-transcript").replaceChildren(); sethVazio();
+-    byId("seth-status").textContent = "PRONTA"; byId("seth-status").className = "chip planned"; campo.focus();
+-  });
+-  form.addEventListener("submit", async (e) => {
++  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
++  form.addEventListener("submit", (e) => {
+     e.preventDefault();
+-    const estado = byId("seth-status"); const botao = byId("seth-send");
+     const texto = campo.value.trim();
+-    if (!texto || botao.disabled) return;
+-    sethHistorico.push({role: "user", content: texto});
+-    sethEscrever("user", texto); campo.value = "";
+-    botao.disabled = true; estado.textContent = "PENSANDO"; estado.className = "chip partial";
+-    const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+-    byId("seth-transcript").append(pensando);
+-    try {
+-      const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+-        body: JSON.stringify({messages: sethHistorico.slice(-20)})});
+-      if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+-      const dados = await r.json();
+-      sethHistorico.push({role: "assistant", content: dados.content});
+-      pensando.remove();
+-      sethEscrever("assistant", dados.content, dados.model || "");
+-      estado.textContent = "PRONTA"; estado.className = "chip planned";
+-    } catch (erro) {
+-      sethHistorico.pop(); pensando.remove();
+-      sethEscrever("assistant", "Não consegui responder agora: " + sethErro(erro.status, erro) + ".");
+-      estado.textContent = "INDISPONÍVEL"; estado.className = "chip horizon";
+-    } finally { botao.disabled = false; campo.focus(); }
++    if (!texto || byId("seth-send").disabled) return;
++    campo.value = "";
++    sethEnviar(texto, false);
+   });
+ }
+ window.addEventListener("load", ligarConversaSeth);
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index bbec95d4..aac45322 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -7,6 +7,7 @@ import hashlib
+ import http.client
+ import collections
+ import json
++import os
+ import socket
+ import re
+ import subprocess
+@@ -511,6 +512,73 @@ def _vault_caminho(caminho: str) -> dict | None:
+             "observed_at": observed_at, "fresh_until": fresh_until}
+ 
+ 
++CONVERSAS_DIR = Path.home() / ".cache/agata/painel-conversas"
++CONVERSA_ID = re.compile(r"[0-9a-f]{12}")
++CONVERSA_LIMITE_BYTES = 262144
++
++
++def _conversa_caminho(conversa_id: str) -> Path | None:
++    if not isinstance(conversa_id, str) or not CONVERSA_ID.fullmatch(conversa_id):
++        return None
++    return CONVERSAS_DIR / (conversa_id + ".json")
++
++
++def _conversas_listar() -> dict:
++    itens = []
++    if CONVERSAS_DIR.is_dir():
++        for arq in sorted(CONVERSAS_DIR.glob("*.json"), key=lambda a: a.stat().st_mtime, reverse=True)[:200]:
++            if not CONVERSA_ID.fullmatch(arq.stem):
++                continue
++            try:
++                dados = json.loads(arq.read_text(encoding="utf-8"))
++            except (OSError, ValueError):
++                continue
++            itens.append({"id": arq.stem, "titulo": dados.get("titulo", "Sem título"),
++                          "atualizada": datetime.fromtimestamp(arq.stat().st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds"),
++                          "mensagens": len(dados.get("mensagens", []))})
++    return {"schema_version": 1, "state": "ok", "items": itens}
++
++
++def _conversa_validar(dados: dict) -> dict | None:
++    if not isinstance(dados, dict):
++        return None
++    titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
++    mensagens = dados.get("mensagens")
++    if not isinstance(mensagens, list) or len(mensagens) > 200:
++        return None
++    limpas = []
++    for m in mensagens:
++        if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
++            return None
++        if len(m["content"]) > 8000:
++            return None
++        limpas.append({"role": m["role"], "content": m["content"]})
++    return {"titulo": titulo, "mensagens": limpas}
++
++
++def _conversa_gravar(dados: dict) -> dict | None:
++    limpo = _conversa_validar(dados)
++    if limpo is None:
++        return None
++    conversa_id = dados.get("id") or os.urandom(6).hex()
++    arq = _conversa_caminho(conversa_id)
++    if arq is None:
++        return None
++    CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
++    tmp = arq.with_suffix(".tmp")
++    tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
++    os.replace(tmp, arq)
++    return {"id": conversa_id, **limpo}
++
++
++def _conversa_apagar(conversa_id: str) -> bool:
++    arq = _conversa_caminho(conversa_id)
++    if arq is None or not arq.is_file():
++        return False
++    arq.unlink()
++    return True
++
++
+ def _lacunas_snapshot() -> dict:
+     """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
+     - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
+@@ -818,6 +886,13 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+         if self.path.startswith("/api/grafo"):
+             return self._grafo()
++        if self.path == "/api/seth/conversas":
++            return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
++        if self.path.startswith("/api/seth/conversa?"):
++            arq = _conversa_caminho((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
++            if arq is None or not arq.is_file():
++                return self._send(404, "text/plain; charset=utf-8", b"conversa indisponivel")
++            return self._send(200, "application/json; charset=utf-8", arq.read_bytes())
+         if self.path.startswith("/api/vault/item"):
+             q = parse_qs(urlparse(self.path).query)
+             if q.get("caminho"):
+@@ -861,6 +936,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+         if self.path == "/api/seth/chat":
+             return self._seth_chat()
++        if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
++            return self._seth_conversa(self.path.endswith("/apagar"))
+         if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
+         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+@@ -908,6 +985,25 @@ class Handler(BaseHTTPRequestHandler):
+         return self._send(200, "application/json; charset=utf-8", body)
+ 
+ 
++    def _seth_conversa(self, apagar: bool) -> None:
++        """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia."""
++        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > CONVERSA_LIMITE_BYTES:
++            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++        try:
++            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
++        except (ValueError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid json")
++        if apagar:
++            ok = _conversa_apagar(dados.get("id") if isinstance(dados, dict) else "")
++            return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
++        salvo = _conversa_gravar(dados)
++        if salvo is None:
++            return self._send(400, "text/plain; charset=utf-8", b"conversa invalida")
++        return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
++
+     def _seth_chat(self) -> None:
+         """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
+         if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 1990ff5b..5253da3a 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -264,5 +264,20 @@ class HttpTests(unittest.TestCase):
+         for ruim in ("../../etc/passwd.md", "/etc/passwd.md", "entradas/../../../x.md", "naoexiste.txt"):
+             self.assertIsNone(panel._vault_caminho(ruim), ruim)
+ 
++    def test_conversa_valida_e_grava_so_formato_esperado(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.CONVERSAS_DIR
++            panel.CONVERSAS_DIR = Path(tmp)
++            try:
++                self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "system", "content": "x"}]}))
++                self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "user", "content": "x"}], "id": "../../etc"}))
++                salvo = panel._conversa_gravar({"titulo": "Teste", "mensagens": [{"role": "user", "content": "oi"}]})
++                self.assertIsNotNone(salvo)
++                self.assertEqual(panel._conversa_caminho(salvo["id"]).name, salvo["id"] + ".json")
++                self.assertTrue(panel._conversa_apagar(salvo["id"]))
++                self.assertFalse(panel._conversa_apagar(salvo["id"]))
++            finally:
++                panel.CONVERSAS_DIR = antes
++
+ if __name__ == "__main__":
+     unittest.main()
