@@ -1,12 +1,18 @@
 # Onde estamos
 
-Atualizado em 23/10/2026.
+Atualizado em 28/10/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 28/10
+
+**Em proposta, aguardando sua assinatura:**
+- RelayCouncil: a primeira etapa define como receber resultados por API oficial ou entrada manual e lista 17 provedores. A automação do navegador fica fora.
+- O painel oficial e os serviços não foram alterados. Depois da assinatura e aplicação desta etapa, a interface e as chamadas de API serão propostas separadamente.
 
 ## Hoje, 22 e 23/10
 

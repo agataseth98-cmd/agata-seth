@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5497cf0432503aeb74baacdad9c85f8e24340823
-  Escrito em: 28/10/2026 11:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ef9c794093475517c8a405e38b5256f346dd01a5
+  Escrito em: 28/10/2026 11:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5497cf0432503aeb74baacdad9c85f8e24340823/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5497cf0432503aeb74baacdad9c85f8e24340823/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5497cf0432503aeb74baacdad9c85f8e24340823/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5497cf0432503aeb74baacdad9c85f8e24340823/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5497cf0432503aeb74baacdad9c85f8e24340823/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef9c794093475517c8a405e38b5256f346dd01a5/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef9c794093475517c8a405e38b5256f346dd01a5/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef9c794093475517c8a405e38b5256f346dd01a5/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef9c794093475517c8a405e38b5256f346dd01a5/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ef9c794093475517c8a405e38b5256f346dd01a5/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
+Modelo: Codex (Codex desktop, na Máquina) · vetor: 14 testes, compilação, diff aplicado e conferido em cópia descartável baseada em `ef9c794` · Autorização: Humano — "Vamos incorporar".
+
 (903) DIÁRIO — 28/10/2026 · **Skills do Agata: painel, memória do Conselho e índice.** Aplica `skills-agata-20261028`, assinado pelo Humano. Duas skills novas com o que a frente mediu (agata-painel e agata-conselho-memoria), índice para o Conselho com dono e escopo, e ponteiros em agata-fluxo-dupla e agata-carregar. Caminhos citados conferidos.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: caminhos citados conferidos, git apply --check contra o main · Autorização: Humano, assinatura de skills-agata-20261028.
 
