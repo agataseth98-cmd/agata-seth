@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-28 18:51 -0300.
+Motivo: parser manual estrito, sem regex nem XML, para eliminar alertas CodeQL
+nome: conselho-em-rede-parser-estrito-20261028
+diff-sha256: c3890120d001edab001a7622d5605a79933f8914521f0b846c4f5e465026bdc1
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQL1pjx1IfKRGGFBXp7oHHLENsqI5pViuloHjAs+3rjb/yT
+mv9Zz9aZUS2MPXRdkCI/flirNwEFfF+R8mKXseEwg=
+-----END SSH SIGNATURE-----

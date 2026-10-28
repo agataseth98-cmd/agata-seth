@@ -10,6 +10,7 @@ import json
 import os
 import socket
 import re
+import secrets
 import subprocess
 import sys
 import threading
@@ -75,10 +76,23 @@ _ASSETS = {
     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+    "/conselho-rede": ("conselho-rede/index.html", "text/html; charset=utf-8"),
+    "/conselho-rede/": ("conselho-rede/index.html", "text/html; charset=utf-8"),
+    "/conselho-rede/style.css": ("conselho-rede/style.css", "text/css; charset=utf-8"),
+    "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
 }
 _STATUS_CACHE: dict | None = None
 _STATUS_CACHE_AT: float | None = None
+RELAY_CLIENT_ID = "agata-relay-v2"
+_COUNCIL_LOCK = threading.Lock()
+_COUNCIL = None
+_COUNCIL_CONFLICT = ValueError
+_COUNCIL_DATA_DIR = Path(os.environ.get(
+    "AGATA_RELAY_COUNCIL_DATA_DIR",
+    str(Path.home() / ".local/share/agata/painel-conselho/official"),
+))
+_COUNCIL_LEGACY_HISTORY = Path.home() / ".local/share/agata/painel-conselho/history.jsonl"
 
 
 def _now() -> datetime:
@@ -174,6 +188,54 @@ def _relay_store(payload: dict) -> dict:
         raise RelayDailyQuotaExceeded from exc
     except cache.ConflitoIdempotencia as exc:
         raise RelayIdempotencyConflict from exc
+
+
+def _council_clean(text: str) -> str:
+    cache, _catalog, _contract, _sanitizer = _relay_modules()
+    return cache.filtrar(text)
+
+
+def _council_execute(tool: str, args: dict, text: str) -> str:
+    """Executa apenas ferramentas locais de leitura, depois da aprovação humana."""
+    cache, _catalog, _contract, _sanitizer = _relay_modules()
+    if tool == "SEARCH":
+        result = _wiki_search(args["canon"], "ambos")
+    elif tool == "STATE":
+        result = collect()
+    elif tool == "CACHE":
+        result = cache.ler(args["ler"])
+    elif tool == "AUDIT":
+        completed = subprocess.run(
+            [sys.executable, str(ROOT / "redesign/router/auditoria_turno.py"), "--verificar"],
+            input=text, text=True, capture_output=True, timeout=10, cwd=ROOT,
+            check=False,
+        )
+        result = {"returncode": completed.returncode, "stdout": completed.stdout,
+                  "stderr": completed.stderr}
+    elif tool == "DELIVER":
+        result = {"state": "requires_human_review", "text": text,
+                  "message": "O painel não executa código nem aplica alterações."}
+    else:
+        raise ValueError("ferramenta não permitida")
+    return json.dumps(result, ensure_ascii=False, default=str)
+
+
+def _council_state():
+    global _COUNCIL, _COUNCIL_CONFLICT
+    if _COUNCIL is None:
+        with _COUNCIL_LOCK:
+            if _COUNCIL is None:
+                for directory in (WEB, ROOT / "redesign/router"):
+                    path = str(directory)
+                    if path not in sys.path:
+                        sys.path.insert(0, path)
+                import conselho_rede
+                _COUNCIL_CONFLICT = conselho_rede.Conflict
+                _COUNCIL = conselho_rede.Council(
+                    _COUNCIL_DATA_DIR, _council_clean, _council_execute,
+                    legacy=_COUNCIL_LEGACY_HISTORY,
+                )
+    return _COUNCIL
 
 
 def _verify(command: str, **arguments: object) -> str:
@@ -1001,6 +1063,28 @@ class Handler(BaseHTTPRequestHandler):
                 ensure_ascii=False,
             ).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/relay-council/state":
+            council = _council_state()
+            data = council.snapshot()
+            data["csrf"] = council.csrf
+            data["legacy_history"] = council.history(legacy=True)
+            body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
+        if self.path.startswith("/api/relay-council/history?"):
+            query = parse_qs(urlparse(self.path).query)
+            try:
+                offset = int((query.get("offset") or ["0"])[0])
+                data = _council_state().history(offset)
+            except (ValueError, TypeError):
+                return self._send(400, "text/plain; charset=utf-8", b"invalid history offset")
+            return self._send(200, "application/json; charset=utf-8",
+                              json.dumps(data, ensure_ascii=False).encode("utf-8"))
+        if self.path == "/api/relay-council/tasks":
+            if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
+                return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
+            tasks = _council_state().claim()
+            return self._send(200, "application/json; charset=utf-8",
+                              json.dumps(tasks, ensure_ascii=False).encode("utf-8"))
         if self.path in {"/api/status", "/api/details"}:
             if not _same_origin_request(
                 self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -1023,6 +1107,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
+                         "/api/relay-council/decision"}:
+            return self._relay_council_human_post()
+        if self.path == "/api/relay-council/result":
+            return self._relay_council_result()
         if self.path == "/api/relay-council/evaluations":
             return self._relay_evaluation()
         if self.path == "/api/seth/chat":
@@ -1074,6 +1163,73 @@ class Handler(BaseHTTPRequestHandler):
             _WIKI_LOCK.release()
         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
         return self._send(200, "application/json; charset=utf-8", body)
+
+    def _relay_council_body(self, max_bytes: int = 65_536) -> dict | None:
+        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+            self._send(415, "text/plain; charset=utf-8", b"JSON required")
+            return None
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > max_bytes:
+            self._send(413, "text/plain; charset=utf-8", b"request too large")
+            return None
+        try:
+            payload = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
+            self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+            return None
+        if not isinstance(payload, dict):
+            self._send(400, "text/plain; charset=utf-8", b"JSON object required")
+            return None
+        return payload
+
+    def _relay_council_human_post(self) -> None:
+        if (self.headers.get("Origin") != ALLOWED_ORIGIN
+                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}):
+            return self._send(403, "text/plain; charset=utf-8", b"same-origin request required")
+        payload = self._relay_council_body()
+        if payload is None:
+            return
+        council = _council_state()
+        if not isinstance(payload.get("csrf"), str) or not secrets.compare_digest(payload["csrf"], council.csrf):
+            return self._send(403, "text/plain; charset=utf-8", b"invalid CSRF token")
+        try:
+            if self.path.endswith("/actions"):
+                action = council.create(payload.get("kind"), payload.get("payload"))
+                result = council._row(action)
+            elif self.path.endswith("/groups"):
+                group = council.group(payload.get("kind"), payload.get("prompt"),
+                                      payload.get("sites"), payload.get("repetitions", 1))
+                result = {"group_id": group, "state": "pending-human-approval"}
+            else:
+                result = council.decide(payload.get("id"), payload.get("hash"), payload.get("approve"))
+            result.pop("lease", None)
+            body = json.dumps(result, ensure_ascii=False, default=str).encode("utf-8")
+        except _COUNCIL_CONFLICT:
+            return self._send(409, "text/plain; charset=utf-8", b"action changed; refresh and review")
+        except (ValueError, TypeError, KeyError, AttributeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid council action")
+        return self._send(201, "application/json; charset=utf-8", body)
+
+    def _relay_council_result(self) -> None:
+        if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
+            return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
+        payload = self._relay_council_body()
+        if payload is None:
+            return
+        council = _council_state()
+        try:
+            result = council.finish(
+                payload.get("task_id"),
+                {"ok": payload.get("ok"), "text": payload.get("text"),
+                 "error": payload.get("error")},
+                lease=payload.get("lease"), site=payload.get("site"),
+            )
+        except _COUNCIL_CONFLICT:
+            return self._send(409, "application/json; charset=utf-8", b'{"error":"task lease mismatch"}')
+        except (ValueError, TypeError, KeyError):
+            return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid result"}')
+        return self._send(200, "application/json; charset=utf-8",
+                          json.dumps(result).encode("utf-8"))
 
     def _relay_evaluation(self) -> None:
         if (self.headers.get("Origin") != ALLOWED_ORIGIN
