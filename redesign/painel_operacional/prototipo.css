@@ -299,3 +299,17 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 
 /* (28/10/2026) Refino: a linha de status do topo fica legível sobre a imagem. */
 .hero-line{text-shadow:0 1px 12px rgba(0,0,0,.75)}
+
+/* (28/10/2026) Conversa com a Seth: falas separadas, quebras de linha preservadas, notas de verificação discretas. */
+.seth-log{min-height:220px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 2px}
+.msg{max-width:88%;padding:11px 14px;border-radius:14px;line-height:1.6;border:1px solid var(--line);overflow-wrap:anywhere}
+.msg-user{align-self:flex-end;background:rgba(97,217,237,.08);border-color:rgba(97,217,237,.25)}
+.msg-assistant{align-self:flex-start;background:rgba(16,26,42,.6)}
+.msg-head{display:flex;justify-content:space-between;gap:14px;font-size:12px;color:#a8b8ce;margin-bottom:5px}
+.msg-body{white-space:pre-wrap}
+.nota{display:block;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px;color:#a8b8ce}
+.seth-vazio{color:#a8b8ce;margin:auto 0}
+.seth-acoes{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.seth-exemplos{display:flex;flex-wrap:wrap;gap:8px}
+.seth-exemplo{border:1px solid var(--line);background:transparent;color:inherit;border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
+.seth-exemplo:hover{border-color:#66b2da}
