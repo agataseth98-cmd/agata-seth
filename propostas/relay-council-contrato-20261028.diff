@@ -1,0 +1,191 @@
+diff --git a/redesign/router/relay_council_contract.py b/redesign/router/relay_council_contract.py
+new file mode 100644
+index 00000000..06c88a28
+--- /dev/null
++++ b/redesign/router/relay_council_contract.py
+@@ -0,0 +1,121 @@
++"""Contrato seguro para resultados do protótipo RelayCouncil.
++
++Este módulo só valida e normaliza dados já produzidos pelo relay. Não abre
++abas, não lê perfis de navegador e não faz chamadas de rede.
++"""
++
++from __future__ import annotations
++
++from datetime import datetime, timezone
++from typing import Any, Mapping
++
++
++CONTRACT_VERSION = "relay-council-evaluation/v1"
++ALLOWED_STATES = frozenset({
++    "candidate",
++    "green",
++    "monitoring",
++    "provider_busy",
++    "excluded",
++})
++_FORBIDDEN_PARTS = frozenset({
++    "authorization",
++    "cookie",
++    "password",
++    "secret",
++    "token",
++    "credential",
++    "session",
++})
++
++
++class RelayCouncilContractError(ValueError):
++    """Payload do relay não pode entrar no boundary do sistema."""
++
++
++def _has_forbidden_key(value: Any, path: str = "") -> str | None:
++    if isinstance(value, Mapping):
++        for key, child in value.items():
++            key_text = str(key).lower().replace("-", "_")
++            if any(part in key_text.split("_") for part in _FORBIDDEN_PARTS):
++                return f"campo proibido: {path + str(key)}"
++            found = _has_forbidden_key(child, f"{path}{key}." )
++            if found:
++                return found
++    elif isinstance(value, (list, tuple)):
++        for index, child in enumerate(value):
++            found = _has_forbidden_key(child, f"{path}{index}.")
++            if found:
++                return found
++    return None
++
++
++def _required_text(payload: Mapping[str, Any], name: str) -> str:
++    value = payload.get(name)
++    if not isinstance(value, str) or not value.strip():
++        raise RelayCouncilContractError(f"campo obrigatório ausente ou vazio: {name}")
++    return value.strip()
++
++
++def _timestamp(value: Any) -> str:
++    if value is None:
++        return datetime.now(timezone.utc).isoformat()
++    if not isinstance(value, str):
++        raise RelayCouncilContractError("timestamp deve ser texto ISO-8601")
++    try:
++        datetime.fromisoformat(value.replace("Z", "+00:00"))
++    except ValueError as exc:
++        raise RelayCouncilContractError("timestamp inválido") from exc
++    return value
++
++
++def normalize_evaluation(payload: Mapping[str, Any]) -> dict[str, Any]:
++    """Valida um resultado do relay e devolve somente campos canônicos.
++
++    O texto de resposta é dado, não instrução. Campos desconhecidos são
++    descartados para impedir que metadados do navegador atravessem o boundary.
++    """
++    if not isinstance(payload, Mapping):
++        raise RelayCouncilContractError("resultado deve ser um objeto")
++    forbidden = _has_forbidden_key(payload)
++    if forbidden:
++        raise RelayCouncilContractError(forbidden)
++
++    task_id = _required_text(payload, "task_id")
++    provider = _required_text(payload, "provider")
++    site = _required_text(payload, "site")
++    state = payload.get("state", "candidate")
++    if state not in ALLOWED_STATES:
++        raise RelayCouncilContractError(f"state inválido: {state}")
++    ok = payload.get("ok")
++    if not isinstance(ok, bool):
++        raise RelayCouncilContractError("ok deve ser booleano")
++
++    text = payload.get("text")
++    error = payload.get("error")
++    if ok:
++        if not isinstance(text, str) or not text.strip():
++            raise RelayCouncilContractError("resposta verde precisa de text")
++        text = text.strip()
++    elif error is not None and (not isinstance(error, str) or not error.strip()):
++        raise RelayCouncilContractError("error deve ser texto não vazio")
++
++    latency_ms = payload.get("latency_ms")
++    if latency_ms is not None and (
++        isinstance(latency_ms, bool) or not isinstance(latency_ms, (int, float))
++        or latency_ms < 0
++    ):
++        raise RelayCouncilContractError("latency_ms inválido")
++
++    return {
++        "contract": CONTRACT_VERSION,
++        "task_id": task_id,
++        "provider": provider,
++        "site": site,
++        "state": state,
++        "ok": ok,
++        "text": text if ok else None,
++        "error": error.strip() if isinstance(error, str) and error.strip() else None,
++        "latency_ms": latency_ms,
++        "timestamp": _timestamp(payload.get("timestamp")),
++    }
+diff --git a/redesign/router/test_relay_council_contract.py b/redesign/router/test_relay_council_contract.py
+new file mode 100644
+index 00000000..60adef42
+--- /dev/null
++++ b/redesign/router/test_relay_council_contract.py
+@@ -0,0 +1,58 @@
++import unittest
++
++from relay_council_contract import (
++    CONTRACT_VERSION,
++    RelayCouncilContractError,
++    normalize_evaluation,
++)
++
++
++class RelayCouncilContractTests(unittest.TestCase):
++    def test_normalizes_green_result_and_discards_unknown_fields(self):
++        result = normalize_evaluation({
++            "task_id": "task-1",
++            "provider": "gemini",
++            "site": "gemini.google.com",
++            "state": "green",
++            "ok": True,
++            "text": "resposta formal",
++            "latency_ms": 1234,
++            "unknown_browser_field": "descartado",
++        })
++
++        self.assertEqual(result["contract"], CONTRACT_VERSION)
++        self.assertEqual(result["provider"], "gemini")
++        self.assertEqual(result["text"], "resposta formal")
++        self.assertNotIn("unknown_browser_field", result)
++
++    def test_allows_provider_capacity_failure_without_response_text(self):
++        result = normalize_evaluation({
++            "task_id": "task-2",
++            "provider": "kimi",
++            "site": "kimi.ai",
++            "state": "provider_busy",
++            "ok": False,
++            "error": "capacidade temporariamente indisponível",
++        })
++
++        self.assertEqual(result["state"], "provider_busy")
++        self.assertIsNone(result["text"])
++
++    def test_rejects_incomplete_or_sensitive_payload(self):
++        payloads = [
++            {"task_id": "x", "provider": "p", "site": "s", "ok": True},
++            {"task_id": "x", "provider": "p", "site": "s", "ok": False,
++             "error": ""},
++            {"task_id": "x", "provider": "p", "site": "s", "ok": False,
++             "cookie": "não pode atravessar"},
++            {"task_id": "x", "provider": "p", "site": "s", "ok": False,
++             "state": "unknown"},
++        ]
++        for payload in payloads:
++            with self.subTest(payload=payload):
++                with self.assertRaises(RelayCouncilContractError):
++                    normalize_evaluation(payload)
++
++
++if __name__ == "__main__":
++    unittest.main()
