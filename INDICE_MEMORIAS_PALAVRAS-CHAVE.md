@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
+  palavras-chave: relaycouncil, proposta, fronteira, integração, contrato, catálogo, provedores, estão, propostos, entrada, api, oficial, manual, automação, dom, ficou, fora, painel, chamadas, externas, foram, feitas
 (903) DIÁRIO — 28/10/2026 · **Skills do Agata: painel, memória do Conselho e índice.** Aplica `skills-agata-20261028`, assinado pelo Humano. Duas skills novas com o que a frente mediu (agata-painel e agata-conselho-memoria), índice para o Conselho com dono e escopo, e ponteiros em agata-fluxo-dupla e agata-carregar. Caminhos citados conferidos.
   palavras-chave: skills, agata, painel, memória, índice, aplica, assinado, humano, novas, frente, mediu, memoria, dono, escopo, ponteiros, fluxo, dupla, carregar, caminhos, citados, conferidos
 (902) DIÁRIO — 28/10/2026 · **Contexto automático para sessões do Claude Code.** Aplica `sessao-claude-contexto-20261028`, assinado pelo Humano. Hook SessionStart do projeto entrega estado da Máquina, memória comum do Conselho e estado da sessão conjunta. Só leitura. Garante a entrega do contexto; o cumprimento das regras segue medido pela auditoria.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, cartões, clicáveis, abrem, evidência, popup, aplica, cards, assinado, humano, oito, sonda, botão, tela, teclado, enter, espaço, documento
 (875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `texto-websocket-20261027`, assinado pelo Humano. O cartão dizia que o painel tinha WebSocket em /live-ws (:20132). A registry define 20132 como omniroute-live-ws, do OmniRoute; o painel lê por HTTP.
   palavras-chave: painel, texto, websocket, corrigido, aplica, assinado, humano, cartão, dizia, tinha, live, registry, define, omniroute, http
-(874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitura do momento.** Aplica `evidencia-timers-20261027`, assinado pelo Humano. Janela de manutenção e Rotinas locais leem o timer no momento; Navegador e Discord lê as unidades. Rotinas locais avisa que o timer do inbox está ativo e que a MEMÓRIAS (804) registra parada pelo Humano; a decisão segue com o Humano.
-  palavras-chave: painel, evidências, timers, unidades, leitura, momento, aplica, evidencia, assinado, humano, janela, manutenção, rotinas, locais, leem, timer, navegador, discord, avisa, inbox, ativo, memórias, registra, parada, decisão, segue
+(874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitur …
+  palavras-chave: painel, evidências, timers, unidades, leitur
 (873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Ap …
   palavras-chave: painel, evidência, viva, recarga, total
 (872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco vi …

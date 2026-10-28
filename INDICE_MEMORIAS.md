@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
 (903) DIÁRIO — 28/10/2026 · **Skills do Agata: painel, memória do Conselho e índice.** Aplica `skills-agata-20261028`, assinado pelo Humano. Duas skills novas com o que a frente mediu (agata-painel e agata-conselho-memoria), índice para o Conselho com dono e escopo, e ponteiros em agata-fluxo-dupla e agata-carregar. Caminhos citados conferidos.
 (902) DIÁRIO — 28/10/2026 · **Contexto automático para sessões do Claude Code.** Aplica `sessao-claude-contexto-20261028`, assinado pelo Humano. Hook SessionStart do projeto entrega estado da Máquina, memória comum do Conselho e estado da sessão conjunta. Só leitura. Garante a entrega do contexto; o cumprimento das regras segue medido pela auditoria.
 (901) DIÁRIO — 28/10/2026 · **Painel: histórico de conversas com a Seth.** Aplica `conversas-historico-20261028`, assinado pelo Humano. Lista de conversas salvas em ~/.cache, fora do canon; abrir, renomear e apagar com confirmação em dois cliques; Markdown seguro; copiar e regenerar. Streaming fica para a etapa seguinte.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (877) DIÁRIO — 27/10/2026 · **Painel: Panorama sem repetir a lista de serviços.** Aplica `redundancia-panorama-20261027`, assinado pelo Humano. O bloco Serviços e rotinas vira um link para Estado operacional, onde as unidades ficam.
 (876) DIÁRIO — 27/10/2026 · **Painel: cartões clicáveis abrem a evidência em popup.** Aplica `cards-popup-20261027`, assinado pelo Humano. Os oito cartões com sonda abrem o popup do botão EVIDÊNCIA, sobre a tela; teclado Enter e Espaço. Cartões de documento não são clicáveis.
 (875) DIÁRIO — 27/10/2026 · **Painel: texto do WebSocket corrigido.** Aplica `texto-websocket-20261027`, assinado pelo Humano. O cartão dizia que o painel tinha WebSocket em /live-ws (:20132). A registry define 20132 como omniroute-live-ws, do OmniRoute; o painel lê por HTTP.
-(874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitura do momento.** Aplica `evidencia-timers-20261027`, assinado pelo Humano. Janela de manutenção e Rotinas locais leem o timer no momento; Navegador e Discord lê as unidades. Rotinas locais avisa que o timer do inbox está ativo e que a MEMÓRIAS (804) registra parada pelo Humano; a decisão segue com o Humano.
+(874) DIÁRIO — 27/10/2026 · **Painel: evidências de timers e unidades com leitur …
 (873) DIÁRIO — 27/10/2026 · **Painel: evidência viva e recarga total ao F5.** Ap …
 (872) DIÁRIO — 27/10/2026 · **Painel: leitura real em oito capacidades; cinco vi …
 (871) DIÁRIO — 27/10/2026 · **Painel: propostas substituídas aparecem como SUBST …

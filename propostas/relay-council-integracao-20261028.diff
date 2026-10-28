@@ -1,0 +1,329 @@
+diff --git a/redesign/painel_operacional/relay_catalog.py b/redesign/painel_operacional/relay_catalog.py
+new file mode 100644
+index 00000000..7f96ce97
+--- /dev/null
++++ b/redesign/painel_operacional/relay_catalog.py
+@@ -0,0 +1,31 @@
++"""Roster RelayCouncil: registra provedores sem habilitar automação DOM."""
++
++from __future__ import annotations
++
++
++PROVIDERS = (
++    {"id": "deepseek", "name": "DeepSeek", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "web_automation_restricted", "policy_url": "https://platform.deepseek.com/downloads/DeepSeek%20User%20Agreement.pdf"},
++    {"id": "gemini", "name": "Gemini", "kind": "model-service", "access_mode": "official_api_only", "availability": "in_roster", "terms_review": "api_terms_required", "source_ref": "config/modelos-gratuitos.md"},
++    {"id": "zai", "name": "Z.ai / GLM", "kind": "model-service", "access_mode": "official_api_only", "availability": "in_roster", "terms_review": "web_automation_restricted", "policy_url": "https://chat.z.ai/legal-agreement/terms-of-service", "source_ref": "config/modelos-gratuitos.md"},
++    {"id": "chatgpt", "name": "ChatGPT", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "web_output_extraction_prohibited", "policy_url": "https://openai.com/policies/terms-of-use/"},
++    {"id": "claude", "name": "Claude", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "api_terms_required", "policy_url": "https://www.anthropic.com/legal"},
++    {"id": "grok", "name": "Grok", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "api_terms_required", "policy_url": "https://x.ai/legal/terms-of-service"},
++    {"id": "qwen", "name": "Qwen", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "web_automation_prohibited", "policy_url": "https://qwen.ai/termsservice"},
++    {"id": "mistral", "name": "Le Chat / Mistral", "kind": "model-service", "access_mode": "official_api_only", "availability": "in_roster", "terms_review": "api_terms_required", "source_ref": "config/modelos-gratuitos.md"},
++    {"id": "kimi", "name": "Kimi", "kind": "model-service", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "api_terms_required"},
++    {"id": "copilot", "name": "Microsoft Copilot", "kind": "model-service", "access_mode": "manual_only", "availability": "candidate", "terms_review": "unverified"},
++    {"id": "meta-ai", "name": "Meta AI", "kind": "model-service", "access_mode": "manual_only", "availability": "candidate", "terms_review": "unverified"},
++    {"id": "poe", "name": "Poe", "kind": "model-router", "access_mode": "manual_only", "availability": "candidate", "terms_review": "unverified"},
++    {"id": "you", "name": "You.com", "kind": "model-router", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "api_terms_required"},
++    {"id": "huggingchat", "name": "HuggingChat / Inference Providers", "kind": "model-router", "access_mode": "official_api_only", "availability": "in_roster", "terms_review": "api_terms_required", "source_ref": "config/modelos-gratuitos.md"},
++    {"id": "duck-ai", "name": "Duck.ai", "kind": "model-router", "access_mode": "manual_only", "availability": "candidate", "terms_review": "unverified"},
++    {"id": "openrouter", "name": "OpenRouter", "kind": "model-router", "access_mode": "official_api_only", "availability": "in_roster", "terms_review": "api_terms_required", "source_ref": "config/modelos-gratuitos.md"},
++    {"id": "groq", "name": "GroqCloud API", "kind": "model-router", "access_mode": "official_api_only", "availability": "candidate", "terms_review": "api_terms_required", "policy_url": "https://console.groq.com/docs/legal"},
++)
++
++PROVIDER_BY_ID = {provider["id"]: provider for provider in PROVIDERS}
++
++
++def snapshot() -> list[dict[str, str]]:
++    """Retorna cópias e não expõe o roster mutável ao handler."""
++    return [dict(provider) for provider in PROVIDERS]
+diff --git a/redesign/painel_operacional/test_relay_catalog.py b/redesign/painel_operacional/test_relay_catalog.py
+new file mode 100644
+index 00000000..c4355c1f
+--- /dev/null
++++ b/redesign/painel_operacional/test_relay_catalog.py
+@@ -0,0 +1,35 @@
++import unittest
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "router"))
++from relay_catalog import PROVIDERS, PROVIDER_BY_ID, snapshot
++from relay_council_contract import ALLOWED_PROVIDERS
++
++
++class RelayCatalogTests(unittest.TestCase):
++    def test_roster_has_seventeen_unique_entries_and_no_perplexity(self):
++        self.assertEqual(len(PROVIDERS), 17)
++        self.assertEqual(len(PROVIDER_BY_ID), 17)
++        self.assertEqual(len(snapshot()), 17)
++        self.assertNotIn("perplexity", PROVIDER_BY_ID)
++
++    def test_no_provider_is_enabled_for_dom_automation(self):
++        self.assertTrue(all(p["access_mode"] != "dom_prototype" for p in PROVIDERS))
++        self.assertTrue(all(p["access_mode"] in {"official_api_only", "manual_only"} for p in PROVIDERS))
++
++    def test_candidates_are_not_marked_configured(self):
++        in_roster = {p["id"] for p in PROVIDERS if p["availability"] == "in_roster"}
++        self.assertEqual(in_roster, {"gemini", "zai", "mistral", "huggingchat", "openrouter"})
++        self.assertTrue(all(p["availability"] in {"in_roster", "candidate"} for p in PROVIDERS))
++
++    def test_policy_links_are_https_and_contract_roster_matches(self):
++        self.assertTrue(all(
++            p["policy_url"].startswith("https://")
++            for p in PROVIDERS if "policy_url" in p
++        ))
++        self.assertEqual(set(PROVIDER_BY_ID), set(ALLOWED_PROVIDERS))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/router/relay_council_contract.py b/redesign/router/relay_council_contract.py
+new file mode 100644
+index 00000000..51ad23da
+--- /dev/null
++++ b/redesign/router/relay_council_contract.py
+@@ -0,0 +1,158 @@
++"""Contrato tipado de resultados do RelayCouncil.
++
++Resultados aceitos vêm de API oficial ou de entrada manual. O contrato não
++autoriza automação DOM. O texto de entrada e de resposta é dado externo não
++confiável; antes de persistir ou encaminhar ao cache comum, o consumidor deve
++aplicar o sanitizador existente. O histórico local fica fora do repositório.
++"""
++
++from __future__ import annotations
++
++import math
++import re
++from datetime import datetime, timezone
++from typing import Any, Mapping
++
++
++CONTRACT_VERSION = "relay-council-evaluation/v3"
++ALLOWED_STATES = frozenset({
++    "candidate",
++    "green",
++    "monitoring",
++    "provider_busy",
++    "excluded",
++})
++ALLOWED_ACCESS_MODES = frozenset({"official_api", "manual"})
++ALLOWED_PROVIDERS = frozenset({
++    "deepseek", "gemini", "zai", "chatgpt", "claude", "grok", "qwen",
++    "mistral", "kimi", "copilot", "meta-ai", "poe", "you",
++    "huggingchat", "duck-ai", "openrouter", "groq",
++})
++MAX_ID_CHARS = 96
++MAX_TEXT_CHARS = 60_000
++MAX_ERROR_CHARS = 2_000
++_FORBIDDEN_WORDS = (
++    "authorization", "cookie", "password", "passwd", "secret", "token",
++    "credential", "session", "bearer", "api_key", "apikey",
++)
++_KEY_SEPARATORS = re.compile(r"([a-z0-9])([A-Z])")
++_NON_ALNUM = re.compile(r"[^a-z0-9]+")
++_ID = re.compile(r"[a-z0-9][a-z0-9._-]{0,95}\Z")
++
++
++class RelayCouncilContractError(ValueError):
++    """Payload do relay não pode entrar no boundary do sistema."""
++
++
++def _normalized_key(key: Any) -> str:
++    camel_split = _KEY_SEPARATORS.sub(r"\1_\2", str(key))
++    return _NON_ALNUM.sub("_", camel_split.lower()).strip("_")
++
++
++def _has_forbidden_key(value: Any, path: str = "") -> str | None:
++    if isinstance(value, Mapping):
++        for key, child in value.items():
++            normalized = _normalized_key(key)
++            words = set(normalized.split("_"))
++            if any(word in words or word.replace("_", "") in normalized.replace("_", "")
++                   for word in _FORBIDDEN_WORDS):
++                return f"campo proibido: {path}{key}"
++            found = _has_forbidden_key(child, f"{path}{key}.")
++            if found:
++                return found
++    elif isinstance(value, (list, tuple)):
++        for index, child in enumerate(value):
++            found = _has_forbidden_key(child, f"{path}{index}.")
++            if found:
++                return found
++    return None
++
++
++def _required_id(payload: Mapping[str, Any], name: str) -> str:
++    value = payload.get(name)
++    if not isinstance(value, str):
++        raise RelayCouncilContractError(f"campo obrigatório inválido: {name}")
++    value = value.strip()
++    if len(value) > MAX_ID_CHARS or not _ID.fullmatch(value):
++        raise RelayCouncilContractError(f"identificador inválido: {name}")
++    return value
++
++
++def _optional_text(value: Any, name: str, limit: int) -> str | None:
++    if value is None:
++        return None
++    if not isinstance(value, str):
++        raise RelayCouncilContractError(f"{name} deve ser texto")
++    value = value.strip()
++    if len(value) > limit:
++        raise RelayCouncilContractError(f"{name} excede o limite")
++    return value or None
++
++
++def _timestamp(value: Any) -> str:
++    if value is None:
++        return datetime.now(timezone.utc).isoformat()
++    if not isinstance(value, str):
++        raise RelayCouncilContractError("timestamp deve ser texto ISO-8601")
++    try:
++        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
++    except ValueError as exc:
++        raise RelayCouncilContractError("timestamp inválido") from exc
++    if parsed.tzinfo is None or parsed.utcoffset() is None:
++        raise RelayCouncilContractError("timestamp precisa informar fuso horário")
++    return parsed.astimezone(timezone.utc).isoformat()
++
++
++def normalize_evaluation(payload: Mapping[str, Any]) -> dict[str, Any]:
++    """Valida e reduz uma avaliação ao esquema público do Conselho.
++
++    Chaves desconhecidas são descartadas. Campos que aparentam conter
++    credenciais, cookies ou sessão são recusados antes de qualquer redução.
++    """
++    if not isinstance(payload, Mapping):
++        raise RelayCouncilContractError("resultado deve ser um objeto")
++    forbidden = _has_forbidden_key(payload)
++    if forbidden:
++        raise RelayCouncilContractError(forbidden)
++
++    task_id = _required_id(payload, "task_id")
++    provider = _required_id(payload, "provider")
++    if provider not in ALLOWED_PROVIDERS:
++        raise RelayCouncilContractError("provider não está no roster do Conselho")
++    site = _required_id(payload, "site")
++    access_mode = payload.get("access_mode")
++    if not isinstance(access_mode, str) or access_mode not in ALLOWED_ACCESS_MODES:
++        raise RelayCouncilContractError("access_mode deve ser official_api ou manual")
++    state = payload.get("state", "candidate")
++    if not isinstance(state, str) or state not in ALLOWED_STATES:
++        raise RelayCouncilContractError("state inválido")
++    ok = payload.get("ok")
++    if not isinstance(ok, bool):
++        raise RelayCouncilContractError("ok deve ser booleano")
++
++    text = _optional_text(payload.get("text"), "text", MAX_TEXT_CHARS)
++    error = _optional_text(payload.get("error"), "error", MAX_ERROR_CHARS)
++    if ok and (state not in {"green", "candidate", "monitoring"} or not text):
++        raise RelayCouncilContractError("resposta positiva precisa de texto e estado compatível")
++    if not ok and state == "green":
++        raise RelayCouncilContractError("estado green exige ok=true")
++
++    latency_ms = payload.get("latency_ms")
++    if latency_ms is not None:
++        if (isinstance(latency_ms, bool) or not isinstance(latency_ms, (int, float))
++                or not math.isfinite(latency_ms) or latency_ms < 0):
++            raise RelayCouncilContractError("latency_ms inválido")
++
++    return {
++        "contract": CONTRACT_VERSION,
++        "task_id": task_id,
++        "provider": provider,
++        "site": site,
++        "access_mode": access_mode,
++        "state": state,
++        "ok": ok,
++        "text": text if ok else None,
++        "error": error,
++        "latency_ms": latency_ms,
++        "timestamp": _timestamp(payload.get("timestamp")),
++    }
+diff --git a/redesign/router/test_relay_council_contract.py b/redesign/router/test_relay_council_contract.py
+new file mode 100644
+index 00000000..25b74272
+--- /dev/null
++++ b/redesign/router/test_relay_council_contract.py
+@@ -0,0 +1,81 @@
++import unittest
++
++from relay_council_contract import (
++    CONTRACT_VERSION,
++    RelayCouncilContractError,
++    normalize_evaluation,
++)
++
++
++def valid(**changes):
++    payload = {
++        "task_id": "task-1",
++        "provider": "gemini",
++        "site": "gemini",
++        "access_mode": "official_api",
++        "state": "green",
++        "ok": True,
++        "text": "resposta formal",
++        "latency_ms": 1234,
++        "timestamp": "2026-10-28T10:00:00-03:00",
++    }
++    payload.update(changes)
++    return payload
++
++
++class RelayCouncilContractTests(unittest.TestCase):
++    def test_normalizes_and_discards_unknown_fields(self):
++        result = normalize_evaluation(valid(unknown_browser_field="discard"))
++        self.assertEqual(result["contract"], CONTRACT_VERSION)
++        self.assertEqual(result["provider"], "gemini")
++        self.assertEqual(result["timestamp"], "2026-10-28T13:00:00+00:00")
++        self.assertNotIn("unknown_browser_field", result)
++
++    def test_allows_capacity_failure_without_response_text(self):
++        result = normalize_evaluation(valid(
++            state="provider_busy", ok=False, text=None,
++            error="capacidade temporariamente indisponível",
++        ))
++        self.assertEqual(result["state"], "provider_busy")
++        self.assertIsNone(result["text"])
++
++    def test_rejects_inconsistent_green_state(self):
++        with self.assertRaises(RelayCouncilContractError):
++            normalize_evaluation(valid(ok=False, text=None, error="timeout"))
++
++    def test_rejects_positive_result_without_text(self):
++        with self.assertRaises(RelayCouncilContractError):
++            normalize_evaluation(valid(text=" \n "))
++
++    def test_rejects_sensitive_keys_in_snake_or_camel_case(self):
++        for key in ("cookie", "sessionId", "apiKey", "auth-token"):
++            with self.subTest(key=key), self.assertRaises(RelayCouncilContractError):
++                normalize_evaluation(valid(**{key: "must not cross boundary"}))
++
++    def test_rejects_naive_timestamp(self):
++        with self.assertRaises(RelayCouncilContractError):
++            normalize_evaluation(valid(timestamp="2026-10-28T10:00:00"))
++
++    def test_rejects_non_finite_latency(self):
++        for value in (float("nan"), float("inf"), -1, True):
++            with self.subTest(value=value), self.assertRaises(RelayCouncilContractError):
++                normalize_evaluation(valid(latency_ms=value))
++
++    def test_rejects_oversized_fields(self):
++        with self.assertRaises(RelayCouncilContractError):
++            normalize_evaluation(valid(text="x" * 60_001))
++
++    def test_rejects_dom_automation_and_unknown_providers(self):
++        for changes in ({"access_mode": "browser_dom"}, {"provider": "perplexity"}):
++            with self.subTest(changes=changes), self.assertRaises(RelayCouncilContractError):
++                normalize_evaluation(valid(**changes))
++
++    def test_requires_explicit_access_mode(self):
++        payload = valid()
++        payload.pop("access_mode")
++        with self.assertRaises(RelayCouncilContractError):
++            normalize_evaluation(payload)
++
++
++if __name__ == "__main__":
++    unittest.main()
