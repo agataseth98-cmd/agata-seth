@@ -1,0 +1,477 @@
+diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
+index edae716b..9ad074cc 100644
+--- a/redesign/painel_operacional/README.md
++++ b/redesign/painel_operacional/README.md
+@@ -21,12 +21,13 @@ Abra `http://127.0.0.1:20146/prototipo`. Para encerrar uma execução manual, us
+ - A lista de propostas informa se há marcador. O botão de verificação consulta `p8_verificar` por nome validado e mostra a etapa de falha ou a aplicabilidade naquele momento; não assina nem aplica. O hash do diff é conferido antes e depois da chamada.
+ - `/api/details` consulta sob demanda oito unidades de integração e conta notas de entradas do vault derivado. Unidade ativa não prova funcionamento completo da integração, e contagem de notas não prova sincronia com o canon.
+ - `/api/wiki/search` consulta somente `busca_texto` e `busca_semantica` pelo verificador. A consulta é limitada a 200 caracteres e uma linha, e o retorno é limitado e redigido pelo verificador. Falha, índice semântico ausente e índice parcial são identificados; ausência de resultado não prova ausência no canon. Há apenas uma busca em andamento por vez. A interface não guarda histórico.
++- A integração RelayCouncil usa o mesmo servidor loopback e a mesma origem do painel: `GET /api/relay-council/catalog` expõe o roster tipado; `POST /api/relay-council/evaluations` valida um resultado com `relay_council_contract.py`, exige timestamp explícito para retry idempotente, confere o modo de acesso contra o provedor, aplica a régua de segredo e acrescenta a avaliação ao cache comum do Conselho. O POST exige `Origin` exata, `Sec-Fetch-Site` same-origin/none e JSON; o corpo tem teto de 65.536 bytes, cada avaliação cabe nos 4.000 caracteres por entrada do cache, e o processo aceita até 60 POSTs por minuto. O identificador da tarefa é resumido por SHA-256 com provedor e timestamp no cache. A mesma tarefa, provedor e timestamp devolvem o recibo existente em retries; conteúdo diferente com essa chave retorna conflito. Limite de frequência e quota diária retornam HTTP 429 com `Retry-After` no primeiro caso. Nenhuma rota chama provedores, lê sessões/cookies ou automatiza DOM.
+ - A referência do Git é local, correspondente ao último fetch; a API não consulta o remoto. Estado Git não altera a saúde das unidades. Cada leitura informa origem, observação e validade. Se uma coleta falhar, o navegador conserva o último valor válido como vencido e anuncia a falha; sem valor anterior, exibe ausência de leitura.
+ - A interface atualiza a cada 60 segundos, permite atualização manual, agrupa pedidos de status próximos e pausa consultas quando a aba está oculta. Os dados complementares são consultados ao abrir Memória ou Integrações.
+ 
+ ## Fronteiras
+ 
+-Host, `Origin` e `Sec-Fetch-Site` são verificados nas consultas da interface; POST exige origem local e JSON. Loopback e essas verificações não autenticam outros processos locais. O servidor não recebe comandos livres, escrita, assinatura, reinício de serviço ou credenciais. Nenhum endereço público ou acesso remoto é configurado. As buscas ajudam a localizar fontes; confirme o texto no canon antes de citar.
++Host, `Origin` e `Sec-Fetch-Site` são verificados nas consultas da interface; POST exige origem local e JSON. Loopback e essas verificações não autenticam outros processos locais. O RelayCouncil acrescenta somente ao cache comum validado; não altera arquivos canônicos ou histórico do painel. O servidor não recebe comandos livres, assinatura, reinício de serviço ou credenciais. Nenhum endereço público ou acesso remoto é configurado. As buscas ajudam a localizar fontes; confirme o texto no canon antes de citar.
+ 
+ Links para Obsidian e LibreChat dependem dos aplicativos existentes. A interface mostra recursos e planos documentados com identificação histórica quando não há leitura viva. `active` do systemd não comprova saúde funcional, e HTTP 200 de `/health` não comprova cada função do chat. A coleta não inclui todos os serviços, resultados internos das tarefas, preços, quota de provedores ou todo o perímetro.
+ 
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index aac45322..d77695a8 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -11,6 +11,7 @@ import os
+ import socket
+ import re
+ import subprocess
++import sys
+ import threading
+ import time
+ import urllib.error
+@@ -55,6 +56,11 @@ INTEGRATION_ALLOWLIST = (
+ )
+ _STATUS_LOCK = threading.Lock()
+ _WIKI_LOCK = threading.BoundedSemaphore(1)
++_RELAY_LOCK = threading.BoundedSemaphore(1)
++_RELAY_RATE_LOCK = threading.Lock()
++_RELAY_REQUESTS: collections.deque[float] = collections.deque()
++_RELAY_RATE_WINDOW_SECONDS = 60
++_RELAY_RATE_LIMIT = 60
+ _SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
+ _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
+ _DETAILS_LOCK = threading.Lock()
+@@ -94,6 +100,82 @@ def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
+     return not origin or origin == ALLOWED_ORIGIN
+ 
+ 
++def _relay_modules():
++    """Carrega contrato e persistência locais; nenhum módulo faz chamada externa."""
++    for directory in (ROOT / "redesign/router", WEB):
++        path = str(directory)
++        if path not in sys.path:
++            sys.path.insert(0, path)
++    import cache_conselho
++    import relay_catalog
++    import relay_council_contract
++    import sanitizar
++    return cache_conselho, relay_catalog, relay_council_contract, sanitizar
++
++
++def _relay_rate_limited() -> bool:
++    now = time.monotonic()
++    with _RELAY_RATE_LOCK:
++        while (_RELAY_REQUESTS
++               and now - _RELAY_REQUESTS[0] >= _RELAY_RATE_WINDOW_SECONDS):
++            _RELAY_REQUESTS.popleft()
++        if len(_RELAY_REQUESTS) >= _RELAY_RATE_LIMIT:
++            return True
++        _RELAY_REQUESTS.append(now)
++        return False
++
++
++class RelayEvaluationTooLarge(ValueError):
++    """Avaliação excede o limite de uma entrada do cache compartilhado."""
++
++
++class RelayDailyQuotaExceeded(ValueError):
++    """Cache comum atingiu a quota diária de escrita."""
++
++
++class RelayIdempotencyConflict(ValueError):
++    """Uma reentrega reutilizou a chave com conteúdo diferente."""
++
++
++def _relay_store(payload: dict) -> dict:
++    cache, _catalog, contract, sanitizer = _relay_modules()
++    if "timestamp" not in payload:
++        raise ValueError("timestamp is required for idempotent result delivery")
++    try:
++        normalized = contract.normalize_evaluation(payload)
++    except RecursionError as exc:
++        raise ValueError("evaluation nesting limit exceeded") from exc
++    provider = _catalog.PROVIDER_BY_ID[normalized["provider"]]
++    expected_mode = {"official_api_only": "official_api", "manual_only": "manual"}.get(
++        provider["access_mode"]
++    )
++    if normalized["access_mode"] != expected_mode:
++        raise ValueError("access mode does not match provider catalog")
++    try:
++        sanitizer.sanitizar_payload(normalized)
++    except sanitizer.SegredoNoPayload as exc:
++        raise ValueError("sensitive content rejected") from exc
++    task_key = hashlib.sha256(
++        f"{normalized['provider']}:{normalized['task_id']}:{normalized['timestamp']}".encode("utf-8")
++    ).hexdigest()
++    persisted = {**normalized, "task_id": task_key}
++    record = json.dumps(persisted, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
++    if len(record) > cache.MAX_TEXTO:
++        raise RelayEvaluationTooLarge("evaluation exceeds shared-cache entry limit")
++    try:
++        return cache.anotar(
++            autor=f"relay:{normalized['provider']}",
++            texto=record,
++            tipo="nota",
++            fonte="RelayCouncil",
++            idempotency_key=f"relay-{task_key}",
++        )
++    except cache.LimiteDiarioAtingido as exc:
++        raise RelayDailyQuotaExceeded from exc
++    except cache.ConflitoIdempotencia as exc:
++        raise RelayIdempotencyConflict from exc
++
++
+ def _verify(command: str, **arguments: object) -> str:
+     """Consulta comandos fixos do verificador; parâmetros externos são validados."""
+     allowed = {"unidade", "git_status", "git_log", "p8_verificar"}
+@@ -912,6 +994,13 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/relay-council/catalog":
++            _cache, catalog, _contract, _sanitizer = _relay_modules()
++            body = json.dumps(
++                {"schema_version": 1, "providers": catalog.snapshot()},
++                ensure_ascii=False,
++            ).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path in {"/api/status", "/api/details"}:
+             if not _same_origin_request(
+                 self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
+@@ -934,6 +1023,8 @@ class Handler(BaseHTTPRequestHandler):
+     def do_POST(self) -> None:
+         if self.headers.get("Host") != f"{BIND}:{PORT}":
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path == "/api/relay-council/evaluations":
++            return self._relay_evaluation()
+         if self.path == "/api/seth/chat":
+             return self._seth_chat()
+         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
+@@ -951,7 +1042,7 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(413, "text/plain; charset=utf-8", b"request too large")
+         try:
+             payload = json.loads(self.rfile.read(int(raw_length)))
+-        except (json.JSONDecodeError, UnicodeDecodeError):
++        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
+             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+         if not isinstance(payload, dict):
+             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
+@@ -984,6 +1075,50 @@ class Handler(BaseHTTPRequestHandler):
+         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+         return self._send(200, "application/json; charset=utf-8", body)
+ 
++    def _relay_evaluation(self) -> None:
++        if (self.headers.get("Origin") != ALLOWED_ORIGIN
++                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}):
++            return self._send(403, "text/plain; charset=utf-8", b"same-origin request required")
++        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
++            return self._send(415, "text/plain; charset=utf-8", b"JSON required")
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > 65_536:
++            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++        try:
++            payload = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
++        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        if not isinstance(payload, dict):
++            return self._send(400, "text/plain; charset=utf-8", b"evaluation must be an object")
++        if not _RELAY_LOCK.acquire(blocking=False):
++            return self._send(429, "text/plain; charset=utf-8", b"relay busy")
++        try:
++            if _relay_rate_limited():
++                return self._send(429, "text/plain; charset=utf-8", b"relay rate limit reached",
++                                  (("Retry-After", str(_RELAY_RATE_WINDOW_SECONDS)),))
++            try:
++                receipt = _relay_store(payload)
++            except RelayDailyQuotaExceeded:
++                return self._send(429, "text/plain; charset=utf-8", b"local council daily quota reached")
++            except RelayIdempotencyConflict:
++                return self._send(409, "text/plain; charset=utf-8", b"task result conflicts with stored result")
++            except RelayEvaluationTooLarge:
++                return self._send(413, "text/plain; charset=utf-8", b"evaluation too large for local council cache")
++            except ValueError:
++                return self._send(400, "text/plain; charset=utf-8", b"invalid evaluation")
++            except OSError:
++                return self._send(503, "text/plain; charset=utf-8", b"local council cache unavailable")
++        finally:
++            _RELAY_LOCK.release()
++        body = json.dumps({
++            "schema_version": 1,
++            "stored": True,
++            "entry": receipt["n"],
++            "hash": receipt["h"],
++            "duplicate": receipt.get("duplicate", False),
++        }).encode("utf-8")
++        return self._send(200 if receipt.get("duplicate") else 201, "application/json; charset=utf-8", body)
++
+ 
+     def _seth_conversa(self, apagar: bool) -> None:
+         """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia."""
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 5253da3a..e17f2875 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -240,6 +240,116 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(json.loads(body)["failed_check"], 4)
+         self.assertEqual(self.request("POST", "/api/proposals/verify", '{"name":"exemplo"}', {"Content-Type":"application/json"})[0], 403)
+ 
++    def test_relay_catalog_and_evaluation_boundary(self):
++        code, body, headers = self.request("GET", "/api/relay-council/catalog")
++        self.assertEqual(code, 200)
++        providers = json.loads(body)["providers"]
++        self.assertEqual(len(providers), 17)
++        self.assertNotIn("perplexity", {provider["id"] for provider in providers})
++        self.assertIn("no-store", headers["Cache-Control"])
++
++        payload = {
++            "task_id": "task-1", "provider": "gemini", "site": "gemini",
++            "access_mode": "official_api", "state": "green", "ok": True,
++            "text": "resposta formal", "latency_ms": 1234,
++            "timestamp": "2026-10-28T10:00:00-03:00",
++        }
++        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                "Content-Type": "application/json"}
++        with mock.patch.object(panel, "_relay_store", return_value={"n": 42, "h": "abc123"}) as store:
++            code, body, _ = self.request("POST", "/api/relay-council/evaluations", json.dumps(payload), base)
++        self.assertEqual(code, 201)
++        self.assertEqual(json.loads(body), {"schema_version": 1, "stored": True, "entry": 42,
++                                            "hash": "abc123", "duplicate": False})
++        store.assert_called_once_with(payload)
++
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(payload),
++                                      {"Content-Type": "application/json"})[0], 403)
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(payload),
++                                      {**base, "Content-Type": "text/plain"})[0], 415)
++        dom = {**payload, "access_mode": "browser_dom"}
++        code, _, _ = self.request("POST", "/api/relay-council/evaluations", json.dumps(dom), base)
++        self.assertEqual(code, 400)
++        mismatched = {**payload, "provider": "copilot", "access_mode": "official_api"}
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(mismatched), base)[0], 400)
++
++    def test_relay_evaluation_rejects_oversized_body_and_busy_cache(self):
++        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                "Content-Type": "application/json"}
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", "x" * 65537, base)[0], 413)
++        payload = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
++                              "access_mode": "official_api", "state": "green", "ok": True,
++                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
++        large = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
++                            "access_mode": "official_api", "state": "green", "ok": True,
++                            "text": "r" * 5000, "timestamp": "2026-10-28T10:00:00-03:00"})
++        self.assertTrue(panel._RELAY_LOCK.acquire(blocking=False))
++        try:
++            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 429)
++        finally:
++            panel._RELAY_LOCK.release()
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", large, base)[0], 413)
++        deeply_nested = "{" + '"a":{' * 1500 + '"x":0' + "}" * 1501
++        self.assertEqual(self.request("POST", "/api/relay-council/evaluations", deeply_nested, base)[0], 400)
++
++    def test_relay_quota_and_idempotent_receipts(self):
++        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                "Content-Type": "application/json"}
++        payload = json.dumps({"task_id": "task-3", "provider": "gemini", "site": "gemini",
++                              "access_mode": "official_api", "state": "green", "ok": True,
++                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
++        with mock.patch.object(panel, "_relay_store", return_value={"n": 8, "h": "hash", "duplicate": True}):
++            code, body, _ = self.request("POST", "/api/relay-council/evaluations", payload, base)
++        self.assertEqual(code, 200)
++        self.assertTrue(json.loads(body)["duplicate"])
++        with mock.patch.object(panel, "_relay_store", side_effect=panel.RelayDailyQuotaExceeded):
++            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 429)
++        with mock.patch.object(panel, "_relay_store", side_effect=panel.RelayIdempotencyConflict):
++            self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 409)
++
++    def test_relay_rate_limit_returns_retry_after(self):
++        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                "Content-Type": "application/json"}
++        payload = json.dumps({"task_id": "task-rate", "provider": "gemini", "site": "gemini",
++                              "access_mode": "official_api", "state": "green", "ok": True,
++                              "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
++        with panel._RELAY_RATE_LOCK:
++            panel._RELAY_REQUESTS.clear()
++        try:
++            with mock.patch.object(panel, "_RELAY_RATE_LIMIT", 1), \
++                    mock.patch.object(panel, "_relay_store", return_value={"n": 1, "h": "hash"}):
++                self.assertEqual(self.request("POST", "/api/relay-council/evaluations", payload, base)[0], 201)
++                code, _, headers = self.request("POST", "/api/relay-council/evaluations", payload, base)
++                self.assertEqual(code, 429)
++                self.assertEqual(headers["Retry-After"], "60")
++        finally:
++            with panel._RELAY_RATE_LOCK:
++                panel._RELAY_REQUESTS.clear()
++
++    def test_relay_store_validates_sanitizes_and_appends_to_isolated_common_cache(self):
++        cache, _catalog, _contract, _sanitizer = panel._relay_modules()
++        payload = {"task_id": "task-2", "provider": "gemini", "site": "gemini",
++                   "access_mode": "official_api", "state": "green", "ok": True,
++                   "text": "resposta formal", "timestamp": "2026-10-28T10:00:00-03:00"}
++        with tempfile.TemporaryDirectory() as tmp:
++            root = Path(tmp)
++            with mock.patch.object(cache, "ARQ", root / "cache" / "cache.jsonl"), \
++                    mock.patch.object(cache, "LISTA_P20", root / "p20.txt"):
++                receipt = panel._relay_store(payload)
++                self.assertEqual(receipt["n"], 1)
++                self.assertTrue(cache.verificar()[0])
++                self.assertNotIn("task-2", cache.ler()[0]["texto"])
++                retry = panel._relay_store(payload)
++                self.assertEqual((retry["n"], retry["duplicate"]), (1, True))
++                next_attempt = panel._relay_store({
++                    **payload, "timestamp": "2026-10-28T10:01:00-03:00"
++                })
++                self.assertEqual(next_attempt["n"], 2)
++                secret = "".join(("sk", "-", "d" * 20))
++                with self.assertRaises(ValueError):
++                    panel._relay_store({**payload, "text": secret})
++                self.assertEqual(len(cache.ler()), 2)
++
+ 
+     def test_vault_so_abre_itens_da_lista_fechada_e_nao_tem_link_externo(self):
+         for nome in panel.VAULT_ITENS.values():
+diff --git a/redesign/router/cache_conselho.py b/redesign/router/cache_conselho.py
+index 862575bf..c4911229 100755
+--- a/redesign/router/cache_conselho.py
++++ b/redesign/router/cache_conselho.py
+@@ -44,6 +44,15 @@ LIMITE_DIA = 20 * 1024 * 1024  # D5
+ LISTA_P20 = Path(os.environ.get("AGATA_P20_LISTA",
+                                 os.path.expanduser("~/.config/agata/identificadores-pessoais.txt")))
+ ZERO = "0" * 64
++_IDEMPOTENCY_KEY = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}\Z")
++
++
++class LimiteDiarioAtingido(ValueError):
++    """O teto diário do cache foi atingido; o chamador pode informar retry."""
++
++
++class ConflitoIdempotencia(ValueError):
++    """Uma chave idempotente já foi usada para conteúdo diferente."""
+ 
+ 
+ def _sha(b: bytes) -> str:
+@@ -90,12 +99,16 @@ def _linhas() -> list[bytes]:
+         return []
+ 
+ 
+-def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None) -> dict:
++def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None,
++           idempotency_key: str | None = None) -> dict:
+     autor, texto = (autor or "").strip(), (texto or "").strip()
+     if not autor or len(autor) > 80:
+         raise ValueError("autor obrigatório (até 80 caracteres)")
+     if tipo not in TIPOS:
+         raise ValueError(f"tipo inválido; use um de {', '.join(TIPOS)}")
++    if idempotency_key is not None and (
++            not isinstance(idempotency_key, str) or not _IDEMPOTENCY_KEY.fullmatch(idempotency_key)):
++        raise ValueError("chave de idempotência inválida")
+     if not texto or len(texto) > MAX_TEXTO:
+         raise ValueError(f"texto obrigatório (até {MAX_TEXTO} caracteres)")
+     texto = filtrar(texto)
+@@ -104,16 +117,26 @@ def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None)
+     with open(ARQ.with_suffix(".lock"), "a") as trava:
+         fcntl.flock(trava, fcntl.LOCK_EX)
+         linhas = _linhas()
++        if idempotency_key is not None:
++            for linha_existente in linhas:
++                anterior = json.loads(linha_existente)
++                if anterior.get("idempotency_key") == idempotency_key:
++                    if (anterior.get("autor"), anterior.get("texto"), anterior.get("tipo"), anterior.get("fonte")) != (
++                            autor, texto, tipo, fonte or None):
++                        raise ConflitoIdempotencia("chave de idempotência já usada por outro conteúdo")
++                    return {"ok": True, "n": anterior["n"], "h": anterior["h"][:12], "duplicate": True}
+         agora = datetime.now(TZ)
+         hoje = agora.strftime("%Y-%m-%d")
+         gravado_hoje = sum(len(l) + 1 for l in linhas if json.loads(l).get("ts", "").startswith(hoje))
+         reg = {"n": (json.loads(linhas[-1])["n"] + 1) if linhas else 1,
+                "ts": agora.strftime("%Y-%m-%dT%H:%M:%S%z"), "autor": autor, "tipo": tipo,
+                "texto": texto, "fonte": (fonte or None), "ant": _sha(linhas[-1]) if linhas else ZERO}
++        if idempotency_key is not None:
++            reg["idempotency_key"] = idempotency_key
+         reg["h"] = _sha(_canon(reg))
+         linha = _canon(reg) + b"\n"
+         if gravado_hoje + len(linha) > LIMITE_DIA:
+-            raise ValueError("limite diário de 20 MB do cache atingido (D5) — nota não gravada")
++            raise LimiteDiarioAtingido("limite diário de 20 MB do cache atingido (D5) — nota não gravada")
+         fd = os.open(ARQ, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+         try:
+             os.write(fd, linha)
+@@ -125,7 +148,10 @@ def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None)
+             os.fsync(dfd)
+         finally:
+             os.close(dfd)
+-    return {"ok": True, "n": reg["n"], "h": reg["h"][:12]}
++    receipt = {"ok": True, "n": reg["n"], "h": reg["h"][:12]}
++    if idempotency_key is not None:
++        receipt["duplicate"] = False
++    return receipt
+ 
+ 
+ def ler(n: int = 20, autor: str | None = None) -> list[dict]:
+@@ -199,8 +225,8 @@ def _cli(argv: list[str]) -> int:
+ 
+ def _selftest() -> int:
+     import tempfile
+-    global ARQ, LISTA_P20
+-    salvo = (ARQ, LISTA_P20)
++    global ARQ, LISTA_P20, LIMITE_DIA
++    salvo = (ARQ, LISTA_P20, LIMITE_DIA)
+     casos = []
+     with tempfile.TemporaryDirectory() as d:
+         ARQ = Path(d) / "c" / "cache.jsonl"
+@@ -212,6 +238,7 @@ def _selftest() -> int:
+             regs = ler()
+             casos += [
+                 ("grava e numera em sequência", a["n"] == 1 and b["n"] == 2 and len(regs) == 2),
++                ("retorno legado mantém esquema", set(a) == {"ok", "n", "h"}),
+                 ("dado pessoal vira marca (padrão e lista P-20)", "fulano@" not in regs[1]["texto"]
+                  and "Zuleica42" not in regs[1]["texto"] and "[pessoal-email removido]" in regs[1]["texto"]),
+                 ("cadeia íntegra", verificar()[0]),
+@@ -230,11 +257,35 @@ def _selftest() -> int:
+                     casos.append((f"recusa entrada inválida {ruim[2]!r}", False))
+                 except ValueError:
+                     casos.append((f"recusa entrada inválida {ruim[2]!r}", True))
++            arquivo_original, limite_original = ARQ, LIMITE_DIA
++            try:
++                ARQ = Path(d) / "idempotente" / "cache.jsonl"
++                primeiro = anotar("relay:gemini", "resultado", fonte="RelayCouncil:task-1",
++                                  idempotency_key="relay-gemini-task-1")
++                repetido = anotar("relay:gemini", "resultado", fonte="RelayCouncil:task-1",
++                                  idempotency_key="relay-gemini-task-1")
++                casos.append(("retry idempotente retorna a entrada original",
++                              primeiro["n"] == repetido["n"] == 1 and repetido["duplicate"]))
++                try:
++                    anotar("relay:gemini", "outro resultado", fonte="RelayCouncil:task-1",
++                           idempotency_key="relay-gemini-task-1")
++                    casos.append(("chave idempotente com conteúdo divergente é recusada", False))
++                except ConflitoIdempotencia:
++                    casos.append(("chave idempotente com conteúdo divergente é recusada", True))
++                LIMITE_DIA = 1
++                try:
++                    anotar("relay:gemini", "segundo resultado", fonte="RelayCouncil:task-2",
++                           idempotency_key="relay-gemini-task-2")
++                    casos.append(("quota tem exceção tipada", False))
++                except LimiteDiarioAtingido:
++                    casos.append(("quota tem exceção tipada", True))
++            finally:
++                ARQ, LIMITE_DIA = arquivo_original, limite_original
+             dados = ARQ.read_bytes().replace(b"11h04", b"11h05")
+             ARQ.write_bytes(dados)
+             casos.append(("alteração de um byte é detectada", not verificar()[0]))
+         finally:
+-            ARQ, LISTA_P20 = salvo
++            ARQ, LISTA_P20, LIMITE_DIA = salvo
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -43,5 +43,8 @@
+ (905) DIÁRIO — 28/10/2026 · **RelayCouncil: contrato v3 e catálogo aplicados em PR.** A assinatura humana foi validada; o diff e seu marcador foram movidos para `propostas/aplicadas`. O PR de aplicação contém o contrato e o catálogo de 17 provedores; a interface e as chamadas externas seguem fora desta etapa.
+ Modelo: Codex (Codex desktop, na Máquina) · vetor: P-8 validado, 14 testes, compilação e `git diff --check` · Autorização: Humano — "feito".
+ 
++(906) DIÁRIO — 28/10/2026 · **RelayCouncil: endpoint local proposto na mesma origem do painel.** O GET expõe o catálogo; o POST valida modo por provedor, aplica sanitização e grava no cache comum. Tem retry idempotente por provedor, tarefa e timestamp, ID resumido, limite de 60 POSTs/minuto e quota tipada. Nada foi aplicado ao painel em execução nem chama provedores.
++Modelo: Codex (Codex desktop, na Máquina) · vetor: revisão independente; 22 testes do painel, 10 do contrato, 14 casos do selftest do cache, compilação e patch testados em worktree descartável · Autorização: Humano — "Vamos incorporar".
++
+ (904) DIÁRIO — 28/10/2026 · **RelayCouncil: proposta de fronteira para integração.** O contrato e o catálogo de 17 provedores estão propostos para entrada por API oficial ou manual; automação DOM ficou fora. A integração ao painel oficial e chamadas externas não foram feitas.
+ Modelo: Codex (Codex desktop, na Máquina) · vetor: 14 testes, compilação, diff aplicado e conferido em cópia descartável baseada em `ef9c794` · Autorização: Humano — "Vamos incorporar".
