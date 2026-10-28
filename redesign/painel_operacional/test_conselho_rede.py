@@ -4,13 +4,15 @@ import json
 import tempfile
 import threading
 import unittest
+from unittest import mock
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
 import server
-from conselho_rede import Council, Conflict, PROVIDERS, requests as parse_requests
+import relay_executor
+from conselho_rede import CONTEXT, Council, Conflict, PROVIDERS, requests as parse_requests
 
 
 class CouncilTests(unittest.TestCase):
@@ -35,8 +37,8 @@ class CouncilTests(unittest.TestCase):
         self.council.finish(action, {"ok": True, "text": "mock response"}, lease=task["lease"], site="gemini")
         self.assertEqual(self.council._row(action)["status"], "completed")
 
-    def test_all_nine_adapters_accept_mock_roundtrip(self):
-        self.assertEqual(len(PROVIDERS), 9)
+    def test_all_active_api_providers_accept_mock_roundtrip(self):
+        self.assertEqual(len(PROVIDERS), 5)
         for site in PROVIDERS:
             action = self.council.create("send", {"site": site, "text": "mock prompt"})
             row = self.council._row(action)
@@ -46,11 +48,11 @@ class CouncilTests(unittest.TestCase):
             self.council.finish(action, {"ok": True, "text": f"mock:{site}"}, lease=task["lease"], site=site)
 
     def test_each_tool_request_waits_for_human(self):
-        action = self.council.create("send", {"site": "deepseek", "text": "mock"})
+        action = self.council.create("send", {"site": "openrouter", "text": "mock"})
         row = self.council._row(action)
         self.council.decide(action, row["hash"], True)
         task, = self.council.claim()
-        self.council.finish(action, {"ok": True, "text": "\n<STATE/>\n"}, lease=task["lease"], site="deepseek")
+        self.council.finish(action, {"ok": True, "text": "\n<STATE/>\n"}, lease=task["lease"], site="openrouter")
         pending, = [item for item in self.council.snapshot()["actions"] if item["kind"] == "tool"]
         self.assertEqual(pending["status"], "pending")
         self.assertEqual(self.executed, [])
@@ -64,7 +66,7 @@ class CouncilTests(unittest.TestCase):
             self.council.decide(action, row["hash"], True)
 
     def test_debate_and_synthesis_are_individually_approved(self):
-        group = self.council.group("debate", "mock topic", ["deepseek", "gemini", "zai"])
+        group = self.council.group("debate", "mock topic", ["openrouter", "gemini", "zai"])
         initial = [item for item in self.council.snapshot()["actions"] if item["parent"] == group]
         initial.sort(key=lambda item: item["created"])
         self.assertEqual(len(initial), 3)
@@ -90,6 +92,34 @@ class CouncilTests(unittest.TestCase):
         self.assertEqual(restarted.claim(), [])
         restarted.db.close()
 
+    def test_api_executor_requires_approved_lease_and_records_once(self):
+        action = self.council.create("send", {"site": "gemini", "text": "mock"})
+        row = self.council._row(action)
+        with self.assertRaises(Conflict):
+            self.council.execute_api(action, "bad-lease", lambda *_: self.fail("must not call"))
+        self.council.decide(action, row["hash"], True)
+        task, = self.council.claim()
+        calls = []
+        result = self.council.execute_api(
+            action, task["lease"], lambda *args: calls.append(args) or "api mock"
+        )
+        self.assertEqual(result, {"duplicate": False})
+        self.assertEqual(calls, [("gemini", "mock", CONTEXT)])
+        self.assertEqual(self.council._row(action)["status"], "completed")
+
+    def test_api_failure_is_recorded_without_automatic_retry(self):
+        action = self.council.create("send", {"site": "gemini", "text": "mock"})
+        row = self.council._row(action)
+        self.council.decide(action, row["hash"], True)
+        task, = self.council.claim()
+        result = self.council.execute_api(
+            action, task["lease"], lambda *_: (_ for _ in ()).throw(RuntimeError("private detail"))
+        )
+        row = self.council._row(action)
+        self.assertEqual(result, {"duplicate": False})
+        self.assertEqual(row["status"], "error")
+        self.assertNotIn("private detail", row["result"])
+        self.assertEqual(self.council.claim(), [])
     def test_tool_requests_require_one_complete_xml_tag_per_line(self):
         parsed = parse_requests('before <STATE/> after\n<SEARCH canon="Agata"/>\n<DELIVER>review</DELIVER>')
         self.assertEqual([item["tool"] for item in parsed], ["SEARCH", "DELIVER"])
@@ -141,7 +171,7 @@ class CouncilHTTPTests(unittest.TestCase):
             error.close()
             return status, body
 
-    def test_api_origin_csrf_approval_and_result_lease(self):
+    def test_api_origin_csrf_approval_and_official_executor(self):
         status, state = self.request("/api/relay-council/state")
         self.assertEqual(status, 200)
         body = {"kind": "send", "payload": {"site": "gemini", "text": "mock"}, "csrf": state["csrf"]}
@@ -150,6 +180,15 @@ class CouncilHTTPTests(unittest.TestCase):
         headers = {"Content-Type": "application/json", "Origin": server.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin"}
         status, created = self.request("/api/relay-council/actions", body, headers, "POST")
         self.assertEqual(status, 201)
+        with mock.patch.object(relay_executor, "send") as send:
+            status, _ = self.request(
+                "/api/relay-council/execute",
+                {"task_id": created["id"], "lease": "not-approved"},
+                {"Content-Type": "application/json", "X-Relay-Client": server.RELAY_CLIENT_ID},
+                "POST",
+            )
+        self.assertEqual(status, 409)
+        send.assert_not_called()
         status, tasks = self.request("/api/relay-council/tasks", headers={"X-Relay-Client": server.RELAY_CLIENT_ID})
         self.assertEqual((status, tasks), (200, []))
         decision = {"id": created["id"], "hash": created["hash"], "approve": True, "csrf": state["csrf"]}
@@ -158,14 +197,23 @@ class CouncilHTTPTests(unittest.TestCase):
         status, tasks = self.request("/api/relay-council/tasks", headers={"X-Relay-Client": server.RELAY_CLIENT_ID})
         task, = tasks
         self.assertEqual(status, 200)
-        report = {"task_id": task["id"], "site": task["site"], "lease": task["lease"], "ok": True, "text": "mock response"}
-        status, _ = self.request("/api/relay-council/result", report,
-                                 {"Content-Type": "application/json", "X-Relay-Client": server.RELAY_CLIENT_ID}, "POST")
+        report = {"task_id": task["id"], "lease": task["lease"]}
+        with mock.patch.object(relay_executor, "send", return_value="mock response") as send:
+            status, _ = self.request("/api/relay-council/execute", report,
+                                     {"Content-Type": "application/json", "X-Relay-Client": server.RELAY_CLIENT_ID}, "POST")
+        send.assert_called_once()
         self.assertEqual(status, 200)
+        self.assertEqual(server._council_state()._row(task["id"])["status"], "completed")
+        status, _ = self.request(
+            "/api/relay-council/result", {"task_id": task["id"]},
+            {"Content-Type": "application/json", "X-Relay-Client": server.RELAY_CLIENT_ID},
+            "POST",
+        )
+        self.assertEqual(status, 405)
 
 
 class ExtensionContractTests(unittest.TestCase):
-    def test_extension_matches_official_panel_and_nine_adapters(self):
+    def test_extension_uses_only_local_api_executor(self):
         directory = Path(__file__).resolve().parent / "relay-extension-v2"
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         background = (directory / "background.js").read_text(encoding="utf-8")
@@ -173,9 +221,14 @@ class ExtensionContractTests(unittest.TestCase):
         self.assertIn("http://127.0.0.1:20146/*", manifest["host_permissions"])
         self.assertNotIn("20147", json.dumps(manifest) + background + popup)
         self.assertIn("/api/relay-council/tasks", background)
-        self.assertIn("/api/relay-council/result", background)
+        self.assertIn("/api/relay-council/execute", background)
+        self.assertNotIn("chrome.tabs", background)
+        self.assertNotIn("chrome.scripting", background)
         self.assertIn("Conselho em Rede", manifest["name"])
-        self.assertEqual(len(PROVIDERS), 9)
+        self.assertNotIn("content_scripts", manifest)
+        self.assertEqual(manifest["permissions"], ["alarms"])
+        self.assertEqual(manifest["host_permissions"], ["http://127.0.0.1:20146/*"])
+        self.assertEqual(len(PROVIDERS), 5)
 
 
 if __name__ == "__main__":

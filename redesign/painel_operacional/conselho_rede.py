@@ -17,7 +17,8 @@ import time
 import uuid
 from pathlib import Path
 
-PROVIDERS = ("deepseek", "gemini", "zai", "chatgpt", "claude", "grok", "qwen", "mistral", "kimi")
+# Only providers with an active, official API mapping may enter the send queue.
+PROVIDERS = ("gemini", "zai", "mistral", "huggingchat", "openrouter")
 TOOLS = {
     "SEARCH": "Buscar no canon público: canon=consulta",
     "STATE": "Consultar estado medido do Agata",
@@ -320,6 +321,23 @@ class Council:
                 return [{"id": row["id"], "action": "send_prompt", **json.loads(row["payload"]),
                          "approval_hash": row["hash"], "lease": lease}]
             return []
+
+    def execute_api(self, action, lease, execute):
+        """Execute exactly one approved, leased send through the API callback."""
+        with self.lock:
+            row = self._row(action)
+            payload = json.loads(row["payload"])
+            if (row["kind"] != "send" or row["status"] != "running"
+                    or not lease or not secrets.compare_digest(row["lease"] or "", lease)
+                    or payload.get("site") not in PROVIDERS):
+                raise Conflict("task lease mismatch")
+            site, prompt = payload["site"], payload["text"]
+        try:
+            response = execute(site, prompt, CONTEXT)
+            result = {"ok": True, "text": response, "error": ""}
+        except Exception:
+            result = {"ok": False, "text": "", "error": "API indisponível; o envio não será repetido automaticamente"}
+        return self.finish(action, result, required="running", lease=lease, site=site)
 
     def finish(self, action, result, required="running", lease=None, site=None):
         if not isinstance(result, dict) or type(result.get("ok")) is not bool:
