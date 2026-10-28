@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bb78cc095a5c7deb8696e7f9fb282c9059c465f0
-  Escrito em: 28/10/2026 14:24 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 08cb1f7541c0bc44015cf00d27d237b2dff49689
+  Escrito em: 28/10/2026 14:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bb78cc095a5c7deb8696e7f9fb282c9059c465f0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bb78cc095a5c7deb8696e7f9fb282c9059c465f0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bb78cc095a5c7deb8696e7f9fb282c9059c465f0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bb78cc095a5c7deb8696e7f9fb282c9059c465f0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bb78cc095a5c7deb8696e7f9fb282c9059c465f0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08cb1f7541c0bc44015cf00d27d237b2dff49689/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08cb1f7541c0bc44015cf00d27d237b2dff49689/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08cb1f7541c0bc44015cf00d27d237b2dff49689/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08cb1f7541c0bc44015cf00d27d237b2dff49689/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/08cb1f7541c0bc44015cf00d27d237b2dff49689/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(908) DIÁRIO — 28/10/2026 · **Dupla vira Equipe, aberta a qualquer membro do Conselho (proposta).** Pedido do Humano: renomear a dupla para Equipe e torná-la universal. A proposta `equipe-universal-20261028` move `scripts/dupla/` para `scripts/equipe/` e `dupla.py` para `equipe.py`. Nenhum nome de membro fica fixo no código: Claude, Codex, Gemini, Goose, Seth ou outro entram com `--agente <nome>`. A partida abre com os membros esperados (`--com`), ou com quaisquer dois. Linha nova na matriz exige o aceite de todos os outros presentes. Vigia, alerta de resposta, quadro, fallback e verificação de pistas passam a valer para qualquer número de membros. O estado em `~/.cache/agata/sincronia/dupla/` muda sozinho para `equipe/` na primeira execução, sem perda. Correções no mesmo pacote: a vigia não quebra mais quando o canal só tem blocos do próprio membro (achado da auditoria de 28/10); `aplicar.py` deixa de gravar um nome de modelo fixo como coautor. Skill `agata-fluxo-dupla` vira `agata-fluxo-equipe`; unit da vigia, CI e hook de sessão apontam o caminho novo. Depende de `aplicar-refazer-base-20261028` aplicado antes (mesmo `aplicar.py`). Nada aplicado.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `equipe.py --selftest` 34/34 (7 casos novos: terceiro membro, aceite de todos, worktree `gemini/*`, nome inválido, membro sem nome cadastrado, migração do estado antigo); `testar_auxiliares.py` 25/25 (5 novos); `git apply --check` sobre o main com `aplicar-refazer-base` aplicado · Autorização: Humano — "onde estamos usando dupla deve ser renomeado para Equipe, deve ser universalista".
+
 (907) DIÁRIO — 28/10/2026 · **aplicar.py: refazer a base quando o main anda antes do merge (proposta).** Hoje, quando o PR de aplicação fica atrás do main, o script junta o main na branch (`gh pr update-branch`). Isso conflita em MEMÓRIAS.md, que recebe toda entrada no mesmo ponto, e foi assim que `discord-venv-unica-20261028` ficou DIRTY. A proposta `aplicar-refazer-base-20261028` troca isso por refazer a branch sobre o main novo: verificador da base nova, apply de novo, número da entrada recalculado, push com `--force-with-lease` e CI de novo. Se o diff assinado não aplicar mais na base nova, o verificador para e pede nova assinatura. Nada aplicado.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: `testar_auxiliares.py` 20/20 com 4 casos novos; montagem e refazer testados em repositório git temporário (entrada (11) virou (12) com o main andando, commit sobre o origin/main novo); `git apply --check` contra a4c6073 · Autorização: Humano — "Antes de reaplicar, conserte o aplicar.py para refazer a base antes do merge".
 
