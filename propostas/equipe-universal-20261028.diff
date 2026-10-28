@@ -1,0 +1,2756 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+index 6fea2ecd..49ccd172 100644
+--- a/.agents/skills/INDICE.md
++++ b/.agents/skills/INDICE.md
+@@ -8,7 +8,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada
+ |---|---|---|
+ | `agata-carregar` | abrir uma sessão ou quando o bloco de estado não aparecer | Claude |
+ | `agata-fluxo` | qualquer trabalho que mude o sistema, para qualquer modelo | Codex (doutrina) |
+-| `agata-fluxo-dupla` | trabalhar em par Claude × Codex (partida, fila, propriedade) | Claude |
++| `agata-fluxo-equipe` | trabalhar em Equipe, qualquer membro do Conselho (partida, fila, propriedade) | Claude |
+ | `agata-conselho-memoria` | cache do Conselho, canal MSG, auditoria antes de afirmar | Claude |
+ | `agata-aplicar-proposta` | criar, verificar e aplicar uma proposta P-8 | Claude |
+ | `agata-mudanca-segura` | antes de mexer em serviço, container, firewall ou config que roda | Claude |
+diff --git a/.agents/skills/agata-conselho-memoria/SKILL.md b/.agents/skills/agata-conselho-memoria/SKILL.md
+index e1f57093..cc996ed8 100644
+--- a/.agents/skills/agata-conselho-memoria/SKILL.md
++++ b/.agents/skills/agata-conselho-memoria/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: agata-conselho-memoria
+-description: Trabalhar com a memória comum do Conselho e o canal da dupla no Agata. Use no início de toda sessão (ler o cache do Conselho e o estado da sessão), ao responder no canal com o protocolo MSG, ao anotar fatos ou pendências no cache, e antes de entregar texto com afirmação verificável (auditoria).
++description: Trabalhar com a memória comum do Conselho e o canal da Equipe no Agata. Use no início de toda sessão (ler o cache do Conselho e o estado da sessão), ao responder no canal com o protocolo MSG, ao anotar fatos ou pendências no cache, e antes de entregar texto com afirmação verificável (auditoria).
+ ---
+ 
+ # Memória comum e canal do Conselho
+@@ -10,7 +10,7 @@ Esta skill junta o que o Conselho precisa para não repetir erros. Cada regra ab
+ ## No início da sessão
+ - O hook `SessionStart` do projeto (`.claude/settings.json` → `scripts/sessao_claude_contexto.sh`) já entrega: estado da Máquina (`scripts/estado_para_eco.sh`), as últimas 10 entradas do cache do Conselho e o estado da sessão conjunta. Se o contexto não chegou, rode isso à mão:
+   - `python3 redesign/router/cache_conselho.py ler --n 20`
+-  - `python3 scripts/dupla/dupla.py status`
++  - `python3 scripts/equipe/equipe.py status`
+ 
+ ## Memória comum (cache do Conselho)
+ - Ler: `python3 redesign/router/cache_conselho.py ler --n 20`.
+@@ -18,11 +18,11 @@ Esta skill junta o que o Conselho precisa para não repetir erros. Cada regra ab
+ - Não é canon. Segredo é recusado. Dado pessoal vira marca.
+ - Anote **fato medido** com o comando e a hora; anote **pendência** com quem deve agir.
+ 
+-## Canal da dupla (protocolo MSG)
+-- Ler o canal como Claude: `bash scripts/dupla/inicio.sh claude`. Ele mostra só um resumo da última entrada. Para ler a mensagem inteira, leia o arquivo `~/.cache/agata/sincronia/conversa.md` (por exemplo com `sed` a partir da última linha `## `).
+-- Responder: `python3 scripts/dupla/dupla.py dizer --agente claude --assunto "..." --resposta-a <id> --estado <estado> --proximo <agente> --texto "..."`.
++## Canal da Equipe (protocolo MSG)
++- Ler o canal (qualquer membro; ex.: Claude): `bash scripts/equipe/inicio.sh claude`. Ele mostra só um resumo da última entrada. Para ler a mensagem inteira, leia o arquivo `~/.cache/agata/sincronia/conversa.md` (por exemplo com `sed` a partir da última linha `## `).
++- Responder: `python3 scripts/equipe/equipe.py dizer --agente claude --assunto "..." --resposta-a <id> --estado <estado> --proximo <agente> --texto "..."`.
+ - "MSG" no fim de uma mensagem do Humano significa: leia o canal, responda, e termine o texto de devolução com `MSG`.
+-- Estado da sessão: `dupla.py status`. Deriva (base diferente de `origin/main`) não se corrige sozinho: é decisão do Humano (`iniciar --nova-base`).
++- Estado da sessão: `equipe.py status`. Deriva (base diferente de `origin/main`) não se corrige sozinho: é decisão do Humano (`iniciar --nova-base`).
+ - Matriz congelada: `aceitar-linha` **altera** a matriz. Confirme com o Humano antes. Em 28/10/2026 a matriz foi trocada sem decisão prévia dele; foi registrada no canal, e o Humano decidiu manter a nova.
+ 
+ ## Antes de afirmar sobre o sistema
+diff --git a/.agents/skills/agata-fluxo-dupla/SKILL.md b/.agents/skills/agata-fluxo-dupla/SKILL.md
+deleted file mode 100644
+index d6f43e02..00000000
+--- a/.agents/skills/agata-fluxo-dupla/SKILL.md
++++ /dev/null
+@@ -1,58 +0,0 @@
+----
+-name: agata-fluxo-dupla
+-description: Trabalhar em DUPLA (Claude Code × Codex) no Agata — partida conjunta, fila, vigia sem timer, proposta → revisão cruzada → assinatura → aplicação → merge, fallback mútuo quando um cai e economia de cota. Use ao abrir ou retomar uma sessão conjunta, antes de publicar uma proposta, ao aplicar uma proposta assinada, ao entregar o comando de assinatura ao Humano, ou quando o outro agente some.
+----
+-
+-# Fluxo da dupla (primeira Skill do sistema Agata)
+-
+-Por quê: em 16/10/2026 a dupla entregou ~20 mudanças assinadas num dia, e gastou cota e errou nas fronteiras que não
+-modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada pelo shell, número (729) repetido 14 vezes,
+-vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/dupla/` (estado fora do repo, em `~/.cache/agata/sincronia/`).
+-
+-> Protocolo MSG, memória do Conselho e auditoria: ver `agata-conselho-memoria`. Painel: ver `agata-painel`.
+-
+-## 0. Antes de tudo
+-- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em dupla.
+-- Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
+-- Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
+-- Texto longo para o canal vai por ARQUIVO: `dupla.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
+-
+-## 1. Partida e retomada
+-`python3 scripts/dupla/dupla.py status` → se "divergente/aguardando": `iniciar --agente <eu> --nova-base --aceitar-matriz <hash da matriz>`.
+-`python3 scripts/painel_estado.py` mostra HEAD, serviços, propostas sem assinatura válida e o comando de assinatura. Fila: `~/.cache/agata/sincronia/fila.md`.
+-`dupla.py estado --agente <eu> --item <nome> --estado <em_andamento|em_revisao|pronto|bloqueado>` mantém o quadro (`quadro`). Dois itens ativos por agente.
+-
+-## 2. Esperar sem gastar: vigia sem timer
+-- **Permanente (decisão do Humano, 16/10/2026):** a vigia roda sempre para todos os modelos, como unit `agata-vigia@<agente>` (`config/systemd/agata-vigia@.service`); eventos em `~/.cache/agata/sincronia/vigia-<agente>.log`. Quem tem Monitor só acompanha: `tail -n0 -F` nesse arquivo. Não precisa rearmar nem rodar `vigia.sh` à mão.
+-- Segundo plano (Claude, com Monitor): `bash scripts/dupla/vigia.sh <eu> 20`. Avisa mensagem do outro, `APROVADO-` novo, `main` andou e pedido parado ("DEVO RESPOSTA" ≥ 8 min; "PAR SEM RESPOSTA" ≥ 15 min).
+-- Bloqueante (Codex, e quem não acorda por stdout): `bash scripts/dupla/vigia.sh <eu> 20 --uma 600` — sai no primeiro evento ou imprime "SEM EVENTO em 600s". Chame de novo sem texto. Sem timer de 2 min.
+-- Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `dupla.py ler --agente <eu>` (mostra só o novo).
+-- Mensagens: uma por ENTREGA ou BLOQUEIO, agrupada, com caminho + sha; nunca resposta só de estado; não copiar relatório para o canal.
+-
+-## 3. Mudança protegida em dupla
+-Use `agata-aplicar-proposta` para o ciclo P-8. Esta skill acrescenta a coordenação entre modelos:
+-1. Autor e revisor são pessoas/modelos diferentes; não editam o mesmo arquivo ao mesmo tempo.
+-2. O revisor escolhe e registra os casos antes de ver os resultados, executa-os e devolve o parecer no formato de quatro partes.
+-3. O autor abre a proposta contra `origin/main` e só a junta após os checks exigidos passarem. O Humano assina depois que a proposta estiver em `main`.
+-4. A aplicação é um PR separado, em worktree própria; um PR de aplicação por vez. O Humano junta esse PR.
+-5. Na divergência ou conflito, pare e reporte evidência; não force merge nem refaça a assinatura.
+-
+-## 4. O comando de assinatura (Humano, Fish, uma linha)
+-Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte: confere o hash de CADA proposta antes de assinar qualquer uma, com bandeira `ok` (um `false` dentro do `for` seria sobrescrito) e igualdade positiva (arquivo ausente conta como divergência). Antes de entregar: a proposta TEM que estar em `origin/main` (`ls propostas/`) e o hash vem do arquivo, nunca da memória.
+-
+-## 5. Fallback mútuo (quando um cai, o outro toca)
+-- `dupla.py ausente --agente <quem> --motivo ... [--ate HH:MM]` só com CONFIRMAÇÃO (Humano ou o próprio agente); silêncio NÃO prova cota esgotada. `presente --agente <quem>` encerra.
+-- Ausente: o outro cobre trabalho INDEPENDENTE na pista dele (aparece como ASSUMIDA em `dupla.py verificar`) e o titular revisa ao voltar.
+-- NÃO cai no fallback: assinar, `aprovar.sh`, `sudo`, configuração do GitHub, instalar/reiniciar serviço, abrir segredo.
+-
+-## 6. Economia de cota (regra do Humano: "sem desperdício")
+-Despertar começa por checagem em shell (`git ls-remote origin main`, `ls propostas/APROVADO-*`, contagem de blocos novos); sem mudança: encerrar sem texto. Fila longa: itens de ≥ 10 min; terminou um, abra o próximo sem esperar mensagem. Não repetir prova verde.
+-
+-## 7. Armadilhas já pagas
+-Crase em texto de argumento executa comando · `pkill -f` com o padrão na própria linha mata o seu shell (use PID) · número de MEMÓRIAS: `aplicar.py` aceita qualquer palavra após o número · comando de assinatura antes de a proposta chegar ao `main` · `fiscal-p8` obrigatório sem testar com o hook ligado (barrava todo PR) · afirmar comportamento de código só pela descrição da unit · hora herdada do cabeçalho anterior.
+-
+-## 8. Devolutiva final para CODE
+-- Toda resposta final de entrega termina com `Devolutiva para CODE` e a Skill mais indicada para a continuação.
+-- Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos/PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
+-- Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
+-- A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
+diff --git a/.agents/skills/agata-fluxo-equipe/SKILL.md b/.agents/skills/agata-fluxo-equipe/SKILL.md
+new file mode 100644
+index 00000000..12743501
+--- /dev/null
++++ b/.agents/skills/agata-fluxo-equipe/SKILL.md
+@@ -0,0 +1,60 @@
++---
++name: agata-fluxo-equipe
++description: Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partida conjunta, fila, vigia sem timer, proposta → revisão cruzada → assinatura → aplicação → merge, fallback quando um cai e economia de cota. Use ao abrir ou retomar uma sessão conjunta, antes de publicar uma proposta, ao aplicar uma proposta assinada, ao entregar o comando de assinatura ao Humano, ou quando um membro some.
++---
++
++# Fluxo da Equipe (primeira Skill do sistema Agata)
++
++Por quê: em 16/10/2026 a dupla Claude × Codex (nome antigo da Equipe, até 28/10/2026) entregou ~20 mudanças assinadas num dia, e gastou cota e errou nas fronteiras que não
++modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada pelo shell, número (729) repetido 14 vezes,
++vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/equipe/` (estado fora do repo, em `~/.cache/agata/sincronia/equipe/`).
++
++Membro = nome curto em minúsculas (`claude`, `codex`, `gemini`, `goose`, `seth`...). Nenhum nome é fixo no código: quem chega entra com `--agente <nome>`; `iniciar --com a,b,c` diz quem a partida espera (sem a lista, quaisquer dois abrem). Linha nova na matriz só entra com o aceite de TODOS os outros presentes.
++
++> Protocolo MSG, memória do Conselho e auditoria: ver `agata-conselho-memoria`. Painel: ver `agata-painel`.
++
++## 0. Antes de tudo
++- Cabeçalho da Regra 1 em TODA resposta, mesmo em NPR: siga `PROTOCOLOS.md`, "Carregar e formatos" e "Regra 1.1". Não crie um formato próprio para o fluxo em equipe.
++- Conte o turno com o contador disponível; sem contador ou prefixo completo, declare a base conforme a Regra 1. Não copie hora ou turno de resposta anterior.
++- Você NUNCA roda `scripts/aprovar.sh`, nunca usa `sudo`, nunca abre segredo. Só o Humano assina.
++- Texto longo para o canal vai por ARQUIVO: `equipe.py dizer ... --texto "$(cat arq.txt)"`. Nunca crase dentro de aspas duplas.
++
++## 1. Partida e retomada
++`python3 scripts/equipe/equipe.py status` → se "divergente/aguardando": `iniciar --agente <eu> --nova-base --aceitar-matriz <hash da matriz>`.
++`python3 scripts/painel_estado.py` mostra HEAD, serviços, propostas sem assinatura válida e o comando de assinatura. Fila: `~/.cache/agata/sincronia/fila.md`.
++`equipe.py estado --agente <eu> --item <nome> --estado <em_andamento|em_revisao|pronto|bloqueado>` mantém o quadro (`quadro`). Dois itens ativos por agente.
++
++## 2. Esperar sem gastar: vigia sem timer
++- **Permanente (decisão do Humano, 16/10/2026):** a vigia roda sempre para todos os modelos, como unit `agata-vigia@<agente>` (`config/systemd/agata-vigia@.service`); eventos em `~/.cache/agata/sincronia/vigia-<agente>.log`. Quem tem Monitor só acompanha: `tail -n0 -F` nesse arquivo. Não precisa rearmar nem rodar `vigia.sh` à mão.
++- Segundo plano (Claude, com Monitor): `bash scripts/equipe/vigia.sh <eu> 20`. Avisa mensagem de outro membro, `APROVADO-` novo, `main` andou e pedido parado ("DEVO RESPOSTA" ≥ 8 min; "SEM RESPOSTA: <membro>" ≥ 15 min).
++- Bloqueante (Codex, e quem não acorda por stdout): `bash scripts/equipe/vigia.sh <eu> 20 --uma 600` — sai no primeiro evento ou imprime "SEM EVENTO em 600s". Chame de novo sem texto. Sem timer de 2 min.
++- Monitores têm prazo (30 min): ao notificar a expiração, REARME. Ler o canal: `equipe.py ler --agente <eu>` (mostra só o novo).
++- Mensagens: uma por ENTREGA ou BLOQUEIO, agrupada, com caminho + sha; nunca resposta só de estado; não copiar relatório para o canal.
++
++## 3. Mudança protegida em equipe
++Use `agata-aplicar-proposta` para o ciclo P-8. Esta skill acrescenta a coordenação entre modelos:
++1. Autor e revisor são pessoas/modelos diferentes; não editam o mesmo arquivo ao mesmo tempo.
++2. O revisor escolhe e registra os casos antes de ver os resultados, executa-os e devolve o parecer no formato de quatro partes.
++3. O autor abre a proposta contra `origin/main` e só a junta após os checks exigidos passarem. O Humano assina depois que a proposta estiver em `main`.
++4. A aplicação é um PR separado, em worktree própria; um PR de aplicação por vez. O Humano junta esse PR.
++5. Na divergência ou conflito, pare e reporte evidência; não force merge nem refaça a assinatura.
++
++## 4. O comando de assinatura (Humano, Fish, uma linha)
++Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte: confere o hash de CADA proposta antes de assinar qualquer uma, com bandeira `ok` (um `false` dentro do `for` seria sobrescrito) e igualdade positiva (arquivo ausente conta como divergência). Antes de entregar: a proposta TEM que estar em `origin/main` (`ls propostas/`) e o hash vem do arquivo, nunca da memória.
++
++## 5. Fallback (quando um cai, os outros tocam)
++- `equipe.py ausente --agente <quem> --motivo ... [--ate HH:MM]` só com CONFIRMAÇÃO (Humano ou o próprio agente); silêncio NÃO prova cota esgotada. `presente --agente <quem>` encerra.
++- Ausente: os outros presentes cobrem trabalho INDEPENDENTE na pista dele (aparece como ASSUMIDA em `equipe.py verificar`) e o titular revisa ao voltar.
++- NÃO cai no fallback: assinar, `aprovar.sh`, `sudo`, configuração do GitHub, instalar/reiniciar serviço, abrir segredo.
++
++## 6. Economia de cota (regra do Humano: "sem desperdício")
++Despertar começa por checagem em shell (`git ls-remote origin main`, `ls propostas/APROVADO-*`, contagem de blocos novos); sem mudança: encerrar sem texto. Fila longa: itens de ≥ 10 min; terminou um, abra o próximo sem esperar mensagem. Não repetir prova verde.
++
++## 7. Armadilhas já pagas
++Crase em texto de argumento executa comando · `pkill -f` com o padrão na própria linha mata o seu shell (use PID) · número de MEMÓRIAS: `aplicar.py` aceita qualquer palavra após o número · comando de assinatura antes de a proposta chegar ao `main` · `fiscal-p8` obrigatório sem testar com o hook ligado (barrava todo PR) · afirmar comportamento de código só pela descrição da unit · hora herdada do cabeçalho anterior.
++
++## 8. Devolutiva final para CODE
++- Toda resposta final de entrega termina com `Devolutiva para CODE` e a Skill mais indicada para a continuação.
++- Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos/PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
++- Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
++- A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index 37718bfa..1deedcce 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -10,30 +10,30 @@ Vale para qualquer modelo da Confederação. Use o cabeçalho exato de `PROTOCOL
+ ## Escolha a skill necessária
+ - Sessão nova ou sem bloco de estado: `agata-carregar`.
+ - Proposta ou aplicação protegida por P-8: `agata-aplicar-proposta`.
+-- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-dupla`.
++- Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-equipe`.
+ - Mudança em serviço, container, rede, energia ou boot: `agata-mudanca-segura`.
+ - Leitura ou contato com a Seth, quando solicitado: `agata-conversar-com-seth`.
+ 
+ Use as skills necessárias ao tipo de tarefa. Se ela envolver, por exemplo, runtime e arquivos P-8, use as duas skills correspondentes. Este fluxo define as regras comuns; cada skill especializada define só seu procedimento próprio.
+ 
+-Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-dupla` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
++Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-equipe` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
+ 
+ ## 0. Antes de qualquer ação
+ 1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`,
+-   `python3 scripts/dupla/dupla.py status`. Sem medição, escrever "não medido".
+-2. **Canal**: `python3 scripts/dupla/dupla.py presente --agente <eu>`; ler o canal com
+-   `python3 scripts/dupla/dupla.py ler --agente <eu>`. Responder com `dizer --assunto ... --texto "$(cat arq)"`.
++   `python3 scripts/equipe/equipe.py status`. Sem medição, escrever "não medido".
++2. **Canal**: `python3 scripts/equipe/equipe.py presente --agente <eu>`; ler o canal com
++   `python3 scripts/equipe/equipe.py ler --agente <eu>`. Responder com `dizer --assunto ... --texto "$(cat arq)"`.
+ 3. **Não tocar** no checkout compartilhado. Trabalhar em worktree própria a partir de `origin/main`.
+ 
+ ## 1. Divisão de trabalho entre modelos
+ - Quem propõe redige a mudança em `propostas/<nome>.diff`; quem audita **executa** os comandos citados
+   e reporta a saída literal. Quem audita não aprova.
+-- Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `dupla.py`).
++- Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `equipe.py`).
+ - Trabalho caro em tokens (suíte completa, varreduras longas) vai para o modelo com mais folga; o relato
+   volta pelo canal, sem colar relatório inteiro.
+ 
+ ## 2. Mudança protegida
+-Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-dupla`.
++Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-equipe`.
+ 
+ Regras que sempre valem: proposta em worktree própria baseada em `origin/main`; `.diff` verificável e testado; proposta e aplicação são etapas separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Não avance com teste ou assinatura ausente.
+ 
+@@ -58,7 +58,7 @@ Regras que sempre valem: proposta em worktree própria baseada em `origin/main`;
+ 
+ ## Relacionadas
+ - `agata-carregar` (abrir sessão), `agata-mudanca-segura` (mudança na Máquina),
+-  `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-dupla` (detalhe do canal e da vigia).
++  `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-equipe` (detalhe do canal e da vigia).
+ 
+ ## 8. Comandos padrão (para o Humano colar; todo modelo entrega neste formato)
+ Atualizar a checkout principal sem perder nada. Guarda qualquer arquivo rastreado modificado antes de devolvê-lo ao repositório:
+diff --git a/.agents/skills/agata-painel/SKILL.md b/.agents/skills/agata-painel/SKILL.md
+index 3aafc632..dda66c4d 100644
+--- a/.agents/skills/agata-painel/SKILL.md
++++ b/.agents/skills/agata-painel/SKILL.md
+@@ -33,7 +33,7 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
+ 1. Trabalhe numa worktree (`git worktree add ... origin/main`), nunca no checkout principal.
+ 2. Rode `python3 server.py --selftest` e `python3 -m unittest test_painel`. Se um teste antigo comparar formato exato, atualize a expectativa e diga isso.
+ 3. Gere o `.diff` só com as alterações do painel (`git add -N` + `git diff origin/main -- redesign/painel_operacional`), confirme com `git apply --check`, e só então commite o `.diff` em `propostas/`.
+-4. O Humano assina. Aplique com `scripts/dupla/aplicar.py` e registro no formato DIÁRIO (ver `agata-aplicar-proposta`).
++4. O Humano assina. Aplique com `scripts/equipe/aplicar.py` e registro no formato DIÁRIO (ver `agata-aplicar-proposta`).
+ 5. Depois da aplicação: reinicie o serviço, meça na página e registre o resultado.
+ 
+ ## Armadilhas que já custaram tempo
+@@ -41,7 +41,7 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
+ - `git stash` é compartilhado entre worktrees: não use. Para guardar trabalho, faça commit WIP.
+ - Caminhos com espaço (`~/Área de trabalho`) quebram `python3 -c` sem aspas: use argumento com aspas ou um script.
+ - `grep -o` com caracteres como `↗` pode falhar em alguns locais: use `python3` para contar.
+-- `dupla.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
++- `equipe.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
+ 
+ ## Pendências conhecidas
+ - Layout em celular não foi medido (o navegador não redimensiona a aba).
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index dd3a3cf1..4563927f 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -73,8 +73,8 @@ jobs:
+           python3 -I scripts/seth_autodev.py --selftest
+           python3 -I scripts/janela_manutencao.py --selftest
+           python3 -I scripts/testar_janela_recuperacao.py
+-          python3 -I scripts/dupla/dupla.py --selftest
+-          python3 -I scripts/dupla/testar_auxiliares.py
++          python3 -I scripts/equipe/equipe.py --selftest
++          python3 -I scripts/equipe/testar_auxiliares.py
+ 
+       - name: Contratos de memória e escriba (offline, stdlib)
+         run: |
+diff --git a/config/systemd/agata-vigia@.service b/config/systemd/agata-vigia@.service
+index b37d7869..5fc193e5 100644
+--- a/config/systemd/agata-vigia@.service
++++ b/config/systemd/agata-vigia@.service
+@@ -1,5 +1,5 @@
+ [Unit]
+-Description=Ágata — vigia permanente da dupla (%i), sem modelo
++Description=Ágata — vigia permanente da Equipe (%i), sem modelo
+ # Decisão do Humano, 16/10/2026: a vigia é permanente para todos os modelos confederados (achados AC-26).
+ # Instância por agente: agata-vigia@claude, agata-vigia@codex. Só shell: não gasta cota de modelo.
+ # Os eventos vão para ~/.cache/agata/sincronia/vigia-%i.log; quem tem Monitor usa:  tail -n0 -F ~/.cache/agata/sincronia/vigia-%i.log
+@@ -8,8 +8,8 @@ Description=Ágata — vigia permanente da dupla (%i), sem modelo
+ [Service]
+ Type=simple
+ WorkingDirectory=%h/agata
+-Environment=DUPLA_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
+-ExecStart=/bin/bash %h/agata/scripts/dupla/vigia.sh %i 20
++Environment=EQUIPE_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
++ExecStart=/bin/bash %h/agata/scripts/equipe/vigia.sh %i 20
+ StandardOutput=append:%h/.cache/agata/sincronia/vigia-%i.log
+ StandardError=append:%h/.cache/agata/sincronia/vigia-%i.log
+ Restart=always
+diff --git a/scripts/dupla/aplicar.py b/scripts/dupla/aplicar.py
+deleted file mode 100755
+index 360f4c40..00000000
+--- a/scripts/dupla/aplicar.py
++++ /dev/null
+@@ -1,127 +0,0 @@
+-#!/usr/bin/env python3
+-"""aplicar.py <nome>... [--registro <arquivo-entrada.txt>] [--onde <arquivo-paragrafo.txt>] [--coautor "Nome <email>"]
+-Aplica propostas P-8 JÁ ASSINADAS pelo Humano: worktree nova de origin/main, copia o APROVADO-, p8_verificar.sh (tem de dar
+-PODE APLICAR), git apply, move o par para aplicadas/, insere a entrada de MEMÓRIAS (número = topo+1, o texto traz {N}),
+-commit (pre-commit real), push, PR, espera CI, junta, pull. Se o main andou antes do merge (BEHIND/DIRTY), refaz a branch sobre
+-o origin/main novo (verificador, apply e número de MEMÓRIAS de novo) e empurra com --force-with-lease. Nunca assina; não faz nada se faltar a assinatura."""
+-import argparse, os, re, subprocess, sys, shutil, time
+-R = os.path.expanduser("~/agata")
+-def sh(cwd, *a, ok=True, **k):
+-    p = subprocess.run(a, cwd=cwd, text=True, capture_output=True, **k)
+-    if ok and p.returncode:
+-        sys.exit(f"ERRO: {' '.join(a)}\n{p.stdout[-1500:]}{p.stderr[-1500:]}")
+-    return p
+-def proximo_numero(texto):
+-    """Próximo número livre de MEMÓRIAS. Aceita QUALQUER palavra após o número (inclusive acentuada: DIÁRIO, CORREÇÃO);
+-    o padrão antigo [A-ZÇÃÕ]+ não reconhecia 'Á' e deu (729) a 14 entradas em 16/10/2026."""
+-    nums = [int(x) for x in re.findall(r"^\((\d+)\) \S+ — ", texto, re.M)]
+-    if not nums:
+-        raise ValueError("nenhuma entrada numerada encontrada em MEMÓRIAS.md")
+-    return max(nums) + 1
+-
+-
+-def precisa_refazer(estado, saida):
+-    """O merge falhou porque a base andou (BEHIND) ou conflita com ela (DIRTY)? Aí a branch se refaz do zero sobre o
+-    origin/main novo. `gh pr update-branch` juntava o main na branch e conflitava em MEMÓRIAS.md (mesmo ponto de inserção):
+-    discord-venv-unica-20261028 ficou DIRTY assim em 28/10/2026."""
+-    return estado in ("BEHIND", "DIRTY") or any(t in saida for t in ("not up to date", "status checks are expected", "BEHIND", "merge conflict"))
+-
+-
+-def montar(wt, a, coautor):
+-    """Sobre o HEAD atual da worktree (= origin/main): verificador congelado, apply, par para aplicadas/, MEMÓRIAS
+-    (número = topo+1 DESTA base), ONDE_ESTAMOS, commit. Roda de novo, igual, cada vez que a base é refeita."""
+-    for n in a.nomes:
+-      shutil.copy(f"{R}/propostas/APROVADO-{n}", f"{wt}/propostas/")
+-    # Verificador CONFIÁVEL = o da base, congelado ANTES de qualquer apply (um diff do lote não pode trocar o verificador do próximo).
+-    confiavel = f"{wt}/../.verificador-confiavel-{int(time.time())}.sh"
+-    shutil.copy(f"{wt}/scripts/p8_verificar.sh", confiavel)
+-    for n in a.nomes:  # TODOS os pares conferidos antes de aplicar o primeiro
+-      v = sh(wt, "bash", confiavel, n, ok=False)
+-      linhas = [l for l in v.stdout.splitlines() if l.strip()]
+-      if v.returncode != 0 or not linhas or linhas[-1].strip() != f"PODE APLICAR: {n}":
+-          sys.exit(f"FALHA no verificador ({n}) rc={v.returncode}:\n{v.stdout}{v.stderr}")
+-    os.remove(confiavel)
+-    for n in a.nomes:
+-      sh(wt, "git", "apply", f"propostas/{n}.diff"); os.makedirs(f"{wt}/propostas/aplicadas", exist_ok=True)
+-      sh(wt, "git", "mv", f"propostas/{n}.diff", "propostas/aplicadas/"); os.rename(f"{wt}/propostas/APROVADO-{n}", f"{wt}/propostas/aplicadas/APROVADO-{n}")
+-    if a.registro:
+-      t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
+-      ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
+-      e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
+-      open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
+-    if a.onde:
+-      o = open(f"{wt}/ONDE_ESTAMOS.md", encoding="utf-8").read(); i = o.index("## Hoje")
+-      open(f"{wt}/ONDE_ESTAMOS.md", "w", encoding="utf-8").write(o[:i] + open(a.onde, encoding="utf-8").read().rstrip("\n") + "\n\n" + o[i:])
+-    sh(wt, "git", "add", "-A")
+-    msg = f"Aplica {', '.join(a.nomes)} (assinado pelo Humano)" + (" e registra" if a.registro else "") + (f"\n\nCo-Authored-By: {coautor}" if coautor else "")
+-    sh(wt, "git", "commit", "-qm", msg)
+-
+-
+-def main():
+-  ap = argparse.ArgumentParser(); ap.add_argument("nomes", nargs="+"); ap.add_argument("--registro", default=None, help="entrada de MEMÓRIAS; NÃO usar se o .diff já mexe em MEMÓRIAS.md")
+-  ap.add_argument("--onde")
+-  ap.add_argument("--coautor", default=None, help="linha Co-Authored-By; padrão: Claude Haiku 5.5 para claude, nenhuma para codex")
+-  ap.add_argument("--agente", default=os.environ.get("DUPLA_AGENTE", "claude"), choices=("claude", "codex"),
+-                  help="quem aplica: dá o nome da worktree (.<agente>/worktrees) e da autoria")
+-  ap.add_argument("--sem-pull", action="store_true", help="não atualiza o checkout compartilhado (para trabalhar só em worktree própria)")
+-  a = ap.parse_args()
+-  coautor = a.coautor if a.coautor is not None else ("Claude Haiku 5.5 <noreply@anthropic.com>" if a.agente == "claude" else "")
+-  if not a.sem_pull:
+-      sh(R, "git", "pull", "-q", "--ff-only")
+-  for n in a.nomes:
+-      if not os.path.exists(f"{R}/propostas/APROVADO-{n}"): sys.exit(f"SEM ASSINATURA: {n} (nada aplicado)")
+-      dp = f"{R}/propostas/{n}.diff"
+-      if a.registro and os.path.exists(dp) and re.search(r"^\+\+\+ b/MEMÓRIAS\.md$", open(dp, encoding="utf-8").read(), re.M):
+-          sys.exit(f"{n} mexe em MEMÓRIAS.md: a entrada já vem no .diff; --registro duplicaria (rode sem --registro)")
+-  tag = "-".join(a.nomes)[:60]; wt = f"{R}/.{a.agente}/worktrees/aplica-{a.agente}-{int(time.time())}"; br = f"aplica/{tag}"
+-  sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
+-  montar(wt, a, coautor)
+-  sh(wt, "git", "push", "-q", "-u", "origin", br)
+-  pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
+-          "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
+-  num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
+-  import json
+-  EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
+-  def ci():
+-      """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
+-      time.sleep(20); limite = time.time() + 1500  # 25 min: check ausente ou API ruim não prende para sempre
+-      while True:
+-          if time.time() > limite: return False, {"erro": "timeout esperando os checks"}
+-          j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
+-          try: cs = {c["name"]: c["bucket"] for c in json.loads(j)}
+-          except Exception: cs = {}
+-          if all(n in cs and cs[n] not in ("pending",) for n in EXIGIDOS): return all(cs[n] == "pass" for n in EXIGIDOS), cs
+-          time.sleep(10)
+-  def head_oid():
+-      return json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "headRefOid").stdout)["headRefOid"]
+-  def ci_pinado():
+-      """Lê o head ANTES e DEPOIS dos checks; só vale se for o mesmo (senão repete, até 3 vezes)."""
+-      for _ in range(3):
+-          antes = head_oid(); ok, cs = ci(); depois = head_oid()
+-          if antes == depois: return ok, cs, depois
+-      return False, {"erro": "head mudou durante os checks"}, None
+-  ok, cs, HEAD = ci_pinado(); print(cs)  # o merge só vale para ESSE head (--match-head-commit)
+-  if not ok: sys.exit(f"CI não passou ({cs}); não juntei")
+-  for _ in range(4):  # main com proteção "strict": se andou, REFAZ a branch sobre o main novo e espera o CI de novo
+-      m = sh(wt, "gh", "pr", "merge", num, "--repo", "agataseth98-cmd/agata-seth", "--merge", "--match-head-commit", HEAD, ok=False)
+-      if m.returncode == 0: break
+-      estado = json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "mergeStateStatus", ok=False).stdout or "{}").get("mergeStateStatus", "")
+-      if not precisa_refazer(estado, m.stdout + m.stderr): sys.exit(f"merge falhou ({estado}):\n{m.stdout}{m.stderr}")
+-      print(f"base andou ({estado}): refazendo a branch sobre o origin/main novo", flush=True)
+-      sh(wt, "git", "fetch", "-q", "origin"); sh(wt, "git", "reset", "-q", "--hard", "origin/main"); sh(wt, "git", "clean", "-qfd")
+-      montar(wt, a, coautor)  # verificador da base NOVA, apply de novo, número de MEMÓRIAS recalculado
+-      sh(wt, "git", "push", "-q", "--force-with-lease", "origin", br)
+-      ok, cs, HEAD = ci_pinado()
+-      if not ok: sys.exit(f"CI não passou após atualizar ({cs}); não juntei")
+-  else:
+-      sys.exit("não consegui juntar após 4 tentativas")
+-  if not a.sem_pull:
+-      sh(R, "git", "pull", "-q", "--ff-only")
+-  for n in a.nomes:
+-      try: os.remove(f"{R}/propostas/APROVADO-{n}")
+-      except FileNotFoundError: pass
+-  print("APLICADO E JUNTADO:", ", ".join(a.nomes))
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/scripts/dupla/contar_turnos.py b/scripts/dupla/contar_turnos.py
+deleted file mode 100755
+index 56ac2337..00000000
+--- a/scripts/dupla/contar_turnos.py
++++ /dev/null
+@@ -1,98 +0,0 @@
+-#!/usr/bin/env python3
+-"""Conta o t= da Regra 1 num transcrito, de forma mecânica. Dois modos:
+-  --modo humano (PADRÃO): mensagens do Humano (registros `user` que não são tool_result nem aviso de sistema/tarefa).
+-     É o t= que o Humano acompanha. Sem transcrito informado, usa o JSONL mais recente de ~/.claude/projects/-home-orusoua-agata
+-     (limite conhecido: com duas sessões abertas pode pegar a outra; informe o transcrito para ser exato).
+-  --modo respostas: respostas textuais do MODELO (Claude JSONL e Codex response_item), dedup por message.id; exige
+-     transcrito explícito (argumento ou AGATA_TRANSCRITO); nunca escolhe sessão por mtime.
+-Uso: contar_turnos.py [--modo humano|respostas] [--proximo] [TRANSCRITO]. --proximo soma 1 (a resposta que será escrita).
+-"""
+-import argparse
+-import glob
+-import json
+-import os
+-from pathlib import Path
+-
+-
+-def contar_humano(linhas):
+-    n = 0
+-    for linha in linhas:
+-        try:
+-            d = json.loads(linha)
+-        except ValueError:
+-            continue
+-        if not isinstance(d, dict) or d.get("type") != "user":
+-            continue
+-        c = (d.get("message") or {}).get("content")
+-        if isinstance(c, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in c):
+-            continue
+-        txt = c if isinstance(c, str) else "".join(x.get("text", "") for x in c if isinstance(x, dict) and x.get("type") == "text") if isinstance(c, list) else ""
+-        s = txt.strip()
+-        if s and not s.startswith(("<system-reminder>", "<task-notification>")) and "[SYSTEM NOTIFICATION" not in s[:200]:
+-            n += 1
+-    return n
+-
+-
+-def contar(linhas):
+-    """Respostas textuais do modelo (modo respostas). JSON truncado é erro explícito."""
+-    vistos = set()
+-    total = 0
+-    for n, linha in enumerate(linhas, 1):
+-        if not linha.strip():
+-            continue
+-        try:
+-            d = json.loads(linha)
+-        except ValueError as e:
+-            raise ValueError(f'linha {n}: JSON incompleto ou inválido') from e
+-        if not isinstance(d, dict):
+-            raise ValueError(f'linha {n}: registro não é objeto')
+-        if d.get('type') == 'assistant':
+-            m = d.get('message') or {}
+-            if not isinstance(m, dict):
+-                raise ValueError(f'linha {n}: mensagem inválida')
+-        elif d.get('type') == 'response_item':
+-            m = d.get('payload') or {}
+-            if not isinstance(m, dict):
+-                raise ValueError(f'linha {n}: payload inválido')
+-            if m.get('type') != 'message' or m.get('role') != 'assistant':
+-                continue
+-        else:
+-            continue
+-        c = m.get('content')
+-        texto = c if isinstance(c, str) else ''.join(x.get('text', '') for x in c
+-                if isinstance(x, dict) and x.get('type') in ('text', 'output_text') and isinstance(x.get('text'), str)) if isinstance(c, list) else ''
+-        if not texto.strip():
+-            continue
+-        # Fragmentos com o mesmo message.id não são respostas novas.
+-        ident = m.get('id')
+-        if isinstance(ident, str) and ident:
+-            if ident in vistos:
+-                continue
+-            vistos.add(ident)
+-        total += 1
+-    return total
+-
+-
+-def main(argv=None):
+-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+-    ap.add_argument('transcrito', nargs='?', default=os.environ.get('AGATA_TRANSCRITO'))
+-    ap.add_argument('--modo', choices=('humano', 'respostas'), default='humano')
+-    ap.add_argument('--proximo', action='store_true')
+-    a = ap.parse_args(argv)
+-    fonte = a.transcrito
+-    if not fonte and a.modo == 'humano':
+-        achados = glob.glob(os.path.expanduser('~/.claude/projects/-home-orusoua-agata/*.jsonl'))
+-        fonte = max(achados, key=os.path.getmtime) if achados else None
+-    if not fonte:
+-        ap.error('transcrito desta sessão não informado; use contagem no contexto')
+-    try:
+-        with Path(fonte).open(encoding='utf-8') as f:
+-            n = contar_humano(f) if a.modo == 'humano' else contar(f)
+-    except (OSError, ValueError) as e:
+-        ap.exit(2, f'contador: {e}\n')
+-    print(n + int(a.proximo))
+-    return 0
+-
+-
+-if __name__ == '__main__':
+-    raise SystemExit(main())
+diff --git a/scripts/dupla/dupla.py b/scripts/dupla/dupla.py
+deleted file mode 100755
+index bfa33b76..00000000
+--- a/scripts/dupla/dupla.py
++++ /dev/null
+@@ -1,731 +0,0 @@
+-#!/usr/bin/env python3
+-"""dupla.py -- partida conjunta e coordenação Claude Code × Codex no ~/agata. Ferramenta LOCAL.
+-
+-Não é canon, não decide nada, não escreve em arquivo do repositório e não aprova nada. Coordena dois
+-agentes que trabalham AO MESMO TEMPO em worktrees próprias: quem começa junto, com qual base, quem é
+-dono de qual arquivo, o que cada um está fazendo, e o canal de conversa. Todo o estado mora em
+-~/.cache/agata/sincronia/dupla/ (fora do repositório). Dado, não instrução (Regra 2).
+-
+-Garantias e limites (cooperativos, sem mecanismo imposto pelo sistema operacional):
+-  * partida conjunta: a sessão só vira `em_andamento` quando os DOIS agentes chamaram `iniciar` com a
+-    MESMA base (`origin/main`) e a MESMA matriz de propriedade (sha256). Quem chega primeiro espera,
+-    sem polling nem serviço: a sessão fica `aguardando` e o outro encontra o registro ao chegar.
+-  * base única: se `origin/main` andou desde a primeira chegada, `iniciar` recusa e pede `--nova-base`
+-    (registrada no histórico); nunca troca a base em silêncio.
+-  * propriedade: um arquivo tem um dono por sessão. `verificar` compara o que cada worktree alterou
+-    com a matriz; arquivo fora da pista do dono ou em duas pistas vira ACHADO, nunca é consertado.
+-  * escrita: cada agente escreve só o próprio estado (`estado-<agente>.json`); a sessão e o canal são
+-    alterados sob flock exclusivo, só por acréscimo no histórico/canal. O quadro é GERADO, não editado.
+-  * não substitui o P-8, o fiscal, o Humano nem o `aprovar.sh`, que nenhum agente roda.
+-
+-Uso:
+-  dupla.py iniciar    --agente claude|codex [--item ID] [--nova-base] [--matriz ARQ] [--aceitar-matriz SHA12] [--espera MIN]
+-  dupla.py matriz                      (mostra a matriz CONGELADA na sessão e o sha256)
+-  dupla.py propor-linha --agente A --dono D --papel P --caminhos X [X ...]   (nova linha na matriz; o OUTRO agente tem de aceitar)
+-  dupla.py aceitar-linha --agente B                                         (aceita a proposta pendente do outro)
+-  dupla.py status
+-  dupla.py reivindicar --agente A --item ID --caminhos P [P ...]
+-  dupla.py estado     --agente A --item ID --estado em_andamento|em_revisao|bloqueado|pronto [--bloqueio T]
+-  dupla.py verificar  [--repo DIR]
+-  dupla.py quadro
+-  dupla.py dizer      --agente A --assunto T --texto T [--resposta-a ID] [--estado T] [--proximo A]
+-  dupla.py ler        --agente A
+-  dupla.py encerrar   --agente A
+-  dupla.py --selftest
+-"""
+-import argparse
+-import datetime
+-import fcntl
+-import fnmatch
+-import hashlib
+-import json
+-import os
+-import re
+-import subprocess
+-import sys
+-import tempfile
+-import zoneinfo
+-
+-TZ = zoneinfo.ZoneInfo("America/Sao_Paulo")
+-AGENTES = ("claude", "codex")
+-RAIZ_SINC = os.environ.get("DUPLA_DIR", os.path.expanduser("~/.cache/agata/sincronia"))
+-D = os.path.join(RAIZ_SINC, "dupla")
+-CANAL = os.path.join(RAIZ_SINC, "conversa.md")
+-REPO = os.environ.get("DUPLA_REPO", os.path.expanduser("~/agata"))
+-
+-# Matriz de propriedade PROPOSTA (parecer do Claude sobre o v4, anexo A). Só vale quando os dois a aceitam
+-# (mesmo sha256 em `iniciar`). Padrão com `/` no fim = prefixo de diretório; senão, glob de fnmatch.
+-MATRIZ_PADRAO = [
+-    {"dono": "claude", "papel": "integração e registro",
+-     "caminhos": ["MEMÓRIAS.md", "ONDE_ESTAMOS.md", "PROJETO.md", "REGRAS.md", "PROTOCOLOS.md", "FALHAS.md",
+-                  "CLAUDE.md", "PROMPT_CARREGAMENTO.md", "propostas/"]},
+-    {"dono": "claude", "papel": "fiscal",
+-     "caminhos": [".github/workflows/perimetro.yml", ".github/workflows/fiscal-p8.yml", "scripts/p8_*",
+-                  "scripts/testar_perimetro.sh", "scripts/testar_p8_*", "scripts/perimetro.sh",
+-                  "scripts/perimetro/p08_quarentena.sh"]},
+-    {"dono": "claude", "papel": "hooks e derivados",
+-     "caminhos": [".githooks/", "scripts/gerar_obsidian.py", "scripts/gerar_indice_derivado.py",
+-                  "scripts/perimetro/p10_vault_derivado.sh", "scripts/perimetro/p17_skip_cronico.sh",
+-                  "scripts/testar_post_commit.py"]},
+-    {"dono": "codex", "papel": "escriba", "caminhos": ["redesign/router/seth_escriba.py"]},
+-    {"dono": "claude", "papel": "defesa local", "caminhos": ["redesign/systemd/", "config/portas-agata.txt"]},
+-    {"dono": "codex", "papel": "evidência, estilo e doutrina",
+-     "caminhos": ["AGENTS.md", "redesign/router/auditoria_turno.py", "redesign/router/afirmacoes_desmentidas.json",
+-                  "redesign/router/seth_gateway.py"]},
+-    {"dono": "codex", "papel": "memória e missões",
+-     "caminhos": ["scripts/busca_semantica.py", "scripts/busca_texto.py", "redesign/mcp/",
+-                  "scripts/avaliar_decisor.py", "redesign/grafo/evals/", "config/temas.tsv"]},
+-    {"dono": "claude", "papel": "atualização",
+-     "caminhos": ["models/manifest.json", "scripts/atualizar.sh", ".github/dependabot.yml"]},
+-    {"dono": "claude", "papel": "voz", "caminhos": ["redesign/router/tts_piper.py", "redesign/router/tts-piper/"]},
+-    {"dono": "claude", "papel": "github", "caminhos": ["SECURITY.md", ".github/CODEOWNERS", "README.md"]},
+-    {"dono": "claude", "papel": "conselho", "caminhos": ["scripts/conselho_remoto.py"]},
+-]
+-
+-
+-def agora():
+-    return datetime.datetime.now(TZ).isoformat(timespec="seconds")
+-
+-
+-def _p(nome):
+-    return os.path.join(D, nome)
+-
+-
+-def _git(repo, *a):
+-    p = subprocess.run(["git", "-C", repo, *a], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+-                       env={k: v for k, v in os.environ.items() if not k.startswith("GIT_") or k == "GIT_CONFIG_GLOBAL"})
+-    return p.returncode, p.stdout.strip(), p.stderr.strip()
+-
+-
+-class Trava:
+-    """flock exclusivo no arquivo de trava da sessão. Cooperativo."""
+-    def __enter__(self):
+-        os.makedirs(D, exist_ok=True)
+-        self.f = open(_p("sessao.lock"), "a")
+-        fcntl.flock(self.f, fcntl.LOCK_EX)
+-        return self
+-
+-    def __exit__(self, *e):
+-        fcntl.flock(self.f, fcntl.LOCK_UN)
+-        self.f.close()
+-
+-
+-def _ler_json(nome, padrao):
+-    try:
+-        with open(_p(nome), encoding="utf-8") as f:
+-            return json.load(f)
+-    except (OSError, ValueError):
+-        return padrao
+-
+-
+-def _gravar_json(nome, obj):
+-    tmp = _p(nome + ".tmp")
+-    with open(tmp, "w", encoding="utf-8") as f:
+-        json.dump(obj, f, ensure_ascii=False, indent=1, sort_keys=True)
+-        f.flush()
+-        os.fsync(f.fileno())
+-    os.replace(tmp, _p(nome))   # só nos arquivos de estado da dupla; o canal NUNCA é substituído
+-
+-
+-def _historico(evento, **kw):
+-    """Acrescenta ao histórico (JSON por linha), sob a trava do chamador."""
+-    with open(_p("historico.jsonl"), "a", encoding="utf-8") as f:
+-        f.write(json.dumps({"quando": agora(), "evento": evento, **kw}, ensure_ascii=False) + "\n")
+-        f.flush()
+-        os.fsync(f.fileno())
+-
+-
+-def sha_matriz(matriz):
+-    return hashlib.sha256(json.dumps(matriz, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+-
+-
+-def dono_de(caminho, matriz):
+-    """Lista de (dono, papel) cujas pistas cobrem o caminho. Esperado: exatamente um."""
+-    achados = []
+-    for linha in matriz:
+-        for pad in linha["caminhos"]:
+-            if (pad.endswith("/") and caminho.startswith(pad)) or fnmatch.fnmatchcase(caminho, pad) or caminho == pad:
+-                achados.append((linha["dono"], linha["papel"]))
+-                break
+-    return achados
+-
+-
+-def disjunta(matriz):
+-    """Pistas sem sobreposição entre papéis diferentes: devolve os conflitos entre padrões literais."""
+-    conflitos = []
+-    for i, a in enumerate(matriz):
+-        for b in matriz[i + 1:]:
+-            for pa in a["caminhos"]:
+-                for pb in b["caminhos"]:
+-                    exemplos = [pa.rstrip("*"), pb.rstrip("*")]
+-                    for ex in exemplos:
+-                        if ex and dono_de(ex, [a]) and dono_de(ex, [b]):
+-                            conflitos.append((a["papel"], b["papel"], ex))
+-    return sorted(set(conflitos))
+-
+-
+-# ---------------------------------------------------------------------------------------------
+-def cmd_iniciar(a):
+-    repo = a.repo or REPO
+-    matriz = MATRIZ_PADRAO
+-    if a.matriz:
+-        with open(a.matriz, encoding="utf-8") as f:
+-            matriz = json.load(f)
+-    hm = sha_matriz(matriz)
+-    rc, base, err = _git(repo, "rev-parse", "origin/main")
+-    if rc:
+-        print(f"ERRO: não consegui ler origin/main em {repo}: {err}", file=sys.stderr)
+-        return 2
+-    _git(repo, "fetch", "-q", "origin")
+-    rc, base, _ = _git(repo, "rev-parse", "origin/main")
+-    c = disjunta(matriz)
+-    if c:
+-        print("ERRO: a matriz de propriedade tem pistas sobrepostas:", *[f"  {x}" for x in c], sep="\n", file=sys.stderr)
+-        return 2
+-    with Trava():
+-        s = _ler_json("sessao.json", None)
+-        if s is None or s.get("estado") == "encerrada":
+-            s = {"estado": "aguardando", "base": base, "matriz_sha256": hm, "matriz": matriz, "criada_em": agora(),
+-                 "presentes": {}, "versao": 2}
+-            _historico("sessao_criada", agente=a.agente, base=base, matriz=hm[:12])
+-        if s["base"] != base and not a.nova_base:
+-            print(f"RECUSADO: origin/main andou desde a primeira chegada (sessão {s['base'][:7]}, agora {base[:7]}). "
+-                  "Se ambos concordam, rode de novo com --nova-base (fica no histórico).", file=sys.stderr)
+-            return 1
+-        if a.nova_base and s["base"] != base:
+-            _historico("nova_base", agente=a.agente, de=s["base"], para=base)
+-            s["base"] = base
+-            s["presentes"] = {}
+-            s["estado"] = "aguardando"
+-        if s["matriz_sha256"] != hm and a.aceitar_matriz and s.get("matriz") \
+-                and s["matriz_sha256"].startswith(a.aceitar_matriz):
+-            # Adoção explícita da matriz CONGELADA na sessão, depois de o agente tê-la lido (`matriz`).
+-            _historico("matriz_aceita", agente=a.agente, matriz=s["matriz_sha256"][:12])
+-            hm, matriz = s["matriz_sha256"], s["matriz"]
+-            if s["estado"] == "divergente":
+-                s["estado"] = "aguardando"
+-                s.pop("divergencia", None)
+-        if s["matriz_sha256"] != hm:
+-            s["estado"] = "divergente"
+-            s["divergencia"] = {"agente": a.agente, "matriz_sessao": s["matriz_sha256"][:12], "matriz_agente": hm[:12]}
+-            _historico("matriz_divergente", agente=a.agente, matriz=hm[:12])
+-            _gravar_json("sessao.json", s)
+-            linhas = lambda m: {f"{l['dono']} | {l['papel']} | {c}" for l in m for c in l["caminhos"]}
+-            so_sessao = sorted(linhas(s.get("matriz") or MATRIZ_PADRAO) - linhas(matriz))
+-            so_agente = sorted(linhas(matriz) - linhas(s.get("matriz") or MATRIZ_PADRAO))
+-            print(f"DIVERGENTE: matriz da sessão {s['matriz_sha256'][:12]} x matriz de {a.agente} {hm[:12]}. Nada começou.", file=sys.stderr)
+-            if so_sessao:
+-                print("  só na sessão:", *so_sessao, sep="\n    ", file=sys.stderr)
+-            if so_agente:
+-                print(f"  só em {a.agente}:", *so_agente, sep="\n    ", file=sys.stderr)
+-            print(f"  Para adotar a matriz da sessão, leia `dupla.py matriz` e rode `iniciar ... --aceitar-matriz {s['matriz_sha256'][:12]}`. "
+-                  "Para mudar a matriz da sessão, é decisão do Humano.", file=sys.stderr)
+-            return 1
+-        s["presentes"][a.agente] = {"chegou_em": agora(), "item": a.item, "base": base}
+-        _historico("chegada", agente=a.agente, item=a.item)
+-        faltam = [x for x in AGENTES if x not in s["presentes"]]
+-        if not faltam and s["estado"] in ("aguardando", "solo"):
+-            s["estado"] = "em_andamento"
+-            s["iniciada_em"] = agora()
+-            _historico("partida_conjunta", base=base, matriz=hm[:12])
+-        _gravar_json("sessao.json", s)
+-        _gravar_json(f"estado-{a.agente}.json", _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}}))
+-    if s["estado"] == "em_andamento":
+-        print(f"PARTIDA CONJUNTA: base {base[:7]}, matriz {hm[:12]}, ambos presentes. Podem trabalhar em paralelo.")
+-        return 0
+-    print(f"AGUARDANDO {', '.join(faltam)}: base {base[:7]} registrada, matriz {hm[:12]}. "
+-          f"Quem chegar depois encontra este registro; nada fica em segundo plano. "
+-          f"(Se o outro não vier em {a.espera} min, rode `status` e decida com o Humano; não há relógio automático.)")
+-    return 0
+-
+-
+-def cmd_status(_a):
+-    s = _ler_json("sessao.json", None)
+-    if not s:
+-        print("sem sessão. Rode `iniciar`.")
+-        return 0
+-    rc, base, _ = _git(REPO, "rev-parse", "origin/main")
+-    print(f"estado: {s['estado']} | base da sessão: {s['base'][:7]} | origin/main agora: {base[:7] if not rc else '?'}"
+-          + ("  <-- DERIVA" if not rc and base != s["base"] else ""))
+-    for ag in AGENTES:
+-        pr = s["presentes"].get(ag)
+-        print(f"  {ag}: {'presente desde ' + pr['chegou_em'] if pr else 'ausente'}")
+-    for ag, info in _ausentes().items():
+-        outro = [x for x in AGENTES if x != ag][0]
+-        print(f"  AUSENTE: {ag} desde {info['desde']}" + (f" até {info['ate']}" if info.get('ate') else "")
+-              + (f" ({info['motivo']})" if info.get('motivo') else "") + f" -> {outro} cobre a pista dele (fallback mútuo)")
+-    if s.get("divergencia"):
+-        print("  divergência:", s["divergencia"])
+-    return 0
+-
+-
+-def _ausentes():
+-    """{agente: {desde, motivo, ate}} dos agentes declarados ausentes (cota esgotada, sessão fechada, etc.)."""
+-    return {ag: _ler_json(f"ausencia-{ag}.json", None) for ag in AGENTES if _ler_json(f"ausencia-{ag}.json", None)}
+-
+-
+-def cmd_ausente(a):
+-    """FALLBACK MÚTUO: declara que `agente` não está disponível. A pista dele pode ser assumida pelo outro SEM alerta de
+-    FORA DA PISTA; o trabalho feito assim fica listado como ASSUMIDA e vale revisão do titular ao voltar (autor != revisor)."""
+-    _gravar_json(f"ausencia-{a.agente}.json", {"desde": agora(), "motivo": a.motivo or "", "ate": a.ate or ""})
+-    _historico("ausente", agente=a.agente, motivo=a.motivo or "", ate=a.ate or "")
+-    outro = [x for x in AGENTES if x != a.agente][0]
+-    print(f"OK: {a.agente} ausente" + (f" até {a.ate}" if a.ate else "") + f". {outro} pode assumir a pista de {a.agente}; "
+-          f"volte com `presente --agente {a.agente}`.")
+-    return 0
+-
+-
+-def cmd_presente(a):
+-    p = _p(f"ausencia-{a.agente}.json")
+-    if os.path.exists(p):
+-        os.unlink(p)
+-    _historico("presente", agente=a.agente)
+-    outro = [x for x in AGENTES if x != a.agente][0]
+-    print(f"OK: {a.agente} presente de novo. O que {outro} fez na pista dele (ASSUMIDA) espera a revisão de {a.agente}.")
+-    return 0
+-
+-
+-def cmd_matriz(_a):
+-    s = _ler_json("sessao.json", None)
+-    m = (s or {}).get("matriz") or MATRIZ_PADRAO
+-    print(f"matriz {sha_matriz(m)[:12]} ({'congelada na sessão' if s and s.get('matriz') else 'padrão da ferramenta; sessão antiga sem congelamento'})")
+-    for l in m:
+-        print(f"  {l['dono']:6s} {l['papel']}: {', '.join(l['caminhos'])}")
+-    return 0
+-
+-
+-def cmd_propor_linha(a):
+-    """Acrescenta UMA linha nova à matriz da sessão, por consentimento mútuo (o outro agente aceita). Nunca
+-    altera nem remove linha existente; a linha nova não pode sobrepor pista já existente."""
+-    with Trava():
+-        s = _ler_json("sessao.json", None)
+-        if not s or s["estado"] != "em_andamento":
+-            print("RECUSADO: sem partida conjunta em andamento.", file=sys.stderr)
+-            return 1
+-        pend = _ler_json("proposta-matriz.json", None)
+-        if pend:
+-            print(f"RECUSADO: já há proposta pendente de {pend['proposta_por']} ({pend['linha']['papel']}); aguarde o aceite "
+-                  "ou combine a retirada no canal. Nada é sobrescrito em silêncio.", file=sys.stderr)
+-            return 1
+-        linha = {"dono": a.dono, "papel": a.papel, "caminhos": sorted(a.caminhos)}
+-        nova = (s.get("matriz") or MATRIZ_PADRAO) + [linha]
+-        conflitos = disjunta(nova)
+-        if conflitos:
+-            print("RECUSADO: a linha sobrepõe pista existente:", *[f"  {c}" for c in conflitos], sep="\n", file=sys.stderr)
+-            return 1
+-        _gravar_json("proposta-matriz.json", {"proposta_por": a.agente, "linha": linha, "em": agora()})
+-        _historico("proposta_de_linha", agente=a.agente, linha=linha)
+-    print(f"OK: proposta registrada; {[x for x in AGENTES if x != a.agente][0]} precisa rodar `aceitar-linha`.")
+-    return 0
+-
+-
+-def cmd_aceitar_linha(a):
+-    with Trava():
+-        s = _ler_json("sessao.json", None)
+-        prop = _ler_json("proposta-matriz.json", None)
+-        if not s or not prop:
+-            print("RECUSADO: não há proposta pendente.", file=sys.stderr)
+-            return 1
+-        if prop["proposta_por"] == a.agente:
+-            print("RECUSADO: quem propõe não aceita a própria proposta (Regra 3).", file=sys.stderr)
+-            return 1
+-        nova = (s.get("matriz") or MATRIZ_PADRAO) + [prop["linha"]]
+-        if disjunta(nova):
+-            print("RECUSADO: a linha passou a sobrepor outra pista.", file=sys.stderr)
+-            return 1
+-        s["matriz"] = nova
+-        s["matriz_sha256"] = sha_matriz(nova)
+-        _gravar_json("sessao.json", s)
+-        os.replace(_p("proposta-matriz.json"), _p(f"proposta-matriz.aceita-{datetime.datetime.now(TZ):%H%M%S}.json"))
+-        _historico("linha_aceita", agente=a.agente, linha=prop["linha"], matriz=s["matriz_sha256"][:12])
+-    print(f"OK: matriz agora {s['matriz_sha256'][:12]} (linha de {prop['proposta_por']}, aceita por {a.agente}).")
+-    return 0
+-
+-
+-def cmd_reivindicar(a):
+-    with Trava():
+-        s = _ler_json("sessao.json", None)
+-        matriz = (s or {}).get("matriz") or MATRIZ_PADRAO
+-        if not s or s["estado"] != "em_andamento":
+-            print("RECUSADO: sem partida conjunta em andamento.", file=sys.stderr)
+-            return 1
+-        est = _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}})
+-        outro = [x for x in AGENTES if x != a.agente][0]
+-        est_o = _ler_json(f"estado-{outro}.json", {"agente": outro, "itens": {}})
+-        usados = {c: (outro, i) for i, v in est_o["itens"].items() for c in v.get("caminhos", [])}
+-        ruins = []
+-        for c in a.caminhos:
+-            for (d, _papel) in dono_de(c, matriz) or [(None, None)]:
+-                if d != a.agente:
+-                    ruins.append(f"{c}: pista de {d or 'ninguém'}")
+-            if c in usados:
+-                ruins.append(f"{c}: já reivindicado por {usados[c][0]} ({usados[c][1]})")
+-        if ruins:
+-            print("RECUSADO:", *ruins, sep="\n  ", file=sys.stderr)
+-            return 1
+-        est["itens"].setdefault(a.item, {"estado": "em_andamento"})["caminhos"] = sorted(a.caminhos)
+-        est["itens"][a.item]["reivindicado_em"] = agora()
+-        _gravar_json(f"estado-{a.agente}.json", est)
+-        _historico("reivindicado", agente=a.agente, item=a.item, caminhos=sorted(a.caminhos))
+-    print(f"OK: {a.agente} reivindicou {a.item}: {', '.join(sorted(a.caminhos))}")
+-    return 0
+-
+-
+-def cmd_estado(a):
+-    with Trava():
+-        est = _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}})
+-        it = est["itens"].setdefault(a.item, {})
+-        it.update(estado=a.estado, atualizado_em=agora())
+-        if a.bloqueio:
+-            it["bloqueio"] = a.bloqueio
+-        em_andamento = sum(1 for v in est["itens"].values() if v.get("estado") == "em_andamento")
+-        if em_andamento > 2:
+-            print(f"AVISO: {a.agente} tem {em_andamento} itens em andamento (limite combinado: 2).", file=sys.stderr)
+-        _gravar_json(f"estado-{a.agente}.json", est)
+-        _historico("estado", agente=a.agente, item=a.item, estado=a.estado)
+-    print(f"OK: {a.item} -> {a.estado}")
+-    return 0
+-
+-
+-_ANC = re.compile(rb"<!-- ANCORA-SHA:INICIO.*?<!-- ANCORA-SHA:FIM -->", re.DOTALL)
+-_ANCORADOS = ("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md", "PROMPT_CARREGAMENTO.md")
+-# Gerados pelos hooks a cada commit (derivados do canon, SEM quarentena no P-8); e pastas que não são do repositório.
+-_IGNORAR = ("reports/", "research_notes/", ".hidrata.md", "INDICE_MEMORIAS.md", "INDICE_MEMORIAS_PALAVRAS-CHAVE.md")
+-
+-
+-def _so_ancora(wt, base_wt, caminho):
+-    """True se o arquivo (versão da worktree) só difere da base dentro do bloco ANCORA-SHA gerado pelo pre-commit."""
+-    rc, antigo, _ = subprocess.run(["git", "-C", wt, "show", f"{base_wt}:{caminho}"], stdout=subprocess.PIPE,
+-                                   stderr=subprocess.PIPE).returncode, None, None
+-    a = subprocess.run(["git", "-C", wt, "show", f"{base_wt}:{caminho}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+-    if a.returncode:
+-        return False
+-    try:
+-        with open(os.path.join(wt, caminho), "rb") as f:
+-            b = f.read()
+-    except OSError:
+-        return False
+-    return _ANC.sub(b"<ANCORA>", a.stdout, count=1) == _ANC.sub(b"<ANCORA>", b, count=1)
+-
+-
+-def cmd_verificar(a):
+-    """Compara o que cada worktree (ramos claude/* e codex/*) alterou frente ao ponto em que saiu da base da
+-    sessão com a matriz de propriedade. Só RELATA: nada é corrigido."""
+-    repo = a.repo or REPO
+-    s = _ler_json("sessao.json", None)
+-    if not s:
+-        print("sem sessão.")
+-        return 1
+-    rc, saida, _ = _git(repo, "worktree", "list", "--porcelain")
+-    pistas = []
+-    for bloco in saida.split("\n\n"):
+-        d = dict(l.split(" ", 1) for l in bloco.splitlines() if " " in l)
+-        if "worktree" in d and d.get("branch", "").startswith(("refs/heads/claude/", "refs/heads/codex/")):
+-            pistas.append((d["worktree"], d["branch"]))
+-    achados, vistos, assumidas = [], {}, []
+-    ausentes = set(_ausentes())
+-    for caminho, ramo in pistas:
+-        quem = "claude" if ramo.startswith("refs/heads/claude/") else "codex"
+-        rc, mb, _ = _git(caminho, "merge-base", "HEAD", s["base"])
+-        if rc:
+-            mb = s["base"]
+-        _, nomes, _ = _git(caminho, "diff", "--name-only", mb)
+-        _, novos, _ = _git(caminho, "ls-files", "--others", "--exclude-standard")
+-        for f in sorted(set((nomes + "\n" + novos).splitlines()) - {""}):
+-            if f.startswith(_IGNORAR) or f in _IGNORAR:
+-                continue
+-            if f in _ANCORADOS and _so_ancora(caminho, mb, f):
+-                continue
+-            donos = dono_de(f, s.get('matriz') or MATRIZ_PADRAO)
+-            if not donos:
+-                achados.append(f"SEM DONO: {f} (alterado por {quem}, {os.path.basename(caminho)})")
+-            elif quem not in {d for d, _ in donos}:
+-                if all(d in ausentes for d, _ in donos):
+-                    assumidas.append(f"ASSUMIDA: {f} por {quem} (pista de {donos[0][0]}, ausente; revisão do titular ao voltar)")
+-                else:
+-                    achados.append(f"FORA DA PISTA: {f} alterado por {quem} (pista de {donos[0][0]}, {donos[0][1]})")
+-            vistos.setdefault(f, set()).add(quem)
+-    for f, qs in vistos.items():
+-        if len(qs) > 1:
+-            achados.append(f"DUPLO: {f} alterado pelos dois ({', '.join(sorted(qs))})")
+-    print(f"worktrees examinadas: {len(pistas)} ({', '.join(os.path.basename(c) for c, _ in pistas) or 'nenhuma'})")
+-    if assumidas:
+-        print("FALLBACK (não é achado):", *sorted(assumidas), sep="\n  ")
+-    if achados:
+-        print("ACHADOS (nada foi corrigido):", *sorted(achados), sep="\n  ")
+-        return 1
+-    print("OK: nenhuma alteração fora da pista nem em duas pistas.")
+-    return 0
+-
+-
+-def cmd_quadro(_a):
+-    s = _ler_json("sessao.json", {})
+-    print(f"# Quadro (gerado em {agora()}; sessão {s.get('estado', '-')}, base {s.get('base', '-')[:7]})\n")
+-    print("| item | dono | estado | caminhos | bloqueio |\n|---|---|---|---|---|")
+-    for ag in AGENTES:
+-        for i, v in sorted(_ler_json(f"estado-{ag}.json", {"itens": {}})["itens"].items()):
+-            print(f"| {i} | {ag} | {v.get('estado', '-')} | {', '.join(v.get('caminhos', [])) or '-'} | {v.get('bloqueio', '')} |")
+-    return 0
+-
+-
+-def _acrescentar_canal(texto):
+-    os.makedirs(os.path.dirname(CANAL), exist_ok=True)
+-    with open(CANAL, "a", encoding="utf-8") as f:
+-        fcntl.flock(f, fcntl.LOCK_EX)
+-        f.write(texto)
+-        f.flush()
+-        os.fsync(f.fileno())
+-        fcntl.flock(f, fcntl.LOCK_UN)
+-
+-
+-def cmd_dizer(a):
+-    ident = f"{a.agente}-{datetime.datetime.now(TZ):%Y-%m-%d}-{hashlib.sha256((agora() + a.texto).encode()).hexdigest()[:8]}"
+-    nome = {"claude": "Claude Code", "codex": "Codex"}[a.agente]
+-    msg = (f"\n## {ident}\n- Autor: {nome} (modelo exato não medido por esta ferramenta).\n- Hora: {agora()} (relógio da Máquina).\n"
+-           + (f"- Resposta-a: {a.resposta_a}.\n" if a.resposta_a else "")
+-           + f"- Assunto: {a.assunto}.\n" + (f"- Estado: {a.estado}.\n" if a.estado else "")
+-           + f"\n{a.texto.strip()}\n" + (f"\nPróximo responsável: {a.proximo}.\n" if a.proximo else ""))
+-    _acrescentar_canal(msg)
+-    print("OK:", ident)
+-    return 0
+-
+-
+-def cmd_ler(a):
+-    marca = _ler_json(f"leitura-{a.agente}.json", {"offset": 0})
+-    try:
+-        with open(CANAL, encoding="utf-8") as f:
+-            fcntl.flock(f, fcntl.LOCK_SH)
+-            f.seek(marca["offset"])
+-            novo = f.read()
+-            fim = f.tell()
+-            fcntl.flock(f, fcntl.LOCK_UN)
+-    except OSError:
+-        print("canal ausente.")
+-        return 1
+-    print(novo if novo.strip() else "(nada novo no canal desde a última leitura)")
+-    with Trava():
+-        _gravar_json(f"leitura-{a.agente}.json", {"offset": fim, "lido_em": agora()})
+-    return 0
+-
+-
+-def cmd_encerrar(a):
+-    with Trava():
+-        s = _ler_json("sessao.json", None)
+-        if not s:
+-            return 0
+-        s["presentes"].pop(a.agente, None)
+-        if not s["presentes"]:
+-            s["estado"] = "encerrada"
+-        _historico("saida", agente=a.agente, sessao=s["estado"])
+-        _gravar_json("sessao.json", s)
+-    print("OK: saída registrada.")
+-    return 0
+-
+-
+-# ---------------------------------------------------------------------------------------------
+-def _selftest():
+-    import shutil
+-    import threading
+-    global D, CANAL, RAIZ_SINC
+-    res = {}
+-    tmp = tempfile.mkdtemp(prefix="dupla-t-")
+-    repo = os.path.join(tmp, "repo")
+-    os.makedirs(repo)
+-    env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+-    for k in [k for k in env if k.startswith("GIT_") and k not in ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM")]:
+-        del env[k]
+-    sh = lambda *c, cwd=repo: subprocess.run(c, cwd=cwd, env=env, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+-    sh("git", "init", "-q", "-b", "main")
+-    sh("git", "config", "user.email", "t@e.i"); sh("git", "config", "user.name", "t")
+-    open(os.path.join(repo, "a.txt"), "w").write("a\n")
+-    sh("git", "add", "-A"); sh("git", "commit", "-qm", "base")
+-    bare = os.path.join(tmp, "origin.git")
+-    sh("git", "clone", "-q", "--bare", repo, bare, cwd=tmp)
+-    sh("git", "remote", "add", "origin", bare); sh("git", "fetch", "-q", "origin")
+-    D = os.path.join(tmp, "sinc", "dupla"); RAIZ_SINC = os.path.join(tmp, "sinc"); CANAL = os.path.join(RAIZ_SINC, "conversa.md")
+-    ns = lambda **k: argparse.Namespace(**{"repo": repo, "matriz": None, "nova_base": False, "item": None, "espera": 20,
+-                                           "aceitar_matriz": None, **k})
+-    try:
+-        res["01 a matriz padrão é disjunta (um dono por arquivo)"] = disjunta(MATRIZ_PADRAO) == []
+-        res["02 cada arquivo tem 1 dono e nenhum fica sem dono nos casos conhecidos"] = all(
+-            len(dono_de(f, MATRIZ_PADRAO)) == 1 for f in (
+-                "MEMÓRIAS.md", "scripts/p8_integral.py", ".githooks/post-commit", "redesign/router/seth_escriba.py",
+-                "redesign/router/tts-piper/instalar-agata.sh", "scripts/busca_semantica.py", "AGENTS.md"))
+-        buf = []
+-        rc1 = cmd_iniciar(ns(agente="claude", item="A1"))
+-        s = _ler_json("sessao.json", {})
+-        res["03 o primeiro a chegar fica AGUARDANDO"] = rc1 == 0 and s["estado"] == "aguardando"
+-        rc2 = cmd_iniciar(ns(agente="codex", item="A2"))
+-        s = _ler_json("sessao.json", {})
+-        res["04 a chegada do segundo abre a PARTIDA CONJUNTA"] = rc2 == 0 and s["estado"] == "em_andamento" and "iniciada_em" in s
+-        # base que anda
+-        open(os.path.join(repo, "b.txt"), "w").write("b\n"); sh("git", "add", "-A"); sh("git", "commit", "-qm", "avanço"); sh("git", "push", "-q", "origin", "main")
+-        res["05 origin/main andou: iniciar recusa sem --nova-base"] = cmd_iniciar(ns(agente="claude", item="A1")) == 1
+-        res["06 --nova-base é aceita e entra no histórico"] = cmd_iniciar(ns(agente="claude", item="A1", nova_base=True)) == 0 \
+-            and "nova_base" in open(_p("historico.jsonl")).read()
+-        # reivindicação
+-        s = _ler_json("sessao.json", {})
+-        cmd_iniciar(ns(agente="codex", item="A2"))
+-        res["07 reivindicar arquivo da própria pista funciona"] = cmd_reivindicar(argparse.Namespace(
+-            agente="claude", item="A1", caminhos=["scripts/p8_integral.py"])) == 0
+-        res["08 reivindicar arquivo da pista do outro é recusado"] = cmd_reivindicar(argparse.Namespace(
+-            agente="claude", item="X", caminhos=["redesign/router/seth_escriba.py"])) == 1
+-        res["09 reivindicar o que o outro já reivindicou é recusado"] = (
+-            cmd_reivindicar(argparse.Namespace(agente="codex", item="A2", caminhos=["redesign/router/seth_escriba.py"])) == 0
+-            and cmd_reivindicar(argparse.Namespace(agente="claude", item="Y", caminhos=["redesign/router/seth_escriba.py"])) == 1)
+-        # matriz divergente
+-        alt = os.path.join(tmp, "alt.json")
+-        json.dump(MATRIZ_PADRAO[:-1], open(alt, "w"))
+-        res["10 matriz diferente da aceita pelo outro: DIVERGENTE e nada começa"] = cmd_iniciar(ns(agente="codex", item="A2", matriz=alt)) == 1 \
+-            and _ler_json("sessao.json", {}).get("estado") == "divergente"
+-
+-        s10 = _ler_json("sessao.json", {})
+-        res["10b a sessão congela a matriz e mostra a diferença na divergência"] = bool(s10.get("matriz")) and s10["estado"] == "divergente"
+-        sess_pref = s10["matriz_sha256"][:12]
+-        res["10c adotar a matriz congelada (--aceitar-matriz) tira a divergência e abre a partida"] = \
+-            cmd_iniciar(ns(agente="codex", item="A2", matriz=alt, aceitar_matriz=sess_pref)) == 0 \
+-            and _ler_json("sessao.json", {})["estado"] == "em_andamento"
+-
+-        # emenda da matriz por consentimento mútuo
+-        s_ant = _ler_json("sessao.json", {})
+-        prop = argparse.Namespace(agente="claude", dono="claude", papel="inventário", caminhos=["scripts/inventario_componentes.py"])
+-        res["10d propor linha nova: registrada, e quem propõe NÃO aceita a própria"] = cmd_propor_linha(prop) == 0 \
+-            and cmd_aceitar_linha(argparse.Namespace(agente="claude")) == 1
+-        res["10e o outro aceita: matriz muda (sha novo), linha existente intacta e a pista passa a ter dono"] = \
+-            cmd_aceitar_linha(argparse.Namespace(agente="codex")) == 0 \
+-            and _ler_json("sessao.json", {})["matriz_sha256"] != s_ant["matriz_sha256"] \
+-            and dono_de("scripts/inventario_componentes.py", _ler_json("sessao.json", {})["matriz"]) == [("claude", "inventário")]
+-        res["10g com a proposta anterior já aceita, nova proposta é possível; com uma pendente, a segunda é recusada"] = (
+-            cmd_propor_linha(argparse.Namespace(agente="codex", dono="codex", papel="outra", caminhos=["x/y.txt"])) == 0
+-            and cmd_propor_linha(argparse.Namespace(agente="claude", dono="claude", papel="terceira", caminhos=["z/w.txt"])) == 1)
+-        os.unlink(_p("proposta-matriz.json"))
+-        res["10f linha que sobrepõe pista existente é recusada"] = cmd_propor_linha(argparse.Namespace(
+-            agente="codex", dono="codex", papel="intruso", caminhos=["scripts/p8_integral.py"])) == 1
+-        # canal: dois escritores simultâneos, nada se perde
+-        for k in ("sessao.json", "historico.jsonl"):
+-            os.path.exists(_p(k)) and os.unlink(_p(k))
+-        ts = []
+-        for i in range(12):
+-            ag = AGENTES[i % 2]
+-            ts.append(threading.Thread(target=cmd_dizer, args=(argparse.Namespace(
+-                agente=ag, assunto=f"a{i}", texto=f"mensagem {i}", resposta_a=None, estado=None, proximo=None),)))
+-        [t.start() for t in ts]; [t.join() for t in ts]
+-        txt = open(CANAL).read()
+-        res["11 12 mensagens simultâneas: todas presentes e inteiras"] = all(f"mensagem {i}" in txt for i in range(12)) and txt.count("## ") == 12
+-        before = open(CANAL).read()
+-        cmd_dizer(argparse.Namespace(agente="claude", assunto="x", texto="y", resposta_a=None, estado=None, proximo=None))
+-        res["12 o canal só cresce (o texto anterior segue intacto)"] = open(CANAL).read().startswith(before)
+-        # chegada simultânea: abre uma única partida
+-        threads = [threading.Thread(target=cmd_iniciar, args=(ns(agente=ag, item="Z"),)) for ag in AGENTES]
+-        [t.start() for t in threads]; [t.join() for t in threads]
+-        hist = open(_p("historico.jsonl")).read()
+-        res["13 chegada simultânea: exatamente 1 partida conjunta"] = hist.count("partida_conjunta") == 1 \
+-            and _ler_json("sessao.json", {})["estado"] == "em_andamento"
+-        # leitura incremental
+-        cmd_ler(argparse.Namespace(agente="codex"))
+-        n1 = _ler_json("leitura-codex.json", {})["offset"]
+-        cmd_dizer(argparse.Namespace(agente="claude", assunto="novo", texto="oi", resposta_a=None, estado=None, proximo=None))
+-        cmd_ler(argparse.Namespace(agente="codex"))
+-        res["14 `ler` avança o marcador e só mostra o novo"] = _ler_json("leitura-codex.json", {})["offset"] > n1
+-        # verificar com worktrees reais
+-        sh("git", "branch", "claude/it"); sh("git", "branch", "codex/it")
+-        wc, wx = os.path.join(tmp, "wc"), os.path.join(tmp, "wx")
+-        sh("git", "worktree", "add", "-q", wc, "claude/it"); sh("git", "worktree", "add", "-q", wx, "codex/it")
+-        s0 = _ler_json("sessao.json", {})
+-        base_atual = subprocess.run(["git", "-C", repo, "rev-parse", "origin/main"], stdout=subprocess.PIPE, text=True).stdout.strip()
+-        with Trava():
+-            s0["base"] = base_atual
+-            _gravar_json("sessao.json", s0)
+-        def escreve(wt, rel, txt):
+-            os.makedirs(os.path.dirname(os.path.join(wt, rel)), exist_ok=True)
+-            open(os.path.join(wt, rel), "w").write(txt)
+-        escreve(wc, "scripts/p8_integral.py", "x\n"); escreve(wx, "redesign/router/seth_escriba.py", "y\n")
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
+-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+-        res["15 cada um na própria pista: verificar OK"] = o.returncode == 0 and "OK:" in o.stdout
+-        escreve(wx, "scripts/p8_integral.py", "z\n")
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
+-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+-        res["16 o Codex mexe na pista do Claude: FORA DA PISTA e DUPLO"] = o.returncode == 1 and "FORA DA PISTA: scripts/p8_integral.py" in o.stdout and "DUPLO" in o.stdout
+-        os.unlink(os.path.join(wx, "scripts/p8_integral.py"))
+-        bloco = "<!-- ANCORA-SHA:INICIO (x) -->\n  sha\n<!-- ANCORA-SHA:FIM -->\n"
+-        sh("git", "-C", wc, "checkout", "-q", "-B", "claude/it") if False else None
+-        escreve(repo, "REGRAS.md", bloco.replace("sha", "aaa") + "corpo\n"); sh("git", "add", "-A"); sh("git", "commit", "-qm", "regras"); sh("git", "push", "-q", "origin", "main")
+-        sh("git", "-C", wc, "merge", "-q", "--ff-only", "main") if False else None
+-        s0["base"] = subprocess.run(["git", "-C", repo, "rev-parse", "HEAD"], stdout=subprocess.PIPE, text=True).stdout.strip()
+-        with Trava():
+-            _gravar_json("sessao.json", s0)
+-        for w in (wc, wx):
+-            subprocess.run(["git", "-C", w, "merge", "-q", "--ff-only", s0["base"]], check=True, capture_output=True)
+-        escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo\n")
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
+-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+-        res["17 só o bloco de âncora mudou em REGRAS.md: não é achado"] = "REGRAS.md" not in o.stdout
+-        escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo ALTERADO\n")
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
+-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+-        res["18a REGRAS.md mudou fora da âncora pelo integrador (Claude): sem achado"] = "FORA DA PISTA: REGRAS.md" not in o.stdout
+-        escreve(wx, "REGRAS.md", bloco.replace("sha", "ccc") + "corpo DO CODEX\n")
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
+-                           env=dict(os.environ, DUPLA_DIR=RAIZ_SINC))
+-        res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
+-        if not res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"]:
+-            print("DEBUG 18b:", o.returncode, o.stdout, o.stderr[-300:])
+-        # 19-21: fallback mútuo. Claude é o dono de REGRAS.md; o Codex a alterou (18b). Se o CLAUDE for declarado ausente, vira ASSUMIDA.
+-        env19 = dict(os.environ, DUPLA_DIR=RAIZ_SINC)
+-        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "ausente", "--agente", "claude", "--motivo", "teste"], capture_output=True, text=True, env=env19)
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
+-        res["19 titular ausente: o outro mexer na pista vira ASSUMIDA, não FORA DA PISTA"] = \
+-            "ASSUMIDA: REGRAS.md por codex" in o.stdout and "FORA DA PISTA: REGRAS.md alterado por codex" not in o.stdout
+-        st = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=env19)
+-        res["20 status mostra o ausente e quem cobre"] = "AUSENTE: claude" in st.stdout and "codex cobre a pista" in st.stdout
+-        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "presente", "--agente", "claude"], capture_output=True, text=True, env=env19)
+-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
+-        res["21 titular de volta: volta o alerta FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
+-    finally:
+-        shutil.rmtree(tmp, ignore_errors=True)
+-    for k, v in res.items():
+-        print(("OK    " if v else "FALHOU"), k)
+-    ruins = [k for k, v in res.items() if not v]
+-    print(f"dupla selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
+-    return 1 if ruins else 0
+-
+-
+-def main(argv=None):
+-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+-    ap.add_argument("--selftest", action="store_true")
+-    sp = ap.add_subparsers(dest="cmd")
+-    def com(nome, **args):
+-        p = sp.add_parser(nome)
+-        for k, v in args.items():
+-            p.add_argument(f"--{k.replace('_', '-')}", **v)
+-        return p
+-    ag = {"required": True, "choices": AGENTES}
+-    p = com("iniciar", agente=ag, item={}, nova_base={"action": "store_true"}, matriz={}, aceitar_matriz={},
+-            espera={"type": int, "default": 20}, repo={})
+-    sp.add_parser("matriz")
+-    p = com("propor-linha", agente=ag, dono={"required": True, "choices": AGENTES}, papel={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
+-    com("aceitar-linha", agente=ag)
+-    sp.add_parser("status")
+-    p = com("reivindicar", agente=ag, item={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
+-    com("estado", agente=ag, item={"required": True}, estado={"required": True, "choices": ["em_andamento", "em_revisao", "bloqueado", "pronto"]}, bloqueio={})
+-    com("verificar", repo={})
+-    sp.add_parser("quadro")
+-    com("dizer", agente=ag, assunto={"required": True}, texto={"required": True}, resposta_a={}, estado={}, proximo={})
+-    com("ler", agente=ag)
+-    com("ausente", agente=ag, motivo={}, ate={})
+-    com("presente", agente=ag)
+-    com("encerrar", agente=ag)
+-    a = ap.parse_args(argv)
+-    if a.selftest:
+-        return _selftest()
+-    f = {"iniciar": cmd_iniciar, "status": cmd_status, "reivindicar": cmd_reivindicar, "estado": cmd_estado,
+-         "verificar": cmd_verificar, "quadro": cmd_quadro, "matriz": cmd_matriz, "propor-linha": cmd_propor_linha, "aceitar-linha": cmd_aceitar_linha, "dizer": cmd_dizer, "ler": cmd_ler, "ausente": cmd_ausente, "presente": cmd_presente, "encerrar": cmd_encerrar}.get(a.cmd)
+-    if not f:
+-        ap.print_help()
+-        return 2
+-    return f(a)
+-
+-
+-if __name__ == "__main__":
+-    sys.exit(main())
+diff --git a/scripts/dupla/inicio.sh b/scripts/dupla/inicio.sh
+deleted file mode 100755
+index 95a1e6e0..00000000
+--- a/scripts/dupla/inicio.sh
++++ /dev/null
+@@ -1,14 +0,0 @@
+-#!/usr/bin/env bash
+-# Início de sessão da dupla (skill agata-fluxo §0): uma leitura, saída curta.
+-# Uso: bash scripts/dupla/inicio.sh <claude|codex>
+-# Sem nada novo, não imprime texto (economia de tokens).
+-set -euo pipefail
+-agente="${1:?uso: inicio.sh <claude|codex>}"
+-raiz="$(cd "$(dirname "$0")/../.." && pwd)"
+-cd "$raiz"
+-timeout 60 python3 scripts/dupla/dupla.py presente --agente "$agente" >/dev/null 2>&1 || true
+-novo="$(timeout 60 python3 scripts/dupla/dupla.py ler --agente "$agente" 2>/dev/null || true)"
+-case "$novo" in
+-  ""|*"nada novo no canal"*) exit 0 ;;
+-  *) printf '%s\n' "$novo" ;;
+-esac
+diff --git a/scripts/dupla/testar_auxiliares.py b/scripts/dupla/testar_auxiliares.py
+deleted file mode 100755
+index 1898b261..00000000
+--- a/scripts/dupla/testar_auxiliares.py
++++ /dev/null
+@@ -1,101 +0,0 @@
+-#!/usr/bin/env python3
+-"""Testes das ferramentas auxiliares da dupla (aplicar.py, vigia_par.py, contar_turnos.py, vigia.sh). Só /tmp; sem rede, sem git, sem gh.
+-Cada caso nasceu de um erro real de 16/10/2026 (MEMÓRIAS (732))."""
+-import datetime
+-import importlib.util
+-import json
+-import os
+-import subprocess
+-import sys
+-import tempfile
+-
+-AQUI = os.path.dirname(os.path.abspath(__file__))
+-
+-
+-def carregar(nome):
+-    s = importlib.util.spec_from_file_location(nome, os.path.join(AQUI, nome + ".py"))
+-    m = importlib.util.module_from_spec(s)
+-    s.loader.exec_module(m)
+-    return m
+-
+-
+-def bloco(autor, minutos, prox):
+-    t = (datetime.datetime.now().astimezone() - datetime.timedelta(minutes=minutos)).isoformat(timespec="seconds")
+-    return f"## {autor}-x\n- Hora: {t}\n- Assunto: a\n\ntexto\n\nPróximo responsável: {prox}\n"
+-
+-
+-def par(eu, *specs):
+-    d = tempfile.mkdtemp()
+-    arq = os.path.join(d, "canal.md")
+-    blocos = []
+-    for i, (autor, minutos, prox) in enumerate(specs):
+-        blocos.append(bloco(autor, minutos, prox).replace(f"{autor}-x", f"{autor}-x{i}"))
+-    open(arq, "w", encoding="utf-8").write("\n".join(blocos))
+-    return subprocess.run([sys.executable, "-I", os.path.join(AQUI, "vigia_par.py"), eu, arq], capture_output=True, text=True).stdout.strip()
+-
+-
+-def main():
+-    casos = []
+-    ap = carregar("aplicar")
+-    casos.append(("numeração: título acentuado (DIÁRIO/CORREÇÃO) conta", ap.proximo_numero("(728) CONSELHO — a\n(729) DIÁRIO — b\n(730) CORREÇÃO — c\n") == 731))
+-    casos.append(("numeração: só o cabeçalho no início da linha", ap.proximo_numero("(5) DIÁRIO — x\ncita (999) no meio da linha\n") == 6))
+-    try:
+-        ap.proximo_numero("sem entradas")
+-        casos.append(("numeração: sem entrada é erro explícito", False))
+-    except ValueError:
+-        casos.append(("numeração: sem entrada é erro explícito", True))
+-    casos.append(("refazer base: PR DIRTY (conflito com o main) refaz", ap.precisa_refazer("DIRTY", "")))
+-    casos.append(("refazer base: PR BEHIND (main andou) refaz", ap.precisa_refazer("BEHIND", "")))
+-    casos.append(("refazer base: mensagem 'not up to date' sem estado refaz", ap.precisa_refazer("", "Head branch is not up to date")))
+-    casos.append(("refazer base: BLOCKED (check vermelho) não refaz", not ap.precisa_refazer("BLOCKED", "Required status check failed")))
+-    casos.append(("par: pedido do outro há 12 min sem resposta -> DEVO RESPOSTA", par("claude", ("codex", 12, "claude")).startswith("DEVO RESPOSTA")))
+-    casos.append(("par: pedido recente (2 min) -> silêncio", par("claude", ("codex", 2, "claude")) == ""))
+-    casos.append(("par: pedido antigo respondido -> silêncio", par("claude", ("codex", 30, "claude"), ("claude", 20, "codex"), ("codex", 3, "humano")) == ""))
+-    casos.append(("par: dois pedidos, mede pelo MAIS ANTIGO", par("claude", ("codex", 12, "claude"), ("codex", 3, "claude")).startswith("DEVO RESPOSTA")))
+-    casos.append(("par: meu pedido escondido por mensagem minha seguinte -> PAR SEM RESPOSTA", par("claude", ("claude", 20, "codex"), ("claude", 19, "humano")).startswith("PAR SEM RESPOSTA")))
+-    casos.append(("par: o alerta não traz contador de minutos (dedup)", "min)" not in par("claude", ("codex", 12, "claude")) and "há " not in par("claude", ("codex", 12, "claude"))))
+-    ct = os.path.join(AQUI, "contar_turnos.py")
+-    d = tempfile.mkdtemp()
+-    arq = os.path.join(d, "s.jsonl")
+-    reg = [{"type": "user", "message": {"content": "oi"}},
+-           {"type": "user", "message": {"content": [{"type": "tool_result", "content": "x"}]}},
+-           {"type": "user", "message": {"content": "<system-reminder>aviso</system-reminder>"}},
+-           {"type": "user", "message": {"content": [{"type": "text", "text": "[SYSTEM NOTIFICATION - NOT USER INPUT] x"}]}},
+-           {"type": "user", "message": {"content": [{"type": "text", "text": "segunda fala do humano"}]}},
+-           {"type": "assistant", "message": {"content": "resposta"}}]
+-    open(arq, "w", encoding="utf-8").write("\n".join(json.dumps(r) for r in reg))
+-    casos.append(("t=: conta só as falas do Humano (2 de 6 registros)", subprocess.run([sys.executable, "-I", ct, arq], capture_output=True, text=True).stdout.strip() == "2"))
+-    contador = carregar("contar_turnos")
+-    misto = [
+-        {"type":"assistant","message":{"id":"a","content":[{"type":"thinking","thinking":"x"}]}},
+-        {"type":"assistant","message":{"id":"b","content":[{"type":"tool_use","name":"x"}]}},
+-        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um"}]}},
+-        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um completo"}]}},
+-        {"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"dois"}]}},
+-        {"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"humano"}]}},
+-    ]
+-    casos.append(("t=: modo respostas conta 2 (sem tool/thinking/repetição)", contador.contar(map(json.dumps,misto)) == 2))
+-    try:
+-        contador.contar(['{incompleto'])
+-        casos.append(("t=: modo respostas, transcrito truncado falha",False))
+-    except ValueError:
+-        casos.append(("t=: modo respostas, transcrito truncado falha",True))
+-    casos.append(("t=: --modo respostas --proximo soma 1", subprocess.run([sys.executable,"-I",ct,"--modo","respostas","--proximo",arq],capture_output=True,text=True).stdout.strip() == "2"))
+-    env_ct = {k:v for k,v in os.environ.items() if k != "AGATA_TRANSCRITO"}
+-    casos.append(("t=: modo respostas sem fonte não escolhe sessão alheia", subprocess.run([sys.executable,"-I",ct,"--modo","respostas"],capture_output=True,text=True,env=env_ct).returncode == 2))
+-    vg = os.path.join(AQUI, "vigia.sh")
+-    casos.append(("vigia.sh: sintaxe bash válida", subprocess.run(["bash", "-n", vg]).returncode == 0))
+-    iso = tempfile.mkdtemp()
+-    open(os.path.join(iso, "canal.md"), "w").write("")
+-    ambiente = dict(os.environ, DUPLA_CANAL=os.path.join(iso, "canal.md"), DUPLA_REPO=iso, DUPLA_PARAR=os.path.join(iso, "parar"))
+-    r = subprocess.run(["bash", vg, "claude", "1", "--uma", "3"], capture_output=True, text=True, timeout=30, env=ambiente)
+-    casos.append(("vigia.sh --uma: sem evento, sai por tempo com 'SEM EVENTO'", r.returncode == 0 and "SEM EVENTO" in r.stdout))
+-    for n, ok in casos:
+-        print(("PASS  " if ok else "FALHA ") + n)
+-    ruins = [n for n, ok in casos if not ok]
+-    print(f"auxiliares da dupla: {len(casos) - len(ruins)}/{len(casos)}")
+-    return 1 if ruins else 0
+-
+-
+-if __name__ == "__main__":
+-    sys.exit(main())
+diff --git a/scripts/dupla/vigia.sh b/scripts/dupla/vigia.sh
+deleted file mode 100755
+index 25ab135b..00000000
+--- a/scripts/dupla/vigia.sh
++++ /dev/null
+@@ -1,24 +0,0 @@
+-#!/usr/bin/env bash
+-# vigia.sh <claude|codex> [intervalo_s=20]  -- SEM modelo: só shell. Imprime UMA linha quando algo muda; silêncio = nada mudou.
+-# Sinais: mensagem nova do OUTRO agente no canal, novo/removido APROVADO- em propostas/, novo HEAD de origin/main.
+-# Uso (quem tem Monitor/stdout em segundo plano): rode em background e reaja só às linhas. Pare com: touch ~/.cache/agata/sincronia/vigia.parar
+-set -u
+-eu="${1:?uso: vigia.sh claude|codex [intervalo_s] [--uma [max_s]]}"; iv="${2:-20}"; uma=0; max=600; [ "${3:-}" = "--uma" ] && { uma=1; max="${4:-600}"; }; ini=$SECONDS; outro=$([ "$eu" = claude ] && echo codex || echo claude)
+-C="${DUPLA_CANAL:-$HOME/.cache/agata/sincronia/conversa.md}"; R="${DUPLA_REPO:-$HOME/agata}"; P="${DUPLA_PARAR:-$HOME/.cache/agata/sincronia/vigia.parar}"; rm -f "$P"
+-n0=$(grep -c "^## $outro-" "$C" 2>/dev/null || echo 0)
+-a0=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
+-par0=""
+-h0=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
+-while [ ! -e "$P" ]; do
+-  sleep "$iv"
+-  achou=0
+-  n=$(grep -c "^## $outro-" "$C" 2>/dev/null || echo 0)
+-  a=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
+-  h=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
+-  [ "$n" != "$n0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MENSAGEM de $outro: $((n-n0)) nova(s)"; n0=$n; achou=1; }
+-  [ "$a" != "$a0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) ASSINATURAS mudaram: $(ls "$R"/propostas/APROVADO-* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"; a0=$a; achou=1; }
+-  par=$(python3 -I "$(dirname "$0")/vigia_par.py" "$eu" "$C" 2>/dev/null); [ -n "$par" ] && [ "$par" != "$par0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) $par"; par0="$par"; achou=1; }
+-  [ -n "$h" ] && [ "$h" != "$h0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MAIN andou: $h"; h0=$h; achou=1; }
+-  [ "$uma" = 1 ] && [ "$achou" = 1 ] && exit 0
+-  [ "$uma" = 1 ] && [ $((SECONDS-ini)) -ge "$max" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) SEM EVENTO em ${max}s"; exit 0; }
+-done
+diff --git a/scripts/dupla/vigia_par.py b/scripts/dupla/vigia_par.py
+deleted file mode 100755
+index 1be2a3c0..00000000
+--- a/scripts/dupla/vigia_par.py
++++ /dev/null
+@@ -1,36 +0,0 @@
+-#!/usr/bin/env python3
+-"""vigia_par.py <eu> [canal.md] -- olha o ÚLTIMO bloco do canal e diz, em uma linha, se alguém está esperando alguém demais.
+-Silêncio = nada a alertar. A linha NÃO traz contador de minutos (para o vigia.sh deduplicar: uma emissão por pendência). Saídas:
+-  DEVO RESPOSTA: o último bloco é do outro, 'Próximo responsável' = eu, parado há >= 8 min;
+-  PAR SEM RESPOSTA: o último bloco é meu, 'Próximo responsável' = o outro, parado há >= 15 min (silêncio não prova ausência).
+-Só leitura. Hora do bloco = linha '- Hora:' (relógio da Máquina)."""
+-import datetime, os, re, sys
+-eu = sys.argv[1]
+-canal = sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser("~/.cache/agata/sincronia/conversa.md")
+-outro = "codex" if eu == "claude" else "claude"
+-def parse(b):
+-    cab = b.split("\n", 1)[0][3:].strip()
+-    m = re.search(r"^- Hora: (\S+)", b, re.M)
+-    prox = re.search(r"Próximo responsável:\s*(\w+)", b)
+-    try:
+-        t = datetime.datetime.fromisoformat(m.group(1)) if m else None
+-    except ValueError:
+-        t = None
+-    return cab.split("-", 1)[0], cab, t, (prox.group(1) if prox else None)
+-
+-
+-try:
+-    blocos = [parse(b) for b in re.split(r"(?m)^(?=## )", open(canal, encoding="utf-8").read()) if b.startswith("## ")]
+-except OSError:
+-    sys.exit(0)
+-agora = lambda t: datetime.datetime.now(t.tzinfo)
+-# Pendência do OUTRO comigo: medida a partir do pedido MAIS ANTIGO dele (com próximo = eu) depois do meu último bloco.
+-ult_meu = max([k for k, x in enumerate(blocos) if x[0] == eu], default=-1)
+-ped = [x for x in blocos[ult_meu + 1:] if x[0] == outro and x[3] == eu and x[2]]
+-if ped and (agora(ped[0][2]) - ped[0][2]).total_seconds() >= 480:
+-    print(f"DEVO RESPOSTA a {outro} (>= 8 min sem eu responder; primeiro pedido em {ped[0][1]})")
+-# Pendência MINHA com o outro: meu pedido mais antigo (próximo = outro) depois do último bloco dele.
+-ult_dele = max([k for k, x in enumerate(blocos) if x[0] == outro], default=-1)
+-ped = [x for x in blocos[ult_dele + 1:] if x[0] == eu and x[3] == outro and x[2]]
+-if ped and (agora(ped[0][2]) - ped[0][2]).total_seconds() >= 900:
+-    print(f"PAR SEM RESPOSTA: {outro} não responde (>= 15 min; primeiro pedido em {ped[0][1]}). Silêncio NÃO prova cota esgotada: confirme com o Humano ou com o outro antes de usar `dupla.py ausente`")
+diff --git a/scripts/equipe/aplicar.py b/scripts/equipe/aplicar.py
+new file mode 100755
+index 00000000..2b11e027
+--- /dev/null
++++ b/scripts/equipe/aplicar.py
+@@ -0,0 +1,128 @@
++#!/usr/bin/env python3
++"""aplicar.py <nome>... [--registro <arquivo-entrada.txt>] [--onde <arquivo-paragrafo.txt>] [--coautor "Nome <email>"]
++Aplica propostas P-8 JÁ ASSINADAS pelo Humano: worktree nova de origin/main, copia o APROVADO-, p8_verificar.sh (tem de dar
++PODE APLICAR), git apply, move o par para aplicadas/, insere a entrada de MEMÓRIAS (número = topo+1, o texto traz {N}),
++commit (pre-commit real), push, PR, espera CI, junta, pull. Se o main andou antes do merge (BEHIND/DIRTY), refaz a branch sobre
++o origin/main novo (verificador, apply e número de MEMÓRIAS de novo) e empurra com --force-with-lease. Nunca assina; não faz nada se faltar a assinatura."""
++import argparse, os, re, subprocess, sys, shutil, time
++R = os.path.expanduser("~/agata")
++def sh(cwd, *a, ok=True, **k):
++    p = subprocess.run(a, cwd=cwd, text=True, capture_output=True, **k)
++    if ok and p.returncode:
++        sys.exit(f"ERRO: {' '.join(a)}\n{p.stdout[-1500:]}{p.stderr[-1500:]}")
++    return p
++def proximo_numero(texto):
++    """Próximo número livre de MEMÓRIAS. Aceita QUALQUER palavra após o número (inclusive acentuada: DIÁRIO, CORREÇÃO);
++    o padrão antigo [A-ZÇÃÕ]+ não reconhecia 'Á' e deu (729) a 14 entradas em 16/10/2026."""
++    nums = [int(x) for x in re.findall(r"^\((\d+)\) \S+ — ", texto, re.M)]
++    if not nums:
++        raise ValueError("nenhuma entrada numerada encontrada em MEMÓRIAS.md")
++    return max(nums) + 1
++
++
++def precisa_refazer(estado, saida):
++    """O merge falhou porque a base andou (BEHIND) ou conflita com ela (DIRTY)? Aí a branch se refaz do zero sobre o
++    origin/main novo. `gh pr update-branch` juntava o main na branch e conflitava em MEMÓRIAS.md (mesmo ponto de inserção):
++    discord-venv-unica-20261028 ficou DIRTY assim em 28/10/2026."""
++    return estado in ("BEHIND", "DIRTY") or any(t in saida for t in ("not up to date", "status checks are expected", "BEHIND", "merge conflict"))
++
++
++def montar(wt, a, coautor):
++    """Sobre o HEAD atual da worktree (= origin/main): verificador congelado, apply, par para aplicadas/, MEMÓRIAS
++    (número = topo+1 DESTA base), ONDE_ESTAMOS, commit. Roda de novo, igual, cada vez que a base é refeita."""
++    for n in a.nomes:
++      shutil.copy(f"{R}/propostas/APROVADO-{n}", f"{wt}/propostas/")
++    # Verificador CONFIÁVEL = o da base, congelado ANTES de qualquer apply (um diff do lote não pode trocar o verificador do próximo).
++    confiavel = f"{wt}/../.verificador-confiavel-{int(time.time())}.sh"
++    shutil.copy(f"{wt}/scripts/p8_verificar.sh", confiavel)
++    for n in a.nomes:  # TODOS os pares conferidos antes de aplicar o primeiro
++      v = sh(wt, "bash", confiavel, n, ok=False)
++      linhas = [l for l in v.stdout.splitlines() if l.strip()]
++      if v.returncode != 0 or not linhas or linhas[-1].strip() != f"PODE APLICAR: {n}":
++          sys.exit(f"FALHA no verificador ({n}) rc={v.returncode}:\n{v.stdout}{v.stderr}")
++    os.remove(confiavel)
++    for n in a.nomes:
++      sh(wt, "git", "apply", f"propostas/{n}.diff"); os.makedirs(f"{wt}/propostas/aplicadas", exist_ok=True)
++      sh(wt, "git", "mv", f"propostas/{n}.diff", "propostas/aplicadas/"); os.rename(f"{wt}/propostas/APROVADO-{n}", f"{wt}/propostas/aplicadas/APROVADO-{n}")
++    if a.registro:
++      t = open(f"{wt}/MEMÓRIAS.md", encoding="utf-8").read()
++      ult = proximo_numero(t) - 1; m = re.search(r"^<!-- ENTRADAS-NOVAS:AQUI.*-->\n", t, re.M)
++      e = open(a.registro, encoding="utf-8").read().replace("{N}", str(ult + 1)).rstrip("\n") + "\n\n"
++      open(f"{wt}/MEMÓRIAS.md", "w", encoding="utf-8").write(t[:m.end()] + e + t[m.end():])
++    if a.onde:
++      o = open(f"{wt}/ONDE_ESTAMOS.md", encoding="utf-8").read(); i = o.index("## Hoje")
++      open(f"{wt}/ONDE_ESTAMOS.md", "w", encoding="utf-8").write(o[:i] + open(a.onde, encoding="utf-8").read().rstrip("\n") + "\n\n" + o[i:])
++    sh(wt, "git", "add", "-A")
++    msg = f"Aplica {', '.join(a.nomes)} (assinado pelo Humano)" + (" e registra" if a.registro else "") + (f"\n\nCo-Authored-By: {coautor}" if coautor else "")
++    sh(wt, "git", "commit", "-qm", msg)
++
++
++def main():
++  ap = argparse.ArgumentParser(); ap.add_argument("nomes", nargs="+"); ap.add_argument("--registro", default=None, help="entrada de MEMÓRIAS; NÃO usar se o .diff já mexe em MEMÓRIAS.md")
++  ap.add_argument("--onde")
++  ap.add_argument("--coautor", default=os.environ.get("EQUIPE_COAUTOR"), help="linha Co-Authored-By (nome do modelo REAL, medido; padrão: $EQUIPE_COAUTOR ou nenhuma)")
++  ap.add_argument("--agente", default=os.environ.get("EQUIPE_AGENTE") or os.environ.get("DUPLA_AGENTE") or "claude",
++                  help="membro da Equipe que aplica (claude, codex, gemini...): dá o nome da worktree (.<membro>/worktrees)")
++  ap.add_argument("--sem-pull", action="store_true", help="não atualiza o checkout compartilhado (para trabalhar só em worktree própria)")
++  a = ap.parse_args()
++  if not re.match(r"^[a-z][a-z0-9-]{0,30}$", a.agente): sys.exit(f"membro inválido: {a.agente!r}")
++  coautor = a.coautor or ""  # nunca um nome de modelo fixo no código: o modelo muda de sessão para sessão
++  if not a.sem_pull:
++      sh(R, "git", "pull", "-q", "--ff-only")
++  for n in a.nomes:
++      if not os.path.exists(f"{R}/propostas/APROVADO-{n}"): sys.exit(f"SEM ASSINATURA: {n} (nada aplicado)")
++      dp = f"{R}/propostas/{n}.diff"
++      if a.registro and os.path.exists(dp) and re.search(r"^\+\+\+ b/MEMÓRIAS\.md$", open(dp, encoding="utf-8").read(), re.M):
++          sys.exit(f"{n} mexe em MEMÓRIAS.md: a entrada já vem no .diff; --registro duplicaria (rode sem --registro)")
++  tag = "-".join(a.nomes)[:60]; wt = f"{R}/.{a.agente}/worktrees/aplica-{a.agente}-{int(time.time())}"; br = f"aplica/{tag}"
++  sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
++  montar(wt, a, coautor)
++  sh(wt, "git", "push", "-q", "-u", "origin", br)
++  pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
++          "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
++  num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
++  import json
++  EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
++  def ci():
++      """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
++      time.sleep(20); limite = time.time() + 1500  # 25 min: check ausente ou API ruim não prende para sempre
++      while True:
++          if time.time() > limite: return False, {"erro": "timeout esperando os checks"}
++          j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
++          try: cs = {c["name"]: c["bucket"] for c in json.loads(j)}
++          except Exception: cs = {}
++          if all(n in cs and cs[n] not in ("pending",) for n in EXIGIDOS): return all(cs[n] == "pass" for n in EXIGIDOS), cs
++          time.sleep(10)
++  def head_oid():
++      return json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "headRefOid").stdout)["headRefOid"]
++  def ci_pinado():
++      """Lê o head ANTES e DEPOIS dos checks; só vale se for o mesmo (senão repete, até 3 vezes)."""
++      for _ in range(3):
++          antes = head_oid(); ok, cs = ci(); depois = head_oid()
++          if antes == depois: return ok, cs, depois
++      return False, {"erro": "head mudou durante os checks"}, None
++  ok, cs, HEAD = ci_pinado(); print(cs)  # o merge só vale para ESSE head (--match-head-commit)
++  if not ok: sys.exit(f"CI não passou ({cs}); não juntei")
++  for _ in range(4):  # main com proteção "strict": se andou, REFAZ a branch sobre o main novo e espera o CI de novo
++      m = sh(wt, "gh", "pr", "merge", num, "--repo", "agataseth98-cmd/agata-seth", "--merge", "--match-head-commit", HEAD, ok=False)
++      if m.returncode == 0: break
++      estado = json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "mergeStateStatus", ok=False).stdout or "{}").get("mergeStateStatus", "")
++      if not precisa_refazer(estado, m.stdout + m.stderr): sys.exit(f"merge falhou ({estado}):\n{m.stdout}{m.stderr}")
++      print(f"base andou ({estado}): refazendo a branch sobre o origin/main novo", flush=True)
++      sh(wt, "git", "fetch", "-q", "origin"); sh(wt, "git", "reset", "-q", "--hard", "origin/main"); sh(wt, "git", "clean", "-qfd")
++      montar(wt, a, coautor)  # verificador da base NOVA, apply de novo, número de MEMÓRIAS recalculado
++      sh(wt, "git", "push", "-q", "--force-with-lease", "origin", br)
++      ok, cs, HEAD = ci_pinado()
++      if not ok: sys.exit(f"CI não passou após atualizar ({cs}); não juntei")
++  else:
++      sys.exit("não consegui juntar após 4 tentativas")
++  if not a.sem_pull:
++      sh(R, "git", "pull", "-q", "--ff-only")
++  for n in a.nomes:
++      try: os.remove(f"{R}/propostas/APROVADO-{n}")
++      except FileNotFoundError: pass
++  print("APLICADO E JUNTADO:", ", ".join(a.nomes))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/scripts/equipe/contar_turnos.py b/scripts/equipe/contar_turnos.py
+new file mode 100755
+index 00000000..56ac2337
+--- /dev/null
++++ b/scripts/equipe/contar_turnos.py
+@@ -0,0 +1,98 @@
++#!/usr/bin/env python3
++"""Conta o t= da Regra 1 num transcrito, de forma mecânica. Dois modos:
++  --modo humano (PADRÃO): mensagens do Humano (registros `user` que não são tool_result nem aviso de sistema/tarefa).
++     É o t= que o Humano acompanha. Sem transcrito informado, usa o JSONL mais recente de ~/.claude/projects/-home-orusoua-agata
++     (limite conhecido: com duas sessões abertas pode pegar a outra; informe o transcrito para ser exato).
++  --modo respostas: respostas textuais do MODELO (Claude JSONL e Codex response_item), dedup por message.id; exige
++     transcrito explícito (argumento ou AGATA_TRANSCRITO); nunca escolhe sessão por mtime.
++Uso: contar_turnos.py [--modo humano|respostas] [--proximo] [TRANSCRITO]. --proximo soma 1 (a resposta que será escrita).
++"""
++import argparse
++import glob
++import json
++import os
++from pathlib import Path
++
++
++def contar_humano(linhas):
++    n = 0
++    for linha in linhas:
++        try:
++            d = json.loads(linha)
++        except ValueError:
++            continue
++        if not isinstance(d, dict) or d.get("type") != "user":
++            continue
++        c = (d.get("message") or {}).get("content")
++        if isinstance(c, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in c):
++            continue
++        txt = c if isinstance(c, str) else "".join(x.get("text", "") for x in c if isinstance(x, dict) and x.get("type") == "text") if isinstance(c, list) else ""
++        s = txt.strip()
++        if s and not s.startswith(("<system-reminder>", "<task-notification>")) and "[SYSTEM NOTIFICATION" not in s[:200]:
++            n += 1
++    return n
++
++
++def contar(linhas):
++    """Respostas textuais do modelo (modo respostas). JSON truncado é erro explícito."""
++    vistos = set()
++    total = 0
++    for n, linha in enumerate(linhas, 1):
++        if not linha.strip():
++            continue
++        try:
++            d = json.loads(linha)
++        except ValueError as e:
++            raise ValueError(f'linha {n}: JSON incompleto ou inválido') from e
++        if not isinstance(d, dict):
++            raise ValueError(f'linha {n}: registro não é objeto')
++        if d.get('type') == 'assistant':
++            m = d.get('message') or {}
++            if not isinstance(m, dict):
++                raise ValueError(f'linha {n}: mensagem inválida')
++        elif d.get('type') == 'response_item':
++            m = d.get('payload') or {}
++            if not isinstance(m, dict):
++                raise ValueError(f'linha {n}: payload inválido')
++            if m.get('type') != 'message' or m.get('role') != 'assistant':
++                continue
++        else:
++            continue
++        c = m.get('content')
++        texto = c if isinstance(c, str) else ''.join(x.get('text', '') for x in c
++                if isinstance(x, dict) and x.get('type') in ('text', 'output_text') and isinstance(x.get('text'), str)) if isinstance(c, list) else ''
++        if not texto.strip():
++            continue
++        # Fragmentos com o mesmo message.id não são respostas novas.
++        ident = m.get('id')
++        if isinstance(ident, str) and ident:
++            if ident in vistos:
++                continue
++            vistos.add(ident)
++        total += 1
++    return total
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument('transcrito', nargs='?', default=os.environ.get('AGATA_TRANSCRITO'))
++    ap.add_argument('--modo', choices=('humano', 'respostas'), default='humano')
++    ap.add_argument('--proximo', action='store_true')
++    a = ap.parse_args(argv)
++    fonte = a.transcrito
++    if not fonte and a.modo == 'humano':
++        achados = glob.glob(os.path.expanduser('~/.claude/projects/-home-orusoua-agata/*.jsonl'))
++        fonte = max(achados, key=os.path.getmtime) if achados else None
++    if not fonte:
++        ap.error('transcrito desta sessão não informado; use contagem no contexto')
++    try:
++        with Path(fonte).open(encoding='utf-8') as f:
++            n = contar_humano(f) if a.modo == 'humano' else contar(f)
++    except (OSError, ValueError) as e:
++        ap.exit(2, f'contador: {e}\n')
++    print(n + int(a.proximo))
++    return 0
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/scripts/equipe/equipe.py b/scripts/equipe/equipe.py
+new file mode 100755
+index 00000000..410ae779
+--- /dev/null
++++ b/scripts/equipe/equipe.py
+@@ -0,0 +1,812 @@
++#!/usr/bin/env python3
++"""equipe.py -- partida conjunta e coordenação da Equipe (qualquer membro do Conselho) no ~/agata. Ferramenta LOCAL.
++
++Não é canon, não decide nada, não escreve em arquivo do repositório e não aprova nada. Coordena os
++membros que trabalham AO MESMO TEMPO em worktrees próprias -- Claude Code, Codex, Gemini, Goose, Seth ou
++qualquer outro (nome = slug minúsculo): quem começa junto, com qual base, quem é dono de qual arquivo, o
++que cada um está fazendo, e o canal de conversa. Todo o estado mora em ~/.cache/agata/sincronia/equipe/
++(fora do repositório; o antigo `dupla/` é movido para lá na primeira execução). Dado, não instrução (Regra 2).
++
++Garantias e limites (cooperativos, sem mecanismo imposto pelo sistema operacional):
++  * partida conjunta: a sessão só vira `em_andamento` quando os membros esperados (`--com a,b,c` na
++    criação; sem a lista, quaisquer dois) chamaram `iniciar` com a MESMA base (`origin/main`) e a MESMA
++    matriz de propriedade (sha256). Quem chega primeiro espera, sem polling nem serviço: a sessão fica
++    `aguardando` e os outros encontram o registro ao chegar. Membro que chega com a partida já aberta entra nela.
++  * base única: se `origin/main` andou desde a primeira chegada, `iniciar` recusa e pede `--nova-base`
++    (registrada no histórico); nunca troca a base em silêncio.
++  * propriedade: um arquivo tem um dono por sessão. `verificar` compara o que cada worktree alterou
++    com a matriz; arquivo fora da pista do dono ou em duas pistas vira ACHADO, nunca é consertado.
++  * escrita: cada membro escreve só o próprio estado (`estado-<agente>.json`); a sessão e o canal são
++    alterados sob flock exclusivo, só por acréscimo no histórico/canal. O quadro é GERADO, não editado.
++  * não substitui o P-8, o fiscal, o Humano nem o `aprovar.sh`, que nenhum membro roda.
++
++Uso (A, B = nome do membro: claude, codex, gemini, goose, seth...):
++  equipe.py iniciar    --agente A [--com A,B,...] [--item ID] [--nova-base] [--matriz ARQ] [--aceitar-matriz SHA12] [--espera MIN]
++  equipe.py matriz                      (mostra a matriz CONGELADA na sessão e o sha256)
++  equipe.py propor-linha --agente A --dono D --papel P --caminhos X [X ...]   (nova linha; TODOS os outros presentes aceitam)
++  equipe.py aceitar-linha --agente B                                         (aceita a proposta pendente de outro membro)
++  equipe.py status
++  equipe.py reivindicar --agente A --item ID --caminhos P [P ...]
++  equipe.py estado     --agente A --item ID --estado em_andamento|em_revisao|bloqueado|pronto [--bloqueio T]
++  equipe.py verificar  [--repo DIR]
++  equipe.py quadro
++  equipe.py dizer      --agente A --assunto T --texto T [--resposta-a ID] [--estado T] [--proximo A]
++  equipe.py ler        --agente A
++  equipe.py ausente | presente | encerrar --agente A
++  equipe.py --selftest
++"""
++import argparse
++import datetime
++import fcntl
++import fnmatch
++import glob
++import hashlib
++import json
++import os
++import re
++import subprocess
++import sys
++import tempfile
++import zoneinfo
++
++TZ = zoneinfo.ZoneInfo("America/Sao_Paulo")
++# Membro = slug minúsculo; qualquer modelo do Conselho entra sem mudar código. NOMES só dá o nome por extenso no canal.
++MEMBRO = re.compile(r"^[a-z][a-z0-9-]{0,30}$")
++NOMES = {"claude": "Claude Code", "codex": "Codex", "gemini": "Gemini CLI", "goose": "Goose", "seth": "Seth", "cursor": "Cursor"}
++_env = lambda k, padrao: os.environ.get(f"EQUIPE_{k}") or os.environ.get(f"DUPLA_{k}") or padrao  # DUPLA_* = nome antigo
++RAIZ_SINC = _env("DIR", os.path.expanduser("~/.cache/agata/sincronia"))
++D = os.path.join(RAIZ_SINC, "equipe")
++CANAL = os.path.join(RAIZ_SINC, "conversa.md")
++REPO = _env("REPO", os.path.expanduser("~/agata"))
++
++
++def membro(v):
++    """argparse type: recusa nome que não seja slug (vira nome de arquivo e de branch)."""
++    if not MEMBRO.match(v or ""):
++        raise argparse.ArgumentTypeError(f"membro inválido: {v!r} (use minúsculas, dígitos e hífen; ex.: claude, codex, gemini)")
++    return v
++
++
++def _migrar_dupla():
++    """Uma vez só: o estado antigo em sincronia/dupla/ passa a sincronia/equipe/ (rename atômico, nada se copia nem se perde)."""
++    antigo = os.path.join(os.path.dirname(D), "dupla")
++    if not os.path.exists(D) and os.path.isdir(antigo):
++        os.rename(antigo, D)
++
++# Matriz de propriedade PROPOSTA (parecer do Claude sobre o v4, anexo A). Só vale quando os dois a aceitam
++# (mesmo sha256 em `iniciar`). Padrão com `/` no fim = prefixo de diretório; senão, glob de fnmatch.
++MATRIZ_PADRAO = [
++    {"dono": "claude", "papel": "integração e registro",
++     "caminhos": ["MEMÓRIAS.md", "ONDE_ESTAMOS.md", "PROJETO.md", "REGRAS.md", "PROTOCOLOS.md", "FALHAS.md",
++                  "CLAUDE.md", "PROMPT_CARREGAMENTO.md", "propostas/"]},
++    {"dono": "claude", "papel": "fiscal",
++     "caminhos": [".github/workflows/perimetro.yml", ".github/workflows/fiscal-p8.yml", "scripts/p8_*",
++                  "scripts/testar_perimetro.sh", "scripts/testar_p8_*", "scripts/perimetro.sh",
++                  "scripts/perimetro/p08_quarentena.sh"]},
++    {"dono": "claude", "papel": "hooks e derivados",
++     "caminhos": [".githooks/", "scripts/gerar_obsidian.py", "scripts/gerar_indice_derivado.py",
++                  "scripts/perimetro/p10_vault_derivado.sh", "scripts/perimetro/p17_skip_cronico.sh",
++                  "scripts/testar_post_commit.py"]},
++    {"dono": "codex", "papel": "escriba", "caminhos": ["redesign/router/seth_escriba.py"]},
++    {"dono": "claude", "papel": "defesa local", "caminhos": ["redesign/systemd/", "config/portas-agata.txt"]},
++    {"dono": "codex", "papel": "evidência, estilo e doutrina",
++     "caminhos": ["AGENTS.md", "redesign/router/auditoria_turno.py", "redesign/router/afirmacoes_desmentidas.json",
++                  "redesign/router/seth_gateway.py"]},
++    {"dono": "codex", "papel": "memória e missões",
++     "caminhos": ["scripts/busca_semantica.py", "scripts/busca_texto.py", "redesign/mcp/",
++                  "scripts/avaliar_decisor.py", "redesign/grafo/evals/", "config/temas.tsv"]},
++    {"dono": "claude", "papel": "atualização",
++     "caminhos": ["models/manifest.json", "scripts/atualizar.sh", ".github/dependabot.yml"]},
++    {"dono": "claude", "papel": "voz", "caminhos": ["redesign/router/tts_piper.py", "redesign/router/tts-piper/"]},
++    {"dono": "claude", "papel": "github", "caminhos": ["SECURITY.md", ".github/CODEOWNERS", "README.md"]},
++    {"dono": "claude", "papel": "conselho", "caminhos": ["scripts/conselho_remoto.py"]},
++]
++
++
++def agora():
++    return datetime.datetime.now(TZ).isoformat(timespec="seconds")
++
++
++def _p(nome):
++    return os.path.join(D, nome)
++
++
++def _git(repo, *a):
++    p = subprocess.run(["git", "-C", repo, *a], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
++                       env={k: v for k, v in os.environ.items() if not k.startswith("GIT_") or k == "GIT_CONFIG_GLOBAL"})
++    return p.returncode, p.stdout.strip(), p.stderr.strip()
++
++
++class Trava:
++    """flock exclusivo no arquivo de trava da sessão. Cooperativo."""
++    def __enter__(self):
++        _migrar_dupla()
++        os.makedirs(D, exist_ok=True)
++        self.f = open(_p("sessao.lock"), "a")
++        fcntl.flock(self.f, fcntl.LOCK_EX)
++        return self
++
++    def __exit__(self, *e):
++        fcntl.flock(self.f, fcntl.LOCK_UN)
++        self.f.close()
++
++
++def _ler_json(nome, padrao):
++    try:
++        with open(_p(nome), encoding="utf-8") as f:
++            return json.load(f)
++    except (OSError, ValueError):
++        return padrao
++
++
++def _gravar_json(nome, obj):
++    tmp = _p(nome + ".tmp")
++    with open(tmp, "w", encoding="utf-8") as f:
++        json.dump(obj, f, ensure_ascii=False, indent=1, sort_keys=True)
++        f.flush()
++        os.fsync(f.fileno())
++    os.replace(tmp, _p(nome))   # só nos arquivos de estado da equipe; o canal NUNCA é substituído
++
++
++def _historico(evento, **kw):
++    """Acrescenta ao histórico (JSON por linha), sob a trava do chamador."""
++    with open(_p("historico.jsonl"), "a", encoding="utf-8") as f:
++        f.write(json.dumps({"quando": agora(), "evento": evento, **kw}, ensure_ascii=False) + "\n")
++        f.flush()
++        os.fsync(f.fileno())
++
++
++def _membros_com_estado():
++    """Membros que já deixaram estado nesta sessão (estado-<membro>.json)."""
++    return sorted(os.path.basename(f)[7:-5] for f in glob.glob(_p("estado-*.json")))
++
++
++def _outros(s, eu):
++    """Os demais membros presentes na sessão, em ordem."""
++    return sorted(m for m in (s or {}).get("presentes", {}) if m != eu)
++
++
++def _faltam(s):
++    """Quem ainda falta para abrir a partida: os esperados ausentes; sem lista, falta alguém até haver dois."""
++    esperados = s.get("esperados") or []
++    if esperados:
++        return [m for m in esperados if m not in s["presentes"]]
++    return [] if len(s["presentes"]) >= 2 else ["outro membro"]
++
++
++def sha_matriz(matriz):
++    return hashlib.sha256(json.dumps(matriz, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
++
++
++def dono_de(caminho, matriz):
++    """Lista de (dono, papel) cujas pistas cobrem o caminho. Esperado: exatamente um."""
++    achados = []
++    for linha in matriz:
++        for pad in linha["caminhos"]:
++            if (pad.endswith("/") and caminho.startswith(pad)) or fnmatch.fnmatchcase(caminho, pad) or caminho == pad:
++                achados.append((linha["dono"], linha["papel"]))
++                break
++    return achados
++
++
++def disjunta(matriz):
++    """Pistas sem sobreposição entre papéis diferentes: devolve os conflitos entre padrões literais."""
++    conflitos = []
++    for i, a in enumerate(matriz):
++        for b in matriz[i + 1:]:
++            for pa in a["caminhos"]:
++                for pb in b["caminhos"]:
++                    exemplos = [pa.rstrip("*"), pb.rstrip("*")]
++                    for ex in exemplos:
++                        if ex and dono_de(ex, [a]) and dono_de(ex, [b]):
++                            conflitos.append((a["papel"], b["papel"], ex))
++    return sorted(set(conflitos))
++
++
++# ---------------------------------------------------------------------------------------------
++def cmd_iniciar(a):
++    repo = a.repo or REPO
++    matriz = MATRIZ_PADRAO
++    if a.matriz:
++        with open(a.matriz, encoding="utf-8") as f:
++            matriz = json.load(f)
++    hm = sha_matriz(matriz)
++    rc, base, err = _git(repo, "rev-parse", "origin/main")
++    if rc:
++        print(f"ERRO: não consegui ler origin/main em {repo}: {err}", file=sys.stderr)
++        return 2
++    _git(repo, "fetch", "-q", "origin")
++    rc, base, _ = _git(repo, "rev-parse", "origin/main")
++    c = disjunta(matriz)
++    if c:
++        print("ERRO: a matriz de propriedade tem pistas sobrepostas:", *[f"  {x}" for x in c], sep="\n", file=sys.stderr)
++        return 2
++    with Trava():
++        s = _ler_json("sessao.json", None)
++        if s is None or s.get("estado") == "encerrada":
++            s = {"estado": "aguardando", "base": base, "matriz_sha256": hm, "matriz": matriz, "criada_em": agora(),
++                 "presentes": {}, "versao": 3, "esperados": sorted(set(getattr(a, "com", None) or []) | ({a.agente} if getattr(a, "com", None) else set()))}
++            _historico("sessao_criada", agente=a.agente, base=base, matriz=hm[:12], esperados=s["esperados"])
++        if s["base"] != base and not a.nova_base:
++            print(f"RECUSADO: origin/main andou desde a primeira chegada (sessão {s['base'][:7]}, agora {base[:7]}). "
++                  "Se ambos concordam, rode de novo com --nova-base (fica no histórico).", file=sys.stderr)
++            return 1
++        if a.nova_base and s["base"] != base:
++            _historico("nova_base", agente=a.agente, de=s["base"], para=base)
++            s["base"] = base
++            s["presentes"] = {}
++            s["estado"] = "aguardando"
++        if s["matriz_sha256"] != hm and a.aceitar_matriz and s.get("matriz") \
++                and s["matriz_sha256"].startswith(a.aceitar_matriz):
++            # Adoção explícita da matriz CONGELADA na sessão, depois de o agente tê-la lido (`matriz`).
++            _historico("matriz_aceita", agente=a.agente, matriz=s["matriz_sha256"][:12])
++            hm, matriz = s["matriz_sha256"], s["matriz"]
++            if s["estado"] == "divergente":
++                s["estado"] = "aguardando"
++                s.pop("divergencia", None)
++        if s["matriz_sha256"] != hm:
++            s["estado"] = "divergente"
++            s["divergencia"] = {"agente": a.agente, "matriz_sessao": s["matriz_sha256"][:12], "matriz_agente": hm[:12]}
++            _historico("matriz_divergente", agente=a.agente, matriz=hm[:12])
++            _gravar_json("sessao.json", s)
++            linhas = lambda m: {f"{l['dono']} | {l['papel']} | {c}" for l in m for c in l["caminhos"]}
++            so_sessao = sorted(linhas(s.get("matriz") or MATRIZ_PADRAO) - linhas(matriz))
++            so_agente = sorted(linhas(matriz) - linhas(s.get("matriz") or MATRIZ_PADRAO))
++            print(f"DIVERGENTE: matriz da sessão {s['matriz_sha256'][:12]} x matriz de {a.agente} {hm[:12]}. Nada começou.", file=sys.stderr)
++            if so_sessao:
++                print("  só na sessão:", *so_sessao, sep="\n    ", file=sys.stderr)
++            if so_agente:
++                print(f"  só em {a.agente}:", *so_agente, sep="\n    ", file=sys.stderr)
++            print(f"  Para adotar a matriz da sessão, leia `equipe.py matriz` e rode `iniciar ... --aceitar-matriz {s['matriz_sha256'][:12]}`. "
++                  "Para mudar a matriz da sessão, é decisão do Humano.", file=sys.stderr)
++            return 1
++        s["presentes"][a.agente] = {"chegou_em": agora(), "item": a.item, "base": base}
++        _historico("chegada", agente=a.agente, item=a.item)
++        faltam = _faltam(s)
++        if not faltam and s["estado"] in ("aguardando", "solo"):
++            s["estado"] = "em_andamento"
++            s["iniciada_em"] = agora()
++            _historico("partida_conjunta", base=base, matriz=hm[:12])
++        _gravar_json("sessao.json", s)
++        _gravar_json(f"estado-{a.agente}.json", _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}}))
++    if s["estado"] == "em_andamento":
++        print(f"PARTIDA CONJUNTA: base {base[:7]}, matriz {hm[:12]}, presentes: {', '.join(sorted(s['presentes']))}. Podem trabalhar em paralelo.")
++        return 0
++    print(f"AGUARDANDO {', '.join(faltam)}: base {base[:7]} registrada, matriz {hm[:12]}. "
++          f"Quem chegar depois encontra este registro; nada fica em segundo plano. "
++          f"(Se ninguém vier em {a.espera} min, rode `status` e decida com o Humano; não há relógio automático.)")
++    return 0
++
++
++def cmd_status(_a):
++    s = _ler_json("sessao.json", None)
++    if not s:
++        print("sem sessão. Rode `iniciar`.")
++        return 0
++    rc, base, _ = _git(REPO, "rev-parse", "origin/main")
++    print(f"estado: {s['estado']} | base da sessão: {s['base'][:7]} | origin/main agora: {base[:7] if not rc else '?'}"
++          + ("  <-- DERIVA" if not rc and base != s["base"] else ""))
++    for ag in sorted(set(s["presentes"]) | set(s.get("esperados") or [])):
++        pr = s["presentes"].get(ag)
++        print(f"  {ag}: {'presente desde ' + pr['chegou_em'] if pr else 'ausente'}")
++    for ag, info in _ausentes().items():
++        outros = [x for x in _outros(s, ag) if x not in _ausentes()]
++        print(f"  AUSENTE: {ag} desde {info['desde']}" + (f" até {info['ate']}" if info.get('ate') else "")
++              + (f" ({info['motivo']})" if info.get('motivo') else "")
++              + f" -> cobrem a pista dele (fallback): {', '.join(outros) or 'ninguém presente'}")
++    if s.get("divergencia"):
++        print("  divergência:", s["divergencia"])
++    return 0
++
++
++def _ausentes():
++    """{agente: {desde, motivo, ate}} dos agentes declarados ausentes (cota esgotada, sessão fechada, etc.)."""
++    r = {}
++    for f in sorted(glob.glob(_p("ausencia-*.json"))):
++        info = _ler_json(os.path.basename(f), None)
++        if info:
++            r[os.path.basename(f)[9:-5]] = info
++    return r
++
++
++def cmd_ausente(a):
++    """FALLBACK: declara que `agente` não está disponível. A pista dele pode ser assumida pelos outros SEM alerta de
++    FORA DA PISTA; o trabalho feito assim fica listado como ASSUMIDA e vale revisão do titular ao voltar (autor != revisor)."""
++    _gravar_json(f"ausencia-{a.agente}.json", {"desde": agora(), "motivo": a.motivo or "", "ate": a.ate or ""})
++    _historico("ausente", agente=a.agente, motivo=a.motivo or "", ate=a.ate or "")
++    print(f"OK: {a.agente} ausente" + (f" até {a.ate}" if a.ate else "") + f". Os outros membros podem assumir a pista de {a.agente}; "
++          f"volte com `presente --agente {a.agente}`.")
++    return 0
++
++
++def cmd_presente(a):
++    p = _p(f"ausencia-{a.agente}.json")
++    if os.path.exists(p):
++        os.unlink(p)
++    _historico("presente", agente=a.agente)
++    print(f"OK: {a.agente} presente de novo. O que outro membro fez na pista dele (ASSUMIDA) espera a revisão de {a.agente}.")
++    return 0
++
++
++def cmd_matriz(_a):
++    s = _ler_json("sessao.json", None)
++    m = (s or {}).get("matriz") or MATRIZ_PADRAO
++    print(f"matriz {sha_matriz(m)[:12]} ({'congelada na sessão' if s and s.get('matriz') else 'padrão da ferramenta; sessão antiga sem congelamento'})")
++    for l in m:
++        print(f"  {l['dono']:8s} {l['papel']}: {', '.join(l['caminhos'])}")
++    return 0
++
++
++def cmd_propor_linha(a):
++    """Acrescenta UMA linha nova à matriz da sessão, por consentimento de TODOS os outros membros presentes. Nunca
++    altera nem remove linha existente; a linha nova não pode sobrepor pista já existente."""
++    with Trava():
++        s = _ler_json("sessao.json", None)
++        if not s or s["estado"] != "em_andamento":
++            print("RECUSADO: sem partida conjunta em andamento.", file=sys.stderr)
++            return 1
++        pend = _ler_json("proposta-matriz.json", None)
++        if pend:
++            print(f"RECUSADO: já há proposta pendente de {pend['proposta_por']} ({pend['linha']['papel']}); aguarde o aceite "
++                  "ou combine a retirada no canal. Nada é sobrescrito em silêncio.", file=sys.stderr)
++            return 1
++        linha = {"dono": a.dono, "papel": a.papel, "caminhos": sorted(a.caminhos)}
++        nova = (s.get("matriz") or MATRIZ_PADRAO) + [linha]
++        conflitos = disjunta(nova)
++        if conflitos:
++            print("RECUSADO: a linha sobrepõe pista existente:", *[f"  {c}" for c in conflitos], sep="\n", file=sys.stderr)
++            return 1
++        precisam = _outros(s, a.agente)
++        if not precisam:
++            print("RECUSADO: nenhum outro membro presente para aceitar (quem propõe não aceita a própria proposta).", file=sys.stderr)
++            return 1
++        _gravar_json("proposta-matriz.json", {"proposta_por": a.agente, "linha": linha, "em": agora(), "aceites": []})
++        _historico("proposta_de_linha", agente=a.agente, linha=linha)
++    print(f"OK: proposta registrada; precisam rodar `aceitar-linha`: {', '.join(precisam)}.")
++    return 0
++
++
++def cmd_aceitar_linha(a):
++    with Trava():
++        s = _ler_json("sessao.json", None)
++        prop = _ler_json("proposta-matriz.json", None)
++        if not s or not prop:
++            print("RECUSADO: não há proposta pendente.", file=sys.stderr)
++            return 1
++        if prop["proposta_por"] == a.agente:
++            print("RECUSADO: quem propõe não aceita a própria proposta (Regra 3).", file=sys.stderr)
++            return 1
++        if a.agente not in s.get("presentes", {}):
++            print(f"RECUSADO: {a.agente} não está presente na sessão (rode `iniciar` antes).", file=sys.stderr)
++            return 1
++        aceites = sorted(set(prop.get("aceites", [])) | {a.agente})
++        faltam = [m for m in _outros(s, prop["proposta_por"]) if m not in aceites]
++        if faltam:
++            prop["aceites"] = aceites
++            _gravar_json("proposta-matriz.json", prop)
++            _historico("linha_aceite_parcial", agente=a.agente, faltam=faltam)
++            print(f"OK: aceite de {a.agente} registrado; faltam: {', '.join(faltam)}.")
++            return 0
++        nova = (s.get("matriz") or MATRIZ_PADRAO) + [prop["linha"]]
++        if disjunta(nova):
++            print("RECUSADO: a linha passou a sobrepor outra pista.", file=sys.stderr)
++            return 1
++        s["matriz"] = nova
++        s["matriz_sha256"] = sha_matriz(nova)
++        _gravar_json("sessao.json", s)
++        os.replace(_p("proposta-matriz.json"), _p(f"proposta-matriz.aceita-{datetime.datetime.now(TZ):%H%M%S}.json"))
++        _historico("linha_aceita", agente=a.agente, linha=prop["linha"], matriz=s["matriz_sha256"][:12])
++    print(f"OK: matriz agora {s['matriz_sha256'][:12]} (linha de {prop['proposta_por']}, aceita por {', '.join(aceites)}).")
++    return 0
++
++
++def cmd_reivindicar(a):
++    with Trava():
++        s = _ler_json("sessao.json", None)
++        matriz = (s or {}).get("matriz") or MATRIZ_PADRAO
++        if not s or s["estado"] != "em_andamento":
++            print("RECUSADO: sem partida conjunta em andamento.", file=sys.stderr)
++            return 1
++        est = _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}})
++        usados = {c: (outro, i) for outro in _membros_com_estado() if outro != a.agente
++                  for i, v in _ler_json(f"estado-{outro}.json", {"itens": {}})["itens"].items() for c in v.get("caminhos", [])}
++        ruins = []
++        for c in a.caminhos:
++            for (d, _papel) in dono_de(c, matriz) or [(None, None)]:
++                if d != a.agente:
++                    ruins.append(f"{c}: pista de {d or 'ninguém'}")
++            if c in usados:
++                ruins.append(f"{c}: já reivindicado por {usados[c][0]} ({usados[c][1]})")
++        if ruins:
++            print("RECUSADO:", *ruins, sep="\n  ", file=sys.stderr)
++            return 1
++        est["itens"].setdefault(a.item, {"estado": "em_andamento"})["caminhos"] = sorted(a.caminhos)
++        est["itens"][a.item]["reivindicado_em"] = agora()
++        _gravar_json(f"estado-{a.agente}.json", est)
++        _historico("reivindicado", agente=a.agente, item=a.item, caminhos=sorted(a.caminhos))
++    print(f"OK: {a.agente} reivindicou {a.item}: {', '.join(sorted(a.caminhos))}")
++    return 0
++
++
++def cmd_estado(a):
++    with Trava():
++        est = _ler_json(f"estado-{a.agente}.json", {"agente": a.agente, "itens": {}})
++        it = est["itens"].setdefault(a.item, {})
++        it.update(estado=a.estado, atualizado_em=agora())
++        if a.bloqueio:
++            it["bloqueio"] = a.bloqueio
++        em_andamento = sum(1 for v in est["itens"].values() if v.get("estado") == "em_andamento")
++        if em_andamento > 2:
++            print(f"AVISO: {a.agente} tem {em_andamento} itens em andamento (limite combinado: 2).", file=sys.stderr)
++        _gravar_json(f"estado-{a.agente}.json", est)
++        _historico("estado", agente=a.agente, item=a.item, estado=a.estado)
++    print(f"OK: {a.item} -> {a.estado}")
++    return 0
++
++
++_ANC = re.compile(rb"<!-- ANCORA-SHA:INICIO.*?<!-- ANCORA-SHA:FIM -->", re.DOTALL)
++_ANCORADOS = ("REGRAS.md", "PROJETO.md", "MEMÓRIAS.md", "PROMPT_CARREGAMENTO.md")
++# Gerados pelos hooks a cada commit (derivados do canon, SEM quarentena no P-8); e pastas que não são do repositório.
++_IGNORAR = ("reports/", "research_notes/", ".hidrata.md", "INDICE_MEMORIAS.md", "INDICE_MEMORIAS_PALAVRAS-CHAVE.md")
++
++
++def _so_ancora(wt, base_wt, caminho):
++    """True se o arquivo (versão da worktree) só difere da base dentro do bloco ANCORA-SHA gerado pelo pre-commit."""
++    a = subprocess.run(["git", "-C", wt, "show", f"{base_wt}:{caminho}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++    if a.returncode:
++        return False
++    try:
++        with open(os.path.join(wt, caminho), "rb") as f:
++            b = f.read()
++    except OSError:
++        return False
++    return _ANC.sub(b"<ANCORA>", a.stdout, count=1) == _ANC.sub(b"<ANCORA>", b, count=1)
++
++
++def cmd_verificar(a):
++    """Compara o que cada worktree de membro (ramo `<membro>/*`, para todo membro presente, com estado ou dono na
++    matriz) alterou frente ao ponto em que saiu da base da sessão com a matriz de propriedade. Só RELATA: nada é corrigido."""
++    repo = a.repo or REPO
++    s = _ler_json("sessao.json", None)
++    if not s:
++        print("sem sessão.")
++        return 1
++    rc, saida, _ = _git(repo, "worktree", "list", "--porcelain")
++    membros = set(s.get("presentes", {})) | set(_membros_com_estado()) | {l["dono"] for l in (s.get("matriz") or MATRIZ_PADRAO)}
++    pistas = []
++    for bloco in saida.split("\n\n"):
++        d = dict(l.split(" ", 1) for l in bloco.splitlines() if " " in l)
++        partes = d.get("branch", "").split("/")
++        if "worktree" in d and len(partes) > 3 and partes[:2] == ["refs", "heads"] and partes[2] in membros:
++            pistas.append((d["worktree"], d["branch"], partes[2]))
++    achados, vistos, assumidas = [], {}, []
++    ausentes = set(_ausentes())
++    for caminho, ramo, quem in pistas:
++        rc, mb, _ = _git(caminho, "merge-base", "HEAD", s["base"])
++        if rc:
++            mb = s["base"]
++        _, nomes, _ = _git(caminho, "diff", "--name-only", mb)
++        _, novos, _ = _git(caminho, "ls-files", "--others", "--exclude-standard")
++        for f in sorted(set((nomes + "\n" + novos).splitlines()) - {""}):
++            if f.startswith(_IGNORAR) or f in _IGNORAR:
++                continue
++            if f in _ANCORADOS and _so_ancora(caminho, mb, f):
++                continue
++            donos = dono_de(f, s.get('matriz') or MATRIZ_PADRAO)
++            if not donos:
++                achados.append(f"SEM DONO: {f} (alterado por {quem}, {os.path.basename(caminho)})")
++            elif quem not in {d for d, _ in donos}:
++                if all(d in ausentes for d, _ in donos):
++                    assumidas.append(f"ASSUMIDA: {f} por {quem} (pista de {donos[0][0]}, ausente; revisão do titular ao voltar)")
++                else:
++                    achados.append(f"FORA DA PISTA: {f} alterado por {quem} (pista de {donos[0][0]}, {donos[0][1]})")
++            vistos.setdefault(f, set()).add(quem)
++    for f, qs in vistos.items():
++        if len(qs) > 1:
++            achados.append(f"DUPLO: {f} alterado por mais de um membro ({', '.join(sorted(qs))})")
++    print(f"worktrees examinadas: {len(pistas)} ({', '.join(os.path.basename(c) for c, _, _ in pistas) or 'nenhuma'})")
++    if assumidas:
++        print("FALLBACK (não é achado):", *sorted(assumidas), sep="\n  ")
++    if achados:
++        print("ACHADOS (nada foi corrigido):", *sorted(achados), sep="\n  ")
++        return 1
++    print("OK: nenhuma alteração fora da pista nem em duas pistas.")
++    return 0
++
++
++def cmd_quadro(_a):
++    s = _ler_json("sessao.json", {})
++    print(f"# Quadro (gerado em {agora()}; sessão {s.get('estado', '-')}, base {s.get('base', '-')[:7]})\n")
++    print("| item | dono | estado | caminhos | bloqueio |\n|---|---|---|---|---|")
++    for ag in _membros_com_estado():
++        for i, v in sorted(_ler_json(f"estado-{ag}.json", {"itens": {}})["itens"].items()):
++            print(f"| {i} | {ag} | {v.get('estado', '-')} | {', '.join(v.get('caminhos', [])) or '-'} | {v.get('bloqueio', '')} |")
++    return 0
++
++
++def _acrescentar_canal(texto):
++    os.makedirs(os.path.dirname(CANAL), exist_ok=True)
++    with open(CANAL, "a", encoding="utf-8") as f:
++        fcntl.flock(f, fcntl.LOCK_EX)
++        f.write(texto)
++        f.flush()
++        os.fsync(f.fileno())
++        fcntl.flock(f, fcntl.LOCK_UN)
++
++
++def cmd_dizer(a):
++    ident = f"{a.agente}-{datetime.datetime.now(TZ):%Y-%m-%d}-{hashlib.sha256((agora() + a.texto).encode()).hexdigest()[:8]}"
++    nome = NOMES.get(a.agente, a.agente.capitalize())
++    msg = (f"\n## {ident}\n- Autor: {nome} (modelo exato não medido por esta ferramenta).\n- Hora: {agora()} (relógio da Máquina).\n"
++           + (f"- Resposta-a: {a.resposta_a}.\n" if a.resposta_a else "")
++           + f"- Assunto: {a.assunto}.\n" + (f"- Estado: {a.estado}.\n" if a.estado else "")
++           + f"\n{a.texto.strip()}\n" + (f"\nPróximo responsável: {a.proximo}.\n" if a.proximo else ""))
++    _acrescentar_canal(msg)
++    print("OK:", ident)
++    return 0
++
++
++def cmd_ler(a):
++    marca = _ler_json(f"leitura-{a.agente}.json", {"offset": 0})
++    try:
++        with open(CANAL, encoding="utf-8") as f:
++            fcntl.flock(f, fcntl.LOCK_SH)
++            f.seek(marca["offset"])
++            novo = f.read()
++            fim = f.tell()
++            fcntl.flock(f, fcntl.LOCK_UN)
++    except OSError:
++        print("canal ausente.")
++        return 1
++    print(novo if novo.strip() else "(nada novo no canal desde a última leitura)")
++    with Trava():
++        _gravar_json(f"leitura-{a.agente}.json", {"offset": fim, "lido_em": agora()})
++    return 0
++
++
++def cmd_encerrar(a):
++    with Trava():
++        s = _ler_json("sessao.json", None)
++        if not s:
++            return 0
++        s["presentes"].pop(a.agente, None)
++        if not s["presentes"]:
++            s["estado"] = "encerrada"
++        _historico("saida", agente=a.agente, sessao=s["estado"])
++        _gravar_json("sessao.json", s)
++    print("OK: saída registrada.")
++    return 0
++
++
++# ---------------------------------------------------------------------------------------------
++def _selftest():
++    import shutil
++    import threading
++    global D, CANAL, RAIZ_SINC
++    res = {}
++    tmp = tempfile.mkdtemp(prefix="equipe-t-")
++    repo = os.path.join(tmp, "repo")
++    os.makedirs(repo)
++    env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
++    for k in [k for k in env if k.startswith("GIT_") and k not in ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM")]:
++        del env[k]
++    sh = lambda *c, cwd=repo: subprocess.run(c, cwd=cwd, env=env, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++    sh("git", "init", "-q", "-b", "main")
++    sh("git", "config", "user.email", "t@e.i"); sh("git", "config", "user.name", "t")
++    open(os.path.join(repo, "a.txt"), "w").write("a\n")
++    sh("git", "add", "-A"); sh("git", "commit", "-qm", "base")
++    bare = os.path.join(tmp, "origin.git")
++    sh("git", "clone", "-q", "--bare", repo, bare, cwd=tmp)
++    sh("git", "remote", "add", "origin", bare); sh("git", "fetch", "-q", "origin")
++    D = os.path.join(tmp, "sinc", "equipe"); RAIZ_SINC = os.path.join(tmp, "sinc"); CANAL = os.path.join(RAIZ_SINC, "conversa.md")
++    ns = lambda **k: argparse.Namespace(**{"repo": repo, "matriz": None, "nova_base": False, "item": None, "espera": 20,
++                                           "aceitar_matriz": None, **k})
++    try:
++        res["01 a matriz padrão é disjunta (um dono por arquivo)"] = disjunta(MATRIZ_PADRAO) == []
++        res["02 cada arquivo tem 1 dono e nenhum fica sem dono nos casos conhecidos"] = all(
++            len(dono_de(f, MATRIZ_PADRAO)) == 1 for f in (
++                "MEMÓRIAS.md", "scripts/p8_integral.py", ".githooks/post-commit", "redesign/router/seth_escriba.py",
++                "redesign/router/tts-piper/instalar-agata.sh", "scripts/busca_semantica.py", "AGENTS.md"))
++        buf = []
++        rc1 = cmd_iniciar(ns(agente="claude", item="A1"))
++        s = _ler_json("sessao.json", {})
++        res["03 o primeiro a chegar fica AGUARDANDO"] = rc1 == 0 and s["estado"] == "aguardando"
++        rc2 = cmd_iniciar(ns(agente="codex", item="A2"))
++        s = _ler_json("sessao.json", {})
++        res["04 a chegada do segundo abre a PARTIDA CONJUNTA"] = rc2 == 0 and s["estado"] == "em_andamento" and "iniciada_em" in s
++        # base que anda
++        open(os.path.join(repo, "b.txt"), "w").write("b\n"); sh("git", "add", "-A"); sh("git", "commit", "-qm", "avanço"); sh("git", "push", "-q", "origin", "main")
++        res["05 origin/main andou: iniciar recusa sem --nova-base"] = cmd_iniciar(ns(agente="claude", item="A1")) == 1
++        res["06 --nova-base é aceita e entra no histórico"] = cmd_iniciar(ns(agente="claude", item="A1", nova_base=True)) == 0 \
++            and "nova_base" in open(_p("historico.jsonl")).read()
++        # reivindicação
++        s = _ler_json("sessao.json", {})
++        cmd_iniciar(ns(agente="codex", item="A2"))
++        res["07 reivindicar arquivo da própria pista funciona"] = cmd_reivindicar(argparse.Namespace(
++            agente="claude", item="A1", caminhos=["scripts/p8_integral.py"])) == 0
++        res["08 reivindicar arquivo da pista do outro é recusado"] = cmd_reivindicar(argparse.Namespace(
++            agente="claude", item="X", caminhos=["redesign/router/seth_escriba.py"])) == 1
++        res["09 reivindicar o que o outro já reivindicou é recusado"] = (
++            cmd_reivindicar(argparse.Namespace(agente="codex", item="A2", caminhos=["redesign/router/seth_escriba.py"])) == 0
++            and cmd_reivindicar(argparse.Namespace(agente="claude", item="Y", caminhos=["redesign/router/seth_escriba.py"])) == 1)
++        # matriz divergente
++        alt = os.path.join(tmp, "alt.json")
++        json.dump(MATRIZ_PADRAO[:-1], open(alt, "w"))
++        res["10 matriz diferente da aceita pelo outro: DIVERGENTE e nada começa"] = cmd_iniciar(ns(agente="codex", item="A2", matriz=alt)) == 1 \
++            and _ler_json("sessao.json", {}).get("estado") == "divergente"
++
++        s10 = _ler_json("sessao.json", {})
++        res["10b a sessão congela a matriz e mostra a diferença na divergência"] = bool(s10.get("matriz")) and s10["estado"] == "divergente"
++        sess_pref = s10["matriz_sha256"][:12]
++        res["10c adotar a matriz congelada (--aceitar-matriz) tira a divergência e abre a partida"] = \
++            cmd_iniciar(ns(agente="codex", item="A2", matriz=alt, aceitar_matriz=sess_pref)) == 0 \
++            and _ler_json("sessao.json", {})["estado"] == "em_andamento"
++
++        # emenda da matriz por consentimento mútuo
++        s_ant = _ler_json("sessao.json", {})
++        prop = argparse.Namespace(agente="claude", dono="claude", papel="inventário", caminhos=["scripts/inventario_componentes.py"])
++        res["10d propor linha nova: registrada, e quem propõe NÃO aceita a própria"] = cmd_propor_linha(prop) == 0 \
++            and cmd_aceitar_linha(argparse.Namespace(agente="claude")) == 1
++        res["10e o outro aceita: matriz muda (sha novo), linha existente intacta e a pista passa a ter dono"] = \
++            cmd_aceitar_linha(argparse.Namespace(agente="codex")) == 0 \
++            and _ler_json("sessao.json", {})["matriz_sha256"] != s_ant["matriz_sha256"] \
++            and dono_de("scripts/inventario_componentes.py", _ler_json("sessao.json", {})["matriz"]) == [("claude", "inventário")]
++        res["10g com a proposta anterior já aceita, nova proposta é possível; com uma pendente, a segunda é recusada"] = (
++            cmd_propor_linha(argparse.Namespace(agente="codex", dono="codex", papel="outra", caminhos=["x/y.txt"])) == 0
++            and cmd_propor_linha(argparse.Namespace(agente="claude", dono="claude", papel="terceira", caminhos=["z/w.txt"])) == 1)
++        os.unlink(_p("proposta-matriz.json"))
++        res["10f linha que sobrepõe pista existente é recusada"] = cmd_propor_linha(argparse.Namespace(
++            agente="codex", dono="codex", papel="intruso", caminhos=["scripts/p8_integral.py"])) == 1
++        # canal: dois escritores simultâneos, nada se perde
++        for k in ("sessao.json", "historico.jsonl"):
++            os.path.exists(_p(k)) and os.unlink(_p(k))
++        ts = []
++        for i in range(12):
++            ag = ("claude", "codex")[i % 2]
++            ts.append(threading.Thread(target=cmd_dizer, args=(argparse.Namespace(
++                agente=ag, assunto=f"a{i}", texto=f"mensagem {i}", resposta_a=None, estado=None, proximo=None),)))
++        [t.start() for t in ts]; [t.join() for t in ts]
++        txt = open(CANAL).read()
++        res["11 12 mensagens simultâneas: todas presentes e inteiras"] = all(f"mensagem {i}" in txt for i in range(12)) and txt.count("## ") == 12
++        before = open(CANAL).read()
++        cmd_dizer(argparse.Namespace(agente="claude", assunto="x", texto="y", resposta_a=None, estado=None, proximo=None))
++        res["12 o canal só cresce (o texto anterior segue intacto)"] = open(CANAL).read().startswith(before)
++        # chegada simultânea: abre uma única partida
++        threads = [threading.Thread(target=cmd_iniciar, args=(ns(agente=ag, item="Z"),)) for ag in ("claude", "codex")]
++        [t.start() for t in threads]; [t.join() for t in threads]
++        hist = open(_p("historico.jsonl")).read()
++        res["13 chegada simultânea: exatamente 1 partida conjunta"] = hist.count("partida_conjunta") == 1 \
++            and _ler_json("sessao.json", {})["estado"] == "em_andamento"
++        # leitura incremental
++        cmd_ler(argparse.Namespace(agente="codex"))
++        n1 = _ler_json("leitura-codex.json", {})["offset"]
++        cmd_dizer(argparse.Namespace(agente="claude", assunto="novo", texto="oi", resposta_a=None, estado=None, proximo=None))
++        cmd_ler(argparse.Namespace(agente="codex"))
++        res["14 `ler` avança o marcador e só mostra o novo"] = _ler_json("leitura-codex.json", {})["offset"] > n1
++        # verificar com worktrees reais
++        sh("git", "branch", "claude/it"); sh("git", "branch", "codex/it")
++        wc, wx = os.path.join(tmp, "wc"), os.path.join(tmp, "wx")
++        sh("git", "worktree", "add", "-q", wc, "claude/it"); sh("git", "worktree", "add", "-q", wx, "codex/it")
++        s0 = _ler_json("sessao.json", {})
++        base_atual = subprocess.run(["git", "-C", repo, "rev-parse", "origin/main"], stdout=subprocess.PIPE, text=True).stdout.strip()
++        with Trava():
++            s0["base"] = base_atual
++            _gravar_json("sessao.json", s0)
++        def escreve(wt, rel, txt):
++            os.makedirs(os.path.dirname(os.path.join(wt, rel)), exist_ok=True)
++            open(os.path.join(wt, rel), "w").write(txt)
++        escreve(wc, "scripts/p8_integral.py", "x\n"); escreve(wx, "redesign/router/seth_escriba.py", "y\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
++                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
++        res["15 cada um na própria pista: verificar OK"] = o.returncode == 0 and "OK:" in o.stdout
++        escreve(wx, "scripts/p8_integral.py", "z\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
++                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
++        res["16 o Codex mexe na pista do Claude: FORA DA PISTA e DUPLO"] = o.returncode == 1 and "FORA DA PISTA: scripts/p8_integral.py" in o.stdout and "DUPLO" in o.stdout
++        os.unlink(os.path.join(wx, "scripts/p8_integral.py"))
++        bloco = "<!-- ANCORA-SHA:INICIO (x) -->\n  sha\n<!-- ANCORA-SHA:FIM -->\n"
++        sh("git", "-C", wc, "checkout", "-q", "-B", "claude/it") if False else None
++        escreve(repo, "REGRAS.md", bloco.replace("sha", "aaa") + "corpo\n"); sh("git", "add", "-A"); sh("git", "commit", "-qm", "regras"); sh("git", "push", "-q", "origin", "main")
++        sh("git", "-C", wc, "merge", "-q", "--ff-only", "main") if False else None
++        s0["base"] = subprocess.run(["git", "-C", repo, "rev-parse", "HEAD"], stdout=subprocess.PIPE, text=True).stdout.strip()
++        with Trava():
++            _gravar_json("sessao.json", s0)
++        for w in (wc, wx):
++            subprocess.run(["git", "-C", w, "merge", "-q", "--ff-only", s0["base"]], check=True, capture_output=True)
++        escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
++                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
++        res["17 só o bloco de âncora mudou em REGRAS.md: não é achado"] = "REGRAS.md" not in o.stdout
++        escreve(wc, "REGRAS.md", bloco.replace("sha", "bbb") + "corpo ALTERADO\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
++                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
++        res["18a REGRAS.md mudou fora da âncora pelo integrador (Claude): sem achado"] = "FORA DA PISTA: REGRAS.md" not in o.stdout
++        escreve(wx, "REGRAS.md", bloco.replace("sha", "ccc") + "corpo DO CODEX\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True,
++                           env=dict(os.environ, EQUIPE_DIR=RAIZ_SINC))
++        res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
++        if not res["18b o Codex muda REGRAS.md fora da âncora: FORA DA PISTA"]:
++            print("DEBUG 18b:", o.returncode, o.stdout, o.stderr[-300:])
++        # 19-21: fallback mútuo. Claude é o dono de REGRAS.md; o Codex a alterou (18b). Se o CLAUDE for declarado ausente, vira ASSUMIDA.
++        env19 = dict(os.environ, EQUIPE_DIR=RAIZ_SINC)
++        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "ausente", "--agente", "claude", "--motivo", "teste"], capture_output=True, text=True, env=env19)
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
++        res["19 titular ausente: o outro mexer na pista vira ASSUMIDA, não FORA DA PISTA"] = \
++            "ASSUMIDA: REGRAS.md por codex" in o.stdout and "FORA DA PISTA: REGRAS.md alterado por codex" not in o.stdout
++        st = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=env19)
++        res["20 status mostra o ausente e quem cobre"] = "AUSENTE: claude" in st.stdout and "cobrem a pista dele (fallback): codex" in st.stdout
++        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "presente", "--agente", "claude"], capture_output=True, text=True, env=env19)
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
++        res["21 titular de volta: volta o alerta FORA DA PISTA"] = "FORA DA PISTA: REGRAS.md alterado por codex" in o.stdout
++        # 22-27: Equipe universal (qualquer membro do Conselho, não só Claude e Codex)
++        res["22 terceiro membro (gemini) entra na partida já aberta"] = cmd_iniciar(ns(agente="gemini", item="G1")) == 0 \
++            and "gemini" in _ler_json("sessao.json", {})["presentes"] and _ler_json("sessao.json", {})["estado"] == "em_andamento"
++        p3 = argparse.Namespace(agente="gemini", dono="gemini", papel="pesquisa", caminhos=["research_notes/g.md"])
++        res["23 com 3 presentes, a linha só entra quando os 2 outros aceitam"] = cmd_propor_linha(p3) == 0 \
++            and cmd_aceitar_linha(argparse.Namespace(agente="claude")) == 0 and os.path.exists(_p("proposta-matriz.json")) \
++            and cmd_aceitar_linha(argparse.Namespace(agente="codex")) == 0 and not os.path.exists(_p("proposta-matriz.json")) \
++            and dono_de("research_notes/g.md", _ler_json("sessao.json", {})["matriz"]) == [("gemini", "pesquisa")]
++        sh("git", "branch", "gemini/it"); wg = os.path.join(tmp, "wg"); sh("git", "worktree", "add", "-q", wg, "gemini/it")
++        escreve(wg, "research_notes/g.md", "g\n")
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "verificar", "--repo", repo], capture_output=True, text=True, env=env19)
++        res["24 verificar enxerga a worktree do terceiro membro (gemini/*)"] = "wg" in o.stdout and "research_notes/g.md" not in o.stdout.split("ACHADOS")[-1]
++        try:
++            membro("Codex X"); res["25 nome de membro fora do slug é recusado"] = False
++        except argparse.ArgumentTypeError:
++            res["25 nome de membro fora do slug é recusado"] = True
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "dizer", "--agente", "goose", "--assunto", "a", "--texto", "b"],
++                           capture_output=True, text=True, env=env19)
++        res["26 membro sem nome cadastrado fala no canal (Goose)"] = o.returncode == 0 and "- Autor: Goose" in open(CANAL).read()
++        velho = os.path.join(tmp, "velho"); os.makedirs(os.path.join(velho, "dupla")); json.dump({"estado": "x"}, open(os.path.join(velho, "dupla", "sessao.json"), "w"))
++        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=dict(os.environ, EQUIPE_DIR=velho))
++        res["27 estado antigo em dupla/ migra para equipe/ sem perda"] = os.path.exists(os.path.join(velho, "equipe", "sessao.json")) \
++            and not os.path.exists(os.path.join(velho, "dupla"))
++    finally:
++        shutil.rmtree(tmp, ignore_errors=True)
++    for k, v in res.items():
++        print(("OK    " if v else "FALHOU"), k)
++    ruins = [k for k, v in res.items() if not v]
++    print(f"equipe selftest: {len(res) - len(ruins)}/{len(res)} verificações OK")
++    return 1 if ruins else 0
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--selftest", action="store_true")
++    sp = ap.add_subparsers(dest="cmd")
++    def com(nome, **args):
++        p = sp.add_parser(nome)
++        for k, v in args.items():
++            p.add_argument(f"--{k.replace('_', '-')}", **v)
++        return p
++    ag = {"required": True, "type": membro}
++    p = com("iniciar", agente=ag, item={}, nova_base={"action": "store_true"}, matriz={}, aceitar_matriz={},
++            espera={"type": int, "default": 20}, repo={},
++            com={"type": lambda v: [membro(x.strip()) for x in v.split(",") if x.strip()], "help": "membros esperados (só na criação)"})
++    sp.add_parser("matriz")
++    p = com("propor-linha", agente=ag, dono={"required": True, "type": membro}, papel={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
++    com("aceitar-linha", agente=ag)
++    sp.add_parser("status")
++    p = com("reivindicar", agente=ag, item={"required": True}); p.add_argument("--caminhos", nargs="+", required=True)
++    com("estado", agente=ag, item={"required": True}, estado={"required": True, "choices": ["em_andamento", "em_revisao", "bloqueado", "pronto"]}, bloqueio={})
++    com("verificar", repo={})
++    sp.add_parser("quadro")
++    com("dizer", agente=ag, assunto={"required": True}, texto={"required": True}, resposta_a={}, estado={}, proximo={})
++    com("ler", agente=ag)
++    com("ausente", agente=ag, motivo={}, ate={})
++    com("presente", agente=ag)
++    com("encerrar", agente=ag)
++    a = ap.parse_args(argv)
++    if a.selftest:
++        return _selftest()
++    _migrar_dupla()
++    f = {"iniciar": cmd_iniciar, "status": cmd_status, "reivindicar": cmd_reivindicar, "estado": cmd_estado,
++         "verificar": cmd_verificar, "quadro": cmd_quadro, "matriz": cmd_matriz, "propor-linha": cmd_propor_linha, "aceitar-linha": cmd_aceitar_linha, "dizer": cmd_dizer, "ler": cmd_ler, "ausente": cmd_ausente, "presente": cmd_presente, "encerrar": cmd_encerrar}.get(a.cmd)
++    if not f:
++        ap.print_help()
++        return 2
++    return f(a)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/equipe/inicio.sh b/scripts/equipe/inicio.sh
+new file mode 100755
+index 00000000..7fb806af
+--- /dev/null
++++ b/scripts/equipe/inicio.sh
+@@ -0,0 +1,14 @@
++#!/usr/bin/env bash
++# Início de sessão na Equipe (skill agata-fluxo §0): uma leitura, saída curta. Qualquer membro do Conselho.
++# Uso: bash scripts/equipe/inicio.sh <membro>   (claude, codex, gemini, goose...)
++# Sem nada novo, não imprime texto (economia de tokens).
++set -euo pipefail
++agente="${1:?uso: inicio.sh <membro>}"
++raiz="$(cd "$(dirname "$0")/../.." && pwd)"
++cd "$raiz"
++timeout 60 python3 scripts/equipe/equipe.py presente --agente "$agente" >/dev/null 2>&1 || true
++novo="$(timeout 60 python3 scripts/equipe/equipe.py ler --agente "$agente" 2>/dev/null || true)"
++case "$novo" in
++  ""|*"nada novo no canal"*) exit 0 ;;
++  *) printf '%s\n' "$novo" ;;
++esac
+diff --git a/scripts/equipe/testar_auxiliares.py b/scripts/equipe/testar_auxiliares.py
+new file mode 100755
+index 00000000..5fac52c0
+--- /dev/null
++++ b/scripts/equipe/testar_auxiliares.py
+@@ -0,0 +1,112 @@
++#!/usr/bin/env python3
++"""Testes das ferramentas auxiliares da Equipe (aplicar.py, vigia_par.py, contar_turnos.py, vigia.sh). Só /tmp; sem rede, sem git, sem gh.
++Cada caso nasceu de um erro real de 16/10/2026 (MEMÓRIAS (732))."""
++import datetime
++import importlib.util
++import json
++import os
++import subprocess
++import sys
++import tempfile
++
++AQUI = os.path.dirname(os.path.abspath(__file__))
++
++
++def carregar(nome):
++    s = importlib.util.spec_from_file_location(nome, os.path.join(AQUI, nome + ".py"))
++    m = importlib.util.module_from_spec(s)
++    s.loader.exec_module(m)
++    return m
++
++
++def bloco(autor, minutos, prox):
++    t = (datetime.datetime.now().astimezone() - datetime.timedelta(minutes=minutos)).isoformat(timespec="seconds")
++    return f"## {autor}-2026-10-28-x\n- Hora: {t}\n- Assunto: a\n\ntexto\n\nPróximo responsável: {prox}\n"
++
++
++def par(eu, *specs):
++    d = tempfile.mkdtemp()
++    arq = os.path.join(d, "canal.md")
++    blocos = []
++    for i, (autor, minutos, prox) in enumerate(specs):
++        blocos.append(bloco(autor, minutos, prox).replace(f"{autor}-2026-10-28-x", f"{autor}-2026-10-28-x{i}"))
++    open(arq, "w", encoding="utf-8").write("\n".join(blocos))
++    return subprocess.run([sys.executable, "-I", os.path.join(AQUI, "vigia_par.py"), eu, arq], capture_output=True, text=True).stdout.strip()
++
++
++def main():
++    casos = []
++    ap = carregar("aplicar")
++    casos.append(("numeração: título acentuado (DIÁRIO/CORREÇÃO) conta", ap.proximo_numero("(728) CONSELHO — a\n(729) DIÁRIO — b\n(730) CORREÇÃO — c\n") == 731))
++    casos.append(("numeração: só o cabeçalho no início da linha", ap.proximo_numero("(5) DIÁRIO — x\ncita (999) no meio da linha\n") == 6))
++    try:
++        ap.proximo_numero("sem entradas")
++        casos.append(("numeração: sem entrada é erro explícito", False))
++    except ValueError:
++        casos.append(("numeração: sem entrada é erro explícito", True))
++    casos.append(("refazer base: PR DIRTY (conflito com o main) refaz", ap.precisa_refazer("DIRTY", "")))
++    casos.append(("refazer base: PR BEHIND (main andou) refaz", ap.precisa_refazer("BEHIND", "")))
++    casos.append(("refazer base: mensagem 'not up to date' sem estado refaz", ap.precisa_refazer("", "Head branch is not up to date")))
++    casos.append(("refazer base: BLOCKED (check vermelho) não refaz", not ap.precisa_refazer("BLOCKED", "Required status check failed")))
++    casos.append(("par: pedido do outro há 12 min sem resposta -> DEVO RESPOSTA", par("claude", ("codex", 12, "claude")).startswith("DEVO RESPOSTA")))
++    casos.append(("par: pedido recente (2 min) -> silêncio", par("claude", ("codex", 2, "claude")) == ""))
++    casos.append(("par: pedido antigo respondido -> silêncio", par("claude", ("codex", 30, "claude"), ("claude", 20, "codex"), ("codex", 3, "humano")) == ""))
++    casos.append(("par: dois pedidos, mede pelo MAIS ANTIGO", par("claude", ("codex", 12, "claude"), ("codex", 3, "claude")).startswith("DEVO RESPOSTA")))
++    casos.append(("par: meu pedido escondido por mensagem minha seguinte -> SEM RESPOSTA", par("claude", ("claude", 20, "codex"), ("claude", 19, "humano")).startswith("SEM RESPOSTA: codex")))
++    casos.append(("par: o alerta não traz contador de minutos (dedup)", "min)" not in par("claude", ("codex", 12, "claude")) and "há " not in par("claude", ("codex", 12, "claude"))))
++    ct = os.path.join(AQUI, "contar_turnos.py")
++    d = tempfile.mkdtemp()
++    arq = os.path.join(d, "s.jsonl")
++    reg = [{"type": "user", "message": {"content": "oi"}},
++           {"type": "user", "message": {"content": [{"type": "tool_result", "content": "x"}]}},
++           {"type": "user", "message": {"content": "<system-reminder>aviso</system-reminder>"}},
++           {"type": "user", "message": {"content": [{"type": "text", "text": "[SYSTEM NOTIFICATION - NOT USER INPUT] x"}]}},
++           {"type": "user", "message": {"content": [{"type": "text", "text": "segunda fala do humano"}]}},
++           {"type": "assistant", "message": {"content": "resposta"}}]
++    open(arq, "w", encoding="utf-8").write("\n".join(json.dumps(r) for r in reg))
++    casos.append(("t=: conta só as falas do Humano (2 de 6 registros)", subprocess.run([sys.executable, "-I", ct, arq], capture_output=True, text=True).stdout.strip() == "2"))
++    contador = carregar("contar_turnos")
++    misto = [
++        {"type":"assistant","message":{"id":"a","content":[{"type":"thinking","thinking":"x"}]}},
++        {"type":"assistant","message":{"id":"b","content":[{"type":"tool_use","name":"x"}]}},
++        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um"}]}},
++        {"type":"assistant","message":{"id":"c","content":[{"type":"text","text":"um completo"}]}},
++        {"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"dois"}]}},
++        {"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"humano"}]}},
++    ]
++    casos.append(("t=: modo respostas conta 2 (sem tool/thinking/repetição)", contador.contar(map(json.dumps,misto)) == 2))
++    try:
++        contador.contar(['{incompleto'])
++        casos.append(("t=: modo respostas, transcrito truncado falha",False))
++    except ValueError:
++        casos.append(("t=: modo respostas, transcrito truncado falha",True))
++    casos.append(("t=: --modo respostas --proximo soma 1", subprocess.run([sys.executable,"-I",ct,"--modo","respostas","--proximo",arq],capture_output=True,text=True).stdout.strip() == "2"))
++    env_ct = {k:v for k,v in os.environ.items() if k != "AGATA_TRANSCRITO"}
++    casos.append(("t=: modo respostas sem fonte não escolhe sessão alheia", subprocess.run([sys.executable,"-I",ct,"--modo","respostas"],capture_output=True,text=True,env=env_ct).returncode == 2))
++    vg = os.path.join(AQUI, "vigia.sh")
++    casos.append(("vigia.sh: sintaxe bash válida", subprocess.run(["bash", "-n", vg]).returncode == 0))
++    iso = tempfile.mkdtemp()
++    open(os.path.join(iso, "canal.md"), "w").write("")
++    ambiente = dict(os.environ, EQUIPE_CANAL=os.path.join(iso, "canal.md"), EQUIPE_REPO=iso, EQUIPE_PARAR=os.path.join(iso, "parar"))
++    r = subprocess.run(["bash", vg, "claude", "1", "--uma", "3"], capture_output=True, text=True, timeout=30, env=ambiente)
++    casos.append(("vigia.sh --uma: sem evento, sai por tempo com 'SEM EVENTO'", r.returncode == 0 and "SEM EVENTO" in r.stdout))
++    casos.append(("equipe: pedido do gemini ao claude há 12 min -> DEVO RESPOSTA a gemini", par("claude", ("gemini", 12, "claude")).startswith("DEVO RESPOSTA a gemini")))
++    casos.append(("equipe: membro com hífen (claude-web) é um autor só", par("claude-web", ("codex", 12, "claude-web")).startswith("DEVO RESPOSTA a codex")))
++    casos.append(("equipe: pedido ao Humano não vira alerta", par("claude", ("claude", 30, "humano")) == ""))
++    casos.append(("equipe: pedidos a dois membros, um respondeu -> só o outro alerta",
++                  (lambda o: o.startswith("SEM RESPOSTA: gemini") and "codex" not in o)(
++                      par("claude", ("claude", 30, "codex"), ("claude", 29, "gemini"), ("codex", 20, "humano")))))
++    # vigia.sh: canal sem bloco de outro membro não pode morrer em aritmética ($'0\n0', achado da auditoria de 28/10)
++    iso2 = tempfile.mkdtemp(); open(os.path.join(iso2, "canal.md"), "w").write("## claude-2026-10-28-aaaa\n- Hora: x\n")
++    amb2 = dict(os.environ, EQUIPE_CANAL=os.path.join(iso2, "canal.md"), EQUIPE_REPO=iso2, EQUIPE_PARAR=os.path.join(iso2, "parar"))
++    r2 = subprocess.run(["bash", vg, "claude", "1", "--uma", "3"], capture_output=True, text=True, timeout=30, env=amb2)
++    casos.append(("vigia.sh: canal só com blocos meus não quebra a conta", r2.returncode == 0 and "SEM EVENTO" in r2.stdout and "erro" not in r2.stderr.lower()))
++    for n, ok in casos:
++        print(("PASS  " if ok else "FALHA ") + n)
++    ruins = [n for n, ok in casos if not ok]
++    print(f"auxiliares da equipe: {len(casos) - len(ruins)}/{len(casos)}")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/equipe/vigia.sh b/scripts/equipe/vigia.sh
+new file mode 100755
+index 00000000..96d3da2f
+--- /dev/null
++++ b/scripts/equipe/vigia.sh
+@@ -0,0 +1,26 @@
++#!/usr/bin/env bash
++# vigia.sh <membro> [intervalo_s=20]  -- SEM modelo: só shell. Imprime UMA linha quando algo muda; silêncio = nada mudou.
++# Sinais: mensagem nova de OUTRO membro da Equipe no canal, novo/removido APROVADO- em propostas/, novo HEAD de origin/main.
++# Uso (quem tem Monitor/stdout em segundo plano): rode em background e reaja só às linhas. Pare com: touch ~/.cache/agata/sincronia/vigia.parar
++set -u
++eu="${1:?uso: vigia.sh <membro> [intervalo_s] [--uma [max_s]]}"; iv="${2:-20}"; uma=0; max=600; [ "${3:-}" = "--uma" ] && { uma=1; max="${4:-600}"; }; ini=$SECONDS
++C="${EQUIPE_CANAL:-${DUPLA_CANAL:-$HOME/.cache/agata/sincronia/conversa.md}}"; R="${EQUIPE_REPO:-${DUPLA_REPO:-$HOME/agata}}"; P="${EQUIPE_PARAR:-${DUPLA_PARAR:-$HOME/.cache/agata/sincronia/vigia.parar}}"; rm -f "$P"
++# Blocos de outros membros = todos os blocos menos os meus. `grep -c` imprime 0 e sai com 1 quando não acha: o `|| true` não pode somar um segundo "0".
++outros() { local t m; t=$(grep -c '^## ' "$C" 2>/dev/null) || true; m=$(grep -c "^## $eu-" "$C" 2>/dev/null) || true; echo $(( ${t:-0} - ${m:-0} )); }
++n0=$(outros)
++a0=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
++par0=""
++h0=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
++while [ ! -e "$P" ]; do
++  sleep "$iv"
++  achou=0
++  n=$(outros)
++  a=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
++  h=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
++  [ "$n" != "$n0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MENSAGEM de outro membro: $((n-n0)) nova(s)"; n0=$n; achou=1; }
++  [ "$a" != "$a0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) ASSINATURAS mudaram: $(ls "$R"/propostas/APROVADO-* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"; a0=$a; achou=1; }
++  par=$(python3 -I "$(dirname "$0")/vigia_par.py" "$eu" "$C" 2>/dev/null); [ -n "$par" ] && [ "$par" != "$par0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) $par"; par0="$par"; achou=1; }
++  [ -n "$h" ] && [ "$h" != "$h0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MAIN andou: $h"; h0=$h; achou=1; }
++  [ "$uma" = 1 ] && [ "$achou" = 1 ] && exit 0
++  [ "$uma" = 1 ] && [ $((SECONDS-ini)) -ge "$max" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) SEM EVENTO em ${max}s"; exit 0; }
++done
+diff --git a/scripts/equipe/vigia_par.py b/scripts/equipe/vigia_par.py
+new file mode 100755
+index 00000000..b5122542
+--- /dev/null
++++ b/scripts/equipe/vigia_par.py
+@@ -0,0 +1,38 @@
++#!/usr/bin/env python3
++"""vigia_par.py <eu> [canal.md] -- olha o canal da Equipe e diz, em uma linha, se alguém está esperando alguém demais.
++Vale para qualquer membro do Conselho. Silêncio = nada a alertar. A linha NÃO traz contador de minutos (para o vigia.sh
++deduplicar: uma emissão por pendência). Saídas:
++  DEVO RESPOSTA: depois do meu último bloco, outro membro pôs 'Próximo responsável' = eu, parado há >= 8 min;
++  SEM RESPOSTA: meu pedido a um membro (próximo = ele) segue sem bloco dele depois, parado há >= 15 min (silêncio não prova ausência).
++Só leitura. Hora do bloco = linha '- Hora:' (relógio da Máquina). 'humano' não é membro: pedido ao Humano não alerta."""
++import datetime, os, re, sys
++eu = sys.argv[1]
++canal = sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser("~/.cache/agata/sincronia/conversa.md")
++def parse(b):
++    cab = b.split("\n", 1)[0][3:].strip()
++    m = re.search(r"^- Hora: (\S+)", b, re.M)
++    prox = re.search(r"Próximo responsável:\s*([\w-]+)", b)
++    try:
++        t = datetime.datetime.fromisoformat(m.group(1)) if m else None
++    except ValueError:
++        t = None
++    autor = re.match(r"^([a-z][a-z0-9-]*?)-\d{4}-\d{2}-\d{2}-", cab)  # id = <membro>-<data>-<hash>; membro pode ter hífen
++    return (autor.group(1) if autor else cab.split("-", 1)[0]), cab, t, (prox.group(1) if prox else None)
++
++
++try:
++    blocos = [parse(b) for b in re.split(r"(?m)^(?=## )", open(canal, encoding="utf-8").read()) if b.startswith("## ")]
++except OSError:
++    sys.exit(0)
++agora = lambda t: datetime.datetime.now(t.tzinfo)
++ultimo = lambda quem: max([k for k, x in enumerate(blocos) if x[0] == quem], default=-1)
++# Pendência de OUTROS comigo: o pedido MAIS ANTIGO a mim depois do meu último bloco.
++ped = [x for x in blocos[ultimo(eu) + 1:] if x[0] != eu and x[3] == eu and x[2]]
++if ped and (agora(ped[0][2]) - ped[0][2]).total_seconds() >= 480:
++    print(f"DEVO RESPOSTA a {ped[0][0]} (>= 8 min sem eu responder; primeiro pedido em {ped[0][1]})")
++# Pendência MINHA com cada membro: meu pedido mais antigo a ele depois do último bloco dele.
++for alvo in sorted({x[3] for x in blocos if x[0] == eu and x[3] and x[3] not in (eu, "humano")}):
++    ped = [x for x in blocos[ultimo(alvo) + 1:] if x[0] == eu and x[3] == alvo and x[2]]
++    if ped and (agora(ped[0][2]) - ped[0][2]).total_seconds() >= 900:
++        print(f"SEM RESPOSTA: {alvo} não responde (>= 15 min; primeiro pedido em {ped[0][1]}). Silêncio NÃO prova cota esgotada: "
++              f"confirme com o Humano ou com {alvo} antes de usar `equipe.py ausente`")
+diff --git a/scripts/sessao_claude_contexto.sh b/scripts/sessao_claude_contexto.sh
+index 7bfc5faf..319e2c95 100755
+--- a/scripts/sessao_claude_contexto.sh
++++ b/scripts/sessao_claude_contexto.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ # (28/10/2026) Contexto automático para sessões do Claude Code no ~/agata: estado da Máquina,
+-# memória comum do Conselho e estado da dupla. Entregue pelo hook SessionStart de .claude/settings.json.
++# memória comum do Conselho e estado da Equipe. Entregue pelo hook SessionStart de .claude/settings.json.
+ # Só leitura. Saída: JSON com hookSpecificOutput.additionalContext. Não escreve em lugar nenhum.
+ set -u
+ cd "$(dirname "$0")/.." || exit 0
+@@ -9,8 +9,8 @@ ctx() {
+   timeout 30 bash scripts/estado_para_eco.sh 2>/dev/null | head -8 || echo "(indisponível)"
+   echo "=== Memória comum do Conselho (últimas 10) ==="
+   timeout 30 python3 redesign/router/cache_conselho.py ler --n 10 2>/dev/null | head -40 || echo "(indisponível)"
+-  echo "=== Sessão conjunta (dupla.py status) ==="
+-  timeout 30 python3 scripts/dupla/dupla.py status 2>/dev/null | head -3 || echo "(indisponível)"
++  echo "=== Sessão conjunta (equipe.py status) ==="
++  timeout 30 python3 scripts/equipe/equipe.py status 2>/dev/null | head -3 || echo "(indisponível)"
+   echo "=== Regras desta sessão ==="
+   echo "Cabeçalho na abertura de cada resposta. Fato do sistema: busque no vault antes de afirmar. Antes de entregar texto com afirmação verificável: python3 redesign/router/auditoria_turno.py --verificar < arquivo. Ao fechar trabalho relevante: cache_conselho.py anotar."
+ }

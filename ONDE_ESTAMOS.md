@@ -12,6 +12,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **Esperando a sua assinatura:**
 - `aplicar-refazer-base-20261028`: quando o main anda antes do merge, o script de aplicação refaz o PR sobre o main novo, em vez de misturar os dois e travar em conflito. Depois dele, o Discord pode ser reaplicado.
+- `equipe-universal-20261028`: a dupla passa a se chamar Equipe e aceita qualquer membro do Conselho, não só Claude e Codex. Assine depois da anterior: as duas mexem no mesmo script.
 
 **Aplicado no PR #674:**
 - RelayCouncil: contrato v3 e catálogo de 17 provedores, com entrada por API oficial ou manual. Automação do navegador fica fora.
