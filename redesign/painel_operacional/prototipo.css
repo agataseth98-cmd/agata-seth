@@ -30,6 +30,25 @@ dialog{border:1px solid var(--line);border-radius:14px;max-width:min(530px,calc(
 @media(max-width:690px){.shell{display:block}.sidebar{height:auto;position:relative;padding:12px 14px;gap:10px;overflow:visible}.brand{padding:0 2px 10px;border:0}.brand-mark{width:30px;height:30px;font-size:18px}.brand-name{font-size:18px}.brand-sub{font-size:8px}.nav-label,.side-bottom{display:none}.nav{display:flex;overflow-x:auto;gap:5px;padding-bottom:2px}.nav button{white-space:nowrap;padding:8px 9px;font-size:12px}.nav svg{width:14px;height:14px}.sidebar .nav button[aria-current="page"]{box-shadow:inset 0 -2px #d3a552}.side-foot{display:none}main{padding:12px 14px 32px}.topbar{height:auto;align-items:center;margin-bottom:15px}.snapshot{display:none}.searchbox{width:42vw}.hero{margin-top:7px}.hero h1{font-size:39px}.hero-stamp{flex-wrap:wrap}.kpis{gap:7px}.kpi{padding:11px;min-height:88px}.kpi .value{font-size:23px}.service-list{grid-template-columns:1fr}.memory-orbit{grid-template-columns:100px 1fr}.orbit{height:100px;width:100px}.orbit-center strong{font-size:18px}.cards{grid-template-columns:1fr}.roadmap-lane{grid-template-columns:1fr}.section-heading h1{font-size:34px}.footer-note{display:block}.footer-note span{display:block;margin:4px 0}.callout{align-items:flex-start}.callout .right{display:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
+/* Conselho de Modelos em Rede */
+.relay-boundary{margin-top:14px;line-height:1.55}
+.relay-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.relay-provider{min-width:0;padding:13px;border:1px solid var(--line);border-radius:9px;background:rgba(16,26,42,.55)}
+.relay-provider-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.relay-provider h3{margin:0;font:17px var(--serif);font-weight:400;overflow-wrap:anywhere}
+.relay-provider p{margin:7px 0 0;color:var(--muted);font-size:12px}
+.relay-provider small{display:block;margin-top:9px;color:var(--muted);font:10px/1.45 var(--mono);overflow-wrap:anywhere}
+.relay-form{display:grid;grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr);gap:10px 14px;align-items:center;margin-top:16px}
+.relay-form>label{font-size:13px;color:var(--ink)}
+.relay-form input,.relay-form select,.relay-form textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans)}
+.relay-form textarea{resize:vertical;min-height:66px}
+.relay-form input:focus,.relay-form select:focus,.relay-form textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
+.relay-form input:disabled,.relay-form textarea:disabled{opacity:.55}
+.relay-form-actions{grid-column:2;display:flex;gap:9px;flex-wrap:wrap}
+.relay-form [hidden]{display:none}
+@media(max-width:1060px){.relay-roster{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:690px){.relay-roster{grid-template-columns:1fr}.relay-form{grid-template-columns:1fr;gap:6px}.relay-form>label{margin-top:6px}.relay-form-actions{grid-column:1;margin-top:8px}}
+
 /* Identidade visual Agata · inspirada no artefato “Sistema Agata” e na imagem local */
 :root{
   --paper:#080d18;--sheet:#101a2a;--ink:#edf4ff;--muted:#a3b3ca;--line:#273750;

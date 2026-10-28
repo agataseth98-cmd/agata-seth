@@ -10,13 +10,15 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Equipe universal e auditoria encadeada aplicadas:** PRs #687 e #688 foram integrados; `main` está em `8519794`.
+**Conselho de Modelos em Rede:** proposta `relay-council-panel-ui-rebase3-20261028` assinada e validada por P-8. A aplicação está na branch própria, com selftest e 22 testes do painel passando; aguarda merge humano. O serviço não foi reiniciado e a página real ainda não foi medida.
 
-**Proposta de interface do Conselho em preparação:** `relay-council-panel-ui-rebase3-20261028` foi refeita sobre o `main` atual. O patch altera os quatro arquivos do painel e passou `git apply --check`; testes de painel e conferência visual não foram repetidos após o rebase. Depois que o PR da proposta entrar no `main` e o CI passar, falta sua assinatura própria.
+**Proposta publicada:** PR #689 integrado em `2d5b0acc`; o diff e o registro da proposta estão em `propostas/aplicadas/` na branch de aplicação, junto do marcador assinado.
 
-**PR anterior #684:** continua aberto e conflitante; esta proposta não o altera.
+**PR anterior #684:** continua aberto e conflitante; não foi alterado.
 
-**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). A proposta do endpoint local aguarda o fluxo de aplicação; a interface e chamadas externas continuam fora do sistema em execução.
+**Equipe universal e auditoria encadeada:** PRs #687 e #688 integrados.
+
+**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). O endpoint local tem proposta/aplicação em etapa separada; nenhuma chamada externa a provedores está ativa.
 
 ## Hoje, 22 e 23/10
 
