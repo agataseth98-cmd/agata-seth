@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2d5b0acc426fe787af7d572d345eba2c8ed700a5
-  Escrito em: 28/10/2026 15:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895
+  Escrito em: 28/10/2026 16:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d5b0acc426fe787af7d572d345eba2c8ed700a5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d5b0acc426fe787af7d572d345eba2c8ed700a5/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d5b0acc426fe787af7d572d345eba2c8ed700a5/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d5b0acc426fe787af7d572d345eba2c8ed700a5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2d5b0acc426fe787af7d572d345eba2c8ed700a5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5b6ca07a08f0002f86a9c3ef84b80a1a0a98f895/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(915) DIÁRIO — 28/10/2026 · **Conselho em Rede preparado para incorporação na mesma entrega do painel, em proposta P-8 ainda sem assinatura.** A página, a fila humana, o histórico e a extensão Chromium foram reunidos sob o servidor do painel; nove adaptadores passaram rodada simulada. `git apply --check` e testes em worktree descartável passaram: 34 testes, selftest do painel e sintaxe dos scripts. A prévia local confirmou prompt e ferramenta pendentes. Nenhum provedor real foi chamado; integração em runtime não aplicada.
+Modelo: Codex (Codex desktop, na Máquina) · vetor: unittest 34/34; selftest OK; prévia HTTP local; testes reais de LLM não medidos · Autorização: Humano — "vc vai fazer isso antes de encerrarmos vai testar e me apresentar os resultados ok?"
+
 (914) DIÁRIO — 28/10/2026 · **Interface do Conselho aplicada em branch após validar a assinatura da proposta.** `p8_verificar.sh relay-council-panel-ui-rebase3-20261028` confirmou hash, assinatura humana e `git apply --check`; `server.py --selftest` passou e 22 testes do painel passaram. A aplicação altera quatro arquivos do painel e arquiva o par assinado. O serviço não foi reiniciado nem a página real medida; aguarda merge humano do PR de aplicação.
 Modelo: Codex · vetor: P-8 PODE APLICAR; selftest OK; unittest 22/22 · Autorização: Humano — "feito".
 
