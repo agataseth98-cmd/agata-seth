@@ -26,20 +26,44 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 79808309b186cf013f875dd7cdcf0b4c8478cb24
-  Escrito em: 28/10/2026 18:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3b432968cf6b76338b8684347f9d055372dbef61
+  Escrito em: 28/10/2026 19:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/79808309b186cf013f875dd7cdcf0b4c8478cb24/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b432968cf6b76338b8684347f9d055372dbef61/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b432968cf6b76338b8684347f9d055372dbef61/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b432968cf6b76338b8684347f9d055372dbef61/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b432968cf6b76338b8684347f9d055372dbef61/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b432968cf6b76338b8684347f9d055372dbef61/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel oficial; porta de depuração 9222 fechada.**
+
+**Porquê:** o painel oficial (`127.0.0.1:20146`) mostrava "sem poll". A extensão carregada no Chromium do projeto era a cópia da Área de trabalho, que faz poll em `127.0.0.1:20147` (painel do workspace). A extensão oficial, em `redesign/painel_operacional/relay-extension-v2/`, faz poll em `20146`. Por isso o painel oficial nunca recebia poll. A porta 9222 estava aberta sem autenticação, o que permitia a qualquer processo local do mesmo usuário controlar o navegador e as sessões do perfil.
+
+**O que foi feito, com o que foi medido:**
+- `agata-relay-browser`: removidas as flags `--remote-debugging-address=127.0.0.1` e `--remote-debugging-port=9222`. Backup anterior em `~/.local/share/agata/rollbacks/agata-relay-browser.antes-porta-9222.bak`. Sintaxe conferida com `bash -n`.
+- Chromium do projeto reiniciado duas vezes. Perfil `~/.config/agata/relay-profile` preservado; o launcher registrou restauração da última sessão.
+- Na primeira tentativa de reinício, o launcher falhou por diretório de extensão inexistente (`~/.local/share/relay-council/extension-v2`). O navegador ficou fora do ar por cerca de dois minutos, até o reinício com `AGATA_RELAY_EXTENSION` apontando para a pasta anterior. Essa falha foi de quem operou, não de dado.
+- Medido depois: porta 9222 fechada; linha de comando sem flag de depuração; só a extensão oficial carregada; `last_poll` do painel oficial com idade de cerca de 20 s, atualizado entre duas medições de 20 s.
+
+**Não medido:**
+- Provedores reais. O poll confirma só a conexão local.
+- Se alguma ferramenta legítima dependia da porta 9222. Não achei consumidor nos logs do usuário nem no repositório, mas não medi um ciclo de poll completo.
+- Se o navegador do usuário bloqueia páginas web que tentem alcançar `127.0.0.1:9222`. Não testei, mas a porta deixou de existir, então o risco some independentemente disso.
+- Restauração das abas: o log registrou a restauração, não conferi na tela.
+
+**Pendências que continuam abertas:**
+- O launcher `agata-relay-browser` está fora do repositório. A P-8 não o cobre até entrar nele, o que é decisão do Humano.
+- A extensão oficial só foi carregada pelo launcher, por `--load-extension`. Não é um ciclo de empacotamento.
+- O drop-in do `painel-operacional.service` (`relay-council-data.conf`, escrita restrita a `~/.local/share/agata/painel-conselho/official`) ainda não tem entrada própria. Vinha pendente desde um registro do cache do Conselho de 28/10/2026 (sem número no MEMÓRIAS).
+- A proposta `reports/proposta-porta-9222.md` ainda é rascunho. A aprovação pelo fluxo P-8 é do Humano; eu não rodo `aprovar.sh`.
+
+**Como verificar:** `ss -ltn | grep 9222` deve estar vazio; `curl -s http://127.0.0.1:20146/api/relay-council/state` deve trazer `last_poll` com valor recente; `ps` na linha do perfil não deve mostrar `remote-debugging` nem o caminho `Área de trabalho`.
+
 (918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
 Modelo: GPT-6 (Codex) · vetor: `p8_verificar.sh` = PODE APLICAR; suíte (37), selftest, `py_compile`, `node --check` e JSON do manifesto · Autorização: Humano — assinatura P-8 e “feito”
 

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel oficial; porta de depuração 9222 fechada.**
+  palavras-chave: chromium, projeto, volta, fazer, poll, painel, oficial, porta, depuração, fechada
 (918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
   palavras-chave: rede, parser, estrito, validado, aplicado, branch, após, assinatura, humana, hash, git, apply, check, passaram, testes, selftest, sintaxe, python, manifesto, aplicação, aguarda, revisão, merge, humano, runtime, reiniciado, provedores, reais, testados
 (917) DIÁRIO — 28/10/2026 · **Proposta P-8 `conselho-em-rede-parser-estrito-20261028` revisa a integração completa após alerta CodeQL de expansão de entidades XML.** O parser agora aceita só tags planas da allowlist, sem regex nem parser XML; 37 testes e selftest passaram em worktree descartável. A versão anterior da aplicação foi encerrada; esta proposta requer assinatura própria antes de aplicar.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, paleta, aplica, assinado, humano, cor, fria, recebe, deslocamento, quente, mantém, tom, original, claridade, intacta, gerada, partir, css, alvo, contraste, wcag, medir, página, real, após, aplicação
 (890) DIÁRIO — 27/10/2026 · **Painel: Panorama com status medido.** Aplica `panorama-status-20261027`, assinado pelo Humano. Pelo canon (resultado primeiro, sem saudação), a frase fixa do Panorama sai. Entra linha de status: serviços ativos, Git e propostas aguardando assinatura, lidos agora. O alerta de unidades deixa de ter contagem fixa.
   palavras-chave: painel, panorama, status, medido, aplica, assinado, humano, canon, resultado, primeiro, saudação, frase, fixa, sai, entra, linha, serviços, ativos, git, propostas, aguardando, assinatura, lidos, agora, alerta, unidades, deixa, ter, contagem
-(889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica `sofa-experiencia-20261027`, assinado pelo Humano. Tons frios (azul e ciano) passam para âmbar e nogueira, mantendo a claridade. Só CSS. Medido na pré-visualização: 628 textos visíveis, todos acima de 4,5:1. Sem frases de saudação: decisão separada.
-  palavras-chave: painel, experiência, sala, paleta, quente, aplica, sofa, experiencia, assinado, humano, tons, frios, azul, ciano, passam, âmbar, nogueira, mantendo, claridade, css, medido, pré, visualização, textos, visíveis, acima, frases, saudação, decisão, separada
+(889) DIÁRIO — 27/10/2026 · **Painel: experiência sala, paleta quente.** Aplica …
+  palavras-chave: painel, experiência, sala, paleta, quente, aplica
 (888) DIÁRIO — 27/10/2026 · **Painel: markdown cru fora dos rótulos.** Aplica `m …
   palavras-chave: painel, markdown, cru, fora, rótulos, aplica
 (887) DIÁRIO — 27/10/2026 · **Painel: telas internas do vault, sem link externo. …

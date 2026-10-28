@@ -10,6 +10,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
+**Navegador do Conselho:** o Chromium do projeto volta a conectar ao painel oficial. Antes, a extensão falava com o painel errado e a página mostrava "sem poll". A porta de controle do navegador, que qualquer programa local podia usar, foi fechada. Confirmado nesta sessão; falta testar com provedores reais. Registro em MEMÓRIAS (919).
+
 **Conselho em Rede:** proposta P-8 `conselho-em-rede-parser-estrito-20261028` (PR #695) integrada ao main e assinada. Aplicação em `aplica/conselho-em-rede-parser-estrito-20261028`; 37 testes e selftest passaram. PR de aplicação aguarda revisão/merge humano. Runtime não reiniciado; provedores reais não testados.
 
 **Conselho de Modelos em Rede:** proposta `relay-council-panel-ui-rebase3-20261028` assinada e validada por P-8. A aplicação está na branch própria, com selftest e 22 testes do painel passando; aguarda merge humano. O serviço não foi reiniciado e a página real ainda não foi medida.
