@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-28 18:35 -0300.
+Motivo: corrigir achado CodeQL com parser XML linha a linha
+nome: conselho-em-rede-seguro-20261028
+diff-sha256: fd2383657c2899e44b5e17ec472e3b998bcfbe440af4a1a0f90e9b4eedc2ae5e
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQA2onUxacLk4SRUXJDNN4I8/b20eRWvqd+ySLwKZBhfw1Z
+fkdhhGxDWGoASsTQqml5mTtKWp+m3qpvcLZVfRFAU=
+-----END SSH SIGNATURE-----
