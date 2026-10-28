@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(894) DIÁRIO — 28/10/2026 · **Painel: volta à identidade visual original do Agata.** Aplica `identidade-original-20261027`, assinado pelo Humano. Restaura o CSS anterior às propostas de paleta. Só cores; layout e comportamento intactos. A proposta de contraste sobre a paleta invertida (`contraste-inversao-20261027`) fica sem objeto e não é aplicada.
+  palavras-chave: painel, volta, identidade, visual, original, agata, aplica, assinado, humano, restaura, css, anterior, propostas, paleta, cores, layout, comportamento, intactos, proposta, contraste, invertida, inversao, fica, objeto, aplicada
 (893) DIÁRIO — 27/10/2026 · **Painel: paleta invertida com a identidade original.** Aplica `inversao-identidade-20261027`, assinado pelo Humano. Luminância invertida sobre o CSS original; matiz e saturação preservados. Contraste a medir na página real após a aplicação.
   palavras-chave: painel, paleta, invertida, identidade, original, aplica, inversao, assinado, humano, luminância, css, matiz, saturação, preservados, contraste, medir, página, real, após, aplicação
 (892) DIÁRIO — 27/10/2026 · **Painel: luz e sombra estilo Caravaggio.** Aplica `caravaggio-luz-sombra-20261027`, assinado pelo Humano. Sombras em terra-sombra, luzes em marfim, violeta e ciano como acentos de saturação média. Partiu do CSS original. Paleta de referência de memória, sem consulta de fonte. Contraste a medir na página real após a aplicação.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: ensaio, seguir, protocolo, gravado, medido, capivara, aplica, assinado, humano, acrescenta, registros, pontuação, ministral, gemini, flash, lite, campo, thinking, qwen, revisada, cegas, codex, regra, resposta, vazia, http, conta, falha, seth, entra, modelo, limite, três, repetições, amostra, pequena, prova, adesão
 (865) DIÁRIO — 26/10/2026 · **Painel: cartão do Panorama com leitura viva do Git.** Aplica `painel-sync-vivo-20261026`, assinado pelo Humano. O cartão do topo mostrava SYNC PASS 65f76af de 23/10 como se fosse atual. Passa a ler o Git de /api/status; o snapshot de 23/10 fica como referência histórica rotulada. Se a leitura falhar, mostra sem leitura, e não o valor antigo.
   palavras-chave: painel, cartão, panorama, leitura, viva, git, aplica, sync, vivo, assinado, humano, topo, mostrava, pass, fosse, atual, passa, ler, api, status, snapshot, fica, referência, histórica, rotulada, falhar, mostra, valor, antigo
-(864) DIÁRIO — 26/10/2026 · **Painel: retrato original da Seth servido em /assets/agata-portrait.png.** Aplica `retrato-original-r2-20261026`, assinado pelo Humano. O protótipo referenciava o arquivo e recebia 404. A versão original (1024×1536, 2,3 MB) passa a ser servida pelo painel. Refeita sobre o main depois de `prototipo-csp-20261026`, porque a primeira versão deixou de aplicar.
-  palavras-chave: painel, retrato, original, seth, servido, assets, agata, portrait, png, aplica, assinado, humano, protótipo, referenciava, arquivo, recebia, versão, passa, servida, refeita, main, prototipo, csp, porque, primeira, deixou, aplicar
+(864) DIÁRIO — 26/10/2026 · **Painel: retrato original da Seth servido em /asset …
+  palavras-chave: painel, retrato, original, seth, servido, asset
 (863) DIÁRIO — 26/10/2026 · **Painel: protótipo separado em HTML, CSS e JS (CSP) …
   palavras-chave: painel, protótipo, separado, html, css, csp
 (862) DIÁRIO — 26/10/2026 · **Painel: protótipo ligado às leituras reais, em /pr …

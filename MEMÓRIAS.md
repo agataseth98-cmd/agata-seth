@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ba40d08a66dfffe9f485bcc4400a188066cff163
-  Escrito em: 27/10/2026 22:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 736992978a295f581a6327c65ca62447ae0e9d2f
+  Escrito em: 28/10/2026 08:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba40d08a66dfffe9f485bcc4400a188066cff163/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba40d08a66dfffe9f485bcc4400a188066cff163/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba40d08a66dfffe9f485bcc4400a188066cff163/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba40d08a66dfffe9f485bcc4400a188066cff163/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ba40d08a66dfffe9f485bcc4400a188066cff163/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/736992978a295f581a6327c65ca62447ae0e9d2f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/736992978a295f581a6327c65ca62447ae0e9d2f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/736992978a295f581a6327c65ca62447ae0e9d2f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/736992978a295f581a6327c65ca62447ae0e9d2f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/736992978a295f581a6327c65ca62447ae0e9d2f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(894) DIÁRIO — 28/10/2026 · **Painel: volta à identidade visual original do Agata.** Aplica `identidade-original-20261027`, assinado pelo Humano. Restaura o CSS anterior às propostas de paleta. Só cores; layout e comportamento intactos. A proposta de contraste sobre a paleta invertida (`contraste-inversao-20261027`) fica sem objeto e não é aplicada.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main, diff só de cores · Autorização: Humano, assinatura de identidade-original-20261027.
+
 (893) DIÁRIO — 27/10/2026 · **Painel: paleta invertida com a identidade original.** Aplica `inversao-identidade-20261027`, assinado pelo Humano. Luminância invertida sobre o CSS original; matiz e saturação preservados. Contraste a medir na página real após a aplicação.
 Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: testes e selftest do painel, git apply --check contra o main · Autorização: Humano, assinatura de inversao-identidade-20261027.
 
