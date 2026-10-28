@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(897) DIÁRIO — 28/10/2026 · **Painel: revisão de textos longos.** Aplica `textos-revisao-20261028`, assinado pelo Humano. Nove textos longos viram frases curtas, com os mesmos fatos: portas, comandos, regras e limites preservados.
+  palavras-chave: painel, revisão, textos, longos, aplica, revisao, assinado, humano, nove, viram, frases, curtas, mesmos, fatos, portas, comandos, regras, limites, preservados
 (896) DIÁRIO — 28/10/2026 · **Painel: revisão de links, setas, rolagem e popups.** Aplica `painel-revisao-20261028`, assinado pelo Humano. Último link obsidian:// sai: resultado da busca abre tela própria, com caminho lido só dentro de memoria/obsidian. Setas ↗ saem de botões internos. Barras de rolagem finas. Popups cabem na tela; o corpo rola dentro deles.
   palavras-chave: painel, revisão, links, setas, rolagem, popups, aplica, revisao, assinado, humano, último, link, obsidian, sai, resultado, busca, abre, tela, própria, caminho, lido, dentro, memoria, saem, botões, internos, barras, finas, cabem, corpo, rola, deles
 (895) DIÁRIO — 28/10/2026 · **Remove proposta de contraste obsoleta.** Aplica `remove-contraste-20261028`, assinado pelo Humano. Remove `propostas/contraste-inversao-20261027.diff`: sem assinatura e sem objeto, porque a paleta invertida foi desfeita pela volta à identidade original.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, parte, funcional, wiki, timers, aplica, retomada, assinado, humano, retoma, trabalho, codex, liberada, false, lista, vazia, decisão, três, testes, ficam, pulados, motivo, selftest
 (868) DIÁRIO — 27/10/2026 · **Painel: sobe e cai junto com a Seth.** Aplica `ciclo-painel-seth-20261027`, assinado pelo Humano. Unit de usuário do painel, sem Install; `seth` sobe o painel e `seth-parar` o derruba, na mesma ordem dos demais serviços. Wiki e timers continuam fora desta mudança.
   palavras-chave: painel, sobe, cai, junto, seth, aplica, ciclo, assinado, humano, unit, usuário, install, parar, derruba, mesma, ordem, demais, serviços, wiki, timers, continuam, fora, desta, mudança
-(867) DIÁRIO — 27/10/2026 · **Verificador: amostra opcional para medir a precisão dos alarmes.** Aplica `amostra-auditoria-20261027`, assinado pelo Humano. Com AGATA_AUDITORIA_AMOSTRA=1, grava a resposta anterior e as saídas de ferramenta do mesmo turno em arquivo próprio, com permissão 0600 e truncamento de 4000 caracteres. Desligada por padrão. O log de achados continua sem texto, como determina o topo de auditoria_turno.py. Ligar a amostra é decisão do Humano.
-  palavras-chave: verificador, amostra, opcional, medir, precisão, alarmes, aplica, auditoria, assinado, humano, agata, grava, resposta, anterior, saídas, ferramenta, mesmo, turno, arquivo, próprio, permissão, truncamento, caracteres, desligada, padrão, log, achados, continua, texto, determina, topo, ligar, decisão
+(867) DIÁRIO — 27/10/2026 · **Verificador: amostra opcional para medir a precisã …
+  palavras-chave: verificador, amostra, opcional, medir, precisã
 (866) DIÁRIO — 27/10/2026 · **Ensaio de seguir protocolo v2 gravado no medido da …
   palavras-chave: ensaio, seguir, protocolo, gravado, medido
 (865) DIÁRIO — 26/10/2026 · **Painel: cartão do Panorama com leitura viva do Git …
