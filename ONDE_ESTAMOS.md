@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 29/10
 
-**Conselho em Rede no Chromium:** P-8 `relay-council-abas-chromium-20261029` assinada e aplicada em worktree própria. Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JS, manifesto e validador da skill passaram. O PR de aplicação ainda aguarda revisão e merge humano. Nenhum prompt real foi enviado; o serviço e o Chromium não foram alterados nem recarregados.
+**Conselho em Rede no Chromium:** PR #705 mergeado em main; painel reiniciado e páginas oficiais responderam HTTP 200. No Brave, o painel mostra nove adaptadores experimentais, mas nenhum provedor aparece em aba ativa. Nenhum prompt real foi enviado. Falta recarregar/conectar a extensão oficial no Chromium e então testar os modelos, com aprovação humana por envio.
 
 ## Hoje, 28/10
 
