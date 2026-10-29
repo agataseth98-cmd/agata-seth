@@ -1,0 +1,19 @@
+diff --git a/redesign/painel_operacional/conselho-rede/app.js b/redesign/painel_operacional/conselho-rede/app.js
+index 9b70f819..59d2a722 100644
+--- a/redesign/painel_operacional/conselho-rede/app.js
++++ b/redesign/painel_operacional/conselho-rede/app.js
+@@ -85,6 +85,4 @@
+ async function decide(item, approve) {
+-  const what = item.kind === "send" ? `enviar para ${item.payload.site}` : `executar ${item.payload.tool}`;
+-  if (!window.confirm(`${approve ? "Confirmar" : "Confirmar rejeição"}: ${what}?\n\nRevise o pedido exibido antes de continuar.`)) return;
+   try {
+     await api("/api/relay-council/decision", jsonOptions({ id: item.id, hash: item.hash, approve }));
+     await refresh();
+@@ -185,3 +183,2 @@ $("btnConversa").addEventListener("click", async () => {
+   if (kind === "evaluation" && sites.length !== 1) { $("turnoHint").textContent = "Para a bateria, informe exatamente um adaptador."; return; }
+-  if (!window.confirm(`Preparar ${kind} para ${sites.join(", ")}? Cada envio ainda exigirá aprovação individual.`)) return;
+   try {
+@@ -205,3 +202,2 @@ $("toolForm").addEventListener("submit", async (event) => {
+   const text = $("toolText").value.trim();
+-  if (!window.confirm(`Solicitar ${tool}? A ferramenta só será executada após sua aprovação na fila.`)) return;
+   try {
