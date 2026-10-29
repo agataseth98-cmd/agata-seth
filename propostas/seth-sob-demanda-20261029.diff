@@ -1,0 +1,60 @@
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index e85a287c..424aa0bb 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -9,6 +9,9 @@ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+ systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
+ systemctl --user start painel-operacional.service 2>/dev/null || true
++# Obsidian (obsidian-app): sobe sob demanda com a Seth. O app roda no escopo
++# Flatpak; quem o fecha e o seth-parar.
++systemctl --user start obsidian-app.service 2>/dev/null || true
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+@@ -44,5 +47,23 @@ docker compose -f "$LC" up -d >/dev/null 2>&1 || true
+ for i in $(seq 1 30); do
+   curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
+ done
+-xdg-open "http://127.0.0.1:3080" >/dev/null 2>&1 &
++# Navegador do projeto: perfil dedicado (logins das LLMs + extensao do Conselho),
++# separado do navegador pessoal. Abre as 9 LLMs, o Conselho e o LibreChat numa
++# janela so. Se o perfil ja esta aberto (SingletonLock de um processo deste
++# perfil), nao abre outro: so reaproveita. O seth-parar fecha so este processo.
++AGATA_PERFIL=~/.config/agata/relay-profile
++AGATA_NAVEGADOR=${AGATA_NAVEGADOR:-brave}
++_lock=$(readlink "$AGATA_PERFIL/SingletonLock" 2>/dev/null || true)
++_pid=${_lock##*-}
++if [ -n "$_pid" ] && kill -0 "$_pid" 2>/dev/null \
++   && tr '\0' ' ' < /proc/$_pid/cmdline | grep -q -F -- "--user-data-dir=$AGATA_PERFIL"; then
++  echo "navegador do projeto ja aberto (pid $_pid)"
++else
++  setsid "$AGATA_NAVEGADOR" --user-data-dir="$AGATA_PERFIL" --no-first-run \
++    http://127.0.0.1:20146/conselho-rede \
++    https://chat.deepseek.com/ https://gemini.google.com/ https://chat.z.ai/ \
++    https://chatgpt.com/ https://claude.ai/ https://grok.com/ https://qwen.ai/ \
++    https://chat.mistral.ai/ https://www.kimi.com/ \
++    http://127.0.0.1:3080 >/dev/null 2>&1 &
++fi
+ notify-send -a Seth "Seth" "pronta em http://127.0.0.1:3080" 2>/dev/null || true
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 7cbb93f7..41079fac 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -5,6 +5,16 @@
+ # frentes e mantinha a espinha de pe.)
+ # Fonte versionada: ~/agata/redesign/systemd/seth-parar
+ LC=~/librechat/docker-compose.yml
++# So o que e do sistema: o Obsidian (o escopo Flatpak nao para com o servico) e o
++# navegador do perfil do projeto, achado pelo SingletonLock. O navegador pessoal
++# (outro perfil) nao e tocado: o cmdline precisa conter o --user-data-dir do projeto.
++flatpak kill md.obsidian.Obsidian 2>/dev/null || true
++AGATA_PERFIL=~/.config/agata/relay-profile
++_lock=$(readlink "$AGATA_PERFIL/SingletonLock" 2>/dev/null || true)
++_pid=${_lock##*-}
++if [ -n "$_pid" ] && tr '\0' ' ' < /proc/$_pid/cmdline 2>/dev/null | grep -q -F -- "--user-data-dir=$AGATA_PERFIL"; then
++  kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
++fi
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+ systemctl --user stop painel-operacional.service 2>/dev/null || true
