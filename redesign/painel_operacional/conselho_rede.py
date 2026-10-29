@@ -41,7 +41,7 @@ CONTEXT = (
     + '\nExemplo: <SEARCH canon="memória do Conselho"/>\n'
 )
 MAX_TEXT = 60_000
-EXPIRY = 600
+EXPIRY = 300  # item parado vira unknown em 5 min (antes 10); precisa ser maior que o pior caso da extensão
 
 
 class Conflict(ValueError):
