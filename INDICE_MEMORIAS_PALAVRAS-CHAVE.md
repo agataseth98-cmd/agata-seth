@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium foi assinada, verificada e aplicada em worktree própria.** Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JavaScript, manifesto e validação da skill passaram. Nenhum serviço ou navegador foi alterado e nenhum prompt real foi enviado; PR de aplicação aguarda revisão e merge humano.
+  palavras-chave: integração, abas, chromium, assinada, verificada, aplicada, worktree, própria, selftest, testes, painel, contrato, sintaxe, javascript, manifesto, validação, skill, passaram, serviço, navegador, alterado, prompt, real, enviado, aplicação, aguarda, revisão, merge, humano
 (926) CORREÇÃO — 29/10/2026 · **A revisão da P-8 de abas Chromium amplia a skill com o mapa e as descobertas operacionais já registrados localmente.** Os resultados de 27–28/10 permanecem históricos; a proposta mantém os nove adaptadores experimentais até confirmação formal na extensão oficial. Nenhum runtime ou provedor foi alterado/testado.
   palavras-chave: revisão, abas, chromium, amplia, skill, mapa, descobertas, operacionais, registrados, localmente, resultados, permanecem, históricos, proposta, mantém, nove, adaptadores, experimentais, confirmação, formal, extensão, oficial, runtime, provedor, alterado, testado
 (925) DIÁRIO — 29/10/2026 · **P-8 preparada para levar o Conselho às abas Chromium já abertas, com nove adaptadores experimentais e aprovação humana por prompt.** A proposta substitui o executor por API, preserva as abas persistentes do launcher e não cria abas ausentes; runtime e provedores reais não foram alterados ou testados. Inclui a skill `agata-relay-provedores`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: painel, segunda, passada, textos, aplica, revisao, assinado, humano, doze, parágrafos, longos, viram, frases, caracteres, mesmos, fatos, oito, aberturas, aba, passam, dizer, leitor, pode, fazer, ali
 (897) DIÁRIO — 28/10/2026 · **Painel: revisão de textos longos.** Aplica `textos-revisao-20261028`, assinado pelo Humano. Nove textos longos viram frases curtas, com os mesmos fatos: portas, comandos, regras e limites preservados.
   palavras-chave: painel, revisão, textos, longos, aplica, revisao, assinado, humano, nove, viram, frases, curtas, mesmos, fatos, portas, comandos, regras, limites, preservados
-(896) DIÁRIO — 28/10/2026 · **Painel: revisão de links, setas, rolagem e popups.** Aplica `painel-revisao-20261028`, assinado pelo Humano. Último link obsidian:// sai: resultado da busca abre tela própria, com caminho lido só dentro de memoria/obsidian. Setas ↗ saem de botões internos. Barras de rolagem finas. Popups cabem na tela; o corpo rola dentro deles.
-  palavras-chave: painel, revisão, links, setas, rolagem, popups, aplica, revisao, assinado, humano, último, link, obsidian, sai, resultado, busca, abre, tela, própria, caminho, lido, dentro, memoria, saem, botões, internos, barras, finas, cabem, corpo, rola, deles
+(896) DIÁRIO — 28/10/2026 · **Painel: revisão de links, setas, rolagem e popups. …
+  palavras-chave: painel, revisão, links, setas, rolagem, popups
 (895) DIÁRIO — 28/10/2026 · **Remove proposta de contraste obsoleta.** Aplica `r …
   palavras-chave: remove, proposta, contraste, obsoleta, aplica
 (894) DIÁRIO — 28/10/2026 · **Painel: volta à identidade visual original do Agat …

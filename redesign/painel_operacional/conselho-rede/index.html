@@ -15,23 +15,23 @@
     <section id="turno">
       <h2>Novo turno</h2>
       <form id="promptForm">
-        <div class="row"><label for="site">Modelo de destino</label><select id="site" required></select></div>
+        <div class="row"><label for="site">Aba de chat aberta</label><select id="site" required></select></div>
         <label for="pergunta">Prompt</label>
         <textarea id="pergunta" maxlength="60000" placeholder="Escreva o pedido. O envio ficará pendente até sua aprovação explícita."></textarea>
         <div class="row"><button type="submit" id="btnEnviar" class="primary">Solicitar aprovação de envio</button></div>
       </form>
-      <p class="hint" id="turnoHint">Cada prompt exige sua aprovação e segue por uma API oficial habilitada no OmniRoute.</p>
+      <p class="hint" id="turnoHint">Cada prompt exige sua aprovação e será digitado na aba Chromium detectada. O modelo pode exigir login ou foco visível.</p>
       <div class="chain-box">
         <div class="chain-title">Conversa e bateria de avaliação</div>
         <label for="groupKind">Tipo de rodada</label>
         <select id="groupKind"><option value="debate">Debate independente + síntese</option><option value="chain">Conversa em cadeia</option><option value="evaluation">Bateria de ensaios de um modelo</option></select>
-        <label for="chainSites">Participantes (até 3 APIs oficiais habilitadas, separados por vírgula)</label>
+        <label for="chainSites">Participantes (IDs das abas abertas, até 3, separados por vírgula)</label>
         <div class="chain-controls"><input id="chainSites" value="gemini,zai,mistral" aria-label="Participantes da conversa" /><input id="groupRepetitions" type="number" min="1" max="5" value="3" aria-label="Número de ensaios" /><button id="btnConversa" type="button" class="primary">Preparar rodada</button></div>
         <p class="hint">Debates e cadeias avançam etapa por etapa. Cada prompt, síntese, repetição e handoff fica pendente de aprovação humana individual.</p>
       </div>
     </section>
     <section id="provedores" class="wide">
-      <h2>Catálogo de provedores</h2><p class="hint">Catálogo e estado de autenticação não comprovam resposta funcional. Só modelos com mapeamento oficial ativo aparecem como destino.</p>
+      <h2>Abas de chat suportadas</h2><p class="hint">Adaptadores experimentais. O painel identifica abas abertas, mas não comprova login nem resposta funcional. Abas ausentes não são abertas automaticamente.</p>
       <div class="provider-table-wrap"><table id="providerTable"><thead><tr><th>Provedor</th><th>Tipo</th><th>Acesso</th><th>Estado do catálogo</th></tr></thead><tbody><tr><td colspan="4" class="hint">carregando catálogo…</td></tr></tbody></table></div>
     </section>
     <section id="fila"><h2>Fila de aprovação <span id="filaCount" class="badge">0</span></h2><ul id="filaLista"></ul></section>

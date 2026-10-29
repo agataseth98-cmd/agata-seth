@@ -160,7 +160,7 @@ def _relay_store(payload: dict) -> dict:
     except RecursionError as exc:
         raise ValueError("evaluation nesting limit exceeded") from exc
     provider = _catalog.PROVIDER_BY_ID[normalized["provider"]]
-    expected_mode = {"official_api_only": "official_api", "manual_only": "manual"}.get(
+    expected_mode = {"browser_tab_only": "browser_tab", "manual_only": "manual"}.get(
         provider["access_mode"]
     )
     if normalized["access_mode"] != expected_mode:
@@ -1058,8 +1058,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/relay-council/catalog":
             _cache, catalog, _contract, _sanitizer = _relay_modules()
+            council = _council_state()
             body = json.dumps(
-                {"schema_version": 1, "providers": catalog.snapshot()},
+                {"schema_version": 1, "providers": catalog.snapshot(council.available_providers())},
                 ensure_ascii=False,
             ).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
@@ -1082,6 +1083,12 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/relay-council/tasks":
             if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
                 return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
+            raw_providers = self.headers.get("X-Relay-Providers", "")
+            providers = raw_providers.split(",") if raw_providers else []
+            try:
+                _council_state().set_active_providers(providers)
+            except ValueError:
+                return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid tab inventory"}')
             tasks = _council_state().claim()
             return self._send(200, "application/json; charset=utf-8",
                               json.dumps(tasks, ensure_ascii=False).encode("utf-8"))
@@ -1110,8 +1117,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
-        if self.path == "/api/relay-council/execute":
-            return self._relay_council_execute()
+        if self.path == "/api/relay-council/result":
+            return self._relay_council_result()
         if self.path == "/api/relay-council/evaluations":
             return self._relay_evaluation()
         if self.path == "/api/seth/chat":
@@ -1210,24 +1217,25 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid council action")
         return self._send(201, "application/json; charset=utf-8", body)
 
-    def _relay_council_execute(self) -> None:
+    def _relay_council_result(self) -> None:
         if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
             return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
-        payload = self._relay_council_body(4096)
+        payload = self._relay_council_body(65_536)
         if payload is None:
             return
-        task_id, lease = payload.get("task_id"), payload.get("lease")
-        if not isinstance(task_id, str) or not isinstance(lease, str):
+        task_id, lease, site = payload.get("task_id"), payload.get("lease"), payload.get("site")
+        result = {"ok": payload.get("ok"), "text": payload.get("text", ""),
+                  "error": payload.get("error", "")}
+        if not all(isinstance(value, str) for value in (task_id, lease, site)):
             return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid task"}')
         try:
-            import relay_executor
-            result = _council_state().execute_api(task_id, lease, relay_executor.send)
+            recorded = _council_state().finish_browser(task_id, lease, site, result)
         except _COUNCIL_CONFLICT:
             return self._send(409, "application/json; charset=utf-8", b'{"error":"task lease mismatch"}')
         except (ValueError, TypeError, KeyError):
             return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid task"}')
         return self._send(200, "application/json; charset=utf-8",
-                          json.dumps(result).encode("utf-8"))
+                          json.dumps(recorded).encode("utf-8"))
 
     def _relay_evaluation(self) -> None:
         if (self.headers.get("Origin") != ALLOWED_ORIGIN

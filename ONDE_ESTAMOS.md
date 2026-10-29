@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 29/10
 
-**Conselho em Rede no Chromium:** proposta P-8 `relay-council-abas-chromium-20261029` revista para preservar mapa e descobertas úteis da skill local, identificando-as como históricas. Ela usa nove adaptadores experimentais nas abas já abertas pelo launcher; cada envio precisa de aprovação no painel. Testes locais passaram em cópia descartável. Nenhum prompt real foi enviado, a extensão do Chromium não foi recarregada e o runtime não mudou. Para aplicar depois da assinatura: `bash scripts/aprovar.sh relay-council-abas-chromium-20261029`.
+**Conselho em Rede no Chromium:** P-8 `relay-council-abas-chromium-20261029` assinada e aplicada em worktree própria. Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JS, manifesto e validador da skill passaram. O PR de aplicação ainda aguarda revisão e merge humano. Nenhum prompt real foi enviado; o serviço e o Chromium não foram alterados nem recarregados.
 
 ## Hoje, 28/10
 

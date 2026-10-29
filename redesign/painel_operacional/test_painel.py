@@ -244,13 +244,13 @@ class HttpTests(unittest.TestCase):
         code, body, headers = self.request("GET", "/api/relay-council/catalog")
         self.assertEqual(code, 200)
         providers = json.loads(body)["providers"]
-        self.assertEqual(len(providers), 17)
+        self.assertEqual(len(providers), 9)
         self.assertNotIn("perplexity", {provider["id"] for provider in providers})
         self.assertIn("no-store", headers["Cache-Control"])
 
         payload = {
             "task_id": "task-1", "provider": "gemini", "site": "gemini",
-            "access_mode": "official_api", "state": "green", "ok": True,
+            "access_mode": "browser_tab", "state": "green", "ok": True,
             "text": "resposta formal", "latency_ms": 1234,
             "timestamp": "2026-10-28T10:00:00-03:00",
         }
@@ -270,7 +270,7 @@ class HttpTests(unittest.TestCase):
         dom = {**payload, "access_mode": "browser_dom"}
         code, _, _ = self.request("POST", "/api/relay-council/evaluations", json.dumps(dom), base)
         self.assertEqual(code, 400)
-        mismatched = {**payload, "provider": "copilot", "access_mode": "official_api"}
+        mismatched = {**payload, "provider": "copilot", "access_mode": "browser_tab"}
         self.assertEqual(self.request("POST", "/api/relay-council/evaluations", json.dumps(mismatched), base)[0], 400)
 
     def test_relay_evaluation_rejects_oversized_body_and_busy_cache(self):
@@ -278,10 +278,10 @@ class HttpTests(unittest.TestCase):
                 "Content-Type": "application/json"}
         self.assertEqual(self.request("POST", "/api/relay-council/evaluations", "x" * 65537, base)[0], 413)
         payload = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
-                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "access_mode": "browser_tab", "state": "green", "ok": True,
                               "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
         large = json.dumps({"task_id": "task-1", "provider": "gemini", "site": "gemini",
-                            "access_mode": "official_api", "state": "green", "ok": True,
+                            "access_mode": "browser_tab", "state": "green", "ok": True,
                             "text": "r" * 5000, "timestamp": "2026-10-28T10:00:00-03:00"})
         self.assertTrue(panel._RELAY_LOCK.acquire(blocking=False))
         try:
@@ -296,7 +296,7 @@ class HttpTests(unittest.TestCase):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
                 "Content-Type": "application/json"}
         payload = json.dumps({"task_id": "task-3", "provider": "gemini", "site": "gemini",
-                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "access_mode": "browser_tab", "state": "green", "ok": True,
                               "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
         with mock.patch.object(panel, "_relay_store", return_value={"n": 8, "h": "hash", "duplicate": True}):
             code, body, _ = self.request("POST", "/api/relay-council/evaluations", payload, base)
@@ -311,7 +311,7 @@ class HttpTests(unittest.TestCase):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
                 "Content-Type": "application/json"}
         payload = json.dumps({"task_id": "task-rate", "provider": "gemini", "site": "gemini",
-                              "access_mode": "official_api", "state": "green", "ok": True,
+                              "access_mode": "browser_tab", "state": "green", "ok": True,
                               "text": "resposta", "timestamp": "2026-10-28T10:00:00-03:00"})
         with panel._RELAY_RATE_LOCK:
             panel._RELAY_REQUESTS.clear()
@@ -329,7 +329,7 @@ class HttpTests(unittest.TestCase):
     def test_relay_store_validates_sanitizes_and_appends_to_isolated_common_cache(self):
         cache, _catalog, _contract, _sanitizer = panel._relay_modules()
         payload = {"task_id": "task-2", "provider": "gemini", "site": "gemini",
-                   "access_mode": "official_api", "state": "green", "ok": True,
+                   "access_mode": "browser_tab", "state": "green", "ok": True,
                    "text": "resposta formal", "timestamp": "2026-10-28T10:00:00-03:00"}
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
