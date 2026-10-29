@@ -83,8 +83,6 @@ function renderApproval(item) {
 }
 
 async function decide(item, approve) {
-  const what = item.kind === "send" ? `enviar para ${item.payload.site}` : `executar ${item.payload.tool}`;
-  if (!window.confirm(`${approve ? "Confirmar" : "Confirmar rejeição"}: ${what}?\n\nRevise o pedido exibido antes de continuar.`)) return;
   try {
     await api("/api/relay-council/decision", jsonOptions({ id: item.id, hash: item.hash, approve }));
     await refresh();
@@ -183,7 +181,6 @@ $("btnConversa").addEventListener("click", async () => {
   const repetitions = Number.parseInt($("groupRepetitions").value, 10);
   if (!prompt) { $("turnoHint").textContent = "Escreva o tema no campo Prompt antes de preparar a rodada."; return; }
   if (kind === "evaluation" && sites.length !== 1) { $("turnoHint").textContent = "Para a bateria, informe exatamente um adaptador."; return; }
-  if (!window.confirm(`Preparar ${kind} para ${sites.join(", ")}? Cada envio ainda exigirá aprovação individual.`)) return;
   try {
     await api("/api/relay-council/groups", jsonOptions({ kind, sites, prompt, repetitions }));
     $("turnoHint").textContent = "Rodada preparada; cada prompt aguarda sua aprovação individual.";
@@ -203,7 +200,6 @@ $("toolForm").addEventListener("submit", async (event) => {
   catch (_) { $("status").textContent = "argumentos precisam ser JSON válido"; return; }
   const tool = $("tool").value;
   const text = $("toolText").value.trim();
-  if (!window.confirm(`Solicitar ${tool}? A ferramenta só será executada após sua aprovação na fila.`)) return;
   try {
     await api("/api/relay-council/actions", jsonOptions({ kind: "tool", payload: { tool, args, text } }));
     $("toolText").value = "";
