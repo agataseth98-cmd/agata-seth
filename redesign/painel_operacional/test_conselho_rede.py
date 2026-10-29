@@ -81,6 +81,43 @@ class CouncilTests(unittest.TestCase):
         self.assertEqual(synthesis["status"], "pending")
         self.assertEqual(self.council.claim(), [])
 
+    def test_every_send_carries_system_context_f1(self):
+        from conselho_rede import CONTEXT
+        direct = self.council.create("send", {"site": "gemini", "text": "pergunta direta"})
+        direct_text = json.loads(self.council._row(direct)["payload"])["text"]
+        self.assertTrue(direct_text.startswith(CONTEXT))
+        self.assertIn("pergunta direta", direct_text)
+        group = self.council.group("debate", "tema", ["chatgpt", "gemini", "zai"])
+        for item in self.council.snapshot()["actions"]:
+            if item["parent"] == group:
+                self.assertTrue(item["payload"]["text"].startswith(CONTEXT))
+
+    def test_estudo_synthesis_waits_for_all_members_and_cleans_responses_f2(self):
+        from conselho_rede import limpa_resposta, RESPOSTA_MAX
+        sites = [p for p in PROVIDERS]
+        self.assertEqual(len(sites), 9)
+        group = self.council.group("estudo", "tema", sites)
+        initial = sorted([i for i in self.council.snapshot()["actions"] if i["parent"] == group], key=lambda i: i["created"])
+        self.assertEqual(len(initial), 9)
+        for item in initial[:-1]:
+            self.council.decide(item["id"], item["hash"], True)
+        for item in initial[:-1]:
+            task, = self.council.claim()
+            self.council.finish(item["id"], {"ok": True, "text": "Trabalhou por 6s\nNÃO\n" + "x" * 3000}, lease=task["lease"], site=item["payload"]["site"])
+        self.assertEqual([i for i in self.council.snapshot()["actions"] if i["parent"] == group and i["payload"]["phase"] == "synthesis"], [])
+        last = initial[-1]
+        self.council.decide(last["id"], last["hash"], True)
+        task, = self.council.claim()
+        self.council.finish(last["id"], {"ok": True, "text": "NÃO"}, lease=task["lease"], site=last["payload"]["site"])
+        synthesis, = [i for i in self.council.snapshot()["actions"] if i["parent"] == group and i["payload"]["phase"] == "synthesis"]
+        texto = synthesis["payload"]["text"]
+        self.assertNotIn("Trabalhou por", texto)
+        self.assertIn("[… cortado]", texto)
+        for site in sites:
+            self.assertIn(site + ":", texto)
+        self.assertLessEqual(len(limpa_resposta("Thinking...\nNÃO\n" + "y" * 5000)), RESPOSTA_MAX + 20)
+        self.assertEqual(limpa_resposta("Refletiu por 1s\nSIM"), "SIM")
+
     def test_restart_does_not_replay_running_delivery(self):
         action = self.council.create("send", {"site": "gemini", "text": "mock"})
         row = self.council._row(action)
