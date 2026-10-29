@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
-# Para a Seth INTEIRA: as frentes E a espinha (agata.target). Libera todos os
-# recursos -- inclusive a VRAM da RTX 4060 e os modelos carregados no Ollama.
-# (Ordem do Humano 10/09/2026: "parar Seth parando tudo". Antes parava so as
-# frentes e mantinha a espinha de pe.)
+# Desliga a Seth INTEIRA (atalho "parar Seth"): vigias, Obsidian, navegador do sistema,
+# LibreChat, serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
+# RTX 4060 e os modelos carregados no Ollama.
+# O Chromium é só do sistema Agata, então fechá-lo inteiro não atinge outro uso.
 # Fonte versionada: ~/agata/redesign/systemd/seth-parar
 LC=~/librechat/docker-compose.yml
+DIARIO=~/.cache/agata/sincronia/eventos.log
+# Vigias primeiro: a parada da Seth não deve gerar alertas de "serviço caiu".
+systemctl --user stop agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
+echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH parando (atalho parar Seth)" >> "$DIARIO" 2>/dev/null || true
+# Obsidian: o app roda no escopo Flatpak, então parar o serviço não o fecha.
+flatpak kill md.obsidian.Obsidian 2>/dev/null || true
+# Navegador: fecha o processo dono do perfil do Chromium (SingletonLock), só se for o Chromium.
+_lock=$(readlink "$HOME/.config/chromium/SingletonLock" 2>/dev/null || true)
+_pid=${_lock##*-}
+if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
+  kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
+fi
 docker compose -f "$LC" stop >/dev/null 2>&1 || true
 systemctl --user stop piper-tts.service 2>/dev/null || true
 systemctl --user stop painel-operacional.service 2>/dev/null || true
@@ -18,6 +30,6 @@ if command -v ollama >/dev/null 2>&1; then
   done
 fi
 # espinha: no stop o agata-drain roda antes e drena o WAL -> nunca corta no meio
-# de um commit. Derruba os 5 servicos + o MoE :20129 (libera a VRAM).
+# de um commit. Derruba os servicos + o MoE :20129 (libera a VRAM).
 systemctl --user stop agata.target 2>/dev/null || true
-notify-send -a Seth "Seth" "parada por completo (frentes + espinha)" 2>/dev/null || true
+notify-send -a Seth "Seth" "parada por completo" 2>/dev/null || true

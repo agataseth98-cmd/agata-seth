@@ -1,0 +1,19 @@
+[Unit]
+Description=Agata -- vigia da Equipe (%i): anota os eventos do sistema, sem modelo
+# Sobe e cai com a Seth: o atalho `seth` inicia e o `seth-parar` para.
+# Não entra no boot (sem [Install]). Parar à mão: systemctl --user stop agata-vigia@%i
+# Eventos vão para ~/.cache/agata/sincronia/eventos.log (a Seth lê pelo painel, /api/eventos)
+# e para ~/.cache/agata/sincronia/vigia-%i.log (saída bruta).
+# Fonte versionada: ~/agata/redesign/systemd/agata-vigia@.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/agata
+Environment=EQUIPE_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
+ExecStart=/bin/bash %h/agata/scripts/equipe/vigia.sh %i 20
+StandardOutput=append:%h/.cache/agata/sincronia/vigia-%i.log
+StandardError=append:%h/.cache/agata/sincronia/vigia-%i.log
+# on-failure: se a vigia travar, sobe de novo. Parada normal (systemctl stop) não reinicia.
+Restart=on-failure
+RestartSec=30
+Nice=19

@@ -50,6 +50,19 @@ TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
 TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
                   "agata-vault-inbox.timer": "agata-vault-inbox.service"}
 MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
+# Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
+EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
+
+
+def _eventos_recentes(limite: int = 60) -> bytes:
+    """Últimas linhas do diário de eventos, em texto simples. Sem diário, diz que ainda não há eventos."""
+    try:
+        linhas = EVENTOS_DIARIO.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        linhas = []
+    if not linhas:
+        return b"(sem eventos ainda)\n"
+    return ("\n".join(linhas[-limite:]) + "\n").encode("utf-8")
 INTEGRATION_ALLOWLIST = (
     "piper-tts.service", "openvino-whisper.service", "openvino-embeddings.service",
     "obsidian-ro-proxy.service", "discord-mcp.service", "navegador-mcp.service",
@@ -1056,6 +1069,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/eventos":
+            return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
         if self.path == "/api/relay-council/catalog":
             _cache, catalog, _contract, _sanitizer = _relay_modules()
             council = _council_state()
