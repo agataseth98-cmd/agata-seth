@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Inicia a Seth para CONVERSA (LibreChat). Sobe a espinha INTEIRA (agata.target)
-# + o gateway + a stack do LibreChat + a voz, espera responder e abre o navegador.
-# Contraparte de `seth-parar` (que para tudo). O MoE :20129 continua sob demanda.
+# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway, o LibreChat,
+# a voz, o painel, o Obsidian e as vigias da Equipe. Depois abre o navegador do sistema
+# (Chromium, perfil "Sistema Agata") só com as abas que faltam.
+# Contraparte: `seth-parar`, que desliga tudo. O MoE :20129 continua sob demanda.
 # Fonte versionada: ~/agata/redesign/systemd/seth
 set -e
 LC=~/librechat/docker-compose.yml
+DIARIO=~/.cache/agata/sincronia/eventos.log
+mkdir -p "$(dirname "$DIARIO")" 2>/dev/null || true
+echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH subindo (atalho seth)" >> "$DIARIO" 2>/dev/null || true
 notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
 systemctl --user start agata.target 2>/dev/null || true
 systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
 systemctl --user start painel-operacional.service 2>/dev/null || true
+systemctl --user start obsidian-app.service 2>/dev/null || true
 # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
 # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
 # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
@@ -17,6 +22,8 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || 
 # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
 # fica de pe pra ingles -- ver comentario no librechat.yaml.
 systemctl --user start piper-tts.service 2>/dev/null || true
+# Vigias da Equipe (Claude e Codex): sobem com a Seth e param com ela.
+systemctl --user start agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
 # Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
 # cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
 # rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
@@ -44,5 +51,36 @@ docker compose -f "$LC" up -d >/dev/null 2>&1 || true
 for i in $(seq 1 30); do
   curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
 done
-xdg-open "http://127.0.0.1:3080" >/dev/null 2>&1 &
-notify-send -a Seth "Seth" "pronta em http://127.0.0.1:3080" 2>/dev/null || true
+# Navegador do sistema: Chromium, perfil "Sistema Agata" (Profile 1 do Chromium).
+# Se ele já estiver aberto, só entram as abas que faltam (nada duplicado).
+# Ao abrir do zero, o Chromium volta com as abas da última vez (Continuar de onde parou).
+AGATA_NAVEGADOR=${AGATA_NAVEGADOR:-chromium}
+AGATA_PERFIL="Profile 1"
+PAINEL=http://127.0.0.1:20146
+_chromium_aberto() {
+  local _l _p
+  _l=$(readlink "$HOME/.config/chromium/SingletonLock" 2>/dev/null) || return 1
+  _p=${_l##*-}
+  [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
+}
+if ! _chromium_aberto; then
+  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/conselho-rede" http://127.0.0.1:3080 >/dev/null 2>&1 &
+  # Dá tempo para a janela voltar e para a extensão do Conselho avisar o painel.
+  sleep 25
+fi
+# Provedores que já têm aba aberta (o painel conta pela extensão). "?" = painel não respondeu.
+_abertos=$(curl -s -m 3 "$PAINEL/api/relay-council/state" | python3 -c 'import sys,json
+try: print(" ".join(json.load(sys.stdin).get("providers", [])))
+except Exception: print("?")' 2>/dev/null || echo "?")
+if [ "$_abertos" != "?" ]; then
+  for _par in deepseek\|https://chat.deepseek.com/ gemini\|https://gemini.google.com/ zai\|https://chat.z.ai/ \
+              chatgpt\|https://chatgpt.com/ claude\|https://claude.ai/ grok\|https://grok.com/ \
+              qwen\|https://qwen.ai/ mistral\|https://chat.mistral.ai/ kimi\|https://www.kimi.com/; do
+    _id=${_par%%|*}; _url=${_par#*|}
+    case " $_abertos " in
+      *" $_id "*) ;;
+      *) "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" "$_url" >/dev/null 2>&1 & ;;
+    esac
+  done
+fi
+notify-send -a Seth "Seth" "pronta: LibreChat em http://127.0.0.1:3080" 2>/dev/null || true
