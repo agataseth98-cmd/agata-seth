@@ -8,8 +8,8 @@ const POLL_INTERVAL_MS = 2000;      // normal
 const POLL_INTERVAL_IDLE_MS = 5000;  // após 5 polls vazios
 const POLL_TIMEOUT_MS = 5000;
 const TURN_STABLE_MS = 8000;         // 8s sem mudança = resposta terminada
-const TURN_MAX_WAIT_MS = 240000;     // 4 min por turno; provedores podem responder lentamente
-const READY_TIMEOUT_MS = 90000;      // páginas pesadas podem levar mais de 30s
+const TURN_MAX_WAIT_MS = 150000;     // 2,5 min por turno; depois disso o item vira sem_leitura
+const READY_TIMEOUT_MS = 60000;      // 1 min para a página ficar pronta
 const TAB_ACTIVATION_SETTLE_MS = 900; // dá ao site tempo para receber foco/visibilidade
 const TAB_OPERATION_TIMEOUT_MS = 4000;
 
