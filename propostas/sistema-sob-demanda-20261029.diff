@@ -1,0 +1,249 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8a7d2c24..b3827466 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -50,6 +50,19 @@ TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
+ TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
+                   "agata-vault-inbox.timer": "agata-vault-inbox.service"}
+ MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
++# Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
++EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
++
++
++def _eventos_recentes(limite: int = 60) -> bytes:
++    """Últimas linhas do diário de eventos, em texto simples. Sem diário, diz que ainda não há eventos."""
++    try:
++        linhas = EVENTOS_DIARIO.read_text(encoding="utf-8", errors="replace").splitlines()
++    except OSError:
++        linhas = []
++    if not linhas:
++        return b"(sem eventos ainda)\n"
++    return ("\n".join(linhas[-limite:]) + "\n").encode("utf-8")
+ INTEGRATION_ALLOWLIST = (
+     "piper-tts.service", "openvino-whisper.service", "openvino-embeddings.service",
+     "obsidian-ro-proxy.service", "discord-mcp.service", "navegador-mcp.service",
+@@ -1056,6 +1069,8 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/eventos":
++            return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
+         if self.path == "/api/relay-council/catalog":
+             _cache, catalog, _contract, _sanitizer = _relay_modules()
+             council = _council_state()
+diff --git a/redesign/systemd/agata-vigia@.service b/redesign/systemd/agata-vigia@.service
+new file mode 100644
+index 00000000..27da65d4
+--- /dev/null
++++ b/redesign/systemd/agata-vigia@.service
+@@ -0,0 +1,19 @@
++[Unit]
++Description=Agata -- vigia da Equipe (%i): anota os eventos do sistema, sem modelo
++# Sobe e cai com a Seth: o atalho `seth` inicia e o `seth-parar` para.
++# Não entra no boot (sem [Install]). Parar à mão: systemctl --user stop agata-vigia@%i
++# Eventos vão para ~/.cache/agata/sincronia/eventos.log (a Seth lê pelo painel, /api/eventos)
++# e para ~/.cache/agata/sincronia/vigia-%i.log (saída bruta).
++# Fonte versionada: ~/agata/redesign/systemd/agata-vigia@.service
++
++[Service]
++Type=simple
++WorkingDirectory=%h/agata
++Environment=EQUIPE_PARAR=%h/.cache/agata/sincronia/vigia-%i.parar
++ExecStart=/bin/bash %h/agata/scripts/equipe/vigia.sh %i 20
++StandardOutput=append:%h/.cache/agata/sincronia/vigia-%i.log
++StandardError=append:%h/.cache/agata/sincronia/vigia-%i.log
++# on-failure: se a vigia travar, sobe de novo. Parada normal (systemctl stop) não reinicia.
++Restart=on-failure
++RestartSec=30
++Nice=19
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index e85a287c..e2bbd026 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -1,14 +1,19 @@
+ #!/usr/bin/env bash
+-# Inicia a Seth para CONVERSA (LibreChat). Sobe a espinha INTEIRA (agata.target)
+-# + o gateway + a stack do LibreChat + a voz, espera responder e abre o navegador.
+-# Contraparte de `seth-parar` (que para tudo). O MoE :20129 continua sob demanda.
++# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway, o LibreChat,
++# a voz, o painel, o Obsidian e as vigias da Equipe. Depois abre o navegador do sistema
++# (Chromium, perfil "Sistema Agata") só com as abas que faltam.
++# Contraparte: `seth-parar`, que desliga tudo. O MoE :20129 continua sob demanda.
+ # Fonte versionada: ~/agata/redesign/systemd/seth
+ set -e
+ LC=~/librechat/docker-compose.yml
++DIARIO=~/.cache/agata/sincronia/eventos.log
++mkdir -p "$(dirname "$DIARIO")" 2>/dev/null || true
++echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH subindo (atalho seth)" >> "$DIARIO" 2>/dev/null || true
+ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+ systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
+ systemctl --user start painel-operacional.service 2>/dev/null || true
++systemctl --user start obsidian-app.service 2>/dev/null || true
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+@@ -17,6 +22,8 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null ||
+ # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
+ # fica de pe pra ingles -- ver comentario no librechat.yaml.
+ systemctl --user start piper-tts.service 2>/dev/null || true
++# Vigias da Equipe (Claude e Codex): sobem com a Seth e param com ela.
++systemctl --user start agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
+ # Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
+ # cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
+ # rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
+@@ -44,5 +51,36 @@ docker compose -f "$LC" up -d >/dev/null 2>&1 || true
+ for i in $(seq 1 30); do
+   curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
+ done
+-xdg-open "http://127.0.0.1:3080" >/dev/null 2>&1 &
+-notify-send -a Seth "Seth" "pronta em http://127.0.0.1:3080" 2>/dev/null || true
++# Navegador do sistema: Chromium, perfil "Sistema Agata" (Profile 1 do Chromium).
++# Se ele já estiver aberto, só entram as abas que faltam (nada duplicado).
++# Ao abrir do zero, o Chromium volta com as abas da última vez (Continuar de onde parou).
++AGATA_NAVEGADOR=${AGATA_NAVEGADOR:-chromium}
++AGATA_PERFIL="Profile 1"
++PAINEL=http://127.0.0.1:20146
++_chromium_aberto() {
++  local _l _p
++  _l=$(readlink "$HOME/.config/chromium/SingletonLock" 2>/dev/null) || return 1
++  _p=${_l##*-}
++  [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
++}
++if ! _chromium_aberto; then
++  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/conselho-rede" http://127.0.0.1:3080 >/dev/null 2>&1 &
++  # Dá tempo para a janela voltar e para a extensão do Conselho avisar o painel.
++  sleep 25
++fi
++# Provedores que já têm aba aberta (o painel conta pela extensão). "?" = painel não respondeu.
++_abertos=$(curl -s -m 3 "$PAINEL/api/relay-council/state" | python3 -c 'import sys,json
++try: print(" ".join(json.load(sys.stdin).get("providers", [])))
++except Exception: print("?")' 2>/dev/null || echo "?")
++if [ "$_abertos" != "?" ]; then
++  for _par in deepseek\|https://chat.deepseek.com/ gemini\|https://gemini.google.com/ zai\|https://chat.z.ai/ \
++              chatgpt\|https://chatgpt.com/ claude\|https://claude.ai/ grok\|https://grok.com/ \
++              qwen\|https://qwen.ai/ mistral\|https://chat.mistral.ai/ kimi\|https://www.kimi.com/; do
++    _id=${_par%%|*}; _url=${_par#*|}
++    case " $_abertos " in
++      *" $_id "*) ;;
++      *) "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" "$_url" >/dev/null 2>&1 & ;;
++    esac
++  done
++fi
++notify-send -a Seth "Seth" "pronta: LibreChat em http://127.0.0.1:3080" 2>/dev/null || true
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 7cbb93f7..70997974 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -1,10 +1,22 @@
+ #!/usr/bin/env bash
+-# Para a Seth INTEIRA: as frentes E a espinha (agata.target). Libera todos os
+-# recursos -- inclusive a VRAM da RTX 4060 e os modelos carregados no Ollama.
+-# (Ordem do Humano 10/09/2026: "parar Seth parando tudo". Antes parava so as
+-# frentes e mantinha a espinha de pe.)
++# Desliga a Seth INTEIRA (atalho "parar Seth"): vigias, Obsidian, navegador do sistema,
++# LibreChat, serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
++# RTX 4060 e os modelos carregados no Ollama.
++# O Chromium é só do sistema Agata, então fechá-lo inteiro não atinge outro uso.
+ # Fonte versionada: ~/agata/redesign/systemd/seth-parar
+ LC=~/librechat/docker-compose.yml
++DIARIO=~/.cache/agata/sincronia/eventos.log
++# Vigias primeiro: a parada da Seth não deve gerar alertas de "serviço caiu".
++systemctl --user stop agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
++echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH parando (atalho parar Seth)" >> "$DIARIO" 2>/dev/null || true
++# Obsidian: o app roda no escopo Flatpak, então parar o serviço não o fecha.
++flatpak kill md.obsidian.Obsidian 2>/dev/null || true
++# Navegador: fecha o processo dono do perfil do Chromium (SingletonLock), só se for o Chromium.
++_lock=$(readlink "$HOME/.config/chromium/SingletonLock" 2>/dev/null || true)
++_pid=${_lock##*-}
++if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
++  kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
++fi
+ docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+ systemctl --user stop painel-operacional.service 2>/dev/null || true
+@@ -18,6 +30,6 @@ if command -v ollama >/dev/null 2>&1; then
+   done
+ fi
+ # espinha: no stop o agata-drain roda antes e drena o WAL -> nunca corta no meio
+-# de um commit. Derruba os 5 servicos + o MoE :20129 (libera a VRAM).
++# de um commit. Derruba os servicos + o MoE :20129 (libera a VRAM).
+ systemctl --user stop agata.target 2>/dev/null || true
+-notify-send -a Seth "Seth" "parada por completo (frentes + espinha)" 2>/dev/null || true
++notify-send -a Seth "Seth" "parada por completo" 2>/dev/null || true
+diff --git a/scripts/equipe/vigia.sh b/scripts/equipe/vigia.sh
+index 96d3da2f..34056091 100755
+--- a/scripts/equipe/vigia.sh
++++ b/scripts/equipe/vigia.sh
+@@ -1,26 +1,60 @@
+ #!/usr/bin/env bash
+-# vigia.sh <membro> [intervalo_s=20]  -- SEM modelo: só shell. Imprime UMA linha quando algo muda; silêncio = nada mudou.
+-# Sinais: mensagem nova de OUTRO membro da Equipe no canal, novo/removido APROVADO- em propostas/, novo HEAD de origin/main.
+-# Uso (quem tem Monitor/stdout em segundo plano): rode em background e reaja só às linhas. Pare com: touch ~/.cache/agata/sincronia/vigia.parar
++# vigia.sh <membro> [intervalo_s=20] [--uma [max_s]]  -- SEM modelo: só shell.
++# Anota, em UMA linha, cada evento do sistema Agata. Silêncio = nada mudou.
++# Eventos vigiados:
++#   1. mensagem nova de outro membro no canal da Equipe;
++#   2. pendência entre membros (vigia_par.py);
++#   3. assinatura nova ou removida em propostas/APROVADO-*;
++#   4. novo commit no origin/main (checado a cada 60 s);
++#   5. serviço da Seth/Agata que subiu, caiu ou mudou de estado (checado a cada intervalo);
++#   6. quantos provedores do Conselho estão detectados no navegador (a cada 60 s, pelo painel);
++#   7. LibreChat saudável ou não (a cada 60 s).
++# Cada evento sai na tela (quem tem Monitor lê) e vai para o diário ~/.cache/agata/sincronia/eventos.log.
++# A Seth lê o diário pelo painel: GET /api/eventos (só leitura).
++# Parar: systemctl --user stop agata-vigia@<membro> (o seth-parar faz isso).
+ set -u
+ eu="${1:?uso: vigia.sh <membro> [intervalo_s] [--uma [max_s]]}"; iv="${2:-20}"; uma=0; max=600; [ "${3:-}" = "--uma" ] && { uma=1; max="${4:-600}"; }; ini=$SECONDS
+-C="${EQUIPE_CANAL:-${DUPLA_CANAL:-$HOME/.cache/agata/sincronia/conversa.md}}"; R="${EQUIPE_REPO:-${DUPLA_REPO:-$HOME/agata}}"; P="${EQUIPE_PARAR:-${DUPLA_PARAR:-$HOME/.cache/agata/sincronia/vigia.parar}}"; rm -f "$P"
++C="${EQUIPE_CANAL:-${DUPLA_CANAL:-$HOME/.cache/agata/sincronia/conversa.md}}"; R="${EQUIPE_REPO:-${DUPLA_REPO:-$HOME/agata}}"; P="${EQUIPE_PARAR:-${DUPLA_PARAR:-$HOME/.cache/agata/sincronia/vigia.parar}}"
++D="${VIGIA_DIARIO:-$HOME/.cache/agata/sincronia/eventos.log}"; rm -f "$P"; mkdir -p "$(dirname "$D")" 2>/dev/null || true
++# Uma linha por evento: vai para a tela e para o diário (o diário é o que a Seth lê).
++ev() { local l; l="$(TZ=America/Sao_Paulo date +%H:%M) $*"; echo "$l"; echo "$l" >> "$D" 2>/dev/null || true; }
++# Serviços da espinha da Seth (os que sobem com `seth` e caem com `seth-parar`).
++ESPINHA="seth-gateway seth-escriba seth-verificador painel-operacional omniroute omniroute-sanitizer openvino-whisper openvino-embeddings obsidian-ro-proxy obsidian-app piper-tts discord-mcp navegador-mcp"
++declare -A st
++for s in $ESPINHA; do st[$s]=$(systemctl --user is-active "$s.service" 2>/dev/null); done
+ # Blocos de outros membros = todos os blocos menos os meus. `grep -c` imprime 0 e sai com 1 quando não acha: o `|| true` não pode somar um segundo "0".
+ outros() { local t m; t=$(grep -c '^## ' "$C" 2>/dev/null) || true; m=$(grep -c "^## $eu-" "$C" 2>/dev/null) || true; echo $(( ${t:-0} - ${m:-0} )); }
++# Provedores do Conselho detectados (o painel conta as abas com a extensão). "?" = painel fora do ar.
++prov() { curl -s -m 3 http://127.0.0.1:20146/api/relay-council/state 2>/dev/null | python3 -c 'import sys,json
++try: print(len(json.load(sys.stdin).get("providers", [])))
++except Exception: print("?")' 2>/dev/null || echo "?"; }
++lc() { docker inspect -f '{{.State.Health.Status}}' librechat 2>/dev/null || echo "fora"; }
+ n0=$(outros)
+ a0=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
+ par0=""
+ h0=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
++pv0=$(prov); lc0=$(lc)
++t=0
+ while [ ! -e "$P" ]; do
+-  sleep "$iv"
++  sleep "$iv"; t=$((t+1))
+   achou=0
+   n=$(outros)
+   a=$(ls "$R"/propostas/APROVADO-* 2>/dev/null | sort | md5sum | cut -c1-8)
+-  h=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
+-  [ "$n" != "$n0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MENSAGEM de outro membro: $((n-n0)) nova(s)"; n0=$n; achou=1; }
+-  [ "$a" != "$a0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) ASSINATURAS mudaram: $(ls "$R"/propostas/APROVADO-* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"; a0=$a; achou=1; }
+-  par=$(python3 -I "$(dirname "$0")/vigia_par.py" "$eu" "$C" 2>/dev/null); [ -n "$par" ] && [ "$par" != "$par0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) $par"; par0="$par"; achou=1; }
+-  [ -n "$h" ] && [ "$h" != "$h0" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) MAIN andou: $h"; h0=$h; achou=1; }
++  [ "$n" != "$n0" ] && { ev "MENSAGEM de outro membro: $((n-n0)) nova(s)"; n0=$n; achou=1; }
++  [ "$a" != "$a0" ] && { ev "ASSINATURAS mudaram: $(ls "$R"/propostas/APROVADO-* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"; a0=$a; achou=1; }
++  par=$(python3 -I "$(dirname "$0")/vigia_par.py" "$eu" "$C" 2>/dev/null); [ -n "$par" ] && [ "$par" != "$par0" ] && { ev "$par"; par0="$par"; achou=1; }
++  for s in $ESPINHA; do
++    x=$(systemctl --user is-active "$s.service" 2>/dev/null)
++    [ "$x" != "${st[$s]}" ] && { ev "SERVIÇO $s: ${st[$s]:-?} -> $x"; st[$s]=$x; achou=1; }
++  done
++  if [ $((t % 3)) -eq 0 ]; then
++    h=$(git -C "$R" ls-remote -q origin refs/heads/main 2>/dev/null | cut -c1-8)
++    [ -n "$h" ] && [ "$h" != "$h0" ] && { ev "MAIN andou: $h"; h0=$h; achou=1; }
++    pv=$(prov)
++    [ "$pv" != "$pv0" ] && { ev "CONSELHO provedores detectados: $pv0 -> $pv"; pv0=$pv; achou=1; }
++    lx=$(lc)
++    [ "$lx" != "$lc0" ] && { ev "LIBRECHAT: $lc0 -> $lx"; lc0=$lx; achou=1; }
++  fi
+   [ "$uma" = 1 ] && [ "$achou" = 1 ] && exit 0
+-  [ "$uma" = 1 ] && [ $((SECONDS-ini)) -ge "$max" ] && { echo "$(TZ=America/Sao_Paulo date +%H:%M) SEM EVENTO em ${max}s"; exit 0; }
++  [ "$uma" = 1 ] && [ $((SECONDS-ini)) -ge "$max" ] && { ev "SEM EVENTO em ${max}s"; exit 0; }
+ done
