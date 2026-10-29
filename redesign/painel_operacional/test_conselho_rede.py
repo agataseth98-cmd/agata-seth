@@ -217,6 +217,23 @@ class CouncilHTTPTests(unittest.TestCase):
                                       "POST")[0], 405)
 
 
+class ExtensionStabilityTests(unittest.TestCase):
+    """F3: a extensão recarrega aba descarregada, limpa a caixa antes de escrever e não reenvia sem leitura."""
+
+    def test_f3_guards_are_present_and_no_cookie_permission(self):
+        base = Path(__file__).resolve().parent / "relay-extension-v2"
+        background = (base / "background.js").read_text(encoding="utf-8")
+        common = (base / "content" / "_common.js").read_text(encoding="utf-8")
+        manifest = (base / "manifest.json").read_text(encoding="utf-8")
+        self.assertIn("ensureTabLoaded", background)
+        self.assertIn("chrome.tabs.reload", background)
+        self.assertIn('sendSiteCmd(tabId, site, "clear")', background)
+        self.assertIn("composer_nao_limpo", background)
+        self.assertIn("sem_leitura", background)
+        self.assertIn('case "clear"', common)
+        self.assertNotIn('"cookies"', manifest)
+
+
 class ExtensionContractTests(unittest.TestCase):
     def test_extension_is_scoped_to_open_chat_tabs_and_local_panel(self):
         directory = Path(__file__).resolve().parent / "relay-extension-v2"
