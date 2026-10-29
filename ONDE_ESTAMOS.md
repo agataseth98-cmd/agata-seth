@@ -10,6 +10,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 29/10
 
+**Confirmação única no Conselho:** assinatura da P-8 validada e mudança aplicada em worktree própria; selftest, 39 testes e sintaxe passaram. A fila continua exigindo aprovação explícita por envio. O painel oficial ainda não foi alterado; PR de aplicação aguarda merge humano.
+
 **Confirmação única no Conselho:** PR #708 propõe remover os três diálogos nativos duplicados, preservando os botões explícitos de aprovar/rejeitar e a aprovação individual dos prompts. `node --check`, verificação dos controles e 39 testes passaram em worktree descartável. Aguarda assinatura; painel oficial não foi alterado. Na bateria, oito provedores retornaram; o Humano viu a resposta de Claude, enquanto o registro do relay marcou timeout.
 
 **Conselho em Rede no Chromium:** PR #705 mergeado em main; painel reiniciado e páginas oficiais responderam HTTP 200. No Brave, o painel mostra nove adaptadores experimentais, mas nenhum provedor aparece em aba ativa. Nenhum prompt real foi enviado. Falta recarregar/conectar a extensão oficial no Chromium e então testar os modelos, com aprovação humana por envio.

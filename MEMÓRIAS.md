@@ -26,20 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e38e6117a1a058ceca94e1ef43fdaea5d2638a94
-  Escrito em: 29/10/2026 10:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e0c019cbc166830b0572f57fdb131c0b62d026f
+  Escrito em: 29/10/2026 10:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e38e6117a1a058ceca94e1ef43fdaea5d2638a94/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e38e6117a1a058ceca94e1ef43fdaea5d2638a94/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e38e6117a1a058ceca94e1ef43fdaea5d2638a94/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e38e6117a1a058ceca94e1ef43fdaea5d2638a94/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e38e6117a1a058ceca94e1ef43fdaea5d2638a94/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e0c019cbc166830b0572f57fdb131c0b62d026f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e0c019cbc166830b0572f57fdb131c0b62d026f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e0c019cbc166830b0572f57fdb131c0b62d026f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e0c019cbc166830b0572f57fdb131c0b62d026f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e0c019cbc166830b0572f57fdb131c0b62d026f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+
+(930) DIÁRIO — 29/10/2026 · **A proposta `conselho-rede-confirmacao-unica-20261029` foi assinada e aplicada em worktree própria.** O P-8 confirmou assinatura/hash e `PODE APLICAR`; o painel remove os diálogos nativos duplicados e mantém a aprovação explícita na fila. Selftest do painel, 39 testes, sintaxe JavaScript, ausência de `window.confirm()` e botões de aprovar/rejeitar passaram. O painel oficial não foi alterado; PR de aplicação aguarda merge humano.
+Modelo: GPT-6 (Codex, na Máquina) · vetor: `scripts/p8_verificar.sh`, selftest, unittest, `node --check`, busca no JS e `git diff --check` · Autorização: Humano — “feito” (assinatura P-8 validada)
 
 
 (929) DIÁRIO — 29/10/2026 · **Proposta P-8 para uma confirmação explícita no Conselho em Rede, sem diálogo duplicado do navegador.** O diff remove `window.confirm()` ao decidir na fila, preparar rodadas e solicitar ferramenta; os controles explícitos e a aprovação individual por envio permanecem. A bateria mostrou resposta de oito provedores; o Humano confirmou visualmente a resposta Claude, embora o registro do relay tenha marcado timeout. A proposta foi rebaseada sobre o `main` atual após o merge do PR #707.
