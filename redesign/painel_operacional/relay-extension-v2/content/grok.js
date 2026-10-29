@@ -1,1 +1,0 @@
-(function () { window.__relayRegisterGeneric({ siteId: "grok", input: 'textarea, div[contenteditable="true"]', submit: 'button[aria-label*="Send"], button[aria-label*="Post"], button[type="submit"]', assistant: '[data-testid*="assistant"], [data-testid*="message"], [class*="message"]' }); })();

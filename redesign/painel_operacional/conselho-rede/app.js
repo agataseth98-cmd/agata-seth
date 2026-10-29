@@ -29,8 +29,8 @@ function node(tag, text, className) {
 }
 
 const statusText = {
-  pending: "aguardando aprovação humana", approved: "aprovado; aguardando extensão",
-  running: "em execução na aba autorizada", executing: "ferramenta aprovada em execução",
+  pending: "aguardando aprovação humana", approved: "aprovado; aguardando executor",
+  running: "em execução via API oficial", executing: "ferramenta aprovada em execução",
   completed: "concluído", rejected: "rejeitado pelo Humano", error: "falha",
   unknown: "resultado incerto; reenvio bloqueado",
 };

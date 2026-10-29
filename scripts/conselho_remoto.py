@@ -380,13 +380,13 @@ VOZ_COMUM = (
 )
 
 
-def enviar_omniroute(pedido_texto, modelo):
+def enviar_omniroute(pedido_texto, modelo, system_prompt=None):
     """UMA chamada. POST no proxy de sanitizacao, que scrub-a o pedido e repassa
     ao OmniRoute pro `modelo` raw escolhido pela rotação (não mais uma combo
     de prioridade fixa). Devolve o JSON cru (shape OpenAI-compat)."""
     payload = {
         "model": modelo,
-        "messages": [{"role": "system", "content": VOZ_COMUM},
+        "messages": [{"role": "system", "content": system_prompt or VOZ_COMUM},
                      {"role": "user", "content": pedido_texto}],
         "max_tokens": MAX_TOKENS_POR_MODELO.get(modelo, TETO_TOKENS_SAIDA),
     }

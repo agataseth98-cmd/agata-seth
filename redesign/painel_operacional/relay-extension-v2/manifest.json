@@ -1,36 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Agata — Conselho em Rede",
-  "version": "0.6.0",
-  "description": "Envios aprovados pelo Humano entre modelos em abas, coordenados pelo painel Agata.",
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage",
-    "tabs",
-    "alarms"
-  ],
-  "host_permissions": [
-    "https://chat.deepseek.com/*",
-    "https://deepseek.com/*",
-    "https://www.deepseek.com/*",
-    "https://gemini.google.com/*",
-    "https://chat.z.ai/*",
-    "https://z.ai/*",
-    "https://chatgpt.com/*",
-    "https://claude.ai/*",
-    "https://grok.com/*",
-    "https://x.com/*",
-    "https://qwen.ai/*",
-    "https://chat.qwen.ai/*",
-    "https://chat.mistral.ai/*",
-    "https://lechat.mistral.ai/*",
-    "https://www.kimi.com/*",
-    "https://kimi.com/*",
-    "https://www.kimi.ai/*",
-    "https://kimi.ai/*",
-    "http://127.0.0.1:20146/*"
-  ],
+  "version": "0.7.0",
+  "description": "Executa envios aprovados pelo Humano via APIs oficiais do OmniRoute.",
+  "permissions": ["alarms"],
+  "host_permissions": ["http://127.0.0.1:20146/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -39,53 +13,6 @@
     "default_popup": "popup/popup.html",
     "default_title": "Conselho em Rede · Agata"
   },
-  "content_scripts": [
-    {
-      "matches": ["https://chat.deepseek.com/*", "https://deepseek.com/*", "https://www.deepseek.com/*"],
-      "js": ["content/_common.js", "content/deepseek.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://gemini.google.com/*"],
-      "js": ["content/_common.js", "content/gemini.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://chat.z.ai/*", "https://z.ai/*"],
-      "js": ["content/_common.js", "content/zai.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://chatgpt.com/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/chatgpt.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://claude.ai/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/claude.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://grok.com/*", "https://x.com/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/grok.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://qwen.ai/*", "https://chat.qwen.ai/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/qwen.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://chat.mistral.ai/*", "https://lechat.mistral.ai/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/mistral.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://www.kimi.com/*", "https://kimi.com/*", "https://www.kimi.ai/*", "https://kimi.ai/*"],
-      "js": ["content/_common.js", "content/_generic.js", "content/kimi.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",

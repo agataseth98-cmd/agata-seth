@@ -1110,8 +1110,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
-        if self.path == "/api/relay-council/result":
-            return self._relay_council_result()
+        if self.path == "/api/relay-council/execute":
+            return self._relay_council_execute()
         if self.path == "/api/relay-council/evaluations":
             return self._relay_evaluation()
         if self.path == "/api/seth/chat":
@@ -1210,24 +1210,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid council action")
         return self._send(201, "application/json; charset=utf-8", body)
 
-    def _relay_council_result(self) -> None:
+    def _relay_council_execute(self) -> None:
         if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
             return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
-        payload = self._relay_council_body()
+        payload = self._relay_council_body(4096)
         if payload is None:
             return
-        council = _council_state()
+        task_id, lease = payload.get("task_id"), payload.get("lease")
+        if not isinstance(task_id, str) or not isinstance(lease, str):
+            return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid task"}')
         try:
-            result = council.finish(
-                payload.get("task_id"),
-                {"ok": payload.get("ok"), "text": payload.get("text"),
-                 "error": payload.get("error")},
-                lease=payload.get("lease"), site=payload.get("site"),
-            )
+            import relay_executor
+            result = _council_state().execute_api(task_id, lease, relay_executor.send)
         except _COUNCIL_CONFLICT:
             return self._send(409, "application/json; charset=utf-8", b'{"error":"task lease mismatch"}')
         except (ValueError, TypeError, KeyError):
-            return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid result"}')
+            return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid task"}')
         return self._send(200, "application/json; charset=utf-8",
                           json.dumps(result).encode("utf-8"))
 

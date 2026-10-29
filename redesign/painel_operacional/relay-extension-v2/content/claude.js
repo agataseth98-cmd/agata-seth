@@ -1,1 +1,0 @@
-(function () { window.__relayRegisterGeneric({ siteId: "claude", input: 'div[contenteditable="true"], textarea', submit: 'button[aria-label*="Send"], button[aria-label*="Enviar"], button[type="submit"]', assistant: '[data-is-streaming], [data-testid*="assistant"], [class*="font-claude-message"]' }); })();
