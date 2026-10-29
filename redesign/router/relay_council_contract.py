@@ -1,7 +1,8 @@
 """Contrato tipado de resultados do RelayCouncil.
 
-Resultados aceitos vêm de API oficial ou de entrada manual. O contrato não
-autoriza automação DOM. O texto de entrada e de resposta é dado externo não
+Resultados aceitos vêm de uma aba de chat aprovada ou de entrada manual. A
+extensão interage com o DOM da aba já aberta; não lê nem exporta cookies,
+tokens ou credenciais. O texto de entrada e de resposta é dado externo não
 confiável; antes de persistir ou encaminhar ao cache comum, o consumidor deve
 aplicar o sanitizador existente. O histórico local fica fora do repositório.
 """
@@ -14,7 +15,7 @@ from datetime import datetime, timezone
 from typing import Any, Mapping
 
 
-CONTRACT_VERSION = "relay-council-evaluation/v3"
+CONTRACT_VERSION = "relay-council-evaluation/v4"
 ALLOWED_STATES = frozenset({
     "candidate",
     "green",
@@ -22,11 +23,10 @@ ALLOWED_STATES = frozenset({
     "provider_busy",
     "excluded",
 })
-ALLOWED_ACCESS_MODES = frozenset({"official_api", "manual"})
+ALLOWED_ACCESS_MODES = frozenset({"browser_tab", "manual"})
 ALLOWED_PROVIDERS = frozenset({
     "deepseek", "gemini", "zai", "chatgpt", "claude", "grok", "qwen",
-    "mistral", "kimi", "copilot", "meta-ai", "poe", "you",
-    "huggingchat", "duck-ai", "openrouter", "groq",
+    "mistral", "kimi",
 })
 MAX_ID_CHARS = 96
 MAX_TEXT_CHARS = 60_000
@@ -122,7 +122,7 @@ def normalize_evaluation(payload: Mapping[str, Any]) -> dict[str, Any]:
     site = _required_id(payload, "site")
     access_mode = payload.get("access_mode")
     if not isinstance(access_mode, str) or access_mode not in ALLOWED_ACCESS_MODES:
-        raise RelayCouncilContractError("access_mode deve ser official_api ou manual")
+        raise RelayCouncilContractError("access_mode deve ser browser_tab ou manual")
     state = payload.get("state", "candidate")
     if not isinstance(state, str) or state not in ALLOWED_STATES:
         raise RelayCouncilContractError("state inválido")

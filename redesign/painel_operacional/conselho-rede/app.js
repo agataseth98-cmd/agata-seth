@@ -30,7 +30,7 @@ function node(tag, text, className) {
 
 const statusText = {
   pending: "aguardando aprovação humana", approved: "aprovado; aguardando executor",
-  running: "em execução via API oficial", executing: "ferramenta aprovada em execução",
+  running: "em execução na aba Chromium", executing: "ferramenta aprovada em execução",
   completed: "concluído", rejected: "rejeitado pelo Humano", error: "falha",
   unknown: "resultado incerto; reenvio bloqueado",
 };
@@ -40,7 +40,9 @@ function renderProviders(items) {
   body.replaceChildren();
   for (const provider of items) {
     const row = document.createElement("tr");
-    for (const value of [provider.name, provider.kind, provider.access_mode, provider.availability]) {
+    const mode = provider.adapter_state === "experimental" ? "experimental" : provider.access_mode;
+    const availability = provider.tab_open ? "aba aberta" : "aba não detectada";
+    for (const value of [provider.name, provider.kind, mode, availability]) {
       row.append(node("td", value));
     }
     body.append(row);
@@ -152,7 +154,8 @@ async function refresh() {
     renderHistory(state.actions, state.legacy);
     const pending = snapshot.pending || 0;
     const age = snapshot.last_poll ? `${Math.round(Date.now() / 1000 - snapshot.last_poll)}s` : "sem poll";
-    $("status").textContent = `painel conectado · ${pending} pedidos pendentes · extensão: ${age}`;
+    const openCount = state.providers.length;
+    $("status").textContent = `painel conectado · ${openCount} abas detectadas · ${pending} pedidos pendentes · extensão: ${age}`;
     $("status").className = "status connected";
   } catch (error) {
     $("status").textContent = `indisponível: ${error.message}`;
@@ -164,7 +167,7 @@ $("promptForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const site = $("site").value;
   const text = $("pergunta").value.trim();
-  if (!site || !text) { $("turnoHint").textContent = "Escolha o adaptador e escreva um prompt."; return; }
+  if (!site || !text) { $("turnoHint").textContent = "Escolha uma aba detectada e escreva um prompt."; return; }
   try {
     await api("/api/relay-council/actions", jsonOptions({ kind: "send", payload: { site, text } }));
     $("pergunta").value = "";

@@ -12,7 +12,7 @@ def valid(**changes):
         "task_id": "task-1",
         "provider": "gemini",
         "site": "gemini",
-        "access_mode": "official_api",
+        "access_mode": "browser_tab",
         "state": "green",
         "ok": True,
         "text": "resposta formal",

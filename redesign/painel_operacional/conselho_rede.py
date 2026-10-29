@@ -16,9 +16,11 @@ import threading
 import time
 import uuid
 from pathlib import Path
+from relay_catalog import PROVIDERS as PROVIDER_CATALOG
 
-# Only providers with an active, official API mapping may enter the send queue.
-PROVIDERS = ("gemini", "zai", "mistral", "huggingchat", "openrouter")
+# Fixed adapter allowlist; each turn also requires a fresh browser-tab heartbeat.
+PROVIDERS = tuple(provider["id"] for provider in PROVIDER_CATALOG)
+PROVIDER_HEARTBEAT_TTL = 30
 TOOLS = {
     "SEARCH": "Buscar no canon público: canon=consulta",
     "STATE": "Consultar estado medido do Agata",
@@ -172,6 +174,8 @@ class Council:
         # Escopado a claim/result; nunca aceito no endpoint de aprovação.
         self.executor_key = secrets.token_urlsafe(32)
         self.last_poll = None
+        self._active_providers = ()
+        self._provider_seen_at = 0.0
         with self.db:
             self.db.executescript('''
                 CREATE TABLE IF NOT EXISTS actions (
@@ -189,6 +193,21 @@ class Council:
                 self.db.execute("UPDATE actions SET status=?,approved=NULL WHERE id=?", (state, row["id"]))
                 self.event(row["id"], state)
 
+    def set_active_providers(self, providers):
+        if (not isinstance(providers, (list, tuple)) or len(providers) > len(PROVIDERS)
+                or any(not isinstance(site, str) or site not in PROVIDERS for site in providers)
+                or len(set(providers)) != len(providers)):
+            raise ValueError("inventário de abas inválido")
+        with self.lock:
+            self._active_providers = tuple(providers)
+            self._provider_seen_at = time.time()
+
+    def available_providers(self):
+        with self.lock:
+            if time.time() - self._provider_seen_at > PROVIDER_HEARTBEAT_TTL:
+                return ()
+            return self._active_providers
+
     def event(self, action, status):
         self.db.execute("INSERT INTO events(action,status,ts) VALUES(?,?,?)", (action, status, time.time()))
 
@@ -201,8 +220,8 @@ class Council:
         if not isinstance(p, dict):
             raise ValueError("payload deve ser objeto")
         if kind == "send":
-            if p.get("site") not in PROVIDERS:
-                raise ValueError("provedor sem adaptador de relay")
+            if p.get("site") not in self.available_providers():
+                raise ValueError("provedor sem aba aberta e detectada no Chromium")
             return {"site": p["site"], "text": self._text(p.get("text")),
                     "group": p.get("group"), "phase": p.get("phase", "single")}
         if kind != "tool" or p.get("tool") not in TOOLS:
@@ -218,8 +237,8 @@ class Council:
                 raise ValueError("CACHE exige ler entre 1 e 50")
             args = {"ler": int(n)}
         elif tool == "RELAY":
-            if args.get("to") not in PROVIDERS:
-                raise ValueError("destino sem adaptador")
+            if args.get("to") not in self.available_providers():
+                raise ValueError("destino sem aba aberta e detectada no Chromium")
             args = {"to": args["to"], "question": self._text(args.get("question") or p.get("text"))}
         else:
             args = {}
@@ -246,7 +265,9 @@ class Council:
     def group(self, kind, prompt, sites, repetitions=1):
         if kind not in {"debate", "chain", "evaluation"}:
             raise ValueError("tipo de rodada inválido")
-        if not isinstance(sites, list) or not sites or len(sites) > 3 or any(s not in PROVIDERS for s in sites) or len(set(sites)) != len(sites):
+        if (not isinstance(sites, list) or not sites or len(sites) > 3
+                or any(s not in self.available_providers() for s in sites)
+                or len(set(sites)) != len(sites)):
             raise ValueError("participantes inválidos")
         if (kind == "debate" and len(sites) != 3) or (kind == "chain" and len(sites) < 2) or (kind == "evaluation" and len(sites) != 1):
             raise ValueError("número de participantes inválido")
@@ -306,6 +327,9 @@ class Council:
     def claim(self):
         with self.lock, self.db:
             self.last_poll = time.time()
+            active = self.available_providers()
+            if not active:
+                return []
             self.db.execute("UPDATE actions SET status='unknown' WHERE status='running' AND approved<?", (time.time() - EXPIRY,))
             if self.db.execute("SELECT 1 FROM actions WHERE status='running'").fetchone():
                 return []
@@ -315,28 +339,26 @@ class Council:
                     self.db.execute("UPDATE actions SET status='pending',approved=NULL WHERE id=?", (item["id"],))
                     self.event(item["id"], "pending")
                     continue
-                row, lease = self._row(item["id"]), secrets.token_urlsafe(24)
+                row = self._row(item["id"])
+                payload = json.loads(row["payload"])
+                if payload.get("site") not in active:
+                    continue
+                lease = secrets.token_urlsafe(24)
                 self.db.execute("UPDATE actions SET status='running',lease=? WHERE id=?", (lease, item["id"]))
                 self.event(item["id"], "running")
-                return [{"id": row["id"], "action": "send_prompt", **json.loads(row["payload"]),
+                return [{"id": row["id"], "action": "send_prompt", **payload,
                          "approval_hash": row["hash"], "lease": lease}]
             return []
 
-    def execute_api(self, action, lease, execute):
-        """Execute exactly one approved, leased send through the API callback."""
+    def finish_browser(self, action, lease, site, result):
+        """Record the result returned by one approved browser-tab task."""
         with self.lock:
             row = self._row(action)
             payload = json.loads(row["payload"])
             if (row["kind"] != "send" or row["status"] != "running"
                     or not lease or not secrets.compare_digest(row["lease"] or "", lease)
-                    or payload.get("site") not in PROVIDERS):
+                    or payload.get("site") != site or site not in PROVIDERS):
                 raise Conflict("task lease mismatch")
-            site, prompt = payload["site"], payload["text"]
-        try:
-            response = execute(site, prompt, CONTEXT)
-            result = {"ok": True, "text": response, "error": ""}
-        except Exception:
-            result = {"ok": False, "text": "", "error": "API indisponível; o envio não será repetido automaticamente"}
         return self.finish(action, result, required="running", lease=lease, site=site)
 
     def finish(self, action, result, required="running", lease=None, site=None):
@@ -398,7 +420,7 @@ class Council:
                 row["result"] = json.loads(row["result"]) if row["result"] else None
                 row.pop("lease", None)
             return {"schema_version": 1, "actions": actions, "tools": TOOLS,
-                    "providers": list(PROVIDERS), "context": CONTEXT, "last_poll": self.last_poll,
+                    "providers": list(self.available_providers()), "context": CONTEXT, "last_poll": self.last_poll,
                     "pending": self.db.execute("SELECT count(*) FROM actions WHERE status='pending'").fetchone()[0],
                     "observed_at": time.time()}
 

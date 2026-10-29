@@ -26,20 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 16b1b8551cd27563a5259f0da3305968ef935d1c
-  Escrito em: 29/10/2026 09:26 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f135b74fe2e21e830c9818ae7a818545e7f3642e
+  Escrito em: 29/10/2026 09:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/16b1b8551cd27563a5259f0da3305968ef935d1c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/16b1b8551cd27563a5259f0da3305968ef935d1c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/16b1b8551cd27563a5259f0da3305968ef935d1c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/16b1b8551cd27563a5259f0da3305968ef935d1c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/16b1b8551cd27563a5259f0da3305968ef935d1c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f135b74fe2e21e830c9818ae7a818545e7f3642e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f135b74fe2e21e830c9818ae7a818545e7f3642e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f135b74fe2e21e830c9818ae7a818545e7f3642e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f135b74fe2e21e830c9818ae7a818545e7f3642e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f135b74fe2e21e830c9818ae7a818545e7f3642e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium foi assinada, verificada e aplicada em worktree própria.** Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JavaScript, manifesto e validação da skill passaram. Nenhum serviço ou navegador foi alterado e nenhum prompt real foi enviado; PR de aplicação aguarda revisão e merge humano.
+Modelo: GPT-6 (Codex, na Máquina) · vetor: `p8_verificar.sh` confirmou assinatura e `PODE APLICAR`; verificações locais listadas passaram · Autorização: Humano — “assinado”.
+
 
 
 (926) CORREÇÃO — 29/10/2026 · **A revisão da P-8 de abas Chromium amplia a skill com o mapa e as descobertas operacionais já registrados localmente.** Os resultados de 27–28/10 permanecem históricos; a proposta mantém os nove adaptadores experimentais até confirmação formal na extensão oficial. Nenhum runtime ou provedor foi alterado/testado.
