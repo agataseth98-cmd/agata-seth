@@ -1,0 +1,29 @@
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index b3042d77..3239e585 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -41,6 +41,11 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+ 
++(928) CORREÇÃO — 29/10/2026 · **Correção da entrada (927): o PR #705 foi mergeado e o painel operacional foi reiniciado.** O checkout principal avançou para acee37a3; painel-operacional.service reiniciou às 09:39 -03. A primeira checagem imediata não conectou à porta, mas após cinco segundos o serviço estava ativo e ouvindo em 127.0.0.1:20146; /conselho-rede e /prototipo responderam HTTP 200. O painel no Brave exibiu os nove adaptadores experimentais; o poll estava recente, mas o inventário de abas de provedores veio vazio. Nenhum prompt real foi enviado. A extensão e os modelos do Chromium ainda não foram verificados: esta automação só mostrou o Brave. O teste negativo em /api/relay-council/tasks com um identificador de cliente deliberadamente inválido recebeu 403 esperado.
++Perímetro antes e depois do restart: 22 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. Backup reversível da skill local divergente: ~/.local/share/agata/rollbacks/conselho-chromium-20261029/skill-local-original/. Rollback do serviço: git -C ~/agata restore --source=2d5c42276d99bfcd364de2f897d310cf4000653e --worktree -- redesign/painel_operacional redesign/router/relay_council_contract.py && systemctl --user restart painel-operacional.service. A extensão do Chromium e as abas dos provedores não foram recarregadas.
++Modelo: GPT-6 (Codex, na Máquina) · vetor: git, systemctl, journalctl, curl, ss, scripts/perimetro.sh e painel visível no Brave · Autorização: Humano — “feito” (merge humano do PR #705).
++
++
+ (927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium foi assinada, verificada e aplicada em worktree própria.** Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JavaScript, manifesto e validação da skill passaram. Nenhum serviço ou navegador foi alterado e nenhum prompt real foi enviado; PR de aplicação aguarda revisão e merge humano.
+ Modelo: GPT-6 (Codex, na Máquina) · vetor: `p8_verificar.sh` confirmou assinatura e `PODE APLICAR`; verificações locais listadas passaram · Autorização: Humano — “assinado”.
+ 
+diff --git a/ONDE_ESTAMOS.md b/ONDE_ESTAMOS.md
+index 78c71a3e..bba4dc3e 100644
+--- a/ONDE_ESTAMOS.md
++++ b/ONDE_ESTAMOS.md
+@@ -10,7 +10,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+ 
+ ## Hoje, 29/10
+ 
+-**Conselho em Rede no Chromium:** P-8 `relay-council-abas-chromium-20261029` assinada e aplicada em worktree própria. Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JS, manifesto e validador da skill passaram. O PR de aplicação ainda aguarda revisão e merge humano. Nenhum prompt real foi enviado; o serviço e o Chromium não foram alterados nem recarregados.
++**Conselho em Rede no Chromium:** PR #705 mergeado em main; painel reiniciado e páginas oficiais responderam HTTP 200. No Brave, o painel mostra nove adaptadores experimentais, mas nenhum provedor aparece em aba ativa. Nenhum prompt real foi enviado. Falta recarregar/conectar a extensão oficial no Chromium e então testar os modelos, com aprovação humana por envio.
+ 
+ ## Hoje, 28/10
+ 
