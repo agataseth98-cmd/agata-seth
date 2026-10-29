@@ -158,6 +158,26 @@
           case "readLast":
             sendResponse({ ok: true, value: await relay.readLast() });
             return;
+          case "clear": {
+            // F3: esvazia a caixa de envio visível antes de escrever, e confere que ficou vazia.
+            const campos = [...document.querySelectorAll('textarea, [contenteditable="true"], [role="textbox"]')]
+              .filter((el) => el.getClientRects().length > 0 && !el.readOnly && !el.disabled);
+            const campo = campos[campos.length - 1];
+            if (!campo) {
+              sendResponse({ ok: false, error: "caixa de envio não encontrada" });
+              return;
+            }
+            if ("value" in campo && campo.tagName === "TEXTAREA") {
+              const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set;
+              setter.call(campo, "");
+            } else {
+              campo.textContent = "";
+            }
+            campo.dispatchEvent(new Event("input", { bubbles: true }));
+            const restante = ("value" in campo ? campo.value : campo.textContent || "").trim();
+            sendResponse(restante ? { ok: false, error: "caixa ainda com texto" } : { ok: true });
+            return;
+          }
           case "write":
             await relay.write(msg.text);
             sendResponse({ ok: true });

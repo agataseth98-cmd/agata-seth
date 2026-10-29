@@ -139,6 +139,13 @@ async function executeTask(task) {
     // Guarda a última resposta antes do turno para não aceitar resposta antiga.
     const baseline = await sendSiteCmd(tabId, site, "readLast");
     // escreve
+    // F3: limpa a caixa antes de escrever. Sem isso, o texto é anexado a um rascunho
+    // restaurado e o mesmo pedido pode ir mais de uma vez.
+    const c = await sendSiteCmd(tabId, site, "clear");
+    if (!c.ok) {
+      await report(false, null, `composer_nao_limpo: ${c.error}`);
+      return;
+    }
     const w = await sendSiteCmd(tabId, site, "write", { text });
     if (!w.ok) {
       await report(false, null, `write falhou: ${w.error}`);
@@ -153,7 +160,8 @@ async function executeTask(task) {
     // espera resposta estabilizar
     const response = await waitForResponse(tabId, site, baseline.ok ? baseline.value : "");
     if (!response) {
-      await report(false, null, "timeout esperando resposta");
+      // F3: sem resposta lida, o envio já saiu. Não reenvia; informa para ativar a aba e conferir.
+      await report(false, null, "sem_leitura: a aba estava ativa, mas a resposta não foi lida; não reenviado");
       return;
     }
     await report(true, response, null);
@@ -174,8 +182,24 @@ async function activateTabForTask(tabId) {
     await withTimeout(chrome.windows.update(target.windowId, { focused: true }), TAB_OPERATION_TIMEOUT_MS, "focar janela");
   }
   await withTimeout(chrome.tabs.update(tabId, { active: true }), TAB_OPERATION_TIMEOUT_MS, "ativar aba");
+  // F3: aba restaurada depois de um reinício do navegador pode estar descarregada.
+  // Nesse caso recarrega e espera a página completa antes de qualquer escrita ou leitura.
+  await ensureTabLoaded(tabId, target.discarded);
   await new Promise((resolve) => setTimeout(resolve, TAB_ACTIVATION_SETTLE_MS));
   return previous;
+}
+
+async function ensureTabLoaded(tabId, wasDiscarded) {
+  if (wasDiscarded) {
+    await withTimeout(chrome.tabs.reload(tabId), TAB_OPERATION_TIMEOUT_MS, "recarregar aba descarregada");
+  }
+  const deadline = Date.now() + READY_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const tab = await chrome.tabs.get(tabId);
+    if (tab.status === "complete" && !tab.discarded) return;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error("aba não carregou a tempo (sem_carregamento)");
 }
 
 async function restorePreviousView(previous) {
