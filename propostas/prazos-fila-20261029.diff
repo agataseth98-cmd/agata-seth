@@ -1,0 +1,28 @@
+diff --git a/redesign/painel_operacional/conselho_rede.py b/redesign/painel_operacional/conselho_rede.py
+index c1fa8f02..3df5273d 100644
+--- a/redesign/painel_operacional/conselho_rede.py
++++ b/redesign/painel_operacional/conselho_rede.py
+@@ -41,7 +41,7 @@ CONTEXT = (
+     + '\nExemplo: <SEARCH canon="memória do Conselho"/>\n'
+ )
+ MAX_TEXT = 60_000
+-EXPIRY = 600
++EXPIRY = 300  # item parado vira unknown em 5 min (antes 10); precisa ser maior que o pior caso da extensão
+ 
+ 
+ class Conflict(ValueError):
+diff --git a/redesign/painel_operacional/relay-extension-v2/background.js b/redesign/painel_operacional/relay-extension-v2/background.js
+index 1c6d32b8..547f345d 100644
+--- a/redesign/painel_operacional/relay-extension-v2/background.js
++++ b/redesign/painel_operacional/relay-extension-v2/background.js
+@@ -8,8 +8,8 @@ const POLL_INTERVAL_MS = 2000;      // normal
+ const POLL_INTERVAL_IDLE_MS = 5000;  // após 5 polls vazios
+ const POLL_TIMEOUT_MS = 5000;
+ const TURN_STABLE_MS = 8000;         // 8s sem mudança = resposta terminada
+-const TURN_MAX_WAIT_MS = 240000;     // 4 min por turno; provedores podem responder lentamente
+-const READY_TIMEOUT_MS = 90000;      // páginas pesadas podem levar mais de 30s
++const TURN_MAX_WAIT_MS = 150000;     // 2,5 min por turno; depois disso o item vira sem_leitura
++const READY_TIMEOUT_MS = 60000;      // 1 min para a página ficar pronta
+ const TAB_ACTIVATION_SETTLE_MS = 900; // dá ao site tempo para receber foco/visibilidade
+ const TAB_OPERATION_TIMEOUT_MS = 4000;
+ 
