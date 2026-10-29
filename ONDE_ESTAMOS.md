@@ -1,12 +1,16 @@
 # Onde estamos
 
-Atualizado em 28/10/2026.
+Atualizado em 29/10/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 29/10
+
+**Conselho em Rede no Chromium:** proposta P-8 `relay-council-abas-chromium-20261029` pronta para revisão e assinatura. Ela usa nove adaptadores experimentais nas abas já abertas pelo launcher; cada envio precisa de aprovação no painel. Testes locais passaram em cópia descartável. Nenhum prompt real foi enviado, a extensão do Chromium não foi recarregada e o runtime não mudou. Para aplicar depois do merge da proposta e da assinatura: `bash scripts/aprovar.sh relay-council-abas-chromium-20261029`.
 
 ## Hoje, 28/10
 
