@@ -12,7 +12,7 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **Conselho em Rede:** página, fila e histórico oficiais estão no painel `127.0.0.1:20146/conselho-rede`; serviço ativo e extensão fazendo poll. A fila de produção ainda aceita IDs da extensão DOM, incompatíveis com o catálogo oficial. Nenhum provedor real foi testado após a publicação.
 
-**Correção em revisão:** P-8 `painel-conselho-api-20261028` foi assinada, validada e aplicada na branch `aplica/painel-conselho-api-20261028`. Selftest, 43 testes, selftest do Conselho Remoto e verificações de sintaxe/manifesto passaram. O runtime permanece na versão atual até o PR de aplicação ser revisado e mergeado; nenhum provedor real foi chamado.
+**Correção em revisão:** P-8 `painel-conselho-api-20261028` foi assinada, aplicada na branch `aplica/painel-conselho-api-20261028` e publicada no PR #701. Selftest, 43 testes, selftest do Conselho Remoto e checks do PR passaram. Aguardando revisão/merge humano; o runtime permanece na versão atual e nenhum provedor real foi chamado.
 
 **Runtime do Conselho:** drop-in do `painel-operacional.service` concede escrita só a `~/.local/share/agata/painel-conselho/official`. Backup e comando de rollback estão na entrada (920) de MEMÓRIAS.
 

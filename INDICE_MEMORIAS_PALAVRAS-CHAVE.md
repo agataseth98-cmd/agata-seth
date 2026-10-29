@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(923) DIÁRIO — 28/10/2026 · **PR de aplicação #701 está aberto e com checks verdes.** O PR aplica a P-8 assinada `painel-conselho-api-20261028`, commit `bb35ef8`; fiscal-p8, suíte adversarial, CodeQL e análises Python/JavaScript passaram. Aguardando revisão/merge humano. O runtime oficial permanece sem alteração e provedores reais não foram chamados.
+  palavras-chave: aplicação, aberto, checks, verdes, aplica, assinada, painel, api, commit, fiscal, suíte, adversarial, codeql, análises, python, javascript, passaram, aguardando, revisão, merge, humano, runtime, oficial, permanece, alteração, provedores, reais, foram, chamados
 (922) DIÁRIO — 28/10/2026 · **Assinatura P-8 validada e proposta aplicada em worktree própria.** O marcador assinado corresponde ao SHA-256 do diff e passou `ssh-keygen -Y verify` com `agata-humano`/`agata-aprovacao-p8`. Aplicação em `aplica/painel-conselho-api-20261028`; selftest do painel, 43 testes, selftest do Conselho Remoto, `py_compile`, `node --check`, manifesto e `git diff --check` passaram. Nenhuma chamada real a provedor; serviço de produção não foi alterado. PR de aplicação ainda será aberto para revisão/merge humano.
   palavras-chave: assinatura, validada, proposta, aplicada, worktree, própria, marcador, assinado, corresponde, sha, diff, passou, ssh, keygen, verify, agata, humano, aprovacao, aplicação, aplica, painel, api, selftest, testes, remoto, compile, node, check, manifesto, git, passaram, chamada, real, provedor, serviço, produção, alterado, será, aberto, revisão, merge
 (921) DIÁRIO — 28/10/2026 · **Proposta P-8 preparada para substituir o executor DOM do Conselho por APIs oficiais.** A proposta preserva a fila e a aprovação humana, limita os destinos aos cinco modelos mapeados no ROSTER do OmniRoute e remove da extensão permissões e scripts de páginas de provedores. Nenhuma chamada real a provedor foi feita; a mudança aguarda assinatura e aplicação.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: remove, proposta, contraste, obsoleta, aplica, assinado, humano, propostas, inversao, diff, assinatura, objeto, porque, paleta, invertida, desfeita, volta, identidade, original
 (894) DIÁRIO — 28/10/2026 · **Painel: volta à identidade visual original do Agata.** Aplica `identidade-original-20261027`, assinado pelo Humano. Restaura o CSS anterior às propostas de paleta. Só cores; layout e comportamento intactos. A proposta de contraste sobre a paleta invertida (`contraste-inversao-20261027`) fica sem objeto e não é aplicada.
   palavras-chave: painel, volta, identidade, visual, original, agata, aplica, assinado, humano, restaura, css, anterior, propostas, paleta, cores, layout, comportamento, intactos, proposta, contraste, invertida, inversao, fica, objeto, aplicada
-(893) DIÁRIO — 27/10/2026 · **Painel: paleta invertida com a identidade original.** Aplica `inversao-identidade-20261027`, assinado pelo Humano. Luminância invertida sobre o CSS original; matiz e saturação preservados. Contraste a medir na página real após a aplicação.
-  palavras-chave: painel, paleta, invertida, identidade, original, aplica, inversao, assinado, humano, luminância, css, matiz, saturação, preservados, contraste, medir, página, real, após, aplicação
+(893) DIÁRIO — 27/10/2026 · **Painel: paleta invertida com a identidade original …
+  palavras-chave: painel, paleta, invertida, identidade, original
 (892) DIÁRIO — 27/10/2026 · **Painel: luz e sombra estilo Caravaggio.** Aplica ` …
   palavras-chave: painel, luz, sombra, estilo, caravaggio, aplica
 (891) DIÁRIO — 27/10/2026 · **Painel: paleta 80/20.** Aplica `paleta-80-20-20261 …
