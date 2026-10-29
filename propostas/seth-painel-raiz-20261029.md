@@ -1,6 +1,6 @@
 # Proposta: a primeira aba da Seth é o painel geral (29/10/2026)
 
-Ao clicar em Seth, o Chromium do sistema abre primeiro o painel geral (`http://127.0.0.1:20146/`) e depois o LibreChat. Hoje abre primeiro o Conselho em Rede.
+Ao clicar em Seth, o Chromium do sistema abre primeiro o painel `http://127.0.0.1:20146/prototipo` (que inclui o Conselho em Rede) e depois o LibreChat. Hoje abre primeiro `/conselho-rede`.
 
 Muda uma linha em `redesign/systemd/seth`. O resto não muda.
 

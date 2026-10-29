@@ -1,5 +1,24 @@
+diff --git a/propostas/seth-painel-raiz-20261029.diff b/propostas/seth-painel-raiz-20261029.diff
+index 24d89d8b..e69de29b 100644
+--- a/propostas/seth-painel-raiz-20261029.diff
++++ b/propostas/seth-painel-raiz-20261029.diff
+@@ -1,14 +0,0 @@
+-diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+-index e2bbd026..92368adb 100755
+---- a/redesign/systemd/seth
+-+++ b/redesign/systemd/seth
+-@@ -64,7 +64,8 @@ _chromium_aberto() {
+-   [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
+- }
+- if ! _chromium_aberto; then
+--  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/conselho-rede" http://127.0.0.1:3080 >/dev/null 2>&1 &
+-+  # Primeira aba: o painel geral do sistema Agata (raiz). O Conselho fica a um clique dali.
+-+  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/" http://127.0.0.1:3080 >/dev/null 2>&1 &
+-   # Dá tempo para a janela voltar e para a extensão do Conselho avisar o painel.
+-   sleep 25
+- fi
 diff --git a/redesign/systemd/seth b/redesign/systemd/seth
-index e2bbd026..92368adb 100755
+index e2bbd026..008c453a 100755
 --- a/redesign/systemd/seth
 +++ b/redesign/systemd/seth
 @@ -64,7 +64,8 @@ _chromium_aberto() {
@@ -7,8 +26,8 @@ index e2bbd026..92368adb 100755
  }
  if ! _chromium_aberto; then
 -  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/conselho-rede" http://127.0.0.1:3080 >/dev/null 2>&1 &
-+  # Primeira aba: o painel geral do sistema Agata (raiz). O Conselho fica a um clique dali.
-+  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/" http://127.0.0.1:3080 >/dev/null 2>&1 &
++  # Primeira aba: o painel do sistema Agata (/prototipo), que inclui o Conselho em Rede.
++  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/prototipo" http://127.0.0.1:3080 >/dev/null 2>&1 &
    # Dá tempo para a janela voltar e para a extensão do Conselho avisar o painel.
    sleep 25
  fi
