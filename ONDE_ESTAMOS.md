@@ -10,9 +10,11 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 28/10
 
-**Conselho em Rede:** página, fila e histórico oficiais estão no painel `127.0.0.1:20146/conselho-rede`; serviço ativo e extensão fazendo poll. A fila de produção ainda aceita IDs da extensão DOM, incompatíveis com o catálogo oficial. Nenhum provedor real foi testado após a publicação.
+**Conselho em Rede:** P-8 `painel-conselho-api-20261028` foi assinada e integrada no PR #701 (`ca80dacc`). `painel-operacional.service` reiniciado; página e catálogo HTTP 200, fila vazia, cinco APIs mapeadas para execução. Selftest e 43 testes passaram; checks do PR verdes.
 
-**Correção em revisão:** P-8 `painel-conselho-api-20261028` foi assinada, validada e aplicada na branch `aplica/painel-conselho-api-20261028`. Selftest, 43 testes, selftest do Conselho Remoto e verificações de sintaxe/manifesto passaram. O runtime permanece na versão atual até o PR de aplicação ser revisado e mergeado; nenhum provedor real foi chamado.
+**Falta para ensaio real:** recarregar manualmente RelayCouncil v2 em `chrome://extensions` no Chromium. A política de navegação impediu o agente de abrir essa página; por isso a versão 0.7.0 no perfil ainda não foi confirmada. Não houve chamadas reais a provedores; cada prompt continua sujeito à aprovação humana no painel.
+
+**Rollback:** backup pré-aplicação e comando estão em MEMÓRIAS (924). A unit e seu drop-in não foram alterados.
 
 **Runtime do Conselho:** drop-in do `painel-operacional.service` concede escrita só a `~/.local/share/agata/painel-conselho/official`. Backup e comando de rollback estão na entrada (920) de MEMÓRIAS.
 
