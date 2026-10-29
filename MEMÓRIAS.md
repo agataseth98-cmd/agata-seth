@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): acee37a39bc8a0b776f56e06714deb6b923a65c0
-  Escrito em: 29/10/2026 09:44 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b
+  Escrito em: 29/10/2026 09:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acee37a39bc8a0b776f56e06714deb6b923a65c0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acee37a39bc8a0b776f56e06714deb6b923a65c0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acee37a39bc8a0b776f56e06714deb6b923a65c0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acee37a39bc8a0b776f56e06714deb6b923a65c0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/acee37a39bc8a0b776f56e06714deb6b923a65c0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c339e7fc1d1d6bc5db38c9f85e0f33f0c23bdf2b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+
+(928) CORREÇÃO — 29/10/2026 · **Correção da entrada (927): o PR #705 foi mergeado e o painel operacional foi reiniciado.** O checkout principal avançou para acee37a3; painel-operacional.service reiniciou às 09:39 -03. A primeira checagem imediata não conectou à porta, mas após cinco segundos o serviço estava ativo e ouvindo em 127.0.0.1:20146; /conselho-rede e /prototipo responderam HTTP 200. O painel no Brave exibiu os nove adaptadores experimentais; o poll estava recente, mas o inventário de abas de provedores veio vazio. Nenhum prompt real foi enviado. A extensão e os modelos do Chromium ainda não foram verificados: esta automação só mostrou o Brave. O teste negativo em /api/relay-council/tasks com um identificador de cliente deliberadamente inválido recebeu 403 esperado.
+Perímetro antes e depois do restart: 22 OK, 2 SKIP, 2 PARCIAL, 0 FALHA. Backup reversível da skill local divergente: ~/.local/share/agata/rollbacks/conselho-chromium-20261029/skill-local-original/. Rollback do serviço: git -C ~/agata restore --source=2d5c42276d99bfcd364de2f897d310cf4000653e --worktree -- redesign/painel_operacional redesign/router/relay_council_contract.py && systemctl --user restart painel-operacional.service. A extensão do Chromium e as abas dos provedores não foram recarregadas.
+Modelo: GPT-6 (Codex, na Máquina) · vetor: git, systemctl, journalctl, curl, ss, scripts/perimetro.sh e painel visível no Brave · Autorização: Humano — “feito” (merge humano do PR #705).
+
 
 (927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium foi assinada, verificada e aplicada em worktree própria.** Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JavaScript, manifesto e validação da skill passaram. Nenhum serviço ou navegador foi alterado e nenhum prompt real foi enviado; PR de aplicação aguarda revisão e merge humano.
 Modelo: GPT-6 (Codex, na Máquina) · vetor: `p8_verificar.sh` confirmou assinatura e `PODE APLICAR`; verificações locais listadas passaram · Autorização: Humano — “assinado”.
