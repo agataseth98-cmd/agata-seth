@@ -27,6 +27,20 @@
     <button data-page="modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4.2"/><ellipse cx="12" cy="12" rx="4.2" ry="9" transform="rotate(35 12 12)"/></svg>Modelos & rota</button>
     <button data-page="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h4"/></svg>Plano de trabalho</button>
   </nav></div>
+  <div class="abrir-lista" aria-label="Abrir programas"><div class="abrir-titulo">Abrir</div>
+    <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
+    <button class="btn" type="button" data-alvo="librechat">LibreChat</button>
+    <button class="btn" type="button" data-alvo="deepseek">DeepSeek</button>
+    <button class="btn" type="button" data-alvo="gemini">Gemini</button>
+    <button class="btn" type="button" data-alvo="zai">Z.ai</button>
+    <button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button>
+    <button class="btn" type="button" data-alvo="claude">Claude</button>
+    <button class="btn" type="button" data-alvo="grok">Grok</button>
+    <button class="btn" type="button" data-alvo="qwen">Qwen</button>
+    <button class="btn" type="button" data-alvo="mistral">Mistral</button>
+    <button class="btn" type="button" data-alvo="kimi">Kimi</button>
+    <p class="abrir-aviso" id="abrir-aviso" role="status"></p>
+  </div>
   <div class="side-bottom"><div class="human-note"><strong>O Humano no centro</strong>O painel reúne contexto e evidência. A decisão e a autorização continuam suas.</div></div>
   <div class="side-foot">LOCAL · LEITURA + REGISTRO LIMITADO</div>
 </aside>
@@ -175,5 +189,19 @@
 <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
 <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
 <script src="prototipo.js"></script>
+<script>
+// Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
+document.querySelectorAll('.abrir-lista [data-alvo]').forEach((botao) => {
+  botao.addEventListener('click', async () => {
+    const aviso = document.getElementById('abrir-aviso');
+    try {
+      const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: botao.dataset.alvo})});
+      aviso.textContent = r.ok ? 'Abrindo ' + botao.textContent + '…' : 'Não consegui abrir ' + botao.textContent + '.';
+    } catch (e) {
+      aviso.textContent = 'Painel fora do ar.';
+    }
+  });
+});
+</script>
 </body>
 </html>

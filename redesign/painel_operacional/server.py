@@ -1007,7 +1007,39 @@ def _wiki_search(query: str, mode: str) -> dict:
     }
 
 
+# Botões "Abrir" do painel. Lista FIXA: o painel só pede um destino pelo nome; nunca um comando ou caminho.
+ABRIR_PROVEDORES = {
+    "deepseek": "https://chat.deepseek.com/", "gemini": "https://gemini.google.com/",
+    "zai": "https://chat.z.ai/", "chatgpt": "https://chatgpt.com/", "claude": "https://claude.ai/",
+    "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
+    "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
+}
+ABRIR_NAVEGADOR = ("chromium", "--profile-directory=Profile 1")
+ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
+
+
 class Handler(BaseHTTPRequestHandler):
+    def _abrir_programa(self) -> None:
+        if (self.headers.get("Origin") != ALLOWED_ORIGIN
+                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}
+                or self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json"):
+            return self._send(403, "text/plain; charset=utf-8", b"same-origin JSON required")
+        try:
+            pedido = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length", "0") or 0), 512)) or b"{}")
+        except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+        alvo = pedido.get("alvo") if isinstance(pedido, dict) else None
+        if alvo == "obsidian":
+            comando = list(ABRIR_OBSIDIAN)
+        elif alvo in ABRIR_PROVEDORES:
+            comando = list(ABRIR_NAVEGADOR) + [ABRIR_PROVEDORES[alvo]]
+        else:
+            return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
+        # Sem shell: a lista de argumentos é fixa, e o processo fica solto do painel.
+        subprocess.Popen(comando, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
+
     server_version = "AgataPainel/1"
 
     def log_message(self, _format: str, *args) -> None:
@@ -1129,6 +1161,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if self.path == "/api/abrir":
+            return self._abrir_programa()
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
