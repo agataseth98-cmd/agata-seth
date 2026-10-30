@@ -282,7 +282,11 @@ class ExtensionContractTests(unittest.TestCase):
         self.assertIn("/api/relay-council/tasks", background)
         self.assertIn("/api/relay-council/result", background)
         self.assertIn("X-Relay-Providers", background)
-        self.assertNotIn("chrome.tabs.create", background)
+        # Abrir aba só é permitido dentro de processarFocos (clique do Humano no painel); nunca nas tarefas de envio.
+        corpo_foco = background[background.index("async function processarFocos"):]
+        antes_foco = background[:background.index("async function processarFocos")]
+        self.assertNotIn("chrome.tabs.create", antes_foco)
+        self.assertIn("chrome.tabs.create", corpo_foco)
         self.assertNotIn("pinRelayTab", background)
         self.assertNotIn("cookies", json.dumps(manifest).lower())
         self.assertIn("Conselho em Rede", manifest["name"])

@@ -15,6 +15,7 @@ import subprocess
 import sys
 import threading
 import time
+import uuid
 import urllib.error
 import urllib.request
 from urllib.parse import parse_qs, quote, urlparse
@@ -1014,7 +1015,9 @@ ABRIR_PROVEDORES = {
     "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
     "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
 }
-ABRIR_CANAL_NAVEGADOR = "http://127.0.0.1:9222"  # porta de depuração local do Chromium do sistema (só loopback)
+# Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
+FOCOS_PENDENTES = []
+_FOCO_LOCK = threading.Lock()
 ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
 
 
@@ -1034,16 +1037,9 @@ class Handler(BaseHTTPRequestHandler):
             subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
         elif alvo in ABRIR_PROVEDORES:
-            # Páginas abrem como aba nova na janela que já existe, pelo canal de depuração local do Chromium
-            # (só 127.0.0.1). Assim não se abre um segundo processo com o mesmo perfil.
-            url = ABRIR_PROVEDORES[alvo]
-            try:
-                pedido_aba = urllib.request.Request(
-                    f"{ABRIR_CANAL_NAVEGADOR}/json/new?{quote(url, safe='')}", method="PUT")
-                with urllib.request.urlopen(pedido_aba, timeout=5):
-                    pass
-            except (urllib.error.URLError, OSError):
-                return self._send(503, "text/plain; charset=utf-8", b"navegador do sistema nao responde")
+            # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
+            with _FOCO_LOCK:
+                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo]})
         else:
             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
@@ -1109,6 +1105,13 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/relay-council/focos":
+            if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
+                return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
+            with _FOCO_LOCK:
+                pedidos = list(FOCOS_PENDENTES)
+                FOCOS_PENDENTES.clear()
+            return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
         if self.path == "/api/eventos":
             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
         if self.path == "/api/relay-council/catalog":
