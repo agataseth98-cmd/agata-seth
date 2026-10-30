@@ -1,0 +1,106 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index ef98a3f9..8ab434e9 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -534,3 +534,6 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .conselho-page .chain-controls { grid-template-columns: 1fr; }
+ }
+ 
++
++/* Links dos modelos dentro do Conselho */
++.modelos-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.modelos-links .abrir-titulo{width:100%}.modelos-links .btn{min-height:0;padding:6px 10px;font-size:12px}
+\ No newline at end of file
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index b1a84ee8..11afa380 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -27,18 +27,10 @@
+     <button data-page="modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4.2"/><ellipse cx="12" cy="12" rx="4.2" ry="9" transform="rotate(35 12 12)"/></svg>Modelos & rota</button>
+     <button data-page="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h4"/></svg>Plano de trabalho</button>
+   </nav></div>
+-  <div class="abrir-lista" aria-label="Abrir programas"><div class="abrir-titulo">Abrir</div>
++  <div class="abrir-lista" aria-label="Serviços do sistema"><div class="abrir-titulo">Serviços</div>
+     <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
+     <button class="btn" type="button" data-alvo="librechat">LibreChat</button>
+-    <button class="btn" type="button" data-alvo="deepseek">DeepSeek</button>
+-    <button class="btn" type="button" data-alvo="gemini">Gemini</button>
+-    <button class="btn" type="button" data-alvo="zai">Z.ai</button>
+-    <button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button>
+-    <button class="btn" type="button" data-alvo="claude">Claude</button>
+-    <button class="btn" type="button" data-alvo="grok">Grok</button>
+-    <button class="btn" type="button" data-alvo="qwen">Qwen</button>
+-    <button class="btn" type="button" data-alvo="mistral">Mistral</button>
+-    <button class="btn" type="button" data-alvo="kimi">Kimi</button>
++    <button class="btn" type="button" data-alvo="omniroute">OmniRoute</button>
+     <p class="abrir-aviso" id="abrir-aviso" role="status"></p>
+   </div>
+   <div class="side-bottom"><div class="human-note"><strong>O Humano no centro</strong>O painel reúne contexto e evidência. A decisão e a autorização continuam suas.</div></div>
+@@ -122,7 +114,7 @@
+   </section>
+ 
+   <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
+-  <div class="conselho-page"><p class="status" id="status" role="status">carregando…</p>
++  <div class="conselho-page"><div class="modelos-links" aria-label="Modelos do Conselho"><div class="abrir-titulo">Modelos</div><button class="btn" type="button" data-alvo="deepseek">DeepSeek</button><button class="btn" type="button" data-alvo="gemini">Gemini</button><button class="btn" type="button" data-alvo="zai">Z.ai</button><button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button><button class="btn" type="button" data-alvo="claude">Claude</button><button class="btn" type="button" data-alvo="grok">Grok</button><button class="btn" type="button" data-alvo="qwen">Qwen</button><button class="btn" type="button" data-alvo="mistral">Mistral</button><button class="btn" type="button" data-alvo="kimi">Kimi</button></div><p class="status" id="status" role="status">carregando…</p>
+     <section id="turno">
+       <h2>Novo turno</h2>
+       <form id="promptForm">
+@@ -225,7 +217,7 @@
+ <script src="prototipo.js"></script>
+ <script>
+ // Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
+-document.querySelectorAll('.abrir-lista [data-alvo]').forEach((botao) => {
++document.querySelectorAll('[data-alvo]').forEach((botao) => {
+   botao.addEventListener('click', async () => {
+     const aviso = document.getElementById('abrir-aviso');
+     try {
+diff --git a/redesign/painel_operacional/relay-extension-v2/background.js b/redesign/painel_operacional/relay-extension-v2/background.js
+index c982915b..eb4bf52a 100644
+--- a/redesign/painel_operacional/relay-extension-v2/background.js
++++ b/redesign/painel_operacional/relay-extension-v2/background.js
+@@ -458,6 +458,11 @@ async function processarFocos() {
+   }
+   for (const pedido of pedidos) {
+     try {
++      if (pedido.janela) {
++        // Serviço do sistema (ex.: LibreChat): janela própria, sem reaproveitar aba de outro site.
++        await chrome.windows.create({ url: pedido.url, type: "normal", focused: true });
++        continue;
++      }
+       const host = new URL(pedido.url).host;
+       const abas = await chrome.tabs.query({ url: `https://${host}/*` });
+       const aba = abas[0];
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index ce594225..ce01baf1 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1010,10 +1010,17 @@ def _wiki_search(query: str, mode: str) -> dict:
+ 
+ # Botões "Abrir" do painel. Lista FIXA: o painel só pede um destino pelo nome; nunca um comando ou caminho.
+ ABRIR_PROVEDORES = {
+-    "deepseek": "https://chat.deepseek.com/", "gemini": "https://gemini.google.com/",
+-    "zai": "https://chat.z.ai/", "chatgpt": "https://chatgpt.com/", "claude": "https://claude.ai/",
+-    "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
+-    "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
++    "deepseek": "https://chat.deepseek.com/",
++    "gemini": "https://gemini.google.com/",
++    "zai": "https://chat.z.ai/",
++    "chatgpt": "https://chatgpt.com/",
++    "claude": "https://claude.ai/",
++    "grok": "https://grok.com/",
++    "qwen": "https://qwen.ai/",
++    "mistral": "https://chat.mistral.ai/",
++    "kimi": "https://www.kimi.com/",
++    "librechat": "http://127.0.0.1:3080/",
++    "omniroute": "http://127.0.0.1:20128/",
+ }
+ # Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
+ FOCOS_PENDENTES = []
+@@ -1039,7 +1046,7 @@ class Handler(BaseHTTPRequestHandler):
+         elif alvo in ABRIR_PROVEDORES:
+             # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
+             with _FOCO_LOCK:
+-                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo]})
++                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo], "janela": True})
+         else:
+             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
+         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
