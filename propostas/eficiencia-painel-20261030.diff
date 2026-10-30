@@ -1,0 +1,76 @@
+diff --git a/redesign/painel_operacional/conselho_rede.py b/redesign/painel_operacional/conselho_rede.py
+index 318dae97..0f564f93 100644
+--- a/redesign/painel_operacional/conselho_rede.py
++++ b/redesign/painel_operacional/conselho_rede.py
+@@ -196,6 +196,7 @@ class Council:
+         self.last_poll = None
+         self._active_providers = ()
+         self._provider_seen_at = 0.0
++        self._legacy_cache = (None, [], 0)  # (data de modificação e tamanho, itens, linhas malformadas)
+         with self.db:
+             self.db.executescript('''
+                 CREATE TABLE IF NOT EXISTS actions (
+@@ -206,6 +207,9 @@ class Council:
+                   n INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT, status TEXT, ts REAL);
+                 CREATE TABLE IF NOT EXISTS groups_ (
+                   id TEXT PRIMARY KEY, kind TEXT, prompt TEXT, sites TEXT, synthesis TEXT);
++                CREATE INDEX IF NOT EXISTS actions_status ON actions(status);
++                CREATE INDEX IF NOT EXISTS actions_created ON actions(created);
++                CREATE INDEX IF NOT EXISTS events_action ON events(action);
+             ''')
+             # Sobreviver a restart não significa ter autorização para repetir.
+             for row in self.db.execute("SELECT id,status FROM actions WHERE status IN ('approved','running','executing')").fetchall():
+@@ -463,7 +467,14 @@ class Council:
+             # Leitura somente; o arquivo original nunca é aberto para escrita.
+             items, malformed, seen = [], 0, set()
+             path = Path(self.legacy) if self.legacy else None
++            chave = None
+             if path and path.is_file():
++                info = path.stat()
++                chave = (info.st_mtime_ns, info.st_size)
++                if chave == self._legacy_cache[0]:
++                    # Arquivo não mudou desde a última leitura: reaproveita o resultado já limpo.
++                    items, malformed = self._legacy_cache[1], self._legacy_cache[2]
++                    return {"schema_version": 1, "items": list(reversed(items))[offset:offset+20], "total": len(items), "malformed": malformed}
+                 with path.open(encoding="utf-8") as source:
+                     for line in source:
+                         try:
+@@ -476,6 +487,8 @@ class Council:
+                                 items.append({"legacy": True, "data": json.loads(self.clean(json.dumps(item, ensure_ascii=False)))})
+                         except (ValueError, UnicodeError):
+                             malformed += 1
++            if chave is not None:
++                self._legacy_cache = (chave, items, malformed)
+             return {"schema_version": 1, "items": list(reversed(items))[offset:offset+20], "total": len(items), "malformed": malformed}
+         with self.lock:
+             rows = self.db.execute("SELECT id FROM actions ORDER BY created DESC LIMIT 20 OFFSET ?", (offset,)).fetchall()
+diff --git a/redesign/painel_operacional/test_conselho_rede.py b/redesign/painel_operacional/test_conselho_rede.py
+index 30cbb15f..e9cb4976 100644
+--- a/redesign/painel_operacional/test_conselho_rede.py
++++ b/redesign/painel_operacional/test_conselho_rede.py
+@@ -26,6 +26,25 @@ class CouncilTests(unittest.TestCase):
+         self.council.db.close()
+         self.temp.cleanup()
+ 
++    def test_banco_tem_indices_para_status_data_e_eventos(self):
++        nomes = {r[0] for r in self.council.db.execute("SELECT name FROM sqlite_master WHERE type='index'")}
++        self.assertTrue({"actions_status", "actions_created", "events_action"} <= nomes)
++
++    def test_historico_legado_e_relido_so_quando_o_arquivo_muda(self):
++        legado = Path(self.temp.name) / "legado.jsonl"
++        legado.write_text(json.dumps({"id": 1, "text": "um"}) + "\n", encoding="utf-8")
++        conselho = Council(Path(self.temp.name) / "outro", clean=lambda v: v, execute=lambda *_: "mock", legacy=legado)
++        try:
++            self.assertEqual(conselho.history(legacy=True)["total"], 1)
++            with mock.patch("builtins.open", side_effect=AssertionError("releu sem mudança")), \
++                 mock.patch.object(Path, "open", side_effect=AssertionError("releu sem mudança")):
++                self.assertEqual(conselho.history(legacy=True)["total"], 1)
++            with legado.open("a", encoding="utf-8") as f:
++                f.write(json.dumps({"id": 2, "text": "dois"}) + "\n")
++            self.assertEqual(conselho.history(legacy=True)["total"], 2)
++        finally:
++            conselho.db.close()
++
+     def test_send_requires_approval_and_single_lease(self):
+         action = self.council.create("send", {"site": "gemini", "text": "mock prompt"})
+         self.assertEqual(self.council.claim(), [])
