@@ -359,3 +359,178 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .abrir-titulo{font:600 11px var(--mono);letter-spacing:.01em;text-transform:none;color:#96aaa5;padding:0 2px}
 .abrir-lista .btn{text-align:left;justify-content:flex-start}
 .abrir-aviso{font-size:12px;color:#c9d6d1;min-height:16px;margin:2px 2px 0}
+
+/* Conselho integrado à casca do painel (escopo .conselho-page) */
+
+.conselho-page * { box-sizing: border-box; }
+.conselho-page {
+  font-family: "Fira Sans", "Noto Sans", "Segoe UI", sans-serif;
+  background: radial-gradient(ellipse at 78% 0%, rgba(35,83,130,.18), transparent 35%), radial-gradient(ellipse at 0% 85%, rgba(75,46,125,.12), transparent 32%), var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.conselho-page header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -20px auto 24px;
+  max-width: 1280px;
+  border-bottom: 1px solid rgba(102,178,218,.18);
+  padding: 18px 0 14px;
+}
+.conselho-page .brand-inline { display: flex; align-items: center; gap: 10px; }
+.conselho-page .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(97,217,237,.55); border-radius: 10px; color: var(--accent); font-weight: 700; background: rgba(20,39,60,.72); }
+.conselho-page .brand-inline h1 { margin: 0; font-size: 20px; letter-spacing: -.035em; }
+.conselho-page .brand-sub, .conselho-page .crumb { color: var(--muted); font-size: 10px; letter-spacing: .12em; }
+.conselho-page .header-meta { display: flex; align-items: center; gap: 10px; }
+.conselho-page .status {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 3px 8px;
+  background: rgba(97,217,237,.08);
+  border: 1px solid rgba(97,217,237,.18);
+  border-radius: 99px;
+}
+.conselho-page .status.connected { color: var(--ok); }
+.conselho-page .status.disconnected { color: var(--err); }
+.conselho-page main {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.conselho-page section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 17px 18px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.12);
+  min-width: 0;
+}
+.conselho-page section.wide { grid-column: 1 / -1; }
+.conselho-page .provider-table-wrap { overflow-x: auto; }
+.conselho-page table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.conselho-page th, .conselho-page td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); }
+.conselho-page th { color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.conselho-page td { color: var(--fg); }
+.conselho-page td.state-green { color: var(--ok); font-weight: 700; }
+.conselho-page td.state-monitoring { color: var(--warn); font-weight: 700; }
+.conselho-page td.state-experimental, .conselho-page td.state-variable { color: var(--muted); }
+.conselho-page section h2 {
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  color: var(--accent);
+}
+.conselho-page .row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.conselho-page .row > * { flex: 1; }
+.conselho-page label { display: block; font-size: 11px; color: var(--muted); margin: 8px 0 3px; }
+.conselho-page select, .conselho-page textarea, .conselho-page input {
+  width: 100%;
+  padding: 8px;
+  background: rgba(7, 13, 25, .72);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.conselho-page textarea { resize: vertical; min-height: 100px; }
+.conselho-page button {
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+.conselho-page button:hover { border-color: var(--accent); }
+.conselho-page button.primary { background: var(--accent); color: #111; border-color: var(--accent); }
+.conselho-page button.primary:hover { background: #6ab4ff; }
+.conselho-page button.danger { background: var(--err); color: #111; border-color: var(--err); }
+.conselho-page button:disabled { opacity: 0.4; cursor: not-allowed; }
+.conselho-page .chain-box {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.conselho-page .chain-title {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  margin-bottom: 2px;
+}
+.conselho-page .chain-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.conselho-page .chain-controls button { white-space: nowrap; }
+.conselho-page .badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #111;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+.conselho-page ul { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+.conselho-page li {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.conselho-page li:last-child { border-bottom: none; }
+.conselho-page li .meta { color: var(--muted); font-size: 10px; margin-bottom: 4px; }
+.conselho-page li .text {
+  font-family: monospace, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg);
+  padding: 8px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.conselho-page li.error .text { color: var(--err); }
+.conselho-page li.ok .meta { color: var(--ok); }
+.conselho-page .hint { color: var(--muted); font-size: 11px; margin-top: 6px; }
+.conselho-page footer { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 12px; }
+.conselho-page details summary { cursor: pointer; color: var(--muted); font-size: 11px; }
+.conselho-page pre {
+  background: var(--bg);
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  max-height: 300px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.conselho-page .decisao-item {
+  border-left: 3px solid var(--warn);
+  padding-left: 10px;
+  margin-bottom: 8px;
+}
+.conselho-page .decisao-item .acoes { display: flex; gap: 6px; margin-top: 6px; }
+.conselho-page .decisao-item button { padding: 4px 10px; font-size: 11px; }
+@media (max-width: 760px) {
+.conselho-page body { padding: 12px; }
+.conselho-page header { align-items: flex-start; flex-direction: column; gap: 6px; }
+.conselho-page main { grid-template-columns: 1fr; gap: 12px; }
+.conselho-page .row { flex-direction: column; align-items: stretch; }
+.conselho-page .row > * { width: 100%; }
+.conselho-page .chain-controls { grid-template-columns: 1fr; }
+}
+
