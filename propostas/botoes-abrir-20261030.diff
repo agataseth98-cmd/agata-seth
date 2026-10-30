@@ -1,0 +1,98 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index e3cbc0b4..bd336b1d 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -27,6 +27,20 @@
+     <button data-page="modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4.2"/><ellipse cx="12" cy="12" rx="4.2" ry="9" transform="rotate(35 12 12)"/></svg>Modelos & rota</button>
+     <button data-page="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h4"/></svg>Plano de trabalho</button>
+   </nav></div>
++  <div class="abrir-lista" aria-label="Abrir programas"><div class="abrir-titulo">Abrir</div>
++    <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
++    <button class="btn" type="button" data-alvo="librechat">LibreChat</button>
++    <button class="btn" type="button" data-alvo="deepseek">DeepSeek</button>
++    <button class="btn" type="button" data-alvo="gemini">Gemini</button>
++    <button class="btn" type="button" data-alvo="zai">Z.ai</button>
++    <button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button>
++    <button class="btn" type="button" data-alvo="claude">Claude</button>
++    <button class="btn" type="button" data-alvo="grok">Grok</button>
++    <button class="btn" type="button" data-alvo="qwen">Qwen</button>
++    <button class="btn" type="button" data-alvo="mistral">Mistral</button>
++    <button class="btn" type="button" data-alvo="kimi">Kimi</button>
++    <p class="abrir-aviso" id="abrir-aviso" role="status"></p>
++  </div>
+   <div class="side-bottom"><div class="human-note"><strong>O Humano no centro</strong>O painel reúne contexto e evidência. A decisão e a autorização continuam suas.</div></div>
+   <div class="side-foot">LOCAL · LEITURA + REGISTRO LIMITADO</div>
+ </aside>
+@@ -175,5 +189,19 @@
+ <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+ <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
+ <script src="prototipo.js"></script>
++<script>
++// Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
++document.querySelectorAll('.abrir-lista [data-alvo]').forEach((botao) => {
++  botao.addEventListener('click', async () => {
++    const aviso = document.getElementById('abrir-aviso');
++    try {
++      const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: botao.dataset.alvo})});
++      aviso.textContent = r.ok ? 'Abrindo ' + botao.textContent + '…' : 'Não consegui abrir ' + botao.textContent + '.';
++    } catch (e) {
++      aviso.textContent = 'Painel fora do ar.';
++    }
++  });
++});
++</script>
+ </body>
+ </html>
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index b3827466..65292e54 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1007,7 +1007,39 @@ def _wiki_search(query: str, mode: str) -> dict:
+     }
+ 
+ 
++# Botões "Abrir" do painel. Lista FIXA: o painel só pede um destino pelo nome; nunca um comando ou caminho.
++ABRIR_PROVEDORES = {
++    "deepseek": "https://chat.deepseek.com/", "gemini": "https://gemini.google.com/",
++    "zai": "https://chat.z.ai/", "chatgpt": "https://chatgpt.com/", "claude": "https://claude.ai/",
++    "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
++    "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
++}
++ABRIR_NAVEGADOR = ("chromium", "--profile-directory=Profile 1")
++ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
++
++
+ class Handler(BaseHTTPRequestHandler):
++    def _abrir_programa(self) -> None:
++        if (self.headers.get("Origin") != ALLOWED_ORIGIN
++                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}
++                or self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json"):
++            return self._send(403, "text/plain; charset=utf-8", b"same-origin JSON required")
++        try:
++            pedido = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length", "0") or 0), 512)) or b"{}")
++        except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        alvo = pedido.get("alvo") if isinstance(pedido, dict) else None
++        if alvo == "obsidian":
++            comando = list(ABRIR_OBSIDIAN)
++        elif alvo in ABRIR_PROVEDORES:
++            comando = list(ABRIR_NAVEGADOR) + [ABRIR_PROVEDORES[alvo]]
++        else:
++            return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
++        # Sem shell: a lista de argumentos é fixa, e o processo fica solto do painel.
++        subprocess.Popen(comando, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
++                         stderr=subprocess.DEVNULL, start_new_session=True)
++        return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
++
+     server_version = "AgataPainel/1"
+ 
+     def log_message(self, _format: str, *args) -> None:
+@@ -1129,6 +1161,8 @@ class Handler(BaseHTTPRequestHandler):
+     def do_POST(self) -> None:
+         if self.headers.get("Host") != f"{BIND}:{PORT}":
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
++        if self.path == "/api/abrir":
++            return self._abrir_programa()
+         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
+                          "/api/relay-council/decision"}:
+             return self._relay_council_human_post()
