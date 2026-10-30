@@ -15,6 +15,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada 
 | `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
 | `agata-conversar-com-seth` | conversar com a Seth ou ler a conversa dela | Claude |
 | `agata-relay-provedores` | adaptadores de chats web no RelayCouncil | Codex |
+| `agata-ferramentas` | achar skill ou agente por tema (testes, segurança, revisão, banco, frontend) | Claude |
 
 ## Skills de terceiros (cópias fixas, não editar aqui)
 - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
