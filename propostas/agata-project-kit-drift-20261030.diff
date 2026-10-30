@@ -1,0 +1,62 @@
+diff --git a/redesign/project_kit/bootstrap.py b/redesign/project_kit/bootstrap.py
+index 02adb5b4..932efaed 100644
+--- a/redesign/project_kit/bootstrap.py
++++ b/redesign/project_kit/bootstrap.py
+@@ -85,14 +85,34 @@ def build(root: Path, out: Path, goal: str) -> None:
+     (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+ 
+ 
++def drift(root: Path, previous: Path, output: Path) -> None:
++    old = json.loads(previous.read_text(encoding="utf-8"))
++    before = {x["path"]: x for x in old.get("files", [])}
++    now = {p.relative_to(root).as_posix(): {"path": p.relative_to(root).as_posix(), "bytes": p.stat().st_size, "sha256": sha256(p)} for p in files(root)}
++    added = sorted(set(now) - set(before))
++    removed = sorted(set(before) - set(now))
++    changed = sorted(p for p in set(now) & set(before) if now[p]["sha256"] != before[p].get("sha256"))
++    lines = ["# Drift report", "", f"Base: `{previous}`", f"Projeto: `{root}`", "", f"- Adicionados: {len(added)}", f"- Removidos: {len(removed)}", f"- Alterados: {len(changed)}", ""]
++    for label, values in (("Adicionados", added), ("Removidos", removed), ("Alterados", changed)):
++        lines += [f"## {label}", ""] + ([f"- `{x}`" for x in values] or ["- nenhum"]) + [""]
++    output.write_text("\n".join(lines), encoding="utf-8")
++
++
+ def main():
+     ap = argparse.ArgumentParser()
+     ap.add_argument("project", type=Path)
+     ap.add_argument("--out", type=Path, required=True)
+     ap.add_argument("--goal", required=True)
++    ap.add_argument("--drift-against", type=Path)
++    ap.add_argument("--drift-out", type=Path)
+     args = ap.parse_args()
+     if not args.project.is_dir():
+         ap.error("project precisa ser um diretório")
++    if args.drift_against:
++        if not args.drift_out:
++            ap.error("--drift-out é obrigatório com --drift-against")
++        drift(args.project.resolve(), args.drift_against, args.drift_out)
++        return
+     build(args.project, args.out, args.goal)
+ 
+ 
+diff --git a/redesign/project_kit/tests/test_bootstrap.py b/redesign/project_kit/tests/test_bootstrap.py
+index 775d9cc5..0ad619ab 100644
+--- a/redesign/project_kit/tests/test_bootstrap.py
++++ b/redesign/project_kit/tests/test_bootstrap.py
+@@ -21,3 +21,18 @@ def test_bootstrap_ignores_venv_and_writes_contract(tmp_path):
+     assert paths == {"README.md"}
+     assert "testar kit" in (out / "concept-brief.md").read_text(encoding="utf-8")
+     assert (out / "reviews" / "README.md").exists()
++
++
++def test_drift_report_detects_added_removed_and_changed(tmp_path):
++    project = tmp_path / "project"
++    project.mkdir()
++    (project / "keep.txt").write_text("one", encoding="utf-8")
++    out = tmp_path / "out"
++    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(out), "--goal", "drift"], check=True)
++    (project / "keep.txt").write_text("two", encoding="utf-8")
++    (project / "added.txt").write_text("new", encoding="utf-8")
++    report = tmp_path / "drift.md"
++    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(tmp_path / "unused"), "--goal", "drift", "--drift-against", str(out / "provenance.json"), "--drift-out", str(report)], check=True)
++    text = report.read_text(encoding="utf-8")
++    assert "added.txt" in text
++    assert "keep.txt" in text
