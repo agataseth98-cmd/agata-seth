@@ -467,7 +467,15 @@ async function processarFocos() {
         }
         await chrome.tabs.update(aba.id, { active: true });
       } else {
-        await chrome.tabs.create({ url: pedido.url, active: true });
+        // Aba nova vai para uma janela NORMAL. Janela do modo app não mostra abas: a aba ficaria
+        // invisível até alguém trazê-la para uma janela normal.
+        const janelas = await chrome.windows.getAll({ windowTypes: ["normal"] });
+        if (janelas.length) {
+          await chrome.tabs.create({ url: pedido.url, active: true, windowId: janelas[0].id });
+          await chrome.windows.update(janelas[0].id, { focused: true });
+        } else {
+          await chrome.windows.create({ url: pedido.url, type: "normal", focused: true });
+        }
       }
     } catch (e) {
       console.warn("[relay] foco falhou:", pedido.site, e.message);
