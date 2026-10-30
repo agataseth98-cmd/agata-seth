@@ -48,10 +48,6 @@ function filterSearch(value) {
   if (empty) empty.classList.toggle("show", active.id === "page-capacidades" && cards.length > 0 && visible === 0);
 }
 function showPage(name) {
-  if (name === "conselho") {
-    window.location.assign("/conselho-rede");
-    return;
-  }
   const page = byId("page-" + name);
   if (!page) return;
   pages.forEach((item) => item.classList.toggle("active", item === page));
