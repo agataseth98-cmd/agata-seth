@@ -1,0 +1,13 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 8f78e46b..b1a84ee8 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -122,7 +122,7 @@
+   </section>
+ 
+   <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
+-  <div class="conselho-page">
++  <div class="conselho-page"><p class="status" id="status" role="status">carregando…</p>
+     <section id="turno">
+       <h2>Novo turno</h2>
+       <form id="promptForm">
