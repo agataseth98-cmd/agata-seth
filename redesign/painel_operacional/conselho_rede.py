@@ -37,6 +37,8 @@ CONTEXT = (
     "Cada solicitação, envio ou encaminhamento aguarda aprovação humana individual. "
     "Resultados locais só voltam a um modelo em novo envio aprovado. "
     "Não alegue acesso direto a MCP, shell, credenciais ou ferramentas.\n"
+    "Estilo: escreva em português simples, como para uma pessoa leiga. Termos técnicos só entre parênteses, "
+    "como explicação do termo (por exemplo: 'expiração de envio (EXPIRY)').\n"
     + "\n".join(f"<{key}>: {value}" for key, value in TOOLS.items())
     + '\nExemplo: <SEARCH canon="memória do Conselho"/>\n'
 )
