@@ -458,6 +458,11 @@ async function processarFocos() {
   }
   for (const pedido of pedidos) {
     try {
+      if (pedido.janela) {
+        // Serviço do sistema (ex.: LibreChat): janela própria, sem reaproveitar aba de outro site.
+        await chrome.windows.create({ url: pedido.url, type: "normal", focused: true });
+        continue;
+      }
       const host = new URL(pedido.url).host;
       const abas = await chrome.tabs.query({ url: `https://${host}/*` });
       const aba = abas[0];
