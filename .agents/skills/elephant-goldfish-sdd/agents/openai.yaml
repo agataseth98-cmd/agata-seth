@@ -1,0 +1,4 @@
+interface:
+  display_name: "Elephant–Goldfish SDD"
+  short_description: "Desenhar com contexto, revisar sem contexto e verificar drift"
+  default_prompt: "Use a skill Elephant–Goldfish SDD para orientar o Humano e preparar uma especificação revisável antes de implementar uma mudança grande ou arriscada."
