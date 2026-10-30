@@ -1,0 +1,3290 @@
+[
+ {
+  "nome": "accessibility",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/accessibility/SKILL.md",
+  "resumo": "Design, implement, and audit accessible UI to WCAG 2.2 Level AA across Web, iOS, and Android — semantic ARIA roles and labels, accessibility"
+ },
+ {
+  "nome": "agent-architecture-audit",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-architecture-audit/SKILL.md",
+  "resumo": "Full-stack diagnostic for agent and LLM applications. Audits the 12-layer agent stack for wrapper regression, memory pollution, tool discipl"
+ },
+ {
+  "nome": "agent-eval",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-eval/SKILL.md",
+  "resumo": "Head-to-head comparison of coding agents (Claude Code, Aider, Codex, etc.) on custom tasks with pass rate, cost, time, and consistency metri"
+ },
+ {
+  "nome": "agent-harness-construction",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-harness-construction/SKILL.md",
+  "resumo": "Design and optimize AI agent action spaces, tool definitions, and observation formatting for higher completion rates. Use when defining or r"
+ },
+ {
+  "nome": "agent-introspection-debugging",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-introspection-debugging/SKILL.md",
+  "resumo": "Structured self-debugging workflow for AI agent failures using capture, diagnosis, contained recovery, and introspection reports. Use when a"
+ },
+ {
+  "nome": "agent-payment-x402",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-payment-x402/SKILL.md",
+  "resumo": "Add x402 payment execution to AI agents with per-task budgets, spending controls, and non-custodial wallets. Supports Base through agentwall"
+ },
+ {
+  "nome": "agent-runtime-gateway-smoke-test",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-runtime-gateway-smoke-test/SKILL.md",
+  "resumo": "Verify a local agent API, temporary gateway tunnel, and remote sandbox callback with a tool-free task, then restore the original app connect"
+ },
+ {
+  "nome": "agent-security-hardening",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-security-hardening/SKILL.md",
+  "resumo": "Security hardening guidance for AI agent frameworks that process untrusted content, invoke tools, write workspace files, manage runtime iden"
+ },
+ {
+  "nome": "agent-self-evaluation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-self-evaluation/SKILL.md",
+  "resumo": "Use after completing any non-trivial task. The agent self-rates its output on 5 axes — accuracy, completeness, clarity, actionability, conci"
+ },
+ {
+  "nome": "agent-sort",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/agent-sort/SKILL.md",
+  "resumo": "Build an evidence-backed ECC install plan for a specific repo by sorting skills, commands, rules, hooks, and extras into DAILY vs LIBRARY bu"
+ },
+ {
+  "nome": "agentic-engineering",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/agentic-engineering/SKILL.md",
+  "resumo": "Operate as an agentic engineer using eval-first execution, decomposition, and cost-aware model routing. Use when planning or executing engin"
+ },
+ {
+  "nome": "agentic-os",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/agentic-os/SKILL.md",
+  "resumo": "Build persistent multi-agent operating systems on Claude Code. Covers kernel architecture, specialist agents, slash commands, file-based mem"
+ },
+ {
+  "nome": "ai-first-engineering",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ai-first-engineering/SKILL.md",
+  "resumo": "Engineering operating model for teams where AI agents generate a large share of implementation output. Use when setting team process, review"
+ },
+ {
+  "nome": "ai-regression-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/ai-regression-testing/SKILL.md",
+  "resumo": "Regression testing strategies for AI-assisted development. Sandbox-mode API testing without database dependencies, automated bug-check workf"
+ },
+ {
+  "nome": "android-clean-architecture",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/android-clean-architecture/SKILL.md",
+  "resumo": "Clean Architecture patterns for Android and Kotlin Multiplatform projects — module structure, dependency rules, UseCases, Repositories, and "
+ },
+ {
+  "nome": "angular-developer",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/angular-developer/SKILL.md",
+  "resumo": "Generates Angular code and provides architectural guidance. Trigger when creating projects, components, or services, or for best practices o"
+ },
+ {
+  "nome": "api-connector-builder",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/api-connector-builder/SKILL.md",
+  "resumo": "Build a new API connector or provider by matching the target repo's existing integration pattern exactly. Use when adding one more integrati"
+ },
+ {
+  "nome": "api-design",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/api-design/SKILL.md",
+  "resumo": "REST API design patterns including resource naming, status codes, pagination, filtering, error responses, versioning, and rate limiting for "
+ },
+ {
+  "nome": "architecture-decision-records",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/architecture-decision-records/SKILL.md",
+  "resumo": "Capture architectural decisions as numbered ADR markdown files in docs/adr/ with context, alternatives considered, consequences, and an inde"
+ },
+ {
+  "nome": "article-writing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/article-writing/SKILL.md",
+  "resumo": "Write articles, guides, blog posts, tutorials, newsletter issues, and other long-form content in a distinctive voice derived from supplied e"
+ },
+ {
+  "nome": "automation-audit-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/automation-audit-ops/SKILL.md",
+  "resumo": "Evidence-first automation inventory and overlap audit workflow for ECC. Use when the user wants to know which jobs, hooks, connectors, MCP s"
+ },
+ {
+  "nome": "autonomous-agent-harness",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/autonomous-agent-harness/SKILL.md",
+  "resumo": "Transform Claude Code into a fully autonomous agent system with persistent memory, scheduled operations, computer use, and task queuing. Rep"
+ },
+ {
+  "nome": "autonomous-loops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/autonomous-loops/SKILL.md",
+  "resumo": "Patterns and architectures for autonomous Claude Code loops — from simple sequential pipelines to RFC-driven multi-agent DAG systems. Retain"
+ },
+ {
+  "nome": "backend-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/backend-patterns/SKILL.md",
+  "resumo": "Backend architecture patterns, API design, database optimization, and server-side best practices for Node.js, Express, and Next.js API route"
+ },
+ {
+  "nome": "benchmark",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/benchmark/SKILL.md",
+  "resumo": "Measure performance baselines and detect regressions across browser Core Web Vitals (LCP, INP, CLS, page weight), API endpoint latency perce"
+ },
+ {
+  "nome": "benchmark-methodology",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/benchmark-methodology/SKILL.md",
+  "resumo": "Score a scoped competitor set into comparable profile cards: nine weighted dimensions (positioning, voice, visual craft, offer packaging, ev"
+ },
+ {
+  "nome": "benchmark-optimization-loop",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/benchmark-optimization-loop/SKILL.md",
+  "resumo": "Convert 'make it faster' requests into a bounded measured optimization loop — baseline first, generate one-hypothesis variants, benchmark ea"
+ },
+ {
+  "nome": "bengali-nlp",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/bengali-nlp/SKILL.md",
+  "resumo": "Bengali (Bangla) text processing patterns including Unicode normalization, script detection, tokenization, conjunct handling, and Bangla-spe"
+ },
+ {
+  "nome": "blender-motion-state-inspection",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/blender-motion-state-inspection/SKILL.md",
+  "resumo": "Use this skill when inspecting Blender characters, rigs, poses, animation retargeting, ground contact, facing direction, or model-vs-motion "
+ },
+ {
+  "nome": "blueprint",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/blueprint/SKILL.md",
+  "resumo": "Turn a one-line objective into a step-by-step construction plan for multi-session, multi-agent engineering projects: one-PR-sized steps with"
+ },
+ {
+  "nome": "brand-discovery",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/brand-discovery/SKILL.md",
+  "resumo": "Run a structured, resumable multi-session brand identity interview across 8 modules (purpose, positioning, audience, personality, voice, nar"
+ },
+ {
+  "nome": "brand-voice",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/brand-voice/SKILL.md",
+  "resumo": "Build a source-derived writing style profile from real posts, essays, launch notes, docs, or site copy, then reuse that profile across conte"
+ },
+ {
+  "nome": "brownfield-retrospective",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/brownfield-retrospective/SKILL.md",
+  "resumo": "Run the ECC engineering process retroactively against an existing project slice. Audit current state, reconstruct past decisions, produce a "
+ },
+ {
+  "nome": "browser-qa",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/browser-qa/SKILL.md",
+  "resumo": "Run automated post-deploy UI verification with a browser automation MCP (claude-in-chrome, Playwright, or Puppeteer): console-error and Core"
+ },
+ {
+  "nome": "bun-runtime",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/bun-runtime/SKILL.md",
+  "resumo": "Bun as runtime, package manager, bundler, and test runner. When to choose Bun vs Node, migration notes, and Vercel support."
+ },
+ {
+  "nome": "canary-watch",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/canary-watch/SKILL.md",
+  "resumo": "Use this skill to monitor and verify a deployed URL after releases — checks HTTP endpoints, SSE streams, static assets, console errors, and "
+ },
+ {
+  "nome": "carrier-relationship-management",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/carrier-relationship-management/SKILL.md",
+  "resumo": "Manage truckload, LTL, and intermodal carrier portfolios: sourcing and FMCSA vetting, freight rate and fuel-surcharge negotiation, RFPs and "
+ },
+ {
+  "nome": "change-impact",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/change-impact/SKILL.md",
+  "resumo": "-"
+ },
+ {
+  "nome": "cisco-ios-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/cisco-ios-patterns/SKILL.md",
+  "resumo": "Cisco IOS and IOS-XE review patterns for show commands, config hierarchy, wildcard masks, ACL placement, interface hygiene, and safe change-"
+ },
+ {
+  "nome": "ck",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ck/SKILL.md",
+  "resumo": "Persistent per-project memory for Claude Code (Context Keeper) driven by deterministic Node.js /ck commands: init, save, resume, info, list,"
+ },
+ {
+  "nome": "claude-devfleet",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/claude-devfleet/SKILL.md",
+  "resumo": "Orchestrate multi-agent coding tasks via Claude DevFleet — plan projects, dispatch parallel agents in isolated worktrees, monitor progress, "
+ },
+ {
+  "nome": "click-path-audit",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/click-path-audit/SKILL.md",
+  "resumo": "Trace every user-facing button/touchpoint through its full state change sequence to find bugs where functions individually work but cancel e"
+ },
+ {
+  "nome": "clickhouse-io",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/clickhouse-io/SKILL.md",
+  "resumo": "ClickHouse database patterns, query optimization, analytics, and data engineering best practices for high-performance analytical workloads. "
+ },
+ {
+  "nome": "code-tour",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/code-tour/SKILL.md",
+  "resumo": "Create CodeTour `.tour` files — persona-targeted, step-by-step walkthroughs with real file and line anchors. Use for onboarding tours, archi"
+ },
+ {
+  "nome": "codebase-onboarding",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/codebase-onboarding/SKILL.md",
+  "resumo": "Analyze an unfamiliar codebase and generate a structured onboarding guide with architecture map, key entry points, conventions, and a starte"
+ },
+ {
+  "nome": "codehealth-mcp",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/codehealth-mcp/SKILL.md",
+  "resumo": "Real-time structural Code Health via CodeScene MCP — review before edits, verify score deltas after changes, gate commits and PRs. Use when "
+ },
+ {
+  "nome": "coding-standards",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/coding-standards/SKILL.md",
+  "resumo": "Baseline cross-project coding conventions for naming, readability, immutability, and code-quality review. Use detailed frontend or backend s"
+ },
+ {
+  "nome": "competitive-platform-analysis",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/competitive-platform-analysis/SKILL.md",
+  "resumo": "Use when scoping a competitive landscape — identifying, categorising, and score-filtering a competitor set before any benchmarking begins. D"
+ },
+ {
+  "nome": "competitive-report-structure",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/competitive-report-structure/SKILL.md",
+  "resumo": "Assemble scored competitor profile cards (from benchmark-methodology) into a decision-grade competitive report with landscape map, competito"
+ },
+ {
+  "nome": "compose-multiplatform-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/compose-multiplatform-patterns/SKILL.md",
+  "resumo": "Compose Multiplatform and Jetpack Compose patterns for KMP projects — state management, navigation, theming, performance, and platform-speci"
+ },
+ {
+  "nome": "config-gc",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/config-gc/SKILL.md",
+  "resumo": "Garbage collection for your Claude Code configuration. Periodically scans ~/.claude (skills, memory, hooks, permissions, MCP servers, caches"
+ },
+ {
+  "nome": "configure-ecc",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/configure-ecc/SKILL.md",
+  "resumo": "Run the conversational ECC setup wizard inside the current harness: inventory the install, collect scope (user/project/local) and hook mode "
+ },
+ {
+  "nome": "connections-optimizer",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/connections-optimizer/SKILL.md",
+  "resumo": "Reorganize the user's X and LinkedIn network with review-first pruning, add/follow recommendations, and channel-specific warm outreach draft"
+ },
+ {
+  "nome": "content-engine",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/content-engine/SKILL.md",
+  "resumo": "Create platform-native content systems for X, LinkedIn, TikTok, YouTube, newsletters, and repurposed multi-platform campaigns. Use when the "
+ },
+ {
+  "nome": "content-hash-cache-pattern",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/content-hash-cache-pattern/SKILL.md",
+  "resumo": "Cache expensive file processing results using SHA-256 content hashes — path-independent, auto-invalidating, with service layer separation. U"
+ },
+ {
+  "nome": "context-and-decisions",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/context-and-decisions/SKILL.md",
+  "resumo": "-"
+ },
+ {
+  "nome": "context-budget",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/context-budget/SKILL.md",
+  "resumo": "Routes live context checks to the native Codex or Claude Code meter without scanning files, and performs a bounded static component audit on"
+ },
+ {
+  "nome": "continuous-agent-loop",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/continuous-agent-loop/SKILL.md",
+  "resumo": "Patterns for continuous autonomous agent loops with quality gates, evals, and recovery controls. Use when running an agent loop that must se"
+ },
+ {
+  "nome": "continuous-learning",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/continuous-learning/SKILL.md",
+  "resumo": "[DEPRECATED - use continuous-learning-v2] Legacy v1 stop-hook skill extractor. v2 is a strict superset with instinct-based, project-scoped, "
+ },
+ {
+  "nome": "continuous-learning-v2",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/continuous-learning-v2/SKILL.md",
+  "resumo": "Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into ski"
+ },
+ {
+  "nome": "contract-first",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/contract-first/SKILL.md",
+  "resumo": "Coordinate frontend/backend or service-to-service work through one authoritative machine-checkable contract (OpenAPI, AsyncAPI, Protocol Buf"
+ },
+ {
+  "nome": "conventional-commit-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/conventional-commit-review/SKILL.md",
+  "resumo": "Reviews staged changes and drafts a Conventional Commits-compliant commit message with the right type, scope, and length. Use before committ"
+ },
+ {
+  "nome": "cost-aware-llm-pipeline",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/cost-aware-llm-pipeline/SKILL.md",
+  "resumo": "Cost optimization patterns for LLM API usage — model routing by task complexity, budget tracking, retry logic, and prompt caching. Use when "
+ },
+ {
+  "nome": "cost-tracking",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/cost-tracking/SKILL.md",
+  "resumo": "Track and report Claude Code token usage, spending, and budgets from the local ECC cost-tracker metrics log. Use when the user asks about co"
+ },
+ {
+  "nome": "council",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/council/SKILL.md",
+  "resumo": "Convene a four-voice council for ambiguous decisions, tradeoffs, and go/no-go calls. Use when multiple valid paths exist and you need struct"
+ },
+ {
+  "nome": "council-multi-model",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/council-multi-model/SKILL.md",
+  "resumo": "Add one optional external Codex critique after the existing council has produced a decision draft. Use when an ambiguous, high-consequence d"
+ },
+ {
+  "nome": "counterparty-channel-discipline",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/counterparty-channel-discipline/SKILL.md",
+  "resumo": "Per-channel strict prompts, mention gating, silent observation, and a communication autonomy policy for agents that sit in shared channels w"
+ },
+ {
+  "nome": "cpp-coding-standards",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/cpp-coding-standards/SKILL.md",
+  "resumo": "C++ coding standards based on the C++ Core Guidelines (isocpp.github.io). Use when writing, reviewing, or refactoring C++ code to enforce mo"
+ },
+ {
+  "nome": "cpp-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/cpp-testing/SKILL.md",
+  "resumo": "Use only when writing/updating/fixing C++ tests, configuring GoogleTest/CTest, diagnosing failing or flaky tests, or adding coverage/sanitiz"
+ },
+ {
+  "nome": "crosspost",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/crosspost/SKILL.md",
+  "resumo": "Multi-platform content distribution across X, LinkedIn, Threads, and Bluesky. Adapts content per platform using content-engine patterns. Nev"
+ },
+ {
+  "nome": "csharp-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/csharp-testing/SKILL.md",
+  "resumo": "C# and .NET testing patterns with xUnit, FluentAssertions, mocking, integration tests, and test organization best practices. Use when writin"
+ },
+ {
+  "nome": "customer-billing-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/customer-billing-ops/SKILL.md",
+  "resumo": "Operate customer billing workflows such as subscriptions, refunds, churn triage, billing-portal recovery, and plan analysis using connected "
+ },
+ {
+  "nome": "customs-trade-compliance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/customs-trade-compliance/SKILL.md",
+  "resumo": "Codified customs and trade compliance expertise — HS/HTS tariff classification with GRI rules, commercial invoices and entry documentation, "
+ },
+ {
+  "nome": "dart-flutter-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/dart-flutter-patterns/SKILL.md",
+  "resumo": "Production-ready Dart and Flutter patterns covering null safety, immutable state with Freezed, async composition, widget architecture, state"
+ },
+ {
+  "nome": "dashboard-builder",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/dashboard-builder/SKILL.md",
+  "resumo": "Build monitoring dashboards that answer real operator questions for Grafana, SigNoz, and similar platforms. Use when turning metrics into a "
+ },
+ {
+  "nome": "data-scraper-agent",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/data-scraper-agent/SKILL.md",
+  "resumo": "Build a fully automated AI-powered data collection agent for any public source — job boards, prices, news, GitHub, sports, anything. Runs on"
+ },
+ {
+  "nome": "data-throughput-accelerator",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/data-throughput-accelerator/SKILL.md",
+  "resumo": "Diagnose and accelerate large data movement — ingestion, backfill, export, ETL, warehouse loading, manifest catch-up, and table synchronizat"
+ },
+ {
+  "nome": "database-migrations",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/database-migrations/SKILL.md",
+  "resumo": "Safe, reversible database migration patterns: forward-only production changes, expand-contract zero-downtime renames, concurrent indexes, ba"
+ },
+ {
+  "nome": "deep-research",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/deep-research/SKILL.md",
+  "resumo": "Produce cited research reports from multiple web sources using firecrawl and exa MCP tools — plan sub-questions, search and deep-read source"
+ },
+ {
+  "nome": "deepseek-harness-setup",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/deepseek-harness-setup/SKILL.md",
+  "resumo": "Install and operate Everything Claude Code (ECC) on the DeepSeek Harness (DSH): native skill roots (~/.dsh/skills, .agents/skills), the @dee"
+ },
+ {
+  "nome": "defi-amm-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/defi-amm-security/SKILL.md",
+  "resumo": "Security checklist for Solidity AMM contracts, liquidity pools, and swap flows. Covers reentrancy, CEI ordering, donation or inflation attac"
+ },
+ {
+  "nome": "delivery-gate",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/delivery-gate/SKILL.md",
+  "resumo": "Stop hook that blocks Claude from finishing until quality checks pass. Detects rationalization patterns (surface text heuristics), stale lea"
+ },
+ {
+  "nome": "deployment-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/deployment-patterns/SKILL.md",
+  "resumo": "Deployment workflows, CI/CD pipeline patterns, Docker containerization, health checks, rollback strategies, and production readiness checkli"
+ },
+ {
+  "nome": "design-system",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/design-system/SKILL.md",
+  "resumo": "Generate a design system from an existing codebase or audit one for visual consistency: extract tokens (colors, typography, spacing, shadows"
+ },
+ {
+  "nome": "dev-team",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/dev-team/SKILL.md",
+  "resumo": "Simulate a collaborative dev team session where multiple role-based personas (PM, Architect, Developer, QA) respond to the same problem toge"
+ },
+ {
+  "nome": "django-celery",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/django-celery/SKILL.md",
+  "resumo": "Django + Celery async task patterns — configuration, task design, beat scheduling, retries, canvas workflows, monitoring, and testing. Use w"
+ },
+ {
+  "nome": "django-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/django-patterns/SKILL.md",
+  "resumo": "Django architecture patterns, REST API design with DRF, ORM best practices, caching, signals, middleware, and production-grade Django apps. "
+ },
+ {
+  "nome": "django-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/django-security/SKILL.md",
+  "resumo": "Django security best practices, authentication, authorization, CSRF protection, SQL injection prevention, XSS prevention, and secure deploym"
+ },
+ {
+  "nome": "django-tdd",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/django-tdd/SKILL.md",
+  "resumo": "Django testing strategies with pytest-django, TDD methodology, factory_boy, mocking, coverage, and testing Django REST Framework APIs. Use w"
+ },
+ {
+  "nome": "django-verification",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/django-verification/SKILL.md",
+  "resumo": "Run the full Django verification loop — environment check, mypy/ruff/black linting, migration safety, pytest with coverage targets, pip-audi"
+ },
+ {
+  "nome": "dmux-workflows",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/dmux-workflows/SKILL.md",
+  "resumo": "Multi-agent orchestration using dmux (tmux pane manager for AI agents). Patterns for parallel agent workflows across Claude Code, Codex, Ope"
+ },
+ {
+  "nome": "docker-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/docker-patterns/SKILL.md",
+  "resumo": "Docker and Docker Compose patterns for local development, hardened CLI installer harnesses, container security, networking, volumes, and mul"
+ },
+ {
+  "nome": "docs-governance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/docs-governance/SKILL.md",
+  "resumo": "Route broad documentation-governance requests to existing ECC skills and run an opt-in, read-only audit of mapped documentation roles, links"
+ },
+ {
+  "nome": "documentation-lookup",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/documentation-lookup/SKILL.md",
+  "resumo": "Use up-to-date library and framework docs via Context7 MCP instead of training data. Activates for setup questions, API references, code exa"
+ },
+ {
+  "nome": "dotnet-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/dotnet-patterns/SKILL.md",
+  "resumo": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET ap"
+ },
+ {
+  "nome": "dynamic-workflow-mode",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/dynamic-workflow-mode/SKILL.md",
+  "resumo": "Design task-local harnesses, eval gates, and reusable skill extraction for Claude dynamic workflow mode and other adaptive agent harnesses. "
+ },
+ {
+  "nome": "e2e-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/e2e-testing/SKILL.md",
+  "resumo": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies. Use wh"
+ },
+ {
+  "nome": "ecc-guide",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/ecc-guide/SKILL.md",
+  "resumo": "Answer questions about ECC by reading the live repo surface — agents, skills, commands, hooks, rules, install profiles, and docs — instead o"
+ },
+ {
+  "nome": "ecc-recipes",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ecc-recipes/SKILL.md",
+  "resumo": "Map a described workflow to the right ECC command group with run-order and stop condition, or browse all command-group recipe families read "
+ },
+ {
+  "nome": "ecc-tools-cost-audit",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ecc-tools-cost-audit/SKILL.md",
+  "resumo": "Evidence-first ECC Tools burn and billing audit workflow. Use when investigating runaway PR creation, quota bypass, premium-model leakage, d"
+ },
+ {
+  "nome": "email-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/email-ops/SKILL.md",
+  "resumo": "Evidence-first mailbox triage, drafting, send verification, and sent-mail-safe follow-up workflow for ECC. Use when the user wants to organi"
+ },
+ {
+  "nome": "energy-procurement",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/energy-procurement/SKILL.md",
+  "resumo": "Procure electricity and natural gas for commercial and industrial facilities: tariff and rate-schedule optimization, demand-charge mitigatio"
+ },
+ {
+  "nome": "enterprise-agent-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/enterprise-agent-ops/SKILL.md",
+  "resumo": "Operational controls for long-lived or cloud-hosted agent systems — runtime lifecycle (start, pause, stop, restart), observability (logs, me"
+ },
+ {
+  "nome": "error-handling",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/error-handling/SKILL.md",
+  "resumo": "Patterns for robust error handling across TypeScript, Python, and Go. Covers typed errors, error boundaries, retries, circuit breakers, and "
+ },
+ {
+  "nome": "esign-field-placement",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/esign-field-placement/SKILL.md",
+  "resumo": "Deterministic method for placing signature, date, and text fields in a web e-signature composer through a browser automation session, using "
+ },
+ {
+  "nome": "eval-harness",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/eval-harness/SKILL.md",
+  "resumo": "Eval-driven development (EDD) framework for AI coding sessions — define capability and regression evals before coding, grade with code-based"
+ },
+ {
+  "nome": "evm-token-decimals",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/evm-token-decimals/SKILL.md",
+  "resumo": "Prevent silent decimal mismatch bugs across EVM chains. Covers runtime decimal lookup, chain-aware caching, bridged-token precision drift, a"
+ },
+ {
+  "nome": "exa-search",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/exa-search/SKILL.md",
+  "resumo": "Neural search via Exa MCP for web, code, and company research. Use when the user needs web search, code examples, company intel, people look"
+ },
+ {
+  "nome": "fal-ai-media",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/fal-ai-media/SKILL.md",
+  "resumo": "Unified media generation via fal.ai MCP — image, video, and audio. Covers text-to-image (Nano Banana), text/image-to-video (Seedance, Kling,"
+ },
+ {
+  "nome": "fastapi-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/fastapi-patterns/SKILL.md",
+  "resumo": "FastAPI best practices covering project structure, Pydantic v2 schemas, dependency injection, async handlers, authentication, authorization,"
+ },
+ {
+  "nome": "finance-billing-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/finance-billing-ops/SKILL.md",
+  "resumo": "Evidence-first revenue, pricing, refunds, team-billing, and billing-model truth workflow for ECC. Use when the user wants a sales snapshot, "
+ },
+ {
+  "nome": "flox-environments",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/flox-environments/SKILL.md",
+  "resumo": "Create reproducible, cross-platform (macOS/Linux) development environments with Flox, a declarative Nix-based environment manager. Use when "
+ },
+ {
+  "nome": "flutter-dart-code-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/flutter-dart-code-review/SKILL.md",
+  "resumo": "Library-agnostic Flutter/Dart code review checklist covering widget best practices, state management patterns (BLoC, Riverpod, Provider, Get"
+ },
+ {
+  "nome": "foundation-models-on-device",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/foundation-models-on-device/SKILL.md",
+  "resumo": "Apple FoundationModels framework for on-device LLM — text generation, guided generation with @Generable, tool calling, and snapshot streamin"
+ },
+ {
+  "nome": "frontend-a11y",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/frontend-a11y/SKILL.md",
+  "resumo": "Accessibility patterns for React and Next.js — semantic HTML, ARIA attributes, form labeling, keyboard navigation, focus management, and scr"
+ },
+ {
+  "nome": "frontend-design-direction",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/frontend-design-direction/SKILL.md",
+  "resumo": "Set an ECC-specific frontend design direction for production UI work. Use when building or improving websites, dashboards, applications, com"
+ },
+ {
+  "nome": "frontend-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/frontend-patterns/SKILL.md",
+  "resumo": "Frontend development patterns for React, Next.js, state management, performance optimization, and UI best practices. Use when building or re"
+ },
+ {
+  "nome": "frontend-slides",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/frontend-slides/SKILL.md",
+  "resumo": "Create stunning, animation-rich HTML presentations from scratch or by converting PowerPoint files. Use when the user wants to build a presen"
+ },
+ {
+  "nome": "fsharp-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/fsharp-testing/SKILL.md",
+  "resumo": "F# testing patterns with xUnit, FsUnit, Unquote, FsCheck property-based testing, integration tests, and test organization best practices. Us"
+ },
+ {
+  "nome": "gan-style-harness",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/gan-style-harness/SKILL.md",
+  "resumo": "GAN-inspired Generator-Evaluator agent harness for building high-quality applications autonomously. Based on Anthropic's March 2026 harness "
+ },
+ {
+  "nome": "gateguard",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/gateguard/SKILL.md",
+  "resumo": "PreToolUse fact-forcing gate that denies the first Edit/Write/Bash (including MultiEdit and NotebookEdit) attempt until the agent presents c"
+ },
+ {
+  "nome": "generating-python-installer",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/generating-python-installer/SKILL.md",
+  "resumo": "Commercial-grade Python installer expert for Windows: Nuitka extreme compilation, dist slimming, DLL footprint analysis, and Inno Setup pack"
+ },
+ {
+  "nome": "git-workflow",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/git-workflow/SKILL.md",
+  "resumo": "Git workflow patterns including branching strategies, commit conventions, keeping history clean and readable, tidying local commits before m"
+ },
+ {
+  "nome": "github-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/github-ops/SKILL.md",
+  "resumo": "GitHub repository operations, automation, and management. Issue triage, PR management, CI/CD operations, release management, and security mo"
+ },
+ {
+  "nome": "golang-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/golang-patterns/SKILL.md",
+  "resumo": "Idiomatic Go patterns, best practices, and conventions for building robust, efficient, and maintainable Go applications. Use when writing or"
+ },
+ {
+  "nome": "golang-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/golang-testing/SKILL.md",
+  "resumo": "Go testing patterns including table-driven tests, subtests, benchmarks, fuzzing, and test coverage. Follows TDD methodology with idiomatic G"
+ },
+ {
+  "nome": "google-workspace-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/google-workspace-ops/SKILL.md",
+  "resumo": "Operate across Google Drive, Docs, Sheets, and Slides as one workflow surface for plans, trackers, decks, and shared documents. Use when the"
+ },
+ {
+  "nome": "growth-log",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/growth-log/SKILL.md",
+  "resumo": "Write growth log entries that extract reusable patterns from completed work — root cause, transferable rule, and a recognizable signal — ins"
+ },
+ {
+  "nome": "healthcare-cdss-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/healthcare-cdss-patterns/SKILL.md",
+  "resumo": "Clinical Decision Support System (CDSS) development patterns. Drug interaction checking, dose validation, clinical scoring (NEWS2, qSOFA), a"
+ },
+ {
+  "nome": "healthcare-emr-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/healthcare-emr-patterns/SKILL.md",
+  "resumo": "EMR/EHR development patterns for healthcare applications. Clinical safety, encounter workflows, prescription generation, clinical decision s"
+ },
+ {
+  "nome": "healthcare-eval-harness",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/healthcare-eval-harness/SKILL.md",
+  "resumo": "Patient safety evaluation harness for healthcare application deployments. Automated test suites for CDSS accuracy, PHI exposure, clinical wo"
+ },
+ {
+  "nome": "healthcare-phi-compliance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/healthcare-phi-compliance/SKILL.md",
+  "resumo": "Protected Health Information (PHI) and PII compliance patterns for healthcare applications: data classification, row-level access control, t"
+ },
+ {
+  "nome": "hermes-imports",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/hermes-imports/SKILL.md",
+  "resumo": "Convert local Hermes operator workflows into sanitized ECC skills and release-pack artifacts. Use when preparing a Hermes workflow for publi"
+ },
+ {
+  "nome": "hexagonal-architecture",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/hexagonal-architecture/SKILL.md",
+  "resumo": "Design, implement, and refactor Ports & Adapters systems with clear domain boundaries, dependency inversion, and testable use-case orchestra"
+ },
+ {
+  "nome": "hipaa-compliance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/hipaa-compliance/SKILL.md",
+  "resumo": "HIPAA-specific entrypoint for healthcare privacy and security work. Use when a task is explicitly framed around HIPAA, PHI handling, covered"
+ },
+ {
+  "nome": "homelab-network-readiness",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/homelab-network-readiness/SKILL.md",
+  "resumo": "Readiness checklist for homelab VLAN segmentation, local DNS filtering (Pi-hole, AdGuard Home), and WireGuard-style remote access. Use when "
+ },
+ {
+  "nome": "homelab-network-setup",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/homelab-network-setup/SKILL.md",
+  "resumo": "Practical home and homelab network planning for gateways, switches, access points, IP ranges, DHCP reservations, DNS, cabling, and common be"
+ },
+ {
+  "nome": "homelab-pihole-dns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/homelab-pihole-dns/SKILL.md",
+  "resumo": "Pi-hole installation, blocklist management, DNS-over-HTTPS setup, DHCP integration, local DNS records, and troubleshooting broken DNS resolu"
+ },
+ {
+  "nome": "homelab-vlan-segmentation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/homelab-vlan-segmentation/SKILL.md",
+  "resumo": "Segmenting home networks into VLANs for IoT, guest, trusted, and server traffic using UniFi, pfSense/OPNsense, and MikroTik — including swit"
+ },
+ {
+  "nome": "homelab-wireguard-vpn",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/homelab-wireguard-vpn/SKILL.md",
+  "resumo": "WireGuard VPN server setup, peer configuration, key generation, split tunneling vs full tunnel routing, and remote access to a home network "
+ },
+ {
+  "nome": "hookify-rules",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/hookify-rules/SKILL.md",
+  "resumo": "Create and configure hookify rules — markdown files with YAML frontmatter that match bash, file, prompt, or stop events by regex or conditio"
+ },
+ {
+  "nome": "i18n-sync",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/i18n-sync/SKILL.md",
+  "resumo": "Translate and synchronize application JSON locale files using source-key usage, project terminology, and focused validation. Use when adding"
+ },
+ {
+  "nome": "inherit-legacy-style",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/inherit-legacy-style/SKILL.md",
+  "resumo": "Prevent AI style drift on legacy projects by scanning the codebase for implicit conventions, resolving conflicts with the operator one at a "
+ },
+ {
+  "nome": "intent-driven-development",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/intent-driven-development/SKILL.md",
+  "resumo": "Turn ambiguous or high-impact product and engineering changes into scoped, verifiable acceptance criteria before or alongside implementation"
+ },
+ {
+  "nome": "inventory-demand-planning",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/inventory-demand-planning/SKILL.md",
+  "resumo": "Codified demand planning expertise for multi-location retailers: demand forecasting method selection, ABC/XYZ segmentation, safety stock and"
+ },
+ {
+  "nome": "investor-materials",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/investor-materials/SKILL.md",
+  "resumo": "Create and update pitch decks, one-pagers, investor memos, accelerator applications, financial models, and fundraising materials. Use when t"
+ },
+ {
+  "nome": "investor-outreach",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/investor-outreach/SKILL.md",
+  "resumo": "Draft cold emails, warm intro blurbs, follow-ups, update emails, and investor communications for fundraising. Use when the user wants outrea"
+ },
+ {
+  "nome": "ios-icon-gen",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ios-icon-gen/SKILL.md",
+  "resumo": "Generate iOS app icons as PNG imagesets for Xcode asset catalogs from SF Symbols (5000+ Apple-native) or Iconify API (275k+ open source icon"
+ },
+ {
+  "nome": "issue-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/issue-review/SKILL.md",
+  "resumo": "Review a GitHub issue the way /code-review reviews a PR. Fetches the issue with the gh CLI, checks the report against the current codebase, "
+ },
+ {
+  "nome": "iterative-retrieval",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/iterative-retrieval/SKILL.md",
+  "resumo": "Pattern for progressively refining context retrieval to solve the subagent context problem. Use when a subagent lacks the context it needs a"
+ },
+ {
+  "nome": "ito-baskets",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ito-baskets/SKILL.md",
+  "resumo": "Read-only Itô basket and prediction-market data skill. Index the live basket catalog, compare a basket against user-supplied research or a w"
+ },
+ {
+  "nome": "ito-compute",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ito-compute/SKILL.md",
+  "resumo": "Query live GPU inventory, submit an authenticated Itô fixed-rate RFQ, inspect RFQ or procurement status, revoke device credentials, and run "
+ },
+ {
+  "nome": "ito-inference",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ito-inference/SKILL.md",
+  "resumo": "Inspect the availability of model serving on a completed Itô compute booking and, when the canonical backend becomes available, hand off an "
+ },
+ {
+  "nome": "ito-training",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ito-training/SKILL.md",
+  "resumo": "Inspect the availability of ML training on a completed Itô compute booking and, when the canonical backend becomes available, hand off an ex"
+ },
+ {
+  "nome": "java-coding-standards",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/java-coding-standards/SKILL.md",
+  "resumo": "Java coding standards for Spring Boot and Quarkus services: naming, immutability, Optional usage, streams, exceptions, generics, CDI, reacti"
+ },
+ {
+  "nome": "jira-integration",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/jira-integration/SKILL.md",
+  "resumo": "Use this skill when retrieving Jira tickets, analyzing requirements, updating ticket status, adding comments, or transitioning issues. Provi"
+ },
+ {
+  "nome": "jpa-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/jpa-patterns/SKILL.md",
+  "resumo": "JPA/Hibernate patterns for entity design, relationships, query optimization, transactions, auditing, indexing, pagination, and pooling in Sp"
+ },
+ {
+  "nome": "knowledge-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/knowledge-ops/SKILL.md",
+  "resumo": "Knowledge base management, ingestion, sync, and retrieval across multiple storage layers (local files, MCP memory, vector stores, Git repos)"
+ },
+ {
+  "nome": "kotlin-coroutines-flows",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/kotlin-coroutines-flows/SKILL.md",
+  "resumo": "Kotlin Coroutines and Flow patterns for Android and KMP — structured concurrency, Flow operators, StateFlow, error handling, and testing. Us"
+ },
+ {
+  "nome": "kotlin-exposed-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/kotlin-exposed-patterns/SKILL.md",
+  "resumo": "JetBrains Exposed ORM patterns including DSL queries, DAO pattern, transactions, HikariCP connection pooling, Flyway migrations, and reposit"
+ },
+ {
+  "nome": "kotlin-ktor-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/kotlin-ktor-patterns/SKILL.md",
+  "resumo": "Ktor server patterns including routing DSL, plugins, authentication, Koin DI, kotlinx.serialization, WebSockets, and testApplication testing"
+ },
+ {
+  "nome": "kotlin-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/kotlin-patterns/SKILL.md",
+  "resumo": "Idiomatic Kotlin patterns, best practices, and conventions for building robust, efficient, and maintainable Kotlin applications with corouti"
+ },
+ {
+  "nome": "kotlin-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/kotlin-testing/SKILL.md",
+  "resumo": "Kotlin testing patterns with Kotest, MockK, coroutine testing, property-based testing, and Kover coverage. Follows TDD methodology with idio"
+ },
+ {
+  "nome": "kubernetes-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/kubernetes-patterns/SKILL.md",
+  "resumo": "Kubernetes workload patterns, resource management, RBAC, probes, autoscaling, ConfigMap/Secret handling, and kubectl debugging for productio"
+ },
+ {
+  "nome": "laravel-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/laravel-patterns/SKILL.md",
+  "resumo": "Laravel architecture patterns, routing/controllers, Eloquent ORM, service layers, queues, events, caching, and API resources for production "
+ },
+ {
+  "nome": "laravel-plugin-discovery",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/laravel-plugin-discovery/SKILL.md",
+  "resumo": "Discover and evaluate Laravel packages via LaraPlugins.io MCP. Use when the user wants to find plugins, check package health, or assess Lara"
+ },
+ {
+  "nome": "laravel-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/laravel-security/SKILL.md",
+  "resumo": "Laravel security best practices — authentication, authorization, Eloquent safety, CSRF, XSS prevention, API security, and secure deployment "
+ },
+ {
+  "nome": "laravel-tdd",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/laravel-tdd/SKILL.md",
+  "resumo": "Laravel testing strategies with PHPUnit, Pest, model factories, HTTP tests, Sanctum authentication testing, mocking, and coverage. Use when "
+ },
+ {
+  "nome": "laravel-verification",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/laravel-verification/SKILL.md",
+  "resumo": "Verification loop for Laravel projects: env checks, linting, static analysis, tests with coverage, security scans, and deployment readiness."
+ },
+ {
+  "nome": "latency-critical-systems",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/latency-critical-systems/SKILL.md",
+  "resumo": "Optimize and verify latency-sensitive systems — realtime dashboards, market data feeds, streaming agents, execution gateways, queues, and ca"
+ },
+ {
+  "nome": "lead-intelligence",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/lead-intelligence/SKILL.md",
+  "resumo": "AI-native lead intelligence and outreach pipeline. Replaces Apollo, Clay, and ZoomInfo with agent-powered signal scoring, mutual ranking, wa"
+ },
+ {
+  "nome": "liquid-glass-design",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/liquid-glass-design/SKILL.md",
+  "resumo": "iOS 26 Liquid Glass design system — dynamic glass material with blur, reflection, and interactive morphing for SwiftUI, UIKit, and WidgetKit"
+ },
+ {
+  "nome": "living-docs-governance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/living-docs-governance/SKILL.md",
+  "resumo": "Keep a long-lived project's documentation from rotting by assigning existing project docs clear constitution, map, status, and history roles"
+ },
+ {
+  "nome": "llm-trading-agent-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/llm-trading-agent-security/SKILL.md",
+  "resumo": "Security patterns for autonomous trading agents with wallet or transaction authority. Covers prompt injection, spend limits, pre-send simula"
+ },
+ {
+  "nome": "logistics-exception-management",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/logistics-exception-management/SKILL.md",
+  "resumo": "Codified freight-exception handling expertise for shipment delays, damages, losses, shortages, and carrier disputes, with escalation protoco"
+ },
+ {
+  "nome": "loop-design-check",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/loop-design-check/SKILL.md",
+  "resumo": "Design a goal-oriented agent loop or review one for failure modes: spinning, Goodhart-gaming the verifier, or running a wrong answer to comp"
+ },
+ {
+  "nome": "mailtrap-email-integration",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/mailtrap-email-integration/SKILL.md",
+  "resumo": "Guides agents through integrating transactional email sending via Mailtrap's Email API, including sandbox testing, domain verification, and "
+ },
+ {
+  "nome": "make-interfaces-feel-better",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/make-interfaces-feel-better/SKILL.md",
+  "resumo": "Apply concrete design-engineering details that make interfaces feel polished. Use when reviewing or improving UI spacing, typography, border"
+ },
+ {
+  "nome": "manim-video",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/manim-video/SKILL.md",
+  "resumo": "Build reusable Manim explainers for technical concepts, graphs, system diagrams, and product walkthroughs, then hand off to the wider ECC vi"
+ },
+ {
+  "nome": "market-research",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/market-research/SKILL.md",
+  "resumo": "Conduct market research, competitive analysis, investor due diligence, and industry intelligence with source attribution and decision-orient"
+ },
+ {
+  "nome": "marketing-campaign",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/marketing-campaign/SKILL.md",
+  "resumo": "End-to-end marketing campaign planning and execution. Covers audience research, positioning, campaign angle definition, landing page copy, e"
+ },
+ {
+  "nome": "master-agreement-generator",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/master-agreement-generator/SKILL.md",
+  "resumo": "Generate review drafts of counterparty master agreements from one template plus a JSON spec, with role-selected clauses and a Schedule A wor"
+ },
+ {
+  "nome": "mcp-dependency-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/mcp-dependency-review/SKILL.md",
+  "resumo": "Statically review MCP configuration for mutable package references before approval or CI, without executing discovered MCP servers. Use when"
+ },
+ {
+  "nome": "mcp-server-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/mcp-server-patterns/SKILL.md",
+  "resumo": "Build MCP servers with Node/TypeScript SDK — tools, resources, prompts, Zod validation, stdio vs Streamable HTTP. Use Context7 or official M"
+ },
+ {
+  "nome": "messages-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/messages-ops/SKILL.md",
+  "resumo": "Evidence-first live messaging workflow for ECC. Use when the user wants to read texts or DMs, recover a recent one-time code, inspect a thre"
+ },
+ {
+  "nome": "ml-adoption-playbook",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ml-adoption-playbook/SKILL.md",
+  "resumo": "End-to-end methodology for AI agents and software engineers to add machine learning algorithms to existing non-ML codebases. Covers problem "
+ },
+ {
+  "nome": "mle-workflow",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/mle-workflow/SKILL.md",
+  "resumo": "Production machine-learning engineering workflow for data contracts, reproducible training, model evaluation, deployment, monitoring, and ro"
+ },
+ {
+  "nome": "module-governance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/module-governance/SKILL.md",
+  "resumo": "-"
+ },
+ {
+  "nome": "module-regression",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/module-regression/SKILL.md",
+  "resumo": "-"
+ },
+ {
+  "nome": "motion-advanced",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/motion-advanced/SKILL.md",
+  "resumo": "Advanced motion patterns for React / Next.js — drag & drop, gestures, text animations, SVG path drawing, custom hooks, imperative sequences "
+ },
+ {
+  "nome": "motion-foundations",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/motion-foundations/SKILL.md",
+  "resumo": "Motion tokens, spring presets, performance rules, device adaptation, accessibility enforcement, and SSR safety for React / Next.js using mot"
+ },
+ {
+  "nome": "motion-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/motion-patterns/SKILL.md",
+  "resumo": "Production-ready animation patterns for React / Next.js — button, modal, toast, stagger, page transitions, exit animations, scroll, and layo"
+ },
+ {
+  "nome": "mybatis-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/mybatis-patterns/SKILL.md",
+  "resumo": "MyBatis and MyBatis-Spring patterns for mapper design, XML and annotation SQL, result mapping, dynamic SQL safety, transactions, batching, p"
+ },
+ {
+  "nome": "mysql-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/mysql-patterns/SKILL.md",
+  "resumo": "MySQL and MariaDB schema, query, indexing, transaction, replication, and connection-pool patterns for production backends. Use when designin"
+ },
+ {
+  "nome": "nanoclaw-repl",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/nanoclaw-repl/SKILL.md",
+  "resumo": "Operate and extend NanoClaw, ECC's zero-dependency session-aware REPL, with persistent markdown-backed sessions and slash commands for model"
+ },
+ {
+  "nome": "nasiko-control-plane",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/nasiko-control-plane/SKILL.md",
+  "resumo": "Manage the experimental Nasiko CLI lifecycle through ECC — read-only status checks, consent-gated install of the pinned qualified version wi"
+ },
+ {
+  "nome": "nestjs-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/nestjs-patterns/SKILL.md",
+  "resumo": "NestJS architecture patterns for modules, controllers, providers, DTO validation, guards, interceptors, config, and production-grade TypeScr"
+ },
+ {
+  "nome": "netmiko-ssh-automation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/netmiko-ssh-automation/SKILL.md",
+  "resumo": "Safe Python Netmiko patterns for read-only collection, bounded batch SSH, TextFSM parsing, guarded config changes, timeouts, and network aut"
+ },
+ {
+  "nome": "network-bgp-diagnostics",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/network-bgp-diagnostics/SKILL.md",
+  "resumo": "Diagnostics-only BGP troubleshooting patterns for neighbor state, route exchange, prefix policy, AS path inspection, and safe evidence colle"
+ },
+ {
+  "nome": "network-config-validation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/network-config-validation/SKILL.md",
+  "resumo": "Pre-deployment checks for router and switch configuration, including dangerous commands, duplicate addresses, subnet overlaps, stale referen"
+ },
+ {
+  "nome": "network-interface-health",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/network-interface-health/SKILL.md",
+  "resumo": "Diagnose interface errors, drops, CRCs, duplex mismatches, flapping, speed negotiation issues, and counter trends on routers, switches, and "
+ },
+ {
+  "nome": "nextjs-turbopack",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/nextjs-turbopack/SKILL.md",
+  "resumo": "Next.js 16+ and Turbopack guidance — incremental Rust bundling, file-system caching, faster dev startup and HMR, Turbopack vs webpack tradeo"
+ },
+ {
+  "nome": "nodejs-keccak256",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/nodejs-keccak256/SKILL.md",
+  "resumo": "Prevent Ethereum hashing bugs in JavaScript and TypeScript. Node's sha3-256 is NIST SHA3, not Ethereum Keccak-256, and silently breaks selec"
+ },
+ {
+  "nome": "nutrient-document-processing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/nutrient-document-processing/SKILL.md",
+  "resumo": "Process, convert, OCR, extract, redact, sign, and fill documents using the Nutrient DWS API. Works with PDFs, DOCX, XLSX, PPTX, HTML, and im"
+ },
+ {
+  "nome": "nuxt4-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/nuxt4-patterns/SKILL.md",
+  "resumo": "Nuxt 4 app patterns for hydration safety, performance, route rules, lazy loading, and SSR-safe data fetching with useFetch and useAsyncData."
+ },
+ {
+  "nome": "openclaw-persona-forge",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/openclaw-persona-forge/SKILL.md",
+  "resumo": "为 OpenClaw AI Agent 锻造完整的龙虾灵魂方案。根据用户偏好或随机抽卡， 输出身份定位、灵魂描述(SOUL.md)、角色化底线规则、名字和头像生图提示词。 如当前环境提供已审核的生图 skill，可自动生成统一风格头像图片。 当用户需要创建、设计或定制 OpenC"
+ },
+ {
+  "nome": "opensource-pipeline",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/opensource-pipeline/SKILL.md",
+  "resumo": "Open-source pipeline: fork, sanitize, and package private projects for safe public release. Chains 3 agents (forker, sanitizer, packager). T"
+ },
+ {
+  "nome": "operator-approval-loop",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/operator-approval-loop/SKILL.md",
+  "resumo": "Operator approval contract with internal filing notices for agent-drafted outbound messages, hashed drafts, epoch-keyed decisions, durable d"
+ },
+ {
+  "nome": "orch-add-feature",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-add-feature/SKILL.md",
+  "resumo": "Orchestrate building a brand-new feature end to end — research, plan, TDD implementation, review, and gated commit — by delegating each phas"
+ },
+ {
+  "nome": "orch-build-mvp",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-build-mvp/SKILL.md",
+  "resumo": "Orchestrate bootstrapping a working MVP from a design or spec document — ingest the SDD/PRD, plan thin vertical slices, scaffold the first e"
+ },
+ {
+  "nome": "orch-change-feature",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-change-feature/SKILL.md",
+  "resumo": "Orchestrate altering an existing, working feature to new desired behavior — update its tests to the new spec, change the implementation to m"
+ },
+ {
+  "nome": "orch-fix-defect",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-fix-defect/SKILL.md",
+  "resumo": "Orchestrate fixing a bug — reproduce it as a failing regression test, fix to green, review, and gated commit — by delegating each phase to t"
+ },
+ {
+  "nome": "orch-pipeline",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-pipeline/SKILL.md",
+  "resumo": "Shared orchestration engine behind the orch-* skill family — the gated Research-Plan-TDD-Review-Commit pipeline, size classifier, agent and "
+ },
+ {
+  "nome": "orch-refine-code",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/orch-refine-code/SKILL.md",
+  "resumo": "Orchestrate a behavior-preserving refactor — confirm tests are green, restructure without changing behavior, keep tests green, review, and g"
+ },
+ {
+  "nome": "osint-investigation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/osint-investigation/SKILL.md",
+  "resumo": "Sparse-clue OSINT investigation methodology for extracting overlooked leads, connecting fragmented evidence, and testing explanations across"
+ },
+ {
+  "nome": "parallel-execution-optimizer",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/parallel-execution-optimizer/SKILL.md",
+  "resumo": "Speed up a task by turning it into a dependency graph of parallel lanes with a lane matrix, batched reads and checks, write surfaces isolate"
+ },
+ {
+  "nome": "perl-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/perl-patterns/SKILL.md",
+  "resumo": "Modern Perl 5.36+ idioms, best practices, and conventions for building robust, maintainable Perl applications. Use when writing or reviewing"
+ },
+ {
+  "nome": "perl-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/perl-security/SKILL.md",
+  "resumo": "Comprehensive Perl security covering taint mode, input validation, safe process execution, DBI parameterized queries, web security (XSS/SQLi"
+ },
+ {
+  "nome": "perl-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/perl-testing/SKILL.md",
+  "resumo": "Perl testing patterns using Test2::V0, Test::More, prove runner, mocking, coverage with Devel::Cover, and TDD methodology. Use when writing "
+ },
+ {
+  "nome": "plan-canvas",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/plan-canvas/SKILL.md",
+  "resumo": "Open plans and HTML artifacts in a local browser canvas where the human annotates elements, chats, and approves or requests changes without "
+ },
+ {
+  "nome": "plan-orchestrate",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/plan-orchestrate/SKILL.md",
+  "resumo": "Read a plan document, decompose it into steps, classify each step, and emit the ready-to-paste ECC slash command for that step, carrying the"
+ },
+ {
+  "nome": "plankton-code-quality",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/plankton-code-quality/SKILL.md",
+  "resumo": "Write-time code quality enforcement using Plankton — auto-formatting, linting, and Claude-powered fixes on every file edit via hooks. Use wh"
+ },
+ {
+  "nome": "postgres-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/postgres-patterns/SKILL.md",
+  "resumo": "PostgreSQL database patterns for query optimization, schema design, indexing, and security. Based on Supabase best practices. Use when desig"
+ },
+ {
+  "nome": "prediction-market-oracle-research",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/prediction-market-oracle-research/SKILL.md",
+  "resumo": "Research prediction markets as data sources or oracle signals for products, agents, dashboards, and corporate decision intelligence. Use for"
+ },
+ {
+  "nome": "prediction-market-risk-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/prediction-market-risk-review/SKILL.md",
+  "resumo": "Review prediction-market, basket, oracle, and trading-agent workflows for compliance, safety, data-quality, privacy, and execution risk. Use"
+ },
+ {
+  "nome": "prisma-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/prisma-patterns/SKILL.md",
+  "resumo": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMan"
+ },
+ {
+  "nome": "product-capability",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/product-capability/SKILL.md",
+  "resumo": "Translate PRD intent, roadmap asks, or product discussions into an implementation-ready capability plan that exposes constraints, invariants"
+ },
+ {
+  "nome": "product-lens",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/product-lens/SKILL.md",
+  "resumo": "Validate the why before building through four product diagnostics — a YC-style product diagnostic that produces PRODUCT-BRIEF.md with a go/n"
+ },
+ {
+  "nome": "production-audit",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/production-audit/SKILL.md",
+  "resumo": "Local-evidence production readiness audit for shipped apps, pre-launch reviews, post-merge checks, and \"what breaks in prod?\" questions with"
+ },
+ {
+  "nome": "production-scheduling",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/production-scheduling/SKILL.md",
+  "resumo": "Codified expertise for production scheduling, job sequencing, line balancing, changeover optimization, and bottleneck resolution in discrete"
+ },
+ {
+  "nome": "project-flow-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/project-flow-ops/SKILL.md",
+  "resumo": "Operate execution flow across GitHub and Linear by triaging issues and pull requests, linking active work, and keeping GitHub public-facing "
+ },
+ {
+  "nome": "prompt-caching-strategy",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/prompt-caching-strategy/SKILL.md",
+  "resumo": "-"
+ },
+ {
+  "nome": "prompt-optimizer",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/prompt-optimizer/SKILL.md",
+  "resumo": "Analyze draft prompts, detect intent and missing context, match ECC commands, skills, and agents, and output a ready-to-paste optimized prom"
+ },
+ {
+  "nome": "python-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/python-patterns/SKILL.md",
+  "resumo": "Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications. Use w"
+ },
+ {
+  "nome": "python-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/python-testing/SKILL.md",
+  "resumo": "Python testing strategies using pytest, TDD methodology, fixtures, mocking, parametrization, and coverage requirements. Use when writing pyt"
+ },
+ {
+  "nome": "pytorch-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/pytorch-patterns/SKILL.md",
+  "resumo": "PyTorch deep learning patterns and best practices for building robust, efficient, and reproducible training pipelines, model architectures, "
+ },
+ {
+  "nome": "quality-nonconformance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/quality-nonconformance/SKILL.md",
+  "resumo": "Quality control and non-conformance management for regulated manufacturing (FDA 21 CFR 820, IATF 16949, AS9100): NCR lifecycle and dispositi"
+ },
+ {
+  "nome": "quarkus-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/quarkus-patterns/SKILL.md",
+  "resumo": "Quarkus 3.x LTS architecture patterns with Camel for messaging, RESTful API design, CDI services, data access with Panache, and async proces"
+ },
+ {
+  "nome": "quarkus-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/quarkus-security/SKILL.md",
+  "resumo": "Quarkus security implementation patterns: JWT and OIDC authentication, @RolesAllowed RBAC and SecurityIdentity checks, Bean Validation and c"
+ },
+ {
+  "nome": "quarkus-tdd",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/quarkus-tdd/SKILL.md",
+  "resumo": "Test-driven development for Quarkus 3.x LTS using JUnit 5, Mockito, REST Assured, Camel testing, and JaCoCo. Use when adding features, fixin"
+ },
+ {
+  "nome": "quarkus-verification",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/quarkus-verification/SKILL.md",
+  "resumo": "Verification loop for Quarkus projects: build, static analysis (Checkstyle, PMD, SpotBugs), tests with JaCoCo coverage, OWASP dependency and"
+ },
+ {
+  "nome": "rails-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/rails-patterns/SKILL.md",
+  "resumo": "Ruby on Rails framework patterns for Rails 7.1+ and 8.x apps. Covers the directory contract, skinny controllers with service objects, form o"
+ },
+ {
+  "nome": "ralphinho-rfc-pipeline",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/ralphinho-rfc-pipeline/SKILL.md",
+  "resumo": "Split an RFC into a multi-agent execution DAG — decompose into work units with dependencies and acceptance tests, run research, plan, implem"
+ },
+ {
+  "nome": "react-native-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/react-native-patterns/SKILL.md",
+  "resumo": "React Native and Expo app patterns — Expo Router navigation, state separation (server/client/route/form), TanStack Query data fetching with "
+ },
+ {
+  "nome": "react-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/react-patterns/SKILL.md",
+  "resumo": "React 18/19 patterns including hooks discipline, server/client component boundaries, Suspense + error boundaries, form actions, data fetchin"
+ },
+ {
+  "nome": "react-performance",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/react-performance/SKILL.md",
+  "resumo": "React and Next.js performance optimization patterns adapted from Vercel Engineering's React Best Practices (https://github.com/vercel-labs/a"
+ },
+ {
+  "nome": "react-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/react-testing/SKILL.md",
+  "resumo": "React component testing with React Testing Library, Vitest/Jest, MSW for network mocking, accessibility assertions with axe, and the decisio"
+ },
+ {
+  "nome": "recsys-pipeline-architect",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/recsys-pipeline-architect/SKILL.md",
+  "resumo": "Design composable recommendation, ranking, and feed pipelines using the six-stage Source→Hydrator→Filter→Scorer→Selector→SideEffect framewor"
+ },
+ {
+  "nome": "recursive-decision-ledger",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/recursive-decision-ledger/SKILL.md",
+  "resumo": "Run repeated rollouts (\"Prime Gauss\" style recursive prompting) while keeping an append-only decision ledger of trials, marks, coherence che"
+ },
+ {
+  "nome": "redis-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/redis-patterns/SKILL.md",
+  "resumo": "Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production appli"
+ },
+ {
+  "nome": "regex-vs-llm-structured-text",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/regex-vs-llm-structured-text/SKILL.md",
+  "resumo": "Decision framework for parsing structured text (quizzes, forms, invoices, receipts, tables) with a hybrid regex-first pipeline — regex extra"
+ },
+ {
+  "nome": "remotion-video-creation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/remotion-video-creation/SKILL.md",
+  "resumo": "Best practices for Remotion - Video creation in React. 29 domain-specific rules covering 3D, animations, audio, captions, charts, transition"
+ },
+ {
+  "nome": "repo-scan",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/repo-scan/SKILL.md",
+  "resumo": "Bootstrap pointer that installs the external repo-scan skill from a pinned, reviewable commit. Use when repo-scan must be installed before r"
+ },
+ {
+  "nome": "research-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/research-ops/SKILL.md",
+  "resumo": "Evidence-first current-state research workflow for ECC. Use when the user wants fresh facts, comparisons, enrichment, or a recommendation bu"
+ },
+ {
+  "nome": "returns-reverse-logistics",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/returns-reverse-logistics/SKILL.md",
+  "resumo": "Codified expertise for returns authorization, receipt and inspection, disposition decisions, refund processing, fraud detection, and warrant"
+ },
+ {
+  "nome": "rules-distill",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/rules-distill/SKILL.md",
+  "resumo": "Scan skills to extract cross-cutting principles and distill them into rules — append, revise, or create new rule files. Use when the same pr"
+ },
+ {
+  "nome": "rust-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/rust-patterns/SKILL.md",
+  "resumo": "Idiomatic Rust patterns, ownership, error handling, traits, concurrency, and best practices for building safe, performant applications. Use "
+ },
+ {
+  "nome": "rust-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/rust-testing/SKILL.md",
+  "resumo": "Rust testing patterns including unit tests, integration tests, async testing, property-based testing, mocking, and coverage. Follows TDD met"
+ },
+ {
+  "nome": "safety-guard",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/safety-guard/SKILL.md",
+  "resumo": "Guard against destructive operations with three modes: Careful intercepts dangerous commands (rm -rf, git push --force, DROP TABLE) for conf"
+ },
+ {
+  "nome": "santa-method",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/santa-method/SKILL.md",
+  "resumo": "Multi-agent adversarial verification: two independent reviewers with the same rubric must both pass before output ships, with a fix-and-re-r"
+ },
+ {
+  "nome": "scientific-db-pubmed-database",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/scientific-db-pubmed-database/SKILL.md",
+  "resumo": "Direct PubMed and NCBI E-utilities search workflows for biomedical literature, MeSH queries, PMID lookup, citation retrieval, and API-backed"
+ },
+ {
+  "nome": "scientific-db-uspto-database",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/scientific-db-uspto-database/SKILL.md",
+  "resumo": "USPTO patent and trademark data workflow for official record lookup, PatentSearch queries, TSDR checks, assignment data, and reproducible IP"
+ },
+ {
+  "nome": "scientific-pkg-gget",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/scientific-pkg-gget/SKILL.md",
+  "resumo": "gget CLI and Python workflow for quick genomic database queries, sequence lookup, BLAST-style searches, enrichment checks, and reproducible "
+ },
+ {
+  "nome": "scientific-thinking-literature-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/skills/scientific-thinking-literature-review/SKILL.md",
+  "resumo": "Systematic literature-review workflow for academic, biomedical, technical, and scientific topics, including search planning, source screenin"
+ },
+ {
+  "nome": "scientific-thinking-scholar-evaluation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/scientific-thinking-scholar-evaluation/SKILL.md",
+  "resumo": "Structured scholarly-work evaluation for papers, proposals, literature reviews, methods sections, evidence quality, citation support, and re"
+ },
+ {
+  "nome": "search-first",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/skills/search-first/SKILL.md",
+  "resumo": "Research-before-coding workflow: search npm/PyPI, MCP servers, skills, and GitHub for existing tools before writing custom code, then adopt,"
+ },
+ {
+  "nome": "security-bounty-hunter",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/security-bounty-hunter/SKILL.md",
+  "resumo": "Hunt for exploitable, bounty-worthy security issues in repositories. Focuses on remotely reachable vulnerabilities that qualify for real rep"
+ },
+ {
+  "nome": "security-review",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/security-review/SKILL.md",
+  "resumo": "Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensit"
+ },
+ {
+  "nome": "security-scan",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/security-scan/SKILL.md",
+  "resumo": "Scan your Claude Code configuration (.claude/ directory) for security vulnerabilities, misconfigurations, and injection risks using AgentShi"
+ },
+ {
+  "nome": "seo",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/seo/SKILL.md",
+  "resumo": "Audit, plan, and implement SEO improvements across technical SEO, on-page optimization, structured data, Core Web Vitals, and content strate"
+ },
+ {
+  "nome": "skill-comply",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/skill-comply/SKILL.md",
+  "resumo": "Visualize whether skills, rules, and agent definitions are actually followed — auto-generates scenarios at 3 prompt strictness levels, runs "
+ },
+ {
+  "nome": "skill-host-compat",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/skill-host-compat/SKILL.md",
+  "resumo": "Lint ECC skills for Codex/Cursor-safe frontmatter and Claude-only substitutions before a skill PR."
+ },
+ {
+  "nome": "skill-scout",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/skill-scout/SKILL.md",
+  "resumo": "Search existing local, marketplace, GitHub, and web skill sources before creating a new skill. Use when the user wants to create, build, for"
+ },
+ {
+  "nome": "skill-stocktake",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/skill-stocktake/SKILL.md",
+  "resumo": "Use when auditing Claude skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential"
+ },
+ {
+  "nome": "social-graph-ranker",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/social-graph-ranker/SKILL.md",
+  "resumo": "Weighted social-graph ranking for warm intro discovery, bridge scoring, and network gap analysis across X and LinkedIn. Use when the user wa"
+ },
+ {
+  "nome": "social-publisher",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/social-publisher/SKILL.md",
+  "resumo": "Agent-driven scheduling and publishing of social media posts across 13 platforms via SocialClaw. Use when the user wants to publish to X, Li"
+ },
+ {
+  "nome": "springboot-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/springboot-patterns/SKILL.md",
+  "resumo": "Spring Boot architecture patterns, REST API design, layered services, data access, caching, async processing, and logging. Use for Java Spri"
+ },
+ {
+  "nome": "springboot-security",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/skills/springboot-security/SKILL.md",
+  "resumo": "Spring Security best practices for authn/authz, validation, CSRF, secrets, headers, rate limiting, and dependency security in Java Spring Bo"
+ },
+ {
+  "nome": "springboot-tdd",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/springboot-tdd/SKILL.md",
+  "resumo": "Test-driven development for Spring Boot using JUnit 5, Mockito, MockMvc, Testcontainers, and JaCoCo. Use when adding features, fixing bugs, "
+ },
+ {
+  "nome": "springboot-verification",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/springboot-verification/SKILL.md",
+  "resumo": "Run the full Spring Boot verification loop — Maven or Gradle build, SpotBugs, PMD, and Checkstyle static analysis, unit and Testcontainers i"
+ },
+ {
+  "nome": "story-lifecycle",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/story-lifecycle/SKILL.md",
+  "resumo": "Manage a file-based epic → story → sprint development loop without requiring an external project management tool. Creates and tracks epics, "
+ },
+ {
+  "nome": "strategic-compact",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/strategic-compact/SKILL.md",
+  "resumo": "Suggests manual context compaction at logical intervals to preserve context through task phases rather than arbitrary auto-compaction. Use w"
+ },
+ {
+  "nome": "swift-actor-persistence",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/swift-actor-persistence/SKILL.md",
+  "resumo": "Thread-safe data persistence in Swift using actors — in-memory cache with file-backed storage, eliminating data races by design. Use when pe"
+ },
+ {
+  "nome": "swift-concurrency-6-2",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/swift-concurrency-6-2/SKILL.md",
+  "resumo": "Swift 6.2 Approachable Concurrency — single-threaded by default, @concurrent for explicit background offloading, isolated conformances for m"
+ },
+ {
+  "nome": "swift-protocol-di-testing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/swift-protocol-di-testing/SKILL.md",
+  "resumo": "Protocol-based dependency injection for testable Swift code — mock file system, network, and external APIs using focused protocols and Swift"
+ },
+ {
+  "nome": "swiftui-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/swiftui-patterns/SKILL.md",
+  "resumo": "SwiftUI architecture patterns, state management with @Observable, view composition, navigation, performance optimization, and modern iOS/mac"
+ },
+ {
+  "nome": "taste",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/taste/SKILL.md",
+  "resumo": "Creative-direction layer for music videos and short-form edits in the angelcore / cloud-trance / hyperpop family — a named-genre aesthetic v"
+ },
+ {
+  "nome": "taste-application",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/taste-application/SKILL.md",
+  "resumo": "Generate new video against a distilled style pack and cut it into a finished piece - plan takes from the reference's cut rhythm, generate on"
+ },
+ {
+  "nome": "taste-distillation",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/taste-distillation/SKILL.md",
+  "resumo": "Measure a set of reference videos into a reusable style pack - colour grade as a 3D LUT, cut rhythm as a shot-length distribution, hero stil"
+ },
+ {
+  "nome": "tasteforge-video",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/tasteforge-video/SKILL.md",
+  "resumo": "Use for file-driven multimodal image, video, and 3D-asset discovery; taste interviews; distill or apply workflows; style-pack validation; ed"
+ },
+ {
+  "nome": "tdd-workflow",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/tdd-workflow/SKILL.md",
+  "resumo": "Test-driven development workflow: write a failing test first, watch it fail, implement the smallest change to green, then refactor with 80%+"
+ },
+ {
+  "nome": "team-agent-orchestration",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/team-agent-orchestration/SKILL.md",
+  "resumo": "Run team-based orchestration for agent squads: work items with owners and scope, agent Kanban state, branch isolation, control pane visibili"
+ },
+ {
+  "nome": "team-builder",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/skills/team-builder/SKILL.md",
+  "resumo": "Interactive picker that discovers available agent personas via the claude agents command and agents/ markdown globs, groups them into domain"
+ },
+ {
+  "nome": "terminal-opener",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/terminal-opener/SKILL.md",
+  "resumo": "Open an executable and its argument array in a visible terminal window through a reusable, shell-free launch plan with dry-run, JSON, capabi"
+ },
+ {
+  "nome": "terminal-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/terminal-ops/SKILL.md",
+  "resumo": "Evidence-first repo execution workflow for ECC. Use when the user wants a command run, a repo checked, a CI failure debugged, or a narrow fi"
+ },
+ {
+  "nome": "test-collaboration",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/test-collaboration/SKILL.md",
+  "resumo": "Inventory and govern a project's test assets. Connect requirements, business rules, risks, bugs, and cross-boundary contracts to stable TEST"
+ },
+ {
+  "nome": "tinystruct-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/tinystruct-patterns/SKILL.md",
+  "resumo": "Expert guidance for developing with the tinystruct Java framework. Use when working on the tinystruct codebase or any project built on tinys"
+ },
+ {
+  "nome": "token-budget-advisor",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/token-budget-advisor/SKILL.md",
+  "resumo": "Offer a choice of response depth (25%/50%/75%/100%) with token estimates before answering, then answer at that level. Use when the user asks"
+ },
+ {
+  "nome": "token-card",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/token-card/SKILL.md",
+  "resumo": "Render a token-usage stat card from local Claude Code, Codex, Gemini CLI, and OpenCode session logs and commit it into the repository as a f"
+ },
+ {
+  "nome": "typescript-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "linguagens",
+  "caminho": "ferramentas/fontes/ecc/skills/typescript-patterns/SKILL.md",
+  "resumo": "TypeScript patterns for strict, type-safe, maintainable code in modern TypeScript and JavaScript applications. Covers strict compiler config"
+ },
+ {
+  "nome": "ui-demo",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/ui-demo/SKILL.md",
+  "resumo": "Record polished UI demo videos using Playwright. Use when the user asks to create a demo, walkthrough, screen recording, or tutorial video o"
+ },
+ {
+  "nome": "ui-to-vue",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/ui-to-vue/SKILL.md",
+  "resumo": "Use when the user has UI screenshots or design exports that need batch conversion into Vue 3 components, especially with Vant, Element Plus,"
+ },
+ {
+  "nome": "uncloud",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/skills/uncloud/SKILL.md",
+  "resumo": "Use when managing an Uncloud cluster — deploying services, configuring Caddy ingress, adding static proxy routes for non-cluster devices, pu"
+ },
+ {
+  "nome": "unified-memory",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/unified-memory/SKILL.md",
+  "resumo": "Share durable, inspectable context and handoffs between Claude, Codex, Hermes, Cursor, OpenCode, and other agents through the local ECC Memo"
+ },
+ {
+  "nome": "unified-notifications-ops",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/unified-notifications-ops/SKILL.md",
+  "resumo": "Operate notifications as one ECC-native workflow across GitHub, Linear, desktop alerts, hooks, and connected communication surfaces. Use whe"
+ },
+ {
+  "nome": "verification-loop",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/verification-loop/SKILL.md",
+  "resumo": "Run a six-phase verification of a Claude Code session's work — build, type check, lint, tests with coverage, security grep, and diff review "
+ },
+ {
+  "nome": "video-editing",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/video-editing/SKILL.md",
+  "resumo": "AI-assisted video editing workflows for cutting, structuring, and augmenting real footage. Covers the full pipeline from raw capture through"
+ },
+ {
+  "nome": "videodb",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/videodb/SKILL.md",
+  "resumo": "Ingest, index, search, edit, and monitor video and audio with the VideoDB Python SDK — upload from files, URLs, or RTSP feeds, build spoken "
+ },
+ {
+  "nome": "visa-doc-translate",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "quarentena",
+  "caminho": "ferramentas/fontes/ecc/skills/visa-doc-translate/SKILL.md",
+  "resumo": "Translate visa document images (bank deposit, employment, income, and retirement certificates; HEIC, PNG, or JPG) into English via OCR and p"
+ },
+ {
+  "nome": "vite-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/vite-patterns/SKILL.md",
+  "resumo": "Vite build tool patterns including config, plugins, HMR, env variables, proxy setup, SSR, library mode, dependency pre-bundling, and build o"
+ },
+ {
+  "nome": "vue-patterns",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/skills/vue-patterns/SKILL.md",
+  "resumo": "Vue.js 3 Composition API patterns, component architecture, reactivity best practices, Pinia state management, Vue Router navigation, and Nux"
+ },
+ {
+  "nome": "windows-desktop-e2e",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/skills/windows-desktop-e2e/SKILL.md",
+  "resumo": "E2E testing for Windows native desktop apps (WPF, WinForms, Win32/MFC, Qt) using pywinauto and Windows UI Automation. Use when writing E2E t"
+ },
+ {
+  "nome": "workspace-surface-audit",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/workspace-surface-audit/SKILL.md",
+  "resumo": "Audit the active repo, MCP servers, plugins, connectors, env surfaces, and harness setup, then recommend the highest-value ECC-native skills"
+ },
+ {
+  "nome": "x-api",
+  "tipo": "skill",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/skills/x-api/SKILL.md",
+  "resumo": "X/Twitter API integration for posting tweets, threads, reading timelines, search, and analytics. Covers OAuth auth patterns, rate limits, an"
+ },
+ {
+  "nome": "a11y-architect",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/a11y-architect.md",
+  "resumo": "Accessibility Architect specializing in WCAG 2.2 compliance for Web and Native platforms. Use PROACTIVELY when designing UI components, esta"
+ },
+ {
+  "nome": "agent-evaluator",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/agents/agent-evaluator.md",
+  "resumo": "Evaluates agent output against 5-axis quality rubric (accuracy, completeness, clarity, actionability, conciseness). Use after any non-trivia"
+ },
+ {
+  "nome": "architect",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/architect.md",
+  "resumo": "Software architecture specialist for system design, scalability, and technical decision-making. Use PROACTIVELY when planning new features, "
+ },
+ {
+  "nome": "bengali-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/bengali-reviewer.md",
+  "resumo": "Reviews code handling Bengali (Bangla) text for Unicode correctness, proper normalization, script-aware processing, and internationalization"
+ },
+ {
+  "nome": "build-error-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/build-error-resolver.md",
+  "resumo": "Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with m"
+ },
+ {
+  "nome": "chief-of-staff",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/chief-of-staff.md",
+  "resumo": "Personal communication chief of staff that triages email, Slack, LINE, and Messenger. Classifies messages into 4 tiers (skip/info_only/meeti"
+ },
+ {
+  "nome": "code-architect",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/code-architect.md",
+  "resumo": "Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concret"
+ },
+ {
+  "nome": "code-explorer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/code-explorer.md",
+  "resumo": "Deeply analyzes existing codebase features by tracing execution paths, mapping architecture layers, and documenting dependencies to inform n"
+ },
+ {
+  "nome": "code-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/code-reviewer.md",
+  "resumo": "Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifyi"
+ },
+ {
+  "nome": "code-simplifier",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/code-simplifier.md",
+  "resumo": "Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Focus on recently modified code unless "
+ },
+ {
+  "nome": "comment-analyzer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/comment-analyzer.md",
+  "resumo": "Analyze code comments for accuracy, completeness, maintainability, and comment rot risk."
+ },
+ {
+  "nome": "commit-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/commit-reviewer.md",
+  "resumo": "Reviews a staged diff and drafts a Conventional Commits-compliant message matching the repository's actual history norms. Use before committ"
+ },
+ {
+  "nome": "conversation-analyzer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/conversation-analyzer.md",
+  "resumo": "Use this agent when analyzing conversation transcripts to find behaviors worth preventing with hooks. Triggered by /hookify without argument"
+ },
+ {
+  "nome": "cpp-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/cpp-build-resolver.md",
+  "resumo": "C++ build, CMake, and compilation error resolution specialist. Fixes build errors, linker issues, and template errors with minimal changes. "
+ },
+ {
+  "nome": "cpp-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/cpp-reviewer.md",
+  "resumo": "Expert C++ code reviewer specializing in memory safety, modern C++ idioms, concurrency, and performance. Use for all C++ code changes. MUST "
+ },
+ {
+  "nome": "csharp-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/csharp-reviewer.md",
+  "resumo": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C"
+ },
+ {
+  "nome": "dart-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/dart-build-resolver.md",
+  "resumo": "Dart/Flutter build, analysis, and dependency error resolution specialist. Fixes `dart analyze` errors, Flutter compilation failures, pub dep"
+ },
+ {
+  "nome": "database-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/database-reviewer.md",
+  "resumo": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating "
+ },
+ {
+  "nome": "django-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/django-build-resolver.md",
+  "resumo": "Django/Python build, migration, and dependency error resolution specialist. Fixes pip/Poetry errors, migration conflicts, import errors, Dja"
+ },
+ {
+  "nome": "django-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/django-reviewer.md",
+  "resumo": "Expert Django code reviewer specializing in ORM correctness, DRF patterns, migration safety, security misconfigurations, and production-grad"
+ },
+ {
+  "nome": "doc-updater",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/agents/doc-updater.md",
+  "resumo": "Documentation and codemap specialist. Use PROACTIVELY for updating codemaps and documentation. Generates docs/CODEMAPS/*, updates READMEs an"
+ },
+ {
+  "nome": "docs-lookup",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "pesquisa-e-docs",
+  "caminho": "ferramentas/fontes/ecc/agents/docs-lookup.md",
+  "resumo": "When the user asks how to use a library, framework, or API or needs up-to-date code examples, use Context7 MCP to fetch current documentatio"
+ },
+ {
+  "nome": "e2e-runner",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/agents/e2e-runner.md",
+  "resumo": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, "
+ },
+ {
+  "nome": "fastapi-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/fastapi-reviewer.md",
+  "resumo": "Reviews FastAPI applications for async correctness, dependency injection, Pydantic schemas, security, OpenAPI quality, testing, and producti"
+ },
+ {
+  "nome": "flutter-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/flutter-reviewer.md",
+  "resumo": "Flutter and Dart code reviewer. Reviews Flutter code for widget best practices, state management patterns, Dart idioms, performance pitfalls"
+ },
+ {
+  "nome": "fsharp-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/fsharp-reviewer.md",
+  "resumo": "Expert F# code reviewer specializing in functional idioms, type safety, pattern matching, computation expressions, and performance. Use for "
+ },
+ {
+  "nome": "gan-evaluator",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/agents/gan-evaluator.md",
+  "resumo": "GAN Harness — Evaluator agent. Tests the live running application via Playwright, scores against rubric, and provides actionable feedback to"
+ },
+ {
+  "nome": "gan-generator",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/gan-generator.md",
+  "resumo": "GAN Harness — Generator agent. Implements features according to the spec, reads evaluator feedback, and iterates until quality threshold is "
+ },
+ {
+  "nome": "gan-planner",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/gan-planner.md",
+  "resumo": "GAN Harness — Planner agent. Expands a one-line prompt into a full product specification with features, sprints, evaluation criteria, and de"
+ },
+ {
+  "nome": "go-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/go-build-resolver.md",
+  "resumo": "Go build, vet, and compilation error resolution specialist. Fixes build errors, go vet issues, and linter warnings with minimal changes. Use"
+ },
+ {
+  "nome": "go-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/go-reviewer.md",
+  "resumo": "Expert Go code reviewer specializing in idiomatic Go, concurrency patterns, error handling, and performance. Use for all Go code changes. MU"
+ },
+ {
+  "nome": "harmonyos-app-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/harmonyos-app-resolver.md",
+  "resumo": "HarmonyOS application development expert specializing in ArkTS and ArkUI. Reviews code for V2 state management compliance, Navigation routin"
+ },
+ {
+  "nome": "harness-optimizer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/harness-optimizer.md",
+  "resumo": "Improve local agent-harness configuration reliability and cost using eval-driven grading (pass@k/pass^k) derived from the eval-harness skill"
+ },
+ {
+  "nome": "healthcare-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/healthcare-reviewer.md",
+  "resumo": "Reviews healthcare application code for clinical safety, CDSS accuracy, PHI compliance, and medical data integrity. Specialized for EMR/EHR,"
+ },
+ {
+  "nome": "homelab-architect",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/homelab-architect.md",
+  "resumo": "Designs home and small-lab network plans from hardware inventory, goals, and operator experience level, with safe staged changes and rollbac"
+ },
+ {
+  "nome": "java-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/java-build-resolver.md",
+  "resumo": "Java/Maven/Gradle build, compilation, and dependency error resolution specialist. Automatically detects Spring Boot or Quarkus and applies f"
+ },
+ {
+  "nome": "java-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/java-reviewer.md",
+  "resumo": "Expert Java code reviewer for Spring Boot and Quarkus projects. Automatically detects the framework and applies the appropriate review rules"
+ },
+ {
+  "nome": "kotlin-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/kotlin-build-resolver.md",
+  "resumo": "Kotlin/Gradle build, compilation, and dependency error resolution specialist. Fixes build errors, Kotlin compiler errors, and Gradle issues "
+ },
+ {
+  "nome": "kotlin-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/kotlin-reviewer.md",
+  "resumo": "Kotlin and Android/KMP code reviewer. Reviews Kotlin code for idiomatic patterns, coroutine safety, Compose best practices, clean architectu"
+ },
+ {
+  "nome": "loop-operator",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/loop-operator.md",
+  "resumo": "Operate autonomous agent loops, monitor progress, and intervene safely when loops stall."
+ },
+ {
+  "nome": "marketing-agent",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/marketing-agent.md",
+  "resumo": "Marketing strategist and copywriter for campaign planning, audience research, positioning, copy creation, and content review. Covers landing"
+ },
+ {
+  "nome": "mle-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/mle-reviewer.md",
+  "resumo": "Production machine-learning engineering reviewer for data contracts, feature pipelines, training reproducibility, offline/online evaluation,"
+ },
+ {
+  "nome": "network-architect",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/network-architect.md",
+  "resumo": "Designs enterprise or multi-site network architecture from requirements, using existing network skills for focused routing, validation, auto"
+ },
+ {
+  "nome": "network-config-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/network-config-reviewer.md",
+  "resumo": "Reviews router and switch configurations for security, correctness, stale references, risky change-window commands, and missing operational "
+ },
+ {
+  "nome": "network-troubleshooter",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "banco-e-infra",
+  "caminho": "ferramentas/fontes/ecc/agents/network-troubleshooter.md",
+  "resumo": "Diagnoses network connectivity, routing, DNS, interface, and policy symptoms with a read-only OSI-layer workflow and evidence-backed root ca"
+ },
+ {
+  "nome": "opensource-forker",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/opensource-forker.md",
+  "resumo": "Fork any project for open-sourcing. Copies files, strips secrets and credentials (20+ patterns), replaces internal references with placehold"
+ },
+ {
+  "nome": "opensource-packager",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/opensource-packager.md",
+  "resumo": "Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, CONTRIBUTING.md, and GitH"
+ },
+ {
+  "nome": "opensource-sanitizer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/agents/opensource-sanitizer.md",
+  "resumo": "Verify an open-source fork is fully sanitized before release. Scans for leaked secrets, PII, internal references, and dangerous files using "
+ },
+ {
+  "nome": "performance-optimizer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/performance-optimizer.md",
+  "resumo": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, "
+ },
+ {
+  "nome": "php-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/php-reviewer.md",
+  "resumo": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all P"
+ },
+ {
+  "nome": "planner",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/ecc/agents/planner.md",
+  "resumo": "Expert planning specialist for complex features and refactoring. Use PROACTIVELY when users request feature implementation, architectural ch"
+ },
+ {
+  "nome": "pr-test-analyzer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/agents/pr-test-analyzer.md",
+  "resumo": "Review pull request test coverage quality and completeness, with emphasis on behavioral coverage and real bug prevention."
+ },
+ {
+  "nome": "python-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/python-reviewer.md",
+  "resumo": "Expert Python code reviewer specializing in PEP 8 compliance, Pythonic idioms, type hints, security, and performance. Use for all Python cod"
+ },
+ {
+  "nome": "pytorch-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/pytorch-build-resolver.md",
+  "resumo": "PyTorch runtime, CUDA, and training error resolution specialist. Fixes tensor shape mismatches, device errors, gradient issues, DataLoader p"
+ },
+ {
+  "nome": "rag-pipeline-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/rag-pipeline-reviewer.md",
+  "resumo": "Reviews RAG (Retrieval-Augmented Generation) pipelines for retrieval quality, chunking strategy, embedding choices, and evaluation coverage."
+ },
+ {
+  "nome": "react-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/react-build-resolver.md",
+  "resumo": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydratio"
+ },
+ {
+  "nome": "react-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/react-reviewer.md",
+  "resumo": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and "
+ },
+ {
+  "nome": "refactor-cleaner",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/refactor-cleaner.md",
+  "resumo": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools ("
+ },
+ {
+  "nome": "ruby-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/ruby-reviewer.md",
+  "resumo": "Expert Ruby and Rails code reviewer specializing in idiomatic Ruby, Active Record query safety, Rails security defaults, and RSpec/Minitest "
+ },
+ {
+  "nome": "rust-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/rust-build-resolver.md",
+  "resumo": "Rust build, compilation, and dependency error resolution specialist. Fixes cargo build errors, borrow checker issues, and Cargo.toml problem"
+ },
+ {
+  "nome": "rust-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/rust-reviewer.md",
+  "resumo": "Expert Rust code reviewer specializing in ownership, lifetimes, error handling, unsafe usage, and idiomatic patterns. Use for all Rust code "
+ },
+ {
+  "nome": "security-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "seguranca",
+  "caminho": "ferramentas/fontes/ecc/agents/security-reviewer.md",
+  "resumo": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API"
+ },
+ {
+  "nome": "seo-specialist",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/seo-specialist.md",
+  "resumo": "SEO specialist for technical SEO audits, on-page optimization, structured data, Core Web Vitals, and content/keyword mapping. Use for site a"
+ },
+ {
+  "nome": "silent-failure-hunter",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/silent-failure-hunter.md",
+  "resumo": "Review code for silent failures, swallowed errors, bad fallbacks, and missing error propagation."
+ },
+ {
+  "nome": "spec-miner",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/ecc/agents/spec-miner.md",
+  "resumo": "Extracts behavioral specs from existing codebases for OpenSpec. Produces flat Requirement and Invariant blocks with structured metadata (ent"
+ },
+ {
+  "nome": "swift-build-resolver",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/swift-build-resolver.md",
+  "resumo": "Swift/Xcode build, compilation, and dependency error resolution specialist. Fixes swift build errors, Xcode build failures, SPM dependency i"
+ },
+ {
+  "nome": "swift-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/swift-reviewer.md",
+  "resumo": "Expert Swift code reviewer specializing in protocol-oriented design, value semantics, ARC memory management, Swift Concurrency, and idiomati"
+ },
+ {
+  "nome": "tdd-guide",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/ecc/agents/tdd-guide.md",
+  "resumo": "Test-Driven Development specialist enforcing write-tests-first methodology. Use PROACTIVELY when writing new features, fixing bugs, or refac"
+ },
+ {
+  "nome": "type-design-analyzer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "frontend-e-design",
+  "caminho": "ferramentas/fontes/ecc/agents/type-design-analyzer.md",
+  "resumo": "Analyze type design for encapsulation, invariant expression, usefulness, and enforcement."
+ },
+ {
+  "nome": "typescript-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/typescript-reviewer.md",
+  "resumo": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use fo"
+ },
+ {
+  "nome": "vue-reviewer",
+  "tipo": "agente",
+  "fonte": "ecc",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/ecc/agents/vue-reviewer.md",
+  "resumo": "Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and"
+ },
+ {
+  "nome": "brainstorming",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/superpowers/skills/brainstorming/SKILL.md",
+  "resumo": "You MUST use this before any creative work - creating features, building components, adding functionality, modifying behavior, or planning a"
+ },
+ {
+  "nome": "diagnosing-superpowers",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/superpowers/skills/diagnosing-superpowers/SKILL.md",
+  "resumo": "Use when a superpowers session went wrong and your human partner wants to know why — repeated work, ignored plans, stumbles, poor results, a"
+ },
+ {
+  "nome": "dispatching-parallel-agents",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/superpowers/skills/dispatching-parallel-agents/SKILL.md",
+  "resumo": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies"
+ },
+ {
+  "nome": "executing-plans",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/superpowers/skills/executing-plans/SKILL.md",
+  "resumo": "Use when executing an implementation plan in the current session as the implementer yourself — your human partner chose inline execution, or"
+ },
+ {
+  "nome": "finishing-a-development-branch",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/superpowers/skills/finishing-a-development-branch/SKILL.md",
+  "resumo": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work"
+ },
+ {
+  "nome": "receiving-code-review",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/superpowers/skills/receiving-code-review/SKILL.md",
+  "resumo": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable -"
+ },
+ {
+  "nome": "requesting-code-review",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/superpowers/skills/requesting-code-review/SKILL.md",
+  "resumo": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements"
+ },
+ {
+  "nome": "subagent-driven-development",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/superpowers/skills/subagent-driven-development/SKILL.md",
+  "resumo": "Use when executing implementation plans with independent tasks in the current session"
+ },
+ {
+  "nome": "systematic-debugging",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/superpowers/skills/systematic-debugging/SKILL.md",
+  "resumo": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes"
+ },
+ {
+  "nome": "test-driven-development",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/superpowers/skills/test-driven-development/SKILL.md",
+  "resumo": "Use when implementing any feature or bugfix, before writing implementation code"
+ },
+ {
+  "nome": "using-git-worktrees",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "revisao-e-git",
+  "caminho": "ferramentas/fontes/superpowers/skills/using-git-worktrees/SKILL.md",
+  "resumo": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated wo"
+ },
+ {
+  "nome": "using-superpowers",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/superpowers/skills/using-superpowers/SKILL.md",
+  "resumo": "Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarif"
+ },
+ {
+  "nome": "verification-before-completion",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "testes",
+  "caminho": "ferramentas/fontes/superpowers/skills/verification-before-completion/SKILL.md",
+  "resumo": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and "
+ },
+ {
+  "nome": "writing-plans",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "planejamento-e-agentes",
+  "caminho": "ferramentas/fontes/superpowers/skills/writing-plans/SKILL.md",
+  "resumo": "Use when you have a spec or requirements for a multi-step task, before touching code"
+ },
+ {
+  "nome": "writing-skills",
+  "tipo": "skill",
+  "fonte": "superpowers",
+  "tema": "negocios-e-nichos",
+  "caminho": "ferramentas/fontes/superpowers/skills/writing-skills/SKILL.md",
+  "resumo": "Use when creating new skills, editing existing skills, or verifying skills work before deployment"
+ },
+ {
+  "nome": "agata-aplicar-proposta",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-aplicar-proposta/SKILL.md",
+  "resumo": "Criar, verificar e aplicar uma proposta P-8. O Humano assina; o modelo nunca assina. Use em mudança protegida, sempre em worktree própria."
+ },
+ {
+  "nome": "agata-carregar",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-carregar/SKILL.md",
+  "resumo": "Abrir uma sessão neste sistema (comando \"carregar\", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEA"
+ },
+ {
+  "nome": "agata-conselho-memoria",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-conselho-memoria/SKILL.md",
+  "resumo": "Trabalhar com a memória comum do Conselho e o canal da Equipe no Agata. Use no início de toda sessão (ler o cache do Conselho e o estado da "
+ },
+ {
+  "nome": "agata-conversar-com-seth",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-conversar-com-seth/SKILL.md",
+  "resumo": "Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou escrever na conversa dele, de qualquer modelo (Claude Code, Codex, Gemini, G"
+ },
+ {
+  "nome": "agata-disciplina",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-disciplina/SKILL.md",
+  "resumo": "Disciplina obrigatória de qualquer modelo no sistema Agata — cabeçalho em toda resposta com hora medida, modo conciso, aviso antes de ação e"
+ },
+ {
+  "nome": "agata-ferramentas",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-ferramentas/SKILL.md",
+  "resumo": "Abre a caixa de ferramentas do Agata por tema (skills e agentes do ECC, do superpowers e as próprias). Use quando a tarefa pedir uma prática"
+ },
+ {
+  "nome": "agata-fluxo",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-fluxo/SKILL.md",
+  "resumo": "Fluxo único de trabalho no sistema Agata para qualquer LLM (Claude, Codex, Seth ou outro) que atue numa tarefa. Usar ao começar uma sessão, "
+ },
+ {
+  "nome": "agata-fluxo-equipe",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-fluxo-equipe/SKILL.md",
+  "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partid"
+ },
+ {
+  "nome": "agata-mudanca-segura",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-mudanca-segura/SKILL.md",
+  "resumo": "Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina. Portão das tr"
+ },
+ {
+  "nome": "agata-painel",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-painel/SKILL.md",
+  "resumo": "Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth"
+ },
+ {
+  "nome": "agata-relay-provedores",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
+  "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+ }
+]
