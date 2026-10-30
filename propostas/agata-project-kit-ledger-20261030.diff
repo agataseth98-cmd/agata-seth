@@ -1,0 +1,88 @@
+diff --git a/redesign/project_kit/README.md b/redesign/project_kit/README.md
+index cc29c8d5..94ccb269 100644
+--- a/redesign/project_kit/README.md
++++ b/redesign/project_kit/README.md
+@@ -10,4 +10,6 @@ python3 redesign/project_kit/bootstrap.py /caminho/projeto \
+   --goal "descrever o objetivo do projeto"
+ ```
+ 
++Para registrar a observação pública no Evidence Ledger, acrescente `--ledger /caminho/ledger.jsonl`.
++
+ O kit ignora `.git`, ambientes virtuais, caches e `node_modules`. Ele não acessa serviços, não envia dados e não altera o projeto de entrada.
+diff --git a/redesign/project_kit/bootstrap.py b/redesign/project_kit/bootstrap.py
+index 932efaed..4a2b2c6b 100644
+--- a/redesign/project_kit/bootstrap.py
++++ b/redesign/project_kit/bootstrap.py
+@@ -6,6 +6,7 @@ import argparse
+ import hashlib
+ import json
+ import os
++import sys
+ from pathlib import Path
+ from datetime import datetime, timezone
+ 
+@@ -85,6 +86,26 @@ def build(root: Path, out: Path, goal: str) -> None:
+     (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+ 
+ 
++def record_bootstrap(ledger: Path, root: Path, out: Path, goal: str) -> None:
++    sys.path.insert(0, str(Path(__file__).parents[1] / "evidence_ledger"))
++    from ledger import append
++    event = {
++        "id": hashlib.sha256(f"{root}|{out}|{goal}".encode()).hexdigest()[:16],
++        "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
++        "actor": "project-kit",
++        "project": str(root),
++        "kind": "observation",
++        "status": "ok",
++        "source": str(out / "provenance.json"),
++        "input_hash": hashlib.sha256(str(root).encode()).hexdigest(),
++        "output_hash": sha256(out / "provenance.json"),
++        "authorization": "human-requested-bootstrap",
++        "classification": "public",
++        "metadata": {"goal": goal, "files": len(json.loads((out / "provenance.json").read_text(encoding="utf-8"))["files"])},
++    }
++    append(ledger, event)
++
++
+ def drift(root: Path, previous: Path, output: Path) -> None:
+     old = json.loads(previous.read_text(encoding="utf-8"))
+     before = {x["path"]: x for x in old.get("files", [])}
+@@ -105,6 +126,7 @@ def main():
+     ap.add_argument("--goal", required=True)
+     ap.add_argument("--drift-against", type=Path)
+     ap.add_argument("--drift-out", type=Path)
++    ap.add_argument("--ledger", type=Path)
+     args = ap.parse_args()
+     if not args.project.is_dir():
+         ap.error("project precisa ser um diretório")
+@@ -114,6 +136,8 @@ def main():
+         drift(args.project.resolve(), args.drift_against, args.drift_out)
+         return
+     build(args.project, args.out, args.goal)
++    if args.ledger:
++        record_bootstrap(args.ledger, args.project.resolve(), args.out, args.goal)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/redesign/project_kit/tests/test_bootstrap.py b/redesign/project_kit/tests/test_bootstrap.py
+index 0ad619ab..64888cdd 100644
+--- a/redesign/project_kit/tests/test_bootstrap.py
++++ b/redesign/project_kit/tests/test_bootstrap.py
+@@ -36,3 +36,16 @@ def test_drift_report_detects_added_removed_and_changed(tmp_path):
+     text = report.read_text(encoding="utf-8")
+     assert "added.txt" in text
+     assert "keep.txt" in text
++
++
++def test_bootstrap_can_record_public_ledger_event(tmp_path):
++    project = tmp_path / "project"
++    project.mkdir()
++    (project / "README.md").write_text("# Demo\n", encoding="utf-8")
++    out = tmp_path / "out"
++    ledger = tmp_path / "ledger.jsonl"
++    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(out), "--goal", "ledger", "--ledger", str(ledger)], check=True)
++    data = json.loads(ledger.read_text(encoding="utf-8").splitlines()[0])
++    assert data["kind"] == "observation"
++    assert data["classification"] == "public"
++    assert data["output_hash"]
