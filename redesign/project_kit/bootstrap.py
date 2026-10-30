@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -85,6 +86,26 @@ def build(root: Path, out: Path, goal: str) -> None:
     (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def record_bootstrap(ledger: Path, root: Path, out: Path, goal: str) -> None:
+    sys.path.insert(0, str(Path(__file__).parents[1] / "evidence_ledger"))
+    from ledger import append
+    event = {
+        "id": hashlib.sha256(f"{root}|{out}|{goal}".encode()).hexdigest()[:16],
+        "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "actor": "project-kit",
+        "project": str(root),
+        "kind": "observation",
+        "status": "ok",
+        "source": str(out / "provenance.json"),
+        "input_hash": hashlib.sha256(str(root).encode()).hexdigest(),
+        "output_hash": sha256(out / "provenance.json"),
+        "authorization": "human-requested-bootstrap",
+        "classification": "public",
+        "metadata": {"goal": goal, "files": len(json.loads((out / "provenance.json").read_text(encoding="utf-8"))["files"])},
+    }
+    append(ledger, event)
+
+
 def drift(root: Path, previous: Path, output: Path) -> None:
     old = json.loads(previous.read_text(encoding="utf-8"))
     before = {x["path"]: x for x in old.get("files", [])}
@@ -105,6 +126,7 @@ def main():
     ap.add_argument("--goal", required=True)
     ap.add_argument("--drift-against", type=Path)
     ap.add_argument("--drift-out", type=Path)
+    ap.add_argument("--ledger", type=Path)
     args = ap.parse_args()
     if not args.project.is_dir():
         ap.error("project precisa ser um diretório")
@@ -114,6 +136,8 @@ def main():
         drift(args.project.resolve(), args.drift_against, args.drift_out)
         return
     build(args.project, args.out, args.goal)
+    if args.ledger:
+        record_bootstrap(args.ledger, args.project.resolve(), args.out, args.goal)
 
 
 if __name__ == "__main__":

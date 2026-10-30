@@ -36,3 +36,16 @@ def test_drift_report_detects_added_removed_and_changed(tmp_path):
     text = report.read_text(encoding="utf-8")
     assert "added.txt" in text
     assert "keep.txt" in text
+
+
+def test_bootstrap_can_record_public_ledger_event(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\n", encoding="utf-8")
+    out = tmp_path / "out"
+    ledger = tmp_path / "ledger.jsonl"
+    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(out), "--goal", "ledger", "--ledger", str(ledger)], check=True)
+    data = json.loads(ledger.read_text(encoding="utf-8").splitlines()[0])
+    assert data["kind"] == "observation"
+    assert data["classification"] == "public"
+    assert data["output_hash"]
