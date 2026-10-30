@@ -1,0 +1,125 @@
+diff --git a/redesign/painel_operacional/relay-extension-v2/background.js b/redesign/painel_operacional/relay-extension-v2/background.js
+index 547f345d..8689fc0c 100644
+--- a/redesign/painel_operacional/relay-extension-v2/background.js
++++ b/redesign/painel_operacional/relay-extension-v2/background.js
+@@ -46,6 +46,7 @@ async function pollOnce() {
+     }
+     const tasks = await r.json();
+     connected = true;
++    await processarFocos();
+     if (!tasks.length) {
+       idleCount++;
+       updateBadge("");
+@@ -438,3 +439,38 @@ globalThis.__relayClaudeCommand = (tabId, cmd, text = "") =>
+ 
+ // primeiro poll na instalação
+ pollOnce();
++
++
++// Foco de abas (pedido pelos botões "Abrir" do painel): ativa a aba do modelo se ela existir;
++// se não existir, abre uma aba nova. Só acontece depois de um clique seu no painel.
++async function processarFocos() {
++  let pedidos = [];
++  try {
++    const r = await fetch(`${PAINEL_URL}/api/relay-council/focos`, {
++      method: "GET",
++      headers: { "X-Relay-Client": RELAY_CLIENT_ID },
++      signal: AbortSignal.timeout(POLL_TIMEOUT_MS),
++    });
++    if (!r.ok) return;
++    pedidos = await r.json();
++  } catch (e) {
++    return;
++  }
++  for (const pedido of pedidos) {
++    try {
++      const host = new URL(pedido.url).host;
++      const abas = await chrome.tabs.query({ url: `https://${host}/*` });
++      const aba = abas[0];
++      if (aba) {
++        if (aba.windowId !== undefined) {
++          await chrome.windows.update(aba.windowId, { focused: true });
++        }
++        await chrome.tabs.update(aba.id, { active: true });
++      } else {
++        await chrome.tabs.create({ url: pedido.url, active: true });
++      }
++    } catch (e) {
++      console.warn("[relay] foco falhou:", pedido.site, e.message);
++    }
++  }
++}
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index b592001e..ce594225 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -15,6 +15,7 @@ import subprocess
+ import sys
+ import threading
+ import time
++import uuid
+ import urllib.error
+ import urllib.request
+ from urllib.parse import parse_qs, quote, urlparse
+@@ -1014,7 +1015,9 @@ ABRIR_PROVEDORES = {
+     "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
+     "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
+ }
+-ABRIR_CANAL_NAVEGADOR = "http://127.0.0.1:9222"  # porta de depuração local do Chromium do sistema (só loopback)
++# Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
++FOCOS_PENDENTES = []
++_FOCO_LOCK = threading.Lock()
+ ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
+ 
+ 
+@@ -1034,16 +1037,9 @@ class Handler(BaseHTTPRequestHandler):
+             subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, start_new_session=True)
+         elif alvo in ABRIR_PROVEDORES:
+-            # Páginas abrem como aba nova na janela que já existe, pelo canal de depuração local do Chromium
+-            # (só 127.0.0.1). Assim não se abre um segundo processo com o mesmo perfil.
+-            url = ABRIR_PROVEDORES[alvo]
+-            try:
+-                pedido_aba = urllib.request.Request(
+-                    f"{ABRIR_CANAL_NAVEGADOR}/json/new?{quote(url, safe='')}", method="PUT")
+-                with urllib.request.urlopen(pedido_aba, timeout=5):
+-                    pass
+-            except (urllib.error.URLError, OSError):
+-                return self._send(503, "text/plain; charset=utf-8", b"navegador do sistema nao responde")
++            # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
++            with _FOCO_LOCK:
++                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo]})
+         else:
+             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
+         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
+@@ -1109,6 +1105,13 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/relay-council/focos":
++            if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:
++                return self._send(403, "application/json; charset=utf-8", b'{"error":"executor not authorized"}')
++            with _FOCO_LOCK:
++                pedidos = list(FOCOS_PENDENTES)
++                FOCOS_PENDENTES.clear()
++            return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
+         if self.path == "/api/eventos":
+             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
+         if self.path == "/api/relay-council/catalog":
+diff --git a/redesign/painel_operacional/test_conselho_rede.py b/redesign/painel_operacional/test_conselho_rede.py
+index 9d07c356..30cbb15f 100644
+--- a/redesign/painel_operacional/test_conselho_rede.py
++++ b/redesign/painel_operacional/test_conselho_rede.py
+@@ -282,7 +282,11 @@ class ExtensionContractTests(unittest.TestCase):
+         self.assertIn("/api/relay-council/tasks", background)
+         self.assertIn("/api/relay-council/result", background)
+         self.assertIn("X-Relay-Providers", background)
+-        self.assertNotIn("chrome.tabs.create", background)
++        # Abrir aba só é permitido dentro de processarFocos (clique do Humano no painel); nunca nas tarefas de envio.
++        corpo_foco = background[background.index("async function processarFocos"):]
++        antes_foco = background[:background.index("async function processarFocos")]
++        self.assertNotIn("chrome.tabs.create", antes_foco)
++        self.assertIn("chrome.tabs.create", corpo_foco)
+         self.assertNotIn("pinRelayTab", background)
+         self.assertNotIn("cookies", json.dumps(manifest).lower())
+         self.assertIn("Conselho em Rede", manifest["name"])
