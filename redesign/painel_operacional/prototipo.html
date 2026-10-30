@@ -27,18 +27,10 @@
     <button data-page="modelos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4.2"/><ellipse cx="12" cy="12" rx="4.2" ry="9" transform="rotate(35 12 12)"/></svg>Modelos & rota</button>
     <button data-page="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h4"/></svg>Plano de trabalho</button>
   </nav></div>
-  <div class="abrir-lista" aria-label="Abrir programas"><div class="abrir-titulo">Abrir</div>
+  <div class="abrir-lista" aria-label="Serviços do sistema"><div class="abrir-titulo">Serviços</div>
     <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
     <button class="btn" type="button" data-alvo="librechat">LibreChat</button>
-    <button class="btn" type="button" data-alvo="deepseek">DeepSeek</button>
-    <button class="btn" type="button" data-alvo="gemini">Gemini</button>
-    <button class="btn" type="button" data-alvo="zai">Z.ai</button>
-    <button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button>
-    <button class="btn" type="button" data-alvo="claude">Claude</button>
-    <button class="btn" type="button" data-alvo="grok">Grok</button>
-    <button class="btn" type="button" data-alvo="qwen">Qwen</button>
-    <button class="btn" type="button" data-alvo="mistral">Mistral</button>
-    <button class="btn" type="button" data-alvo="kimi">Kimi</button>
+    <button class="btn" type="button" data-alvo="omniroute">OmniRoute</button>
     <p class="abrir-aviso" id="abrir-aviso" role="status"></p>
   </div>
   <div class="side-bottom"><div class="human-note"><strong>O Humano no centro</strong>O painel reúne contexto e evidência. A decisão e a autorização continuam suas.</div></div>
@@ -122,7 +114,7 @@
   </section>
 
   <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
-  <div class="conselho-page"><p class="status" id="status" role="status">carregando…</p>
+  <div class="conselho-page"><div class="modelos-links" aria-label="Modelos do Conselho"><div class="abrir-titulo">Modelos</div><button class="btn" type="button" data-alvo="deepseek">DeepSeek</button><button class="btn" type="button" data-alvo="gemini">Gemini</button><button class="btn" type="button" data-alvo="zai">Z.ai</button><button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button><button class="btn" type="button" data-alvo="claude">Claude</button><button class="btn" type="button" data-alvo="grok">Grok</button><button class="btn" type="button" data-alvo="qwen">Qwen</button><button class="btn" type="button" data-alvo="mistral">Mistral</button><button class="btn" type="button" data-alvo="kimi">Kimi</button></div><p class="status" id="status" role="status">carregando…</p>
     <section id="turno">
       <h2>Novo turno</h2>
       <form id="promptForm">
@@ -225,7 +217,7 @@
 <script src="prototipo.js"></script>
 <script>
 // Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
-document.querySelectorAll('.abrir-lista [data-alvo]').forEach((botao) => {
+document.querySelectorAll('[data-alvo]').forEach((botao) => {
   botao.addEventListener('click', async () => {
     const aviso = document.getElementById('abrir-aviso');
     try {

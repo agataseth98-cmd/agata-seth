@@ -1010,10 +1010,17 @@ def _wiki_search(query: str, mode: str) -> dict:
 
 # Botões "Abrir" do painel. Lista FIXA: o painel só pede um destino pelo nome; nunca um comando ou caminho.
 ABRIR_PROVEDORES = {
-    "deepseek": "https://chat.deepseek.com/", "gemini": "https://gemini.google.com/",
-    "zai": "https://chat.z.ai/", "chatgpt": "https://chatgpt.com/", "claude": "https://claude.ai/",
-    "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
-    "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
+    "deepseek": "https://chat.deepseek.com/",
+    "gemini": "https://gemini.google.com/",
+    "zai": "https://chat.z.ai/",
+    "chatgpt": "https://chatgpt.com/",
+    "claude": "https://claude.ai/",
+    "grok": "https://grok.com/",
+    "qwen": "https://qwen.ai/",
+    "mistral": "https://chat.mistral.ai/",
+    "kimi": "https://www.kimi.com/",
+    "librechat": "http://127.0.0.1:3080/",
+    "omniroute": "http://127.0.0.1:20128/",
 }
 # Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
 FOCOS_PENDENTES = []
@@ -1039,7 +1046,7 @@ class Handler(BaseHTTPRequestHandler):
         elif alvo in ABRIR_PROVEDORES:
             # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
             with _FOCO_LOCK:
-                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo]})
+                FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo], "janela": True})
         else:
             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
