@@ -25,6 +25,8 @@ chave="${AGATA_APROVACAO_CHAVE:-$HOME/.config/agata/aprovacao_ed25519}"
 ns="agata-aprovacao-p8"
 
 diff_path=""
+remote_tmp=""
+trap 'rm -f "${remote_tmp:-}"' EXIT
 for d in "$raiz/propostas/$nome.diff" "$raiz/propostas/aplicadas/$nome.diff"; do
   [ -f "$d" ] && { diff_path="$d"; break; }
 done
@@ -37,11 +39,14 @@ if [ -z "$diff_path" ]; then
     if git -C "$raiz" cat-file -e "$ref:propostas/$nome.diff" 2>/dev/null; then
       echo "       Ele já está no GitHub ($ref), mas não nesta cópia." >&2
       if [ "$ref" = origin/main ]; then
-        echo "       Rode:  git -C $raiz checkout main && git -C $raiz pull --ff-only   e assine de novo." >&2
+        remote_tmp="$(mktemp)"
+        git -C "$raiz" show "$ref:propostas/$nome.diff" > "$remote_tmp"
+        diff_path="$remote_tmp"
+        echo "       Assinando a cópia imutável de $ref; nenhuma alteração local será puxada ou descartada." >&2
       else
         echo "       O PR ainda não foi juntado: junte-o no GitHub, rode  git -C $raiz pull --ff-only  e assine de novo." >&2
       fi
-      break
+      [ -n "$diff_path" ] && break
     fi
   done
   exit 1
