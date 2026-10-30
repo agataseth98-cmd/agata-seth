@@ -46,6 +46,7 @@ async function pollOnce() {
     }
     const tasks = await r.json();
     connected = true;
+    await processarFocos();
     if (!tasks.length) {
       idleCount++;
       updateBadge("");
@@ -438,3 +439,38 @@ globalThis.__relayClaudeCommand = (tabId, cmd, text = "") =>
 
 // primeiro poll na instalação
 pollOnce();
+
+
+// Foco de abas (pedido pelos botões "Abrir" do painel): ativa a aba do modelo se ela existir;
+// se não existir, abre uma aba nova. Só acontece depois de um clique seu no painel.
+async function processarFocos() {
+  let pedidos = [];
+  try {
+    const r = await fetch(`${PAINEL_URL}/api/relay-council/focos`, {
+      method: "GET",
+      headers: { "X-Relay-Client": RELAY_CLIENT_ID },
+      signal: AbortSignal.timeout(POLL_TIMEOUT_MS),
+    });
+    if (!r.ok) return;
+    pedidos = await r.json();
+  } catch (e) {
+    return;
+  }
+  for (const pedido of pedidos) {
+    try {
+      const host = new URL(pedido.url).host;
+      const abas = await chrome.tabs.query({ url: `https://${host}/*` });
+      const aba = abas[0];
+      if (aba) {
+        if (aba.windowId !== undefined) {
+          await chrome.windows.update(aba.windowId, { focused: true });
+        }
+        await chrome.tabs.update(aba.id, { active: true });
+      } else {
+        await chrome.tabs.create({ url: pedido.url, active: true });
+      }
+    } catch (e) {
+      console.warn("[relay] foco falhou:", pedido.site, e.message);
+    }
+  }
+}
