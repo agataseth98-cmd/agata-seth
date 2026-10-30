@@ -1024,7 +1024,12 @@ ABRIR_PROVEDORES = {
 }
 # Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
 FOCOS_PENDENTES = []
+FOCOS_MAX = 20
 _FOCO_LOCK = threading.Lock()
+_OBSIDIAN_ULTIMA = [0.0]
+OBSIDIAN_INTERVALO_S = 5.0
+# Rotas lidas pela extensão: não passam pela checagem de origem do navegador (usam o cabeçalho do executor).
+ROTAS_DA_EXTENSAO = {"/api/relay-council/focos", "/api/relay-council/tasks"}
 ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
 
 
@@ -1034,19 +1039,28 @@ class Handler(BaseHTTPRequestHandler):
                 or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}
                 or self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json"):
             return self._send(403, "text/plain; charset=utf-8", b"same-origin JSON required")
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal() or int(tamanho) > 512:
+            return self._send(400, "text/plain; charset=utf-8", b"invalid body size")
         try:
-            pedido = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length", "0") or 0), 512)) or b"{}")
+            pedido = json.loads(self.rfile.read(int(tamanho)) or b"{}")
         except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
         alvo = pedido.get("alvo") if isinstance(pedido, dict) else None
         if alvo == "obsidian":
-            # Obsidian é um programa próprio: sobe como processo separado.
+            # Obsidian é um programa próprio: sobe como processo separado (no máximo um pedido a cada poucos segundos).
+            agora = time.monotonic()
+            with _FOCO_LOCK:
+                if agora - _OBSIDIAN_ULTIMA[0] < OBSIDIAN_INTERVALO_S:
+                    return self._send(429, "text/plain; charset=utf-8", b"aguarde alguns segundos")
+                _OBSIDIAN_ULTIMA[0] = agora
             subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
         elif alvo in ABRIR_PROVEDORES:
             # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
             with _FOCO_LOCK:
                 FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": alvo, "url": ABRIR_PROVEDORES[alvo], "janela": True})
+                del FOCOS_PENDENTES[:-FOCOS_MAX]
         else:
             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
@@ -1084,6 +1098,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.headers.get("Host") != f"{BIND}:{PORT}":
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+        if (self.path.startswith("/api/") and self.path.split("?", 1)[0] not in ROTAS_DA_EXTENSAO
+                and not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin"))):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
         if self.path.startswith("/api/grafo"):
             return self._grafo()
         if self.path == "/api/seth/conversas":

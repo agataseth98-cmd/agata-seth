@@ -206,6 +206,31 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
 
 
+    def test_leituras_de_api_recusam_origem_cruzada_mas_a_extensao_passa(self):
+        for rota in ("/api/seth/conversas", "/api/eventos", "/api/lacunas", "/api/relay-council/state"):
+            self.assertEqual(self.request("GET", rota, headers={"Origin": "https://exemplo.invalid"})[0], 403, rota)
+            self.assertEqual(self.request("GET", rota, headers={"Sec-Fetch-Site": "cross-site"})[0], 403, rota)
+        # as rotas da extensão seguem o cabeçalho do executor, não a origem do navegador
+        self.assertEqual(self.request("GET", "/api/relay-council/focos", headers={"Origin": "chrome-extension://x"})[0], 403)
+        code, body, _ = self.request("GET", "/api/relay-council/focos",
+                                     headers={"Origin": "chrome-extension://x", "X-Relay-Client": panel.RELAY_CLIENT_ID})
+        self.assertEqual(code, 200)
+
+    def test_abrir_recusa_corpo_invalido_limita_fila_e_frequencia(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
+        for tamanho in ("-1", "abc", "513"):
+            self.assertEqual(self.request("POST", "/api/abrir", "{}", {**base, "Content-Length": tamanho})[0], 400, tamanho)
+        panel.FOCOS_PENDENTES.clear()
+        for _ in range(panel.FOCOS_MAX + 5):
+            self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "deepseek"}), base)[0], 202)
+        self.assertEqual(len(panel.FOCOS_PENDENTES), panel.FOCOS_MAX)
+        panel.FOCOS_PENDENTES.clear()
+        panel._OBSIDIAN_ULTIMA[0] = 0.0
+        with mock.patch.object(panel.subprocess, "Popen") as popen:
+            self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 202)
+            self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 429)
+            self.assertEqual(popen.call_count, 1)
+
     def test_busca_exige_origem_json_e_entrada_valida(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
         payload = json.dumps({"query": "painel", "mode": "texto"})
