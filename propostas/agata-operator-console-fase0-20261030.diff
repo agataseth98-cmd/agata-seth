@@ -1,3 +1,109 @@
+diff --git a/propostas/agata-operator-console-fase0-sdd.md b/propostas/agata-operator-console-fase0-sdd.md
+new file mode 100644
+index 00000000..427b14cc
+--- /dev/null
++++ b/propostas/agata-operator-console-fase0-sdd.md
+@@ -0,0 +1,57 @@
++# Operator Console offline — SDD fase 0
++
++Status: rascunho para revisão humana; não autorizado para aplicação.
++
++## Objetivo
++
++Oferecer uma superfície local e somente leitura para inspecionar um pacote Project Kit, exibindo proveniência, capacidades, revisões e drift sem criar uma nova fonte de verdade.
++
++## Escopo
++
++- carregar um diretório local via `webkitdirectory`;
++- ler `provenance.json`, `capabilities.md`, `drift-report.md` e arquivos `packet.md`;
++- mostrar estado explícito quando o pacote estiver ausente, inválido ou não medido;
++- manter a operação sem rede, sem execução de comandos, sem escrita de artefatos e sem aprovação automática;
++- oferecer navegação local entre Visão, Capacidades, Revisões e Drift.
++
++## Fora de escopo
++
++- verificar criptografia ou recalcular hashes do pacote;
++- alterar arquivos do pacote;
++- executar ações, aprovar decisões ou publicar resultados;
++- depender de fontes externas para carregar fontes, dados ou lógica.
++
++## Invariantes de segurança
++
++1. A interface é read-only.
++2. Ausência ou erro de `provenance.json` deve ser visível e não pode ser tratado como integridade confirmada.
++3. Dados não medidos devem permanecer rotulados como “não medido”.
++4. A interface não deve fazer chamadas de rede nem executar código vindo do pacote.
++
++## Critérios de aceite
++
++- [ ] abrir `index.html` localmente sem servidor;
++- [ ] selecionar um pacote válido e exibir objetivo, raiz, quantidade de arquivos, origem e frescor;
++- [ ] exibir “PACOTE INVÁLIDO” quando `provenance.json` não existir;
++- [ ] exibir “INTEGRIDADE NÃO MEDIDA” quando o JSON for inválido;
++- [ ] manter as abas funcionais sem recarregar a página;
++- [ ] não haver escrita, execução de comandos ou dependência funcional de rede;
++- [ ] validar o JavaScript com `node --check` e o patch com `git diff --check`.
++
++## Lacunas e riscos
++
++- A integridade ainda é apenas declarada como não medida; não há verificação criptográfica.
++- A renderização de conteúdo do pacote exige revisão de segurança contra injeção de HTML.
++- Não há revisão independente registrada.
++- O diff proposto ainda não possui aprovação assinada correspondente.
++
++## Decisões pendentes
++
++- aceitar ou rejeitar a renderização de conteúdo local com HTML bruto;
++- definir se a fase 0 deve incluir teste automatizado de ausência de rede;
++- aprovar o escopo e autorizar uma revisão independente;
++- assinar o diff exato somente após a consolidação das revisões.
++
++## Drift inicial
++
++Ainda não medido. A comparação entre esta especificação e o comportamento implementado deve ocorrer depois da decisão humana e dos testes.
+diff --git a/propostas/revisao-tecnica-agata-operator-console-fase0.md b/propostas/revisao-tecnica-agata-operator-console-fase0.md
+new file mode 100644
+index 00000000..85f47025
+--- /dev/null
++++ b/propostas/revisao-tecnica-agata-operator-console-fase0.md
+@@ -0,0 +1,37 @@
++# Revisão técnica — Operator Console fase 0
++
++Status: revisão local do agente; não substitui revisão independente nem aprovação humana.
++
++## Evidências examinadas
++
++- `redesign/operator_console/index.html`
++- `redesign/operator_console/app.js`
++- `redesign/operator_console/style.css`
++- `propostas/agata-operator-console-fase0-sdd.md`
++- `propostas/agata-operator-console-fase0-20261030.diff`
++
++## Achados
++
++### 1. Alto — conteúdo do pacote é inserido como HTML
++
++`capabilities.md` é convertido com `replaceAll` e atribuído a `innerHTML`; nomes de arquivos também são interpolados em HTML no painel de revisões. Um pacote local pode conter marcação ativa. Isso contradiz a intenção de exibir dados como conteúdo passivo.
++
++Decisão sugerida: usar `textContent` e criar nós DOM, ou sanitizar com uma política explícita. O aceite deve incluir um caso com `<img onerror=...>` e verificar que não há execução.
++
++### 2. Médio — a folha de estilo depende de rede
++
++`style.css` importa fontes do Google Fonts. A interface pode continuar parcialmente funcional offline, mas isso contradiz o requisito de não depender funcionalmente de rede e torna a ausência de rede um comportamento não testado.
++
++Decisão sugerida: remover o `@import` ou empacotar fontes locais; adicionar verificação que bloqueie dependências externas.
++
++### 3. Médio — o critério “sem rede” não está demonstrado
++
++Não há teste automatizado nem inspeção de runtime que prove ausência de chamadas de rede. A presença do `@import` já impede declarar o critério como atendido.
++
++### 4. Baixo — declaração de integridade é deliberadamente limitada
++
++O protótipo exibe “não medido”, o que é coerente com a spec, mas não verifica hashes. O texto de aceite deve manter essa limitação visível para evitar interpretação de integridade confirmada.
++
++## Resultado
++
++Não recomendar assinatura do diff atual. Recomendar revisão do escopo para corrigir a injeção de HTML e a dependência externa, seguida de nova revisão e novo hash do diff.
 diff --git a/redesign/operator_console/README.md b/redesign/operator_console/README.md
 new file mode 100644
 index 00000000..b76fa45a
@@ -9,12 +115,76 @@ index 00000000..b76fa45a
 +Abra `index.html` localmente e selecione o diretório de um pacote Project Kit. A tela não faz rede, não executa comandos, não escreve artefatos e não aprova ações.
 diff --git a/redesign/operator_console/app.js b/redesign/operator_console/app.js
 new file mode 100644
-index 00000000..e638e752
+index 00000000..c5b10eda
 --- /dev/null
 +++ b/redesign/operator_console/app.js
-@@ -0,0 +1,2 @@
-+const $=s=>document.querySelector(s);const tabs=[...document.querySelectorAll('.tabs button')];tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#'+b.dataset.tab).classList.add('active')});
-+const read=async f=>f?await f.text():'';$('#package').onchange=async e=>{const fs=[...e.target.files];const by=n=>fs.find(f=>f.webkitRelativePath.endsWith('/'+n)||f.name===n);const prov=by('provenance.json');if(!prov){$('#state').textContent='PACOTE INVÁLIDO';$('#summary').textContent='provenance.json não encontrado.';return}let data;try{data=JSON.parse(await read(prov))}catch{ $('#state').textContent='INTEGRIDADE NÃO MEDIDA';return}$('#state').textContent='PACOTE CARREGADO';$('#summary').textContent=`Objetivo: ${data.goal||'não informado'} · raiz: ${data.root||'não medida'}`;$('#files').textContent=(data.files||[]).length;$('#integrity').textContent='não medido';$('#source').textContent=prov.webkitRelativePath||prov.name;$('#freshness').textContent=data.generated_at||'não medido';const caps=by('capabilities.md');if(caps)$('#capability-list').innerHTML='<article>'+((await read(caps)).replaceAll('\n','<br>'))+'</article>';const drift=by('drift-report.md');if(drift)$('#drift-text').textContent=await read(drift);const reviews=fs.filter(f=>f.name==='packet.md');$('#review-list').innerHTML=reviews.length?reviews.map(f=>`<article>${f.webkitRelativePath}</article>`).join(''):'<p class="empty">Não medido.</p>'};
+@@ -0,0 +1,66 @@
++const $ = (selector) => document.querySelector(selector);
++const tabs = [...document.querySelectorAll('.tabs button')];
++
++tabs.forEach((button) => {
++  button.addEventListener('click', () => {
++    tabs.forEach((item) => item.classList.remove('active'));
++    document.querySelectorAll('.panel').forEach((panel) => panel.classList.remove('active'));
++    button.classList.add('active');
++    $(`#${button.dataset.tab}`).classList.add('active');
++  });
++});
++
++const read = async (file) => (file ? file.text() : '');
++const addTextArticle = (container, text) => {
++  const article = document.createElement('article');
++  article.textContent = text;
++  container.replaceChildren(article);
++};
++
++$('#package').addEventListener('change', async (event) => {
++  const files = [...event.target.files];
++  const byName = (name) => files.find((file) => file.webkitRelativePath.endsWith(`/${name}`) || file.name === name);
++  const provenance = byName('provenance.json');
++  if (!provenance) {
++    $('#state').textContent = 'PACOTE INVÁLIDO';
++    $('#summary').textContent = 'provenance.json não encontrado.';
++    return;
++  }
++
++  let data;
++  try {
++    data = JSON.parse(await read(provenance));
++  } catch {
++    $('#state').textContent = 'INTEGRIDADE NÃO MEDIDA';
++    return;
++  }
++
++  $('#state').textContent = 'PACOTE CARREGADO';
++  $('#summary').textContent = `Objetivo: ${data.goal || 'não informado'} · raiz: ${data.root || 'não medida'}`;
++  $('#files').textContent = (data.files || []).length;
++  $('#integrity').textContent = 'não medido';
++  $('#source').textContent = provenance.webkitRelativePath || provenance.name;
++  $('#freshness').textContent = data.generated_at || 'não medido';
++
++  const capabilities = byName('capabilities.md');
++  if (capabilities) addTextArticle($('#capability-list'), await read(capabilities));
++
++  const drift = byName('drift-report.md');
++  if (drift) $('#drift-text').textContent = await read(drift);
++
++  const reviews = files.filter((file) => file.name === 'packet.md');
++  const reviewList = $('#review-list');
++  reviewList.replaceChildren();
++  if (!reviews.length) {
++    const empty = document.createElement('p');
++    empty.className = 'empty';
++    empty.textContent = 'Não medido.';
++    reviewList.append(empty);
++    return;
++  }
++  reviews.forEach((file) => {
++    const article = document.createElement('article');
++    article.textContent = file.webkitRelativePath || file.name;
++    reviewList.append(article);
++  });
++});
 diff --git a/redesign/operator_console/index.html b/redesign/operator_console/index.html
 new file mode 100644
 index 00000000..af6d24a9
@@ -33,9 +203,8 @@ index 00000000..af6d24a9
 +</main><script src="app.js"></script></body></html>
 diff --git a/redesign/operator_console/style.css b/redesign/operator_console/style.css
 new file mode 100644
-index 00000000..1f89c630
+index 00000000..ac5502e9
 --- /dev/null
 +++ b/redesign/operator_console/style.css
-@@ -0,0 +1,2 @@
-+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
-+:root{--ink:#e9f0ed;--muted:#91a29d;--bg:#0a1110;--card:#111c19;--line:#29403a;--lime:#d9f36a;--orange:#ff9b58}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#203b31 0,transparent 35%),var(--bg);color:var(--ink);font:15px Manrope, sans-serif;min-height:100vh}.shell{max-width:1180px;margin:auto;padding:48px 28px 80px}header{display:flex;justify-content:space-between;gap:30px;align-items:end}h1{font-size:clamp(42px,7vw,86px);letter-spacing:-.07em;line-height:.9;margin:10px 0 18px}.eyebrow,small,.stamp span,.source span{font:500 11px 'DM Mono',monospace;letter-spacing:.14em;color:var(--lime)}.lede{color:var(--muted);max-width:460px}.load{border:1px solid var(--lime);color:var(--lime);padding:13px 16px;cursor:pointer;font:500 12px 'DM Mono';white-space:nowrap}.load input{display:none}.hero{margin:60px 0 28px;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:24px}.status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--orange);margin-right:9px}.hero p{color:var(--muted);max-width:650px;line-height:1.6}.stamp{text-align:right}.stamp strong{display:block;font:500 22px 'DM Mono';margin-top:10px}.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:26px}.tabs button{background:none;color:var(--muted);border:0;padding:13px 16px;cursor:pointer;font:500 12px 'DM Mono'}.tabs button.active{color:var(--ink);border-bottom:2px solid var(--lime)}.panel{display:none}.panel.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cards article{background:var(--card);border:1px solid var(--line);padding:22px;min-height:120px}.cards strong{display:block;font-size:30px;margin:16px 0 7px}.cards span{color:var(--muted);font-size:12px}.source{margin-top:14px;padding:16px;border-left:2px solid var(--lime);background:#0e1815}.source code,pre{font:13px 'DM Mono';color:var(--muted);display:block;margin-top:9px;white-space:pre-wrap}.list{display:grid;gap:8px}.list p,.list article{padding:15px;background:var(--card);border:1px solid var(--line)}.empty{color:var(--muted)}h2{letter-spacing:-.04em;font-size:28px}pre{background:var(--card);border:1px solid var(--line);padding:20px;min-height:180px}@media(max-width:700px){header,.hero{display:block}.load{display:inline-block;margin-top:20px}.stamp{text-align:left;margin-top:25px}.cards{grid-template-columns:1fr}}
+@@ -0,0 +1 @@
++:root{--ink:#e9f0ed;--muted:#91a29d;--bg:#0a1110;--card:#111c19;--line:#29403a;--lime:#d9f36a;--orange:#ff9b58}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#203b31 0,transparent 35%),var(--bg);color:var(--ink);font:15px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}.shell{max-width:1180px;margin:auto;padding:48px 28px 80px}header{display:flex;justify-content:space-between;gap:30px;align-items:end}h1{font-size:clamp(42px,7vw,86px);letter-spacing:-.07em;line-height:.9;margin:10px 0 18px}.eyebrow,small,.stamp span,.source span{font:500 11px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;letter-spacing:.14em;color:var(--lime)}.lede{color:var(--muted);max-width:460px}.load{border:1px solid var(--lime);color:var(--lime);padding:13px 16px;cursor:pointer;font:500 12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;white-space:nowrap}.load input{display:none}.hero{margin:60px 0 28px;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:24px}.status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--orange);margin-right:9px}.hero p{color:var(--muted);max-width:650px;line-height:1.6}.stamp{text-align:right}.stamp strong{display:block;font:500 22px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;margin-top:10px}.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:26px}.tabs button{background:none;color:var(--muted);border:0;padding:13px 16px;cursor:pointer;font:500 12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace}.tabs button.active{color:var(--ink);border-bottom:2px solid var(--lime)}.panel{display:none}.panel.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cards article{background:var(--card);border:1px solid var(--line);padding:22px;min-height:120px}.cards strong{display:block;font-size:30px;margin:16px 0 7px}.cards span{color:var(--muted);font-size:12px}.source{margin-top:14px;padding:16px;border-left:2px solid var(--lime);background:#0e1815}.source code,pre{font:13px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;color:var(--muted);display:block;margin-top:9px;white-space:pre-wrap}.list{display:grid;gap:8px}.list p,.list article{padding:15px;background:var(--card);border:1px solid var(--line)}.empty{color:var(--muted)}h2{letter-spacing:-.04em;font-size:28px}pre{background:var(--card);border:1px solid var(--line);padding:20px;min-height:180px}@media(max-width:700px){header,.hero{display:block}.load{display:inline-block;margin-top:20px}.stamp{text-align:left;margin-top:25px}.cards{grid-template-columns:1fr}}
