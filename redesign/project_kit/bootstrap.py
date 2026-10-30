@@ -85,14 +85,34 @@ def build(root: Path, out: Path, goal: str) -> None:
     (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def drift(root: Path, previous: Path, output: Path) -> None:
+    old = json.loads(previous.read_text(encoding="utf-8"))
+    before = {x["path"]: x for x in old.get("files", [])}
+    now = {p.relative_to(root).as_posix(): {"path": p.relative_to(root).as_posix(), "bytes": p.stat().st_size, "sha256": sha256(p)} for p in files(root)}
+    added = sorted(set(now) - set(before))
+    removed = sorted(set(before) - set(now))
+    changed = sorted(p for p in set(now) & set(before) if now[p]["sha256"] != before[p].get("sha256"))
+    lines = ["# Drift report", "", f"Base: `{previous}`", f"Projeto: `{root}`", "", f"- Adicionados: {len(added)}", f"- Removidos: {len(removed)}", f"- Alterados: {len(changed)}", ""]
+    for label, values in (("Adicionados", added), ("Removidos", removed), ("Alterados", changed)):
+        lines += [f"## {label}", ""] + ([f"- `{x}`" for x in values] or ["- nenhum"]) + [""]
+    output.write_text("\n".join(lines), encoding="utf-8")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("project", type=Path)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--goal", required=True)
+    ap.add_argument("--drift-against", type=Path)
+    ap.add_argument("--drift-out", type=Path)
     args = ap.parse_args()
     if not args.project.is_dir():
         ap.error("project precisa ser um diretório")
+    if args.drift_against:
+        if not args.drift_out:
+            ap.error("--drift-out é obrigatório com --drift-against")
+        drift(args.project.resolve(), args.drift_against, args.drift_out)
+        return
     build(args.project, args.out, args.goal)
 
 
