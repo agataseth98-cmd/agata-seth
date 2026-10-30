@@ -17,7 +17,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -1014,7 +1014,7 @@ ABRIR_PROVEDORES = {
     "grok": "https://grok.com/", "qwen": "https://qwen.ai/", "mistral": "https://chat.mistral.ai/",
     "kimi": "https://www.kimi.com/", "librechat": "http://127.0.0.1:3080/",
 }
-ABRIR_NAVEGADOR = ("chromium", "--profile-directory=Profile 1")
+ABRIR_CANAL_NAVEGADOR = "http://127.0.0.1:9222"  # porta de depuração local do Chromium do sistema (só loopback)
 ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
 
 
@@ -1030,14 +1030,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
         alvo = pedido.get("alvo") if isinstance(pedido, dict) else None
         if alvo == "obsidian":
-            comando = list(ABRIR_OBSIDIAN)
+            # Obsidian é um programa próprio: sobe como processo separado.
+            subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
         elif alvo in ABRIR_PROVEDORES:
-            comando = list(ABRIR_NAVEGADOR) + [ABRIR_PROVEDORES[alvo]]
+            # Páginas abrem como aba nova na janela que já existe, pelo canal de depuração local do Chromium
+            # (só 127.0.0.1). Assim não se abre um segundo processo com o mesmo perfil.
+            url = ABRIR_PROVEDORES[alvo]
+            try:
+                pedido_aba = urllib.request.Request(
+                    f"{ABRIR_CANAL_NAVEGADOR}/json/new?{quote(url, safe='')}", method="PUT")
+                with urllib.request.urlopen(pedido_aba, timeout=5):
+                    pass
+            except (urllib.error.URLError, OSError):
+                return self._send(503, "text/plain; charset=utf-8", b"navegador do sistema nao responde")
         else:
             return self._send(400, "text/plain; charset=utf-8", b"destino fora da lista")
-        # Sem shell: a lista de argumentos é fixa, e o processo fica solto do painel.
-        subprocess.Popen(comando, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, start_new_session=True)
         return self._send(202, "application/json; charset=utf-8", json.dumps({"ok": True, "alvo": alvo}).encode("utf-8"))
 
     server_version = "AgataPainel/1"
