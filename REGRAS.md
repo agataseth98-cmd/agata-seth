@@ -22,14 +22,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 21a46f5f0c3257e39e71c0540d03032b9105ccb2
-  Escrito em: 30/10/2026 10:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 11fa415d2051d4871448fea5e248b6dc233c37fb
+  Escrito em: 30/10/2026 11:10 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/21a46f5f0c3257e39e71c0540d03032b9105ccb2/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/21a46f5f0c3257e39e71c0540d03032b9105ccb2/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/21a46f5f0c3257e39e71c0540d03032b9105ccb2/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/21a46f5f0c3257e39e71c0540d03032b9105ccb2/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/21a46f5f0c3257e39e71c0540d03032b9105ccb2/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/11fa415d2051d4871448fea5e248b6dc233c37fb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/11fa415d2051d4871448fea5e248b6dc233c37fb/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/11fa415d2051d4871448fea5e248b6dc233c37fb/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/11fa415d2051d4871448fea5e248b6dc233c37fb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/11fa415d2051d4871448fea5e248b6dc233c37fb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 

@@ -1,0 +1,256 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 0cfd12a4..6fbaae8b 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -359,3 +359,178 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .abrir-titulo{font:600 11px var(--mono);letter-spacing:.01em;text-transform:none;color:#96aaa5;padding:0 2px}
+ .abrir-lista .btn{text-align:left;justify-content:flex-start}
+ .abrir-aviso{font-size:12px;color:#c9d6d1;min-height:16px;margin:2px 2px 0}
++
++/* Conselho integrado à casca do painel (escopo .conselho-page) */
++
++.conselho-page * { box-sizing: border-box; }
++.conselho-page {
++  font-family: "Fira Sans", "Noto Sans", "Segoe UI", sans-serif;
++  background: radial-gradient(ellipse at 78% 0%, rgba(35,83,130,.18), transparent 35%), radial-gradient(ellipse at 0% 85%, rgba(75,46,125,.12), transparent 32%), var(--bg);
++  color: var(--fg);
++  margin: 0;
++  padding: 20px;
++  font-size: 14px;
++  line-height: 1.5;
++  min-height: 100vh;
++}
++.conselho-page header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++  margin: -20px auto 24px;
++  max-width: 1280px;
++  border-bottom: 1px solid rgba(102,178,218,.18);
++  padding: 18px 0 14px;
++}
++.conselho-page .brand-inline { display: flex; align-items: center; gap: 10px; }
++.conselho-page .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(97,217,237,.55); border-radius: 10px; color: var(--accent); font-weight: 700; background: rgba(20,39,60,.72); }
++.conselho-page .brand-inline h1 { margin: 0; font-size: 20px; letter-spacing: -.035em; }
++.conselho-page .brand-sub, .conselho-page .crumb { color: var(--muted); font-size: 10px; letter-spacing: .12em; }
++.conselho-page .header-meta { display: flex; align-items: center; gap: 10px; }
++.conselho-page .status {
++  font-size: 11px;
++  color: var(--muted);
++  padding: 3px 8px;
++  background: rgba(97,217,237,.08);
++  border: 1px solid rgba(97,217,237,.18);
++  border-radius: 99px;
++}
++.conselho-page .status.connected { color: var(--ok); }
++.conselho-page .status.disconnected { color: var(--err); }
++.conselho-page main {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 20px;
++  max-width: 1280px;
++  margin: 0 auto;
++}
++.conselho-page section {
++  background: var(--card);
++  border: 1px solid var(--border);
++  border-radius: 12px;
++  padding: 17px 18px;
++  box-shadow: 0 12px 34px rgba(0,0,0,.12);
++  min-width: 0;
++}
++.conselho-page section.wide { grid-column: 1 / -1; }
++.conselho-page .provider-table-wrap { overflow-x: auto; }
++.conselho-page table { width: 100%; border-collapse: collapse; font-size: 12px; }
++.conselho-page th, .conselho-page td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); }
++.conselho-page th { color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
++.conselho-page td { color: var(--fg); }
++.conselho-page td.state-green { color: var(--ok); font-weight: 700; }
++.conselho-page td.state-monitoring { color: var(--warn); font-weight: 700; }
++.conselho-page td.state-experimental, .conselho-page td.state-variable { color: var(--muted); }
++.conselho-page section h2 {
++  font-size: 14px;
++  margin: 0 0 12px 0;
++  color: var(--accent);
++}
++.conselho-page .row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
++.conselho-page .row > * { flex: 1; }
++.conselho-page label { display: block; font-size: 11px; color: var(--muted); margin: 8px 0 3px; }
++.conselho-page select, .conselho-page textarea, .conselho-page input {
++  width: 100%;
++  padding: 8px;
++  background: rgba(7, 13, 25, .72);
++  color: var(--fg);
++  border: 1px solid var(--border);
++  border-radius: 8px;
++  font-size: 13px;
++  font-family: inherit;
++}
++.conselho-page textarea { resize: vertical; min-height: 100px; }
++.conselho-page button {
++  padding: 8px 14px;
++  background: transparent;
++  color: var(--fg);
++  border: 1px solid var(--border);
++  border-radius: 8px;
++  cursor: pointer;
++  font-size: 12px;
++  font-weight: 600;
++}
++.conselho-page button:hover { border-color: var(--accent); }
++.conselho-page button.primary { background: var(--accent); color: #111; border-color: var(--accent); }
++.conselho-page button.primary:hover { background: #6ab4ff; }
++.conselho-page button.danger { background: var(--err); color: #111; border-color: var(--err); }
++.conselho-page button:disabled { opacity: 0.4; cursor: not-allowed; }
++.conselho-page .chain-box {
++  margin-top: 18px;
++  padding-top: 14px;
++  border-top: 1px solid var(--border);
++}
++.conselho-page .chain-title {
++  color: var(--accent);
++  font-size: 12px;
++  font-weight: 700;
++  letter-spacing: .02em;
++  margin-bottom: 2px;
++}
++.conselho-page .chain-controls {
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) auto;
++  gap: 8px;
++  align-items: center;
++}
++.conselho-page .chain-controls button { white-space: nowrap; }
++.conselho-page .badge {
++  display: inline-block;
++  background: var(--accent);
++  color: #111;
++  font-size: 11px;
++  padding: 1px 7px;
++  border-radius: 10px;
++  margin-left: 6px;
++}
++.conselho-page ul { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
++.conselho-page li {
++  padding: 10px;
++  border-bottom: 1px solid var(--border);
++  font-size: 12px;
++}
++.conselho-page li:last-child { border-bottom: none; }
++.conselho-page li .meta { color: var(--muted); font-size: 10px; margin-bottom: 4px; }
++.conselho-page li .text {
++  font-family: monospace, monospace;
++  white-space: pre-wrap;
++  word-break: break-word;
++  max-height: 200px;
++  overflow-y: auto;
++  background: var(--bg);
++  padding: 8px;
++  border-radius: 3px;
++  font-size: 11px;
++}
++.conselho-page li.error .text { color: var(--err); }
++.conselho-page li.ok .meta { color: var(--ok); }
++.conselho-page .hint { color: var(--muted); font-size: 11px; margin-top: 6px; }
++.conselho-page footer { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 12px; }
++.conselho-page details summary { cursor: pointer; color: var(--muted); font-size: 11px; }
++.conselho-page pre {
++  background: var(--bg);
++  padding: 10px;
++  border-radius: 4px;
++  font-size: 11px;
++  max-height: 300px;
++  overflow: auto;
++  white-space: pre-wrap;
++  word-break: break-all;
++}
++.conselho-page .decisao-item {
++  border-left: 3px solid var(--warn);
++  padding-left: 10px;
++  margin-bottom: 8px;
++}
++.conselho-page .decisao-item .acoes { display: flex; gap: 6px; margin-top: 6px; }
++.conselho-page .decisao-item button { padding: 4px 10px; font-size: 11px; }
++@media (max-width: 760px) {
++.conselho-page body { padding: 12px; }
++.conselho-page header { align-items: flex-start; flex-direction: column; gap: 6px; }
++.conselho-page main { grid-template-columns: 1fr; gap: 12px; }
++.conselho-page .row { flex-direction: column; align-items: stretch; }
++.conselho-page .row > * { width: 100%; }
++.conselho-page .chain-controls { grid-template-columns: 1fr; }
++}
++
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index bd336b1d..8f78e46b 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -122,9 +122,43 @@
+   </section>
+ 
+   <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
+-    <div class="section-heading"><div><div class="eyebrow">Conversa mediada pelo Humano</div><h1>Conselho de Modelos em Rede</h1><p>Abra a página de conversa para preparar prompts, revisar o histórico e aprovar cada envio e solicitação de ferramenta.</p></div></div>
+-    <article class="panel mt14"><p class="route-foot">A interface de conversa está em uma página própria para preservar a identidade visual do protótipo e manter visíveis fila, decisões e histórico.</p><a class="btn" href="/conselho-rede">Abrir o Conselho em Rede</a></article>
+-  </section>
++  <div class="conselho-page">
++    <section id="turno">
++      <h2>Novo turno</h2>
++      <form id="promptForm">
++        <div class="row"><label for="site">Aba de chat aberta</label><select id="site" required></select></div>
++        <label for="pergunta">Prompt</label>
++        <textarea id="pergunta" maxlength="60000" placeholder="Escreva o pedido. O envio ficará pendente até sua aprovação explícita."></textarea>
++        <div class="row"><button type="submit" id="btnEnviar" class="primary">Solicitar aprovação de envio</button></div>
++      </form>
++      <p class="hint" id="turnoHint">Cada prompt exige sua aprovação e será digitado na aba Chromium detectada. O modelo pode exigir login ou foco visível.</p>
++      <div class="chain-box">
++        <div class="chain-title">Conversa e bateria de avaliação</div>
++        <label for="groupKind">Tipo de rodada</label>
++        <select id="groupKind"><option value="debate">Debate independente + síntese</option><option value="chain">Conversa em cadeia</option><option value="evaluation">Bateria de ensaios de um modelo</option></select>
++        <label for="chainSites">Participantes (IDs das abas abertas, até 3, separados por vírgula)</label>
++        <div class="chain-controls"><input id="chainSites" value="gemini,zai,mistral" aria-label="Participantes da conversa" /><input id="groupRepetitions" type="number" min="1" max="5" value="3" aria-label="Número de ensaios" /><button id="btnConversa" type="button" class="primary">Preparar rodada</button></div>
++        <p class="hint">Debates e cadeias avançam etapa por etapa. Cada prompt, síntese, repetição e handoff fica pendente de aprovação humana individual.</p>
++      </div>
++    </section>
++    <section id="provedores" class="wide">
++      <h2>Abas de chat suportadas</h2><p class="hint">Adaptadores experimentais. O painel identifica abas abertas, mas não comprova login nem resposta funcional. Abas ausentes não são abertas automaticamente.</p>
++      <div class="provider-table-wrap"><table id="providerTable"><thead><tr><th>Provedor</th><th>Tipo</th><th>Acesso</th><th>Estado do catálogo</th></tr></thead><tbody><tr><td colspan="4" class="hint">carregando catálogo…</td></tr></tbody></table></div>
++    </section>
++    <section id="fila"><h2>Fila de aprovação <span id="filaCount" class="badge">0</span></h2><ul id="filaLista"></ul></section>
++    <section id="rodadas" class="wide"><h2>Debates e baterias</h2><ul id="rodadasLista"></ul></section>
++    <section id="ferramentas">
++      <h2>Solicitar ferramenta</h2><p class="hint">O pedido será mostrado para aprovação antes de consultar dados do Agata. O modelo não executa a ferramenta diretamente.</p>
++      <form id="toolForm"><label for="tool">Ferramenta</label><select id="tool"><option value="SEARCH">Busca no canon</option><option value="STATE">Estado medido do Agata</option><option value="CACHE">Leitura do cache do Conselho</option><option value="AUDIT">Auditoria do texto</option><option value="RELAY">Encaminhar pergunta a outro modelo</option><option value="DELIVER">Preparar entrega para revisão humana</option></select>
++        <label for="toolArgs">Argumentos (JSON)</label><input id="toolArgs" value='{"canon":""}' autocomplete="off" />
++        <label for="toolText">Texto/contexto (se aplicável)</label><textarea id="toolText" maxlength="60000" placeholder="Texto que a ferramenta deve analisar ou encaminhar"></textarea>
++        <button type="submit" class="primary">Solicitar aprovação da ferramenta</button>
++      </form>
++    </section>
++    <section id="historico" class="wide"><h2>Histórico recente</h2><ul id="historicoLista"></ul></section>
++    <section id="decisao" class="wide"><h2>Pedidos de ferramentas</h2><p class="hint">Pedidos manuais e tags interpretadas das respostas ficam pendentes. Nada é executado sem aprovação individual.</p><ul id="decisaoLista"></ul></section>
++  </div>
++</section>
+ 
+   <section class="page" id="page-memoria" data-title="Memória & mapas">
+ 
+@@ -203,5 +237,6 @@ document.querySelectorAll('.abrir-lista [data-alvo]').forEach((botao) => {
+   });
+ });
+ </script>
++<script src="conselho-rede/app.js" defer></script>
+ </body>
+ </html>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 50282ca4..86ca43de 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -48,10 +48,6 @@ function filterSearch(value) {
+   if (empty) empty.classList.toggle("show", active.id === "page-capacidades" && cards.length > 0 && visible === 0);
+ }
+ function showPage(name) {
+-  if (name === "conselho") {
+-    window.location.assign("/conselho-rede");
+-    return;
+-  }
+   const page = byId("page-" + name);
+   if (!page) return;
+   pages.forEach((item) => item.classList.toggle("active", item === page));
