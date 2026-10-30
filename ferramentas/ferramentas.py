@@ -36,7 +36,11 @@ TEMAS = [
     ("frontend-e-design", r"frontend|design|ui|ux|a11y|css|react|vue|svelte|angular|nextjs|nuxt|tailwind|motion|slide|video|taste|canvas"),
     ("banco-e-infra", r"postgres|mysql|redis|clickhouse|sql|database|migration|docker|k8s|kube|terraform|network|homelab|deploy|ci-|cloud|aws|gcp|azure"),
     ("pesquisa-e-docs", r"research|search|doc|lookup|onboarding|readme|knowledge|wiki|note|summar"),
-    ("linguagens", r"python|typescript|javascript|go-|golang|rust|java|kotlin|swift|cpp|c\+\+|csharp|dart|flutter|php|laravel|django|spring|ruby|rails|scala|elixir|fsharp|node|bash|shell|lua|perl|haskell|zig|nest|fastapi|flask|quarkus"),
+    ("linguagens", r"prisma|jpa|mybatis|vite|dotnet|pytorch|bun-|compose|tinystruct|backend|mcp-server|python|typescript|javascript|go-|golang|rust|java|kotlin|swift|cpp|c\+\+|csharp|dart|flutter|php|laravel|django|spring|ruby|rails|scala|elixir|fsharp|node|bash|shell|lua|perl|haskell|zig|nest|fastapi|flask|quarkus"),
+    ("contexto-e-custo", r"token|context|cost|prompt|caching|budget|compact|latency|throughput|performance"),
+    ("meta-skills", r"skill|using-superpowers|rules-distill|ecc|hookify|gateguard|configure|openclaw|hermes|nanoclaw|safety-guard|santa"),
+    ("qualidade-de-codigo", r"error-handling|coding-standards|refactor|simplif|silent-failure|regex|repo-scan|change-impact|module-|audit|comment-analyzer|code-|contract-first|intent-driven|spec-miner|brownfield|inherit|click-path|delivery-gate|production-audit"),
+    ("marketing-e-comunicacao", r"brand|marketing|investor|lead-|seo|social|content|crosspost|email|messages|article|publisher|competitive|story|x-api|connections|notif|mailtrap"),
     ("negocios-e-nichos", r"."),
 ]
 
