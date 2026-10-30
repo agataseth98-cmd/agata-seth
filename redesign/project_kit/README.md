@@ -10,4 +10,6 @@ python3 redesign/project_kit/bootstrap.py /caminho/projeto \
   --goal "descrever o objetivo do projeto"
 ```
 
+Para registrar a observação pública no Evidence Ledger, acrescente `--ledger /caminho/ledger.jsonl`.
+
 O kit ignora `.git`, ambientes virtuais, caches e `node_modules`. Ele não acessa serviços, não envia dados e não altera o projeto de entrada.
