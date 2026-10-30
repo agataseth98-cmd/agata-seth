@@ -1,0 +1,44 @@
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 008c453a..11291fe3 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -13,7 +13,7 @@ notify-send -a Seth "Seth" "subindo..." 2>/dev/null || true
+ systemctl --user start agata.target 2>/dev/null || true
+ systemctl --user start seth-gateway.service seth-escriba.service seth-verificador.service
+ systemctl --user start painel-operacional.service 2>/dev/null || true
+-systemctl --user start obsidian-app.service 2>/dev/null || true
++# Obsidian não sobe aqui: abre pelo painel, quando você pedir.
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+ # navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+ # LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+@@ -63,25 +63,11 @@ _chromium_aberto() {
+   _p=${_l##*-}
+   [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
+ }
++# Modo programa: o painel abre como janela de aplicativo (sem barra de endereço).
++# As janelas dos modelos e o LibreChat não abrem aqui: abrem pelo painel, quando você clica.
+ if ! _chromium_aberto; then
+-  # Primeira aba: o painel do sistema Agata (/prototipo), que inclui o Conselho em Rede.
+-  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run "$PAINEL/prototipo" http://127.0.0.1:3080 >/dev/null 2>&1 &
+-  # Dá tempo para a janela voltar e para a extensão do Conselho avisar o painel.
++  setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run --app="$PAINEL/prototipo" >/dev/null 2>&1 &
++  # Dá tempo para a janela do painel aparecer e para a extensão do Conselho avisar o painel.
+   sleep 25
+ fi
+-# Provedores que já têm aba aberta (o painel conta pela extensão). "?" = painel não respondeu.
+-_abertos=$(curl -s -m 3 "$PAINEL/api/relay-council/state" | python3 -c 'import sys,json
+-try: print(" ".join(json.load(sys.stdin).get("providers", [])))
+-except Exception: print("?")' 2>/dev/null || echo "?")
+-if [ "$_abertos" != "?" ]; then
+-  for _par in deepseek\|https://chat.deepseek.com/ gemini\|https://gemini.google.com/ zai\|https://chat.z.ai/ \
+-              chatgpt\|https://chatgpt.com/ claude\|https://claude.ai/ grok\|https://grok.com/ \
+-              qwen\|https://qwen.ai/ mistral\|https://chat.mistral.ai/ kimi\|https://www.kimi.com/; do
+-    _id=${_par%%|*}; _url=${_par#*|}
+-    case " $_abertos " in
+-      *" $_id "*) ;;
+-      *) "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" "$_url" >/dev/null 2>&1 & ;;
+-    esac
+-  done
+-fi
+-notify-send -a Seth "Seth" "pronta: LibreChat em http://127.0.0.1:3080" 2>/dev/null || true
++notify-send -a Seth "Seth" "pronta: painel do Agata aberto" 2>/dev/null || true
