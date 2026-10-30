@@ -7,11 +7,15 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por 
 |---|---|---|
 | agata | 11 | skills próprias do sistema |
 | banco-e-infra | 19 |  |
+| contexto-e-custo | 13 |  |
 | frontend-e-design | 44 |  |
-| linguagens | 25 |  |
-| negocios-e-nichos | 140 |  |
+| linguagens | 36 |  |
+| marketing-e-comunicacao | 23 |  |
+| meta-skills | 16 |  |
+| negocios-e-nichos | 54 |  |
 | pesquisa-e-docs | 14 |  |
 | planejamento-e-agentes | 46 |  |
+| qualidade-de-codigo | 23 |  |
 | quarentena | 16 | só consulta; nada carrega sem decisão do Humano |
 | revisao-e-git | 37 |  |
 | seguranca | 16 |  |

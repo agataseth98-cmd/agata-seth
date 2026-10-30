@@ -196,6 +196,7 @@ class Council:
         self.last_poll = None
         self._active_providers = ()
         self._provider_seen_at = 0.0
+        self._legacy_cache = (None, [], 0)  # (data de modificação e tamanho, itens, linhas malformadas)
         with self.db:
             self.db.executescript('''
                 CREATE TABLE IF NOT EXISTS actions (
@@ -206,6 +207,9 @@ class Council:
                   n INTEGER PRIMARY KEY AUTOINCREMENT, action TEXT, status TEXT, ts REAL);
                 CREATE TABLE IF NOT EXISTS groups_ (
                   id TEXT PRIMARY KEY, kind TEXT, prompt TEXT, sites TEXT, synthesis TEXT);
+                CREATE INDEX IF NOT EXISTS actions_status ON actions(status);
+                CREATE INDEX IF NOT EXISTS actions_created ON actions(created);
+                CREATE INDEX IF NOT EXISTS events_action ON events(action);
             ''')
             # Sobreviver a restart não significa ter autorização para repetir.
             for row in self.db.execute("SELECT id,status FROM actions WHERE status IN ('approved','running','executing')").fetchall():
@@ -463,7 +467,14 @@ class Council:
             # Leitura somente; o arquivo original nunca é aberto para escrita.
             items, malformed, seen = [], 0, set()
             path = Path(self.legacy) if self.legacy else None
+            chave = None
             if path and path.is_file():
+                info = path.stat()
+                chave = (info.st_mtime_ns, info.st_size)
+                if chave == self._legacy_cache[0]:
+                    # Arquivo não mudou desde a última leitura: reaproveita o resultado já limpo.
+                    items, malformed = self._legacy_cache[1], self._legacy_cache[2]
+                    return {"schema_version": 1, "items": list(reversed(items))[offset:offset+20], "total": len(items), "malformed": malformed}
                 with path.open(encoding="utf-8") as source:
                     for line in source:
                         try:
@@ -476,6 +487,8 @@ class Council:
                                 items.append({"legacy": True, "data": json.loads(self.clean(json.dumps(item, ensure_ascii=False)))})
                         except (ValueError, UnicodeError):
                             malformed += 1
+            if chave is not None:
+                self._legacy_cache = (chave, items, malformed)
             return {"schema_version": 1, "items": list(reversed(items))[offset:offset+20], "total": len(items), "malformed": malformed}
         with self.lock:
             rows = self.db.execute("SELECT id FROM actions ORDER BY created DESC LIMIT 20 OFFSET ?", (offset,)).fetchall()

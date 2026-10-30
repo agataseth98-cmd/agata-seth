@@ -26,6 +26,25 @@ class CouncilTests(unittest.TestCase):
         self.council.db.close()
         self.temp.cleanup()
 
+    def test_banco_tem_indices_para_status_data_e_eventos(self):
+        nomes = {r[0] for r in self.council.db.execute("SELECT name FROM sqlite_master WHERE type='index'")}
+        self.assertTrue({"actions_status", "actions_created", "events_action"} <= nomes)
+
+    def test_historico_legado_e_relido_so_quando_o_arquivo_muda(self):
+        legado = Path(self.temp.name) / "legado.jsonl"
+        legado.write_text(json.dumps({"id": 1, "text": "um"}) + "\n", encoding="utf-8")
+        conselho = Council(Path(self.temp.name) / "outro", clean=lambda v: v, execute=lambda *_: "mock", legacy=legado)
+        try:
+            self.assertEqual(conselho.history(legacy=True)["total"], 1)
+            with mock.patch("builtins.open", side_effect=AssertionError("releu sem mudança")), \
+                 mock.patch.object(Path, "open", side_effect=AssertionError("releu sem mudança")):
+                self.assertEqual(conselho.history(legacy=True)["total"], 1)
+            with legado.open("a", encoding="utf-8") as f:
+                f.write(json.dumps({"id": 2, "text": "dois"}) + "\n")
+            self.assertEqual(conselho.history(legacy=True)["total"], 2)
+        finally:
+            conselho.db.close()
+
     def test_send_requires_approval_and_single_lease(self):
         action = self.council.create("send", {"site": "gemini", "text": "mock prompt"})
         self.assertEqual(self.council.claim(), [])

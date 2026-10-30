@@ -155,7 +155,7 @@
   "nome": "article-writing",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/article-writing/SKILL.md",
   "resumo": "Write articles, guides, blog posts, tutorials, newsletter issues, and other long-form content in a distinctive voice derived from supplied e"
  },
@@ -163,7 +163,7 @@
   "nome": "automation-audit-ops",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/automation-audit-ops/SKILL.md",
   "resumo": "Evidence-first automation inventory and overlap audit workflow for ECC. Use when the user wants to know which jobs, hooks, connectors, MCP s"
  },
@@ -187,7 +187,7 @@
   "nome": "backend-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/backend-patterns/SKILL.md",
   "resumo": "Backend architecture patterns, API design, database optimization, and server-side best practices for Node.js, Express, and Next.js API route"
  },
@@ -243,7 +243,7 @@
   "nome": "brand-discovery",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/brand-discovery/SKILL.md",
   "resumo": "Run a structured, resumable multi-session brand identity interview across 8 modules (purpose, positioning, audience, personality, voice, nar"
  },
@@ -251,7 +251,7 @@
   "nome": "brand-voice",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/brand-voice/SKILL.md",
   "resumo": "Build a source-derived writing style profile from real posts, essays, launch notes, docs, or site copy, then reuse that profile across conte"
  },
@@ -259,7 +259,7 @@
   "nome": "brownfield-retrospective",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/brownfield-retrospective/SKILL.md",
   "resumo": "Run the ECC engineering process retroactively against an existing project slice. Audit current state, reconstruct past decisions, produce a "
  },
@@ -275,7 +275,7 @@
   "nome": "bun-runtime",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/bun-runtime/SKILL.md",
   "resumo": "Bun as runtime, package manager, bundler, and test runner. When to choose Bun vs Node, migration notes, and Vercel support."
  },
@@ -299,7 +299,7 @@
   "nome": "change-impact",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/change-impact/SKILL.md",
   "resumo": "-"
  },
@@ -331,7 +331,7 @@
   "nome": "click-path-audit",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/click-path-audit/SKILL.md",
   "resumo": "Trace every user-facing button/touchpoint through its full state change sequence to find bugs where functions individually work but cancel e"
  },
@@ -347,7 +347,7 @@
   "nome": "code-tour",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/code-tour/SKILL.md",
   "resumo": "Create CodeTour `.tour` files — persona-targeted, step-by-step walkthroughs with real file and line anchors. Use for onboarding tours, archi"
  },
@@ -371,7 +371,7 @@
   "nome": "coding-standards",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/coding-standards/SKILL.md",
   "resumo": "Baseline cross-project coding conventions for naming, readability, immutability, and code-quality review. Use detailed frontend or backend s"
  },
@@ -379,7 +379,7 @@
   "nome": "competitive-platform-analysis",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/competitive-platform-analysis/SKILL.md",
   "resumo": "Use when scoping a competitive landscape — identifying, categorising, and score-filtering a competitor set before any benchmarking begins. D"
  },
@@ -387,7 +387,7 @@
   "nome": "competitive-report-structure",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/competitive-report-structure/SKILL.md",
   "resumo": "Assemble scored competitor profile cards (from benchmark-methodology) into a decision-grade competitive report with landscape map, competito"
  },
@@ -395,7 +395,7 @@
   "nome": "compose-multiplatform-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/compose-multiplatform-patterns/SKILL.md",
   "resumo": "Compose Multiplatform and Jetpack Compose patterns for KMP projects — state management, navigation, theming, performance, and platform-speci"
  },
@@ -411,7 +411,7 @@
   "nome": "configure-ecc",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/configure-ecc/SKILL.md",
   "resumo": "Run the conversational ECC setup wizard inside the current harness: inventory the install, collect scope (user/project/local) and hook mode "
  },
@@ -419,7 +419,7 @@
   "nome": "connections-optimizer",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/connections-optimizer/SKILL.md",
   "resumo": "Reorganize the user's X and LinkedIn network with review-first pruning, add/follow recommendations, and channel-specific warm outreach draft"
  },
@@ -427,7 +427,7 @@
   "nome": "content-engine",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/content-engine/SKILL.md",
   "resumo": "Create platform-native content systems for X, LinkedIn, TikTok, YouTube, newsletters, and repurposed multi-platform campaigns. Use when the "
  },
@@ -435,7 +435,7 @@
   "nome": "content-hash-cache-pattern",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/content-hash-cache-pattern/SKILL.md",
   "resumo": "Cache expensive file processing results using SHA-256 content hashes — path-independent, auto-invalidating, with service layer separation. U"
  },
@@ -451,7 +451,7 @@
   "nome": "context-budget",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/context-budget/SKILL.md",
   "resumo": "Routes live context checks to the native Codex or Claude Code meter without scanning files, and performs a bounded static component audit on"
  },
@@ -483,7 +483,7 @@
   "nome": "contract-first",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/contract-first/SKILL.md",
   "resumo": "Coordinate frontend/backend or service-to-service work through one authoritative machine-checkable contract (OpenAPI, AsyncAPI, Protocol Buf"
  },
@@ -499,7 +499,7 @@
   "nome": "cost-aware-llm-pipeline",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/cost-aware-llm-pipeline/SKILL.md",
   "resumo": "Cost optimization patterns for LLM API usage — model routing by task complexity, budget tracking, retry logic, and prompt caching. Use when "
  },
@@ -507,7 +507,7 @@
   "nome": "cost-tracking",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/cost-tracking/SKILL.md",
   "resumo": "Track and report Claude Code token usage, spending, and budgets from the local ECC cost-tracker metrics log. Use when the user asks about co"
  },
@@ -555,7 +555,7 @@
   "nome": "crosspost",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/crosspost/SKILL.md",
   "resumo": "Multi-platform content distribution across X, LinkedIn, Threads, and Bluesky. Adapts content per platform using content-engine patterns. Nev"
  },
@@ -611,7 +611,7 @@
   "nome": "data-throughput-accelerator",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/data-throughput-accelerator/SKILL.md",
   "resumo": "Diagnose and accelerate large data movement — ingestion, backfill, export, ETL, warehouse loading, manifest catch-up, and table synchronizat"
  },
@@ -651,7 +651,7 @@
   "nome": "delivery-gate",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/delivery-gate/SKILL.md",
   "resumo": "Stop hook that blocks Claude from finishing until quality checks pass. Detects rationalization patterns (surface text heuristics), stale lea"
  },
@@ -755,7 +755,7 @@
   "nome": "dotnet-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/dotnet-patterns/SKILL.md",
   "resumo": "Idiomatic C# and .NET patterns, conventions, dependency injection, async/await, and best practices for building robust, maintainable .NET ap"
  },
@@ -787,7 +787,7 @@
   "nome": "ecc-recipes",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/ecc-recipes/SKILL.md",
   "resumo": "Map a described workflow to the right ECC command group with run-order and stop condition, or browse all command-group recipe families read "
  },
@@ -795,7 +795,7 @@
   "nome": "ecc-tools-cost-audit",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/ecc-tools-cost-audit/SKILL.md",
   "resumo": "Evidence-first ECC Tools burn and billing audit workflow. Use when investigating runaway PR creation, quota bypass, premium-model leakage, d"
  },
@@ -803,7 +803,7 @@
   "nome": "email-ops",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/email-ops/SKILL.md",
   "resumo": "Evidence-first mailbox triage, drafting, send verification, and sent-mail-safe follow-up workflow for ECC. Use when the user wants to organi"
  },
@@ -827,7 +827,7 @@
   "nome": "error-handling",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/error-handling/SKILL.md",
   "resumo": "Patterns for robust error handling across TypeScript, Python, and Go. Covers typed errors, error boundaries, retries, circuit breakers, and "
  },
@@ -851,7 +851,7 @@
   "nome": "evm-token-decimals",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/evm-token-decimals/SKILL.md",
   "resumo": "Prevent silent decimal mismatch bugs across EVM chains. Covers runtime decimal lookup, chain-aware caching, bridged-token precision drift, a"
  },
@@ -963,7 +963,7 @@
   "nome": "gateguard",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/gateguard/SKILL.md",
   "resumo": "PreToolUse fact-forcing gate that denies the first Edit/Write/Bash (including MultiEdit and NotebookEdit) attempt until the agent presents c"
  },
@@ -1059,7 +1059,7 @@
   "nome": "hermes-imports",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/hermes-imports/SKILL.md",
   "resumo": "Convert local Hermes operator workflows into sanitized ECC skills and release-pack artifacts. Use when preparing a Hermes workflow for publi"
  },
@@ -1123,7 +1123,7 @@
   "nome": "hookify-rules",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/hookify-rules/SKILL.md",
   "resumo": "Create and configure hookify rules — markdown files with YAML frontmatter that match bash, file, prompt, or stop events by regex or conditio"
  },
@@ -1139,7 +1139,7 @@
   "nome": "inherit-legacy-style",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/inherit-legacy-style/SKILL.md",
   "resumo": "Prevent AI style drift on legacy projects by scanning the codebase for implicit conventions, resolving conflicts with the operator one at a "
  },
@@ -1147,7 +1147,7 @@
   "nome": "intent-driven-development",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/intent-driven-development/SKILL.md",
   "resumo": "Turn ambiguous or high-impact product and engineering changes into scoped, verifiable acceptance criteria before or alongside implementation"
  },
@@ -1163,7 +1163,7 @@
   "nome": "investor-materials",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/investor-materials/SKILL.md",
   "resumo": "Create and update pitch decks, one-pagers, investor memos, accelerator applications, financial models, and fundraising materials. Use when t"
  },
@@ -1171,7 +1171,7 @@
   "nome": "investor-outreach",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/investor-outreach/SKILL.md",
   "resumo": "Draft cold emails, warm intro blurbs, follow-ups, update emails, and investor communications for fundraising. Use when the user wants outrea"
  },
@@ -1251,7 +1251,7 @@
   "nome": "jpa-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/jpa-patterns/SKILL.md",
   "resumo": "JPA/Hibernate patterns for entity design, relationships, query optimization, transactions, auditing, indexing, pagination, and pooling in Sp"
  },
@@ -1355,7 +1355,7 @@
   "nome": "latency-critical-systems",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/latency-critical-systems/SKILL.md",
   "resumo": "Optimize and verify latency-sensitive systems — realtime dashboards, market data feeds, streaming agents, execution gateways, queues, and ca"
  },
@@ -1363,7 +1363,7 @@
   "nome": "lead-intelligence",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/lead-intelligence/SKILL.md",
   "resumo": "AI-native lead intelligence and outreach pipeline. Replaces Apollo, Clay, and ZoomInfo with agent-powered signal scoring, mutual ranking, wa"
  },
@@ -1411,7 +1411,7 @@
   "nome": "mailtrap-email-integration",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/mailtrap-email-integration/SKILL.md",
   "resumo": "Guides agents through integrating transactional email sending via Mailtrap's Email API, including sandbox testing, domain verification, and "
  },
@@ -1443,7 +1443,7 @@
   "nome": "marketing-campaign",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/marketing-campaign/SKILL.md",
   "resumo": "End-to-end marketing campaign planning and execution. Covers audience research, positioning, campaign angle definition, landing page copy, e"
  },
@@ -1467,7 +1467,7 @@
   "nome": "mcp-server-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/mcp-server-patterns/SKILL.md",
   "resumo": "Build MCP servers with Node/TypeScript SDK — tools, resources, prompts, Zod validation, stdio vs Streamable HTTP. Use Context7 or official M"
  },
@@ -1475,7 +1475,7 @@
   "nome": "messages-ops",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/messages-ops/SKILL.md",
   "resumo": "Evidence-first live messaging workflow for ECC. Use when the user wants to read texts or DMs, recover a recent one-time code, inspect a thre"
  },
@@ -1499,7 +1499,7 @@
   "nome": "module-governance",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/module-governance/SKILL.md",
   "resumo": "-"
  },
@@ -1507,7 +1507,7 @@
   "nome": "module-regression",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/module-regression/SKILL.md",
   "resumo": "-"
  },
@@ -1539,7 +1539,7 @@
   "nome": "mybatis-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/mybatis-patterns/SKILL.md",
   "resumo": "MyBatis and MyBatis-Spring patterns for mapper design, XML and annotation SQL, result mapping, dynamic SQL safety, transactions, batching, p"
  },
@@ -1555,7 +1555,7 @@
   "nome": "nanoclaw-repl",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/nanoclaw-repl/SKILL.md",
   "resumo": "Operate and extend NanoClaw, ECC's zero-dependency session-aware REPL, with persistent markdown-backed sessions and slash commands for model"
  },
@@ -1643,7 +1643,7 @@
   "nome": "openclaw-persona-forge",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/openclaw-persona-forge/SKILL.md",
   "resumo": "为 OpenClaw AI Agent 锻造完整的龙虾灵魂方案。根据用户偏好或随机抽卡， 输出身份定位、灵魂描述(SOUL.md)、角色化底线规则、名字和头像生图提示词。 如当前环境提供已审核的生图 skill，可自动生成统一风格头像图片。 当用户需要创建、设计或定制 OpenC"
  },
@@ -1803,7 +1803,7 @@
   "nome": "prisma-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/prisma-patterns/SKILL.md",
   "resumo": "Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMan"
  },
@@ -1827,7 +1827,7 @@
   "nome": "production-audit",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/production-audit/SKILL.md",
   "resumo": "Local-evidence production readiness audit for shipped apps, pre-launch reviews, post-merge checks, and \"what breaks in prod?\" questions with"
  },
@@ -1851,7 +1851,7 @@
   "nome": "prompt-caching-strategy",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/prompt-caching-strategy/SKILL.md",
   "resumo": "-"
  },
@@ -1859,7 +1859,7 @@
   "nome": "prompt-optimizer",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/prompt-optimizer/SKILL.md",
   "resumo": "Analyze draft prompts, detect intent and missing context, match ECC commands, skills, and agents, and output a ready-to-paste optimized prom"
  },
@@ -1883,7 +1883,7 @@
   "nome": "pytorch-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/pytorch-patterns/SKILL.md",
   "resumo": "PyTorch deep learning patterns and best practices for building robust, efficient, and reproducible training pipelines, model architectures, "
  },
@@ -2003,7 +2003,7 @@
   "nome": "regex-vs-llm-structured-text",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/regex-vs-llm-structured-text/SKILL.md",
   "resumo": "Decision framework for parsing structured text (quizzes, forms, invoices, receipts, tables) with a hybrid regex-first pipeline — regex extra"
  },
@@ -2019,7 +2019,7 @@
   "nome": "repo-scan",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/repo-scan/SKILL.md",
   "resumo": "Bootstrap pointer that installs the external repo-scan skill from a pinned, reviewable commit. Use when repo-scan must be installed before r"
  },
@@ -2043,7 +2043,7 @@
   "nome": "rules-distill",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/rules-distill/SKILL.md",
   "resumo": "Scan skills to extract cross-cutting principles and distill them into rules — append, revise, or create new rule files. Use when the same pr"
  },
@@ -2067,7 +2067,7 @@
   "nome": "safety-guard",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/safety-guard/SKILL.md",
   "resumo": "Guard against destructive operations with three modes: Careful intercepts dangerous commands (rm -rf, git push --force, DROP TABLE) for conf"
  },
@@ -2075,7 +2075,7 @@
   "nome": "santa-method",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/santa-method/SKILL.md",
   "resumo": "Multi-agent adversarial verification: two independent reviewers with the same rubric must both pass before output ships, with a fix-and-re-r"
  },
@@ -2155,7 +2155,7 @@
   "nome": "seo",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/seo/SKILL.md",
   "resumo": "Audit, plan, and implement SEO improvements across technical SEO, on-page optimization, structured data, Core Web Vitals, and content strate"
  },
@@ -2163,7 +2163,7 @@
   "nome": "skill-comply",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/skill-comply/SKILL.md",
   "resumo": "Visualize whether skills, rules, and agent definitions are actually followed — auto-generates scenarios at 3 prompt strictness levels, runs "
  },
@@ -2171,7 +2171,7 @@
   "nome": "skill-host-compat",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/skill-host-compat/SKILL.md",
   "resumo": "Lint ECC skills for Codex/Cursor-safe frontmatter and Claude-only substitutions before a skill PR."
  },
@@ -2179,7 +2179,7 @@
   "nome": "skill-scout",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/skill-scout/SKILL.md",
   "resumo": "Search existing local, marketplace, GitHub, and web skill sources before creating a new skill. Use when the user wants to create, build, for"
  },
@@ -2187,7 +2187,7 @@
   "nome": "skill-stocktake",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/ecc/skills/skill-stocktake/SKILL.md",
   "resumo": "Use when auditing Claude skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential"
  },
@@ -2195,7 +2195,7 @@
   "nome": "social-graph-ranker",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/social-graph-ranker/SKILL.md",
   "resumo": "Weighted social-graph ranking for warm intro discovery, bridge scoring, and network gap analysis across X and LinkedIn. Use when the user wa"
  },
@@ -2203,7 +2203,7 @@
   "nome": "social-publisher",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/social-publisher/SKILL.md",
   "resumo": "Agent-driven scheduling and publishing of social media posts across 13 platforms via SocialClaw. Use when the user wants to publish to X, Li"
  },
@@ -2243,7 +2243,7 @@
   "nome": "story-lifecycle",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/story-lifecycle/SKILL.md",
   "resumo": "Manage a file-based epic → story → sprint development loop without requiring an external project management tool. Creates and tracks epics, "
  },
@@ -2251,7 +2251,7 @@
   "nome": "strategic-compact",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/strategic-compact/SKILL.md",
   "resumo": "Suggests manual context compaction at logical intervals to preserve context through task phases rather than arbitrary auto-compaction. Use w"
  },
@@ -2371,7 +2371,7 @@
   "nome": "tinystruct-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/tinystruct-patterns/SKILL.md",
   "resumo": "Expert guidance for developing with the tinystruct Java framework. Use when working on the tinystruct codebase or any project built on tinys"
  },
@@ -2379,7 +2379,7 @@
   "nome": "token-budget-advisor",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/token-budget-advisor/SKILL.md",
   "resumo": "Offer a choice of response depth (25%/50%/75%/100%) with token estimates before answering, then answer at that level. Use when the user asks"
  },
@@ -2387,7 +2387,7 @@
   "nome": "token-card",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/skills/token-card/SKILL.md",
   "resumo": "Render a token-usage stat card from local Claude Code, Codex, Gemini CLI, and OpenCode session logs and commit it into the repository as a f"
  },
@@ -2435,7 +2435,7 @@
   "nome": "unified-notifications-ops",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/unified-notifications-ops/SKILL.md",
   "resumo": "Operate notifications as one ECC-native workflow across GitHub, Linear, desktop alerts, hooks, and connected communication surfaces. Use whe"
  },
@@ -2475,7 +2475,7 @@
   "nome": "vite-patterns",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "linguagens",
   "caminho": "ferramentas/fontes/ecc/skills/vite-patterns/SKILL.md",
   "resumo": "Vite build tool patterns including config, plugins, HMR, env variables, proxy setup, SSR, library mode, dependency pre-bundling, and build o"
  },
@@ -2499,7 +2499,7 @@
   "nome": "workspace-surface-audit",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/skills/workspace-surface-audit/SKILL.md",
   "resumo": "Audit the active repo, MCP servers, plugins, connectors, env surfaces, and harness setup, then recommend the highest-value ECC-native skills"
  },
@@ -2507,7 +2507,7 @@
   "nome": "x-api",
   "tipo": "skill",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/skills/x-api/SKILL.md",
   "resumo": "X/Twitter API integration for posting tweets, threads, reading timelines, search, and analytics. Covers OAuth auth patterns, rate limits, an"
  },
@@ -2571,7 +2571,7 @@
   "nome": "code-explorer",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/code-explorer.md",
   "resumo": "Deeply analyzes existing codebase features by tracing execution paths, mapping architecture layers, and documenting dependencies to inform n"
  },
@@ -2587,7 +2587,7 @@
   "nome": "code-simplifier",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/code-simplifier.md",
   "resumo": "Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Focus on recently modified code unless "
  },
@@ -2595,7 +2595,7 @@
   "nome": "comment-analyzer",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/comment-analyzer.md",
   "resumo": "Analyze code comments for accuracy, completeness, maintainability, and comment rot risk."
  },
@@ -2899,7 +2899,7 @@
   "nome": "performance-optimizer",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "contexto-e-custo",
   "caminho": "ferramentas/fontes/ecc/agents/performance-optimizer.md",
   "resumo": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, "
  },
@@ -2971,7 +2971,7 @@
   "nome": "refactor-cleaner",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/refactor-cleaner.md",
   "resumo": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools ("
  },
@@ -3011,7 +3011,7 @@
   "nome": "seo-specialist",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "marketing-e-comunicacao",
   "caminho": "ferramentas/fontes/ecc/agents/seo-specialist.md",
   "resumo": "SEO specialist for technical SEO audits, on-page optimization, structured data, Core Web Vitals, and content/keyword mapping. Use for site a"
  },
@@ -3019,7 +3019,7 @@
   "nome": "silent-failure-hunter",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/silent-failure-hunter.md",
   "resumo": "Review code for silent failures, swallowed errors, bad fallbacks, and missing error propagation."
  },
@@ -3027,7 +3027,7 @@
   "nome": "spec-miner",
   "tipo": "agente",
   "fonte": "ecc",
-  "tema": "negocios-e-nichos",
+  "tema": "qualidade-de-codigo",
   "caminho": "ferramentas/fontes/ecc/agents/spec-miner.md",
   "resumo": "Extracts behavioral specs from existing codebases for OpenSpec. Produces flat Requirement and Invariant blocks with structured metadata (ent"
  },
@@ -3171,7 +3171,7 @@
   "nome": "using-superpowers",
   "tipo": "skill",
   "fonte": "superpowers",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/superpowers/skills/using-superpowers/SKILL.md",
   "resumo": "Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarif"
  },
@@ -3195,7 +3195,7 @@
   "nome": "writing-skills",
   "tipo": "skill",
   "fonte": "superpowers",
-  "tema": "negocios-e-nichos",
+  "tema": "meta-skills",
   "caminho": "ferramentas/fontes/superpowers/skills/writing-skills/SKILL.md",
   "resumo": "Use when creating new skills, editing existing skills, or verifying skills work before deployment"
  },
