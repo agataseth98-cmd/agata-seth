@@ -1,0 +1,56 @@
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index 71569abe..dc8b37a7 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -5,7 +5,7 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ 
+ | Tema | Peças | Observação |
+ |---|---|---|
+-| agata | 11 | skills próprias do sistema |
++| agata | 12 | skills próprias do sistema |
+ | banco-e-infra | 19 |  |
+ | contexto-e-custo | 13 |  |
+ | frontend-e-design | 44 |  |
+@@ -21,4 +21,4 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ | seguranca | 16 |  |
+ | testes | 43 |  |
+ 
+-Total: 411 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
++Total: 412 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index d924c51c..825235ee 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -3286,5 +3286,13 @@
+   "tema": "agata",
+   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
+   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
++ },
++ {
++  "nome": "elephant-goldfish-sdd",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/elephant-goldfish-sdd/SKILL.md",
++  "resumo": "Orientar o Humano e os modelos a aplicar SDD 2.0 em funcionalidades grandes ou arriscadas: contexto profundo para desenhar, revisão independ"
+  }
+ ]
+diff --git a/ferramentas/test_ferramentas.py b/ferramentas/test_ferramentas.py
+index dcad9693..99564537 100644
+--- a/ferramentas/test_ferramentas.py
++++ b/ferramentas/test_ferramentas.py
+@@ -9,9 +9,11 @@ RAIZ = Path(__file__).resolve().parent
+ 
+ class FerramentasTests(unittest.TestCase):
+     def test_indice_em_dia(self):
+-        antes = (RAIZ / "indice.json").read_text(encoding="utf-8")
+-        subprocess.run([sys.executable, "-I", str(RAIZ / "ferramentas.py"), "reindexar"], check=True, capture_output=True)
+-        self.assertEqual(antes, (RAIZ / "indice.json").read_text(encoding="utf-8"))
++        # compara em memória; não reescreve INDICE.md nem indice.json
++        sys.path.insert(0, str(RAIZ))
++        import ferramentas
++        gravado = json.loads((RAIZ / "indice.json").read_text(encoding="utf-8"))
++        self.assertEqual(gravado, ferramentas.varrer())
+ 
+     def test_quarentena_nao_vaza_para_outros_temas(self):
+         for p in json.loads((RAIZ / "indice.json").read_text(encoding="utf-8")):
