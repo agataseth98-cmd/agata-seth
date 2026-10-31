@@ -9,9 +9,11 @@ RAIZ = Path(__file__).resolve().parent
 
 class FerramentasTests(unittest.TestCase):
     def test_indice_em_dia(self):
-        antes = (RAIZ / "indice.json").read_text(encoding="utf-8")
-        subprocess.run([sys.executable, "-I", str(RAIZ / "ferramentas.py"), "reindexar"], check=True, capture_output=True)
-        self.assertEqual(antes, (RAIZ / "indice.json").read_text(encoding="utf-8"))
+        # compara em memória; não reescreve INDICE.md nem indice.json
+        sys.path.insert(0, str(RAIZ))
+        import ferramentas
+        gravado = json.loads((RAIZ / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual(gravado, ferramentas.varrer())
 
     def test_quarentena_nao_vaza_para_outros_temas(self):
         for p in json.loads((RAIZ / "indice.json").read_text(encoding="utf-8")):

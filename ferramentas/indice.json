@@ -3286,5 +3286,13 @@
   "tema": "agata",
   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+ },
+ {
+  "nome": "elephant-goldfish-sdd",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/elephant-goldfish-sdd/SKILL.md",
+  "resumo": "Orientar o Humano e os modelos a aplicar SDD 2.0 em funcionalidades grandes ou arriscadas: contexto profundo para desenhar, revisão independ"
  }
 ]
