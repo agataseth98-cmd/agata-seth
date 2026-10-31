@@ -1,0 +1,10 @@
+Aprovado pelo Humano em 2026-10-31 15:22 -0300.
+Motivo: Aprovo a correção CSP para permitir somente o iframe local do Operator Console
+nome: agata-painel-console-csp-20261031
+diff-sha256: 8c8976e951f6a7135ab104ec83665bdbd10e87de3d894c86732b2e3cab30b671
+-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgQiF+i+tkIxDq6DZFreEfGHYS7W
+ldG0CK49K5po7XxlwAAAASYWdhdGEtYXByb3ZhY2FvLXA4AAAAAAAAAAZzaGE1MTIAAABT
+AAAAC3NzaC1lZDI1NTE5AAAAQCDKyHXa3j1Exl5zWqCztTGI5n4f5ixMSNYePzrhZWd1zt
++ontkI6ucRp3CJ8NcwDJTYvR8w1WL33oDenSFrSAk=
+-----END SSH SIGNATURE-----
