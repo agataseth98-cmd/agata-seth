@@ -1,0 +1,33 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8dd78112..f71dd40a 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1090,11 +1090,12 @@ class Handler(BaseHTTPRequestHandler):
+         self.send_header("Referrer-Policy", "no-referrer")
+         for name, value in extra_headers:
+             self.send_header(name, value)
++        frame_ancestors = "'self'" if self.path.startswith("/operator_console") else "'none'"
+         self.send_header(
+             "Content-Security-Policy",
+             "default-src 'none'; script-src 'self'; style-src 'self'; frame-src 'self'; "
+             "connect-src 'self'; img-src 'self'; base-uri 'none'; "
+-            "frame-ancestors 'none'",
++            f"frame-ancestors {frame_ancestors}",
+         )
+         self.end_headers()
+         self.wfile.write(body)
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index be0b90d7..7d4e51d0 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -199,6 +199,10 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
++        _, _, console_headers = self.request("GET", "/operator_console/")
++        self.assertIn("frame-ancestors 'self'", console_headers["Content-Security-Policy"])
++        _, _, panel_headers = self.request("GET", "/prototipo")
++        self.assertIn("frame-ancestors 'none'", panel_headers["Content-Security-Policy"])
+         with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
+             code, body, headers = self.request("GET", "/api/status")
+         self.assertEqual(code, 200)

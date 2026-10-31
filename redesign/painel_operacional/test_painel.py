@@ -199,6 +199,10 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
         self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
+        _, _, console_headers = self.request("GET", "/operator_console/")
+        self.assertIn("frame-ancestors 'self'", console_headers["Content-Security-Policy"])
+        _, _, panel_headers = self.request("GET", "/prototipo")
+        self.assertIn("frame-ancestors 'none'", panel_headers["Content-Security-Policy"])
         with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
             code, body, headers = self.request("GET", "/api/status")
         self.assertEqual(code, 200)
