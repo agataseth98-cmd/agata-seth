@@ -537,3 +537,5 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 
 /* Links dos modelos dentro do Conselho */
 .modelos-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.modelos-links .abrir-titulo{width:100%}.modelos-links .btn{min-height:0;padding:6px 10px;font-size:12px}
+.operator-console-frame { padding: 0; overflow: hidden; }
+.operator-console-frame iframe { display: block; width: 100%; min-height: 78vh; border: 0; background: #0a1110; }
