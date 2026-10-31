@@ -197,6 +197,7 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
         self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
+        self.assertEqual(self.request("GET", "/operator_console/index.html")[0], 200)
         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
         self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
         _, _, console_headers = self.request("GET", "/operator_console/")

@@ -92,6 +92,7 @@ _ASSETS = {
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
+    "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/style.css": ("operator_console/style.css", "text/css; charset=utf-8"),
     "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
     "/conselho-rede": ("conselho-rede/index.html", "text/html; charset=utf-8"),

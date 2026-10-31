@@ -1,0 +1,24 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index f71dd40a..524552b1 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -92,6 +92,7 @@ _ASSETS = {
+     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
++    "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/style.css": ("operator_console/style.css", "text/css; charset=utf-8"),
+     "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
+     "/conselho-rede": ("conselho-rede/index.html", "text/html; charset=utf-8"),
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 7d4e51d0..e4f3d22e 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -197,6 +197,7 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
+         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
++        self.assertEqual(self.request("GET", "/operator_console/index.html")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
+         _, _, console_headers = self.request("GET", "/operator_console/")
