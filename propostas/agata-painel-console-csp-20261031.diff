@@ -1,0 +1,13 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 34f686eb..8dd78112 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1092,7 +1092,7 @@ class Handler(BaseHTTPRequestHandler):
+             self.send_header(name, value)
+         self.send_header(
+             "Content-Security-Policy",
+-            "default-src 'none'; script-src 'self'; style-src 'self'; "
++            "default-src 'none'; script-src 'self'; style-src 'self'; frame-src 'self'; "
+             "connect-src 'self'; img-src 'self'; base-uri 'none'; "
+             "frame-ancestors 'none'",
+         )
