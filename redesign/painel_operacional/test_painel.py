@@ -196,6 +196,9 @@ class HttpTests(unittest.TestCase):
     def test_html_e_status_sao_servidos_e_origem_cruzada_recusada(self):
         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
+        self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
+        self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
+        self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
         with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
             code, body, headers = self.request("GET", "/api/status")
         self.assertEqual(code, 200)
