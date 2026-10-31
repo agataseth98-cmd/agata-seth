@@ -1,0 +1,29 @@
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index af0fe312..34f686eb 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -90,6 +90,10 @@ _ASSETS = {
+     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
+     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
++    "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
++    "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
++    "/operator_console/style.css": ("operator_console/style.css", "text/css; charset=utf-8"),
++    "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
+     "/conselho-rede": ("conselho-rede/index.html", "text/html; charset=utf-8"),
+     "/conselho-rede/": ("conselho-rede/index.html", "text/html; charset=utf-8"),
+     "/conselho-rede/style.css": ("conselho-rede/style.css", "text/css; charset=utf-8"),
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 585bd193..be0b90d7 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -196,6 +196,9 @@ class HttpTests(unittest.TestCase):
+     def test_html_e_status_sao_servidos_e_origem_cruzada_recusada(self):
+         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
+         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
++        self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
++        self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
++        self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
+         with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
+             code, body, headers = self.request("GET", "/api/status")
+         self.assertEqual(code, 200)
