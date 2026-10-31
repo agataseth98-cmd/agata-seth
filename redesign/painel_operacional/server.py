@@ -1090,11 +1090,12 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Referrer-Policy", "no-referrer")
         for name, value in extra_headers:
             self.send_header(name, value)
+        frame_ancestors = "'self'" if self.path.startswith("/operator_console") else "'none'"
         self.send_header(
             "Content-Security-Policy",
             "default-src 'none'; script-src 'self'; style-src 'self'; frame-src 'self'; "
             "connect-src 'self'; img-src 'self'; base-uri 'none'; "
-            "frame-ancestors 'none'",
+            f"frame-ancestors {frame_ancestors}",
         )
         self.end_headers()
         self.wfile.write(body)
