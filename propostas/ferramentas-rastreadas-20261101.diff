@@ -1,0 +1,61 @@
+diff --git a/ferramentas/ferramentas.py b/ferramentas/ferramentas.py
+index 0fcdb300..9a70c54b 100644
+--- a/ferramentas/ferramentas.py
++++ b/ferramentas/ferramentas.py
+@@ -9,6 +9,7 @@ Só lê arquivos; não executa nada do que está em fontes/.
+ """
+ import json
+ import re
++import subprocess
+ import sys
+ from pathlib import Path
+ 
+@@ -66,6 +67,17 @@ def tema_de(nome: str) -> str:
+     return "negocios-e-nichos"
+ 
+ 
++def skills_proprias(base: Path) -> list:
++    """SKILL.md das skills próprias: só as versionadas, para o índice ser igual em qualquer clone.
++    Fora de um repositório git, cai na busca no disco."""
++    r = subprocess.run(["git", "-C", str(REPO), "ls-files", "--", str(base.relative_to(REPO))],
++                       capture_output=True, text=True)
++    if r.returncode != 0:
++        return sorted(base.glob("*/SKILL.md"))
++    fundo = len(base.relative_to(REPO).parts) + 2  # <base>/<skill>/SKILL.md
++    return sorted(REPO / l for l in r.stdout.splitlines() if l.endswith("/SKILL.md") and len(l.split("/")) == fundo)
++
++
+ def varrer() -> list:
+     pecas = []
+     for fonte, base in FONTES.items():
+@@ -79,7 +91,7 @@ def varrer() -> list:
+             pecas.append({"nome": ag.stem, "tipo": "agente", "fonte": fonte, "tema": tema_de(ag.stem),
+                           "caminho": str(ag.relative_to(REPO)), "resumo": f.get("description", "")[:140]})
+     for base in PROPRIAS:
+-        for skill in sorted(base.glob("*/SKILL.md")):
++        for skill in skills_proprias(base):
+             f = frontmatter(skill)
+             pecas.append({"nome": skill.parent.name, "tipo": "skill", "fonte": "agata", "tema": "agata",
+                           "caminho": str(skill.relative_to(REPO)), "resumo": f.get("description", "")[:140]})
+diff --git a/ferramentas/test_ferramentas.py b/ferramentas/test_ferramentas.py
+index 99564537..412e863a 100644
+--- a/ferramentas/test_ferramentas.py
++++ b/ferramentas/test_ferramentas.py
+@@ -15,6 +15,17 @@ class FerramentasTests(unittest.TestCase):
+         gravado = json.loads((RAIZ / "indice.json").read_text(encoding="utf-8"))
+         self.assertEqual(gravado, ferramentas.varrer())
+ 
++    def test_skills_proprias_sao_so_as_versionadas(self):
++        sys.path.insert(0, str(RAIZ))
++        import ferramentas
++        base = ferramentas.PROPRIAS[0]
++        r = subprocess.run(["git", "-C", str(ferramentas.REPO), "ls-files", "--", str(base.relative_to(ferramentas.REPO))],
++                           capture_output=True, text=True)
++        if r.returncode != 0:
++            self.skipTest("fora de um repositório git")
++        for skill in ferramentas.skills_proprias(base):
++            self.assertTrue(str(skill.relative_to(ferramentas.REPO)) in r.stdout.splitlines())
++
+     def test_quarentena_nao_vaza_para_outros_temas(self):
+         for p in json.loads((RAIZ / "indice.json").read_text(encoding="utf-8")):
+             if p["nome"] in ("continuous-learning-v2", "unified-memory", "agentic-os"):
