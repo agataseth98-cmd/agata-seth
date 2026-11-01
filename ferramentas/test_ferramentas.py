@@ -15,6 +15,17 @@ class FerramentasTests(unittest.TestCase):
         gravado = json.loads((RAIZ / "indice.json").read_text(encoding="utf-8"))
         self.assertEqual(gravado, ferramentas.varrer())
 
+    def test_skills_proprias_sao_so_as_versionadas(self):
+        sys.path.insert(0, str(RAIZ))
+        import ferramentas
+        base = ferramentas.PROPRIAS[0]
+        r = subprocess.run(["git", "-C", str(ferramentas.REPO), "ls-files", "--", str(base.relative_to(ferramentas.REPO))],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            self.skipTest("fora de um repositório git")
+        for skill in ferramentas.skills_proprias(base):
+            self.assertTrue(str(skill.relative_to(ferramentas.REPO)) in r.stdout.splitlines())
+
     def test_quarentena_nao_vaza_para_outros_temas(self):
         for p in json.loads((RAIZ / "indice.json").read_text(encoding="utf-8")):
             if p["nome"] in ("continuous-learning-v2", "unified-memory", "agentic-os"):
