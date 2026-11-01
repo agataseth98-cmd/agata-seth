@@ -9,6 +9,7 @@ Só lê arquivos; não executa nada do que está em fontes/.
 """
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -66,6 +67,17 @@ def tema_de(nome: str) -> str:
     return "negocios-e-nichos"
 
 
+def skills_proprias(base: Path) -> list:
+    """SKILL.md das skills próprias: só as versionadas, para o índice ser igual em qualquer clone.
+    Fora de um repositório git, cai na busca no disco."""
+    r = subprocess.run(["git", "-C", str(REPO), "ls-files", "--", str(base.relative_to(REPO))],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        return sorted(base.glob("*/SKILL.md"))
+    fundo = len(base.relative_to(REPO).parts) + 2  # <base>/<skill>/SKILL.md
+    return sorted(REPO / l for l in r.stdout.splitlines() if l.endswith("/SKILL.md") and len(l.split("/")) == fundo)
+
+
 def varrer() -> list:
     pecas = []
     for fonte, base in FONTES.items():
@@ -79,7 +91,7 @@ def varrer() -> list:
             pecas.append({"nome": ag.stem, "tipo": "agente", "fonte": fonte, "tema": tema_de(ag.stem),
                           "caminho": str(ag.relative_to(REPO)), "resumo": f.get("description", "")[:140]})
     for base in PROPRIAS:
-        for skill in sorted(base.glob("*/SKILL.md")):
+        for skill in skills_proprias(base):
             f = frontmatter(skill)
             pecas.append({"nome": skill.parent.name, "tipo": "skill", "fonte": "agata", "tema": "agata",
                           "caminho": str(skill.relative_to(REPO)), "resumo": f.get("description", "")[:140]})
