@@ -20,6 +20,8 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada 
 ## Skills de terceiros (cópias fixas, não editar aqui)
 - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
 
+- `design-taste-frontend` (tasteskill v2, fonte: github.com/Leonxlnx/taste-skill): direção de arte e inspeção de páginas de frontend. Cópia fixa em `.agents/skills`; não editar aqui. Para o Claude Code carregá-la, crie o link local `ln -s ../../.agents/skills/design-taste-frontend .claude/skills/design-taste-frontend` (link não versionado: o P-8 não verifica symlink). Os scripts abrem um Chrome headless e `assets.mjs` acessa a rede; ver `propostas/design-taste-frontend-v2-20261031.md`.
+
 ## Regras de manutenção
 1. Cada skill cita só caminhos que existem. Antes de salvar, confira: `python3 -c` com `os.path.exists` sobre os caminhos entre crases.
 2. Uma skill por assunto. Se um assunto já tem skill, acrescente à skill, não crie outra.

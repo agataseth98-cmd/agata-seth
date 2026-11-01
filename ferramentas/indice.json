@@ -3288,6 +3288,14 @@
   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
  },
  {
+  "nome": "design-taste-frontend",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/design-taste-frontend/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "elephant-goldfish-sdd",
   "tipo": "skill",
   "fonte": "agata",
