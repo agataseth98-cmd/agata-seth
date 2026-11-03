@@ -69,9 +69,12 @@ def _listar_disco(caminho_url: str):
     rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
     if any(p.startswith(".") for p in rel.split("/") if p):
         return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
-    alvo = os.path.realpath(os.path.join(VAULT, rel))
-    if alvo != VAULT and not alvo.startswith(VAULT + os.sep):
-        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
+    if not rel:
+        alvo = VAULT
+    else:
+        alvo = os.path.realpath(os.path.join(VAULT, rel))
+        if not alvo.startswith(VAULT + os.sep):
+            return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
     if not os.path.isdir(alvo):
         return None
     def _tem_arquivo(d):
@@ -84,12 +87,11 @@ def _listar_disco(caminho_url: str):
     for nome in sorted(os.listdir(alvo)):
         if nome.startswith("."):
             continue
-        c = os.path.join(alvo, nome)
-        real = os.path.realpath(c)
-        if real != VAULT and not real.startswith(VAULT + os.sep):
+        real = os.path.realpath(os.path.join(alvo, nome))
+        if not real.startswith(VAULT + os.sep):
             continue
-        if os.path.isdir(c):
-            if _tem_arquivo(c):
+        if os.path.isdir(real):
+            if _tem_arquivo(real):
                 itens.append(nome + "/")
         else:
             itens.append(nome)

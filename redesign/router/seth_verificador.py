@@ -368,6 +368,10 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None) 
 
 def _executar(nome: str, n: int | None, prop_nome: str | None = None,
               consulta: str | None = None) -> str:
+    permitidos = {k: k for k in COMANDOS}
+    if nome not in permitidos:
+        raise ValueError(f"comando fora da lista: {str(nome)[:40]!r}")
+    nome = permitidos[nome]  # só chave da lista fechada segue adiante: o executável nunca vem do pedido
     argv = _argv(nome, n, prop_nome, consulta)
     _, timeout, _desc = COMANDOS[nome]
     try:
