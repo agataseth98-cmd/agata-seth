@@ -31,6 +31,7 @@ if str(WEB) not in sys.path:
     sys.path.insert(0, str(WEB))
 import armazem  # noqa: E402
 import qualidade_llm  # noqa: E402
+import medicoes_painel  # noqa: E402
 import sdd_painel  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
@@ -1030,6 +1031,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/medicoes/estado":
+            observed_at, fresh_until = _reading_window()
+            body = json.dumps({**medicoes_painel.estado(), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/sdd/estado":
             observed_at, fresh_until = _reading_window()
             body = json.dumps({**sdd_painel.estado(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
@@ -1119,7 +1124,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_chat()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
-        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -1136,6 +1141,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
         if not isinstance(payload, dict):
             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
+        if self.path == "/api/medicoes/executar":
+            try:
+                resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"))
+            except ValueError:
+                return self._send(400, "text/plain; charset=utf-8", b"invalid measurement")
+            except RuntimeError:
+                return self._send(429, "text/plain; charset=utf-8", b"measurement busy")
+            body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
+            return self._send(202, "application/json; charset=utf-8", body)
         if self.path == "/api/sdd/executar":
             if not _SDD_LOCK.acquire(blocking=False):
                 return self._send(429, "text/plain; charset=utf-8", b"sdd busy")

@@ -1,7 +1,7 @@
 "use strict";
 
 const byId = (id) => document.getElementById(id);
-const nav = [...document.querySelectorAll(".nav button")];
+const nav = [...document.querySelectorAll(".nav button[data-page]")];
 const pages = [...document.querySelectorAll(".page")];
 const shell = document.querySelector(".shell");
 const sidebarToggle = byId("sidebar-toggle");
@@ -47,6 +47,13 @@ function filterSearch(value) {
   const empty = byId("no-results");
   if (empty) empty.classList.toggle("show", active.id === "page-capacidades" && cards.length > 0 && visible === 0);
 }
+function alternarGrupo(grupo, abrir) {
+  const toggle = grupo.querySelector(".nav-group-toggle"); const sub = grupo.querySelector(".nav-sub");
+  if (!toggle || !sub) return;
+  const aberto = abrir === undefined ? toggle.getAttribute("aria-expanded") !== "true" : abrir;
+  toggle.setAttribute("aria-expanded", String(aberto)); sub.hidden = !aberto;
+}
+document.querySelectorAll(".nav-group-toggle").forEach((toggle) => toggle.addEventListener("click", () => alternarGrupo(toggle.closest(".nav-group"))));
 function showPage(name) {
   const page = byId("page-" + name);
   if (!page) return;
@@ -54,6 +61,11 @@ function showPage(name) {
   nav.forEach((button) => {
     if (button.dataset.page === name) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
+  });
+  document.querySelectorAll(".nav-group").forEach((grupo) => {
+    const atual = !!grupo.querySelector('button[data-page][aria-current="page"]');
+    grupo.classList.toggle("tem-pagina-atual", atual);
+    if (atual) alternarGrupo(grupo, true);
   });
   byId("crumb").textContent = "Agata / " + (page.dataset.title || "Panorama");
   search.value = "";
@@ -63,7 +75,7 @@ function showPage(name) {
   if (name === "grafo") carregarGrafo();
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
   if (name === "visao") carregarVisaoSistema();
-  if (name === "qualidade") carregarQualidade();
+  if (name === "qualidade") { carregarQualidade(); carregarMedicoes(); }
   if (name === "sdd") carregarSdd();
   if (name === "conselho") loadRelayCatalog();
 }
@@ -850,6 +862,38 @@ async function carregarSdd() {
     linha.append(nome, resumo, nota, acoes); lista.append(linha);
   });
 }
+let medicaoTimer = null;
+async function carregarMedicoes() {
+  const nota = byId("medir-nota"); const sel = byId("medir-modelo");
+  if (!nota || !sel) return;
+  let d = null;
+  try { d = await fetchJson("/api/medicoes/estado", {headers: {Accept: "application/json"}}); } catch (_) { d = null; }
+  if (!d) { nota.textContent = "Medições indisponíveis."; return; }
+  const atual = sel.value; sel.replaceChildren();
+  (d.modelos || []).forEach((m) => { const o = document.createElement("option"); o.value = m; o.textContent = m; sel.append(o); });
+  if (atual) sel.value = atual;
+  const j = d.job || {};
+  if (j.estado === "rodando") {
+    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo : "") + "…";
+    if (!medicaoTimer) medicaoTimer = setInterval(carregarMedicoes, 4000);
+  } else {
+    if (medicaoTimer) { clearInterval(medicaoTimer); medicaoTimer = null; carregarQualidade(); }
+    if (j.estado === "ok" || j.estado === "falhou") nota.textContent = (j.estado === "ok" ? "Concluído" : "Falhou") + ": " + j.acao + (j.modelo ? " em " + j.modelo : "") + " (" + j.segundos + " s). " + (j.detalhe || "");
+  }
+}
+function ligarMedicao(botao, rotulo, pedido) {
+  let armado = false;
+  botao.addEventListener("click", async () => {
+    if (!armado) { armado = true; botao.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
+    armado = false; botao.textContent = rotulo; botao.disabled = true;
+    try {
+      await fetchJson("/api/medicoes/executar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(pedido())});
+    } catch (_) { byId("medir-nota").textContent = "Não foi possível iniciar (ocupado ou fora da lista)."; }
+    botao.disabled = false; carregarMedicoes();
+  });
+}
+ligarMedicao(byId("medir-recuperacao"), "Medir recuperação da busca", () => ({acao: "recuperacao"}));
+ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value}));
 async function carregarQualidade() {
   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
   if (!kpis || !lista) return;

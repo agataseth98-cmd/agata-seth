@@ -7,6 +7,7 @@ Cada indicador diz o que mediu e como; o que ainda não tem medição sai como `
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -18,8 +19,6 @@ RESERVADAS = ("anthropic", "claude")
 ORCAMENTO_HIDRATACAO = 25_000
 FAMILIAS_FALHAS = ("FAB", "MED", "IDF", "ART", "CIT", "SIN", "INT")
 NAO_MEDIDOS = (
-    ("recall_busca", "Recuperação: 1 − recall@k da busca", "sem conjunto de ouro de recuperação"),
-    ("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "sem teste de agulha nem RULER"),
     ("cache_prompt", "Cache de prompt (acerto e custo)", "nenhum uso de cache encontrado na busca de 03/11/2026"),
     ("esforco", "Esforço de raciocínio por tarefa", "sem tabela por tipo de tarefa"),
 )
@@ -113,6 +112,37 @@ def _ind(id_, titulo, estado, valor, evidencia, fonte):
     return {"id": id_, "titulo": titulo, "estado": estado, "valor": valor, "evidencia": evidencia, "fonte": fonte}
 
 
+def _medicoes() -> list[dict]:
+    """Indicadores que dependem de medição pesada salva pelo painel; sem arquivo, saem como não medidos."""
+    pasta = Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
+    def ler(arq):
+        try:
+            return json.loads(arq.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+    rec = ler(pasta / "recuperacao.json")
+    if rec and isinstance(rec.get("recall"), dict):
+        r5 = rec["recall"].get("5", 0)
+        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "ok" if r5 >= 0.9 else "warning",
+                 f"recall@1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})",
+                 f"Medido em {rec.get('medido_em', '?')} só para busca léxica por conteúdo; paráfrase e busca semântica: não medido.",
+                 "scripts/medir_recuperacao.py")
+    else:
+        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "unknown", "não medido",
+                 "rode a medição na aba Qualidade de LLM (leitura do vault; sem modelo)", "scripts/medir_recuperacao.py")
+    modelos = [d for d in (ler(x) for x in sorted(pasta.glob("contexto-*.json"))) if d and "linhas" in d]
+    if modelos:
+        partes = [f"{d.get('modelo', '?')}: " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
+        pior = min((d.get("efetivo_tokens") or 0) for d in modelos)
+        b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "warning" if pior < 16384 else "ok",
+                 " · ".join(partes), "Teste de agulha em 3 profundidades; mede só recuperação simples, não o RULER completo.",
+                 "scripts/medir_contexto_efetivo.py")
+    else:
+        b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "unknown", "não medido",
+                 "escolha um modelo local na aba Qualidade de LLM e rode a medição (gasta GPU e minutos)", "scripts/medir_contexto_efetivo.py")
+    return [a, b]
+
+
 def indicadores(raiz: Path = ROOT) -> list[dict]:
     saida = []
     skills = lint_skills(raiz)
@@ -140,6 +170,7 @@ def indicadores(raiz: Path = ROOT) -> list[dict]:
                       "sem leitura" if h is None else f"{h['memorias_chars']} caracteres; orçamento {h['orcamento']}",
                       "Contexto longo degrada (Chroma 2025; RULER 2024); P-24 avisa e a escalada para FALHA ainda não existe.",
                       "MEMÓRIAS.md; scripts/gerar_mapa_projeto.py (LIMITE_CHARS)"))
+    saida += _medicoes()
     for id_, titulo, motivo in NAO_MEDIDOS:
         saida.append(_ind(id_, titulo, "unknown", "não medido", motivo, "mapa.md da skill agata-llm-fundamentos"))
     return saida
@@ -151,6 +182,7 @@ def snapshot(raiz: Path = ROOT) -> dict:
 
 def _selftest() -> int:
     import tempfile
+    os.environ["AGATA_MEDICOES_DIR"] = tempfile.mkdtemp()
     falhou = 0
     def conferir(nome, cond):
         nonlocal falhou

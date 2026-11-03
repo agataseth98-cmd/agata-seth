@@ -301,14 +301,25 @@ def _estado_medir() -> str:
         return ""
 
 
-def _linha_propostas() -> str:
+def _linha_propostas(pasta: Path | None = None) -> str:
     """(695) Nomes das propostas abertas (`.diff` sem `APROVADO-`) -- a Seth afirmava
-    pendente o que já estava em propostas/aplicadas/, lendo uma entrada antiga."""
-    pasta = REPO / "propostas"
-    abertas = sorted(d.stem for d in pasta.glob("*.diff") if not (pasta / f"APROVADO-{d.stem}").exists())
-    assinadas = sorted(d.stem for d in pasta.glob("*.diff") if (pasta / f"APROVADO-{d.stem}").exists())
+    pendente o que já estava em propostas/aplicadas/, lendo uma entrada antiga.
+    Proposta listada em `SUBSTITUIDAS.txt` (primeira coluna) não é pendência: vai à parte."""
+    pasta = pasta or (REPO / "propostas")
+    substituidas = set()
+    try:
+        for linha in (pasta / "SUBSTITUIDAS.txt").read_text(encoding="utf-8").splitlines():
+            if linha.strip() and not linha.lstrip().startswith("#"):
+                substituidas.add(linha.split("|", 1)[0].strip())
+    except OSError:
+        pass
+    diffs = [d.stem for d in pasta.glob("*.diff") if d.stem not in substituidas]
+    abertas = sorted(n for n in diffs if not (pasta / f"APROVADO-{n}").exists())
+    assinadas = sorted(n for n in diffs if (pasta / f"APROVADO-{n}").exists())
+    descartadas = sorted(d.stem for d in pasta.glob("*.diff") if d.stem in substituidas)
     return ("PROPOSTAS-PENDENTES: " + (", ".join(abertas) if abertas else "nenhuma")
             + (f" · assinadas, falta aplicar: {', '.join(assinadas)}" if assinadas else "")
+            + (f" · substituídas, NÃO pendentes: {', '.join(descartadas)}" if descartadas else "")
             + " · o que está em propostas/aplicadas/ NÃO está pendente")
 
 
@@ -2251,6 +2262,19 @@ def _selftest() -> int:
     # 16. (695) linha de propostas no estado
     ok16 = _linha_propostas().startswith("PROPOSTAS-PENDENTES: ") and "propostas/aplicadas/" in _linha_propostas()
     print(f"{'PASS' if ok16 else 'FALHA'}  PROPOSTAS-PENDENTES no estado: {_linha_propostas()[:80]}")
+    import tempfile as _tf
+    with _tf.TemporaryDirectory() as _t:
+        _p = Path(_t)
+        for _n in ("a-aberta", "b-assinada", "c-substituida"):
+            (_p / f"{_n}.diff").write_text("x", encoding="utf-8")
+        (_p / "APROVADO-b-assinada").write_text("s", encoding="utf-8")
+        (_p / "APROVADO-c-substituida").write_text("s", encoding="utf-8")
+        (_p / "SUBSTITUIDAS.txt").write_text("# nome | por | motivo\nc-substituida | d-nova | teste\n", encoding="utf-8")
+        _l = _linha_propostas(_p)
+        ok16b = ("PENDENTES: a-aberta" in _l and "falta aplicar: b-assinada" in _l
+                 and "falta aplicar: b-assinada, c" not in _l and "substituídas, NÃO pendentes: c-substituida" in _l)
+    print(f"{'PASS' if ok16b else 'FALHA'}  proposta em SUBSTITUIDAS.txt sai das pendentes e das assinadas: {_l[:110]}")
+    falhas += 0 if ok16b else 1
     falhas += 0 if ok16 else 1
     # 17. (E-2, 16/10/2026) remoção de emoji da prosa: não streaming e SSE, log só com códigos, chave para desligar
     import tempfile as _tf
