@@ -13,7 +13,7 @@
 - `GET /api/qualidade-llm` devolve indicadores medidos; item sem medição vem como `unknown` e `não medido`.
 - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
 - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
-- `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` e `medir_contexto_efetivo.py`, um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+- `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha` ou `varias`, de lista fechada), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
 - A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
 - Proposta, assinatura, PR e merge não são executados pelo painel.
 

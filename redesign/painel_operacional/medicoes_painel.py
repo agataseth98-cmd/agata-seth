@@ -19,8 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags"
-ACOES = ("recuperacao", "contexto")
-TIMEOUT_S = {"recuperacao": 300, "contexto": 3600}
+ACOES = ("recuperacao", "recuperacao_semantica", "contexto")
+TAREFAS = ("agulha", "varias")
+TIMEOUT_S = {"recuperacao": 300, "recuperacao_semantica": 300, "contexto": 3600}
 _LOCK = threading.Lock()
 _JOB: dict = {"estado": "ocioso"}
 
@@ -47,7 +48,7 @@ def _ler(arq: Path) -> dict | None:
 
 def resultados() -> dict:
     p = pasta()
-    return {"recuperacao": _ler(p / "recuperacao.json"),
+    return {"recuperacao": _ler(p / "recuperacao.json"), "recuperacao_semantica": _ler(p / "recuperacao-semantica.json"),
             "contexto": [d for d in (_ler(a) for a in sorted(p.glob("contexto-*.json"))) if d]}
 
 
@@ -73,11 +74,14 @@ def _rodar(acao: str, argv: list[str]) -> None:
         _JOB.update(novo, fim=time.time(), segundos=round(time.time() - inicio, 1))
 
 
-def executar(acao: str, modelo: str | None = None, sincrono: bool = False) -> dict:
+def executar(acao: str, modelo: str | None = None, sincrono: bool = False, tarefa: str | None = None) -> dict:
     if acao not in ACOES:
         raise ValueError("ação fora da lista")
-    escolhido = None
+    escolhido, tarefa_ok = None, None
     if acao == "contexto":
+        if tarefa not in (None, *TAREFAS):
+            raise ValueError("tarefa fora da lista")
+        tarefa_ok = TAREFAS[TAREFAS.index(tarefa or "agulha")]
         permitidos = {m: m for m in modelos_locais()}
         if not isinstance(modelo, str) or modelo not in permitidos:
             raise ValueError("modelo fora da lista do Ollama local")
@@ -86,10 +90,12 @@ def executar(acao: str, modelo: str | None = None, sincrono: bool = False) -> di
     with _LOCK:
         if _JOB.get("estado") == "rodando":
             raise RuntimeError("ocupado")
-        _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, inicio=time.time())
-    argv = [sys.executable, str(ROOT / "scripts" / ("medir_recuperacao.py" if acao == "recuperacao" else "medir_contexto_efetivo.py")), "--salvar"]
+        _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, tarefa=tarefa_ok, inicio=time.time())
+    argv = [sys.executable, str(ROOT / "scripts" / ("medir_contexto_efetivo.py" if acao == "contexto" else "medir_recuperacao.py")), "--salvar"]
+    if acao == "recuperacao_semantica":
+        argv.append("--semantico")
     if escolhido:
-        argv += ["--modelo", escolhido]
+        argv += ["--modelo", escolhido, "--tarefa", tarefa_ok]
     if sincrono:
         _rodar(acao, argv)
     else:

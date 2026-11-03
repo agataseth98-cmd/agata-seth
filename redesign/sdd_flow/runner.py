@@ -11,6 +11,7 @@ import json
 import subprocess
 import sys
 import hashlib
+import importlib.util
 import shutil
 import tempfile
 from datetime import datetime, timezone
@@ -84,10 +85,13 @@ def implementation(state: dict, worktree: Path) -> None:
 
 def verification(state: dict, tests: list[str], pytest_bin: str, cwd: Path = ROOT) -> None:
     executable = shutil.which(pytest_bin) if "/" not in pytest_bin else pytest_bin
-    if not executable:
+    base = [executable, "-q"] if executable else None
+    if base is None and importlib.util.find_spec("pytest") is not None:
+        executable, base = f"{sys.executable} -m pytest", [sys.executable, "-m", "pytest", "-q"]  # pytest no mesmo Python, fora do PATH
+    if base is None:
         raise SystemExit(f"pytest não encontrado: {pytest_bin}; informe --pytest-bin ou ajuste PATH")
     for target in tests:
-        subprocess.run([executable, "-q", target], cwd=cwd, check=True)
+        subprocess.run([*base, target], cwd=cwd, check=True)
     record(state, "verification", f"{executable}:" + ";".join(tests))
 
 
