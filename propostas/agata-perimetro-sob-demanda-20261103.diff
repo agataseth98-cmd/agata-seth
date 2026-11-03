@@ -1,0 +1,183 @@
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index fc03bb09..1b36d3ef 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -249,7 +249,8 @@ P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
+ 
+ 
+ _perimetro_veredito() {
+-  local codigo="$1"
++  local codigo="$1" p17_isento="${PERIMETRO_P17_ISENTO:-0}"
++  PERIMETRO_P17_ISENTO=0
+   if [ "$codigo" -ne 0 ]; then
+     echo "veredito: FALHOU"
+     FALHOU=1
+@@ -257,7 +258,9 @@ _perimetro_veredito() {
+   elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
+     echo "veredito: SKIP"
+     CONT_SKIP=$((CONT_SKIP + 1))
+-    P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
++    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese) não é pular em silêncio:
++    # a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida.
++    [ "$p17_isento" = 1 ] || P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
+   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
+     echo "veredito: PARCIAL"
+     CONT_PARCIAL=$((CONT_PARCIAL + 1))
+diff --git a/scripts/perimetro/p09_servicos_declarados.sh b/scripts/perimetro/p09_servicos_declarados.sh
+index dd4ce579..40069f1b 100644
+--- a/scripts/perimetro/p09_servicos_declarados.sh
++++ b/scripts/perimetro/p09_servicos_declarados.sh
+@@ -18,13 +18,24 @@ p9_servicos_declarados() {
+       avisos=1
+     fi
+   done
++  # (03/11/2026, decisão de 29/10: sistema sob demanda) Com o agata.target inativo E o seth-gateway.service
++  # (o núcleo: hidratação e roteamento) inativo, o sistema está desligado de propósito: serviço parado e
++  # contêiner ausente deixam de avisar, e uma linha diz isso. Continuam avisando: timer fora do ar, unidade
++  # 'failed', e tudo quando o target está ativo ou o gateway está no ar (subida parcial). Queda com o
++  # sistema ligado (o caso de 24/10) segue coberta. O seth-escriba pode ficar ligado à parte; não conta.
++  local desligado=0
++  if [ "$(systemctl --user is-active agata.target 2>/dev/null)" != "active" ] \
++      && [ "$(systemctl --user is-active seth-gateway.service 2>/dev/null)" != "active" ]; then
++    desligado=1
++    echo "P-9: sistema sob demanda desligado (agata.target e seth-gateway inativos) -- serviços parados e contêineres não são avaliados agora; timers e unidades 'failed' continuam. Ligue com o atalho seth para avaliar."
++  fi
+   for u in "${P9_UNIDADES_USUARIO[@]}"; do
+     estado="$(systemctl --user is-active "$u" 2>/dev/null)"
+     # (24/10/2026) serviço parado do jeito normal fica 'inactive', não 'failed': no teste de queda
+     # e volta o gateway, o OmniRoute e o Laya caíram e o P-9 não disse nada. Agora 'inactive' também
+     # avisa, menos o oneshot (termina sozinho e fica parado de propósito, ex.: agata-manutencao.service).
+     if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
+-        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] \
++        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
+              && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
+       echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+       avisos=1
+@@ -35,7 +46,7 @@ p9_servicos_declarados() {
+       avisos=1
+     fi
+   done
+-  if command -v docker >/dev/null 2>&1; then
++  if [ "$desligado" = 0 ] && command -v docker >/dev/null 2>&1; then
+     for u in "${P9_CONTAINERS_DOCKER[@]}"; do
+       rodando="$(docker ps --filter "name=^${u}\$" --format '{{.Names}}' 2>/dev/null)"
+       if [ -z "$rodando" ]; then
+diff --git a/scripts/perimetro/p16_testes_dos_controles.sh b/scripts/perimetro/p16_testes_dos_controles.sh
+index b17999a4..50031d3e 100644
+--- a/scripts/perimetro/p16_testes_dos_controles.sh
++++ b/scripts/perimetro/p16_testes_dos_controles.sh
+@@ -7,18 +7,18 @@ p16_testes_dos_controles() {
+   # Guarda de recursão: a suíte roda o perímetro dentro do clone dela.
+   if [ -n "${AGATA_TESTE_PERIMETRO:-}" ]; then
+     echo "P-16: rodando DENTRO da suíte -- pulado (senão recursa infinitamente)."
+-    PERIMETRO_ESTADO="SKIP"; return 0
++    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
+   fi
+   if _perimetro_eh_genese; then
+     echo "P-16: gênese -- sem commit anterior; a suíte roda depois do nascimento."
+-    PERIMETRO_ESTADO="SKIP"; return 0
++    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
+   fi
+   local staged tocados
+   staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only 2>/dev/null)"
+   tocados="$(echo "$staged" | grep -E "$P16_ARQUIVOS_DE_CONTROLE" || true)"
+   if [ -z "$tocados" ]; then
+     echo "P-16: nenhum arquivo de controle staged -- suíte não precisa rodar."
+-    PERIMETRO_ESTADO="SKIP"; return 0
++    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
+   fi
+   if [ ! -f "$_PERIMETRO_DIR/testar_perimetro.sh" ]; then
+     echo "SUSPEITO (P-16): arquivo de controle staged ($(echo "$tocados" | tr '\n' ' ')) mas scripts/testar_perimetro.sh não existe -- o controle mudou sem que exista teste dele."
+diff --git a/scripts/testar_p17_isento.sh b/scripts/testar_p17_isento.sh
+new file mode 100644
+index 00000000..916707ba
+--- /dev/null
++++ b/scripts/testar_p17_isento.sh
+@@ -0,0 +1,31 @@
++#!/usr/bin/env bash
++# Contraprovas offline do isento do P-17 (03/11/2026): um SKIP de "não se aplica" do P-16 (sem controle
++# staged, dentro da suíte, gênese) não conta na série do P-17; o SKIP comum continua contando.
++# Sem rede nem systemd. Saída 0 = todos os casos passaram.
++set -u
++RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
++# shellcheck source=/dev/null
++source "$RAIZ/scripts/perimetro.sh"
++falhas=0
++caso() { if eval "$2"; then echo "PASS  $1"; else echo "FALHA $1"; falhas=$((falhas + 1)); fi; }
++veredito() { CONT_SKIP=0; CONT_OK=0; CONT_PARCIAL=0; CONT_FALHA=0; FALHOU=0; _perimetro_veredito "$1" >/dev/null; }
++
++P17_SKIPS=""; PERIMETRO_CTRL="P-16"; PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; veredito 0
++caso "SKIP isento (não se aplica) não entra na série do P-17" '[ -z "${P17_SKIPS// /}" ]'
++caso "o isento vale para uma corrida só" '[ "$PERIMETRO_P17_ISENTO" = 0 ]'
++PERIMETRO_CTRL="P-16"; PERIMETRO_ESTADO="SKIP"; veredito 0
++caso "SKIP comum volta a contar" '[[ "$P17_SKIPS" == *"P-16 "* ]]'
++P17_SKIPS=""; PERIMETRO_CTRL="P-7"; PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; veredito 0
++caso "o isento é decidido por quem marca; o veredito só obedece" '[ -z "${P17_SKIPS// /}" ]'
++
++# o P-16 marca o isento nos três SKIPs de "não se aplica"
++cd "$TMP" && git init -q . && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m base && echo x > a && git add a
++unset AGATA_TESTE_PERIMETRO
++PERIMETRO_P17_ISENTO=0; PERIMETRO_ESTADO=""; p16_testes_dos_controles >/dev/null 2>&1
++caso "P-16 sem arquivo de controle staged: SKIP isento" '[ "$PERIMETRO_ESTADO" = SKIP ] && [ "$PERIMETRO_P17_ISENTO" = 1 ]'
++PERIMETRO_P17_ISENTO=0; PERIMETRO_ESTADO=""; AGATA_TESTE_PERIMETRO=1 p16_testes_dos_controles >/dev/null 2>&1
++caso "P-16 dentro da suíte (recursão): SKIP isento" '[ "$PERIMETRO_ESTADO" = SKIP ] && [ "$PERIMETRO_P17_ISENTO" = 1 ]'
++
++[ "$falhas" -eq 0 ] && echo "P-17 isento: OK" || echo "P-17 isento: $falhas FALHA(S)"
++exit "$falhas"
+diff --git a/scripts/testar_p9.sh b/scripts/testar_p9.sh
+index 3fe6ced3..533abc5f 100755
+--- a/scripts/testar_p9.sh
++++ b/scripts/testar_p9.sh
+@@ -10,7 +10,7 @@ mkdir -p "$TMP/bin"
+ cat > "$TMP/bin/systemctl" <<'EOF'
+ #!/usr/bin/env bash
+ # estado por unidade: lido de $P9F_ESTADOS ("unidade=estado:tipo ...")
+-u=""; for a in "$@"; do case "$a" in *.service|*.timer) u="$a";; esac; done
++u=""; for a in "$@"; do case "$a" in *.service|*.timer|*.target) u="$a";; esac; done
+ for par in $P9F_ESTADOS; do
+   nome="${par%%=*}"; resto="${par#*=}"; est="${resto%%:*}"; tipo="${resto#*:}"
+   if [ "$nome" = "$u" ]; then
+@@ -52,6 +52,21 @@ caso "oneshot parado não avisa" '[[ "$out" != *"agata-manutencao.service"* ]]'
+ export P9F_ESTADOS="seth-gateway.service=active:simple agata-manutencao.service=inactive:oneshot"
+ caso "tudo no ar: nenhum aviso de unidade" '[[ "$(rodar)" != *"unidade de usuário"* ]]'
+ 
++# (03/11/2026) sistema sob demanda: desligado de propósito não avisa; ligado, parcial ou com falha, avisa.
++export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=inactive:simple agata-manutencao.service=inactive:oneshot"
++out="$(rodar)"
++caso "sob demanda desligado: serviço parado não avisa" '[[ "$out" != *"unidade de usuário 'seth-gateway.service'"* ]]'
++caso "sob demanda desligado: uma linha explica" '[[ "$out" == *"sob demanda desligado"* ]]'
++export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=failed:simple agata-manutencao.service=inactive:oneshot"
++caso "sob demanda desligado mas serviço 'failed' avisa" '[[ "$(rodar)" == *"seth-gateway.service"* ]]'
++P9_UNIDADES_USUARIO=("seth-gateway.service" "seth-escriba.service" "agata-manutencao.service")
++export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=active:simple seth-escriba.service=inactive:simple agata-manutencao.service=inactive:oneshot"
++caso "subida parcial (gateway no ar, target inativo) avisa o que está parado" '[[ "$(rodar)" == *"seth-escriba.service"* && "$(rodar)" != *"sob demanda desligado"* ]]'
++P9_UNIDADES_USUARIO=("seth-gateway.service" "agata-manutencao.service")
++export P9F_ESTADOS="agata.target=active:simple seth-gateway.service=inactive:simple agata-manutencao.service=inactive:oneshot"
++caso "target ativo e serviço parado: avisa (caso de 24/10)" '[[ "$(rodar)" == *"seth-gateway.service"* ]]'
++export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=active:simple agata-manutencao.service=inactive:oneshot"
++
+ G=$((1024 * 1024 * 1024))
+ echo "{\"models\": [{\"name\": \"moe\", \"size\": $((198 * G / 10)), \"size_vram\": $((7 * G))}]}" > "$TMP/ps.json"
+ caso "modelo maior que a GPU usando o que cabe: não avisa" '[[ "$(rodar)" != *"GPU"* ]]'
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index 2016b488..4a37974d 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -708,6 +708,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-9 || "$FILTRO" == L2 || "$FILTRO" == "__AGR
+   fi
+ fi
+ 
++# (03/11/2026) P-16/P-17: SKIP de "não se aplica" do P-16 não entra na série do P-17; SKIP comum continua contando.
++if [[ -z "$FILTRO" || "$FILTRO" == P-16 || "$FILTRO" == P-17 || "$FILTRO" == "__AGREGADOS__" ]]; then
++  if bash "$RAIZ/scripts/testar_p17_isento.sh" >/dev/null 2>&1; then
++    OK=$((OK + 1))
++  else
++    FALHOU=$((FALHOU + 1))
++    falhas_detalhe+=("P-16/P-17: contraprovas do isento (scripts/testar_p17_isento.sh)")
++  fi
++fi
++
+ # Contraprovas estruturais do fluxo de escrita, classificação externa,
+ # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
+ # dispara quando qualquer uma dessas provas ou seus controles muda.
