@@ -1,0 +1,73 @@
+diff --git a/redesign/sdd_flow/independent_review.py b/redesign/sdd_flow/independent_review.py
+new file mode 100644
+index 00000000..b6a70949
+--- /dev/null
++++ b/redesign/sdd_flow/independent_review.py
+@@ -0,0 +1,35 @@
++#!/usr/bin/env python3
++"""Validate independent review packets and preserve disagreements."""
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++
++ROLES = ("simplificador", "operador", "implementador")
++REQUIRED = ("Contexto do revisor", "Veredito", "Achados")
++
++
++def check_packet(path: Path) -> list[str]:
++    text = path.read_text(encoding="utf-8") if path.exists() else ""
++    return [heading for heading in REQUIRED if f"## {heading}" not in text]
++
++
++def consolidate(root: Path, output: Path) -> None:
++    blocks = []
++    for role in ROLES:
++        report = root / role / "report.md"
++        gaps = check_packet(report)
++        if gaps:
++            raise SystemExit(f"relatório incompleto: {role}: {', '.join(gaps)}")
++        blocks.append(f"## {role}\n\n{report.read_text(encoding='utf-8').rstrip()}\n")
++    output.write_text("# Consolidação independente\n\n" + "\n".join(blocks), encoding="utf-8")
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(); ap.add_argument("reviews", type=Path); ap.add_argument("output", type=Path)
++    args = ap.parse_args(); consolidate(args.reviews.resolve(), args.output.resolve()); return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/redesign/sdd_flow/tests/test_independent_review.py b/redesign/sdd_flow/tests/test_independent_review.py
+new file mode 100644
+index 00000000..e7b21716
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_independent_review.py
+@@ -0,0 +1,26 @@
++import subprocess
++import sys
++from pathlib import Path
++
++
++SCRIPT = Path(__file__).parents[1] / "independent_review.py"
++ROLES = ("simplificador", "operador", "implementador")
++
++
++def test_consolidation_preserves_all_role_reports(tmp_path):
++    root = tmp_path / "reviews"
++    for role in ROLES:
++        path = root / role; path.mkdir(parents=True)
++        (path / "report.md").write_text(f"## Contexto do revisor\n{role}\n\n## Veredito\nrevisar\n\n## Achados\n{role}-achado\n", encoding="utf-8")
++    out = tmp_path / "consolidated.md"
++    subprocess.run([sys.executable, str(SCRIPT), str(root), str(out)], check=True)
++    text = out.read_text(encoding="utf-8")
++    assert all(role + "-achado" in text for role in ROLES)
++
++
++def test_incomplete_report_blocks(tmp_path):
++    root = tmp_path / "reviews"; (root / ROLES[0]).mkdir(parents=True)
++    (root / ROLES[0] / "report.md").write_text("## Veredito\nrevisar\n", encoding="utf-8")
++    result = subprocess.run([sys.executable, str(SCRIPT), str(root), str(tmp_path / "out")], capture_output=True, text=True)
++    assert result.returncode != 0
++    assert "relatório incompleto" in result.stderr
