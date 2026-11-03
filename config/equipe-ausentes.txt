@@ -1,0 +1,3 @@
+# Membros da Equipe offline: o atalho `seth` não sobe a vigia deles. Um nome por linha.
+# Para voltar: apague a linha e rode `python3 scripts/equipe/equipe.py presente --agente <nome>`.
+codex

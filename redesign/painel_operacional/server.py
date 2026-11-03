@@ -31,6 +31,7 @@ if str(WEB) not in sys.path:
     sys.path.insert(0, str(WEB))
 import armazem  # noqa: E402
 import qualidade_llm  # noqa: E402
+import sdd_painel  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
@@ -85,6 +86,7 @@ _RELAY_RATE_WINDOW_SECONDS = 60
 _RELAY_RATE_LIMIT = 60
 _SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
 _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
+_SDD_LOCK = threading.Lock()
 _DETAILS_LOCK = threading.Lock()
 _DETAILS_CACHE: dict | None = None
 _DETAILS_CACHE_AT: float | None = None
@@ -1028,6 +1030,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/sdd/estado":
+            observed_at, fresh_until = _reading_window()
+            body = json.dumps({**sdd_painel.estado(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/qualidade-llm":
             observed_at, fresh_until = _reading_window()
             dados = {**qualidade_llm.snapshot(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}
@@ -1113,7 +1119,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_chat()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
-        if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -1130,6 +1136,18 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
         if not isinstance(payload, dict):
             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
+        if self.path == "/api/sdd/executar":
+            if not _SDD_LOCK.acquire(blocking=False):
+                return self._send(429, "text/plain; charset=utf-8", b"sdd busy")
+            try:
+                try:
+                    resultado = sdd_painel.executar(payload.get("acao"), payload.get("componente"), ROOT)
+                except ValueError:
+                    return self._send(400, "text/plain; charset=utf-8", b"invalid sdd action")
+            finally:
+                _SDD_LOCK.release()
+            body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/proposals/verify":
             name = payload.get("name")
             if not _PROPOSAL_LOCK.acquire(blocking=False):

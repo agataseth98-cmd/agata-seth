@@ -23,7 +23,11 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || 
 # fica de pe pra ingles -- ver comentario no librechat.yaml.
 systemctl --user start piper-tts.service 2>/dev/null || true
 # Vigias da Equipe (Claude e Codex): sobem com a Seth e param com ela.
-systemctl --user start agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
+# Membros listados em config/equipe-ausentes.txt (um por linha) ficam sem vigia: offline até ordem do Humano.
+_ausentes=~/agata/config/equipe-ausentes.txt
+for _m in claude codex; do
+  grep -qx "$_m" "$_ausentes" 2>/dev/null || systemctl --user start "agata-vigia@$_m.service" 2>/dev/null || true
+done
 # Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
 # cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
 # rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
