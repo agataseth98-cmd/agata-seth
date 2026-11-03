@@ -45,6 +45,27 @@ TEMAS = [
     ("negocios-e-nichos", r"."),
 ]
 
+# Peças que a regra por nome não classifica bem. Explícito e por nome: nenhuma outra peça muda de tema.
+AJUSTES = {
+    **dict.fromkeys(["accessibility", "i18n-sync", "fal-ai-media", "ios-icon-gen", "make-interfaces-feel-better"], "frontend-e-design"),
+    **dict.fromkeys(["benchmark"], "testes"),
+    **dict.fromkeys(["blueprint", "claude-devfleet", "ralphinho-rfc-pipeline", "ai-first-engineering", "gan-generator",
+                     "chief-of-staff", "conversation-analyzer", "jira-integration", "project-flow-ops",
+                     "product-capability", "product-lens", "benchmark-methodology"], "planejamento-e-agentes"),
+    **dict.fromkeys(["canary-watch", "terminal-opener", "terminal-ops", "flox-environments"], "banco-e-infra"),
+    **dict.fromkeys(["codehealth-mcp"], "qualidade-de-codigo"),
+    **dict.fromkeys(["config-gc", "ck"], "contexto-e-custo"),
+    **dict.fromkeys(["opensource-pipeline", "opensource-forker", "opensource-packager"], "revisao-e-git"),
+    **dict.fromkeys(["ml-adoption-playbook", "foundation-models-on-device", "scientific-pkg-gget", "bengali-nlp",
+                     "ito-baskets", "ito-compute", "ito-inference", "ito-training"], "dados-e-ml"),
+    **dict.fromkeys(["carrier-relationship-management", "logistics-exception-management", "energy-procurement",
+                     "production-scheduling", "quality-nonconformance", "returns-reverse-logistics",
+                     "customer-billing-ops", "finance-billing-ops", "master-agreement-generator",
+                     "esign-field-placement", "counterparty-channel-discipline", "google-workspace-ops",
+                     "healthcare-cdss-patterns", "healthcare-emr-patterns", "netmiko-ssh-automation",
+                     "cisco-ios-patterns", "osint-investigation", "harmonyos-app-resolver"], "operacoes-e-dominios"),
+}
+
 
 def frontmatter(caminho: Path) -> dict:
     texto = caminho.read_text(encoding="utf-8", errors="replace")
@@ -61,6 +82,8 @@ def frontmatter(caminho: Path) -> dict:
 def tema_de(nome: str) -> str:
     if QUARENTENA.match(nome):
         return "quarentena"
+    if nome in AJUSTES:
+        return AJUSTES[nome]
     for tema, padrao in TEMAS:
         if re.search(padrao, nome):
             return tema
