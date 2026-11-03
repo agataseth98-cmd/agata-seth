@@ -42,5 +42,10 @@ def test_complete_requires_gates_and_records_completion(tmp_path):
     project = tmp_path / "project"; project.mkdir()
     output = tmp_path / "drift.md"
     invoke(state, "drift", project, previous, output)
+    data = json.loads(state.read_text())
+    artifacts = {}
+    for key in ("spec", "consolidated_review", "evidence", "criterion_drift"):
+        path = tmp_path / key; path.write_text("ok", encoding="utf-8"); artifacts[key] = str(path)
+    data["artifacts"] = artifacts; state.write_text(json.dumps(data), encoding="utf-8")
     invoke(state, "complete")
     assert json.loads(state.read_text(encoding="utf-8"))["stage"] == "complete"

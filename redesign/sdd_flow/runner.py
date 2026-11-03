@@ -91,9 +91,39 @@ def drift(state: dict, project: Path, previous: Path, output: Path) -> None:
 def complete(state: dict) -> None:
     required = {entry["stage"] for entry in state.get("history", [])}
     missing = {"decision", "implementation", "verification", "drift"} - required
+    artifacts = state.get("artifacts", {})
+    for key in ("spec", "consolidated_review", "evidence", "criterion_drift"):
+        if not artifacts.get(key) or not Path(artifacts[key]).exists():
+            missing.add(key)
     if missing:
         raise SystemExit("etapas ausentes: " + ", ".join(sorted(missing)))
     record(state, "complete", "ciclo SDD encerrado")
+
+
+def artifact(state: dict, key: str, path: Path) -> None:
+    if not path.exists():
+        raise SystemExit(f"artefato inexistente: {path}")
+    state.setdefault("artifacts", {})[key] = str(path.resolve())
+
+
+def spec_init(state: dict, root: Path) -> None:
+    run("redesign/sdd_flow/spec_gate.py", "init", str(root)); artifact(state, "spec", root / "spec.md")
+
+
+def spec_check(state: dict, root: Path) -> None:
+    run("redesign/sdd_flow/spec_gate.py", "check", str(root)); artifact(state, "spec", root / "spec.md")
+
+
+def review_check(state: dict, reviews: Path, output: Path) -> None:
+    run("redesign/sdd_flow/independent_review.py", str(reviews), str(output)); artifact(state, "consolidated_review", output)
+
+
+def acceptance(state: dict, manifest: Path, output: Path) -> None:
+    run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(output)); artifact(state, "evidence", output)
+
+
+def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> None:
+    run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
 
 
 def main() -> int:
@@ -109,6 +139,11 @@ def main() -> int:
     v = sub.add_parser("verify"); v.add_argument("tests", nargs="+", type=str); v.add_argument("--pytest-bin", default="pytest")
     dr = sub.add_parser("drift"); dr.add_argument("project", type=Path); dr.add_argument("previous", type=Path); dr.add_argument("output", type=Path)
     sub.add_parser("complete")
+    si = sub.add_parser("spec-init"); si.add_argument("root", type=Path)
+    sc = sub.add_parser("spec-check"); sc.add_argument("root", type=Path)
+    rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
+    ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
+    cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
     sub.add_parser("status")
     args = ap.parse_args()
     state = load(args.state)
@@ -120,6 +155,11 @@ def main() -> int:
     elif args.cmd == "verify": verification(state, args.tests, args.pytest_bin)
     elif args.cmd == "drift": drift(state, args.project, args.previous, args.output)
     elif args.cmd == "complete": complete(state)
+    elif args.cmd == "spec-init": spec_init(state, args.root.resolve())
+    elif args.cmd == "spec-check": spec_check(state, args.root.resolve())
+    elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
+    elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
+    elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
     else: print(json.dumps(state, ensure_ascii=False, indent=2))
     if args.cmd != "status":
         save(args.state, state)
