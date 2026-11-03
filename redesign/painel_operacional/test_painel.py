@@ -393,13 +393,13 @@ class HttpTests(unittest.TestCase):
         self.assertNotIn('target="_blank"', html)
 
     def test_vault_item_mede_ausente_como_lacuna(self):
-        raiz = panel.ROOT
+        raiz = panel.armazem.ROOT
         with tempfile.TemporaryDirectory() as tmp:
-            panel.ROOT = Path(tmp)
+            panel.armazem.ROOT = Path(tmp)
             try:
                 data = panel._vault_item("inicio")
             finally:
-                panel.ROOT = raiz
+                panel.armazem.ROOT = raiz
         self.assertEqual(data["state"], "unknown")
         self.assertIn("ausente", data["motivo"])
 
@@ -409,8 +409,8 @@ class HttpTests(unittest.TestCase):
 
     def test_conversa_valida_e_grava_so_formato_esperado(self):
         with tempfile.TemporaryDirectory() as tmp:
-            antes = panel.CONVERSAS_DIR
-            panel.CONVERSAS_DIR = Path(tmp)
+            antes = panel.armazem.CONVERSAS_DIR
+            panel.armazem.CONVERSAS_DIR = Path(tmp)
             try:
                 self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "system", "content": "x"}]}))
                 self.assertIsNone(panel._conversa_gravar({"mensagens": [{"role": "user", "content": "x"}], "id": "../../etc"}))
@@ -420,7 +420,7 @@ class HttpTests(unittest.TestCase):
                 self.assertTrue(panel._conversa_apagar(salvo["id"]))
                 self.assertFalse(panel._conversa_apagar(salvo["id"]))
             finally:
-                panel.CONVERSAS_DIR = antes
+                panel.armazem.CONVERSAS_DIR = antes
 
 if __name__ == "__main__":
     unittest.main()
