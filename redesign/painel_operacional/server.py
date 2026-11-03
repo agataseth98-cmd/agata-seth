@@ -895,9 +895,9 @@ ABRIR_PROVEDORES = {
     "chatgpt": "https://chatgpt.com/",
     "claude": "https://claude.ai/",
     "grok": "https://grok.com/",
-    "qwen": "https://qwen.ai/",
+    "qwen": "https://chat.qwen.ai/",
     "mistral": "https://chat.mistral.ai/",
-    "kimi": "https://www.kimi.ai/",
+    "kimi": "https://www.kimi.ai/en",
     "librechat": "http://127.0.0.1:3080/",
     "omniroute": "http://127.0.0.1:20128/",
 }

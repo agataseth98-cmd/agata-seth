@@ -10,9 +10,9 @@ PROVIDERS = (
     {"id": "chatgpt", "name": "ChatGPT", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chatgpt.com/"},
     {"id": "claude", "name": "Claude", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://claude.ai/"},
     {"id": "grok", "name": "Grok", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://grok.com/"},
-    {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://qwen.ai/"},
+    {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.qwen.ai/"},
     {"id": "mistral", "name": "Le Chat / Mistral", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.mistral.ai/"},
-    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/"},
+    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/en"},
 )
 
 PROVIDER_BY_ID = {provider["id"]: provider for provider in PROVIDERS}

@@ -4,7 +4,6 @@ import collections
 import http.client
 import importlib.util
 import json
-import re
 import tempfile
 import threading
 import time
@@ -269,11 +268,19 @@ class HttpTests(unittest.TestCase):
         # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
         for nome in ("prototipo.html", "index.html"):
             html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
-            self.assertEqual([], [m for m in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>", html)], nome)
+            inline = []
+
+            class _Scripts(HTMLParser):
+                def handle_starttag(self, tag, attrs):
+                    if tag == "script" and not dict(attrs).get("src"):
+                        inline.append(tag)
+
+            _Scripts().feed(html)
+            self.assertEqual([], inline, nome)
         self.assertEqual(self.request("GET", "/abrir.js", None, {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"})[0], 200)
 
     def test_urls_de_abrir_dos_conselheiros_batem_com_o_catalogo(self):
-        # Kimi em www.kimi.com abre em chinês; o catálogo e o canon usam www.kimi.ai (pt-BR).
+        # Kimi em www.kimi.com abre em chinês e o Qwen precisa abrir em inglês: Humano escolheu chat.qwen.ai e www.kimi.ai/en.
         import relay_catalog
         sites = {p["id"]: p["site"] for p in relay_catalog.PROVIDERS}
         for conselheiro in panel.CONSELHEIROS:
