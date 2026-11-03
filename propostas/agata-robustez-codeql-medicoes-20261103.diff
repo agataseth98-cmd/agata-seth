@@ -1,0 +1,606 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+index ba8cd9d5..c589a21c 100644
+--- a/.agents/skills/INDICE.md
++++ b/.agents/skills/INDICE.md
+@@ -19,7 +19,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada
+ | `agata-llm-fundamentos` | como uma LLM funciona; custo, contexto, alucinação, esforço, RAG, MCP e skills, com fonte e lacuna | Claude |
+ 
+ ## Skills de terceiros (cópias fixas, não editar aqui)
+-- `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
++- `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills` só como cópias locais fora do git (`.git/info/exclude`): um clone limpo e a CI não as têm. São cópias do mesmo conteúdo; a fonte de atualização é externa.
+ 
+ - `design-taste-frontend` (tasteskill v2, fonte: github.com/Leonxlnx/taste-skill): direção de arte e inspeção de páginas de frontend. Cópia fixa em `.agents/skills`; não editar aqui. Para o Claude Code carregá-la, crie o link local `ln -s ../../.agents/skills/design-taste-frontend .claude/skills/design-taste-frontend` (link não versionado: o P-8 não verifica symlink). Os scripts abrem um Chrome headless e `assets.mjs` acessa a rede; ver `propostas/design-taste-frontend-v2-20261031.md`.
+ 
+diff --git a/redesign/obsidian/ro_proxy.py b/redesign/obsidian/ro_proxy.py
+index 298557a5..d17a3b6e 100644
+--- a/redesign/obsidian/ro_proxy.py
++++ b/redesign/obsidian/ro_proxy.py
+@@ -69,9 +69,12 @@ def _listar_disco(caminho_url: str):
+     rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
+     if any(p.startswith(".") for p in rel.split("/") if p):
+         return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
+-    alvo = os.path.realpath(os.path.join(VAULT, rel))
+-    if alvo != VAULT and not alvo.startswith(VAULT + os.sep):
+-        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
++    if not rel:
++        alvo = VAULT
++    else:
++        alvo = os.path.realpath(os.path.join(VAULT, rel))
++        if not alvo.startswith(VAULT + os.sep):
++            return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
+     if not os.path.isdir(alvo):
+         return None
+     def _tem_arquivo(d):
+@@ -84,12 +87,11 @@ def _listar_disco(caminho_url: str):
+     for nome in sorted(os.listdir(alvo)):
+         if nome.startswith("."):
+             continue
+-        c = os.path.join(alvo, nome)
+-        real = os.path.realpath(c)
+-        if real != VAULT and not real.startswith(VAULT + os.sep):
++        real = os.path.realpath(os.path.join(alvo, nome))
++        if not real.startswith(VAULT + os.sep):
+             continue
+-        if os.path.isdir(c):
+-            if _tem_arquivo(c):
++        if os.path.isdir(real):
++            if _tem_arquivo(real):
+                 itens.append(nome + "/")
+         else:
+             itens.append(nome)
+diff --git a/redesign/painel_operacional/medicoes_painel.py b/redesign/painel_operacional/medicoes_painel.py
+index acf15ec7..88484085 100644
+--- a/redesign/painel_operacional/medicoes_painel.py
++++ b/redesign/painel_operacional/medicoes_painel.py
+@@ -19,8 +19,9 @@ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags"
+-ACOES = ("recuperacao", "contexto")
+-TIMEOUT_S = {"recuperacao": 300, "contexto": 3600}
++ACOES = ("recuperacao", "recuperacao_semantica", "contexto")
++TAREFAS = ("agulha", "varias")
++TIMEOUT_S = {"recuperacao": 300, "recuperacao_semantica": 300, "contexto": 3600}
+ _LOCK = threading.Lock()
+ _JOB: dict = {"estado": "ocioso"}
+ 
+@@ -47,7 +48,7 @@ def _ler(arq: Path) -> dict | None:
+ 
+ def resultados() -> dict:
+     p = pasta()
+-    return {"recuperacao": _ler(p / "recuperacao.json"),
++    return {"recuperacao": _ler(p / "recuperacao.json"), "recuperacao_semantica": _ler(p / "recuperacao-semantica.json"),
+             "contexto": [d for d in (_ler(a) for a in sorted(p.glob("contexto-*.json"))) if d]}
+ 
+ 
+@@ -73,11 +74,14 @@ def _rodar(acao: str, argv: list[str]) -> None:
+         _JOB.update(novo, fim=time.time(), segundos=round(time.time() - inicio, 1))
+ 
+ 
+-def executar(acao: str, modelo: str | None = None, sincrono: bool = False) -> dict:
++def executar(acao: str, modelo: str | None = None, sincrono: bool = False, tarefa: str | None = None) -> dict:
+     if acao not in ACOES:
+         raise ValueError("ação fora da lista")
+-    escolhido = None
++    escolhido, tarefa_ok = None, None
+     if acao == "contexto":
++        if tarefa not in (None, *TAREFAS):
++            raise ValueError("tarefa fora da lista")
++        tarefa_ok = TAREFAS[TAREFAS.index(tarefa or "agulha")]
+         permitidos = {m: m for m in modelos_locais()}
+         if not isinstance(modelo, str) or modelo not in permitidos:
+             raise ValueError("modelo fora da lista do Ollama local")
+@@ -86,10 +90,12 @@ def executar(acao: str, modelo: str | None = None, sincrono: bool = False) -> di
+     with _LOCK:
+         if _JOB.get("estado") == "rodando":
+             raise RuntimeError("ocupado")
+-        _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, inicio=time.time())
+-    argv = [sys.executable, str(ROOT / "scripts" / ("medir_recuperacao.py" if acao == "recuperacao" else "medir_contexto_efetivo.py")), "--salvar"]
++        _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, tarefa=tarefa_ok, inicio=time.time())
++    argv = [sys.executable, str(ROOT / "scripts" / ("medir_contexto_efetivo.py" if acao == "contexto" else "medir_recuperacao.py")), "--salvar"]
++    if acao == "recuperacao_semantica":
++        argv.append("--semantico")
+     if escolhido:
+-        argv += ["--modelo", escolhido]
++        argv += ["--modelo", escolhido, "--tarefa", tarefa_ok]
+     if sincrono:
+         _rodar(acao, argv)
+     else:
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 408e9100..b06267e6 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -79,7 +79,7 @@
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Canon</div><h2 class="panel-title">Declarado e não confirmado</h2></div></div><div id="lacunas-canon"></div></article></section>
+ <section class="page" id="page-qualidade" data-title="Qualidade de LLM"><div class="section-heading"><div><div class="eyebrow">Falhas de LLM · leitura do momento</div><h1>Qualidade de LLM</h1><p>Indicadores medidos agora no repositório. O que ainda não tem medição aparece como não medido, nunca como número estimado. Mapa completo e fontes: skill agata-llm-fundamentos.</p></div></div>
+ <div class="kpis" id="qualidade-kpis"></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Medições</div><h2 class="panel-title">Medir agora</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><button type="button" class="text-link" id="medir-recuperacao">Medir recuperação da busca</button><select id="medir-modelo" aria-label="Modelo local para medir o contexto"></select><button type="button" class="text-link" id="medir-contexto">Medir contexto efetivo</button></div><p class="note" id="medir-nota" style="margin:8px 0 0">Recuperação lê só o vault (segundos). Contexto usa a GPU e leva minutos; confirme com dois cliques.</p></article>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Medições</div><h2 class="panel-title">Medir agora</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><button type="button" class="text-link" id="medir-recuperacao">Medir recuperação da busca</button><button type="button" class="text-link" id="medir-semantica">Medir busca por sentido</button><select id="medir-modelo" aria-label="Modelo local para medir o contexto"></select><select id="medir-tarefa" aria-label="Tarefa da medição de contexto"><option value="agulha">1 fato (agulha)</option><option value="varias">8 fatos parecidos</option></select><button type="button" class="text-link" id="medir-contexto">Medir contexto efetivo</button></div><p class="note" id="medir-nota" style="margin:8px 0 0">Recuperação lê só o vault (segundos). Contexto usa a GPU e leva minutos; confirme com dois cliques.</p></article>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Evidência</div><h2 class="panel-title" id="qualidade-titulo">Calculando…</h2></div></div><ul id="qualidade-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
+ <section class="page" id="page-sdd" data-title="SDD"><div class="section-heading"><div><div class="eyebrow">Spec-driven · componentes ancorados</div><h1>SDD</h1><p>Cada componente tem uma spec que lista o código que possui e critérios de aceite ligados a testes. Aqui você confere a âncora e roda os critérios. Proposta, assinatura e PR continuam fora do painel, pelo Humano.</p></div></div>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Componentes</div><h2 class="panel-title" id="sdd-titulo">Calculando…</h2></div></div><div id="sdd-lista" style="display:flex;flex-direction:column;gap:10px"></div></article></section>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 405cf884..0f17b83f 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -874,7 +874,7 @@ async function carregarMedicoes() {
+   if (atual) sel.value = atual;
+   const j = d.job || {};
+   if (j.estado === "rodando") {
+-    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo : "") + "…";
++    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo + (j.tarefa ? " (" + j.tarefa + ")" : "") : "") + "…";
+     if (!medicaoTimer) medicaoTimer = setInterval(carregarMedicoes, 4000);
+   } else {
+     if (medicaoTimer) { clearInterval(medicaoTimer); medicaoTimer = null; carregarQualidade(); }
+@@ -893,7 +893,8 @@ function ligarMedicao(botao, rotulo, pedido) {
+   });
+ }
+ ligarMedicao(byId("medir-recuperacao"), "Medir recuperação da busca", () => ({acao: "recuperacao"}));
+-ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value}));
++ligarMedicao(byId("medir-semantica"), "Medir busca por sentido", () => ({acao: "recuperacao_semantica"}));
++ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value, tarefa: byId("medir-tarefa").value}));
+ async function carregarQualidade() {
+   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
+   if (!kpis || !lista) return;
+diff --git a/redesign/painel_operacional/qualidade_llm.py b/redesign/painel_operacional/qualidade_llm.py
+index bad2d504..a5d8d630 100644
+--- a/redesign/painel_operacional/qualidade_llm.py
++++ b/redesign/painel_operacional/qualidade_llm.py
+@@ -123,19 +123,22 @@ def _medicoes() -> list[dict]:
+     rec = ler(pasta / "recuperacao.json")
+     if rec and isinstance(rec.get("recall"), dict):
+         r5 = rec["recall"].get("5", 0)
+-        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "ok" if r5 >= 0.9 else "warning",
+-                 f"recall@1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})",
+-                 f"Medido em {rec.get('medido_em', '?')} só para busca léxica por conteúdo; paráfrase e busca semântica: não medido.",
++        sem = ler(pasta / "recuperacao-semantica.json")
++        extra = (f" · por sentido: @1 {sem['recall'].get('1', 0):.0%} · @10 {sem['recall'].get('10', 0):.0%}"
++                 if sem and isinstance(sem.get("recall"), dict) else " · por sentido: não medido")
++        a = _ind("recall_busca", "Recuperação: recall@k da busca", "ok" if r5 >= 0.9 else "warning",
++                 f"texto: @1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})" + extra,
++                 f"Medido em {rec.get('medido_em', '?')} com consultas de palavras raras (caso fácil da busca léxica); paráfrase: não medido.",
+                  "scripts/medir_recuperacao.py")
+     else:
+-        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "unknown", "não medido",
++        a = _ind("recall_busca", "Recuperação: recall@k da busca", "unknown", "não medido",
+                  "rode a medição na aba Qualidade de LLM (leitura do vault; sem modelo)", "scripts/medir_recuperacao.py")
+     modelos = [d for d in (ler(x) for x in sorted(pasta.glob("contexto-*.json"))) if d and "linhas" in d]
+     if modelos:
+-        partes = [f"{d.get('modelo', '?')}: " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
++        partes = [f"{d.get('modelo', '?')} ({d.get('tarefa', 'agulha')}): " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
+         pior = min((d.get("efetivo_tokens") or 0) for d in modelos)
+         b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "warning" if pior < 16384 else "ok",
+-                 " · ".join(partes), "Teste de agulha em 3 profundidades; mede só recuperação simples, não o RULER completo.",
++                 " · ".join(partes), "Agulha em 3 profundidades e, quando medido, 8 fatos parecidos; não é o RULER completo (agregação e rastreio ficam de fora).",
+                  "scripts/medir_contexto_efetivo.py")
+     else:
+         b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "unknown", "não medido",
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 6eaf4a4a..4688cfc1 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1143,7 +1143,7 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
+         if self.path == "/api/medicoes/executar":
+             try:
+-                resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"))
++                resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"), tarefa=payload.get("tarefa"))
+             except ValueError:
+                 return self._send(400, "text/plain; charset=utf-8", b"invalid measurement")
+             except RuntimeError:
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index f67f2aa0..aa9f4f27 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -13,7 +13,7 @@
+ - `GET /api/qualidade-llm` devolve indicadores medidos; item sem medição vem como `unknown` e `não medido`.
+ - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
+ - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+-- `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` e `medir_contexto_efetivo.py`, um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
++- `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha` ou `varias`, de lista fechada), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+ - A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+diff --git a/redesign/painel_operacional/test_medicoes_painel.py b/redesign/painel_operacional/test_medicoes_painel.py
+index ed2d617c..b7ae94b8 100644
+--- a/redesign/painel_operacional/test_medicoes_painel.py
++++ b/redesign/painel_operacional/test_medicoes_painel.py
+@@ -56,6 +56,7 @@ class MedicoesTests(unittest.TestCase):
+             self.assertEqual(self.post({"acao": "contexto", "modelo": "../../etc/passwd"})[0], 400)
+             self.assertEqual(self.post({"acao": "contexto", "modelo": "outro:7b"})[0], 400)
+             self.assertEqual(self.post({"acao": "contexto"})[0], 400)
++            self.assertEqual(self.post({"acao": "contexto", "modelo": "qwen3:4b", "tarefa": "rm -rf"})[0], 400)
+ 
+     def test_executar_exige_origem_e_recusa_quando_ocupado(self):
+         self.assertEqual(self.post({"acao": "recuperacao"}, Origin="http://outro.invalid")[0], 403)
+@@ -71,10 +72,15 @@ class MedicoesTests(unittest.TestCase):
+             self.assertEqual(r["job"]["estado"], "ok")
+             argv, kw = chamadas[0]
+             self.assertEqual(argv[1].split("/")[-1], "medir_contexto_efetivo.py")
+-            self.assertEqual(argv[2:], ["--salvar", "--modelo", "qwen3:4b"])
++            self.assertEqual(argv[2:], ["--salvar", "--modelo", "qwen3:4b", "--tarefa", "agulha"])
++            med.executar("contexto", "qwen3:4b", sincrono=True, tarefa="varias")
++            self.assertEqual(chamadas[1][0][-2:], ["--tarefa", "varias"])
+             self.assertFalse(kw.get("shell"))
+             med.executar("recuperacao", sincrono=True)
+-            self.assertEqual(chamadas[1][0][1].split("/")[-1], "medir_recuperacao.py")
++            self.assertEqual(chamadas[2][0][1].split("/")[-1], "medir_recuperacao.py")
++            self.assertNotIn("--semantico", chamadas[2][0])
++            med.executar("recuperacao_semantica", sincrono=True)
++            self.assertEqual(chamadas[3][0][-1], "--semantico")
+ 
+     def test_estado_traz_resultados_salvos_e_lista_de_modelos(self):
+         Path(self.dir.name, "recuperacao.json").write_text(json.dumps({"n": 3, "recall": {"1": 1.0, "5": 1.0}, "mrr": 1.0}), encoding="utf-8")
+@@ -94,7 +100,7 @@ class MedicoesTests(unittest.TestCase):
+ 
+     def test_pagina_tem_os_controles_e_o_js_so_chama_as_rotas_das_medicoes(self):
+         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+-        for i in ("medir-recuperacao", "medir-modelo", "medir-contexto", "medir-nota"):
++        for i in ("medir-recuperacao", "medir-semantica", "medir-modelo", "medir-tarefa", "medir-contexto", "medir-nota"):
+             self.assertIn(f'id="{i}"', html)
+         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+         self.assertIn("/api/medicoes/estado", js); self.assertIn("/api/medicoes/executar", js)
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index cdf6cd84..b90615f8 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -368,6 +368,10 @@ def _leitura(nome: str, texto: str, codigo: int, head_local: str | None = None)
+ 
+ def _executar(nome: str, n: int | None, prop_nome: str | None = None,
+               consulta: str | None = None) -> str:
++    permitidos = {k: k for k in COMANDOS}
++    if nome not in permitidos:
++        raise ValueError(f"comando fora da lista: {str(nome)[:40]!r}")
++    nome = permitidos[nome]  # só chave da lista fechada segue adiante: o executável nunca vem do pedido
+     argv = _argv(nome, n, prop_nome, consulta)
+     _, timeout, _desc = COMANDOS[nome]
+     try:
+diff --git a/redesign/sdd_flow/runner.py b/redesign/sdd_flow/runner.py
+index 352dea3c..dc7606e3 100644
+--- a/redesign/sdd_flow/runner.py
++++ b/redesign/sdd_flow/runner.py
+@@ -11,6 +11,7 @@ import json
+ import subprocess
+ import sys
+ import hashlib
++import importlib.util
+ import shutil
+ import tempfile
+ from datetime import datetime, timezone
+@@ -84,10 +85,13 @@ def implementation(state: dict, worktree: Path) -> None:
+ 
+ def verification(state: dict, tests: list[str], pytest_bin: str, cwd: Path = ROOT) -> None:
+     executable = shutil.which(pytest_bin) if "/" not in pytest_bin else pytest_bin
+-    if not executable:
++    base = [executable, "-q"] if executable else None
++    if base is None and importlib.util.find_spec("pytest") is not None:
++        executable, base = f"{sys.executable} -m pytest", [sys.executable, "-m", "pytest", "-q"]  # pytest no mesmo Python, fora do PATH
++    if base is None:
+         raise SystemExit(f"pytest não encontrado: {pytest_bin}; informe --pytest-bin ou ajuste PATH")
+     for target in tests:
+-        subprocess.run([executable, "-q", target], cwd=cwd, check=True)
++        subprocess.run([*base, target], cwd=cwd, check=True)
+     record(state, "verification", f"{executable}:" + ";".join(tests))
+ 
+ 
+diff --git a/redesign/sdd_flow/spec/acceptance.json b/redesign/sdd_flow/spec/acceptance.json
+index 4ab3ba93..42c16d3f 100644
+--- a/redesign/sdd_flow/spec/acceptance.json
++++ b/redesign/sdd_flow/spec/acceptance.json
+@@ -70,5 +70,14 @@
+       "redesign/sdd_flow/tests/test_github_flow.py::test_handoff_requires_recorded_cycle"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a verificação usa python -m pytest quando o binário não está no PATH",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_runner.py::test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/sdd_flow/spec/spec.md b/redesign/sdd_flow/spec/spec.md
+index 469f09d7..0f1081d3 100644
+--- a/redesign/sdd_flow/spec/spec.md
++++ b/redesign/sdd_flow/spec/spec.md
+@@ -23,6 +23,7 @@
+ - [ ] proposta grava um diff único e não deixa worktree temporária
+ - [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
+ - [ ] handoff do GitHub exige ciclo registrado
++- [ ] a verificação usa python -m pytest quando o binário não está no PATH
+ 
+ ## Desenho e alternativas
+ 
+diff --git a/redesign/sdd_flow/tests/test_runner.py b/redesign/sdd_flow/tests/test_runner.py
+index 983892ba..0cd42e0c 100644
+--- a/redesign/sdd_flow/tests/test_runner.py
++++ b/redesign/sdd_flow/tests/test_runner.py
+@@ -49,3 +49,11 @@ def test_complete_requires_gates_and_records_completion(tmp_path):
+     data["artifacts"] = artifacts; state.write_text(json.dumps(data), encoding="utf-8")
+     invoke(state, "complete")
+     assert json.loads(state.read_text(encoding="utf-8"))["stage"] == "complete"
++
++
++def test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path(tmp_path):
++    state = tmp_path / "state.json"
++    result = subprocess.run([sys.executable, str(SCRIPT), str(state), "verify", "redesign/sdd_flow/tests/test_spec_gate.py", "--pytest-bin", "pytest-que-nao-existe"],
++                            capture_output=True, text=True)
++    assert result.returncode == 0, result.stderr
++    assert "-m pytest" in json.loads(state.read_text(encoding="utf-8"))["history"][-1]["detail"]
+diff --git a/scripts/medir_contexto_efetivo.py b/scripts/medir_contexto_efetivo.py
+index 32738b1f..f20afa6b 100644
+--- a/scripts/medir_contexto_efetivo.py
++++ b/scripts/medir_contexto_efetivo.py
+@@ -8,10 +8,11 @@ devolvê-lo. É o caso mais fácil do RULER (recuperação simples); tarefas de
+ estão cobertas. Comprimento efetivo = o maior comprimento até o qual TODAS as tentativas acertaram. Acerto = o código correto
+ aparece na resposta (modelos que expõem o raciocínio no texto contam se citarem o código certo).
+ 
+-Só fala com o endpoint local do Ollama (padrão http://127.0.0.1:11434/api/chat). Gasta GPU e minutos: só roda
++Tarefas: `agulha` (um fato) e `varias` (8 fatos parecidos espalhados, pergunta por um: é o multi-chave do
++RULER, mais duro porque os distratores são semelhantes). Só fala com o endpoint local do Ollama (padrão http://127.0.0.1:11434/api/chat). Gasta GPU e minutos: só roda
+ quando pedido. Com --salvar escreve em AGATA_MEDICOES_DIR (padrão ~/.cache/agata/painel/medicoes).
+   medir_contexto_efetivo.py --modelo TAG [--url URL] [--comprimentos 2048,4096,8192,16384,32768]
+-                            [--tentativas 3] [--salvar]     |     --selftest
++                            [--tarefa agulha|varias] [--tentativas 3] [--salvar]     |     --selftest
+ Exit 0 = medido; 2 = uso; 4 = o endpoint não respondeu.
+ """
+ import json
+@@ -34,6 +35,8 @@ COMPRIMENTOS = (2048, 4096, 8192, 16384, 32768)
+ PROFUNDIDADES = (0.25, 0.5, 0.75)
+ CHARS_POR_TOKEN = 3.0
+ PERGUNTA = "Qual é o código de verificação do lote? Responda apenas o código, sem mais nada."
++TAREFAS = ("agulha", "varias")
++N_VARIAS = 8
+ 
+ 
+ def palheiro(chars: int, base: str) -> str:
+@@ -48,6 +51,17 @@ def montar(chars: int, profundidade: float, codigo: str, base: str) -> str:
+     return miolo[:corte] + agulha + miolo[corte:] + "\n\n" + PERGUNTA
+ 
+ 
++def montar_varias(chars: int, codigos: list[str], alvo: int, base: str) -> str:
++    miolo = palheiro(chars, base)
++    pos = [int(len(miolo) * (i + 1) / (len(codigos) + 1)) for i in range(len(codigos))]
++    pedacos, ant = [], 0
++    for i, (p, c) in enumerate(zip(pos, codigos)):
++        pedacos += [miolo[ant:p], f" O código de verificação do lote-{i + 1} é {c}. "]
++        ant = p
++    pedacos.append(miolo[ant:])
++    return "".join(pedacos) + f"\n\nQual é o código de verificação do lote-{alvo + 1}? Responda apenas o código, sem mais nada."
++
++
+ def perguntar(url: str, modelo: str, prompt: str, num_ctx: int, timeout: int = 900) -> dict:
+     corpo = json.dumps({"model": modelo, "stream": False, "think": False,
+                         "messages": [{"role": "user", "content": prompt}],
+@@ -67,32 +81,46 @@ def efetivo(linhas: list[dict]) -> int | None:
+     return melhor
+ 
+ 
+-def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3, base: str = "", progresso=None) -> dict:
++def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3, base: str = "", progresso=None, tarefa: str = "agulha") -> dict:
++    if tarefa not in TAREFAS:
++        raise ValueError("tarefa fora da lista")
+     linhas = []
+     for alvo in comprimentos:
+         acertos, tokens, segundos = 0, [], 0.0
+         for t in range(tentativas):
+-            codigo = "%06x" % random.Random(alvo * 31 + t).randrange(16**6)
+-            prompt = montar(int(alvo * CHARS_POR_TOKEN), PROFUNDIDADES[t % len(PROFUNDIDADES)], codigo, base)
++            rnd = random.Random(alvo * 31 + t)
++            if tarefa == "agulha":
++                codigo = "%06x" % rnd.randrange(16**6)
++                prompt = montar(int(alvo * CHARS_POR_TOKEN), PROFUNDIDADES[t % len(PROFUNDIDADES)], codigo, base)
++                certos, errados = [codigo], []
++            else:
++                codigos = ["%06x" % rnd.randrange(16**6) for _ in range(N_VARIAS)]
++                indice = (t * 3 + 1) % N_VARIAS
++                prompt = montar_varias(int(alvo * CHARS_POR_TOKEN), codigos, indice, base)
++                certos, errados = [codigos[indice]], [c for i, c in enumerate(codigos) if i != indice]
+             t0 = time.time()
+             r = perguntar(url, modelo, prompt, min(65536, alvo + 1024))
+             segundos += time.time() - t0
+             tokens.append(r.get("prompt_eval_count"))
+-            acertos += codigo in (r.get("message", {}).get("content", "") or "").lower()
++            resposta = (r.get("message", {}).get("content", "") or "").lower()
++            acertos += all(c in resposta for c in certos) and not any(c in resposta for c in errados)
+         linhas.append({"alvo_tokens": alvo, "tokens_reais": [x for x in tokens if x], "acertos": acertos,
+                        "tentativas": tentativas, "segundos": round(segundos, 1)})
+         if progresso:
+             progresso(linhas[-1])
+-    return {"modelo": modelo, "metodo": "agulha no palheiro, 3 profundidades; só recuperação simples",
++    metodo = ("agulha no palheiro, 3 profundidades; só recuperação simples" if tarefa == "agulha"
++              else f"{N_VARIAS} fatos parecidos espalhados, pergunta por um (multi-chave do RULER); resposta com outro código conta como erro")
++    return {"modelo": modelo, "tarefa": tarefa, "metodo": metodo,
+             "linhas": linhas, "efetivo_tokens": efetivo(linhas),
+-            "nao_medido": ["agregação e múltiplos saltos (RULER completo)", "outros modelos"],
++            "nao_medido": ["agregação e rastreio de variáveis (RULER completo)", "outros modelos"],
+             "medido_em": datetime.now().astimezone().isoformat(timespec="seconds")}
+ 
+ 
+ def _salvar(resultado: dict) -> Path:
+     pasta = Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
+     pasta.mkdir(parents=True, exist_ok=True, mode=0o700)
+-    arq = pasta / ("contexto-" + re.sub(r"[^a-z0-9._-]", "_", resultado["modelo"].lower()) + ".json")
++    sufixo = "" if resultado.get("tarefa", "agulha") == "agulha" else "-" + resultado["tarefa"]
++    arq = pasta / ("contexto-" + re.sub(r"[^a-z0-9._-]", "_", resultado["modelo"].lower()) + sufixo + ".json")
+     arq.write_text(json.dumps(resultado, ensure_ascii=False), encoding="utf-8")
+     return arq
+ 
+@@ -108,7 +136,8 @@ def _selftest() -> int:
+         def do_POST(self):
+             dados = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+             prompt = dados["messages"][0]["content"]
+-            m = re.search(r"lote é ([0-9a-f]{6})\.", prompt)
++            q = re.search(r"lote-(\d+)\? Responda", prompt)
++            m = re.search(rf"lote-{q.group(1)} é ([0-9a-f]{{6}})\.", prompt) if q else re.search(r"lote é ([0-9a-f]{6})\.", prompt)
+             resp = m.group(1) if (m and len(prompt) <= LIMITE_CHARS) else "não sei"
+             corpo = json.dumps({"message": {"content": resp}, "prompt_eval_count": len(prompt) // 3}).encode()
+             self.send_response(200); self.send_header("Content-Length", str(len(corpo))); self.end_headers(); self.wfile.write(corpo)
+@@ -125,7 +154,18 @@ def _selftest() -> int:
+                                                        {"alvo_tokens": 3, "acertos": 3, "tentativas": 3}]) == 1)
+     conferir("a agulha cai nas 3 profundidades", len({montar(3000, p, "abcdef", "x ").index("abcdef") for p in PROFUNDIDADES}) == 3)
+     conferir("diz o que não mediu", len(res["nao_medido"]) == 2)
++    srv2 = ThreadingHTTPServer(("127.0.0.1", 0), Falso); threading.Thread(target=srv2.serve_forever, daemon=True).start()
++    rv = medir(f"http://127.0.0.1:{srv2.server_address[1]}/api/chat", "falso:1", (1000, 4000), 3, "Texto de enchimento do canon. ", tarefa="varias")
++    srv2.shutdown(); srv2.server_close()
++    conferir("varias: acerta o alvo no curto e perde no longo", rv["tarefa"] == "varias" and [l["acertos"] for l in rv["linhas"]] == [3, 0])
++    p = montar_varias(3000, ["aaaaaa", "bbbbbb", "cccccc"], 1, "x ")
++    conferir("varias: 3 fatos espalhados e a pergunta pelo segundo", p.count("O código de verificação do lote-") == 3 and p.rstrip().endswith("lote-2? Responda apenas o código, sem mais nada."))
++    try:
++        medir("http://x", "m", (1,), 1, "", tarefa="outra"); conferir("tarefa fora da lista levanta erro", False)
++    except ValueError:
++        conferir("tarefa fora da lista levanta erro", True)
+     os.environ["AGATA_MEDICOES_DIR"] = tempfile.mkdtemp()
++    conferir("salvar usa nome distinto para a tarefa varias", _salvar({"modelo": "m", "tarefa": "varias"}).name == "contexto-m-varias.json")
+     conferir("salvar usa nome seguro por modelo", _salvar({"modelo": "Qwen3:4B/../x"}).name == "contexto-qwen3_4b_.._x.json")
+     return 1 if falhou else 0
+ 
+@@ -141,8 +181,12 @@ def main(argv: list[str]) -> int:
+         return 2
+     comprimentos = tuple(int(x) for x in opt("--comprimentos", ",".join(map(str, COMPRIMENTOS))).split(","))
+     base = " ".join((RAIZ / a).read_text(encoding="utf-8", errors="replace") for a in ("REGRAS.md", "PROTOCOLOS.md") if (RAIZ / a).exists())
++    tarefa = opt("--tarefa", "agulha")
++    if tarefa not in TAREFAS:
++        print(f"tarefa inválida: {tarefa}; use {' ou '.join(TAREFAS)}", file=sys.stderr)
++        return 2
+     try:
+-        resultado = medir(opt("--url", URL_PADRAO), modelo, comprimentos, int(opt("--tentativas", "3")), base,
++        resultado = medir(opt("--url", URL_PADRAO), modelo, comprimentos, int(opt("--tentativas", "3")), base, tarefa=tarefa,
+                           progresso=lambda l: print(f"{l['alvo_tokens']} tokens: {l['acertos']}/{l['tentativas']} em {l['segundos']} s", file=sys.stderr))
+     except (urllib.error.URLError, OSError, ValueError) as exc:
+         print(f"endpoint não respondeu: {exc}", file=sys.stderr)
+diff --git a/scripts/medir_recuperacao.py b/scripts/medir_recuperacao.py
+index 2194864c..5179166d 100644
+--- a/scripts/medir_recuperacao.py
++++ b/scripts/medir_recuperacao.py
+@@ -10,7 +10,9 @@ embeddings) e saem como "não medido".
+ 
+ Só LÊ o repositório; com --salvar escreve um JSON em AGATA_MEDICOES_DIR (padrão
+ ~/.cache/agata/painel/medicoes). Uso:
+-  medir_recuperacao.py [--raiz DIR] [--n 40] [--seed 7] [--salvar]     |     --selftest
++  medir_recuperacao.py [--raiz DIR] [--n 40] [--seed 7] [--semantico] [--salvar]     |     --selftest
++--semantico mede a busca por sentido (scripts/busca_semantica.py, embeddings locais) com as MESMAS consultas; precisa do
++serviço de embeddings no ar, senão sai como não medido. Paráfrase continua não coberta.
+ Saída: JSON em stdout. Exit 0 = medido; 3 = sem notas para medir.
+ """
+ import json
+@@ -83,24 +85,50 @@ def posicao(consulta: str, esperado: str, raiz: Path) -> int | None:
+     return vistos.index(esperado) + 1 if esperado in vistos else None
+ 
+ 
+-def medir(raiz: Path, n: int = 40, seed: int = 7) -> dict | None:
+-    lista = casos(raiz, n, seed)
+-    if not lista:
+-        return None
+-    pos = [posicao(c["consulta"], c["esperado"], raiz) for c in lista]
++def posicao_semantica(consulta: str, esperado: str, n: int = 10) -> int | None:
++    import busca_semantica
++    num = int(Path(esperado).stem)
++    vistos = []
++    for item in busca_semantica.buscar_dados(consulta, n=n, blocos=False):
++        if item.get("tipo") == "entrada" and item.get("num") not in vistos:
++            vistos.append(item.get("num"))
++    return vistos.index(num) + 1 if num in vistos else None
++
++
++def _resumo(pos: list, metodo: str, seed: int) -> dict:
+     total = len(pos)
+-    return {"metodo": "busca_texto (léxica, só conteúdo, 3 palavras raras por nota)", "n": total, "seed": seed,
++    return {"metodo": metodo, "n": total, "seed": seed,
+             "recall": {str(k): round(sum(1 for p in pos if p is not None and p <= k) / total, 3) for k in KS},
+             "mrr": round(sum(1 / p for p in pos if p) / total, 3),
+             "sem_resultado": round(sum(1 for p in pos if p is None) / total, 3),
+-            "nao_medido": ["busca semântica (serviço de embeddings fora do ar ou não consultado)", "consultas por paráfrase"],
++            "nao_medido": ["consultas por paráfrase"] + ([] if "sentido" in metodo else ["busca por sentido (use --semantico)"]),
+             "medido_em": datetime.now().astimezone().isoformat(timespec="seconds")}
+ 
+ 
+-def _salvar(resultado: dict) -> Path:
++def medir_semantico(raiz: Path, n: int = 40, seed: int = 7) -> dict | None:
++    lista = casos(raiz, n, seed)
++    if not lista:
++        return None
++    try:
++        pos = [posicao_semantica(c["consulta"], c["esperado"]) for c in lista]
++    except Exception as exc:  # serviço de embeddings fora do ar ou índice ausente
++        print(f"busca semântica indisponível: {str(exc)[:120]}", file=sys.stderr)
++        return None
++    return _resumo(pos, "busca por sentido (busca_semantica.py, embeddings locais, mesmas consultas lexicais)", seed)
++
++
++def medir(raiz: Path, n: int = 40, seed: int = 7) -> dict | None:
++    lista = casos(raiz, n, seed)
++    if not lista:
++        return None
++    pos = [posicao(c["consulta"], c["esperado"], raiz) for c in lista]
++    return _resumo(pos, "busca_texto (léxica, só conteúdo, 3 palavras raras por nota)", seed)
++
++
++def _salvar(resultado: dict, nome: str = "recuperacao.json") -> Path:
+     pasta = Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
+     pasta.mkdir(parents=True, exist_ok=True, mode=0o700)
+-    arq = pasta / "recuperacao.json"
++    arq = pasta / nome
+     arq.write_text(json.dumps(resultado, ensure_ascii=False), encoding="utf-8")
+     return arq
+ 
+@@ -124,6 +152,17 @@ def _selftest() -> int:
+         conferir("diz o que não mediu", len(res["nao_medido"]) == 2)
+         conferir("mesma seed, mesmos casos", casos(r, 5, 3) == casos(r, 5, 3))
+         conferir("sem notas devolve None", medir(r / "vazio") is None)
++        import types
++        falso = types.ModuleType("busca_semantica")
++        falso.buscar_dados = lambda q, n=10, blocos=True: [{"tipo": "entrada", "num": 3}, {"tipo": "bloco", "num": 1}, {"tipo": "entrada", "num": 1}]
++        sys.modules["busca_semantica"] = falso
++        conferir("posição semântica conta só entradas, em ordem", posicao_semantica("x", "memoria/obsidian/entradas/0001.md") == 2 and posicao_semantica("x", "memoria/obsidian/entradas/0009.md") is None)
++        ms = medir_semantico(r, 40, 7)
++        conferir("medir_semantico usa o mesmo formato e diz que é por sentido", ms is not None and "sentido" in ms["metodo"] and set(ms["recall"]) == {"1", "5", "10"})
++        def cai(*a, **k): raise OSError("serviço fora do ar")
++        falso.buscar_dados = cai
++        conferir("serviço fora do ar devolve None, não número", medir_semantico(r, 40, 7) is None)
++        del sys.modules["busca_semantica"]
+         os.environ["AGATA_MEDICOES_DIR"] = str(r / "saida")
+         conferir("salvar grava o JSON", json.loads(_salvar(res).read_text(encoding="utf-8"))["n"] == len(temas))
+     return 1 if falhou else 0
+@@ -135,12 +174,13 @@ def main(argv: list[str]) -> int:
+     def opt(nome, padrao):
+         return type(padrao)(argv[argv.index(nome) + 1]) if nome in argv else padrao
+     raiz = Path(opt("--raiz", str(RAIZ)))
+-    resultado = medir(raiz, opt("--n", 40), opt("--seed", 7))
++    semantico = "--semantico" in argv
++    resultado = (medir_semantico if semantico else medir)(raiz, opt("--n", 40), opt("--seed", 7))
+     if resultado is None:
+-        print("sem notas em memoria/obsidian/entradas/: não medido", file=sys.stderr)
++        print("sem notas em memoria/obsidian/entradas/ ou serviço de embeddings fora do ar: não medido", file=sys.stderr)
+         return 3
+     if "--salvar" in argv:
+-        _salvar(resultado)
++        _salvar(resultado, "recuperacao-semantica.json" if semantico else "recuperacao.json")
+     print(json.dumps(resultado, ensure_ascii=False, indent=2))
+     return 0
+ 
+diff --git a/scripts/testar_trava_escriba.py b/scripts/testar_trava_escriba.py
+index 5bdd4283..420d0d2f 100644
+--- a/scripts/testar_trava_escriba.py
++++ b/scripts/testar_trava_escriba.py
+@@ -4,9 +4,13 @@ from pathlib import Path
+ from unittest.mock import patch
+ sys.dont_write_bytecode=True
+ ROOT=Path(__file__).resolve().parents[1]
+-with patch.dict(os.environ,{'SETH_REPO':str(ROOT)}):
+- spec=importlib.util.spec_from_file_location('escriba',ROOT/'redesign/router/seth_escriba.py')
+- m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
++try:
++ with patch.dict(os.environ,{'SETH_REPO':str(ROOT)}):
++  spec=importlib.util.spec_from_file_location('escriba',ROOT/'redesign/router/seth_escriba.py')
++  m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
++except ModuleNotFoundError as exc:
++ if exc.name!='cryptography':raise
++ print('NAO MEDIDO: modulo cryptography ausente neste Python (o escriba o exige); rode com o Python do venv do MCP.');sys.exit(0)
+ class Locks(unittest.TestCase):
+  def setUp(self):
+   self.t=tempfile.TemporaryDirectory();self.addCleanup(self.t.cleanup)
