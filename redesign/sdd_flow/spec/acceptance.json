@@ -1,0 +1,47 @@
+[
+  {
+    "criterion": "gates de spec recusam seção não preenchida",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_spec_gate.py::test_init_blocks_until_all_sections_and_decision_are_filled"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "critério com comando de retorno diferente de zero vira defeito na evidência",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_acceptance_runner.py::test_failed_acceptance_is_recorded_as_defect"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "drift por critério falha quando falta evidência",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_criterion_drift.py::test_drift_reports_each_criterion_and_blocks_missing_evidence"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "âncora recusa código sem dono na spec",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_anchor.py::test_orphan_code_blocks"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "ciclo para no primeiro portão que falha",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_cycle.py::test_cycle_stops_at_first_failing_gate"
+    ],
+    "cwd": null
+  }
+]
