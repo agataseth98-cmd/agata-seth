@@ -4,6 +4,7 @@ import collections
 import http.client
 import importlib.util
 import json
+import re
 import tempfile
 import threading
 import time
@@ -263,6 +264,20 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(resposta["faltando"], [])
             self.assertEqual(panel.FOCOS_PENDENTES, [])
         panel.FOCOS_PENDENTES.clear()
+
+    def test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp(self):
+        # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
+        for nome in ("prototipo.html", "index.html"):
+            html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
+            self.assertEqual([], [m for m in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>", html)], nome)
+        self.assertEqual(self.request("GET", "/abrir.js", None, {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"})[0], 200)
+
+    def test_urls_de_abrir_dos_conselheiros_batem_com_o_catalogo(self):
+        # Kimi em www.kimi.com abre em chinês; o catálogo e o canon usam www.kimi.ai (pt-BR).
+        import relay_catalog
+        sites = {p["id"]: p["site"] for p in relay_catalog.PROVIDERS}
+        for conselheiro in panel.CONSELHEIROS:
+            self.assertEqual(panel.ABRIR_PROVEDORES[conselheiro], sites[conselheiro], conselheiro)
 
     def test_busca_exige_origem_json_e_entrada_valida(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
