@@ -1,0 +1,66 @@
+diff --git a/redesign/painel_operacional/relay_catalog.py b/redesign/painel_operacional/relay_catalog.py
+index d472f9e6..d88f44e3 100644
+--- a/redesign/painel_operacional/relay_catalog.py
++++ b/redesign/painel_operacional/relay_catalog.py
+@@ -10,9 +10,9 @@ PROVIDERS = (
+     {"id": "chatgpt", "name": "ChatGPT", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chatgpt.com/"},
+     {"id": "claude", "name": "Claude", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://claude.ai/"},
+     {"id": "grok", "name": "Grok", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://grok.com/"},
+-    {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://qwen.ai/"},
++    {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.qwen.ai/"},
+     {"id": "mistral", "name": "Le Chat / Mistral", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.mistral.ai/"},
+-    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/"},
++    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/en"},
+ )
+ 
+ PROVIDER_BY_ID = {provider["id"]: provider for provider in PROVIDERS}
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 1328a044..0f8289b8 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -895,9 +895,9 @@ ABRIR_PROVEDORES = {
+     "chatgpt": "https://chatgpt.com/",
+     "claude": "https://claude.ai/",
+     "grok": "https://grok.com/",
+-    "qwen": "https://qwen.ai/",
++    "qwen": "https://chat.qwen.ai/",
+     "mistral": "https://chat.mistral.ai/",
+-    "kimi": "https://www.kimi.ai/",
++    "kimi": "https://www.kimi.ai/en",
+     "librechat": "http://127.0.0.1:3080/",
+     "omniroute": "http://127.0.0.1:20128/",
+ }
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 0bec646b..c7c56007 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -4,7 +4,6 @@ import collections
+ import http.client
+ import importlib.util
+ import json
+-import re
+ import tempfile
+ import threading
+ import time
+@@ -269,11 +268,19 @@ class HttpTests(unittest.TestCase):
+         # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
+         for nome in ("prototipo.html", "index.html"):
+             html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
+-            self.assertEqual([], [m for m in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>", html)], nome)
++            inline = []
++
++            class _Scripts(HTMLParser):
++                def handle_starttag(self, tag, attrs):
++                    if tag == "script" and not dict(attrs).get("src"):
++                        inline.append(tag)
++
++            _Scripts().feed(html)
++            self.assertEqual([], inline, nome)
+         self.assertEqual(self.request("GET", "/abrir.js", None, {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"})[0], 200)
+ 
+     def test_urls_de_abrir_dos_conselheiros_batem_com_o_catalogo(self):
+-        # Kimi em www.kimi.com abre em chinês; o catálogo e o canon usam www.kimi.ai (pt-BR).
++        # Kimi em www.kimi.com abre em chinês e o Qwen precisa abrir em inglês: Humano escolheu chat.qwen.ai e www.kimi.ai/en.
+         import relay_catalog
+         sites = {p["id"]: p["site"] for p in relay_catalog.PROVIDERS}
+         for conselheiro in panel.CONSELHEIROS:
