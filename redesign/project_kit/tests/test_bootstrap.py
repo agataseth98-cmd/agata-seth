@@ -49,3 +49,17 @@ def test_bootstrap_can_record_public_ledger_event(tmp_path):
     assert data["kind"] == "observation"
     assert data["classification"] == "public"
     assert data["output_hash"]
+
+def test_bootstrap_omits_secret_names_and_external_symlink(tmp_path):
+    project = tmp_path / "project"; project.mkdir()
+    (project / ".env").write_text("TOKEN=secret", encoding="utf-8")
+    (project / "id_rsa").write_text("private", encoding="utf-8")
+    (project / "notes.txt").write_text("ok", encoding="utf-8")
+    outside = tmp_path / "outside.txt"; outside.write_text("outside", encoding="utf-8")
+    (project / "link.txt").symlink_to(outside)
+    out = tmp_path / "out"
+    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(out), "--goal", "secrets"], check=True)
+    data = json.loads((out / "provenance.json").read_text(encoding="utf-8"))
+    assert {item["path"] for item in data["files"]} == {"notes.txt"}
+    assert {item["path"] for item in data["omitted"]} == {".env", "id_rsa", "link.txt"}
+    assert all("sha256" not in item for item in data["omitted"])
