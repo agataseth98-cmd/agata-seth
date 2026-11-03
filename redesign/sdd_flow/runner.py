@@ -133,6 +133,21 @@ def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> No
     run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
 
 
+def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
+    """Mechanical gates in order; stops at the first one that fails."""
+    run("redesign/sdd_flow/spec_gate.py", "check", str(root))
+    run("redesign/sdd_flow/anchor.py", str(ROOT), *scopes)
+    evidence = root / "evidence.json"
+    try:
+        run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(evidence))
+    finally:
+        if evidence.exists():
+            artifact(state, "evidence", evidence)
+    artifact(state, "spec", root / "spec.md")
+    criterion_drift(state, root / "spec.md", evidence, root / "criterion-drift.md")
+    record(state, "cycle", "spec, âncora, aceite e drift por critério: OK")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("state", type=Path)
@@ -152,6 +167,7 @@ def main() -> int:
     rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
+    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
     sub.add_parser("status")
     args = ap.parse_args()
     state = load(args.state)
@@ -169,6 +185,7 @@ def main() -> int:
     elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
+    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
     else: print(json.dumps(state, ensure_ascii=False, indent=2))
     if args.cmd != "status":
         save(args.state, state)

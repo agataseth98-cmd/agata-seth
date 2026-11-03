@@ -1,0 +1,33 @@
+# Ciclo SDD na CI: repete, fora da Máquina, o que o ciclo local confere.
+# Só lê o repositório; não assina, não aplica, não mergeia.
+name: SDD (ciclo mecânico)
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "redesign/sdd_flow/**"
+      - "redesign/review_mesh/**"
+      - "redesign/project_kit/**"
+      - "redesign/evidence_ledger/**"
+      - ".github/workflows/sdd.yml"
+  workflow_dispatch: {}
+
+jobs:
+  sdd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA como em perimetro.yml
+
+      - name: pytest fixado
+        run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+
+      - name: Testes dos componentes SDD
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger
+
+      - name: Ciclo SDD sobre o próprio sdd_flow
+        run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow

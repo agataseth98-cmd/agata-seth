@@ -15,3 +15,16 @@ python3 redesign/sdd_flow/runner.py work/state.json drift projeto/ work/kit/prov
 python3 redesign/sdd_flow/runner.py work/state.json complete
 python3 redesign/sdd_flow/runner.py work/state.json status
 ```
+
+## Ciclo único e âncora
+
+```bash
+python3 redesign/sdd_flow/runner.py work/state.json cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow
+```
+
+`cycle` roda gates de spec, âncora, critérios de aceite e drift por critério, e para no primeiro que falha. `anchor.py` ancora componente existente: a spec (`spec/spec.md` ou `SPEC.md`) lista o código que possui; arquivo-fonte sem dono ou citação de arquivo inexistente falha. O job `sdd` da CI repete isso.
+
+## Uma assinatura por implementação
+
+Cada implementação coerente é uma proposta, com uma assinatura P-8 e uma aplicação. Brainstorm, spec, código, testes e CI vão juntos no mesmo `.diff`; não se abrem propostas pequenas em série.
