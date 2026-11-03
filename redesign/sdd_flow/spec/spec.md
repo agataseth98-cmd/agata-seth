@@ -9,6 +9,8 @@
 
 - `runner.py <state> cycle <root> <manifest> --scope <pasta>...` executa, nesta ordem: gates de spec, âncora, critérios de aceite e drift por critério; para no primeiro que falha.
 - `anchor.py <repo> <pasta>...` falha se faltar spec, seção obrigatória, dono de arquivo-fonte ou se a spec citar arquivo inexistente.
+- `runner.py <state> proposal <nome> <worktree> <saida.diff> [--base origin/main] [--test alvo...]` gera o `.diff` único do lote e só o grava depois de aplicá-lo, conferi-lo (`git diff --check`) e testá-lo num checkout limpo da base; não assina, não abre PR.
+- `github_flow.py` só inicia o handoff com `--state` de um ciclo que registrou a etapa `cycle`.
 - Nenhum comando decide pelo Humano: `DECISAO: aceita` só entra em `decision.md` junto da assinatura P-8 que aplica este arquivo.
 
 ## Critérios de aceite
@@ -18,6 +20,9 @@
 - [ ] drift por critério falha quando falta evidência
 - [ ] âncora recusa código sem dono na spec
 - [ ] ciclo para no primeiro portão que falha
+- [ ] proposta grava um diff único e não deixa worktree temporária
+- [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
+- [ ] handoff do GitHub exige ciclo registrado
 
 ## Desenho e alternativas
 
@@ -25,7 +30,7 @@ Reaproveita as peças existentes (`spec_gate`, `acceptance_runner`, `criterion_d
 
 ## Implementação e testes
 
-`anchor.py` (novo), `cycle` em `runner.py`, testes em `tests/test_anchor.py` e `tests/test_cycle.py`, job `sdd` na CI. Os critérios acima estão ligados a testes em `acceptance.json`.
+`anchor.py`, `cycle` e `proposal` em `runner.py`, `require_cycle` em `github_flow.py`, testes em `tests/test_anchor.py`, `tests/test_cycle.py` e `tests/test_proposal.py`, job `sdd` na CI. Os critérios acima estão ligados a testes em `acceptance.json`.
 
 ## Migração e reversão
 
