@@ -1,0 +1,137 @@
+diff --git a/redesign/painel_operacional/abrir.js b/redesign/painel_operacional/abrir.js
+new file mode 100644
+index 00000000..eda2d368
+--- /dev/null
++++ b/redesign/painel_operacional/abrir.js
+@@ -0,0 +1,25 @@
++// Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
++document.querySelectorAll('[data-alvo]').forEach((botao) => {
++  botao.addEventListener('click', async () => {
++    const aviso = document.getElementById('abrir-aviso');
++    try {
++      const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: botao.dataset.alvo})});
++      aviso.textContent = r.ok ? 'Abrindo ' + botao.textContent + '…' : 'Não consegui abrir ' + botao.textContent + '.';
++    } catch (e) {
++      aviso.textContent = 'Painel fora do ar.';
++    }
++  });
++});
++// Entrar na aba Conselho (a cada clique) confere os nove conselheiros e abre só os que faltam.
++async function conferirConselheiros() {
++  const aviso = document.getElementById('abrir-aviso');
++  try {
++    const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: 'conselho'})});
++    if (!r.ok) { aviso.textContent = 'Não consegui conferir os conselheiros.'; return; }
++    const d = await r.json();
++    aviso.textContent = d.faltando.length ? 'Abrindo ' + d.faltando.length + ' conselheiro(s) que faltavam…' : 'Os nove conselheiros estão abertos.';
++  } catch (e) {
++    aviso.textContent = 'Painel fora do ar.';
++  }
++}
++document.querySelectorAll('[data-page="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 664dd0bb..40dd5829 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -218,33 +218,7 @@
+ <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+ <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
+ <script src="prototipo.js"></script>
+-<script>
+-// Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
+-document.querySelectorAll('[data-alvo]').forEach((botao) => {
+-  botao.addEventListener('click', async () => {
+-    const aviso = document.getElementById('abrir-aviso');
+-    try {
+-      const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: botao.dataset.alvo})});
+-      aviso.textContent = r.ok ? 'Abrindo ' + botao.textContent + '…' : 'Não consegui abrir ' + botao.textContent + '.';
+-    } catch (e) {
+-      aviso.textContent = 'Painel fora do ar.';
+-    }
+-  });
+-});
+-// Entrar na aba Conselho (a cada clique) confere os nove conselheiros e abre só os que faltam.
+-async function conferirConselheiros() {
+-  const aviso = document.getElementById('abrir-aviso');
+-  try {
+-    const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: 'conselho'})});
+-    if (!r.ok) { aviso.textContent = 'Não consegui conferir os conselheiros.'; return; }
+-    const d = await r.json();
+-    aviso.textContent = d.faltando.length ? 'Abrindo ' + d.faltando.length + ' conselheiro(s) que faltavam…' : 'Os nove conselheiros estão abertos.';
+-  } catch (e) {
+-    aviso.textContent = 'Painel fora do ar.';
+-  }
+-}
+-document.querySelectorAll('[data-page="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
+-</script>
++<script src="abrir.js"></script>
+ <script src="conselho-rede/app.js" defer></script>
+ </body>
+ </html>
+diff --git a/redesign/painel_operacional/relay_catalog.py b/redesign/painel_operacional/relay_catalog.py
+index a96fa75d..d472f9e6 100644
+--- a/redesign/painel_operacional/relay_catalog.py
++++ b/redesign/painel_operacional/relay_catalog.py
+@@ -12,7 +12,7 @@ PROVIDERS = (
+     {"id": "grok", "name": "Grok", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://grok.com/"},
+     {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://qwen.ai/"},
+     {"id": "mistral", "name": "Le Chat / Mistral", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.mistral.ai/"},
+-    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.com/"},
++    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/"},
+ )
+ 
+ PROVIDER_BY_ID = {provider["id"]: provider for provider in PROVIDERS}
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 6d956dc5..1328a044 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -96,6 +96,7 @@ _ASSETS = {
+     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
+     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
++    "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
+     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
+@@ -896,7 +897,7 @@ ABRIR_PROVEDORES = {
+     "grok": "https://grok.com/",
+     "qwen": "https://qwen.ai/",
+     "mistral": "https://chat.mistral.ai/",
+-    "kimi": "https://www.kimi.com/",
++    "kimi": "https://www.kimi.ai/",
+     "librechat": "http://127.0.0.1:3080/",
+     "omniroute": "http://127.0.0.1:20128/",
+ }
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 1061d4b8..0bec646b 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -4,6 +4,7 @@ import collections
+ import http.client
+ import importlib.util
+ import json
++import re
+ import tempfile
+ import threading
+ import time
+@@ -264,6 +265,20 @@ class HttpTests(unittest.TestCase):
+             self.assertEqual(panel.FOCOS_PENDENTES, [])
+         panel.FOCOS_PENDENTES.clear()
+ 
++    def test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp(self):
++        # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
++        for nome in ("prototipo.html", "index.html"):
++            html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
++            self.assertEqual([], [m for m in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>", html)], nome)
++        self.assertEqual(self.request("GET", "/abrir.js", None, {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"})[0], 200)
++
++    def test_urls_de_abrir_dos_conselheiros_batem_com_o_catalogo(self):
++        # Kimi em www.kimi.com abre em chinês; o catálogo e o canon usam www.kimi.ai (pt-BR).
++        import relay_catalog
++        sites = {p["id"]: p["site"] for p in relay_catalog.PROVIDERS}
++        for conselheiro in panel.CONSELHEIROS:
++            self.assertEqual(panel.ABRIR_PROVEDORES[conselheiro], sites[conselheiro], conselheiro)
++
+     def test_busca_exige_origem_json_e_entrada_valida(self):
+         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
+         payload = json.dumps({"query": "painel", "mode": "texto"})
