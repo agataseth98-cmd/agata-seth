@@ -7,18 +7,18 @@ p16_testes_dos_controles() {
   # Guarda de recursão: a suíte roda o perímetro dentro do clone dela.
   if [ -n "${AGATA_TESTE_PERIMETRO:-}" ]; then
     echo "P-16: rodando DENTRO da suíte -- pulado (senão recursa infinitamente)."
-    PERIMETRO_ESTADO="SKIP"; return 0
+    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
   fi
   if _perimetro_eh_genese; then
     echo "P-16: gênese -- sem commit anterior; a suíte roda depois do nascimento."
-    PERIMETRO_ESTADO="SKIP"; return 0
+    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
   fi
   local staged tocados
   staged="$(git -c core.quotepath=false diff --cached --no-renames --name-only 2>/dev/null)"
   tocados="$(echo "$staged" | grep -E "$P16_ARQUIVOS_DE_CONTROLE" || true)"
   if [ -z "$tocados" ]; then
     echo "P-16: nenhum arquivo de controle staged -- suíte não precisa rodar."
-    PERIMETRO_ESTADO="SKIP"; return 0
+    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
   fi
   if [ ! -f "$_PERIMETRO_DIR/testar_perimetro.sh" ]; then
     echo "SUSPEITO (P-16): arquivo de controle staged ($(echo "$tocados" | tr '\n' ' ')) mas scripts/testar_perimetro.sh não existe -- o controle mudou sem que exista teste dele."
