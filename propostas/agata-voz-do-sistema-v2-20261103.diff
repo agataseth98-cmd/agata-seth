@@ -1,5 +1,5 @@
 diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
-index ba8cd9d5..46f25850 100644
+index c589a21c..dc1ed04b 100644
 --- a/.agents/skills/INDICE.md
 +++ b/.agents/skills/INDICE.md
 @@ -17,6 +17,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada
@@ -9,7 +9,7 @@ index ba8cd9d5..46f25850 100644
 +| `agata-voz` | ler em voz alta, falar, narrar, voz do sistema; todo modelo que fala usa a voz do Agata | Claude |
  
  ## Skills de terceiros (cópias fixas, não editar aqui)
- - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
+ - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills` só como cópias locais fora do git (`.git/info/exclude`): um clone limpo e a CI não as têm. São cópias do mesmo conteúdo; a fonte de atualização é externa.
 diff --git a/.agents/skills/agata-voz/SKILL.md b/.agents/skills/agata-voz/SKILL.md
 new file mode 100644
 index 00000000..35ca9236
