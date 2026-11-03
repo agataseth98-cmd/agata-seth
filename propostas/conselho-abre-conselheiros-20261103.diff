@@ -1,0 +1,96 @@
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 7b2b4cea..664dd0bb 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -231,6 +231,19 @@ document.querySelectorAll('[data-alvo]').forEach((botao) => {
+     }
+   });
+ });
++// Entrar na aba Conselho (a cada clique) confere os nove conselheiros e abre só os que faltam.
++async function conferirConselheiros() {
++  const aviso = document.getElementById('abrir-aviso');
++  try {
++    const r = await fetch('/api/abrir', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({alvo: 'conselho'})});
++    if (!r.ok) { aviso.textContent = 'Não consegui conferir os conselheiros.'; return; }
++    const d = await r.json();
++    aviso.textContent = d.faltando.length ? 'Abrindo ' + d.faltando.length + ' conselheiro(s) que faltavam…' : 'Os nove conselheiros estão abertos.';
++  } catch (e) {
++    aviso.textContent = 'Painel fora do ar.';
++  }
++}
++document.querySelectorAll('[data-page="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
+ </script>
+ <script src="conselho-rede/app.js" defer></script>
+ </body>
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index d383560b..6d956dc5 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -908,6 +908,9 @@ _OBSIDIAN_ULTIMA = [0.0]
+ OBSIDIAN_INTERVALO_S = 5.0
+ # Rotas lidas pela extensão: não passam pela checagem de origem do navegador (usam o cabeçalho do executor).
+ ROTAS_DA_EXTENSAO = {"/api/relay-council/focos", "/api/relay-council/tasks"}
++CONSELHEIROS = ("deepseek", "gemini", "zai", "chatgpt", "claude", "grok", "qwen", "mistral", "kimi")
++CONSELHO_REPETE_S = 20.0  # não reenfileira o mesmo conselheiro enquanto o inventário da extensão alcança
++_CONSELHO_ULTIMA: dict = {}
+ ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
+ 
+ 
+@@ -934,6 +937,21 @@ class Handler(BaseHTTPRequestHandler):
+                 _OBSIDIAN_ULTIMA[0] = agora
+             subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, start_new_session=True)
++        elif alvo == "conselho":
++            # Entrar na aba Conselho confere os nove conselheiros: só pede abertura dos que a extensão não vê.
++            abertos = set(_council_state().available_providers())
++            agora = time.monotonic()
++            with _FOCO_LOCK:
++                na_fila = {p["site"] for p in FOCOS_PENDENTES}
++                faltando = [c for c in CONSELHEIROS if c not in abertos]
++                for site in faltando:
++                    if site in na_fila or agora - _CONSELHO_ULTIMA.get(site, -CONSELHO_REPETE_S) < CONSELHO_REPETE_S:
++                        continue
++                    _CONSELHO_ULTIMA[site] = agora
++                    FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": site, "url": ABRIR_PROVEDORES[site], "janela": False})
++                del FOCOS_PENDENTES[:-FOCOS_MAX]
++            return self._send(202, "application/json; charset=utf-8",
++                              json.dumps({"ok": True, "alvo": alvo, "abertos": len(abertos), "faltando": faltando}).encode("utf-8"))
+         elif alvo in ABRIR_PROVEDORES:
+             # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
+             with _FOCO_LOCK:
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 345d66c6..1061d4b8 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -239,6 +239,31 @@ class HttpTests(unittest.TestCase):
+             self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 429)
+             self.assertEqual(popen.call_count, 1)
+ 
++    def test_abrir_conselho_pede_so_os_conselheiros_que_faltam(self):
++        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
++        estado = SimpleNamespace(available_providers=lambda: ("deepseek", "gemini", "claude"))
++        panel.FOCOS_PENDENTES.clear()
++        panel._CONSELHO_ULTIMA.clear()
++        with mock.patch.object(panel, "_council_state", return_value=estado):
++            status, corpo = self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)[:2]
++            self.assertEqual(status, 202)
++            resposta = json.loads(corpo)
++            self.assertEqual(resposta["abertos"], 3)
++            self.assertEqual(sorted(resposta["faltando"]), sorted(set(panel.CONSELHEIROS) - {"deepseek", "gemini", "claude"}))
++            self.assertEqual({p["site"] for p in panel.FOCOS_PENDENTES}, set(resposta["faltando"]))
++            self.assertTrue(all(p["janela"] is False for p in panel.FOCOS_PENDENTES))
++            n = len(panel.FOCOS_PENDENTES)
++            self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)
++            self.assertEqual(len(panel.FOCOS_PENDENTES), n)  # repetir o clique não duplica
++        estado_cheio = SimpleNamespace(available_providers=lambda: panel.CONSELHEIROS)
++        panel.FOCOS_PENDENTES.clear()
++        panel._CONSELHO_ULTIMA.clear()
++        with mock.patch.object(panel, "_council_state", return_value=estado_cheio):
++            resposta = json.loads(self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)[1])
++            self.assertEqual(resposta["faltando"], [])
++            self.assertEqual(panel.FOCOS_PENDENTES, [])
++        panel.FOCOS_PENDENTES.clear()
++
+     def test_busca_exige_origem_json_e_entrada_valida(self):
+         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
+         payload = json.dumps({"query": "painel", "mode": "texto"})
