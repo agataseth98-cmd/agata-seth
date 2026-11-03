@@ -1,0 +1,396 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+new file mode 100644
+index 00000000..0a142296
+--- /dev/null
++++ b/.github/workflows/sdd.yml
+@@ -0,0 +1,33 @@
++# Ciclo SDD na CI: repete, fora da Máquina, o que o ciclo local confere.
++# Só lê o repositório; não assina, não aplica, não mergeia.
++name: SDD (ciclo mecânico)
++
++permissions:
++  contents: read
++
++on:
++  pull_request:
++    branches: [main]
++    paths:
++      - "redesign/sdd_flow/**"
++      - "redesign/review_mesh/**"
++      - "redesign/project_kit/**"
++      - "redesign/evidence_ledger/**"
++      - ".github/workflows/sdd.yml"
++  workflow_dispatch: {}
++
++jobs:
++  sdd:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout
++        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA como em perimetro.yml
++
++      - name: pytest fixado
++        run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
++
++      - name: Testes dos componentes SDD
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger
++
++      - name: Ciclo SDD sobre o próprio sdd_flow
++        run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+diff --git a/redesign/sdd_flow/README.md b/redesign/sdd_flow/README.md
+index 848fd898..7b7266c6 100644
+--- a/redesign/sdd_flow/README.md
++++ b/redesign/sdd_flow/README.md
+@@ -15,3 +15,16 @@ python3 redesign/sdd_flow/runner.py work/state.json drift projeto/ work/kit/prov
+ python3 redesign/sdd_flow/runner.py work/state.json complete
+ python3 redesign/sdd_flow/runner.py work/state.json status
+ ```
++
++## Ciclo único e âncora
++
++```bash
++python3 redesign/sdd_flow/runner.py work/state.json cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
++python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow
++```
++
++`cycle` roda gates de spec, âncora, critérios de aceite e drift por critério, e para no primeiro que falha. `anchor.py` ancora componente existente: a spec (`spec/spec.md` ou `SPEC.md`) lista o código que possui; arquivo-fonte sem dono ou citação de arquivo inexistente falha. O job `sdd` da CI repete isso.
++
++## Uma assinatura por implementação
++
++Cada implementação coerente é uma proposta, com uma assinatura P-8 e uma aplicação. Brainstorm, spec, código, testes e CI vão juntos no mesmo `.diff`; não se abrem propostas pequenas em série.
+diff --git a/redesign/sdd_flow/anchor.py b/redesign/sdd_flow/anchor.py
+new file mode 100644
+index 00000000..d368d736
+--- /dev/null
++++ b/redesign/sdd_flow/anchor.py
+@@ -0,0 +1,61 @@
++#!/usr/bin/env python3
++"""Anchor existing components to a SPEC.md and block orphan or ghost code.
++
++Brownfield retrofit: a component is anchored when its directory has spec/spec.md
++(or SPEC.md)
++with the sections Contrato and Critérios de aceite, and a Código section that
++lists every source file (backticked). Listing `tests/` owns that whole subtree.
++The check is mechanical: it never writes and never invents ownership.
++"""
++from __future__ import annotations
++
++import argparse
++import re
++from pathlib import Path
++
++
++SOURCE = (".py", ".sh", ".js", ".html")
++REQUIRED = ("Contrato", "Critérios de aceite", "Código")
++
++
++def section(text: str, name: str) -> str | None:
++    parts = re.split(rf"^## {re.escape(name)}\s*$", text, maxsplit=1, flags=re.M)
++    return parts[1].split("\n## ", 1)[0] if len(parts) == 2 else None
++
++
++def check_component(root: Path, scope: str) -> list[str]:
++    base = root / scope
++    spec = next((c for c in (base / "spec" / "spec.md", base / "SPEC.md") if c.exists()), None)
++    if spec is None:
++        return [f"{scope}: sem SPEC.md (nem spec/spec.md)"]
++    text = spec.read_text(encoding="utf-8")
++    gaps = [f"{scope}: seção ausente ou vazia: {name}" for name in REQUIRED if not (section(text, name) or "").strip()]
++    owned = set(re.findall(r"`([^`\n]+)`", section(text, "Código") or ""))
++    files = sorted(
++        p.relative_to(base).as_posix()
++        for p in base.rglob("*")
++        if p.is_file() and p.suffix in SOURCE and "__pycache__" not in p.parts
++    )
++    for rel in files:
++        if not any(rel == own or (own.endswith("/") and rel.startswith(own)) for own in owned):
++            gaps.append(f"{scope}: código órfão (sem dono na SPEC): {rel}")
++    for own in sorted(owned):
++        if not (base / own).exists():
++            gaps.append(f"{scope}: SPEC cita arquivo inexistente: {own}")
++    return gaps
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(description=__doc__)
++    ap.add_argument("repo", type=Path)
++    ap.add_argument("scopes", nargs="+")
++    args = ap.parse_args()
++    gaps = [gap for scope in args.scopes for gap in check_component(args.repo.resolve(), scope)]
++    if gaps:
++        raise SystemExit("âncora incompleta:\n" + "\n".join(f"- {gap}" for gap in gaps))
++    print("ANCHOR: OK")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/redesign/sdd_flow/runner.py b/redesign/sdd_flow/runner.py
+index a10e4597..daf5ca95 100644
+--- a/redesign/sdd_flow/runner.py
++++ b/redesign/sdd_flow/runner.py
+@@ -133,6 +133,21 @@ def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> No
+     run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
+ 
+ 
++def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
++    """Mechanical gates in order; stops at the first one that fails."""
++    run("redesign/sdd_flow/spec_gate.py", "check", str(root))
++    run("redesign/sdd_flow/anchor.py", str(ROOT), *scopes)
++    evidence = root / "evidence.json"
++    try:
++        run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(evidence))
++    finally:
++        if evidence.exists():
++            artifact(state, "evidence", evidence)
++    artifact(state, "spec", root / "spec.md")
++    criterion_drift(state, root / "spec.md", evidence, root / "criterion-drift.md")
++    record(state, "cycle", "spec, âncora, aceite e drift por critério: OK")
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("state", type=Path)
+@@ -152,6 +167,7 @@ def main() -> int:
+     rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
+     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
+     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
++    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
+     sub.add_parser("status")
+     args = ap.parse_args()
+     state = load(args.state)
+@@ -169,6 +185,7 @@ def main() -> int:
+     elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
+     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
+     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
++    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
+     else: print(json.dumps(state, ensure_ascii=False, indent=2))
+     if args.cmd != "status":
+         save(args.state, state)
+diff --git a/redesign/sdd_flow/spec/acceptance.json b/redesign/sdd_flow/spec/acceptance.json
+new file mode 100644
+index 00000000..631fb06e
+--- /dev/null
++++ b/redesign/sdd_flow/spec/acceptance.json
+@@ -0,0 +1,47 @@
++[
++  {
++    "criterion": "gates de spec recusam seção não preenchida",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_spec_gate.py::test_init_blocks_until_all_sections_and_decision_are_filled"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "critério com comando de retorno diferente de zero vira defeito na evidência",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_acceptance_runner.py::test_failed_acceptance_is_recorded_as_defect"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "drift por critério falha quando falta evidência",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_criterion_drift.py::test_drift_reports_each_criterion_and_blocks_missing_evidence"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "âncora recusa código sem dono na spec",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_anchor.py::test_orphan_code_blocks"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "ciclo para no primeiro portão que falha",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_cycle.py::test_cycle_stops_at_first_failing_gate"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/sdd_flow/spec/brainstorm.md b/redesign/sdd_flow/spec/brainstorm.md
+new file mode 100644
+index 00000000..6045a1b9
+--- /dev/null
++++ b/redesign/sdd_flow/spec/brainstorm.md
+@@ -0,0 +1,29 @@
++# Brainstorm
++
++## Usuários
++
++O Humano (assina e decide), os modelos que operam no Agata (propõem e executam) e a CI (confere sem confiar em ninguém).
++
++## Estado que muda
++
++Arquivos do componente `redesign/sdd_flow/`, o `state.json` de cada ciclo e os artefatos `evidence.json` e `criterion-drift.md`. Nada em canon, nada em `scripts/*`.
++
++## Erros e concorrência
++
++Um portão que falha para o ciclo no ponto exato e não grava `complete`. Dois ciclos no mesmo `state.json` não são suportados: um arquivo de estado por ciclo.
++
++## Migração
++
++O desenvolvimento do Agata já existia. O ciclo entra por ancoragem: cada componente existente ganha uma spec que lista o código que possui; componente sem spec continua fora do escopo até ser ancorado, sem bloquear o resto.
++
++## Observabilidade
++
++`status` mostra o histórico de etapas; `evidence.json` guarda comando, retorno e saída de cada critério; `criterion-drift.md` lista cada critério como pass, fail ou unmeasured.
++
++## Reversão
++
++Reverter o commit de aplicação. O componente não toca em estado fora da própria pasta.
++
++## Sucesso
++
++Um ciclo roda ponta a ponta sobre o próprio `sdd_flow` na CI, e todo critério tem evidência executada.
+diff --git a/redesign/sdd_flow/spec/decision.md b/redesign/sdd_flow/spec/decision.md
+new file mode 100644
+index 00000000..fbc8f4c2
+--- /dev/null
++++ b/redesign/sdd_flow/spec/decision.md
+@@ -0,0 +1,5 @@
++# Decisão
++
++DECISAO: aceita
++
++Registrada pela assinatura P-8 da proposta que aplica este arquivo; o arquivo só entra no repositório com essa assinatura.
+diff --git a/redesign/sdd_flow/spec/spec.md b/redesign/sdd_flow/spec/spec.md
+new file mode 100644
+index 00000000..ab902685
+--- /dev/null
++++ b/redesign/sdd_flow/spec/spec.md
+@@ -0,0 +1,49 @@
++# Spec
++
++## Jornadas críticas
++
++1. Quem implementa escreve brainstorm, spec e critérios; o Humano assina uma vez; o ciclo confere tudo e a CI repete a conferência.
++2. Um componente existente é ancorado: a spec lista seu código, e arquivo novo sem dono falha na CI.
++
++## Contrato
++
++- `runner.py <state> cycle <root> <manifest> --scope <pasta>...` executa, nesta ordem: gates de spec, âncora, critérios de aceite e drift por critério; para no primeiro que falha.
++- `anchor.py <repo> <pasta>...` falha se faltar spec, seção obrigatória, dono de arquivo-fonte ou se a spec citar arquivo inexistente.
++- Nenhum comando decide pelo Humano: `DECISAO: aceita` só entra em `decision.md` junto da assinatura P-8 que aplica este arquivo.
++
++## Critérios de aceite
++
++- [ ] gates de spec recusam seção não preenchida
++- [ ] critério com comando de retorno diferente de zero vira defeito na evidência
++- [ ] drift por critério falha quando falta evidência
++- [ ] âncora recusa código sem dono na spec
++- [ ] ciclo para no primeiro portão que falha
++
++## Desenho e alternativas
++
++Reaproveita as peças existentes (`spec_gate`, `acceptance_runner`, `criterion_drift`) e acrescenta só a âncora e o comando `cycle`. Alternativa descartada: grafo de specs com assembler de contexto (Spec Growth Engine); é grande demais para o retrofit e fica como evolução se a âncora provar valor. Alternativa descartada: spec única na raiz do repositório; não escala por componente.
++
++## Implementação e testes
++
++`anchor.py` (novo), `cycle` em `runner.py`, testes em `tests/test_anchor.py` e `tests/test_cycle.py`, job `sdd` na CI. Os critérios acima estão ligados a testes em `acceptance.json`.
++
++## Migração e reversão
++
++Ancoragem gradual por componente, começando por `sdd_flow`. Reversão por revert do commit de aplicação.
++
++## Riscos e dependências
++
++A spec pode divergir do código em comportamento que nenhum teste cobre; a âncora só pega ownership, não semântica. Depende de pytest na CI (versão fixada no workflow).
++
++## Código
++
++- `runner.py`
++- `anchor.py`
++- `spec_gate.py`
++- `acceptance_runner.py`
++- `criterion_drift.py`
++- `independent_review.py`
++- `agent_dispatch.py`
++- `github_flow.py`
++- `tests/`
++- `README.md`
+diff --git a/redesign/sdd_flow/tests/test_anchor.py b/redesign/sdd_flow/tests/test_anchor.py
+new file mode 100644
+index 00000000..c6fe34b6
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_anchor.py
+@@ -0,0 +1,42 @@
++import subprocess
++import sys
++from pathlib import Path
++
++
++SCRIPT = Path(__file__).parents[1] / "anchor.py"
++SPEC = "# Spec\n\n## Contrato\n\nx\n\n## Critérios de aceite\n\n- [ ] a\n\n## Código\n\n- `a.py`\n"
++
++
++def anchor(repo, *scopes):
++    return subprocess.run([sys.executable, str(SCRIPT), str(repo), *scopes], capture_output=True, text=True)
++
++
++def component(tmp_path, spec=SPEC):
++    comp = tmp_path / "comp"; comp.mkdir()
++    (comp / "SPEC.md").write_text(spec, encoding="utf-8")
++    (comp / "a.py").write_text("x = 1\n", encoding="utf-8")
++    return comp
++
++
++def test_anchored_component_passes(tmp_path):
++    component(tmp_path)
++    assert anchor(tmp_path, "comp").returncode == 0
++
++
++def test_orphan_code_blocks(tmp_path):
++    comp = component(tmp_path)
++    (comp / "novo.py").write_text("y = 2\n", encoding="utf-8")
++    result = anchor(tmp_path, "comp")
++    assert result.returncode != 0 and "novo.py" in result.stderr
++
++
++def test_ghost_entry_and_missing_spec_block(tmp_path):
++    comp = component(tmp_path, SPEC + "- `fantasma.py`\n")
++    assert "fantasma.py" in anchor(tmp_path, "comp").stderr
++    (comp / "SPEC.md").unlink()
++    assert "sem SPEC.md" in anchor(tmp_path, "comp").stderr
++
++
++def test_missing_section_blocks(tmp_path):
++    component(tmp_path, "# Spec\n\n## Contrato\n\nx\n\n## Código\n\n- `a.py`\n")
++    assert "Critérios de aceite" in anchor(tmp_path, "comp").stderr
+diff --git a/redesign/sdd_flow/tests/test_cycle.py b/redesign/sdd_flow/tests/test_cycle.py
+new file mode 100644
+index 00000000..e0479ffa
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_cycle.py
+@@ -0,0 +1,18 @@
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++
++RUNNER = Path(__file__).parents[1] / "runner.py"
++
++
++def test_cycle_stops_at_first_failing_gate(tmp_path):
++    root = tmp_path / "spec"; root.mkdir()
++    (root / "spec.md").write_text("# Spec\n", encoding="utf-8")
++    manifest = tmp_path / "acceptance.json"; manifest.write_text("[]", encoding="utf-8")
++    state = tmp_path / "state.json"
++    result = subprocess.run([sys.executable, str(RUNNER), str(state), "cycle", str(root), str(manifest), "--scope", "redesign/sdd_flow"], capture_output=True, text=True)
++    assert result.returncode != 0
++    assert not (root / "evidence.json").exists()
++    assert "cycle" not in {e["stage"] for e in (json.loads(state.read_text())["history"] if state.exists() else [])}
