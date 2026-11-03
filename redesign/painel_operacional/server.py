@@ -30,6 +30,7 @@ WEB = Path(__file__).resolve().parent
 if str(WEB) not in sys.path:
     sys.path.insert(0, str(WEB))
 import armazem  # noqa: E402
+import qualidade_llm  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
@@ -1026,6 +1027,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/capacidades":
             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/qualidade-llm":
+            observed_at, fresh_until = _reading_window()
+            dados = {**qualidade_llm.snapshot(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}
+            body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/relay-council/focos":
             if self.headers.get("X-Relay-Client") != RELAY_CLIENT_ID:

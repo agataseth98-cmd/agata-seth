@@ -63,6 +63,7 @@ function showPage(name) {
   if (name === "grafo") carregarGrafo();
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
   if (name === "visao") carregarVisaoSistema();
+  if (name === "qualidade") carregarQualidade();
   if (name === "conselho") loadRelayCatalog();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
@@ -812,6 +813,27 @@ async function carregarLacunasCanon() {
 }
 
 /* (27/10/2026) Visão do sistema: junta as leituras já existentes (status, capacidades, lacunas). Nada novo é medido aqui. */
+async function carregarQualidade() {
+  const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
+  if (!kpis || !lista) return;
+  kpis.replaceChildren(); lista.replaceChildren();
+  let dados = null;
+  try { dados = await fetchJson("/api/qualidade-llm", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
+  if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
+  const rotulo = {ok: "ok", warning: "atenção", unknown: "não medido"};
+  dados.items.forEach((item) => {
+    const d = document.createElement("div"); d.className = "kpi";
+    const l = document.createElement("div"); l.className = "label"; l.textContent = item.titulo;
+    const v = document.createElement("div"); v.className = "note"; v.textContent = item.valor;
+    const e = document.createElement("div"); e.className = "note"; e.textContent = (rotulo[item.estado] || "sem leitura").toUpperCase();
+    d.append(l, v, e); kpis.append(d);
+    const li = document.createElement("li"); li.textContent = item.titulo + ": " + item.evidencia + " (fonte: " + item.fonte + ")";
+    lista.append(li);
+  });
+  const atencao = dados.items.filter((i) => i.estado === "warning").length;
+  const naoMedidos = dados.items.filter((i) => i.estado === "unknown").length;
+  if (titulo) titulo.textContent = atencao + " em atenção · " + naoMedidos + " não medidos";
+}
 async function carregarVisaoSistema() {
   const kpis = byId("visao-kpis"); const lista = byId("visao-melhorias");
   if (!kpis || !lista) return;
