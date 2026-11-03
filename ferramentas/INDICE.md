@@ -6,19 +6,20 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por 
 | Tema | Peças | Observação |
 |---|---|---|
 | agata | 13 | skills próprias do sistema |
-| banco-e-infra | 19 |  |
-| contexto-e-custo | 13 |  |
-| frontend-e-design | 44 |  |
+| banco-e-infra | 23 |  |
+| contexto-e-custo | 15 |  |
+| dados-e-ml | 8 |  |
+| frontend-e-design | 49 |  |
 | linguagens | 36 |  |
 | marketing-e-comunicacao | 23 |  |
 | meta-skills | 16 |  |
-| negocios-e-nichos | 54 |  |
+| operacoes-e-dominios | 18 |  |
 | pesquisa-e-docs | 14 |  |
-| planejamento-e-agentes | 46 |  |
-| qualidade-de-codigo | 23 |  |
+| planejamento-e-agentes | 58 |  |
+| qualidade-de-codigo | 24 |  |
 | quarentena | 16 | só consulta; nada carrega sem decisão do Humano |
-| revisao-e-git | 37 |  |
+| revisao-e-git | 40 |  |
 | seguranca | 16 |  |
-| testes | 43 |  |
+| testes | 44 |  |
 
 Total: 413 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
