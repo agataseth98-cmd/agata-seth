@@ -1,0 +1,38 @@
+[
+  {
+    "criterion": "acrescentar, verificar e exportar publicamente",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/evidence_ledger/tests/test_ledger.py::test_append_verify_and_public_export"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "adulteração é detectada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/evidence_ledger/tests/test_ledger.py::test_tamper_is_detected"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "escritas concorrentes preservam a cadeia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/evidence_ledger/tests/test_ledger.py::test_concurrent_appends_preserve_chain"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "linha final truncada é explícita e preservada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/evidence_ledger/tests/test_ledger.py::test_truncated_final_line_is_explicit_and_preserved"
+    ],
+    "cwd": null
+  }
+]

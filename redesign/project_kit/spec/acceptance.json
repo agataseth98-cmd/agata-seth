@@ -1,0 +1,29 @@
+[
+  {
+    "criterion": "bootstrap ignora venv e grava o contrato",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/project_kit/tests/test_bootstrap.py::test_bootstrap_ignores_venv_and_writes_contract"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "drift detecta arquivo adicionado, removido e alterado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/project_kit/tests/test_bootstrap.py::test_drift_report_detects_added_removed_and_changed"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "bootstrap omite nomes de segredo e link simbólico externo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/project_kit/tests/test_bootstrap.py::test_bootstrap_omits_secret_names_and_external_symlink"
+    ],
+    "cwd": null
+  }
+]

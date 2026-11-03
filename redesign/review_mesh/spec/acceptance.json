@@ -1,0 +1,20 @@
+[
+  {
+    "criterion": "prepare isola os papéis e consolida relatório ausente como não medido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/review_mesh/tests/test_mesh.py::test_prepare_isolates_roles_and_consolidates_missing"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "prepare recusa sobrescrever e respeita o contrato do pacote",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/review_mesh/tests/test_mesh.py::test_prepare_refuses_overwrite_and_packet_contract"
+    ],
+    "cwd": null
+  }
+]
