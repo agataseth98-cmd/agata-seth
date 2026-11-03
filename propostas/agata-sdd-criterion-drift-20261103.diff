@@ -1,0 +1,72 @@
+diff --git a/redesign/sdd_flow/criterion_drift.py b/redesign/sdd_flow/criterion_drift.py
+new file mode 100644
+index 00000000..4e8b4d47
+--- /dev/null
++++ b/redesign/sdd_flow/criterion_drift.py
+@@ -0,0 +1,36 @@
++#!/usr/bin/env python3
++"""Compare implemented behavior against explicit acceptance criteria."""
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++
++def criteria(spec: Path) -> list[str]:
++    return [line[6:].strip() for line in spec.read_text(encoding="utf-8").splitlines() if line.startswith("- [ ] ") or line.startswith("- [x] ")]
++
++
++def report(spec: Path, evidence: Path, output: Path) -> None:
++    wanted = criteria(spec)
++    data = json.loads(evidence.read_text(encoding="utf-8"))
++    rows = []
++    for item in wanted:
++        match = next((entry for entry in data if entry.get("criterion") == item), None)
++        if not match:
++            rows.append((item, "unmeasured", "evidence missing"))
++        else:
++            rows.append((item, match.get("status", "unmeasured"), match.get("classification", "unclassified")))
++    text = "# Criterion drift report\n\n" + "\n".join(f"- `{criterion}` — **{status}** — {classification}" for criterion, status, classification in rows) + "\n"
++    output.write_text(text, encoding="utf-8")
++    if any(status == "unmeasured" for _, status, _ in rows):
++        raise SystemExit("critério sem evidência")
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(); ap.add_argument("spec", type=Path); ap.add_argument("evidence", type=Path); ap.add_argument("output", type=Path)
++    args = ap.parse_args(); report(args.spec.resolve(), args.evidence.resolve(), args.output.resolve()); return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/redesign/sdd_flow/tests/test_criterion_drift.py b/redesign/sdd_flow/tests/test_criterion_drift.py
+new file mode 100644
+index 00000000..3e5326bd
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_criterion_drift.py
+@@ -0,0 +1,24 @@
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++
++SCRIPT = Path(__file__).parents[1] / "criterion_drift.py"
++
++
++def test_drift_reports_each_criterion_and_blocks_missing_evidence(tmp_path):
++    spec = tmp_path / "spec.md"; spec.write_text("# Spec\n\n- [ ] aceite A\n- [ ] aceite B\n", encoding="utf-8")
++    evidence = tmp_path / "evidence.json"; evidence.write_text(json.dumps([{"criterion": "aceite A", "status": "pass", "classification": "intentional"}]), encoding="utf-8")
++    output = tmp_path / "drift.md"
++    result = subprocess.run([sys.executable, str(SCRIPT), str(spec), str(evidence), str(output)], capture_output=True, text=True)
++    assert result.returncode != 0
++    text = output.read_text(encoding="utf-8")
++    assert "aceite A" in text and "aceite B" in text and "unmeasured" in text
++
++
++def test_drift_passes_when_all_criteria_have_evidence(tmp_path):
++    spec = tmp_path / "spec.md"; spec.write_text("- [x] aceite A\n", encoding="utf-8")
++    evidence = tmp_path / "evidence.json"; evidence.write_text(json.dumps([{"criterion": "aceite A", "status": "pass", "classification": "intentional"}]), encoding="utf-8")
++    result = subprocess.run([sys.executable, str(SCRIPT), str(spec), str(evidence), str(tmp_path / "drift.md")], capture_output=True, text=True)
++    assert result.returncode == 0
