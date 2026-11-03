@@ -1,0 +1,115 @@
+diff --git a/redesign/sdd_flow/runner.py b/redesign/sdd_flow/runner.py
+index b47bb449..6f23e44d 100644
+--- a/redesign/sdd_flow/runner.py
++++ b/redesign/sdd_flow/runner.py
+@@ -91,11 +91,41 @@ def drift(state: dict, project: Path, previous: Path, output: Path) -> None:
+ def complete(state: dict) -> None:
+     required = {entry["stage"] for entry in state.get("history", [])}
+     missing = {"decision", "implementation", "verification", "drift"} - required
++    artifacts = state.get("artifacts", {})
++    for key in ("spec", "consolidated_review", "evidence", "criterion_drift"):
++        if not artifacts.get(key) or not Path(artifacts[key]).exists():
++            missing.add(key)
+     if missing:
+         raise SystemExit("etapas ausentes: " + ", ".join(sorted(missing)))
+     record(state, "complete", "ciclo SDD encerrado")
+ 
+ 
++def artifact(state: dict, key: str, path: Path) -> None:
++    if not path.exists():
++        raise SystemExit(f"artefato inexistente: {path}")
++    state.setdefault("artifacts", {})[key] = str(path.resolve())
++
++
++def spec_init(state: dict, root: Path) -> None:
++    run("redesign/sdd_flow/spec_gate.py", "init", str(root)); artifact(state, "spec", root / "spec.md")
++
++
++def spec_check(state: dict, root: Path) -> None:
++    run("redesign/sdd_flow/spec_gate.py", "check", str(root)); artifact(state, "spec", root / "spec.md")
++
++
++def review_check(state: dict, reviews: Path, output: Path) -> None:
++    run("redesign/sdd_flow/independent_review.py", str(reviews), str(output)); artifact(state, "consolidated_review", output)
++
++
++def acceptance(state: dict, manifest: Path, output: Path) -> None:
++    run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(output)); artifact(state, "evidence", output)
++
++
++def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> None:
++    run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("state", type=Path)
+@@ -109,6 +139,11 @@ def main() -> int:
+     v = sub.add_parser("verify"); v.add_argument("tests", nargs="+", type=str); v.add_argument("--pytest-bin", default="pytest")
+     dr = sub.add_parser("drift"); dr.add_argument("project", type=Path); dr.add_argument("previous", type=Path); dr.add_argument("output", type=Path)
+     sub.add_parser("complete")
++    si = sub.add_parser("spec-init"); si.add_argument("root", type=Path)
++    sc = sub.add_parser("spec-check"); sc.add_argument("root", type=Path)
++    rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
++    ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
++    cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
+     sub.add_parser("status")
+     args = ap.parse_args()
+     state = load(args.state)
+@@ -120,6 +155,11 @@ def main() -> int:
+     elif args.cmd == "verify": verification(state, args.tests, args.pytest_bin)
+     elif args.cmd == "drift": drift(state, args.project, args.previous, args.output)
+     elif args.cmd == "complete": complete(state)
++    elif args.cmd == "spec-init": spec_init(state, args.root.resolve())
++    elif args.cmd == "spec-check": spec_check(state, args.root.resolve())
++    elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
++    elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
++    elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
+     else: print(json.dumps(state, ensure_ascii=False, indent=2))
+     if args.cmd != "status":
+         save(args.state, state)
+diff --git a/redesign/sdd_flow/tests/test_runner.py b/redesign/sdd_flow/tests/test_runner.py
+index d74f3c6c..983892ba 100644
+--- a/redesign/sdd_flow/tests/test_runner.py
++++ b/redesign/sdd_flow/tests/test_runner.py
+@@ -42,5 +42,10 @@ def test_complete_requires_gates_and_records_completion(tmp_path):
+     project = tmp_path / "project"; project.mkdir()
+     output = tmp_path / "drift.md"
+     invoke(state, "drift", project, previous, output)
++    data = json.loads(state.read_text())
++    artifacts = {}
++    for key in ("spec", "consolidated_review", "evidence", "criterion_drift"):
++        path = tmp_path / key; path.write_text("ok", encoding="utf-8"); artifacts[key] = str(path)
++    data["artifacts"] = artifacts; state.write_text(json.dumps(data), encoding="utf-8")
+     invoke(state, "complete")
+     assert json.loads(state.read_text(encoding="utf-8"))["stage"] == "complete"
+diff --git a/redesign/sdd_flow/tests/test_runner_integration.py b/redesign/sdd_flow/tests/test_runner_integration.py
+new file mode 100644
+index 00000000..cd937bc7
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_runner_integration.py
+@@ -0,0 +1,24 @@
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++
++ROOT = Path(__file__).parents[2]; RUNNER = ROOT / "sdd_flow" / "runner.py"
++
++
++def call(state, *args):
++    return subprocess.run([sys.executable, str(RUNNER), str(state), *map(str, args)], capture_output=True, text=True)
++
++
++def test_complete_requires_integrated_artifacts(tmp_path):
++    state = tmp_path / "state.json"
++    for stage, detail in (("decision", "ok"), ("implementation", str(tmp_path)), ("verification", "ok"), ("drift", "ok")):
++        call(state, "decision", "--accepted") if stage == "decision" else None
++        if stage != "decision":
++            data = json.loads(state.read_text()) if state.exists() else {"history": []}
++            data.setdefault("history", []).append({"stage": stage, "detail": detail})
++            state.write_text(json.dumps(data))
++    result = call(state, "complete")
++    assert result.returncode != 0
++    assert "artefato" in result.stderr or "spec" in result.stderr
