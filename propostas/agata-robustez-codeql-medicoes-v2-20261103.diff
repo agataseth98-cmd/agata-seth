@@ -332,7 +332,7 @@ index 983892ba..0cd42e0c 100644
 +    assert result.returncode == 0, result.stderr
 +    assert "-m pytest" in json.loads(state.read_text(encoding="utf-8"))["history"][-1]["detail"]
 diff --git a/scripts/medir_contexto_efetivo.py b/scripts/medir_contexto_efetivo.py
-index 32738b1f..f20afa6b 100644
+index 32738b1f..bdb5ddd2 100644
 --- a/scripts/medir_contexto_efetivo.py
 +++ b/scripts/medir_contexto_efetivo.py
 @@ -8,10 +8,11 @@ devolvê-lo. É o caso mais fácil do RULER (recuperação simples); tarefas de
@@ -430,17 +430,22 @@ index 32738b1f..f20afa6b 100644
      arq.write_text(json.dumps(resultado, ensure_ascii=False), encoding="utf-8")
      return arq
  
-@@ -108,7 +136,8 @@ def _selftest() -> int:
+@@ -108,7 +136,13 @@ def _selftest() -> int:
          def do_POST(self):
              dados = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
              prompt = dados["messages"][0]["content"]
 -            m = re.search(r"lote é ([0-9a-f]{6})\.", prompt)
 +            q = re.search(r"lote-(\d+)\? Responda", prompt)
-+            m = re.search(rf"lote-{q.group(1)} é ([0-9a-f]{{6}})\.", prompt) if q else re.search(r"lote é ([0-9a-f]{6})\.", prompt)
++            if q:  # sem regex montado com dado do pedido: procura o trecho literal e lê o código depois dele
++                chave = f"lote-{q.group(1)} é "
++                i = prompt.find(chave)
++                m = re.match(r"([0-9a-f]{6})\.", prompt[i + len(chave):]) if i >= 0 else None
++            else:
++                m = re.search(r"lote é ([0-9a-f]{6})\.", prompt)
              resp = m.group(1) if (m and len(prompt) <= LIMITE_CHARS) else "não sei"
              corpo = json.dumps({"message": {"content": resp}, "prompt_eval_count": len(prompt) // 3}).encode()
              self.send_response(200); self.send_header("Content-Length", str(len(corpo))); self.end_headers(); self.wfile.write(corpo)
-@@ -125,7 +154,18 @@ def _selftest() -> int:
+@@ -125,7 +159,18 @@ def _selftest() -> int:
                                                         {"alvo_tokens": 3, "acertos": 3, "tentativas": 3}]) == 1)
      conferir("a agulha cai nas 3 profundidades", len({montar(3000, p, "abcdef", "x ").index("abcdef") for p in PROFUNDIDADES}) == 3)
      conferir("diz o que não mediu", len(res["nao_medido"]) == 2)
@@ -459,7 +464,7 @@ index 32738b1f..f20afa6b 100644
      conferir("salvar usa nome seguro por modelo", _salvar({"modelo": "Qwen3:4B/../x"}).name == "contexto-qwen3_4b_.._x.json")
      return 1 if falhou else 0
  
-@@ -141,8 +181,12 @@ def main(argv: list[str]) -> int:
+@@ -141,8 +186,12 @@ def main(argv: list[str]) -> int:
          return 2
      comprimentos = tuple(int(x) for x in opt("--comprimentos", ",".join(map(str, COMPRIMENTOS))).split(","))
      base = " ".join((RAIZ / a).read_text(encoding="utf-8", errors="replace") for a in ("REGRAS.md", "PROTOCOLOS.md") if (RAIZ / a).exists())
