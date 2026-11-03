@@ -1,0 +1,585 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index 9f7fd493..6316a8ae 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -36,8 +36,8 @@ jobs:
+ 
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger
+-          for c in project_kit review_mesh evidence_ledger; do
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional
++          for c in project_kit review_mesh evidence_ledger painel_operacional; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+           done
+diff --git a/config/equipe-ausentes.txt b/config/equipe-ausentes.txt
+new file mode 100644
+index 00000000..e7dba661
+--- /dev/null
++++ b/config/equipe-ausentes.txt
+@@ -0,0 +1,3 @@
++# Membros da Equipe offline: o atalho `seth` não sobe a vigia deles. Um nome por linha.
++# Para voltar: apague a linha e rode `python3 scripts/equipe/equipe.py presente --agente <nome>`.
++codex
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 061b50eb..0d4c3810 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -20,6 +20,7 @@
+     <button data-page="visao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/></svg>Visão do sistema</button>
+     <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
+     <button data-page="qualidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Qualidade de LLM</button>
++    <button data-page="sdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg>SDD</button>
+     <button data-page="integracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.3 10.8 7.3-3.6M8.3 13.2l7.3 3.6"/></svg>Integrações</button>
+     <button data-page="conselho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><path d="M9.8 9 6.5 14M14.2 9l3.3 5M7.5 17h9"/></svg>Conselho de Modelos em Rede</button>
+     <button data-page="memoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Memória & mapas</button>
+@@ -73,6 +74,8 @@
+ <section class="page" id="page-qualidade" data-title="Qualidade de LLM"><div class="section-heading"><div><div class="eyebrow">Falhas de LLM · leitura do momento</div><h1>Qualidade de LLM</h1><p>Indicadores medidos agora no repositório. O que ainda não tem medição aparece como não medido, nunca como número estimado. Mapa completo e fontes: skill agata-llm-fundamentos.</p></div></div>
+ <div class="kpis" id="qualidade-kpis"></div>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Evidência</div><h2 class="panel-title" id="qualidade-titulo">Calculando…</h2></div></div><ul id="qualidade-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
++<section class="page" id="page-sdd" data-title="SDD"><div class="section-heading"><div><div class="eyebrow">Spec-driven · componentes ancorados</div><h1>SDD</h1><p>Cada componente tem uma spec que lista o código que possui e critérios de aceite ligados a testes. Aqui você confere a âncora e roda os critérios. Proposta, assinatura e PR continuam fora do painel, pelo Humano.</p></div></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Componentes</div><h2 class="panel-title" id="sdd-titulo">Calculando…</h2></div></div><div id="sdd-lista" style="display:flex;flex-direction:column;gap:10px"></div></article></section>
+ <section class="page" id="page-visao" data-title="Visão do sistema"><div class="section-heading"><div><div class="eyebrow">Tudo junto · leitura do momento</div><h1>Visão do sistema</h1><p>Os números vêm das mesmas leituras das outras abas. O que falta aparece como lacuna, com link para a aba que resolve.</p></div></div>
+ <div class="kpis" id="visao-kpis"></div>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Melhorias a propor</div><h2 class="panel-title">O que falta ou está pendente</h2></div></div><ul id="visao-melhorias" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 1e2e3041..46ca2289 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -64,6 +64,7 @@ function showPage(name) {
+   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
+   if (name === "visao") carregarVisaoSistema();
+   if (name === "qualidade") carregarQualidade();
++  if (name === "sdd") carregarSdd();
+   if (name === "conselho") loadRelayCatalog();
+ }
+ nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+@@ -813,6 +814,42 @@ async function carregarLacunasCanon() {
+ }
+ 
+ /* (27/10/2026) Visão do sistema: junta as leituras já existentes (status, capacidades, lacunas). Nada novo é medido aqui. */
++async function executarSdd(acao, componente, nota) {
++  nota.textContent = "Executando…";
++  try {
++    const r = await fetchJson("/api/sdd/executar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({acao, componente})});
++    nota.textContent = (r.ok ? "OK · " : "FALHOU · ") + r.passos.map((p) => p.passo + ": " + p.detalhe).join(" | ");
++  } catch (_) { nota.textContent = "Execução indisponível."; }
++}
++async function carregarSdd() {
++  const lista = byId("sdd-lista"); const titulo = byId("sdd-titulo");
++  if (!lista) return;
++  lista.replaceChildren();
++  let dados = null;
++  try { dados = await fetchJson("/api/sdd/estado", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
++  if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
++  const falhas = dados.items.filter((i) => i.ancora !== "ok").length;
++  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta";
++  dados.items.forEach((item) => {
++    const linha = document.createElement("div"); linha.className = "cap-card";
++    const nome = document.createElement("strong"); nome.textContent = item.componente;
++    const resumo = document.createElement("div"); resumo.className = "note";
++    resumo.textContent = item.criterios + " critérios · âncora " + item.ancora + (item.manifesto ? "" : " · sem manifesto de aceite (critérios não medidos)");
++    const nota = document.createElement("div"); nota.className = "note";
++    const u = item.ultima; nota.textContent = u ? "Última execução: " + (u.ok ? "OK" : "FALHOU") + " (" + u.acao + ")" : "Sem execução nesta sessão: não medido.";
++    const acoes = document.createElement("div"); acoes.style.display = "flex"; acoes.style.gap = "8px";
++    [["ancora", "Conferir âncora"], ["criterios", "Rodar critérios"]].forEach(([acao, rotulo]) => {
++      const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = rotulo;
++      let armado = false;
++      b.addEventListener("click", async () => {
++        if (!armado) { armado = true; b.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
++        b.disabled = true; await executarSdd(acao, item.componente, nota); b.disabled = false; armado = false; b.textContent = rotulo;
++      });
++      acoes.append(b);
++    });
++    linha.append(nome, resumo, nota, acoes); lista.append(linha);
++  });
++}
+ async function carregarQualidade() {
+   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
+   if (!kpis || !lista) return;
+diff --git a/redesign/painel_operacional/sdd_painel.py b/redesign/painel_operacional/sdd_painel.py
+new file mode 100644
+index 00000000..2c6ba47b
+--- /dev/null
++++ b/redesign/painel_operacional/sdd_painel.py
+@@ -0,0 +1,153 @@
++#!/usr/bin/env python3
++"""SDD no painel: estado dos componentes ancorados e execução local de âncora e critérios.
++
++Só executa o que está na lista fechada: conferir a âncora (leitura) e rodar os critérios de aceite
++declarados em `spec/acceptance.json` (comandos `pytest -q redesign/...`, validados antes). Nada aqui
++escreve no repositório, abre PR, assina ou mescla: ações externas continuam fora do painel.
++"""
++from __future__ import annotations
++
++import importlib.util
++import json
++import os
++import re
++import shutil
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++CACHE = Path(os.environ.get("AGATA_PAINEL_CACHE", Path.home() / ".cache" / "agata" / "painel" / "sdd"))
++ACOES = ("ancora", "criterios")
++NOME = re.compile(r"[a-z][a-z0-9_]{0,40}")
++TIMEOUT_S = 300
++
++
++def _anchor():
++    spec = importlib.util.spec_from_file_location("sdd_anchor", ROOT / "redesign" / "sdd_flow" / "anchor.py")
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod
++
++
++def _spec(raiz: Path, nome: str) -> Path | None:
++    base = raiz / "redesign" / nome
++    return next((p for p in (base / "spec" / "spec.md", base / "SPEC.md") if p.exists()), None)
++
++
++def componentes(raiz: Path = ROOT) -> list[str]:
++    base = raiz / "redesign"
++    if not base.is_dir():
++        return []
++    return sorted(d.name for d in base.iterdir() if d.is_dir() and NOME.fullmatch(d.name) and _spec(raiz, d.name))
++
++
++def _criterios(spec: Path) -> list[str]:
++    return [l[6:].strip() for l in spec.read_text(encoding="utf-8").splitlines() if l.startswith(("- [ ] ", "- [x] "))]
++
++
++def _manifesto(raiz: Path, nome: str) -> Path:
++    return raiz / "redesign" / nome / "spec" / "acceptance.json"
++
++
++def comando_valido(comando) -> bool:
++    """Só `pytest -q <alvo>` com alvo dentro de redesign/ e sem sair dele."""
++    if not (isinstance(comando, list) and len(comando) >= 3 and all(isinstance(c, str) for c in comando)):
++        return False
++    if comando[0] != "pytest" or comando[1] != "-q":
++        return False
++    return all(c.startswith("redesign/") and ".." not in c and not c.startswith("/") for c in comando[2:])
++
++
++def _ultima(nome: str) -> dict | None:
++    try:
++        return json.loads((CACHE / nome / "ultima.json").read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++
++
++def estado(raiz: Path = ROOT) -> dict:
++    anchor = _anchor()
++    itens = []
++    for nome in componentes(raiz):
++        spec = _spec(raiz, nome)
++        lacunas = anchor.check_component(raiz, f"redesign/{nome}")
++        itens.append({"componente": nome, "spec": spec.relative_to(raiz).as_posix(), "criterios": len(_criterios(spec)),
++                      "manifesto": _manifesto(raiz, nome).exists(), "ancora": "ok" if not lacunas else "falha",
++                      "lacunas": lacunas[:5], "ultima": _ultima(nome)})
++    return {"schema_version": 1, "acoes": list(ACOES), "items": itens}
++
++
++def _rodar(args: list[str], cwd: Path) -> tuple[int, str]:
++    try:
++        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=TIMEOUT_S)
++        return r.returncode, (r.stdout + r.stderr)[-600:]
++    except subprocess.TimeoutExpired:
++        return 124, f"tempo esgotado ({TIMEOUT_S} s)"
++    except OSError as exc:
++        return 127, str(exc)[:200]
++
++
++def executar(acao: str, nome: str, raiz: Path = ROOT) -> dict:
++    permitidos = {c: c for c in componentes(raiz)}
++    if acao not in ACOES or not isinstance(nome, str) or nome not in permitidos:
++        raise ValueError("ação ou componente fora da lista")
++    acao, nome = ACOES[ACOES.index(acao)], permitidos[nome]  # só valores da lista fechada seguem adiante
++    passos = []
++    anchor = _anchor()
++    lacunas = anchor.check_component(raiz, f"redesign/{nome}")
++    passos.append({"passo": "âncora", "ok": not lacunas, "detalhe": "; ".join(lacunas[:3]) or "todo código tem dono na spec"})
++    criterios = []
++    if acao == "criterios":
++        manifesto = _manifesto(raiz, nome)
++        if not manifesto.exists():
++            passos.append({"passo": "critérios", "ok": False, "detalhe": "sem spec/acceptance.json: não medido"})
++        else:
++            itens = json.loads(manifesto.read_text(encoding="utf-8"))
++            invalidos = [i.get("criterion", "?") for i in itens if not comando_valido(i.get("command"))]
++            if invalidos:
++                passos.append({"passo": "critérios", "ok": False, "detalhe": "comando fora do padrão pytest -q redesign/: " + "; ".join(invalidos[:2])})
++            elif shutil.which("pytest") is None and not os.environ.get("AGATA_PYTEST"):
++                passos.append({"passo": "critérios", "ok": False, "detalhe": "pytest não encontrado no PATH do painel: não medido"})
++            else:
++                for item in itens:
++                    comando = list(item["command"])
++                    if os.environ.get("AGATA_PYTEST"):
++                        comando[0] = os.environ["AGATA_PYTEST"]
++                    rc, saida = _rodar(comando, raiz)
++                    criterios.append({"criterio": item["criterion"], "status": "pass" if rc == 0 else "fail"})
++                    if rc != 0:
++                        passos.append({"passo": "critério", "ok": False, "detalhe": f"{item['criterion']}: {saida.strip().splitlines()[-1] if saida.strip() else rc}"})
++                passos.append({"passo": "critérios", "ok": all(c["status"] == "pass" for c in criterios) and bool(criterios),
++                               "detalhe": f"{sum(c['status'] == 'pass' for c in criterios)}/{len(criterios)} passaram"})
++    ok = all(p["ok"] for p in passos)
++    resultado = {"acao": acao, "componente": nome, "ok": ok, "passos": passos, "criterios": criterios}
++    try:
++        (CACHE / nome).mkdir(parents=True, exist_ok=True, mode=0o700)
++        (CACHE / nome / "ultima.json").write_text(json.dumps(resultado, ensure_ascii=False), encoding="utf-8")
++    except OSError:
++        pass
++    return resultado
++
++
++def _selftest() -> int:
++    falhou = 0
++    def conferir(nome, cond):
++        nonlocal falhou
++        print(("PASS " if cond else "FALHA ") + nome); falhou += 0 if cond else 1
++    conferir("comando válido: pytest -q dentro de redesign/", comando_valido(["pytest", "-q", "redesign/x/tests/t.py::a"]))
++    for ruim in (["bash", "-c", "x"], ["pytest", "-q", "/etc/passwd"], ["pytest", "-q", "redesign/../x"], ["pytest"], "pytest -q redesign/x", ["pytest", "-q", "scripts/x.py"]):
++        conferir(f"comando recusado: {ruim!r}", not comando_valido(ruim))
++    with tempfile.TemporaryDirectory() as t:
++        r = Path(t)
++        try:
++            executar("ancora", "inexistente", r)
++            conferir("componente fora da lista levanta erro", False)
++        except ValueError:
++            conferir("componente fora da lista levanta erro", True)
++    return 1 if falhou else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(_selftest() if "--selftest" in sys.argv else print(json.dumps(estado(), ensure_ascii=False, indent=2)) or 0)
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index dfe32af1..f9cb1b85 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -31,6 +31,7 @@ if str(WEB) not in sys.path:
+     sys.path.insert(0, str(WEB))
+ import armazem  # noqa: E402
+ import qualidade_llm  # noqa: E402
++import sdd_painel  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
+@@ -85,6 +86,7 @@ _RELAY_RATE_WINDOW_SECONDS = 60
+ _RELAY_RATE_LIMIT = 60
+ _SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
+ _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
++_SDD_LOCK = threading.Lock()
+ _DETAILS_LOCK = threading.Lock()
+ _DETAILS_CACHE: dict | None = None
+ _DETAILS_CACHE_AT: float | None = None
+@@ -1028,6 +1030,10 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path == "/api/capacidades":
+             body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/sdd/estado":
++            observed_at, fresh_until = _reading_window()
++            body = json.dumps({**sdd_painel.estado(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/qualidade-llm":
+             observed_at, fresh_until = _reading_window()
+             dados = {**qualidade_llm.snapshot(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}
+@@ -1113,7 +1119,7 @@ class Handler(BaseHTTPRequestHandler):
+             return self._seth_chat()
+         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
+             return self._seth_conversa(self.path.endswith("/apagar"))
+-        if self.path not in {"/api/wiki/search", "/api/proposals/verify"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
++        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
+         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
+@@ -1130,6 +1136,18 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+         if not isinstance(payload, dict):
+             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
++        if self.path == "/api/sdd/executar":
++            if not _SDD_LOCK.acquire(blocking=False):
++                return self._send(429, "text/plain; charset=utf-8", b"sdd busy")
++            try:
++                try:
++                    resultado = sdd_painel.executar(payload.get("acao"), payload.get("componente"), ROOT)
++                except ValueError:
++                    return self._send(400, "text/plain; charset=utf-8", b"invalid sdd action")
++            finally:
++                _SDD_LOCK.release()
++            body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/proposals/verify":
+             name = payload.get("name")
+             if not _PROPOSAL_LOCK.acquire(blocking=False):
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+new file mode 100644
+index 00000000..7cea699e
+--- /dev/null
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -0,0 +1,56 @@
++[
++  {
++    "criterion": "a página não tem script inline por causa da CSP",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "leituras de API recusam origem cruzada",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_leituras_de_api_recusam_origem_cruzada_mas_a_extensao_passa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a verificação de proposta é só leitura de origem local",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_verificacao_de_proposta_e_apenas_uma_leitura_de_origem_local"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o indicador sem medição sai como não medido",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_qualidade_llm.py::QualidadeLlmTests::test_rota_devolve_indicadores_e_marca_o_que_nao_foi_medido"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a execução do SDD recusa ação e componente fora da lista",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_sdd_painel.py::SddPainelTests::test_executar_recusa_acao_e_componente_fora_da_lista"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a execução do SDD recusa comando fora do padrão pytest",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_sdd_painel.py::SddPainelTests::test_criterios_recusam_comando_fora_do_padrao"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+new file mode 100644
+index 00000000..28b17f0a
+--- /dev/null
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -0,0 +1,68 @@
++# Spec — Painel operacional
++
++## Jornadas críticas
++
++1. O Humano abre o painel local e vê, por aba, o que o sistema mede agora; o que não tem medição aparece como não medido.
++2. O Humano confere a âncora e roda os critérios de aceite de cada componente na aba SDD, com confirmação em dois cliques.
++3. O Humano aprova no painel as ações do Conselho; nada é enviado sem a aprovação explícita.
++
++## Contrato
++
++- O servidor escuta só em 127.0.0.1, recusa `Host` diferente e recusa origem cruzada nas rotas de API (as rotas da extensão são a exceção declarada).
++- `Content-Security-Policy` com `script-src 'self'`: todo JavaScript fica em arquivo externo, nunca inline.
++- `GET /api/qualidade-llm` devolve indicadores medidos; item sem medição vem como `unknown` e `não medido`.
++- `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
++- `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
++- Proposta, assinatura, PR e merge não são executados pelo painel.
++
++## Critérios de aceite
++
++- [ ] a página não tem script inline por causa da CSP
++- [ ] leituras de API recusam origem cruzada
++- [ ] a verificação de proposta é só leitura de origem local
++- [ ] o indicador sem medição sai como não medido
++- [ ] a execução do SDD recusa ação e componente fora da lista
++- [ ] a execução do SDD recusa comando fora do padrão pytest
++
++## Desenho e alternativas
++
++Servidor HTTP da biblioteca padrão com módulos pequenos por assunto (`armazem`, `relogio`, `qualidade_llm`, `sdd_painel`). Alternativa descartada: framework web; aumentaria a superfície sem necessidade. Alternativa descartada: executar `proposal` e o handoff do GitHub pelo painel; são ações externas e ficam com o Humano.
++
++## Implementação e testes
++
++Testes em `test_painel.py`, `test_qualidade_llm.py`, `test_sdd_painel.py`, `test_relay_catalog.py` e `test_conselho_rede.py`. Cada critério acima está ligado a um teste em `spec/acceptance.json`.
++
++## Migração e reversão
++
++Sem migração de dados. Reversão por revert do commit; o painel não guarda estado além do cache em `~/.cache/agata/painel/`.
++
++## Riscos e dependências
++
++O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem ele a execução devolve não medido, não falha em silêncio. A spec descreve o contrato observado em 03/11/2026.
++
++## Código
++
++- `server.py`
++- `armazem.py`
++- `relogio.py`
++- `conselho_rede.py`
++- `relay_catalog.py`
++- `qualidade_llm.py`
++- `sdd_painel.py`
++- `abrir.js`
++- `app.js`
++- `prototipo.js`
++- `prototipo.html`
++- `index.html`
++- `prototipo.css`
++- `styles.css`
++- `README.md`
++- `test_painel.py`
++- `test_qualidade_llm.py`
++- `test_sdd_painel.py`
++- `test_relay_catalog.py`
++- `test_conselho_rede.py`
++- `conselho-rede/`
++- `relay-extension-v2/`
++- `operator_console/`
++- `assets/`
+diff --git a/redesign/painel_operacional/test_sdd_painel.py b/redesign/painel_operacional/test_sdd_painel.py
+new file mode 100644
+index 00000000..38c113dc
+--- /dev/null
++++ b/redesign/painel_operacional/test_sdd_painel.py
+@@ -0,0 +1,107 @@
++import http.client
++import importlib.util
++import json
++import os
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++from unittest import mock
++
++HERE = Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location("painel_sdd_teste", HERE / "server.py")
++panel = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(panel)
++sdd = panel.sdd_painel
++
++
++def repo_falso(raiz: Path, comando):
++    (raiz / "redesign" / "x" / "spec").mkdir(parents=True)
++    (raiz / "redesign" / "x" / "spec" / "spec.md").write_text(
++        "# Spec\n\n## Contrato\n\nc\n\n## Critérios de aceite\n\n- [ ] criterio um\n\n## Código\n\n- `a.py`\n", encoding="utf-8")
++    (raiz / "redesign" / "x" / "a.py").write_text("x = 1\n", encoding="utf-8")
++    (raiz / "redesign" / "x" / "spec" / "acceptance.json").write_text(
++        json.dumps([{"criterion": "criterio um", "command": comando, "cwd": None}]), encoding="utf-8")
++    (raiz / "redesign" / "sdd_flow").mkdir(parents=True)
++    (raiz / "redesign" / "sdd_flow" / "anchor.py").write_text((HERE.parent / "sdd_flow" / "anchor.py").read_text(encoding="utf-8"), encoding="utf-8")
++
++
++class SddPainelTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.old_port, cls.old_origin, cls.old_root = panel.PORT, panel.ALLOWED_ORIGIN, sdd.ROOT
++        cls.cache = tempfile.TemporaryDirectory()
++        cls.old_cache = sdd.CACHE; sdd.CACHE = Path(cls.cache.name)
++        cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.server.daemon_threads = True
++        panel.PORT = cls.server.server_address[1]
++        panel.ALLOWED_ORIGIN = f"http://127.0.0.1:{panel.PORT}"
++        threading.Thread(target=cls.server.serve_forever, daemon=True).start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.server.shutdown(); cls.server.server_close()
++        panel.PORT, panel.ALLOWED_ORIGIN, sdd.CACHE = cls.old_port, cls.old_origin, cls.old_cache
++        cls.cache.cleanup()
++
++    def pedir(self, metodo, caminho, corpo=None, cabecalhos=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=10)
++        try:
++            conn.request(metodo, caminho, body=corpo, headers=cabecalhos or {})
++            r = conn.getresponse()
++            return r.status, r.read()
++        finally:
++            conn.close()
++
++    def post(self, dados, **extra):
++        cab = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json", **extra}
++        return self.pedir("POST", "/api/sdd/executar", json.dumps(dados).encode(), cab)
++
++    def test_estado_lista_os_componentes_ancorados(self):
++        status, corpo = self.pedir("GET", "/api/sdd/estado", None, {"Sec-Fetch-Site": "same-origin"})
++        self.assertEqual(status, 200)
++        nomes = {i["componente"] for i in json.loads(corpo)["items"]}
++        self.assertTrue({"sdd_flow", "painel_operacional"} <= nomes)
++
++    def test_executar_recusa_acao_e_componente_fora_da_lista(self):
++        self.assertEqual(self.post({"acao": "ancora", "componente": "../etc"})[0], 400)
++        self.assertEqual(self.post({"acao": "apagar", "componente": "sdd_flow"})[0], 400)
++        self.assertEqual(self.post({"acao": "ancora", "componente": 7})[0], 400)
++
++    def test_executar_exige_origem_json_e_confere_a_ancora(self):
++        self.assertEqual(self.post({"acao": "ancora", "componente": "sdd_flow"}, Origin="http://outro.invalid")[0], 403)
++        self.assertEqual(self.pedir("POST", "/api/sdd/executar", b"{}", {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "text/plain"})[0], 415)
++        status, corpo = self.post({"acao": "ancora", "componente": "sdd_flow"})
++        self.assertEqual(status, 200)
++        self.assertTrue(json.loads(corpo)["ok"])
++
++    def test_criterios_recusam_comando_fora_do_padrao(self):
++        with tempfile.TemporaryDirectory() as t:
++            raiz = Path(t); repo_falso(raiz, ["bash", "-c", "echo oi"])
++            r = sdd.executar("criterios", "x", raiz)
++        self.assertFalse(r["ok"])
++        self.assertTrue(any("fora do padrão" in p["detalhe"] for p in r["passos"]))
++
++    def test_criterios_rodam_e_sem_pytest_sao_nao_medidos(self):
++        with tempfile.TemporaryDirectory() as t:
++            raiz = Path(t); repo_falso(raiz, ["pytest", "-q", "redesign/x/t.py"])
++            with mock.patch.object(sdd.shutil, "which", return_value=None), mock.patch.dict(os.environ, {}, clear=False):
++                os.environ.pop("AGATA_PYTEST", None)
++                r = sdd.executar("criterios", "x", raiz)
++            self.assertTrue(any("não medido" in p["detalhe"] for p in r["passos"]))
++            with mock.patch.dict(os.environ, {"AGATA_PYTEST": "/bin/true"}):
++                r = sdd.executar("criterios", "x", raiz)
++            self.assertTrue(r["ok"] and r["criterios"][0]["status"] == "pass")
++            with mock.patch.dict(os.environ, {"AGATA_PYTEST": "/bin/false"}):
++                r = sdd.executar("criterios", "x", raiz)
++            self.assertFalse(r["ok"])
++
++    def test_pagina_sdd_existe_e_o_js_chama_so_as_rotas_do_sdd(self):
++        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
++        self.assertIn('id="page-sdd"', html); self.assertIn('data-page="sdd"', html)
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        self.assertIn("/api/sdd/estado", js); self.assertIn("/api/sdd/executar", js)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 11291fe3..426dc4af 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -23,7 +23,11 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null ||
+ # fica de pe pra ingles -- ver comentario no librechat.yaml.
+ systemctl --user start piper-tts.service 2>/dev/null || true
+ # Vigias da Equipe (Claude e Codex): sobem com a Seth e param com ela.
+-systemctl --user start agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
++# Membros listados em config/equipe-ausentes.txt (um por linha) ficam sem vigia: offline até ordem do Humano.
++_ausentes=~/agata/config/equipe-ausentes.txt
++for _m in claude codex; do
++  grep -qx "$_m" "$_ausentes" 2>/dev/null || systemctl --user start "agata-vigia@$_m.service" 2>/dev/null || true
++done
+ # Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
+ # cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
+ # rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
