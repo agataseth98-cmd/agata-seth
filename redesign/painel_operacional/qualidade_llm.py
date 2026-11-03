@@ -123,19 +123,22 @@ def _medicoes() -> list[dict]:
     rec = ler(pasta / "recuperacao.json")
     if rec and isinstance(rec.get("recall"), dict):
         r5 = rec["recall"].get("5", 0)
-        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "ok" if r5 >= 0.9 else "warning",
-                 f"recall@1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})",
-                 f"Medido em {rec.get('medido_em', '?')} só para busca léxica por conteúdo; paráfrase e busca semântica: não medido.",
+        sem = ler(pasta / "recuperacao-semantica.json")
+        extra = (f" · por sentido: @1 {sem['recall'].get('1', 0):.0%} · @10 {sem['recall'].get('10', 0):.0%}"
+                 if sem and isinstance(sem.get("recall"), dict) else " · por sentido: não medido")
+        a = _ind("recall_busca", "Recuperação: recall@k da busca", "ok" if r5 >= 0.9 else "warning",
+                 f"texto: @1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})" + extra,
+                 f"Medido em {rec.get('medido_em', '?')} com consultas de palavras raras (caso fácil da busca léxica); paráfrase: não medido.",
                  "scripts/medir_recuperacao.py")
     else:
-        a = _ind("recall_busca", "Recuperação: recall@k da busca por texto", "unknown", "não medido",
+        a = _ind("recall_busca", "Recuperação: recall@k da busca", "unknown", "não medido",
                  "rode a medição na aba Qualidade de LLM (leitura do vault; sem modelo)", "scripts/medir_recuperacao.py")
     modelos = [d for d in (ler(x) for x in sorted(pasta.glob("contexto-*.json"))) if d and "linhas" in d]
     if modelos:
-        partes = [f"{d.get('modelo', '?')}: " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
+        partes = [f"{d.get('modelo', '?')} ({d.get('tarefa', 'agulha')}): " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
         pior = min((d.get("efetivo_tokens") or 0) for d in modelos)
         b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "warning" if pior < 16384 else "ok",
-                 " · ".join(partes), "Teste de agulha em 3 profundidades; mede só recuperação simples, não o RULER completo.",
+                 " · ".join(partes), "Agulha em 3 profundidades e, quando medido, 8 fatos parecidos; não é o RULER completo (agregação e rastreio ficam de fora).",
                  "scripts/medir_contexto_efetivo.py")
     else:
         b = _ind("contexto_efetivo", "Comprimento efetivo de contexto dos modelos locais", "unknown", "não medido",

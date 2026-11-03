@@ -23,6 +23,7 @@
 - [ ] proposta grava um diff único e não deixa worktree temporária
 - [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
 - [ ] handoff do GitHub exige ciclo registrado
+- [ ] a verificação usa python -m pytest quando o binário não está no PATH
 
 ## Desenho e alternativas
 

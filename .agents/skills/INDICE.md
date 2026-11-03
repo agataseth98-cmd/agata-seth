@@ -19,7 +19,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada 
 | `agata-llm-fundamentos` | como uma LLM funciona; custo, contexto, alucinação, esforço, RAG, MCP e skills, com fonte e lacuna | Claude |
 
 ## Skills de terceiros (cópias fixas, não editar aqui)
-- `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills`. São cópias do mesmo conteúdo; a fonte de atualização é externa.
+- `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills` só como cópias locais fora do git (`.git/info/exclude`): um clone limpo e a CI não as têm. São cópias do mesmo conteúdo; a fonte de atualização é externa.
 
 - `design-taste-frontend` (tasteskill v2, fonte: github.com/Leonxlnx/taste-skill): direção de arte e inspeção de páginas de frontend. Cópia fixa em `.agents/skills`; não editar aqui. Para o Claude Code carregá-la, crie o link local `ln -s ../../.agents/skills/design-taste-frontend .claude/skills/design-taste-frontend` (link não versionado: o P-8 não verifica symlink). Os scripts abrem um Chrome headless e `assets.mjs` acessa a rede; ver `propostas/design-taste-frontend-v2-20261031.md`.
 

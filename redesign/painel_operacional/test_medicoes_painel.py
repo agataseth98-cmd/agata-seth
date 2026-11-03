@@ -56,6 +56,7 @@ class MedicoesTests(unittest.TestCase):
             self.assertEqual(self.post({"acao": "contexto", "modelo": "../../etc/passwd"})[0], 400)
             self.assertEqual(self.post({"acao": "contexto", "modelo": "outro:7b"})[0], 400)
             self.assertEqual(self.post({"acao": "contexto"})[0], 400)
+            self.assertEqual(self.post({"acao": "contexto", "modelo": "qwen3:4b", "tarefa": "rm -rf"})[0], 400)
 
     def test_executar_exige_origem_e_recusa_quando_ocupado(self):
         self.assertEqual(self.post({"acao": "recuperacao"}, Origin="http://outro.invalid")[0], 403)
@@ -71,10 +72,15 @@ class MedicoesTests(unittest.TestCase):
             self.assertEqual(r["job"]["estado"], "ok")
             argv, kw = chamadas[0]
             self.assertEqual(argv[1].split("/")[-1], "medir_contexto_efetivo.py")
-            self.assertEqual(argv[2:], ["--salvar", "--modelo", "qwen3:4b"])
+            self.assertEqual(argv[2:], ["--salvar", "--modelo", "qwen3:4b", "--tarefa", "agulha"])
+            med.executar("contexto", "qwen3:4b", sincrono=True, tarefa="varias")
+            self.assertEqual(chamadas[1][0][-2:], ["--tarefa", "varias"])
             self.assertFalse(kw.get("shell"))
             med.executar("recuperacao", sincrono=True)
-            self.assertEqual(chamadas[1][0][1].split("/")[-1], "medir_recuperacao.py")
+            self.assertEqual(chamadas[2][0][1].split("/")[-1], "medir_recuperacao.py")
+            self.assertNotIn("--semantico", chamadas[2][0])
+            med.executar("recuperacao_semantica", sincrono=True)
+            self.assertEqual(chamadas[3][0][-1], "--semantico")
 
     def test_estado_traz_resultados_salvos_e_lista_de_modelos(self):
         Path(self.dir.name, "recuperacao.json").write_text(json.dumps({"n": 3, "recall": {"1": 1.0, "5": 1.0}, "mrr": 1.0}), encoding="utf-8")
@@ -94,7 +100,7 @@ class MedicoesTests(unittest.TestCase):
 
     def test_pagina_tem_os_controles_e_o_js_so_chama_as_rotas_das_medicoes(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
-        for i in ("medir-recuperacao", "medir-modelo", "medir-contexto", "medir-nota"):
+        for i in ("medir-recuperacao", "medir-semantica", "medir-modelo", "medir-tarefa", "medir-contexto", "medir-nota"):
             self.assertIn(f'id="{i}"', html)
         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
         self.assertIn("/api/medicoes/estado", js); self.assertIn("/api/medicoes/executar", js)

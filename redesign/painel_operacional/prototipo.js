@@ -874,7 +874,7 @@ async function carregarMedicoes() {
   if (atual) sel.value = atual;
   const j = d.job || {};
   if (j.estado === "rodando") {
-    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo : "") + "…";
+    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo + (j.tarefa ? " (" + j.tarefa + ")" : "") : "") + "…";
     if (!medicaoTimer) medicaoTimer = setInterval(carregarMedicoes, 4000);
   } else {
     if (medicaoTimer) { clearInterval(medicaoTimer); medicaoTimer = null; carregarQualidade(); }
@@ -893,7 +893,8 @@ function ligarMedicao(botao, rotulo, pedido) {
   });
 }
 ligarMedicao(byId("medir-recuperacao"), "Medir recuperação da busca", () => ({acao: "recuperacao"}));
-ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value}));
+ligarMedicao(byId("medir-semantica"), "Medir busca por sentido", () => ({acao: "recuperacao_semantica"}));
+ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value, tarefa: byId("medir-tarefa").value}));
 async function carregarQualidade() {
   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
   if (!kpis || !lista) return;

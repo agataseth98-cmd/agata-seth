@@ -49,3 +49,11 @@ def test_complete_requires_gates_and_records_completion(tmp_path):
     data["artifacts"] = artifacts; state.write_text(json.dumps(data), encoding="utf-8")
     invoke(state, "complete")
     assert json.loads(state.read_text(encoding="utf-8"))["stage"] == "complete"
+
+
+def test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path(tmp_path):
+    state = tmp_path / "state.json"
+    result = subprocess.run([sys.executable, str(SCRIPT), str(state), "verify", "redesign/sdd_flow/tests/test_spec_gate.py", "--pytest-bin", "pytest-que-nao-existe"],
+                            capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "-m pytest" in json.loads(state.read_text(encoding="utf-8"))["history"][-1]["detail"]

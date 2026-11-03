@@ -70,5 +70,14 @@
       "redesign/sdd_flow/tests/test_github_flow.py::test_handoff_requires_recorded_cycle"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a verificação usa python -m pytest quando o binário não está no PATH",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_runner.py::test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path"
+    ],
+    "cwd": null
   }
 ]

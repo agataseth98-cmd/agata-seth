@@ -4,9 +4,13 @@ from pathlib import Path
 from unittest.mock import patch
 sys.dont_write_bytecode=True
 ROOT=Path(__file__).resolve().parents[1]
-with patch.dict(os.environ,{'SETH_REPO':str(ROOT)}):
- spec=importlib.util.spec_from_file_location('escriba',ROOT/'redesign/router/seth_escriba.py')
- m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+try:
+ with patch.dict(os.environ,{'SETH_REPO':str(ROOT)}):
+  spec=importlib.util.spec_from_file_location('escriba',ROOT/'redesign/router/seth_escriba.py')
+  m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+except ModuleNotFoundError as exc:
+ if exc.name!='cryptography':raise
+ print('NAO MEDIDO: modulo cryptography ausente neste Python (o escriba o exige); rode com o Python do venv do MCP.');sys.exit(0)
 class Locks(unittest.TestCase):
  def setUp(self):
   self.t=tempfile.TemporaryDirectory();self.addCleanup(self.t.cleanup)
