@@ -708,6 +708,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-9 || "$FILTRO" == L2 || "$FILTRO" == "__AGR
   fi
 fi
 
+# (03/11/2026) P-16/P-17: SKIP de "não se aplica" do P-16 não entra na série do P-17; SKIP comum continua contando.
+if [[ -z "$FILTRO" || "$FILTRO" == P-16 || "$FILTRO" == P-17 || "$FILTRO" == "__AGREGADOS__" ]]; then
+  if bash "$RAIZ/scripts/testar_p17_isento.sh" >/dev/null 2>&1; then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("P-16/P-17: contraprovas do isento (scripts/testar_p17_isento.sh)")
+  fi
+fi
+
 # Contraprovas estruturais do fluxo de escrita, classificação externa,
 # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
 # dispara quando qualquer uma dessas provas ou seus controles muda.

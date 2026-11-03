@@ -10,7 +10,7 @@ mkdir -p "$TMP/bin"
 cat > "$TMP/bin/systemctl" <<'EOF'
 #!/usr/bin/env bash
 # estado por unidade: lido de $P9F_ESTADOS ("unidade=estado:tipo ...")
-u=""; for a in "$@"; do case "$a" in *.service|*.timer) u="$a";; esac; done
+u=""; for a in "$@"; do case "$a" in *.service|*.timer|*.target) u="$a";; esac; done
 for par in $P9F_ESTADOS; do
   nome="${par%%=*}"; resto="${par#*=}"; est="${resto%%:*}"; tipo="${resto#*:}"
   if [ "$nome" = "$u" ]; then
@@ -51,6 +51,21 @@ caso "serviço simple parado ('inactive') avisa" '[[ "$out" == *"seth-gateway.se
 caso "oneshot parado não avisa" '[[ "$out" != *"agata-manutencao.service"* ]]'
 export P9F_ESTADOS="seth-gateway.service=active:simple agata-manutencao.service=inactive:oneshot"
 caso "tudo no ar: nenhum aviso de unidade" '[[ "$(rodar)" != *"unidade de usuário"* ]]'
+
+# (03/11/2026) sistema sob demanda: desligado de propósito não avisa; ligado, parcial ou com falha, avisa.
+export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=inactive:simple agata-manutencao.service=inactive:oneshot"
+out="$(rodar)"
+caso "sob demanda desligado: serviço parado não avisa" '[[ "$out" != *"unidade de usuário 'seth-gateway.service'"* ]]'
+caso "sob demanda desligado: uma linha explica" '[[ "$out" == *"sob demanda desligado"* ]]'
+export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=failed:simple agata-manutencao.service=inactive:oneshot"
+caso "sob demanda desligado mas serviço 'failed' avisa" '[[ "$(rodar)" == *"seth-gateway.service"* ]]'
+P9_UNIDADES_USUARIO=("seth-gateway.service" "seth-escriba.service" "agata-manutencao.service")
+export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=active:simple seth-escriba.service=inactive:simple agata-manutencao.service=inactive:oneshot"
+caso "subida parcial (gateway no ar, target inativo) avisa o que está parado" '[[ "$(rodar)" == *"seth-escriba.service"* && "$(rodar)" != *"sob demanda desligado"* ]]'
+P9_UNIDADES_USUARIO=("seth-gateway.service" "agata-manutencao.service")
+export P9F_ESTADOS="agata.target=active:simple seth-gateway.service=inactive:simple agata-manutencao.service=inactive:oneshot"
+caso "target ativo e serviço parado: avisa (caso de 24/10)" '[[ "$(rodar)" == *"seth-gateway.service"* ]]'
+export P9F_ESTADOS="agata.target=inactive:simple seth-gateway.service=active:simple agata-manutencao.service=inactive:oneshot"
 
 G=$((1024 * 1024 * 1024))
 echo "{\"models\": [{\"name\": \"moe\", \"size\": $((198 * G / 10)), \"size_vram\": $((7 * G))}]}" > "$TMP/ps.json"

@@ -18,13 +18,24 @@ p9_servicos_declarados() {
       avisos=1
     fi
   done
+  # (03/11/2026, decisão de 29/10: sistema sob demanda) Com o agata.target inativo E o seth-gateway.service
+  # (o núcleo: hidratação e roteamento) inativo, o sistema está desligado de propósito: serviço parado e
+  # contêiner ausente deixam de avisar, e uma linha diz isso. Continuam avisando: timer fora do ar, unidade
+  # 'failed', e tudo quando o target está ativo ou o gateway está no ar (subida parcial). Queda com o
+  # sistema ligado (o caso de 24/10) segue coberta. O seth-escriba pode ficar ligado à parte; não conta.
+  local desligado=0
+  if [ "$(systemctl --user is-active agata.target 2>/dev/null)" != "active" ] \
+      && [ "$(systemctl --user is-active seth-gateway.service 2>/dev/null)" != "active" ]; then
+    desligado=1
+    echo "P-9: sistema sob demanda desligado (agata.target e seth-gateway inativos) -- serviços parados e contêineres não são avaliados agora; timers e unidades 'failed' continuam. Ligue com o atalho seth para avaliar."
+  fi
   for u in "${P9_UNIDADES_USUARIO[@]}"; do
     estado="$(systemctl --user is-active "$u" 2>/dev/null)"
     # (24/10/2026) serviço parado do jeito normal fica 'inactive', não 'failed': no teste de queda
     # e volta o gateway, o OmniRoute e o Laya caíram e o P-9 não disse nada. Agora 'inactive' também
     # avisa, menos o oneshot (termina sozinho e fica parado de propósito, ex.: agata-manutencao.service).
     if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
-        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] \
+        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
              && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
       echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
       avisos=1
@@ -35,7 +46,7 @@ p9_servicos_declarados() {
       avisos=1
     fi
   done
-  if command -v docker >/dev/null 2>&1; then
+  if [ "$desligado" = 0 ] && command -v docker >/dev/null 2>&1; then
     for u in "${P9_CONTAINERS_DOCKER[@]}"; do
       rodando="$(docker ps --filter "name=^${u}\$" --format '{{.Names}}' 2>/dev/null)"
       if [ -z "$rodando" ]; then

@@ -249,7 +249,8 @@ P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
 
 
 _perimetro_veredito() {
-  local codigo="$1"
+  local codigo="$1" p17_isento="${PERIMETRO_P17_ISENTO:-0}"
+  PERIMETRO_P17_ISENTO=0
   if [ "$codigo" -ne 0 ]; then
     echo "veredito: FALHOU"
     FALHOU=1
@@ -257,7 +258,9 @@ _perimetro_veredito() {
   elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
     echo "veredito: SKIP"
     CONT_SKIP=$((CONT_SKIP + 1))
-    P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
+    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese) não é pular em silêncio:
+    # a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida.
+    [ "$p17_isento" = 1 ] || P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
     echo "veredito: PARCIAL"
     CONT_PARCIAL=$((CONT_PARCIAL + 1))
