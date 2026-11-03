@@ -1,0 +1,270 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index 0a142296..94937640 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -31,3 +31,11 @@ jobs:
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
++
++      - name: Âncora e critérios dos componentes existentes
++        run: |
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger
++          for c in project_kit review_mesh evidence_ledger; do
++            python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
++            python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
++          done
+diff --git a/redesign/evidence_ledger/spec/acceptance.json b/redesign/evidence_ledger/spec/acceptance.json
+new file mode 100644
+index 00000000..b92b0aa2
+--- /dev/null
++++ b/redesign/evidence_ledger/spec/acceptance.json
+@@ -0,0 +1,38 @@
++[
++  {
++    "criterion": "acrescentar, verificar e exportar publicamente",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/evidence_ledger/tests/test_ledger.py::test_append_verify_and_public_export"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "adulteração é detectada",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/evidence_ledger/tests/test_ledger.py::test_tamper_is_detected"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "escritas concorrentes preservam a cadeia",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/evidence_ledger/tests/test_ledger.py::test_concurrent_appends_preserve_chain"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "linha final truncada é explícita e preservada",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/evidence_ledger/tests/test_ledger.py::test_truncated_final_line_is_explicit_and_preserved"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/evidence_ledger/spec/spec.md b/redesign/evidence_ledger/spec/spec.md
+new file mode 100644
+index 00000000..e9e8fdab
+--- /dev/null
++++ b/redesign/evidence_ledger/spec/spec.md
+@@ -0,0 +1,39 @@
++# Spec — Evidence Ledger
++
++## Jornadas críticas
++
++Registrar evidência em cadeia de hashes e detectar adulteração.
++
++## Contrato
++
++- `ledger.py` acrescenta eventos encadeados por hash, com trava de escrita (`flock`).
++- Adulteração e linha final truncada são detectadas e preservadas, nunca consertadas em silêncio.
++- A exportação pública não carrega dado privado.
++
++## Critérios de aceite
++
++- [ ] acrescentar, verificar e exportar publicamente
++- [ ] adulteração é detectada
++- [ ] escritas concorrentes preservam a cadeia
++- [ ] linha final truncada é explícita e preservada
++
++## Desenho e alternativas
++
++Componente existente, ancorado sem reescrever: a spec descreve o que o código já promete e os testes já provam.
++
++## Implementação e testes
++
++Testes em `tests/`; cada critério abaixo aponta o teste que o prova em `acceptance.json`.
++
++## Migração e reversão
++
++Sem migração de dados. Reversão por revert do commit que ancorou o componente.
++
++## Riscos e dependências
++
++A spec descreve o contrato observado em 03/11/2026; comportamento sem teste não está coberto pela âncora.
++
++## Código
++
++- `ledger.py`
++- `tests/`
+diff --git a/redesign/project_kit/spec/acceptance.json b/redesign/project_kit/spec/acceptance.json
+new file mode 100644
+index 00000000..a3703795
+--- /dev/null
++++ b/redesign/project_kit/spec/acceptance.json
+@@ -0,0 +1,29 @@
++[
++  {
++    "criterion": "bootstrap ignora venv e grava o contrato",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/project_kit/tests/test_bootstrap.py::test_bootstrap_ignores_venv_and_writes_contract"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "drift detecta arquivo adicionado, removido e alterado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/project_kit/tests/test_bootstrap.py::test_drift_report_detects_added_removed_and_changed"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "bootstrap omite nomes de segredo e link simbólico externo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/project_kit/tests/test_bootstrap.py::test_bootstrap_omits_secret_names_and_external_symlink"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/project_kit/spec/spec.md b/redesign/project_kit/spec/spec.md
+new file mode 100644
+index 00000000..5153ec46
+--- /dev/null
++++ b/redesign/project_kit/spec/spec.md
+@@ -0,0 +1,39 @@
++# Spec — Project Kit
++
++## Jornadas críticas
++
++Gerar o pacote inicial de um projeto externo e medir o drift depois.
++
++## Contrato
++
++- `bootstrap.py <projeto> --out <pasta> --goal <texto>` grava pacote com proveniência, sem escrever no projeto.
++- Omite nomes de segredo e links simbólicos externos; ignora `.venv`.
++- `--drift-against` compara hashes de arquivos entre dois pacotes.
++
++## Critérios de aceite
++
++- [ ] bootstrap ignora venv e grava o contrato
++- [ ] drift detecta arquivo adicionado, removido e alterado
++- [ ] bootstrap omite nomes de segredo e link simbólico externo
++
++## Desenho e alternativas
++
++Componente existente, ancorado sem reescrever: a spec descreve o que o código já promete e os testes já provam.
++
++## Implementação e testes
++
++Testes em `tests/`; cada critério abaixo aponta o teste que o prova em `acceptance.json`.
++
++## Migração e reversão
++
++Sem migração de dados. Reversão por revert do commit que ancorou o componente.
++
++## Riscos e dependências
++
++A spec descreve o contrato observado em 03/11/2026; comportamento sem teste não está coberto pela âncora.
++
++## Código
++
++- `bootstrap.py`
++- `tests/`
++- `README.md`
+diff --git a/redesign/review_mesh/spec/acceptance.json b/redesign/review_mesh/spec/acceptance.json
+new file mode 100644
+index 00000000..a14177ed
+--- /dev/null
++++ b/redesign/review_mesh/spec/acceptance.json
+@@ -0,0 +1,20 @@
++[
++  {
++    "criterion": "prepare isola os papéis e consolida relatório ausente como não medido",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/review_mesh/tests/test_mesh.py::test_prepare_isolates_roles_and_consolidates_missing"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "prepare recusa sobrescrever e respeita o contrato do pacote",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/review_mesh/tests/test_mesh.py::test_prepare_refuses_overwrite_and_packet_contract"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/review_mesh/spec/spec.md b/redesign/review_mesh/spec/spec.md
+new file mode 100644
+index 00000000..9f856a74
+--- /dev/null
++++ b/redesign/review_mesh/spec/spec.md
+@@ -0,0 +1,37 @@
++# Spec — Review Mesh
++
++## Jornadas críticas
++
++Preparar pacotes isolados para revisores e consolidar os relatórios sem decidir.
++
++## Contrato
++
++- `mesh.py prepare <spec> <pasta>` cria um pacote por papel e recusa sobrescrever.
++- `mesh.py consolidate` marca relatório ausente como não medido.
++
++## Critérios de aceite
++
++- [ ] prepare isola os papéis e consolida relatório ausente como não medido
++- [ ] prepare recusa sobrescrever e respeita o contrato do pacote
++
++## Desenho e alternativas
++
++Componente existente, ancorado sem reescrever: a spec descreve o que o código já promete e os testes já provam.
++
++## Implementação e testes
++
++Testes em `tests/`; cada critério abaixo aponta o teste que o prova em `acceptance.json`.
++
++## Migração e reversão
++
++Sem migração de dados. Reversão por revert do commit que ancorou o componente.
++
++## Riscos e dependências
++
++A spec descreve o contrato observado em 03/11/2026; comportamento sem teste não está coberto pela âncora.
++
++## Código
++
++- `mesh.py`
++- `tests/`
++- `README.md`
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 29928e48..f463235c 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -1750,6 +1750,8 @@ class _Dummy(BaseHTTPRequestHandler):
+ 
+ 
+ def _selftest() -> int:
++    # offline por desenho: o ls-remote do estado nao pode estourar o timeout dos casos (flaky na CI)
++    os.environ.setdefault("LS_REMOTE_TIMEOUT_ECO", "1")
+     global UPSTREAM, MODELO_REAL_PATH
+     up_port, gw_port = _porta_livre(), _porta_livre()
+     UPSTREAM = f"http://127.0.0.1:{up_port}"
