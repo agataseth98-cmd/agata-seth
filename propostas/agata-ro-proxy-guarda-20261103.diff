@@ -1,0 +1,130 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index aee8defa..eac39fba 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -14,6 +14,7 @@ on:
+       - "redesign/project_kit/**"
+       - "redesign/evidence_ledger/**"
+       - "redesign/painel_operacional/**"
++      - "redesign/obsidian/**"
+       - ".agents/skills/**"
+       - "scripts/medir_*.py"
+       - ".github/workflows/sdd.yml"
+@@ -30,14 +31,14 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+ 
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/obsidian
+           for c in project_kit review_mesh evidence_ledger painel_operacional; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+diff --git a/redesign/obsidian/ro_proxy.py b/redesign/obsidian/ro_proxy.py
+index d17a3b6e..1c5326d1 100644
+--- a/redesign/obsidian/ro_proxy.py
++++ b/redesign/obsidian/ro_proxy.py
+@@ -62,19 +62,9 @@ def _token():
+         return ""
+ 
+ 
+-def _listar_disco(caminho_url: str):
+-    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
+-    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
+-    from urllib.parse import unquote
+-    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
+-    if any(p.startswith(".") for p in rel.split("/") if p):
+-        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
+-    if not rel:
+-        alvo = VAULT
+-    else:
+-        alvo = os.path.realpath(os.path.join(VAULT, rel))
+-        if not alvo.startswith(VAULT + os.sep):
+-            return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
++def _itens_do_diretorio(alvo: str):
++    """(codigo, corpo_json) da listagem de `alvo`, ou None se não é diretório. `alvo` chega aqui JÁ dentro do
++    vault: ou é o próprio VAULT (raiz) ou um caminho que passou pelo guarda de `_listar_disco`."""
+     if not os.path.isdir(alvo):
+         return None
+     def _tem_arquivo(d):
+@@ -98,6 +88,21 @@ def _listar_disco(caminho_url: str):
+     return 200, {"files": itens}
+ 
+ 
++def _listar_disco(caminho_url: str):
++    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
++    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
++    from urllib.parse import unquote
++    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
++    if any(p.startswith(".") for p in rel.split("/") if p):
++        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
++    if not rel:
++        return _itens_do_diretorio(VAULT)
++    alvo = os.path.realpath(os.path.join(VAULT, rel))
++    if not alvo.startswith(VAULT + os.sep):
++        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
++    return _itens_do_diretorio(alvo)
++
++
+ def _bloqueia_mcp(body: bytes) -> str | None:
+     """Retorna None se pode passar; senao a razao do 403."""
+     try:
+diff --git a/redesign/obsidian/test_ro_proxy.py b/redesign/obsidian/test_ro_proxy.py
+new file mode 100644
+index 00000000..c5157409
+--- /dev/null
++++ b/redesign/obsidian/test_ro_proxy.py
+@@ -0,0 +1,46 @@
++import importlib.util
++import os
++import tempfile
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location("ro_proxy_teste", AQUI / "ro_proxy.py")
++mod = importlib.util.module_from_spec(spec)
++os.environ.setdefault("OBS_VAULT", str(AQUI))
++spec.loader.exec_module(mod)
++
++
++def vault(tmp_path):
++    raiz = Path(tmp_path) / "vault"
++    (raiz / "sub").mkdir(parents=True)
++    (raiz / ".oculto").mkdir()
++    (raiz / "vazio").mkdir()
++    (raiz / "a.md").write_text("a", encoding="utf-8")
++    (raiz / "sub" / "b.md").write_text("b", encoding="utf-8")
++    (raiz / ".oculto" / "c.md").write_text("c", encoding="utf-8")
++    (Path(tmp_path) / "fora.md").write_text("f", encoding="utf-8")
++    (raiz / "link-fora").symlink_to(Path(tmp_path) / "fora.md")
++    mod.VAULT = os.path.realpath(raiz)
++    return raiz
++
++
++def test_lista_a_raiz_e_um_subdiretorio_sem_ocultos_vazios_nem_links_para_fora(tmp_path):
++    vault(tmp_path)
++    codigo, corpo = mod._listar_disco("/vault/")
++    assert codigo == 200 and corpo["files"] == ["a.md", "sub/"]
++    codigo, corpo = mod._listar_disco("/vault/sub/")
++    assert codigo == 200 and corpo["files"] == ["b.md"]
++
++
++def test_recusa_caminho_oculto_e_saida_do_vault(tmp_path):
++    vault(tmp_path)
++    assert mod._listar_disco("/vault/.oculto/")[0] == 403
++    assert mod._listar_disco("/vault/../")[0] == 403
++    assert mod._listar_disco("/vault/sub/../../")[0] == 403
++    assert mod._listar_disco("/vault/%2e%2e/")[0] == 403
++
++
++def test_arquivo_ou_inexistente_repassa_ao_plugin(tmp_path):
++    vault(tmp_path)
++    assert mod._listar_disco("/vault/a.md") is None
++    assert mod._listar_disco("/vault/nao-existe/") is None
