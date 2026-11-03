@@ -1,0 +1,201 @@
+diff --git a/redesign/evidence_ledger/ledger.py b/redesign/evidence_ledger/ledger.py
+index 119368cc..78a47e1b 100644
+--- a/redesign/evidence_ledger/ledger.py
++++ b/redesign/evidence_ledger/ledger.py
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env python3
+ """Evidence Ledger offline: append, verify and public export."""
+ from __future__ import annotations
+-import argparse, hashlib, json
++import argparse, hashlib, json, fcntl, os
+ from pathlib import Path
+ 
+ KINDS = {"observation", "decision", "proposal", "approval", "execution", "verification", "drift", "correction"}
+@@ -23,19 +23,43 @@ def validate(event):
+     if event["classification"] == "secret":
+         raise ValueError("secret não entra no ledger")
+ 
++class LedgerCorruptError(ValueError):
++    """The ledger contains an invalid record and must not be repaired implicitly."""
++
++
++def _records(handle):
++    handle.seek(0)
++    records = []
++    for n, line in enumerate(handle, 1):
++        if not line.strip():
++            continue
++        try:
++            records.append(json.loads(line))
++        except json.JSONDecodeError as exc:
++            suffix = " (linha final possivelmente truncada)" if not line.endswith("\n") else ""
++            raise LedgerCorruptError(f"JSON inválido na linha {n}{suffix}") from exc
++    return records
++
++
+ def read(path):
+     if not path.exists(): return []
+-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
++    with path.open("r", encoding="utf-8") as handle:
++        return _records(handle)
+ 
+ def append(path, event):
+     validate(event)
+-    old = read(path)
+-    event = dict(event)
+-    event["prev_hash"] = old[-1]["event_hash"] if old else None
+-    event["event_hash"] = digest(event)
+     path.parent.mkdir(parents=True, exist_ok=True)
+-    with path.open("a", encoding="utf-8") as f:
+-        f.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
++    with path.open("a+", encoding="utf-8") as handle:
++        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
++        old = _records(handle)
++        event = dict(event)
++        event["prev_hash"] = old[-1]["event_hash"] if old else None
++        event["event_hash"] = digest(event)
++        handle.seek(0, os.SEEK_END)
++        handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
++        handle.flush()
++        os.fsync(handle.fileno())
++        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+ 
+ def verify(path):
+     previous = None
+diff --git a/redesign/evidence_ledger/tests/test_ledger.py b/redesign/evidence_ledger/tests/test_ledger.py
+index c7a390d7..9887a305 100644
+--- a/redesign/evidence_ledger/tests/test_ledger.py
++++ b/redesign/evidence_ledger/tests/test_ledger.py
+@@ -20,3 +20,23 @@ def test_tamper_is_detected(tmp_path):
+     ledger = tmp_path / "ledger.jsonl"; e = tmp_path / "e.json"; e.write_text(json.dumps(event()), encoding="utf-8")
+     run("append", ledger, e); data = json.loads(ledger.read_text()); data["status"] = "tampered"; ledger.write_text(json.dumps(data) + "\n")
+     assert subprocess.run([sys.executable, str(SCRIPT), "verify", str(ledger)]).returncode != 0
++
++def test_concurrent_appends_preserve_chain(tmp_path):
++    ledger = tmp_path / "ledger.jsonl"
++    worker = """import json, subprocess, sys\nfrom pathlib import Path\nscript, ledger, directory, prefix = map(Path, sys.argv[1:])\nfor i in range(40):\n    event = {'id': f'{prefix}-{i}', 'timestamp': '2026-10-30T19:00:00Z', 'actor': 'test', 'project': 'demo', 'kind': 'observation', 'status': 'ok', 'source': 'test', 'classification': 'public'}\n    source = directory / f'{prefix}-{i}.json'; source.write_text(json.dumps(event), encoding='utf-8')\n    subprocess.run([sys.executable, str(script), 'append', str(ledger), str(source)], check=True)\n"""
++    a = subprocess.Popen([sys.executable, "-c", worker, str(SCRIPT), str(ledger), str(tmp_path), "a"])
++    b = subprocess.Popen([sys.executable, "-c", worker, str(SCRIPT), str(ledger), str(tmp_path), "b"])
++    assert a.wait() == b.wait() == 0
++    run("verify", ledger)
++    assert len(ledger.read_text(encoding="utf-8").splitlines()) == 80
++
++def test_truncated_final_line_is_explicit_and_preserved(tmp_path):
++    ledger = tmp_path / "ledger.jsonl"
++    item = tmp_path / "e.json"; item.write_text(json.dumps(event()), encoding="utf-8")
++    run("append", ledger, item)
++    ledger.open("ab").write(b'{"id":"truncated"')
++    before = ledger.read_bytes()
++    result = subprocess.run([sys.executable, str(SCRIPT), "append", str(ledger), str(item)], capture_output=True, text=True)
++    assert result.returncode != 0
++    assert "truncada" in result.stderr
++    assert ledger.read_bytes() == before
+diff --git a/redesign/project_kit/bootstrap.py b/redesign/project_kit/bootstrap.py
+index 4a2b2c6b..00a61307 100644
+--- a/redesign/project_kit/bootstrap.py
++++ b/redesign/project_kit/bootstrap.py
+@@ -12,6 +12,12 @@ from datetime import datetime, timezone
+ 
+ IGNORED = {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache", ".pytest_cache"}
+ TEXT_EXT = {".md", ".txt", ".py", ".js", ".ts", ".tsx", ".jsx", ".json", ".yaml", ".yml", ".toml", ".sh", ".html", ".css"}
++SECRET_NAMES = {".env", ".env.local", ".env.production", ".env.development", "id_rsa", "id_dsa", "id_ecdsa", "authorized_keys"}
++
++
++def sensitive(path: Path) -> bool:
++    name = path.name.lower()
++    return name in SECRET_NAMES or name.endswith((".pem", ".key")) or name.startswith(".env.")
+ 
+ 
+ def files(root: Path):
+@@ -42,9 +48,17 @@ def build(root: Path, out: Path, goal: str) -> None:
+     root = root.resolve()
+     out.mkdir(parents=True, exist_ok=True)
+     records = []
++    omitted = []
+     headings = []
+     for path in files(root):
+         rel = path.relative_to(root).as_posix()
++        if sensitive(path):
++            omitted.append({"path": rel, "reason": "sensitive-name"})
++            continue
++        resolved = path.resolve(strict=False)
++        if path.is_symlink() and root not in resolved.parents:
++            omitted.append({"path": rel, "reason": "symlink-outside-root"})
++            continue
+         content = read_head(path)
+         records.append({"path": rel, "bytes": path.stat().st_size, "sha256": sha256(path)})
+         for line in content.splitlines():
+@@ -83,7 +97,7 @@ def build(root: Path, out: Path, goal: str) -> None:
+     (reviews / "README.md").write_text("# Reviews\n\nRevisores independentes devem receber somente a spec e o material mínimo da tarefa.\n", encoding="utf-8")
+     (out / "decision.md").write_text("# Decisão\n\nAguardando decisão humana.\n", encoding="utf-8")
+     (out / "drift-report.md").write_text("# Drift report\n\nNão há implementação aprovada para comparar nesta fase.\n", encoding="utf-8")
+-    (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
++    (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records, "omitted": omitted}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+ 
+ 
+ def record_bootstrap(ledger: Path, root: Path, out: Path, goal: str) -> None:
+diff --git a/redesign/project_kit/tests/test_bootstrap.py b/redesign/project_kit/tests/test_bootstrap.py
+index 64888cdd..837771a4 100644
+--- a/redesign/project_kit/tests/test_bootstrap.py
++++ b/redesign/project_kit/tests/test_bootstrap.py
+@@ -49,3 +49,17 @@ def test_bootstrap_can_record_public_ledger_event(tmp_path):
+     assert data["kind"] == "observation"
+     assert data["classification"] == "public"
+     assert data["output_hash"]
++
++def test_bootstrap_omits_secret_names_and_external_symlink(tmp_path):
++    project = tmp_path / "project"; project.mkdir()
++    (project / ".env").write_text("TOKEN=secret", encoding="utf-8")
++    (project / "id_rsa").write_text("private", encoding="utf-8")
++    (project / "notes.txt").write_text("ok", encoding="utf-8")
++    outside = tmp_path / "outside.txt"; outside.write_text("outside", encoding="utf-8")
++    (project / "link.txt").symlink_to(outside)
++    out = tmp_path / "out"
++    subprocess.run([sys.executable, str(SCRIPT), str(project), "--out", str(out), "--goal", "secrets"], check=True)
++    data = json.loads((out / "provenance.json").read_text(encoding="utf-8"))
++    assert {item["path"] for item in data["files"]} == {"notes.txt"}
++    assert {item["path"] for item in data["omitted"]} == {".env", "id_rsa", "link.txt"}
++    assert all("sha256" not in item for item in data["omitted"])
+diff --git a/redesign/review_mesh/mesh.py b/redesign/review_mesh/mesh.py
+index 986037a4..37a7d07b 100644
+--- a/redesign/review_mesh/mesh.py
++++ b/redesign/review_mesh/mesh.py
+@@ -11,11 +11,13 @@ ROLES = {
+ 
+ def prepare(spec: Path, out: Path):
+     text = spec.read_text(encoding="utf-8")
++    if out.exists() and any(out.iterdir()):
++        raise FileExistsError(f"pacote já existe; recusando sobrescrever: {out}")
+     out.mkdir(parents=True, exist_ok=True)
+     (out / "README.md").write_text("# Review Mesh\n\nPacotes independentes; nenhum revisor recebe a conversa original.\n", encoding="utf-8")
+     for role, question in ROLES.items():
+         d = out / role; d.mkdir(exist_ok=True)
+-        (d / "packet.md").write_text(f"# Revisão: {role}\n\n## Pergunta\n{question}\n\n## Spec\n\n{text}\n\n## Relatório\n\nPreencha com achados, evidência, severidade e recomendação.\n", encoding="utf-8")
++        (d / "packet.md").write_text(f"# Revisão: {role}\n\n## Pergunta\n{question}\n\n## Spec\n\n{text}\n\n## Relatório\n\nEscreva os achados em `report.md`, com evidência, severidade e recomendação.\n", encoding="utf-8")
+     (out / "manifest.json").write_text(json.dumps({"spec": str(spec), "roles": sorted(ROLES)}, indent=2) + "\n", encoding="utf-8")
+ 
+ def consolidate(reviews: Path, output: Path):
+diff --git a/redesign/review_mesh/tests/test_mesh.py b/redesign/review_mesh/tests/test_mesh.py
+index a2510d4c..bf71b508 100644
+--- a/redesign/review_mesh/tests/test_mesh.py
++++ b/redesign/review_mesh/tests/test_mesh.py
+@@ -1,4 +1,4 @@
+-import subprocess, sys
++import subprocess, sys, pytest
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).parents[1]; SCRIPT = ROOT / "mesh.py"
+@@ -14,3 +14,13 @@ def test_prepare_isolates_roles_and_consolidates_missing(tmp_path):
+     text = report.read_text(encoding="utf-8")
+     assert "Relatório ausente" in text
+     assert "implementador" in text
++
++def test_prepare_refuses_overwrite_and_packet_contract(tmp_path):
++    spec = tmp_path / "spec.md"; spec.write_text("# Spec", encoding="utf-8")
++    out = tmp_path / "reviews"
++    subprocess.run([sys.executable, str(SCRIPT), "prepare", str(spec), str(out)], check=True)
++    report = out / "operador" / "report.md"; report.write_text("preservar", encoding="utf-8")
++    result = subprocess.run([sys.executable, str(SCRIPT), "prepare", str(spec), str(out)], capture_output=True, text=True)
++    assert result.returncode != 0
++    assert report.read_text(encoding="utf-8") == "preservar"
++    assert "report.md" in (out / "operador" / "packet.md").read_text(encoding="utf-8")
