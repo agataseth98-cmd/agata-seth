@@ -10,6 +10,7 @@ import argparse
 import json
 import subprocess
 import sys
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -72,10 +73,13 @@ def implementation(state: dict, worktree: Path) -> None:
     record(state, "implementation", str(worktree.resolve()))
 
 
-def verification(state: dict, tests: list[str]) -> None:
+def verification(state: dict, tests: list[str], pytest_bin: str) -> None:
+    executable = shutil.which(pytest_bin) if "/" not in pytest_bin else pytest_bin
+    if not executable:
+        raise SystemExit(f"pytest não encontrado: {pytest_bin}; informe --pytest-bin ou ajuste PATH")
     for target in tests:
-        subprocess.run([sys.executable, "-m", "pytest", "-q", target], cwd=ROOT, check=True)
-    record(state, "verification", ";".join(tests))
+        subprocess.run([executable, "-q", target], cwd=ROOT, check=True)
+    record(state, "verification", f"{executable}:" + ";".join(tests))
 
 
 def drift(state: dict, project: Path, previous: Path, output: Path) -> None:
@@ -102,7 +106,7 @@ def main() -> int:
         sub.add_parser(name).add_argument("out", type=Path)
     d = sub.add_parser("decision"); d.add_argument("--accepted", action="store_true")
     sub.add_parser("implementation").add_argument("worktree", type=Path)
-    v = sub.add_parser("verify"); v.add_argument("tests", nargs="+", type=str)
+    v = sub.add_parser("verify"); v.add_argument("tests", nargs="+", type=str); v.add_argument("--pytest-bin", default="pytest")
     dr = sub.add_parser("drift"); dr.add_argument("project", type=Path); dr.add_argument("previous", type=Path); dr.add_argument("output", type=Path)
     sub.add_parser("complete")
     sub.add_parser("status")
@@ -113,7 +117,7 @@ def main() -> int:
     elif args.cmd == "consolidate": consolidate(state, args.out.resolve())
     elif args.cmd == "decision": decision(state, args.accepted)
     elif args.cmd == "implementation": implementation(state, args.worktree)
-    elif args.cmd == "verify": verification(state, args.tests)
+    elif args.cmd == "verify": verification(state, args.tests, args.pytest_bin)
     elif args.cmd == "drift": drift(state, args.project, args.previous, args.output)
     elif args.cmd == "complete": complete(state)
     else: print(json.dumps(state, ensure_ascii=False, indent=2))
