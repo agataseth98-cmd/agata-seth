@@ -1,0 +1,564 @@
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index df90534c..100735b0 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -6,19 +6,20 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ | Tema | Peças | Observação |
+ |---|---|---|
+ | agata | 13 | skills próprias do sistema |
+-| banco-e-infra | 19 |  |
+-| contexto-e-custo | 13 |  |
+-| frontend-e-design | 44 |  |
++| banco-e-infra | 23 |  |
++| contexto-e-custo | 15 |  |
++| dados-e-ml | 8 |  |
++| frontend-e-design | 49 |  |
+ | linguagens | 36 |  |
+ | marketing-e-comunicacao | 23 |  |
+ | meta-skills | 16 |  |
+-| negocios-e-nichos | 54 |  |
++| operacoes-e-dominios | 18 |  |
+ | pesquisa-e-docs | 14 |  |
+-| planejamento-e-agentes | 46 |  |
+-| qualidade-de-codigo | 23 |  |
++| planejamento-e-agentes | 58 |  |
++| qualidade-de-codigo | 24 |  |
+ | quarentena | 16 | só consulta; nada carrega sem decisão do Humano |
+-| revisao-e-git | 37 |  |
++| revisao-e-git | 40 |  |
+ | seguranca | 16 |  |
+-| testes | 43 |  |
++| testes | 44 |  |
+ 
+ Total: 413 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/ferramentas.py b/ferramentas/ferramentas.py
+index 9a70c54b..524b34bb 100644
+--- a/ferramentas/ferramentas.py
++++ b/ferramentas/ferramentas.py
+@@ -45,6 +45,27 @@ TEMAS = [
+     ("negocios-e-nichos", r"."),
+ ]
+ 
++# Peças que a regra por nome não classifica bem. Explícito e por nome: nenhuma outra peça muda de tema.
++AJUSTES = {
++    **dict.fromkeys(["accessibility", "i18n-sync", "fal-ai-media", "ios-icon-gen", "make-interfaces-feel-better"], "frontend-e-design"),
++    **dict.fromkeys(["benchmark"], "testes"),
++    **dict.fromkeys(["blueprint", "claude-devfleet", "ralphinho-rfc-pipeline", "ai-first-engineering", "gan-generator",
++                     "chief-of-staff", "conversation-analyzer", "jira-integration", "project-flow-ops",
++                     "product-capability", "product-lens", "benchmark-methodology"], "planejamento-e-agentes"),
++    **dict.fromkeys(["canary-watch", "terminal-opener", "terminal-ops", "flox-environments"], "banco-e-infra"),
++    **dict.fromkeys(["codehealth-mcp"], "qualidade-de-codigo"),
++    **dict.fromkeys(["config-gc", "ck"], "contexto-e-custo"),
++    **dict.fromkeys(["opensource-pipeline", "opensource-forker", "opensource-packager"], "revisao-e-git"),
++    **dict.fromkeys(["ml-adoption-playbook", "foundation-models-on-device", "scientific-pkg-gget", "bengali-nlp",
++                     "ito-baskets", "ito-compute", "ito-inference", "ito-training"], "dados-e-ml"),
++    **dict.fromkeys(["carrier-relationship-management", "logistics-exception-management", "energy-procurement",
++                     "production-scheduling", "quality-nonconformance", "returns-reverse-logistics",
++                     "customer-billing-ops", "finance-billing-ops", "master-agreement-generator",
++                     "esign-field-placement", "counterparty-channel-discipline", "google-workspace-ops",
++                     "healthcare-cdss-patterns", "healthcare-emr-patterns", "netmiko-ssh-automation",
++                     "cisco-ios-patterns", "osint-investigation", "harmonyos-app-resolver"], "operacoes-e-dominios"),
++}
++
+ 
+ def frontmatter(caminho: Path) -> dict:
+     texto = caminho.read_text(encoding="utf-8", errors="replace")
+@@ -61,6 +82,8 @@ def frontmatter(caminho: Path) -> dict:
+ def tema_de(nome: str) -> str:
+     if QUARENTENA.match(nome):
+         return "quarentena"
++    if nome in AJUSTES:
++        return AJUSTES[nome]
+     for tema, padrao in TEMAS:
+         if re.search(padrao, nome):
+             return tema
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index a28952a9..557dff82 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -3,7 +3,7 @@
+   "nome": "accessibility",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "frontend-e-design",
+   "caminho": "ferramentas/fontes/ecc/skills/accessibility/SKILL.md",
+   "resumo": "Design, implement, and audit accessible UI to WCAG 2.2 Level AA across Web, iOS, and Android — semantic ARIA roles and labels, accessibility"
+  },
+@@ -99,7 +99,7 @@
+   "nome": "ai-first-engineering",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/ai-first-engineering/SKILL.md",
+   "resumo": "Engineering operating model for teams where AI agents generate a large share of implementation output. Use when setting team process, review"
+  },
+@@ -195,7 +195,7 @@
+   "nome": "benchmark",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "testes",
+   "caminho": "ferramentas/fontes/ecc/skills/benchmark/SKILL.md",
+   "resumo": "Measure performance baselines and detect regressions across browser Core Web Vitals (LCP, INP, CLS, page weight), API endpoint latency perce"
+  },
+@@ -203,7 +203,7 @@
+   "nome": "benchmark-methodology",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/benchmark-methodology/SKILL.md",
+   "resumo": "Score a scoped competitor set into comparable profile cards: nine weighted dimensions (positioning, voice, visual craft, offer packaging, ev"
+  },
+@@ -219,7 +219,7 @@
+   "nome": "bengali-nlp",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/bengali-nlp/SKILL.md",
+   "resumo": "Bengali (Bangla) text processing patterns including Unicode normalization, script detection, tokenization, conjunct handling, and Bangla-spe"
+  },
+@@ -235,7 +235,7 @@
+   "nome": "blueprint",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/blueprint/SKILL.md",
+   "resumo": "Turn a one-line objective into a step-by-step construction plan for multi-session, multi-agent engineering projects: one-PR-sized steps with"
+  },
+@@ -283,7 +283,7 @@
+   "nome": "canary-watch",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "banco-e-infra",
+   "caminho": "ferramentas/fontes/ecc/skills/canary-watch/SKILL.md",
+   "resumo": "Use this skill to monitor and verify a deployed URL after releases — checks HTTP endpoints, SSE streams, static assets, console errors, and "
+  },
+@@ -291,7 +291,7 @@
+   "nome": "carrier-relationship-management",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/carrier-relationship-management/SKILL.md",
+   "resumo": "Manage truckload, LTL, and intermodal carrier portfolios: sourcing and FMCSA vetting, freight rate and fuel-surcharge negotiation, RFPs and "
+  },
+@@ -307,7 +307,7 @@
+   "nome": "cisco-ios-patterns",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/cisco-ios-patterns/SKILL.md",
+   "resumo": "Cisco IOS and IOS-XE review patterns for show commands, config hierarchy, wildcard masks, ACL placement, interface hygiene, and safe change-"
+  },
+@@ -315,7 +315,7 @@
+   "nome": "ck",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "contexto-e-custo",
+   "caminho": "ferramentas/fontes/ecc/skills/ck/SKILL.md",
+   "resumo": "Persistent per-project memory for Claude Code (Context Keeper) driven by deterministic Node.js /ck commands: init, save, resume, info, list,"
+  },
+@@ -323,7 +323,7 @@
+   "nome": "claude-devfleet",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/claude-devfleet/SKILL.md",
+   "resumo": "Orchestrate multi-agent coding tasks via Claude DevFleet — plan projects, dispatch parallel agents in isolated worktrees, monitor progress, "
+  },
+@@ -363,7 +363,7 @@
+   "nome": "codehealth-mcp",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "qualidade-de-codigo",
+   "caminho": "ferramentas/fontes/ecc/skills/codehealth-mcp/SKILL.md",
+   "resumo": "Real-time structural Code Health via CodeScene MCP — review before edits, verify score deltas after changes, gate commits and PRs. Use when "
+  },
+@@ -403,7 +403,7 @@
+   "nome": "config-gc",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "contexto-e-custo",
+   "caminho": "ferramentas/fontes/ecc/skills/config-gc/SKILL.md",
+   "resumo": "Garbage collection for your Claude Code configuration. Periodically scans ~/.claude (skills, memory, hooks, permissions, MCP servers, caches"
+  },
+@@ -531,7 +531,7 @@
+   "nome": "counterparty-channel-discipline",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/counterparty-channel-discipline/SKILL.md",
+   "resumo": "Per-channel strict prompts, mention gating, silent observation, and a communication autonomy policy for agents that sit in shared channels w"
+  },
+@@ -571,7 +571,7 @@
+   "nome": "customer-billing-ops",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/customer-billing-ops/SKILL.md",
+   "resumo": "Operate customer billing workflows such as subscriptions, refunds, churn triage, billing-portal recovery, and plan analysis using connected "
+  },
+@@ -811,7 +811,7 @@
+   "nome": "energy-procurement",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/energy-procurement/SKILL.md",
+   "resumo": "Procure electricity and natural gas for commercial and industrial facilities: tariff and rate-schedule optimization, demand-charge mitigatio"
+  },
+@@ -835,7 +835,7 @@
+   "nome": "esign-field-placement",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/esign-field-placement/SKILL.md",
+   "resumo": "Deterministic method for placing signature, date, and text fields in a web e-signature composer through a browser automation session, using "
+  },
+@@ -867,7 +867,7 @@
+   "nome": "fal-ai-media",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "frontend-e-design",
+   "caminho": "ferramentas/fontes/ecc/skills/fal-ai-media/SKILL.md",
+   "resumo": "Unified media generation via fal.ai MCP — image, video, and audio. Covers text-to-image (Nano Banana), text/image-to-video (Seedance, Kling,"
+  },
+@@ -883,7 +883,7 @@
+   "nome": "finance-billing-ops",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/finance-billing-ops/SKILL.md",
+   "resumo": "Evidence-first revenue, pricing, refunds, team-billing, and billing-model truth workflow for ECC. Use when the user wants a sales snapshot, "
+  },
+@@ -891,7 +891,7 @@
+   "nome": "flox-environments",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "banco-e-infra",
+   "caminho": "ferramentas/fontes/ecc/skills/flox-environments/SKILL.md",
+   "resumo": "Create reproducible, cross-platform (macOS/Linux) development environments with Flox, a declarative Nix-based environment manager. Use when "
+  },
+@@ -907,7 +907,7 @@
+   "nome": "foundation-models-on-device",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/foundation-models-on-device/SKILL.md",
+   "resumo": "Apple FoundationModels framework for on-device LLM — text generation, guided generation with @Generable, tool calling, and snapshot streamin"
+  },
+@@ -1011,7 +1011,7 @@
+   "nome": "google-workspace-ops",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/google-workspace-ops/SKILL.md",
+   "resumo": "Operate across Google Drive, Docs, Sheets, and Slides as one workflow surface for plans, trackers, decks, and shared documents. Use when the"
+  },
+@@ -1027,7 +1027,7 @@
+   "nome": "healthcare-cdss-patterns",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/healthcare-cdss-patterns/SKILL.md",
+   "resumo": "Clinical Decision Support System (CDSS) development patterns. Drug interaction checking, dose validation, clinical scoring (NEWS2, qSOFA), a"
+  },
+@@ -1035,7 +1035,7 @@
+   "nome": "healthcare-emr-patterns",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/healthcare-emr-patterns/SKILL.md",
+   "resumo": "EMR/EHR development patterns for healthcare applications. Clinical safety, encounter workflows, prescription generation, clinical decision s"
+  },
+@@ -1131,7 +1131,7 @@
+   "nome": "i18n-sync",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "frontend-e-design",
+   "caminho": "ferramentas/fontes/ecc/skills/i18n-sync/SKILL.md",
+   "resumo": "Translate and synchronize application JSON locale files using source-key usage, project terminology, and focused validation. Use when adding"
+  },
+@@ -1179,7 +1179,7 @@
+   "nome": "ios-icon-gen",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "frontend-e-design",
+   "caminho": "ferramentas/fontes/ecc/skills/ios-icon-gen/SKILL.md",
+   "resumo": "Generate iOS app icons as PNG imagesets for Xcode asset catalogs from SF Symbols (5000+ Apple-native) or Iconify API (275k+ open source icon"
+  },
+@@ -1203,7 +1203,7 @@
+   "nome": "ito-baskets",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/ito-baskets/SKILL.md",
+   "resumo": "Read-only Itô basket and prediction-market data skill. Index the live basket catalog, compare a basket against user-supplied research or a w"
+  },
+@@ -1211,7 +1211,7 @@
+   "nome": "ito-compute",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/ito-compute/SKILL.md",
+   "resumo": "Query live GPU inventory, submit an authenticated Itô fixed-rate RFQ, inspect RFQ or procurement status, revoke device credentials, and run "
+  },
+@@ -1219,7 +1219,7 @@
+   "nome": "ito-inference",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/ito-inference/SKILL.md",
+   "resumo": "Inspect the availability of model serving on a completed Itô compute booking and, when the canonical backend becomes available, hand off an "
+  },
+@@ -1227,7 +1227,7 @@
+   "nome": "ito-training",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/ito-training/SKILL.md",
+   "resumo": "Inspect the availability of ML training on a completed Itô compute booking and, when the canonical backend becomes available, hand off an ex"
+  },
+@@ -1243,7 +1243,7 @@
+   "nome": "jira-integration",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/jira-integration/SKILL.md",
+   "resumo": "Use this skill when retrieving Jira tickets, analyzing requirements, updating ticket status, adding comments, or transitioning issues. Provi"
+  },
+@@ -1395,7 +1395,7 @@
+   "nome": "logistics-exception-management",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/logistics-exception-management/SKILL.md",
+   "resumo": "Codified freight-exception handling expertise for shipment delays, damages, losses, shortages, and carrier disputes, with escalation protoco"
+  },
+@@ -1419,7 +1419,7 @@
+   "nome": "make-interfaces-feel-better",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "frontend-e-design",
+   "caminho": "ferramentas/fontes/ecc/skills/make-interfaces-feel-better/SKILL.md",
+   "resumo": "Apply concrete design-engineering details that make interfaces feel polished. Use when reviewing or improving UI spacing, typography, border"
+  },
+@@ -1451,7 +1451,7 @@
+   "nome": "master-agreement-generator",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/master-agreement-generator/SKILL.md",
+   "resumo": "Generate review drafts of counterparty master agreements from one template plus a JSON spec, with role-selected clauses and a Schedule A wor"
+  },
+@@ -1483,7 +1483,7 @@
+   "nome": "ml-adoption-playbook",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/ml-adoption-playbook/SKILL.md",
+   "resumo": "End-to-end methodology for AI agents and software engineers to add machine learning algorithms to existing non-ML codebases. Covers problem "
+  },
+@@ -1579,7 +1579,7 @@
+   "nome": "netmiko-ssh-automation",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/netmiko-ssh-automation/SKILL.md",
+   "resumo": "Safe Python Netmiko patterns for read-only collection, bounded batch SSH, TextFSM parsing, guarded config changes, timeouts, and network aut"
+  },
+@@ -1651,7 +1651,7 @@
+   "nome": "opensource-pipeline",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "revisao-e-git",
+   "caminho": "ferramentas/fontes/ecc/skills/opensource-pipeline/SKILL.md",
+   "resumo": "Open-source pipeline: fork, sanitize, and package private projects for safe public release. Chains 3 agents (forker, sanitizer, packager). T"
+  },
+@@ -1715,7 +1715,7 @@
+   "nome": "osint-investigation",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/osint-investigation/SKILL.md",
+   "resumo": "Sparse-clue OSINT investigation methodology for extracting overlooked leads, connecting fragmented evidence, and testing explanations across"
+  },
+@@ -1811,7 +1811,7 @@
+   "nome": "product-capability",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/product-capability/SKILL.md",
+   "resumo": "Translate PRD intent, roadmap asks, or product discussions into an implementation-ready capability plan that exposes constraints, invariants"
+  },
+@@ -1819,7 +1819,7 @@
+   "nome": "product-lens",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/product-lens/SKILL.md",
+   "resumo": "Validate the why before building through four product diagnostics — a YC-style product diagnostic that produces PRODUCT-BRIEF.md with a go/n"
+  },
+@@ -1835,7 +1835,7 @@
+   "nome": "production-scheduling",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/production-scheduling/SKILL.md",
+   "resumo": "Codified expertise for production scheduling, job sequencing, line balancing, changeover optimization, and bottleneck resolution in discrete"
+  },
+@@ -1843,7 +1843,7 @@
+   "nome": "project-flow-ops",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/project-flow-ops/SKILL.md",
+   "resumo": "Operate execution flow across GitHub and Linear by triaging issues and pull requests, linking active work, and keeping GitHub public-facing "
+  },
+@@ -1891,7 +1891,7 @@
+   "nome": "quality-nonconformance",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/quality-nonconformance/SKILL.md",
+   "resumo": "Quality control and non-conformance management for regulated manufacturing (FDA 21 CFR 820, IATF 16949, AS9100): NCR lifecycle and dispositi"
+  },
+@@ -1939,7 +1939,7 @@
+   "nome": "ralphinho-rfc-pipeline",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/skills/ralphinho-rfc-pipeline/SKILL.md",
+   "resumo": "Split an RFC into a multi-agent execution DAG — decompose into work units with dependencies and acceptance tests, run research, plan, implem"
+  },
+@@ -2035,7 +2035,7 @@
+   "nome": "returns-reverse-logistics",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/skills/returns-reverse-logistics/SKILL.md",
+   "resumo": "Codified expertise for returns authorization, receipt and inspection, disposition decisions, refund processing, fraud detection, and warrant"
+  },
+@@ -2099,7 +2099,7 @@
+   "nome": "scientific-pkg-gget",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "dados-e-ml",
+   "caminho": "ferramentas/fontes/ecc/skills/scientific-pkg-gget/SKILL.md",
+   "resumo": "gget CLI and Python workflow for quick genomic database queries, sequence lookup, BLAST-style searches, enrichment checks, and reproducible "
+  },
+@@ -2347,7 +2347,7 @@
+   "nome": "terminal-opener",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "banco-e-infra",
+   "caminho": "ferramentas/fontes/ecc/skills/terminal-opener/SKILL.md",
+   "resumo": "Open an executable and its argument array in a visible terminal window through a reusable, shell-free launch plan with dry-run, JSON, capabi"
+  },
+@@ -2355,7 +2355,7 @@
+   "nome": "terminal-ops",
+   "tipo": "skill",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "banco-e-infra",
+   "caminho": "ferramentas/fontes/ecc/skills/terminal-ops/SKILL.md",
+   "resumo": "Evidence-first repo execution workflow for ECC. Use when the user wants a command run, a repo checked, a CI failure debugged, or a narrow fi"
+  },
+@@ -2555,7 +2555,7 @@
+   "nome": "chief-of-staff",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/agents/chief-of-staff.md",
+   "resumo": "Personal communication chief of staff that triages email, Slack, LINE, and Messenger. Classifies messages into 4 tiers (skip/info_only/meeti"
+  },
+@@ -2611,7 +2611,7 @@
+   "nome": "conversation-analyzer",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/agents/conversation-analyzer.md",
+   "resumo": "Use this agent when analyzing conversation transcripts to find behaviors worth preventing with hooks. Triggered by /hookify without argument"
+  },
+@@ -2731,7 +2731,7 @@
+   "nome": "gan-generator",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "planejamento-e-agentes",
+   "caminho": "ferramentas/fontes/ecc/agents/gan-generator.md",
+   "resumo": "GAN Harness — Generator agent. Implements features according to the spec, reads evaluator feedback, and iterates until quality threshold is "
+  },
+@@ -2763,7 +2763,7 @@
+   "nome": "harmonyos-app-resolver",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "operacoes-e-dominios",
+   "caminho": "ferramentas/fontes/ecc/agents/harmonyos-app-resolver.md",
+   "resumo": "HarmonyOS application development expert specializing in ArkTS and ArkUI. Reviews code for V2 state management compliance, Navigation routin"
+  },
+@@ -2875,7 +2875,7 @@
+   "nome": "opensource-forker",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "revisao-e-git",
+   "caminho": "ferramentas/fontes/ecc/agents/opensource-forker.md",
+   "resumo": "Fork any project for open-sourcing. Copies files, strips secrets and credentials (20+ patterns), replaces internal references with placehold"
+  },
+@@ -2883,7 +2883,7 @@
+   "nome": "opensource-packager",
+   "tipo": "agente",
+   "fonte": "ecc",
+-  "tema": "negocios-e-nichos",
++  "tema": "revisao-e-git",
+   "caminho": "ferramentas/fontes/ecc/agents/opensource-packager.md",
+   "resumo": "Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, CONTRIBUTING.md, and GitH"
+  },
