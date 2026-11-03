@@ -13,6 +13,8 @@ on:
       - "redesign/review_mesh/**"
       - "redesign/project_kit/**"
       - "redesign/evidence_ledger/**"
+      - "redesign/painel_operacional/**"
+      - ".agents/skills/**"
       - ".github/workflows/sdd.yml"
   workflow_dispatch: {}
 
@@ -27,7 +29,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
 
       - name: Testes dos componentes SDD
-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional
 
       - name: Ciclo SDD sobre o próprio sdd_flow
         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
@@ -39,3 +41,9 @@ jobs:
             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
           done
+
+      - name: Indicadores de qualidade de LLM (selftest e leitura das skills)
+        run: |
+          python3 -I redesign/painel_operacional/qualidade_llm.py --selftest
+          python3 redesign/painel_operacional/qualidade_llm.py > "$RUNNER_TEMP/qualidade.json"
+          python3 -c "import json,sys; d=json.load(open(sys.argv[1])); bad=[s for s in d['skills'] if s['problemas']]; print('skills com problema:', [(s['skill'], s['problemas']) for s in bad]); sys.exit(1 if bad else 0)" "$RUNNER_TEMP/qualidade.json"
