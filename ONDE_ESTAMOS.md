@@ -1,36 +1,24 @@
 # Onde estamos
 
-Atualizado em 29/10/2026.
+Atualizado em 03/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
-Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`.
+Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Hoje, 29/10
+## Hoje, 03/11
 
-**Conselho em Rede:** PR #709 (`df9a50c2`) aplicado no painel oficial. O serviço reiniciou; `/conselho-rede`, o JS e o estado responderam HTTP 200. No Brave, nove abas detectadas e fila vazia. O JS servido não tem `window.confirm()` e mantém a aprovação explícita. Nenhum prompt foi enviado nesta verificação. Backup e rollback estão em MEMÓRIAS (931).
+**SDD (spec-driven):** o ciclo está no ar e passa na CI: `anchor`, `cycle` e `proposal` em `redesign/sdd_flow/`, com os componentes `sdd_flow`, `project_kit`, `review_mesh`, `evidence_ledger` e `painel_operacional` ancorados (spec com critérios ligados a testes). Cada implementação agora é uma proposta e uma assinatura.
 
-## Hoje, 28/10
+**Painel:** menu em submenus (Sistema, Memória e conhecimento, Qualidade); abas novas SDD e Qualidade de LLM, com botões de medição (dois cliques para confirmar). Skill `agata-llm-fundamentos` com a pesquisa e o mapa falha por mecanismo.
 
-**Conselho em Rede:** P-8 `painel-conselho-api-20261028` foi assinada e integrada no PR #701 (`ca80dacc`). `painel-operacional.service` reiniciado; página e catálogo HTTP 200, fila vazia, cinco APIs mapeadas para execução. Selftest e 43 testes passaram; checks do PR verdes.
+**Medido nesta Máquina:** busca por texto recall@1 70%, @5 100% (consultas de palavras raras); busca por sentido com as mesmas consultas recall@10 22,5%; `qwen3.5-9b-64k` e `qwen3:4b` acham um fato escondido em 3 de 3 até 32 mil tokens, e o 9b até 61 mil (só recuperação simples).
 
-**Falta para ensaio real:** recarregar manualmente RelayCouncil v2 em `chrome://extensions` no Chromium. A política de navegação impediu o agente de abrir essa página; por isso a versão 0.7.0 no perfil ainda não foi confirmada. Não houve chamadas reais a provedores; cada prompt continua sujeito à aprovação humana no painel.
+**Codex:** offline até segunda ordem. Marcado ausente na Equipe, vigia dele fora do atalho `seth` (`config/equipe-ausentes.txt`); arquivos locais dele em `~/.cache/agata/sincronia/arquivo-codex-20261103/`.
 
-**Rollback:** backup pré-aplicação e comando estão em MEMÓRIAS (924). A unit e seu drop-in não foram alterados.
-
-**Runtime do Conselho:** drop-in do `painel-operacional.service` concede escrita só a `~/.local/share/agata/painel-conselho/official`. Backup e comando de rollback estão na entrada (920) de MEMÓRIAS.
-
-**Navegador do Conselho:** a extensão oficial está carregada no Chromium persistente e a porta de depuração 9222 está fechada. Registro em MEMÓRIAS (919).
-
-**Proposta publicada:** PR #689 integrado em `2d5b0acc`; o diff e o registro da proposta estão em `propostas/aplicadas/` na branch de aplicação, junto do marcador assinado.
-
-**PR anterior #684:** continua aberto e conflitante; não foi alterado.
-
-**Equipe universal e auditoria encadeada:** PRs #687 e #688 integrados.
-
-**RelayCouncil:** contrato v3 e catálogo de 17 provedores estão aplicados (PR #674). O envio está integrado ao painel; adaptadores e termos variam por provedor.
+**Esperando você:** assinar `agata-robustez-codeql-medicoes-20261103` (5 alertas do CodeQL, fallback do pytest, escriba sem `cryptography`, medição de vários fatos e da busca por sentido). Apagar 512 branches remotos já mesclados (lista na pasta da Área de trabalho) e decidir sobre 12 não mesclados. Decisões de doutrina: P-9 sob demanda, P-16 contra P-17, escalada do P-24.
 
 ## Hoje, 22 e 23/10
 
