@@ -1,0 +1,56 @@
+[
+  {
+    "criterion": "a página não tem script inline por causa da CSP",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "leituras de API recusam origem cruzada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_leituras_de_api_recusam_origem_cruzada_mas_a_extensao_passa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a verificação de proposta é só leitura de origem local",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_verificacao_de_proposta_e_apenas_uma_leitura_de_origem_local"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o indicador sem medição sai como não medido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_qualidade_llm.py::QualidadeLlmTests::test_rota_devolve_indicadores_e_marca_o_que_nao_foi_medido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a execução do SDD recusa ação e componente fora da lista",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_sdd_painel.py::SddPainelTests::test_executar_recusa_acao_e_componente_fora_da_lista"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a execução do SDD recusa comando fora do padrão pytest",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_sdd_painel.py::SddPainelTests::test_criterios_recusam_comando_fora_do_padrao"
+    ],
+    "cwd": null
+  }
+]

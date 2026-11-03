@@ -64,6 +64,7 @@ function showPage(name) {
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
   if (name === "visao") carregarVisaoSistema();
   if (name === "qualidade") carregarQualidade();
+  if (name === "sdd") carregarSdd();
   if (name === "conselho") loadRelayCatalog();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
@@ -813,6 +814,42 @@ async function carregarLacunasCanon() {
 }
 
 /* (27/10/2026) Visão do sistema: junta as leituras já existentes (status, capacidades, lacunas). Nada novo é medido aqui. */
+async function executarSdd(acao, componente, nota) {
+  nota.textContent = "Executando…";
+  try {
+    const r = await fetchJson("/api/sdd/executar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({acao, componente})});
+    nota.textContent = (r.ok ? "OK · " : "FALHOU · ") + r.passos.map((p) => p.passo + ": " + p.detalhe).join(" | ");
+  } catch (_) { nota.textContent = "Execução indisponível."; }
+}
+async function carregarSdd() {
+  const lista = byId("sdd-lista"); const titulo = byId("sdd-titulo");
+  if (!lista) return;
+  lista.replaceChildren();
+  let dados = null;
+  try { dados = await fetchJson("/api/sdd/estado", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
+  if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
+  const falhas = dados.items.filter((i) => i.ancora !== "ok").length;
+  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta";
+  dados.items.forEach((item) => {
+    const linha = document.createElement("div"); linha.className = "cap-card";
+    const nome = document.createElement("strong"); nome.textContent = item.componente;
+    const resumo = document.createElement("div"); resumo.className = "note";
+    resumo.textContent = item.criterios + " critérios · âncora " + item.ancora + (item.manifesto ? "" : " · sem manifesto de aceite (critérios não medidos)");
+    const nota = document.createElement("div"); nota.className = "note";
+    const u = item.ultima; nota.textContent = u ? "Última execução: " + (u.ok ? "OK" : "FALHOU") + " (" + u.acao + ")" : "Sem execução nesta sessão: não medido.";
+    const acoes = document.createElement("div"); acoes.style.display = "flex"; acoes.style.gap = "8px";
+    [["ancora", "Conferir âncora"], ["criterios", "Rodar critérios"]].forEach(([acao, rotulo]) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = rotulo;
+      let armado = false;
+      b.addEventListener("click", async () => {
+        if (!armado) { armado = true; b.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
+        b.disabled = true; await executarSdd(acao, item.componente, nota); b.disabled = false; armado = false; b.textContent = rotulo;
+      });
+      acoes.append(b);
+    });
+    linha.append(nome, resumo, nota, acoes); lista.append(linha);
+  });
+}
 async function carregarQualidade() {
   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
   if (!kpis || !lista) return;
