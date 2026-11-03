@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Evidence Ledger offline: append, verify and public export."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, hashlib, json, fcntl, os
 from pathlib import Path
 
 KINDS = {"observation", "decision", "proposal", "approval", "execution", "verification", "drift", "correction"}
@@ -23,19 +23,43 @@ def validate(event):
     if event["classification"] == "secret":
         raise ValueError("secret não entra no ledger")
 
+class LedgerCorruptError(ValueError):
+    """The ledger contains an invalid record and must not be repaired implicitly."""
+
+
+def _records(handle):
+    handle.seek(0)
+    records = []
+    for n, line in enumerate(handle, 1):
+        if not line.strip():
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            suffix = " (linha final possivelmente truncada)" if not line.endswith("\n") else ""
+            raise LedgerCorruptError(f"JSON inválido na linha {n}{suffix}") from exc
+    return records
+
+
 def read(path):
     if not path.exists(): return []
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    with path.open("r", encoding="utf-8") as handle:
+        return _records(handle)
 
 def append(path, event):
     validate(event)
-    old = read(path)
-    event = dict(event)
-    event["prev_hash"] = old[-1]["event_hash"] if old else None
-    event["event_hash"] = digest(event)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+    with path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        old = _records(handle)
+        event = dict(event)
+        event["prev_hash"] = old[-1]["event_hash"] if old else None
+        event["event_hash"] = digest(event)
+        handle.seek(0, os.SEEK_END)
+        handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 def verify(path):
     previous = None

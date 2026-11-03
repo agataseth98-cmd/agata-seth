@@ -11,11 +11,13 @@ ROLES = {
 
 def prepare(spec: Path, out: Path):
     text = spec.read_text(encoding="utf-8")
+    if out.exists() and any(out.iterdir()):
+        raise FileExistsError(f"pacote já existe; recusando sobrescrever: {out}")
     out.mkdir(parents=True, exist_ok=True)
     (out / "README.md").write_text("# Review Mesh\n\nPacotes independentes; nenhum revisor recebe a conversa original.\n", encoding="utf-8")
     for role, question in ROLES.items():
         d = out / role; d.mkdir(exist_ok=True)
-        (d / "packet.md").write_text(f"# Revisão: {role}\n\n## Pergunta\n{question}\n\n## Spec\n\n{text}\n\n## Relatório\n\nPreencha com achados, evidência, severidade e recomendação.\n", encoding="utf-8")
+        (d / "packet.md").write_text(f"# Revisão: {role}\n\n## Pergunta\n{question}\n\n## Spec\n\n{text}\n\n## Relatório\n\nEscreva os achados em `report.md`, com evidência, severidade e recomendação.\n", encoding="utf-8")
     (out / "manifest.json").write_text(json.dumps({"spec": str(spec), "roles": sorted(ROLES)}, indent=2) + "\n", encoding="utf-8")
 
 def consolidate(reviews: Path, output: Path):

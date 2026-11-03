@@ -12,6 +12,12 @@ from datetime import datetime, timezone
 
 IGNORED = {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache", ".pytest_cache"}
 TEXT_EXT = {".md", ".txt", ".py", ".js", ".ts", ".tsx", ".jsx", ".json", ".yaml", ".yml", ".toml", ".sh", ".html", ".css"}
+SECRET_NAMES = {".env", ".env.local", ".env.production", ".env.development", "id_rsa", "id_dsa", "id_ecdsa", "authorized_keys"}
+
+
+def sensitive(path: Path) -> bool:
+    name = path.name.lower()
+    return name in SECRET_NAMES or name.endswith((".pem", ".key")) or name.startswith(".env.")
 
 
 def files(root: Path):
@@ -42,9 +48,17 @@ def build(root: Path, out: Path, goal: str) -> None:
     root = root.resolve()
     out.mkdir(parents=True, exist_ok=True)
     records = []
+    omitted = []
     headings = []
     for path in files(root):
         rel = path.relative_to(root).as_posix()
+        if sensitive(path):
+            omitted.append({"path": rel, "reason": "sensitive-name"})
+            continue
+        resolved = path.resolve(strict=False)
+        if path.is_symlink() and root not in resolved.parents:
+            omitted.append({"path": rel, "reason": "symlink-outside-root"})
+            continue
         content = read_head(path)
         records.append({"path": rel, "bytes": path.stat().st_size, "sha256": sha256(path)})
         for line in content.splitlines():
@@ -83,7 +97,7 @@ def build(root: Path, out: Path, goal: str) -> None:
     (reviews / "README.md").write_text("# Reviews\n\nRevisores independentes devem receber somente a spec e o material mínimo da tarefa.\n", encoding="utf-8")
     (out / "decision.md").write_text("# Decisão\n\nAguardando decisão humana.\n", encoding="utf-8")
     (out / "drift-report.md").write_text("# Drift report\n\nNão há implementação aprovada para comparar nesta fase.\n", encoding="utf-8")
-    (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (out / "provenance.json").write_text(json.dumps({"generated_at": generated, "root": str(root), "goal": goal, "files": records, "omitted": omitted}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def record_bootstrap(ledger: Path, root: Path, out: Path, goal: str) -> None:
