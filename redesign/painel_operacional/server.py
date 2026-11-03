@@ -96,6 +96,7 @@ _ASSETS = {
     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+    "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
@@ -896,7 +897,7 @@ ABRIR_PROVEDORES = {
     "grok": "https://grok.com/",
     "qwen": "https://qwen.ai/",
     "mistral": "https://chat.mistral.ai/",
-    "kimi": "https://www.kimi.com/",
+    "kimi": "https://www.kimi.ai/",
     "librechat": "http://127.0.0.1:3080/",
     "omniroute": "http://127.0.0.1:20128/",
 }

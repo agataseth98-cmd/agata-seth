@@ -12,7 +12,7 @@ PROVIDERS = (
     {"id": "grok", "name": "Grok", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://grok.com/"},
     {"id": "qwen", "name": "Qwen", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://qwen.ai/"},
     {"id": "mistral", "name": "Le Chat / Mistral", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://chat.mistral.ai/"},
-    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.com/"},
+    {"id": "kimi", "name": "Kimi", "kind": "chat", "access_mode": "browser_tab_only", "adapter_state": "experimental", "site": "https://www.kimi.ai/"},
 )
 
 PROVIDER_BY_ID = {provider["id"]: provider for provider in PROVIDERS}
