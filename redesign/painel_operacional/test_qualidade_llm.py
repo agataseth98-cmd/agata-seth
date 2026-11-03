@@ -1,8 +1,11 @@
 import http.client
 import importlib.util
 import json
+import os
+import tempfile
 import threading
 import unittest
+import unittest.mock
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -26,6 +29,8 @@ class ScriptInline(HTMLParser):
 class QualidadeLlmTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.medicoes = tempfile.TemporaryDirectory()
+        cls.env = unittest.mock.patch.dict(os.environ, {"AGATA_MEDICOES_DIR": cls.medicoes.name}); cls.env.start()
         cls.old_port, cls.old_origin = panel.PORT, panel.ALLOWED_ORIGIN
         cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
         cls.server.daemon_threads = True
@@ -37,6 +42,7 @@ class QualidadeLlmTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.shutdown(); cls.server.server_close()
         panel.PORT, panel.ALLOWED_ORIGIN = cls.old_port, cls.old_origin
+        cls.env.stop(); cls.medicoes.cleanup()
 
     def get(self, path, headers=None):
         conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=5)

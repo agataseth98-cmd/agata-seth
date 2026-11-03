@@ -75,7 +75,7 @@ function showPage(name) {
   if (name === "grafo") carregarGrafo();
   if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
   if (name === "visao") carregarVisaoSistema();
-  if (name === "qualidade") carregarQualidade();
+  if (name === "qualidade") { carregarQualidade(); carregarMedicoes(); }
   if (name === "sdd") carregarSdd();
   if (name === "conselho") loadRelayCatalog();
 }
@@ -862,6 +862,38 @@ async function carregarSdd() {
     linha.append(nome, resumo, nota, acoes); lista.append(linha);
   });
 }
+let medicaoTimer = null;
+async function carregarMedicoes() {
+  const nota = byId("medir-nota"); const sel = byId("medir-modelo");
+  if (!nota || !sel) return;
+  let d = null;
+  try { d = await fetchJson("/api/medicoes/estado", {headers: {Accept: "application/json"}}); } catch (_) { d = null; }
+  if (!d) { nota.textContent = "Medições indisponíveis."; return; }
+  const atual = sel.value; sel.replaceChildren();
+  (d.modelos || []).forEach((m) => { const o = document.createElement("option"); o.value = m; o.textContent = m; sel.append(o); });
+  if (atual) sel.value = atual;
+  const j = d.job || {};
+  if (j.estado === "rodando") {
+    nota.textContent = "Rodando: " + j.acao + (j.modelo ? " em " + j.modelo : "") + "…";
+    if (!medicaoTimer) medicaoTimer = setInterval(carregarMedicoes, 4000);
+  } else {
+    if (medicaoTimer) { clearInterval(medicaoTimer); medicaoTimer = null; carregarQualidade(); }
+    if (j.estado === "ok" || j.estado === "falhou") nota.textContent = (j.estado === "ok" ? "Concluído" : "Falhou") + ": " + j.acao + (j.modelo ? " em " + j.modelo : "") + " (" + j.segundos + " s). " + (j.detalhe || "");
+  }
+}
+function ligarMedicao(botao, rotulo, pedido) {
+  let armado = false;
+  botao.addEventListener("click", async () => {
+    if (!armado) { armado = true; botao.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
+    armado = false; botao.textContent = rotulo; botao.disabled = true;
+    try {
+      await fetchJson("/api/medicoes/executar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(pedido())});
+    } catch (_) { byId("medir-nota").textContent = "Não foi possível iniciar (ocupado ou fora da lista)."; }
+    botao.disabled = false; carregarMedicoes();
+  });
+}
+ligarMedicao(byId("medir-recuperacao"), "Medir recuperação da busca", () => ({acao: "recuperacao"}));
+ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value}));
 async function carregarQualidade() {
   const kpis = byId("qualidade-kpis"); const lista = byId("qualidade-lista"); const titulo = byId("qualidade-titulo");
   if (!kpis || !lista) return;
