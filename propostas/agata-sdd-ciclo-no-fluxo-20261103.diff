@@ -1,0 +1,280 @@
+diff --git a/redesign/sdd_flow/README.md b/redesign/sdd_flow/README.md
+index 7b7266c6..9ef120d3 100644
+--- a/redesign/sdd_flow/README.md
++++ b/redesign/sdd_flow/README.md
+@@ -25,6 +25,15 @@ python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow
+ 
+ `cycle` roda gates de spec, âncora, critérios de aceite e drift por critério, e para no primeiro que falha. `anchor.py` ancora componente existente: a spec (`spec/spec.md` ou `SPEC.md`) lista o código que possui; arquivo-fonte sem dono ou citação de arquivo inexistente falha. O job `sdd` da CI repete isso.
+ 
++## Proposta e handoff
++
++```bash
++python3 redesign/sdd_flow/runner.py work/state.json proposal <nome> /caminho/worktree propostas/<nome>.diff --test redesign/sdd_flow/tests
++python3 redesign/sdd_flow/github_flow.py . <nome> --state work/state.json --create
++```
++
++`proposal` gera o `.diff` único contra a base, aplica num checkout limpo, confere espaços e roda os testes; só então grava o arquivo. `github_flow.py` recusa o handoff sem `--state` de um ciclo que passou por `cycle`.
++
+ ## Uma assinatura por implementação
+ 
+ Cada implementação coerente é uma proposta, com uma assinatura P-8 e uma aplicação. Brainstorm, spec, código, testes e CI vão juntos no mesmo `.diff`; não se abrem propostas pequenas em série.
+diff --git a/redesign/sdd_flow/github_flow.py b/redesign/sdd_flow/github_flow.py
+index 708315b0..cd0e65c5 100644
+--- a/redesign/sdd_flow/github_flow.py
++++ b/redesign/sdd_flow/github_flow.py
+@@ -23,15 +23,26 @@ def approval(repo: Path, name: str) -> Path:
+     return path
+ 
+ 
++def require_cycle(state: Path | None) -> None:
++    """The handoff only starts after the mechanical SDD cycle passed and was recorded."""
++    if state is None or not state.exists():
++        raise SystemExit("informe --state de um ciclo SDD já executado")
++    stages = {entry.get("stage") for entry in json.loads(state.read_text(encoding="utf-8")).get("history", [])}
++    if "cycle" not in stages:
++        raise SystemExit("ciclo SDD não registrado no state: rode `runner.py cycle` antes do handoff")
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("repo", type=Path)
+     ap.add_argument("name")
++    ap.add_argument("--state", type=Path, help="state.json do runner SDD (ciclo obrigatório)")
+     ap.add_argument("--pr", type=int)
+     ap.add_argument("--create", action="store_true")
+     ap.add_argument("--merge", action="store_true")
+     args = ap.parse_args()
+     repo = args.repo.resolve()
++    require_cycle(args.state)
+     approval(repo, args.name)
+     pr = args.pr
+     if args.create:
+diff --git a/redesign/sdd_flow/runner.py b/redesign/sdd_flow/runner.py
+index daf5ca95..352dea3c 100644
+--- a/redesign/sdd_flow/runner.py
++++ b/redesign/sdd_flow/runner.py
+@@ -10,7 +10,9 @@ import argparse
+ import json
+ import subprocess
+ import sys
++import hashlib
+ import shutil
++import tempfile
+ from datetime import datetime, timezone
+ from pathlib import Path
+ 
+@@ -80,12 +82,12 @@ def implementation(state: dict, worktree: Path) -> None:
+     record(state, "implementation", str(worktree.resolve()))
+ 
+ 
+-def verification(state: dict, tests: list[str], pytest_bin: str) -> None:
++def verification(state: dict, tests: list[str], pytest_bin: str, cwd: Path = ROOT) -> None:
+     executable = shutil.which(pytest_bin) if "/" not in pytest_bin else pytest_bin
+     if not executable:
+         raise SystemExit(f"pytest não encontrado: {pytest_bin}; informe --pytest-bin ou ajuste PATH")
+     for target in tests:
+-        subprocess.run([executable, "-q", target], cwd=ROOT, check=True)
++        subprocess.run([executable, "-q", target], cwd=cwd, check=True)
+     record(state, "verification", f"{executable}:" + ";".join(tests))
+ 
+ 
+@@ -148,6 +150,34 @@ def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
+     record(state, "cycle", "spec, âncora, aceite e drift por critério: OK")
+ 
+ 
++def git(cwd: Path, *args: str, stdin: str | None = None) -> str:
++    return subprocess.run(["git", *args], cwd=cwd, input=stdin, check=True, capture_output=True, text=True).stdout
++
++
++def proposal(state: dict, name: str, worktree: Path, base: str, out: Path, tests: list[str], pytest_bin: str) -> None:
++    """Build the single .diff of a batch and prove it applies and passes on a clean checkout of base."""
++    wt = worktree.resolve()
++    git(wt, "add", "-N", ".")
++    diff = git(wt, "diff", git(wt, "merge-base", base, "HEAD").strip())
++    if not diff.strip():
++        raise SystemExit("diff vazio: nada a propor")
++    clean = Path(tempfile.mkdtemp(prefix="sdd-clean-"))
++    try:
++        git(wt, "worktree", "add", "--detach", str(clean), base)
++        git(clean, "apply", "--check", stdin=diff)
++        git(clean, "apply", stdin=diff)
++        git(clean, "add", "-N", ".")
++        git(clean, "diff", "--check")
++        if tests:
++            verification(state, tests, pytest_bin, cwd=clean)
++    finally:
++        subprocess.run(["git", "worktree", "remove", "--force", str(clean)], cwd=wt, capture_output=True)
++        shutil.rmtree(clean, ignore_errors=True)
++    out.parent.mkdir(parents=True, exist_ok=True)
++    out.write_text(diff, encoding="utf-8")
++    record(state, "proposal", f"{name}:{hashlib.sha256(diff.encode()).hexdigest()[:12]}:{out.resolve()}")
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("state", type=Path)
+@@ -168,6 +198,8 @@ def main() -> int:
+     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
+     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
+     cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
++    pr = sub.add_parser("proposal"); pr.add_argument("name"); pr.add_argument("worktree", type=Path); pr.add_argument("out", type=Path)
++    pr.add_argument("--base", default="origin/main"); pr.add_argument("--test", nargs="*", default=[]); pr.add_argument("--pytest-bin", default="pytest")
+     sub.add_parser("status")
+     args = ap.parse_args()
+     state = load(args.state)
+@@ -186,6 +218,7 @@ def main() -> int:
+     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
+     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
+     elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
++    elif args.cmd == "proposal": proposal(state, args.name, args.worktree, args.base, args.out.resolve(), args.test, args.pytest_bin)
+     else: print(json.dumps(state, ensure_ascii=False, indent=2))
+     if args.cmd != "status":
+         save(args.state, state)
+diff --git a/redesign/sdd_flow/spec/acceptance.json b/redesign/sdd_flow/spec/acceptance.json
+index 631fb06e..4ab3ba93 100644
+--- a/redesign/sdd_flow/spec/acceptance.json
++++ b/redesign/sdd_flow/spec/acceptance.json
+@@ -43,5 +43,32 @@
+       "redesign/sdd_flow/tests/test_cycle.py::test_cycle_stops_at_first_failing_gate"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "proposta grava um diff único e não deixa worktree temporária",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_proposal.py::test_proposal_builds_one_diff_and_leaves_no_worktree"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "proposta com diff vazio ou erro de espaço é recusada sem gravar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_proposal.py::test_empty_diff_is_refused"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "handoff do GitHub exige ciclo registrado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_github_flow.py::test_handoff_requires_recorded_cycle"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/sdd_flow/spec/spec.md b/redesign/sdd_flow/spec/spec.md
+index ab902685..469f09d7 100644
+--- a/redesign/sdd_flow/spec/spec.md
++++ b/redesign/sdd_flow/spec/spec.md
+@@ -9,6 +9,8 @@
+ 
+ - `runner.py <state> cycle <root> <manifest> --scope <pasta>...` executa, nesta ordem: gates de spec, âncora, critérios de aceite e drift por critério; para no primeiro que falha.
+ - `anchor.py <repo> <pasta>...` falha se faltar spec, seção obrigatória, dono de arquivo-fonte ou se a spec citar arquivo inexistente.
++- `runner.py <state> proposal <nome> <worktree> <saida.diff> [--base origin/main] [--test alvo...]` gera o `.diff` único do lote e só o grava depois de aplicá-lo, conferi-lo (`git diff --check`) e testá-lo num checkout limpo da base; não assina, não abre PR.
++- `github_flow.py` só inicia o handoff com `--state` de um ciclo que registrou a etapa `cycle`.
+ - Nenhum comando decide pelo Humano: `DECISAO: aceita` só entra em `decision.md` junto da assinatura P-8 que aplica este arquivo.
+ 
+ ## Critérios de aceite
+@@ -18,6 +20,9 @@
+ - [ ] drift por critério falha quando falta evidência
+ - [ ] âncora recusa código sem dono na spec
+ - [ ] ciclo para no primeiro portão que falha
++- [ ] proposta grava um diff único e não deixa worktree temporária
++- [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
++- [ ] handoff do GitHub exige ciclo registrado
+ 
+ ## Desenho e alternativas
+ 
+@@ -25,7 +30,7 @@ Reaproveita as peças existentes (`spec_gate`, `acceptance_runner`, `criterion_d
+ 
+ ## Implementação e testes
+ 
+-`anchor.py` (novo), `cycle` em `runner.py`, testes em `tests/test_anchor.py` e `tests/test_cycle.py`, job `sdd` na CI. Os critérios acima estão ligados a testes em `acceptance.json`.
++`anchor.py`, `cycle` e `proposal` em `runner.py`, `require_cycle` em `github_flow.py`, testes em `tests/test_anchor.py`, `tests/test_cycle.py` e `tests/test_proposal.py`, job `sdd` na CI. Os critérios acima estão ligados a testes em `acceptance.json`.
+ 
+ ## Migração e reversão
+ 
+diff --git a/redesign/sdd_flow/tests/test_github_flow.py b/redesign/sdd_flow/tests/test_github_flow.py
+index 66d2ce6d..8f99f666 100644
+--- a/redesign/sdd_flow/tests/test_github_flow.py
++++ b/redesign/sdd_flow/tests/test_github_flow.py
+@@ -20,3 +20,22 @@ def test_approval_path_is_exact(tmp_path):
+     path = tmp_path / "propostas" / "APROVADO-demo"
+     path.parent.mkdir(); path.write_text("signed", encoding="utf-8")
+     assert flow.approval(tmp_path, "demo") == path
++
++
++def test_handoff_requires_recorded_cycle(tmp_path):
++    for state in (None, tmp_path / "ausente.json"):
++        try:
++            flow.require_cycle(state)
++        except SystemExit as exc:
++            assert "--state" in str(exc)
++        else:
++            raise AssertionError("handoff must require a state")
++    sem_ciclo = tmp_path / "s.json"; sem_ciclo.write_text('{"history": [{"stage": "decision"}]}', encoding="utf-8")
++    try:
++        flow.require_cycle(sem_ciclo)
++    except SystemExit as exc:
++        assert "ciclo SDD" in str(exc)
++    else:
++        raise AssertionError("handoff must require the cycle stage")
++    com_ciclo = tmp_path / "c.json"; com_ciclo.write_text('{"history": [{"stage": "cycle"}]}', encoding="utf-8")
++    flow.require_cycle(com_ciclo)
+diff --git a/redesign/sdd_flow/tests/test_proposal.py b/redesign/sdd_flow/tests/test_proposal.py
+new file mode 100644
+index 00000000..e8b95878
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_proposal.py
+@@ -0,0 +1,45 @@
++import json
++import os
++import subprocess
++import sys
++from pathlib import Path
++
++
++RUNNER = Path(__file__).parents[1] / "runner.py"
++ENV = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
++
++
++def git(cwd, *args):
++    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True, env=ENV).stdout
++
++
++def repo(tmp_path):
++    r = tmp_path / "repo"; r.mkdir(); git(r, "init", "-q", "-b", "main")
++    (r / "a.txt").write_text("a\n", encoding="utf-8"); git(r, "add", "."); git(r, "commit", "-qm", "base")
++    return r
++
++
++def proposal(state, wt, out, *extra):
++    return subprocess.run([sys.executable, str(RUNNER), str(state), "proposal", "demo", str(wt), str(out), "--base", "main", *extra], capture_output=True, text=True, env=ENV)
++
++
++def test_proposal_builds_one_diff_and_leaves_no_worktree(tmp_path):
++    r = repo(tmp_path); (r / "novo.txt").write_text("x\n", encoding="utf-8")
++    state = tmp_path / "state.json"; out = tmp_path / "demo.diff"
++    result = proposal(state, r, out)
++    assert result.returncode == 0, result.stderr
++    assert "novo.txt" in out.read_text(encoding="utf-8")
++    assert json.loads(state.read_text())["history"][-1]["stage"] == "proposal"
++    assert git(r, "worktree", "list").count("\n") == 1
++
++
++def test_empty_diff_is_refused(tmp_path):
++    r = repo(tmp_path); out = tmp_path / "demo.diff"
++    result = proposal(tmp_path / "state.json", r, out)
++    assert result.returncode != 0 and "diff vazio" in result.stderr and not out.exists()
++
++
++def test_whitespace_error_blocks_the_proposal(tmp_path):
++    r = repo(tmp_path); (r / "ruim.txt").write_text("linha com espaco  \n", encoding="utf-8")
++    out = tmp_path / "demo.diff"
++    assert proposal(tmp_path / "state.json", r, out).returncode != 0 and not out.exists()
