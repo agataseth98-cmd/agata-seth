@@ -908,6 +908,9 @@ _OBSIDIAN_ULTIMA = [0.0]
 OBSIDIAN_INTERVALO_S = 5.0
 # Rotas lidas pela extensão: não passam pela checagem de origem do navegador (usam o cabeçalho do executor).
 ROTAS_DA_EXTENSAO = {"/api/relay-council/focos", "/api/relay-council/tasks"}
+CONSELHEIROS = ("deepseek", "gemini", "zai", "chatgpt", "claude", "grok", "qwen", "mistral", "kimi")
+CONSELHO_REPETE_S = 20.0  # não reenfileira o mesmo conselheiro enquanto o inventário da extensão alcança
+_CONSELHO_ULTIMA: dict = {}
 ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
 
 
@@ -934,6 +937,21 @@ class Handler(BaseHTTPRequestHandler):
                 _OBSIDIAN_ULTIMA[0] = agora
             subprocess.Popen(list(ABRIR_OBSIDIAN), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
+        elif alvo == "conselho":
+            # Entrar na aba Conselho confere os nove conselheiros: só pede abertura dos que a extensão não vê.
+            abertos = set(_council_state().available_providers())
+            agora = time.monotonic()
+            with _FOCO_LOCK:
+                na_fila = {p["site"] for p in FOCOS_PENDENTES}
+                faltando = [c for c in CONSELHEIROS if c not in abertos]
+                for site in faltando:
+                    if site in na_fila or agora - _CONSELHO_ULTIMA.get(site, -CONSELHO_REPETE_S) < CONSELHO_REPETE_S:
+                        continue
+                    _CONSELHO_ULTIMA[site] = agora
+                    FOCOS_PENDENTES.append({"id": uuid.uuid4().hex, "site": site, "url": ABRIR_PROVEDORES[site], "janela": False})
+                del FOCOS_PENDENTES[:-FOCOS_MAX]
+            return self._send(202, "application/json; charset=utf-8",
+                              json.dumps({"ok": True, "alvo": alvo, "abertos": len(abertos), "faltando": faltando}).encode("utf-8"))
         elif alvo in ABRIR_PROVEDORES:
             # Foco pela extensão, no mesmo canal do Conselho: o pedido fica numa fila própria (não entra na fila de envios).
             with _FOCO_LOCK:

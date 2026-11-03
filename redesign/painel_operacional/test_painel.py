@@ -239,6 +239,31 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 429)
             self.assertEqual(popen.call_count, 1)
 
+    def test_abrir_conselho_pede_so_os_conselheiros_que_faltam(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
+        estado = SimpleNamespace(available_providers=lambda: ("deepseek", "gemini", "claude"))
+        panel.FOCOS_PENDENTES.clear()
+        panel._CONSELHO_ULTIMA.clear()
+        with mock.patch.object(panel, "_council_state", return_value=estado):
+            status, corpo = self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)[:2]
+            self.assertEqual(status, 202)
+            resposta = json.loads(corpo)
+            self.assertEqual(resposta["abertos"], 3)
+            self.assertEqual(sorted(resposta["faltando"]), sorted(set(panel.CONSELHEIROS) - {"deepseek", "gemini", "claude"}))
+            self.assertEqual({p["site"] for p in panel.FOCOS_PENDENTES}, set(resposta["faltando"]))
+            self.assertTrue(all(p["janela"] is False for p in panel.FOCOS_PENDENTES))
+            n = len(panel.FOCOS_PENDENTES)
+            self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)
+            self.assertEqual(len(panel.FOCOS_PENDENTES), n)  # repetir o clique não duplica
+        estado_cheio = SimpleNamespace(available_providers=lambda: panel.CONSELHEIROS)
+        panel.FOCOS_PENDENTES.clear()
+        panel._CONSELHO_ULTIMA.clear()
+        with mock.patch.object(panel, "_council_state", return_value=estado_cheio):
+            resposta = json.loads(self.request("POST", "/api/abrir", json.dumps({"alvo": "conselho"}), base)[1])
+            self.assertEqual(resposta["faltando"], [])
+            self.assertEqual(panel.FOCOS_PENDENTES, [])
+        panel.FOCOS_PENDENTES.clear()
+
     def test_busca_exige_origem_json_e_entrada_valida(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Content-Type": "application/json"}
         payload = json.dumps({"query": "painel", "mode": "texto"})
