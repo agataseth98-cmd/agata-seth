@@ -23,15 +23,26 @@ def approval(repo: Path, name: str) -> Path:
     return path
 
 
+def require_cycle(state: Path | None) -> None:
+    """The handoff only starts after the mechanical SDD cycle passed and was recorded."""
+    if state is None or not state.exists():
+        raise SystemExit("informe --state de um ciclo SDD já executado")
+    stages = {entry.get("stage") for entry in json.loads(state.read_text(encoding="utf-8")).get("history", [])}
+    if "cycle" not in stages:
+        raise SystemExit("ciclo SDD não registrado no state: rode `runner.py cycle` antes do handoff")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("repo", type=Path)
     ap.add_argument("name")
+    ap.add_argument("--state", type=Path, help="state.json do runner SDD (ciclo obrigatório)")
     ap.add_argument("--pr", type=int)
     ap.add_argument("--create", action="store_true")
     ap.add_argument("--merge", action="store_true")
     args = ap.parse_args()
     repo = args.repo.resolve()
+    require_cycle(args.state)
     approval(repo, args.name)
     pr = args.pr
     if args.create:

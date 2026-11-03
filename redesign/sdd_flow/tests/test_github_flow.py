@@ -20,3 +20,22 @@ def test_approval_path_is_exact(tmp_path):
     path = tmp_path / "propostas" / "APROVADO-demo"
     path.parent.mkdir(); path.write_text("signed", encoding="utf-8")
     assert flow.approval(tmp_path, "demo") == path
+
+
+def test_handoff_requires_recorded_cycle(tmp_path):
+    for state in (None, tmp_path / "ausente.json"):
+        try:
+            flow.require_cycle(state)
+        except SystemExit as exc:
+            assert "--state" in str(exc)
+        else:
+            raise AssertionError("handoff must require a state")
+    sem_ciclo = tmp_path / "s.json"; sem_ciclo.write_text('{"history": [{"stage": "decision"}]}', encoding="utf-8")
+    try:
+        flow.require_cycle(sem_ciclo)
+    except SystemExit as exc:
+        assert "ciclo SDD" in str(exc)
+    else:
+        raise AssertionError("handoff must require the cycle stage")
+    com_ciclo = tmp_path / "c.json"; com_ciclo.write_text('{"history": [{"stage": "cycle"}]}', encoding="utf-8")
+    flow.require_cycle(com_ciclo)

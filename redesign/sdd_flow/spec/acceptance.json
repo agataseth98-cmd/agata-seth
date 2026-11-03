@@ -43,5 +43,32 @@
       "redesign/sdd_flow/tests/test_cycle.py::test_cycle_stops_at_first_failing_gate"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "proposta grava um diff único e não deixa worktree temporária",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_proposal.py::test_proposal_builds_one_diff_and_leaves_no_worktree"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "proposta com diff vazio ou erro de espaço é recusada sem gravar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_proposal.py::test_empty_diff_is_refused"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "handoff do GitHub exige ciclo registrado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_github_flow.py::test_handoff_requires_recorded_cycle"
+    ],
+    "cwd": null
   }
 ]

@@ -10,7 +10,9 @@ import argparse
 import json
 import subprocess
 import sys
+import hashlib
 import shutil
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -80,12 +82,12 @@ def implementation(state: dict, worktree: Path) -> None:
     record(state, "implementation", str(worktree.resolve()))
 
 
-def verification(state: dict, tests: list[str], pytest_bin: str) -> None:
+def verification(state: dict, tests: list[str], pytest_bin: str, cwd: Path = ROOT) -> None:
     executable = shutil.which(pytest_bin) if "/" not in pytest_bin else pytest_bin
     if not executable:
         raise SystemExit(f"pytest não encontrado: {pytest_bin}; informe --pytest-bin ou ajuste PATH")
     for target in tests:
-        subprocess.run([executable, "-q", target], cwd=ROOT, check=True)
+        subprocess.run([executable, "-q", target], cwd=cwd, check=True)
     record(state, "verification", f"{executable}:" + ";".join(tests))
 
 
@@ -148,6 +150,34 @@ def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
     record(state, "cycle", "spec, âncora, aceite e drift por critério: OK")
 
 
+def git(cwd: Path, *args: str, stdin: str | None = None) -> str:
+    return subprocess.run(["git", *args], cwd=cwd, input=stdin, check=True, capture_output=True, text=True).stdout
+
+
+def proposal(state: dict, name: str, worktree: Path, base: str, out: Path, tests: list[str], pytest_bin: str) -> None:
+    """Build the single .diff of a batch and prove it applies and passes on a clean checkout of base."""
+    wt = worktree.resolve()
+    git(wt, "add", "-N", ".")
+    diff = git(wt, "diff", git(wt, "merge-base", base, "HEAD").strip())
+    if not diff.strip():
+        raise SystemExit("diff vazio: nada a propor")
+    clean = Path(tempfile.mkdtemp(prefix="sdd-clean-"))
+    try:
+        git(wt, "worktree", "add", "--detach", str(clean), base)
+        git(clean, "apply", "--check", stdin=diff)
+        git(clean, "apply", stdin=diff)
+        git(clean, "add", "-N", ".")
+        git(clean, "diff", "--check")
+        if tests:
+            verification(state, tests, pytest_bin, cwd=clean)
+    finally:
+        subprocess.run(["git", "worktree", "remove", "--force", str(clean)], cwd=wt, capture_output=True)
+        shutil.rmtree(clean, ignore_errors=True)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(diff, encoding="utf-8")
+    record(state, "proposal", f"{name}:{hashlib.sha256(diff.encode()).hexdigest()[:12]}:{out.resolve()}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("state", type=Path)
@@ -168,6 +198,8 @@ def main() -> int:
     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
     cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
+    pr = sub.add_parser("proposal"); pr.add_argument("name"); pr.add_argument("worktree", type=Path); pr.add_argument("out", type=Path)
+    pr.add_argument("--base", default="origin/main"); pr.add_argument("--test", nargs="*", default=[]); pr.add_argument("--pytest-bin", default="pytest")
     sub.add_parser("status")
     args = ap.parse_args()
     state = load(args.state)
@@ -186,6 +218,7 @@ def main() -> int:
     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
     elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
+    elif args.cmd == "proposal": proposal(state, args.name, args.worktree, args.base, args.out.resolve(), args.test, args.pytest_bin)
     else: print(json.dumps(state, ensure_ascii=False, indent=2))
     if args.cmd != "status":
         save(args.state, state)
