@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
-index aee8defa..eac39fba 100644
+index aee8defa..f2a7a109 100644
 --- a/.github/workflows/sdd.yml
 +++ b/.github/workflows/sdd.yml
 @@ -14,6 +14,7 @@ on:
@@ -10,7 +10,7 @@ index aee8defa..eac39fba 100644
        - ".agents/skills/**"
        - "scripts/medir_*.py"
        - ".github/workflows/sdd.yml"
-@@ -30,14 +31,14 @@ jobs:
+@@ -30,7 +31,7 @@ jobs:
          run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
  
        - name: Testes dos componentes SDD
@@ -19,14 +19,6 @@ index aee8defa..eac39fba 100644
  
        - name: Ciclo SDD sobre o próprio sdd_flow
          run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
- 
-       - name: Âncora e critérios dos componentes existentes
-         run: |
--          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional
-+          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/obsidian
-           for c in project_kit review_mesh evidence_ledger painel_operacional; do
-             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
-             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
 diff --git a/redesign/obsidian/ro_proxy.py b/redesign/obsidian/ro_proxy.py
 index d17a3b6e..1c5326d1 100644
 --- a/redesign/obsidian/ro_proxy.py
