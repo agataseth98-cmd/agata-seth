@@ -13,6 +13,7 @@
 - `GET /api/qualidade-llm` devolve indicadores medidos; item sem medição vem como `unknown` e `não medido`.
 - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
 - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+- A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
 - Proposta, assinatura, PR e merge não são executados pelo painel.
 
 ## Critérios de aceite
@@ -23,6 +24,7 @@
 - [ ] o indicador sem medição sai como não medido
 - [ ] a execução do SDD recusa ação e componente fora da lista
 - [ ] a execução do SDD recusa comando fora do padrão pytest
+- [ ] o menu agrupa as páginas em submenus sem perder nenhuma
 
 ## Desenho e alternativas
 
@@ -60,6 +62,7 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
 - `test_painel.py`
 - `test_qualidade_llm.py`
 - `test_sdd_painel.py`
+- `test_menu_painel.py`
 - `test_relay_catalog.py`
 - `test_conselho_rede.py`
 - `conselho-rede/`

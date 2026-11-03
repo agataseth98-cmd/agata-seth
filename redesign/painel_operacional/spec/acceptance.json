@@ -52,5 +52,14 @@
       "redesign/painel_operacional/test_sdd_painel.py::SddPainelTests::test_criterios_recusam_comando_fora_do_padrao"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o menu agrupa as páginas em submenus sem perder nenhuma",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_menu_painel.py::MenuTests::test_nenhuma_pagina_se_perdeu_no_agrupamento"
+    ],
+    "cwd": null
   }
 ]

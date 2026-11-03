@@ -1,7 +1,7 @@
 "use strict";
 
 const byId = (id) => document.getElementById(id);
-const nav = [...document.querySelectorAll(".nav button")];
+const nav = [...document.querySelectorAll(".nav button[data-page]")];
 const pages = [...document.querySelectorAll(".page")];
 const shell = document.querySelector(".shell");
 const sidebarToggle = byId("sidebar-toggle");
@@ -47,6 +47,13 @@ function filterSearch(value) {
   const empty = byId("no-results");
   if (empty) empty.classList.toggle("show", active.id === "page-capacidades" && cards.length > 0 && visible === 0);
 }
+function alternarGrupo(grupo, abrir) {
+  const toggle = grupo.querySelector(".nav-group-toggle"); const sub = grupo.querySelector(".nav-sub");
+  if (!toggle || !sub) return;
+  const aberto = abrir === undefined ? toggle.getAttribute("aria-expanded") !== "true" : abrir;
+  toggle.setAttribute("aria-expanded", String(aberto)); sub.hidden = !aberto;
+}
+document.querySelectorAll(".nav-group-toggle").forEach((toggle) => toggle.addEventListener("click", () => alternarGrupo(toggle.closest(".nav-group"))));
 function showPage(name) {
   const page = byId("page-" + name);
   if (!page) return;
@@ -54,6 +61,11 @@ function showPage(name) {
   nav.forEach((button) => {
     if (button.dataset.page === name) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
+  });
+  document.querySelectorAll(".nav-group").forEach((grupo) => {
+    const atual = !!grupo.querySelector('button[data-page][aria-current="page"]');
+    grupo.classList.toggle("tem-pagina-atual", atual);
+    if (atual) alternarGrupo(grupo, true);
   });
   byId("crumb").textContent = "Agata / " + (page.dataset.title || "Panorama");
   search.value = "";

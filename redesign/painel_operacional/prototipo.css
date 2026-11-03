@@ -539,3 +539,19 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .modelos-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.modelos-links .abrir-titulo{width:100%}.modelos-links .btn{min-height:0;padding:6px 10px;font-size:12px}
 .operator-console-frame { padding: 0; overflow: hidden; }
 .operator-console-frame iframe { display: block; width: 100%; min-height: 78vh; border: 0; background: #0a1110; }
+
+/* Submenus da navegação (03/11/2026): grupos recolhíveis; o grupo da página aberta fica expandido. */
+.nav-group{display:grid;gap:2px}
+.nav-group-toggle{border:0;background:transparent;color:#96aaa5;text-align:left;padding:10px 11px;border-radius:9px;display:flex;align-items:center;gap:12px;cursor:pointer;font:inherit;transition:.18s}
+.nav-group-toggle:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-group-toggle svg{width:17px;height:17px;opacity:.9;flex:none}
+.nav-caret{margin-left:auto;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(-45deg);transition:.18s}
+.nav-group-toggle[aria-expanded="true"] .nav-caret{transform:rotate(45deg)}
+.nav-group.tem-pagina-atual .nav-group-toggle{color:#fff}
+.nav-sub{display:grid;gap:2px;margin:0 0 4px 14px;padding-left:8px;border-left:1px solid rgba(255,255,255,.12)}
+.nav-sub[hidden]{display:none}
+.nav-sub button{padding:8px 10px;font-size:13px}
+.sidebar-collapsed .nav-group-toggle{justify-content:center}
+.sidebar-collapsed .nav-group-toggle .nav-caret{display:none}
+.sidebar-collapsed .nav-sub{display:grid;margin-left:0;padding-left:0;border-left:0}
+@media(max-width:690px){.nav-group{display:flex;gap:5px}.nav-group-toggle{display:none}.nav-sub,.nav-sub[hidden]{display:flex;gap:5px;margin:0;padding:0;border:0}.nav-sub button{font-size:12px;padding:8px 9px}}
