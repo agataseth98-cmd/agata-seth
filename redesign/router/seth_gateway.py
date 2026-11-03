@@ -1750,6 +1750,8 @@ class _Dummy(BaseHTTPRequestHandler):
 
 
 def _selftest() -> int:
+    # offline por desenho: o ls-remote do estado nao pode estourar o timeout dos casos (flaky na CI)
+    os.environ.setdefault("LS_REMOTE_TIMEOUT_ECO", "1")
     global UPSTREAM, MODELO_REAL_PATH
     up_port, gw_port = _porta_livre(), _porta_livre()
     UPSTREAM = f"http://127.0.0.1:{up_port}"
