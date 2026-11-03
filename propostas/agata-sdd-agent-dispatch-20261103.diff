@@ -1,0 +1,53 @@
+diff --git a/redesign/sdd_flow/agent_dispatch.py b/redesign/sdd_flow/agent_dispatch.py
+new file mode 100644
+index 00000000..c6abda7c
+--- /dev/null
++++ b/redesign/sdd_flow/agent_dispatch.py
+@@ -0,0 +1,27 @@
++#!/usr/bin/env python3
++"""Dispatch isolated review packets to explicit agent commands."""
++from __future__ import annotations
++
++import argparse
++import json
++import subprocess
++from pathlib import Path
++
++
++ROLES = ("simplificador", "operador", "implementador")
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(); ap.add_argument("packets", type=Path); ap.add_argument("commands", type=Path)
++    args = ap.parse_args(); commands = json.loads(args.commands.read_text(encoding="utf-8"))
++    for role in ROLES:
++        command = commands.get(role)
++        if not command: raise SystemExit(f"comando ausente: {role}")
++        packet = args.packets / role
++        packet.mkdir(parents=True, exist_ok=True)
++        subprocess.run(command, cwd=packet, check=True)
++        if not (packet / "report.md").exists(): raise SystemExit(f"relatório ausente: {role}")
++    return 0
++
++
++if __name__ == "__main__": raise SystemExit(main())
+diff --git a/redesign/sdd_flow/tests/test_agent_dispatch.py b/redesign/sdd_flow/tests/test_agent_dispatch.py
+new file mode 100644
+index 00000000..8c8576bc
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_agent_dispatch.py
+@@ -0,0 +1,14 @@
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++
++SCRIPT = Path(__file__).parents[1] / "agent_dispatch.py"
++
++
++def test_dispatch_runs_each_role_in_its_own_directory(tmp_path):
++    packets = tmp_path / "packets"; commands = tmp_path / "commands"
++    commands.write_text(json.dumps({role: [sys.executable, "-c", "open('report.md','w').write('## Contexto do revisor\\n\\n## Veredito\\npass\\n\\n## Achados\\nnone')"] for role in ("simplificador", "operador", "implementador")}), encoding="utf-8")
++    subprocess.run([sys.executable, str(SCRIPT), str(packets), str(commands)], check=True)
++    assert all((packets / role / "report.md").exists() for role in ("simplificador", "operador", "implementador"))
