@@ -14,6 +14,7 @@ lendo prosa espalhada.
 | arquivo | o quê |
 |---|---|
 | `~/.config/agata/.env` | chaves de API dos provedores de modelo (`GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `ZHIPU_API_KEY`, `CEREBRAS_API_KEY`, …). Era `~/.hermes/.env` até a remoção do Hermes (03/09/2026, MEMÓRIAS (312)). |
+| `~/.config/agata/conexoes/<id>.chave` | chaves de API das **conexões da nova versão** (Claude, ChatGPT e provedores que o usuário acrescentar), gravadas só pelo painel (Nova versão → Conexões de modelos), pasta `700`, arquivo `600`. O painel mostra só se existe. Alternativa: `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` no ambiente. Ver `redesign/conexoes/README.md` |
 | `~/.config/agata/restic.pass` | senha do repo restic no HD `AgataBkup01` |
 | `~/.config/agata/obsidian.token` | bearer do plugin `obsidian-local-rest-api` (`:27124`) |
 | `~/.config/agata/google-project/` | credencial OAuth da conta do projeto (`agata.seth98@gmail.com`, escopo `drive.file`) para o índice → Drive/NotebookLM |

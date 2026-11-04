@@ -11,8 +11,9 @@ O que lê (GET e comandos de leitura, nunca POST, nunca reinício, nunca geraç�
 - disco, memória, carga e temperatura (`/proc`, `/sys`, `shutil.disk_usage`).
 
 Para cada modelo ou rota, separa os campos que o inventário pede (§5): instalado, anunciado,
-elegível, testado, em fila e pronto. "Testado" e "elegível" só vêm de medição própria
-(lote 2) — aqui ficam `null` (não medido), nunca deduzidos do catálogo.
+elegível, testado, em fila e pronto. "Testado" e "pronto" só vêm do último teste funcional
+(`redesign/conexoes/testar_rotas.py`); sem teste ficam `null` (não medido), nunca deduzidos
+do catálogo. "Elegível" (política) continua `null` até haver regra declarada.
 
 Grava `<dados>/corpo/fotografias.jsonl` (append) e devolve o dicionário.
 """
@@ -132,7 +133,27 @@ def modelos(get=None) -> dict:
             if nome:
                 linha(nome)["em_fila"].append(c.get("name"))
     erros = {k: v for k, v in (("ollama", e1), ("catalogo", e2), ("combos", e3)) if v}
+    # "testado"/"pronto" só vêm do último teste funcional (redesign/conexoes/testar_rotas.py)
+    teste = ultimo_teste()
+    if teste:
+        por_rota: dict[str, list] = {}
+        for r in teste.get("resultados", []):
+            por_rota.setdefault(r["rota"], []).append(r)
+        for rota, rs in por_rota.items():
+            passou = sum(bool(r.get("passou")) for r in rs)
+            ln = linha(rota)
+            ln["testado"] = {"quando": teste.get("quando"), "run_id": teste.get("run_id"), "passou": f"{passou}/{len(rs)}"}
+            ln["pronto"] = passou == len(rs) and not teste.get("obsoleto")
     return {"tabela": tab, "erros": erros}
+
+
+def ultimo_teste() -> dict | None:
+    pasta = eventos.dados() / "redundancia" / "testes"
+    arqs = sorted(pasta.glob("t-*.json")) if pasta.exists() else []
+    try:
+        return json.loads(arqs[-1].read_text(encoding="utf-8")) if arqs else None
+    except (OSError, ValueError):
+        return None
 
 
 def fotografar(gravar: bool = True, **fontes) -> dict:

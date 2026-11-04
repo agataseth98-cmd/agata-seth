@@ -98,5 +98,14 @@
       "redesign/painel_operacional/test_nova_versao_painel.py"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a chave gravada pelo painel não volta na resposta nem no estado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_chave_gravada_nao_volta_na_resposta_nem_no_estado"
+    ],
+    "cwd": null
   }
 ]

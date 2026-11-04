@@ -1,0 +1,47 @@
+[
+  {
+    "criterion": "a chave vai para o cofre 0600 e nunca volta em estado, resposta ou ledger",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::CofreTests::test_chave_vai_para_o_cofre_0600_e_nunca_volta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "orçamento, privacidade e custo barram a chamada antes de sair",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_portas_orcamento_privacidade_e_custo_antes_de_sair"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o programa da assinatura roda em pasta vazia, sem ferramentas e sem sessão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_cli_roda_em_pasta_vazia_sem_ferramentas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "provedor novo pelo painel é só API com https e sem id repetido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_provedor_novo_so_api_https"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o teste de rotas é por capacidade, descreve a independência e não guarda a resposta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::RedundanciaTests::test_testa_por_capacidade_sem_guardar_resposta_e_com_independencia"
+    ],
+    "cwd": null
+  }
+]
