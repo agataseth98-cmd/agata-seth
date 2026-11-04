@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
-index aee8defa..f2a7a109 100644
+index b924caac..8765e438 100644
 --- a/.github/workflows/sdd.yml
 +++ b/.github/workflows/sdd.yml
 @@ -14,6 +14,7 @@ on:
@@ -9,8 +9,8 @@ index aee8defa..f2a7a109 100644
 +      - "redesign/obsidian/**"
        - ".agents/skills/**"
        - "scripts/medir_*.py"
-       - ".github/workflows/sdd.yml"
-@@ -30,7 +31,7 @@ jobs:
+       - "scripts/agata_falar.py"
+@@ -31,7 +32,7 @@ jobs:
          run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
  
        - name: Testes dos componentes SDD
