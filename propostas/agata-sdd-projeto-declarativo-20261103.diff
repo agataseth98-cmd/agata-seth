@@ -1,0 +1,778 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index 8765e438..e3ed7dcd 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -58,3 +58,6 @@ jobs:
+ 
+       - name: Voz do sistema (selftest offline)
+         run: python3 -I scripts/agata_falar.py --selftest
++
++      - name: Projeto SDD declarativo (selftest offline)
++        run: python3 -I redesign/sdd_flow/project.py --selftest
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 0f17b83f..8866bda1 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -841,7 +841,7 @@ async function carregarSdd() {
+   try { dados = await fetchJson("/api/sdd/estado", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
+   if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
+   const falhas = dados.items.filter((i) => i.ancora !== "ok").length;
+-  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta";
++  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta · " + (dados.externos || []).length + " projetos externos";
+   dados.items.forEach((item) => {
+     const linha = document.createElement("div"); linha.className = "cap-card";
+     const nome = document.createElement("strong"); nome.textContent = item.componente;
+@@ -861,6 +861,25 @@ async function carregarSdd() {
+     });
+     linha.append(nome, resumo, nota, acoes); lista.append(linha);
+   });
++  (dados.externos || []).forEach((ext) => {
++    const linha = document.createElement("div"); linha.className = "cap-card";
++    const nome = document.createElement("strong"); nome.textContent = ext.nome + " · projeto externo";
++    const resumo = document.createElement("div"); resumo.className = "note";
++    resumo.textContent = ext.valido ? ext.raiz : "descritor inválido: " + (ext.erro || "");
++    const nota = document.createElement("div"); nota.className = "note";
++    nota.textContent = ext.ultimo ? "Última execução: " + (ext.ultimo.ok ? "OK" : "FALHOU") + " (" + ext.ultimo.run_id + ")" : "Sem execução: não medido.";
++    linha.append(nome, resumo, nota);
++    if (ext.valido) {
++      const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = "Rodar ciclo do projeto";
++      let armado = false;
++      b.addEventListener("click", async () => {
++        if (!armado) { armado = true; b.textContent = "Confirmar: rodar ciclo do projeto"; return; }
++        b.disabled = true; await executarSdd("projeto", ext.nome, nota); b.disabled = false; armado = false; b.textContent = "Rodar ciclo do projeto";
++      });
++      linha.append(b);
++    }
++    lista.append(linha);
++  });
+ }
+ let medicaoTimer = null;
+ async function carregarMedicoes() {
+diff --git a/redesign/painel_operacional/sdd_painel.py b/redesign/painel_operacional/sdd_painel.py
+index 2c6ba47b..a7908956 100644
+--- a/redesign/painel_operacional/sdd_painel.py
++++ b/redesign/painel_operacional/sdd_painel.py
+@@ -19,7 +19,8 @@ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ CACHE = Path(os.environ.get("AGATA_PAINEL_CACHE", Path.home() / ".cache" / "agata" / "painel" / "sdd"))
+-ACOES = ("ancora", "criterios")
++ACOES = ("ancora", "criterios", "projeto")
++DESCRITORES = "config/sdd"
+ NOME = re.compile(r"[a-z][a-z0-9_]{0,40}")
+ TIMEOUT_S = 300
+ 
+@@ -67,6 +68,38 @@ def _ultima(nome: str) -> dict | None:
+         return None
+ 
+ 
++def _project():
++    spec = importlib.util.spec_from_file_location("sdd_project", ROOT / "redesign" / "sdd_flow" / "project.py")
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod
++
++
++def externos(raiz: Path = ROOT) -> dict:
++    """{nome: {"arquivo": Path, "descritor": dict | None, "erro": str | None}} dos descritores em config/sdd/*.json."""
++    pasta = raiz / DESCRITORES
++    saida = {}
++    if not pasta.is_dir():
++        return saida
++    projeto = _project()
++    for arq in sorted(pasta.glob("*.json")):
++        try:
++            d = projeto.carregar(arq)
++            saida[d["nome"]] = {"arquivo": arq, "descritor": d, "erro": None}
++        except projeto.DescritorInvalido as exc:
++            saida[arq.stem] = {"arquivo": arq, "descritor": None, "erro": str(exc)[:160]}
++    return saida
++
++
++def _ultimo_externo(d: dict) -> dict | None:
++    base = Path(d["saida"]) if d.get("saida") else Path.home() / ".cache" / "agata" / "sdd" / d["nome"]
++    try:
++        u = json.loads((base / "ultimo.json").read_text(encoding="utf-8"))
++        return {"run_id": u.get("run_id"), "ok": u.get("ok")}
++    except (OSError, ValueError):
++        return None
++
++
+ def estado(raiz: Path = ROOT) -> dict:
+     anchor = _anchor()
+     itens = []
+@@ -76,20 +109,40 @@ def estado(raiz: Path = ROOT) -> dict:
+         itens.append({"componente": nome, "spec": spec.relative_to(raiz).as_posix(), "criterios": len(_criterios(spec)),
+                       "manifesto": _manifesto(raiz, nome).exists(), "ancora": "ok" if not lacunas else "falha",
+                       "lacunas": lacunas[:5], "ultima": _ultima(nome)})
+-    return {"schema_version": 1, "acoes": list(ACOES), "items": itens}
++    ext = [{"nome": n, "raiz": e["descritor"]["raiz"] if e["descritor"] else None, "valido": e["descritor"] is not None, "erro": e["erro"],
++            "ultimo": _ultimo_externo(e["descritor"]) if e["descritor"] else None} for n, e in externos(raiz).items()]
++    return {"schema_version": 1, "acoes": list(ACOES), "items": itens, "externos": ext}
+ 
+ 
+-def _rodar(args: list[str], cwd: Path) -> tuple[int, str]:
++def _rodar(args: list[str], cwd: Path, limite: int = TIMEOUT_S) -> tuple[int, str]:
+     try:
+-        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=TIMEOUT_S)
++        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=limite)
+         return r.returncode, (r.stdout + r.stderr)[-600:]
+     except subprocess.TimeoutExpired:
+-        return 124, f"tempo esgotado ({TIMEOUT_S} s)"
++        return 124, f"tempo esgotado ({limite} s)"
+     except OSError as exc:
+         return 127, str(exc)[:200]
+ 
+ 
++def _executar_externo(nome, raiz: Path) -> dict:
++    """Roda o ciclo de um projeto externo registrado em config/sdd/. O descritor vem do repositório (assinado);
++    o manifesto de critérios, do projeto, só passa se for `pytest` com alvos relativos (ver sdd_flow/project.py)."""
++    permitidos = {n: e for n, e in externos(raiz).items() if e["descritor"] is not None}
++    if not isinstance(nome, str) or nome not in permitidos:
++        raise ValueError("projeto fora de config/sdd")
++    escolhido = permitidos[nome]
++    d = escolhido["descritor"]
++    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
++    estado_arq = CACHE / f"projeto-{d['nome']}.state.json"
++    rc, saida = _rodar([sys.executable, str(raiz / "redesign" / "sdd_flow" / "runner.py"), str(estado_arq), "project", str(escolhido["arquivo"])], raiz, min(d["limite_s"] * 10 + 120, 4000))
++    passos = [{"passo": "ciclo do projeto", "ok": rc == 0, "detalhe": saida.strip().replace("\n", " | ")[-300:] or ("ok" if rc == 0 else f"saída {rc}")}]
++    ultimo = _ultimo_externo(d)
++    return {"acao": "projeto", "componente": d["nome"], "ok": rc == 0, "passos": passos, "criterios": [], "ultimo": ultimo}
++
++
+ def executar(acao: str, nome: str, raiz: Path = ROOT) -> dict:
++    if acao == "projeto":
++        return _executar_externo(nome, raiz)
+     permitidos = {c: c for c in componentes(raiz)}
+     if acao not in ACOES or not isinstance(nome, str) or nome not in permitidos:
+         raise ValueError("ação ou componente fora da lista")
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index b2d14fb8..a1d3d8d7 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -80,5 +80,14 @@
+       "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_indicador_de_recuperacao_usa_a_medicao_salva"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index aa9f4f27..265e4ef8 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -15,6 +15,7 @@
+ - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+ - `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha` ou `varias`, de lista fechada), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+ - A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
++- A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+ ## Critérios de aceite
+@@ -26,6 +27,7 @@
+ - [ ] a execução do SDD recusa ação e componente fora da lista
+ - [ ] a execução do SDD recusa comando fora do padrão pytest
+ - [ ] o menu agrupa as páginas em submenus sem perder nenhuma
++- [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
+ - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
+ - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
+ 
+diff --git a/redesign/painel_operacional/test_sdd_painel.py b/redesign/painel_operacional/test_sdd_painel.py
+index 38c113dc..59bedc13 100644
+--- a/redesign/painel_operacional/test_sdd_painel.py
++++ b/redesign/painel_operacional/test_sdd_painel.py
+@@ -103,5 +103,42 @@ class SddPainelTests(unittest.TestCase):
+         self.assertIn("/api/sdd/estado", js); self.assertIn("/api/sdd/executar", js)
+ 
+ 
++def projeto_externo(tmp_path):
++    raiz = tmp_path / "ext"
++    (raiz / "tests").mkdir(parents=True); (raiz / "spec").mkdir()
++    (raiz / "app.py").write_text("def um():\n    return 1\n", encoding="utf-8"); (raiz / "conftest.py").write_text("", encoding="utf-8")
++    (raiz / "tests" / "test_app.py").write_text("from app import um\n\n\ndef test_um():\n    assert um() == 1\n", encoding="utf-8")
++    nomes_b = ("Usuários", "Estado que muda", "Erros e concorrência", "Migração", "Observabilidade", "Reversão", "Sucesso")
++    nomes_s = ("Jornadas críticas", "Contrato", "Critérios de aceite", "Desenho e alternativas", "Implementação e testes", "Migração e reversão", "Riscos e dependências")
++    (raiz / "spec" / "brainstorm.md").write_text("# B\n\n" + "".join(f"## {n}\n\ntexto\n\n" for n in nomes_b), encoding="utf-8")
++    (raiz / "spec" / "spec.md").write_text("# S\n\n" + "".join(f"## {n}\n\n" + ("- [ ] devolve um\n" if n == "Critérios de aceite" else "texto\n") + "\n" for n in nomes_s) + "## Código\n\n- `app.py`\n- `conftest.py`\n- `tests/`\n", encoding="utf-8")
++    (raiz / "spec" / "decision.md").write_text("# D\n\nDECISAO: aceita\n", encoding="utf-8")
++    (raiz / "spec" / "acceptance.json").write_text(json.dumps([{"criterion": "devolve um", "command": ["pytest", "-q", "tests/test_app.py::test_um"]}]), encoding="utf-8")
++    return raiz
++
++
++class ProjetosExternosTests(unittest.TestCase):
++    def test_estado_lista_descritores_validos_e_invalidos_de_config_sdd(self):
++        with tempfile.TemporaryDirectory() as t:
++            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
++            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida")}), encoding="utf-8")
++            (base / "config" / "sdd" / "ruim.json").write_text(json.dumps({"nome": "ruim", "raiz": "relativa"}), encoding="utf-8")
++            ext = {e["nome"]: e for e in sdd.estado(base)["externos"]}
++            self.assertTrue(ext["ext"]["valido"]); self.assertFalse(ext["ruim"]["valido"]); self.assertIn("raiz", ext["ruim"]["erro"])
++
++    def test_executar_projeto_roda_o_ciclo_e_recusa_o_que_nao_esta_em_config_sdd(self):
++        with tempfile.TemporaryDirectory() as t:
++            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
++            (base / "redesign").symlink_to(sdd.ROOT / "redesign")
++            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida"), "ambiente": {"PYTHONPATH": "."}}), encoding="utf-8")
++            antes = sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file())
++            r = sdd.executar("projeto", "ext", base)
++            self.assertTrue(r["ok"], r["passos"]); self.assertTrue(r["ultimo"]["ok"])
++            self.assertEqual(sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file()), antes)
++            for nome in ("outro", "../ext", 7, None):
++                with self.assertRaises(ValueError):
++                    sdd.executar("projeto", nome, base)
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/sdd_flow/README.md b/redesign/sdd_flow/README.md
+index 9ef120d3..f38cfa59 100644
+--- a/redesign/sdd_flow/README.md
++++ b/redesign/sdd_flow/README.md
+@@ -25,6 +25,16 @@ python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow
+ 
+ `cycle` roda gates de spec, âncora, critérios de aceite e drift por critério, e para no primeiro que falha. `anchor.py` ancora componente existente: a spec (`spec/spec.md` ou `SPEC.md`) lista o código que possui; arquivo-fonte sem dono ou citação de arquivo inexistente falha. O job `sdd` da CI repete isso.
+ 
++## Projeto SDD declarativo (qualquer projeto, sem escrever nele)
++
++Um descritor JSON diz onde está o projeto e o que conferir; o ciclo roda contra a raiz dele e grava **fora** (padrão `~/.cache/agata/sdd/<nome>/`):
++
++```bash
++python3 redesign/sdd_flow/runner.py work/state.json project redesign/sdd_flow/exemplo-projeto.json
++```
++
++Passos: gates da spec, âncora (contra a raiz do projeto), critérios de aceite (`pytest` com alvos relativos, no ambiente do descritor), drift por critério e drift de arquivos contra a execução anterior. Cada execução vira uma pasta com `relatorio.md`, `evidence.json` e os drifts, e um evento `pass` ou `fail` no `ledger.jsonl` (encadeado por hash; `python3 redesign/evidence_ledger/ledger.py verify`). Falha também é evidência. Para aparecer na aba SDD do painel, o descritor vai em `config/sdd/<nome>.json` por proposta P-8.
++
+ ## Proposta e handoff
+ 
+ ```bash
+diff --git a/redesign/sdd_flow/acceptance_runner.py b/redesign/sdd_flow/acceptance_runner.py
+index 5c0f5999..1a0d77df 100644
+--- a/redesign/sdd_flow/acceptance_runner.py
++++ b/redesign/sdd_flow/acceptance_runner.py
+@@ -1,9 +1,10 @@
+ #!/usr/bin/env python3
+-"""Execute declared acceptance commands and emit criterion evidence."""
++"""Execute declared acceptance commands and emit criterion evidence. Cada item aceita `cwd`, `env` (acrescentado ao ambiente) e `timeout` (s)."""
+ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import subprocess
+ from datetime import datetime, timezone
+ from pathlib import Path
+@@ -14,7 +15,11 @@ def main() -> int:
+     args = ap.parse_args(); manifest = json.loads(args.manifest.read_text(encoding="utf-8")); evidence = []
+     for item in manifest:
+         command = item["command"]
+-        result = subprocess.run(command, cwd=item.get("cwd") or None, capture_output=True, text=True, shell=False)
++        try:
++            result = subprocess.run(command, cwd=item.get("cwd") or None, capture_output=True, text=True, shell=False,
++                                    env={**os.environ, **item["env"]} if item.get("env") else None, timeout=item.get("timeout") or None)
++        except subprocess.TimeoutExpired as exc:
++            result = subprocess.CompletedProcess(command, 124, "", f"tempo esgotado ({exc.timeout} s)")
+         evidence.append({"criterion": item["criterion"], "status": "pass" if result.returncode == 0 else "fail", "classification": "verified" if result.returncode == 0 else "defect", "command": command, "returncode": result.returncode, "stdout": result.stdout[-4000:], "stderr": result.stderr[-4000:], "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+     args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+     return 0 if all(row["status"] == "pass" for row in evidence) else 1
+diff --git a/redesign/sdd_flow/anchor.py b/redesign/sdd_flow/anchor.py
+index d368d736..d1c76aa5 100644
+--- a/redesign/sdd_flow/anchor.py
++++ b/redesign/sdd_flow/anchor.py
+@@ -15,6 +15,7 @@ from pathlib import Path
+ 
+ 
+ SOURCE = (".py", ".sh", ".js", ".html")
++IGNORADOS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache", ".pytest_cache"}
+ REQUIRED = ("Contrato", "Critérios de aceite", "Código")
+ 
+ 
+@@ -34,7 +35,7 @@ def check_component(root: Path, scope: str) -> list[str]:
+     files = sorted(
+         p.relative_to(base).as_posix()
+         for p in base.rglob("*")
+-        if p.is_file() and p.suffix in SOURCE and "__pycache__" not in p.parts
++        if p.is_file() and p.suffix in SOURCE and not IGNORADOS & set(p.relative_to(base).parts)
+     )
+     for rel in files:
+         if not any(rel == own or (own.endswith("/") and rel.startswith(own)) for own in owned):
+diff --git a/redesign/sdd_flow/exemplo-projeto.json b/redesign/sdd_flow/exemplo-projeto.json
+new file mode 100644
+index 00000000..198d8850
+--- /dev/null
++++ b/redesign/sdd_flow/exemplo-projeto.json
+@@ -0,0 +1,13 @@
++{
++  "nome": "contador",
++  "raiz": "/caminho/absoluto/do/projeto",
++  "spec": "spec",
++  "escopos": [
++    "."
++  ],
++  "criterios": "spec/acceptance.json",
++  "ambiente": {
++    "PYTHONPATH": "."
++  },
++  "limite_s": 300
++}
+diff --git a/redesign/sdd_flow/project.py b/redesign/sdd_flow/project.py
+new file mode 100644
+index 00000000..37d0321b
+--- /dev/null
++++ b/redesign/sdd_flow/project.py
+@@ -0,0 +1,222 @@
++#!/usr/bin/env python3
++"""Projeto SDD declarativo: o ciclo mecânico sobre QUALQUER projeto, sem escrever nele.
++
++Um descritor JSON diz onde está o projeto, onde fica a spec, o que ancorar e quais critérios rodar. O ciclo
++(gates da spec, âncora, critérios de aceite, drift por critério, drift de arquivos) roda contra a raiz do
++projeto, grava tudo FORA dele (padrão ~/.cache/agata/sdd/<nome>/) e acrescenta o resultado, pass ou fail, a um
++ledger encadeado por hash. Falha também vira evidência: o relatório e o ledger saem mesmo quando um passo reprova.
++
++Descritor (todas as chaves menos `nome` e `raiz` têm padrão):
++  {"nome": "contador", "raiz": "/abs/projeto", "spec": "spec", "escopos": ["."],
++   "criterios": "spec/acceptance.json", "ambiente": {"PYTHONPATH": "."}, "saida": "/abs/saida", "limite_s": 300}
++
++Os critérios só podem ser `pytest [-q] [-x] <alvo>...` com alvo relativo dentro da raiz (sem `..`, sem caminho
++absoluto): o manifesto mora no projeto, que não é canon, então o painel e o ciclo nunca executam comando livre.
++Uso: project.py <descritor.json>   |   --selftest      Exit 0 = tudo passou; 1 = algum passo reprovou; 2 = descritor inválido.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import re
++import shutil
++import subprocess
++import sys
++import tempfile
++from datetime import datetime, timezone
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++NOME = re.compile(r"[a-z][a-z0-9-]{0,40}")
++CHAVES_AMBIENTE = {"PYTHONPATH", "PYTHONHASHSEED", "TZ", "LANG", "LC_ALL", "NODE_PATH"}
++ALVO = re.compile(r"[A-Za-z0-9_./-]+(::[A-Za-z0-9_.\[\]-]+)*")
++
++
++class DescritorInvalido(ValueError):
++    pass
++
++
++def _rel_seguro(valor: str) -> bool:
++    p = Path(valor)
++    return not p.is_absolute() and ".." not in p.parts
++
++
++def carregar(caminho: Path) -> dict:
++    try:
++        d = json.loads(Path(caminho).read_text(encoding="utf-8"))
++    except (OSError, ValueError) as exc:
++        raise DescritorInvalido(f"descritor ilegível: {exc}") from exc
++    if not isinstance(d, dict) or not isinstance(d.get("nome"), str) or not NOME.fullmatch(d["nome"]):
++        raise DescritorInvalido("nome ausente ou inválido (minúsculas, dígitos e hífen)")
++    raiz = Path(str(d.get("raiz", "")))
++    if not raiz.is_absolute() or not raiz.is_dir():
++        raise DescritorInvalido("raiz precisa ser um diretório absoluto existente")
++    d["raiz"] = str(raiz.resolve())
++    d.setdefault("spec", "spec"); d.setdefault("escopos", ["."]); d.setdefault("criterios", "spec/acceptance.json")
++    d.setdefault("ambiente", {}); d.setdefault("limite_s", 300)
++    for chave in ("spec", "criterios"):
++        if not isinstance(d[chave], str) or not _rel_seguro(d[chave]):
++            raise DescritorInvalido(f"{chave} precisa ser relativo à raiz, sem ..")
++    if not isinstance(d["escopos"], list) or not d["escopos"] or not all(isinstance(e, str) and _rel_seguro(e) for e in d["escopos"]):
++        raise DescritorInvalido("escopos: lista de caminhos relativos à raiz, sem ..")
++    if not isinstance(d["ambiente"], dict) or not set(d["ambiente"]) <= CHAVES_AMBIENTE or not all(isinstance(v, str) for v in d["ambiente"].values()):
++        raise DescritorInvalido(f"ambiente: só as chaves {sorted(CHAVES_AMBIENTE)}, com valor texto")
++    if not isinstance(d["limite_s"], int) or not 1 <= d["limite_s"] <= 3600:
++        raise DescritorInvalido("limite_s: inteiro de 1 a 3600")
++    if d.get("saida") is not None and not Path(str(d["saida"])).is_absolute():
++        raise DescritorInvalido("saida, se informada, precisa ser absoluta")
++    return d
++
++
++def comando_valido(comando) -> bool:
++    if not (isinstance(comando, list) and len(comando) >= 2 and all(isinstance(c, str) for c in comando)) or comando[0] != "pytest":
++        return False
++    alvos = [c for c in comando[1:] if c not in ("-q", "-x")]
++    return bool(alvos) and all(not a.startswith("-") and ALVO.fullmatch(a) and _rel_seguro(a.split("::", 1)[0]) for a in alvos)
++
++
++def _ambiente(d: dict) -> dict:
++    saida = {}
++    for chave, valor in d["ambiente"].items():
++        partes = [str(Path(d["raiz"]) / p) if _rel_seguro(p) else p for p in valor.split(os.pathsep)]
++        saida[chave] = os.pathsep.join(partes) if chave in ("PYTHONPATH", "NODE_PATH") else valor
++    return saida
++
++
++def _sha(p: Path) -> str:
++    return hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else ""
++
++
++def _rodar(args: list[str], limite: int) -> tuple[int, str]:
++    try:
++        r = subprocess.run(args, cwd=AQUI.parents[1], capture_output=True, text=True, timeout=limite)
++        return r.returncode, (r.stdout + r.stderr).strip()[-500:]
++    except subprocess.TimeoutExpired:
++        return 124, f"tempo esgotado ({limite} s)"
++
++
++def executar(caminho_descritor: Path) -> dict:
++    d = carregar(caminho_descritor)
++    raiz = Path(d["raiz"])
++    saida = Path(d["saida"]) if d.get("saida") else Path.home() / ".cache" / "agata" / "sdd" / d["nome"]
++    (saida / "execucoes").mkdir(parents=True, exist_ok=True, mode=0o700)
++    while True:  # microssegundos + exclusão mútua: duas execuções no mesmo instante não dividem a pasta
++        run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
++        run = saida / "execucoes" / run_id
++        try:
++            run.mkdir(mode=0o700)
++            break
++        except FileExistsError:
++            continue
++    passos: list[dict] = []
++
++    def passo(nome: str, ok: bool, detalhe: str) -> bool:
++        passos.append({"passo": nome, "ok": ok, "detalhe": detalhe[:300]})
++        return ok
++
++    py = sys.executable
++    seguir = True
++    spec_dir = raiz / d["spec"]
++    rc, txt = _rodar([py, str(AQUI / "spec_gate.py"), "check", str(spec_dir)], d["limite_s"])
++    seguir = passo("gates da spec", rc == 0, txt.replace("\n", " ") or "ok")
++    if seguir:
++        rc, txt = _rodar([py, str(AQUI / "anchor.py"), str(raiz), *d["escopos"]], d["limite_s"])
++        seguir = passo("âncora", rc == 0, txt.replace("\n", " ") or "ok")
++    manifesto = raiz / d["criterios"]
++    evidencia, deriva = run / "evidence.json", run / "criterion-drift.md"
++    if seguir:
++        try:
++            itens = json.loads(manifesto.read_text(encoding="utf-8"))
++            ruins = [i.get("criterion", "?") for i in itens if not comando_valido(i.get("command"))]
++        except (OSError, ValueError, AttributeError):
++            itens, ruins = [], ["manifesto ilegível"]
++        if ruins or not itens:
++            seguir = passo("critérios", False, "comando fora do padrão pytest ou manifesto vazio: " + "; ".join(ruins[:2]))
++        else:
++            tem_pytest = shutil.which("pytest") is not None
++            # nada de bytecode nem cache dentro do projeto: o ciclo não escreve nele
++            normal = [{"criterion": i["criterion"], "command": ([i["command"][0], "-p", "no:cacheprovider", *i["command"][1:]] if tem_pytest else [py, "-m", i["command"][0], "-p", "no:cacheprovider", *i["command"][1:]]),
++                       "cwd": str(raiz), "env": {**_ambiente(d), "PYTHONDONTWRITEBYTECODE": "1"}, "timeout": d["limite_s"]} for i in itens]
++            (run / "manifesto-normalizado.json").write_text(json.dumps(normal, ensure_ascii=False, indent=2), encoding="utf-8")
++            rc, _ = _rodar([py, str(AQUI / "acceptance_runner.py"), str(run / "manifesto-normalizado.json"), str(evidencia)], d["limite_s"] * len(normal) + 30)
++            ev = json.loads(evidencia.read_text(encoding="utf-8")) if evidencia.exists() else []
++            aprovados = sum(1 for e in ev if e.get("status") == "pass")
++            seguir = passo("critérios", rc == 0 and bool(ev), f"{aprovados}/{len(normal)} passaram")
++            if evidencia.exists():
++                rc2, txt2 = _rodar([py, str(AQUI / "criterion_drift.py"), str(spec_dir / "spec.md"), str(evidencia), str(deriva)], 60)
++                passo("drift por critério", rc2 == 0, txt2.replace("\n", " ") or "todo critério tem evidência")
++    # drift de arquivos contra a execução anterior (o kit anterior é guardado fora do projeto)
++    kit, anterior = run / "kit", saida / "ultimo" / "kit"
++    rc, txt = _rodar([py, str(AQUI.parent / "project_kit" / "bootstrap.py"), str(raiz), "--out", str(kit), "--goal", f"SDD {d['nome']}"], 120)
++    if rc == 0 and (anterior / "provenance.json").exists():
++        rc3, txt3 = _rodar([py, str(AQUI.parent / "project_kit" / "bootstrap.py"), str(raiz), "--out", str(kit), "--goal", "drift",
++                            "--drift-against", str(anterior / "provenance.json"), "--drift-out", str(run / "file-drift.md")], 120)
++        passo("drift de arquivos", rc3 == 0, "comparado com a execução anterior" if rc3 == 0 else txt3)
++    elif rc == 0:
++        passo("drift de arquivos", True, "primeira execução: sem base para comparar")
++    else:
++        passo("drift de arquivos", False, txt)
++    ok = all(p["ok"] for p in passos)
++    relatorio = {"nome": d["nome"], "raiz": d["raiz"], "run_id": run_id, "ok": ok, "passos": passos,
++                 "artefatos": {n: str(p) for n, p in (("evidencia", evidencia), ("drift_criterios", deriva), ("drift_arquivos", run / "file-drift.md")) if p.exists()}}
++    (run / "relatorio.json").write_text(json.dumps(relatorio, ensure_ascii=False, indent=2), encoding="utf-8")
++    (run / "relatorio.md").write_text(f"# SDD {d['nome']} · {run_id} · {'OK' if ok else 'FALHOU'}\n\n" + "\n".join(f"- {'OK' if p['ok'] else 'FALHOU'} · {p['passo']}: {p['detalhe']}" for p in passos) + "\n", encoding="utf-8")
++    sys.path.insert(0, str(AQUI.parent / "evidence_ledger"))
++    from ledger import append
++    append(saida / "ledger.jsonl", {
++        "id": hashlib.sha256(f"{d['nome']}|{run_id}".encode()).hexdigest()[:16], "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
++        "actor": "sdd-project", "project": d["nome"], "kind": "verification", "status": "pass" if ok else "fail",
++        "source": str(run / "relatorio.json"), "input_hash": _sha(manifesto), "output_hash": _sha(run / "relatorio.json"),
++        "authorization": "human-requested-cycle", "classification": "project",
++        "metadata": {"run_id": run_id, "passos": len(passos), "falhas": [p["passo"] for p in passos if not p["ok"]]}})
++    if (kit / "provenance.json").exists():
++        (saida / "ultimo").mkdir(parents=True, exist_ok=True)
++        shutil.rmtree(saida / "ultimo" / "kit", ignore_errors=True)
++        shutil.copytree(kit, saida / "ultimo" / "kit")
++    (saida / "ultimo.json").write_text(json.dumps({"run_id": run_id, "ok": ok, "relatorio": str(run / "relatorio.json")}), encoding="utf-8")
++    return relatorio
++
++
++def _selftest() -> int:
++    falhou = 0
++    def conferir(nome, cond):
++        nonlocal falhou
++        print(("PASS " if cond else "FALHA ") + nome); falhou += 0 if cond else 1
++    conferir("comando pytest com alvos relativos é aceito", comando_valido(["pytest", "-q", "tests/test_a.py::test_x"]))
++    for ruim in (["bash", "-c", "x"], ["pytest", "-q", "/etc/passwd"], ["pytest", "-q", "../fora.py"], ["pytest", "-q"], ["pytest", "-q", "a b"], ["pytest", "--co", "x.py"], "pytest -q x"):
++        conferir(f"comando recusado: {ruim!r}", not comando_valido(ruim))
++    with tempfile.TemporaryDirectory() as t:
++        base = Path(t)
++        def descritor(**extra):
++            d = {"nome": "demo", "raiz": str(base), **extra}
++            arq = base / "d.json"; arq.write_text(json.dumps(d), encoding="utf-8"); return arq
++        for nome, extra in (("raiz relativa", {"raiz": "relativa"}), ("ambiente fora da lista", {"ambiente": {"LD_PRELOAD": "x"}}),
++                            ("spec com ..", {"spec": "../x"}), ("limite absurdo", {"limite_s": 99999}), ("saida relativa", {"saida": "rel"})):
++            try:
++                carregar(descritor(**extra)); conferir(f"descritor inválido recusado: {nome}", False)
++            except DescritorInvalido:
++                conferir(f"descritor inválido recusado: {nome}", True)
++        d = carregar(descritor(ambiente={"PYTHONPATH": "src"}))
++        conferir("padrões do descritor", d["spec"] == "spec" and d["escopos"] == ["."] and d["limite_s"] == 300)
++        conferir("PYTHONPATH relativo vira caminho dentro da raiz", _ambiente(d)["PYTHONPATH"] == str(base / "src"))
++    return 1 if falhou else 0
++
++
++def main(argv: list[str]) -> int:
++    if argv[:1] == ["--selftest"]:
++        return _selftest()
++    if len(argv) != 1:
++        print(__doc__, file=sys.stderr)
++        return 2
++    try:
++        r = executar(Path(argv[0]))
++    except DescritorInvalido as exc:
++        print(f"descritor inválido: {exc}", file=sys.stderr)
++        return 2
++    print((Path(r["artefatos"].get("evidencia", "")).parent / "relatorio.md").read_text(encoding="utf-8") if r["artefatos"].get("evidencia") else json.dumps(r, ensure_ascii=False))
++    return 0 if r["ok"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main(sys.argv[1:]))
+diff --git a/redesign/sdd_flow/runner.py b/redesign/sdd_flow/runner.py
+index dc7606e3..106a168e 100644
+--- a/redesign/sdd_flow/runner.py
++++ b/redesign/sdd_flow/runner.py
+@@ -139,10 +139,10 @@ def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> No
+     run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
+ 
+ 
+-def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
+-    """Mechanical gates in order; stops at the first one that fails."""
++def cycle(state: dict, root: Path, manifest: Path, scopes: list[str], repo: Path = ROOT) -> None:
++    """Mechanical gates in order; stops at the first one that fails. `repo` é a base das âncoras (padrão: este repositório)."""
+     run("redesign/sdd_flow/spec_gate.py", "check", str(root))
+-    run("redesign/sdd_flow/anchor.py", str(ROOT), *scopes)
++    run("redesign/sdd_flow/anchor.py", str(repo), *scopes)
+     evidence = root / "evidence.json"
+     try:
+         run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(evidence))
+@@ -182,6 +182,21 @@ def proposal(state: dict, name: str, worktree: Path, base: str, out: Path, tests
+     record(state, "proposal", f"{name}:{hashlib.sha256(diff.encode()).hexdigest()[:12]}:{out.resolve()}")
+ 
+ 
++def project_cmd(state: dict, descriptor: Path, state_path: Path) -> None:
++    sys.path.insert(0, str(Path(__file__).resolve().parent))
++    import project
++    try:
++        r = project.executar(descriptor)
++    except project.DescritorInvalido as exc:
++        raise SystemExit(f"descritor inválido: {exc}")
++    record(state, "project", f"{r['nome']}:{r['run_id']}:{'ok' if r['ok'] else 'falhou'}")
++    save(state_path, state)
++    for p in r["passos"]:
++        print(f"{'OK' if p['ok'] else 'FALHOU'} · {p['passo']}: {p['detalhe']}")
++    if not r["ok"]:
++        raise SystemExit(1)
++
++
+ def main() -> int:
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("state", type=Path)
+@@ -201,7 +216,8 @@ def main() -> int:
+     rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
+     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
+     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
+-    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
++    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True); cy.add_argument("--repo", type=Path, default=ROOT)
++    pj = sub.add_parser("project"); pj.add_argument("descriptor", type=Path)
+     pr = sub.add_parser("proposal"); pr.add_argument("name"); pr.add_argument("worktree", type=Path); pr.add_argument("out", type=Path)
+     pr.add_argument("--base", default="origin/main"); pr.add_argument("--test", nargs="*", default=[]); pr.add_argument("--pytest-bin", default="pytest")
+     sub.add_parser("status")
+@@ -221,7 +237,8 @@ def main() -> int:
+     elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
+     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
+     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
+-    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
++    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope, args.repo.resolve())
++    elif args.cmd == "project": project_cmd(state, args.descriptor, args.state)
+     elif args.cmd == "proposal": proposal(state, args.name, args.worktree, args.base, args.out.resolve(), args.test, args.pytest_bin)
+     else: print(json.dumps(state, ensure_ascii=False, indent=2))
+     if args.cmd != "status":
+diff --git a/redesign/sdd_flow/spec/acceptance.json b/redesign/sdd_flow/spec/acceptance.json
+index 42c16d3f..cd4e908a 100644
+--- a/redesign/sdd_flow/spec/acceptance.json
++++ b/redesign/sdd_flow/spec/acceptance.json
+@@ -79,5 +79,41 @@
+       "redesign/sdd_flow/tests/test_runner.py::test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "o ciclo de projeto roda sem escrever no projeto e registra no ledger",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_project.py::test_ciclo_roda_sem_escrever_no_projeto_e_registra_no_ledger"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "critério reprovado vira evidência e código de saída 1",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_project.py::test_falha_de_criterio_vira_evidencia_e_codigo_de_saida_1"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o drift de arquivos compara com a execução anterior",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_project.py::test_segunda_execucao_mede_o_drift_de_arquivos"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "comando livre no manifesto do projeto é recusado sem executar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sdd_flow/tests/test_project.py::test_comando_livre_no_manifesto_e_recusado_sem_executar"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/sdd_flow/spec/spec.md b/redesign/sdd_flow/spec/spec.md
+index 0f1081d3..98798ebc 100644
+--- a/redesign/sdd_flow/spec/spec.md
++++ b/redesign/sdd_flow/spec/spec.md
+@@ -11,6 +11,8 @@
+ - `anchor.py <repo> <pasta>...` falha se faltar spec, seção obrigatória, dono de arquivo-fonte ou se a spec citar arquivo inexistente.
+ - `runner.py <state> proposal <nome> <worktree> <saida.diff> [--base origin/main] [--test alvo...]` gera o `.diff` único do lote e só o grava depois de aplicá-lo, conferi-lo (`git diff --check`) e testá-lo num checkout limpo da base; não assina, não abre PR.
+ - `github_flow.py` só inicia o handoff com `--state` de um ciclo que registrou a etapa `cycle`.
++- `runner.py <state> project <descritor.json>` roda o ciclo mecânico (gates da spec, âncora, critérios, drift por critério e drift de arquivos) sobre QUALQUER projeto descrito por um descritor JSON, grava tudo fora do projeto e acrescenta o resultado, pass ou fail, a um ledger encadeado por hash; os critérios só podem ser `pytest` com alvos relativos dentro da raiz do projeto.
++- `runner.py ... cycle ... --repo DIR` ancora contra outro repositório; `anchor.py` ignora `.git`, ambientes virtuais, `node_modules` e caches.
+ - Nenhum comando decide pelo Humano: `DECISAO: aceita` só entra em `decision.md` junto da assinatura P-8 que aplica este arquivo.
+ 
+ ## Critérios de aceite
+@@ -24,6 +26,10 @@
+ - [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
+ - [ ] handoff do GitHub exige ciclo registrado
+ - [ ] a verificação usa python -m pytest quando o binário não está no PATH
++- [ ] o ciclo de projeto roda sem escrever no projeto e registra no ledger
++- [ ] critério reprovado vira evidência e código de saída 1
++- [ ] o drift de arquivos compara com a execução anterior
++- [ ] comando livre no manifesto do projeto é recusado sem executar
+ 
+ ## Desenho e alternativas
+ 
+@@ -44,6 +50,7 @@ A spec pode divergir do código em comportamento que nenhum teste cobre; a ânco
+ ## Código
+ 
+ - `runner.py`
++- `project.py`
+ - `anchor.py`
+ - `spec_gate.py`
+ - `acceptance_runner.py`
+diff --git a/redesign/sdd_flow/tests/test_project.py b/redesign/sdd_flow/tests/test_project.py
+new file mode 100644
+index 00000000..d9aedabf
+--- /dev/null
++++ b/redesign/sdd_flow/tests/test_project.py
+@@ -0,0 +1,80 @@
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++RUNNER = Path(__file__).parents[1] / "runner.py"
++LEDGER = Path(__file__).parents[2] / "evidence_ledger" / "ledger.py"
++
++
++def projeto(tmp_path, teste_ok=True, comando=None):
++    raiz = tmp_path / "proj"
++    (raiz / "tests").mkdir(parents=True); (raiz / "spec").mkdir()
++    (raiz / "app.py").write_text("def dobro(x):\n    return x * 2\n", encoding="utf-8")
++    (raiz / "conftest.py").write_text("", encoding="utf-8")
++    (raiz / "tests" / "test_app.py").write_text(f"from app import dobro\n\n\ndef test_dobro():\n    assert dobro(2) == {4 if teste_ok else 5}\n", encoding="utf-8")
++    secoes = {"brainstorm.md": ("Brainstorm", ("Usuários", "Estado que muda", "Erros e concorrência", "Migração", "Observabilidade", "Reversão", "Sucesso")),
++              "spec.md": ("Spec", ("Jornadas críticas", "Contrato", "Critérios de aceite", "Desenho e alternativas", "Implementação e testes", "Migração e reversão", "Riscos e dependências"))}
++    for arq, (titulo, nomes) in secoes.items():
++        corpo = "".join(f"## {n}\n\n" + ("- [ ] dobra o número\n" if n == "Critérios de aceite" else "texto\n") + "\n" for n in nomes)
++        (raiz / "spec" / arq).write_text(f"# {titulo}\n\n{corpo}" + ("## Código\n\n- `app.py`\n- `conftest.py`\n- `tests/`\n" if arq == "spec.md" else ""), encoding="utf-8")
++    (raiz / "spec" / "decision.md").write_text("# Decisão\n\nDECISAO: aceita\n", encoding="utf-8")
++    (raiz / "spec" / "acceptance.json").write_text(json.dumps([{"criterion": "dobra o número", "command": comando or ["pytest", "-q", "tests/test_app.py::test_dobro"]}]), encoding="utf-8")
++    saida = tmp_path / "saida"
++    desc = tmp_path / "d.json"
++    desc.write_text(json.dumps({"nome": "proj", "raiz": str(raiz), "ambiente": {"PYTHONPATH": "."}, "saida": str(saida)}), encoding="utf-8")
++    return raiz, saida, desc
++
++
++def rodar(tmp_path, desc):
++    return subprocess.run([sys.executable, str(RUNNER), str(tmp_path / "state.json"), "project", str(desc)], capture_output=True, text=True)
++
++
++def arquivos(raiz):
++    return sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file())
++
++
++def test_ciclo_roda_sem_escrever_no_projeto_e_registra_no_ledger(tmp_path):
++    raiz, saida, desc = projeto(tmp_path)
++    antes = arquivos(raiz)
++    r = rodar(tmp_path, desc)
++    assert r.returncode == 0, r.stdout + r.stderr
++    assert arquivos(raiz) == antes
++    assert json.loads((saida / "ultimo.json").read_text())["ok"] is True
++    assert subprocess.run([sys.executable, str(LEDGER), "verify", str(saida / "ledger.jsonl")], capture_output=True).returncode == 0
++
++
++def test_falha_de_criterio_vira_evidencia_e_codigo_de_saida_1(tmp_path):
++    raiz, saida, desc = projeto(tmp_path, teste_ok=False)
++    r = rodar(tmp_path, desc)
++    assert r.returncode == 1
++    evento = json.loads((saida / "ledger.jsonl").read_text().splitlines()[-1])
++    assert evento["status"] == "fail" and evento["metadata"]["falhas"] == ["critérios"]
++
++
++def test_segunda_execucao_mede_o_drift_de_arquivos(tmp_path):
++    raiz, saida, desc = projeto(tmp_path)
++    rodar(tmp_path, desc)
++    (raiz / "app.py").write_text("def dobro(x):\n    return 2 * x\n", encoding="utf-8")
++    assert rodar(tmp_path, desc).returncode == 0
++    ultimo = json.loads((saida / "ultimo.json").read_text())
++    drift = (Path(ultimo["relatorio"]).parent / "file-drift.md").read_text(encoding="utf-8")
++    assert "Alterados: 1" in drift and "app.py" in drift
++
++
++def test_comando_livre_no_manifesto_e_recusado_sem_executar(tmp_path):
++    raiz, saida, desc = projeto(tmp_path, comando=["bash", "-c", "touch invadido"])
++    r = rodar(tmp_path, desc)
++    assert r.returncode == 1 and not (raiz / "invadido").exists()
++
++
++def test_descritor_invalido_sai_com_erro_claro(tmp_path):
++    desc = tmp_path / "ruim.json"; desc.write_text(json.dumps({"nome": "x", "raiz": "relativa"}), encoding="utf-8")
++    r = rodar(tmp_path, desc)
++    assert r.returncode != 0 and "descritor inválido" in r.stderr
++
++
++def test_duas_execucoes_no_mesmo_instante_nao_dividem_pasta(tmp_path):
++    raiz, saida, desc = projeto(tmp_path)
++    rodar(tmp_path, desc); rodar(tmp_path, desc)
++    assert len(list((saida / "execucoes").iterdir())) == 2
