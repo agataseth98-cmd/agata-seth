@@ -1,0 +1,3105 @@
+diff --git a/.agents/skills/agata-carregar/SKILL.md b/.agents/skills/agata-carregar/SKILL.md
+index 758796f9..7ef619b8 100644
+--- a/.agents/skills/agata-carregar/SKILL.md
++++ b/.agents/skills/agata-carregar/SKILL.md
+@@ -13,7 +13,7 @@ Use só para iniciar ou retomar uma sessão sem estado atual injetado. Ao termin
+ Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
+ O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
+ 
+-1. `bash ~/agata/scripts/estado_para_eco.sh` — read-only. Dá HEAD, topo de MEMÓRIAS, `sync:`, idade da
++1. `bash ~/agata/scripts/estado_para_eco.sh` — não escreve no repo (só grava o cache do `ls-remote` em `~/.cache/agata/`). Dá HEAD, topo de MEMÓRIAS, `sync:`, idade da
+    hidratação, propostas abertas, hora da Máquina e `HASH-ESTADO`. É a fonte dos campos; não estime nenhum.
+ 2. Se `sync:` não for `PASS`: `git -C ~/agata fetch -q` e `git -C ~/agata status -sb`. **Nunca** descarte
+    mudança local (`checkout --`, `reset`, `restore`, `stash`) pra "consertar" sync — pode ser aplicação
+diff --git a/.github/workflows/perimetro.yml b/.github/workflows/perimetro.yml
+index 4563927f..6468bc33 100644
+--- a/.github/workflows/perimetro.yml
++++ b/.github/workflows/perimetro.yml
+@@ -54,6 +54,9 @@ jobs:
+           python3 -I scripts/benchmark_roteamento.py --selftest
+           python3 -I scripts/queda_por_elo.py --selftest
+           python3 -I redesign/router/sombra_capacidade.py --selftest
++          python3 -I redesign/router/sombra_nova_versao.py --selftest
++          python3 -I redesign/nova_versao/nv.py --selftest
++          python3 -I scripts/busca_texto.py --selftest
+ 
+       # Candidato 16/10/2026: o auxiliar de integralidade e o fiscal de PR são testados aqui, contra o
+       # CÓDIGO DO PR e sem privilégio algum (job `pull_request`). Quem fiscaliza de verdade é o job
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index cbbe61d0..2bb26842 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -13,6 +13,13 @@ on:
+       - "redesign/review_mesh/**"
+       - "redesign/project_kit/**"
+       - "redesign/evidence_ledger/**"
++      - "redesign/nova_versao/**"
++      - "redesign/alexandria/**"
++      - "redesign/metacognicao/**"
++      - "redesign/corpo/**"
++      - "redesign/router/sombra_nova_versao.py"
++      - "ferramentas/**"
++      - "scripts/busca_texto.py"
+       - "redesign/painel_operacional/**"
+       - "redesign/obsidian/**"
+       - ".agents/skills/**"
+@@ -32,15 +39,18 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests ferramentas/test_ferramentas.py
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+ 
++      - name: Ciclo SDD sobre a spec-mãe da nova versão (Experimento GPT)
++        run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
++
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional
+-          for c in project_kit review_mesh evidence_ledger painel_operacional; do
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo
++          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+           done
+diff --git a/PROJETO_REFERENCIA.md b/PROJETO_REFERENCIA.md
+index c9a1b744..8c2f60cf 100644
+--- a/PROJETO_REFERENCIA.md
++++ b/PROJETO_REFERENCIA.md
+@@ -78,6 +78,14 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
+ 
+ **Nota 2 — `scripts/busca_semantica.py`, ferramenta SECUNDÁRIA (decisão do Humano, 04/09/2026, MEMÓRIAS (327)):** o gatilho de (115) não foi atingido (276 entradas, não a ordem de grandeza medida em 118). A recusa como camada PRIMÁRIA continua de pé — grep/query_canon seguem a fonte de verdade, nada foi injetado em hidratação. O que mudou: o Humano autorizou por escrito uma ferramenta opcional, sob demanda, que usa o embedding já em produção (`:20134`, iGPU) pra rankear entradas por sentido. Medido ao vivo, não presumido: útil pra tema concreto/narrativo (busca sobre os travamentos de suspend achou (124)/(99)/(125) nos 3 primeiros lugares), fraca pra pergunta abstrata sobre o próprio sistema (busca sobre "por que evitar vetor" não achou (115) nem (293) nos top-30 — rank real 116º e 150º de 276). Registrado sem suavizar: a limitação de modelo pequeno em corpus técnico denso que (115) já apontava se confirma de novo, agora com medição desta ferramenta específica.
+ 
++## Nova versão (Experimento GPT) — Alexandria e demais componentes
++Direção do Humano em 04/11/2026: a arquitetura do Experimento GPT (`~/Área de trabalho/Experimento GPT/`, diário `conclusoes.md` 001–080) é a base da nova versão do Agata, com Alexandria como subsistema. Spec-mãe: `redesign/nova_versao/spec/spec.md`. A direção não substitui P-8: cada lote entra por proposta assinada.
++
++- **Fases:** F0 spec · F1 sombra · F2 avaliação · F3 integração protegida. Lote 1 (este): spec de tudo e sombra de Alexandria (`redesign/alexandria/`), metacognição (`redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py`) e corpo (`redesign/corpo/`), sem inferência. Lote 2: redundância por capacidade e coordenação. Lote 3: avaliação com split reservado. Lote 4: integração, item por item.
++- **Papéis:** o Humano decide objetivo, orçamento e efeito protegido; o Modelo interpreta, pesquisa e propõe; a Máquina guarda, executa e mede. Hash prova bytes, não verdade. Nenhum componente se autoaprova nem ganha autoridade normativa: Alexandria organiza o acervo, não é cânone paralelo.
++- **Reaproveitamento:** a nova versão não cria segundo cache, indexador, roteador nem avaliador. O ledger é o `evidence_ledger`; a memória comum é o `cache_conselho`; a semântica continua secundária ((327)) e a recusa de vetor/GraphRAG como camada primária ((115)) permanece.
++- **Dados:** fora do repo, em `~/.local/share/agata/nova-versao/` (pastas de trabalho) e `~/.cache/agata/nova-versao/` (índice derivado). Orçamento de inferência configurável no painel, grupo "Nova versão"; o padrão de fábrica é só local.
++
+ ## Diagnóstico
+ `agata status` (grafo) · `bash scripts/perimetro.sh` (P-1..P-12) · `systemctl --user status agata.target`. Prontidão da Agata: definida nas REGRAS. (Era `hermes doctor` / `hermes status` até a remoção do Hermes em (312).)
+ 
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index 100735b0..eb331bf6 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -5,7 +5,7 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ 
+ | Tema | Peças | Observação |
+ |---|---|---|
+-| agata | 13 | skills próprias do sistema |
++| agata | 15 | skills próprias do sistema |
+ | banco-e-infra | 23 |  |
+ | contexto-e-custo | 15 |  |
+ | dados-e-ml | 8 |  |
+@@ -22,4 +22,4 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ | seguranca | 16 |  |
+ | testes | 44 |  |
+ 
+-Total: 413 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
++Total: 415 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index 557dff82..53573163 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -3263,6 +3263,14 @@
+   "caminho": ".agents/skills/agata-fluxo-equipe/SKILL.md",
+   "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partid"
+  },
++ {
++  "nome": "agata-llm-fundamentos",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/agata-llm-fundamentos/SKILL.md",
++  "resumo": "-"
++ },
+  {
+   "nome": "agata-mudanca-segura",
+   "tipo": "skill",
+@@ -3287,6 +3295,14 @@
+   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
+   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+  },
++ {
++  "nome": "agata-voz",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/agata-voz/SKILL.md",
++  "resumo": "-"
++ },
+  {
+   "nome": "design-taste-frontend",
+   "tipo": "skill",
+diff --git a/redesign/README.md b/redesign/README.md
+index b722d5c1..d173192c 100644
+--- a/redesign/README.md
++++ b/redesign/README.md
+@@ -41,6 +41,10 @@ regime normal:
+ | `LOG.md` | histórico append-only do redesenho — **fica aqui** porque PROJETO.md e MEMÓRIAS.md citam este caminho (MEMÓRIAS não se edita) | — |
+ | `ACESSO-GRADUADO.md` | método de acesso graduado (R0–R3) — **fica aqui** porque `librechat/canon-mcp.mjs` (dict `CANON`, quarentena P-8) aponta pra este caminho | — |
+ | `propostas/` | os pares `.diff`/`APROVADO-` das Fases 0–8 | — |
++| `nova_versao/` | spec-mãe da nova versão (Experimento GPT), ledger de eventos e orçamento (`nv.py`) | painel, grupo Nova versão |
++| `alexandria/` | acervo com proveniência, índice FTS5 derivado, consulta com pacote de evidência, índice de skills | `acervo.py` · painel |
++| `metacognicao/` | antes (`previo.py`) e depois (`posterior.py`) do turno; sombra no gateway por `router/sombra_nova_versao.py` | `SETH_SOMBRA_NOVA_VERSAO=1` |
++| `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
+ 
+ ## Docs de planejamento — arquivados
+ 
+diff --git a/redesign/alexandria/acervo.py b/redesign/alexandria/acervo.py
+new file mode 100644
+index 00000000..b441793c
+--- /dev/null
++++ b/redesign/alexandria/acervo.py
+@@ -0,0 +1,438 @@
++#!/usr/bin/env python3
++"""Alexandria — acervo, índice léxico e consulta com pacote de evidência (piloto em sombra).
++
++Especificação: `redesign/alexandria/spec/spec.md` (origem: Experimento GPT, proposta
++Alexandria §4–§7, decisão do Humano (077) e decisões de 04/11/2026).
++
++O que faz:
++- `iniciar`: cria a estrutura de pastas de trabalho em `<dados>/alexandria/` (fluxo
++  editorial, skills, contextos) — fora do repo, 0700.
++- `snapshot <commit>`: cópia fixa do repositório naquele commit (`git archive`), que é
++  o acervo do piloto (decisão 1: só o que já está no repo).
++- `indexar`: índice DERIVADO e reconstruível em SQLite/FTS5 (`<cache>/indice.sqlite3`).
++  Cada objeto tem `object_id`, caminho, commit, sha256, classificação de acesso, estado
++  editorial e verificação — dimensões separadas. Entradas `(N)` viram objetos próprios e
++  suas citações `(M)` viram relações. Reindexar compara hashes e registra no ledger os
++  objetos que mudaram: contextos que os citam ficam pendentes de revisão.
++- `consultar "frase"`: filtra acesso, busca léxica (FTS5, sem acento), segue relações e,
++  só quando pedido ou quando o léxico achou pouco, chama a busca semântica SECUNDÁRIA
++  (`scripts/busca_semantica.py --json`, (327)), sempre rotulada. Devolve pacote de
++  evidência com objeto, trecho, linha, commit e sha. Nunca chama LLM. Sem resultado:
++  "não encontrado nesta busca" — nunca "não existe".
++
++Não é camada primária vetorial ((115)); não grava no canon; não lê ~/.config/agata/.env.
++"""
++from __future__ import annotations
++
++import argparse
++import hashlib
++import io
++import json
++import os
++import re
++import sqlite3
++import subprocess
++import sys
++import tarfile
++import tempfile
++import time
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++sys.path.insert(0, str(REPO / "redesign" / "nova_versao"))
++sys.path.insert(0, str(REPO / "scripts"))
++import eventos  # noqa: E402
++import busca_texto  # noqa: E402  (mesma normalização da busca por texto, (682)/(716))
++
++ESTRUTURA = {
++    "alexandria/acervo/recebido": "entrada bruta, ainda sem verificação",
++    "alexandria/acervo/quarentena": "parser isolado; nada aqui é executado nem vira instrução",
++    "alexandria/acervo/catalogado": "origem, direitos e hash registrados",
++    "alexandria/acervo/revisado": "conferido; elegível para consulta",
++    "alexandria/acervo/contestado": "preservado, mas com afirmação contestada",
++    "alexandria/acervo/restrito": "acesso limitado por silo ou sensibilidade",
++    "alexandria/acervo/arquivado": "fora de circulação, história preservada",
++    "alexandria/acervo/rejeitado": "não entra; motivo no ledger",
++    "alexandria/acervo/snapshots": "cópia fixa do repo por commit (acervo do piloto)",
++    "alexandria/skills/rascunho": "skill candidata, sem revisão",
++    "alexandria/skills/quarentena": "em revisão de fontes",
++    "alexandria/skills/em-teste": "testes reservados",
++    "alexandria/skills/elegivel": "elegível para experimento (NÃO instalada; instalar segue P-8)",
++    "alexandria/skills/revogada": "versão retirada; uso futuro impedido, registro preservado",
++    "alexandria/contextos": "pacotes de evidência entregues a modelos",
++    "metacognicao": "sombra do antes/depois do turno, sem o texto do pedido",
++    "corpo": "fotografias e saúde datadas da Máquina",
++    "redundancia/testes": "testes por rota e capacidade (lote 2)",
++    "coordenacao/tarefas": "task_id, versão de contexto e estado (lote 2)",
++    "avaliacao/dev": "casos de desenvolvimento (lote 3)",
++    "avaliacao/calibracao": "casos de calibração (lote 3)",
++    "avaliacao/teste-reservado": "gabarito fora da visão do executor (lote 3)",
++    "avaliacao/execucoes": "registro por execução (lote 3)",
++    "eventos": "ledger único, encadeado por hash",
++    "config": "orcamento.json (editado pelo painel)",
++}
++
++CANON = ("REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "PROJETO.md", "PROJETO_REFERENCIA.md", "MEMÓRIAS.md",
++         "AGENTS.md", "PROMPT_CARREGAMENTO.md")   # INDICE_MEMORIAS*.md é derivado: não é fonte
++GLOBS = ("memoria/**/*.md", "extras/**/*.md", "propostas/*.md", "redesign/*/README.md", "redesign/*/spec/spec.md")
++# acesso por caminho; o que não casar é "public" (tudo aqui está no repo público)
++PRIVADO = re.compile(r"(^|/)(privado|private|mod-[^/]+)/", re.I)
++RE_ENTRADA = re.compile(r"^\((\d{1,4})\)\s")
++RE_CITA = re.compile(r"(?<![\w(])\((\d{1,4})\)")
++NAO_ENCONTRADO = "não encontrado nesta busca"
++# a mesma entrada pode existir em cópia (extras/arquivo): a fonte viva vem primeiro
++PRIORIDADE = "CASE origem WHEN 'canon' THEN 0 WHEN 'memoria' THEN 1 ELSE 2 END, caminho"
++
++
++def cache() -> Path:
++    return Path(os.environ.get("AGATA_NV_CACHE", Path.home() / ".cache" / "agata" / "nova-versao"))
++
++
++def indice_path() -> Path:
++    return cache() / "indice.sqlite3"
++
++
++def iniciar() -> Path:
++    base = eventos.dados()
++    base.mkdir(parents=True, exist_ok=True)
++    os.chmod(base, 0o700)
++    for rel in ESTRUTURA:
++        (base / rel).mkdir(parents=True, exist_ok=True)
++    linhas = ["# Nova versão do Agata — pastas de trabalho", "",
++              "Gerado por `redesign/alexandria/acervo.py iniciar`. Fora do repo. Não editar à mão.", ""]
++    linhas += [f"- `{rel}/` — {desc}" for rel, desc in ESTRUTURA.items()]
++    (base / "LEIA-ME.md").write_text("\n".join(linhas) + "\n", encoding="utf-8")
++    eventos.registrar("execution", "ok", "estrutura", componente="alexandria", chave="iniciar:v1")
++    return base
++
++
++def snapshot(commit: str = "HEAD", repo: Path = REPO) -> Path:
++    sha = subprocess.run(["git", "-C", str(repo), "rev-parse", "--verify", commit + "^{commit}"],
++                         capture_output=True, text=True, check=True).stdout.strip()
++    destino = eventos.dados() / "alexandria" / "acervo" / "snapshots" / sha[:12]
++    if (destino / ".completo").exists():
++        return destino
++    bruto = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", sha],
++                           capture_output=True, check=True).stdout
++    tmp = Path(tempfile.mkdtemp(dir=destino.parent if destino.parent.exists() else None, prefix=".snap-"))
++    with tarfile.open(fileobj=io.BytesIO(bruto)) as tar:
++        tar.extractall(tmp, filter="data")  # sem link absoluto, sem sair da pasta
++    (tmp / ".commit").write_text(sha + "\n", encoding="utf-8")
++    (tmp / ".completo").write_text("", encoding="utf-8")
++    destino.parent.mkdir(parents=True, exist_ok=True)
++    os.replace(tmp, destino)
++    eventos.registrar("observation", "ok", f"snapshot:{sha[:12]}", componente="alexandria", chave=f"snapshot:{sha}",
++                      commit=sha)
++    return destino
++
++
++def _fontes(raiz: Path):
++    vistos = set()
++    for nome in CANON:
++        p = raiz / nome
++        if p.is_file():
++            vistos.add(p); yield p, "canon"
++    for g in GLOBS:
++        for p in sorted(raiz.glob(g)):
++            if p.is_file() and p not in vistos and not any(x.startswith(".") for x in p.relative_to(raiz).parts):
++                vistos.add(p)
++                yield p, ("memoria" if g.startswith("memoria") else g.split("/")[0])
++
++
++def _blocos(linhas: list[str]):
++    """Parágrafos (linhas não vazias seguidas), com a linha inicial (1-based)."""
++    ini, buf = None, []
++    for i, ln in enumerate(linhas, 1):
++        if ln.strip():
++            if ini is None:
++                ini = i
++            buf.append(ln)
++        elif buf:
++            yield ini, "\n".join(buf); ini, buf = None, []
++    if buf:
++        yield ini, "\n".join(buf)
++
++
++def _objetos(raiz: Path, commit: str):
++    """Gera (objeto, [trechos]) — arquivos inteiros e, dentro deles, entradas (N)."""
++    for p, origem in _fontes(raiz):
++        rel = p.relative_to(raiz).as_posix()
++        texto = p.read_text(encoding="utf-8", errors="replace")
++        linhas = texto.splitlines()
++        acesso = "private" if PRIVADO.search(rel) else "public"
++        editorial = "revisado" if origem in ("canon", "memoria") else "catalogado"
++        entradas = [(i, int(m.group(1))) for i, ln in enumerate(linhas, 1) if (m := RE_ENTRADA.match(ln))]
++        if entradas:
++            limites = [i for i, _ in entradas] + [len(linhas) + 1]
++            for (i, n), fim in zip(entradas, limites[1:]):
++                corpo = "\n".join(linhas[i - 1:fim - 1])
++                obj = {"object_id": f"alex:entrada:{n}@{rel}", "tipo": "entrada", "entrada": n, "caminho": rel,
++                       "linha": i, "commit": commit, "sha256": hashlib.sha256(corpo.encode()).hexdigest(),
++                       "classification": acesso, "editorial_status": editorial, "origem": origem,
++                       "cita": sorted({int(c) for c in RE_CITA.findall(corpo)} - {n})}
++                yield obj, [(i + off - 1, b) for off, b in _blocos(linhas[i - 1:fim - 1])]
++            cabeca = linhas[:entradas[0][0] - 1]
++        else:
++            cabeca = linhas
++        obj = {"object_id": f"alex:arquivo:{rel}", "tipo": "arquivo", "entrada": None, "caminho": rel, "linha": 1,
++               "commit": commit, "sha256": hashlib.sha256(texto.encode()).hexdigest(), "classification": acesso,
++               "editorial_status": editorial, "origem": origem, "cita": []}
++        yield obj, list(_blocos(cabeca))
++
++
++ESQUEMA = """
++CREATE TABLE meta(chave TEXT PRIMARY KEY, valor TEXT);
++CREATE TABLE objects(object_id TEXT PRIMARY KEY, tipo TEXT, entrada INTEGER, caminho TEXT, linha INTEGER,
++  commit_ TEXT, sha256 TEXT, classification TEXT, editorial_status TEXT, origem TEXT,
++  v_identidade TEXT, v_integridade TEXT, v_suporte TEXT);
++CREATE TABLE relations(src TEXT, dst_entrada INTEGER, tipo TEXT);
++CREATE TABLE trechos(rowid INTEGER PRIMARY KEY, object_id TEXT, linha INTEGER, texto TEXT);
++CREATE VIRTUAL TABLE trechos_fts USING fts5(texto, content='trechos', content_rowid='rowid',
++  tokenize='unicode61 remove_diacritics 2');
++CREATE TABLE skills(skill_id TEXT PRIMARY KEY, nome TEXT, origem TEXT, caminho TEXT, descricao TEXT,
++  sha256 TEXT, estado TEXT, quarentena INTEGER);
++CREATE VIRTUAL TABLE skills_fts USING fts5(nome, descricao, content='skills', tokenize='unicode61 remove_diacritics 2');
++"""
++
++
++def _anteriores() -> dict:
++    try:
++        con = sqlite3.connect(f"file:{indice_path()}?mode=ro", uri=True)
++        try:
++            return dict(con.execute("SELECT object_id, sha256 FROM objects"))
++        finally:
++            con.close()
++    except sqlite3.Error:
++        return {}
++
++
++def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
++    """Reconstrói o índice inteiro a partir do snapshot (determinístico; troca atômica)."""
++    raiz = Path(raiz) if raiz else snapshot("HEAD")
++    commit = (raiz / ".commit").read_text().strip() if (raiz / ".commit").exists() else "sem-commit"
++    antes = _anteriores()
++    cache().mkdir(parents=True, exist_ok=True)
++    fd, tmp = tempfile.mkstemp(dir=cache(), prefix=".indice.", suffix=".sqlite3")
++    os.close(fd)
++    con = sqlite3.connect(tmp)
++    try:
++        con.executescript(ESQUEMA)
++        n_obj = n_tr = 0
++        for obj, trechos in _objetos(raiz, commit):
++            con.execute("INSERT OR REPLACE INTO objects VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
++                        (obj["object_id"], obj["tipo"], obj["entrada"], obj["caminho"], obj["linha"], commit,
++                         obj["sha256"], obj["classification"], obj["editorial_status"], obj["origem"],
++                         f"git:{commit[:12]}", "sha256", "not_checked"))
++            con.executemany("INSERT INTO relations VALUES (?,?, 'cita')", [(obj["object_id"], c) for c in obj["cita"]])
++            for linha, texto in trechos:
++                cur = con.execute("INSERT INTO trechos(object_id, linha, texto) VALUES (?,?,?)",
++                                  (obj["object_id"], linha, texto[:4000]))
++                con.execute("INSERT INTO trechos_fts(rowid, texto) VALUES (?,?)", (cur.lastrowid, texto[:4000]))
++                n_tr += 1
++            n_obj += 1
++        n_sk = 0
++        if skills:
++            sys.path.insert(0, str(AQUI))
++            import skills as _sk  # noqa: E402
++            n_sk = _sk.popular(con, raiz)
++        con.executemany("INSERT INTO meta VALUES (?,?)", [("commit", commit), ("raiz", str(raiz)),
++                        ("gerado_em", time.strftime("%Y-%m-%dT%H:%M:%S%z")), ("objetos", str(n_obj)),
++                        ("trechos", str(n_tr)), ("skills", str(n_sk)), ("schema", "1")])
++        novos = dict(con.execute("SELECT object_id, sha256 FROM objects"))
++        con.commit()
++    finally:
++        con.close()
++    os.replace(tmp, indice_path())
++    mudou = sorted(k for k, v in novos.items() if k in antes and antes[k] != v)
++    saiu = sorted(set(antes) - set(novos))
++    if mudou or saiu:
++        eventos.registrar("drift", "derivados_pendentes", "indice", componente="alexandria", commit=commit,
++                          mudaram=mudou[:200], sairam=saiu[:200], n_mudaram=len(mudou), n_sairam=len(saiu))
++    eventos.registrar("execution", "ok", "indexar", componente="alexandria", commit=commit, objetos=n_obj,
++                      trechos=n_tr, skills=n_sk)
++    return {"commit": commit, "objetos": n_obj, "trechos": n_tr, "skills": n_sk, "mudaram": len(mudou), "sairam": len(saiu)}
++
++
++def _con() -> sqlite3.Connection:
++    if not indice_path().exists():
++        raise FileNotFoundError("índice ausente: rode `acervo.py indexar`")
++    con = sqlite3.connect(f"file:{indice_path()}?mode=ro", uri=True)
++    con.row_factory = sqlite3.Row
++    return con
++
++
++def meta() -> dict:
++    try:
++        con = _con()
++    except FileNotFoundError:
++        return {}
++    try:
++        return dict(con.execute("SELECT chave, valor FROM meta").fetchall())
++    finally:
++        con.close()
++
++
++def _alvo(con, entrada: int, permitidos: tuple):
++    # só fonte viva (canon e memória); cópia em extras/arquivo não é alvo de citação
++    sql = ("SELECT * FROM objects WHERE entrada = ? AND origem IN ('canon', 'memoria') AND classification IN (%s)"
++           " ORDER BY %s LIMIT 1"
++           % (",".join("?" * len(permitidos)), PRIORIDADE))
++    return con.execute(sql, (entrada, *permitidos)).fetchone()
++
++
++def _fts_query(ps: list[str]) -> str:
++    return " OR ".join('"' + p.replace('"', "") + '"*' for p in ps)
++
++
++def _semantica_padrao(consulta: str, n: int) -> list[dict]:
++    r = subprocess.run([sys.executable, str(REPO / "scripts" / "busca_semantica.py"), "--json", "-n", str(n), consulta],
++                       capture_output=True, text=True, timeout=30)
++    if r.returncode != 0:
++        raise RuntimeError((r.stderr or r.stdout).strip().splitlines()[-1:] or ["falhou"])
++    d = json.loads(r.stdout)
++    return d if isinstance(d, list) else d.get("resultados", [])
++
++
++def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: str = "auto",
++              buscar_semantica=None, salvar: bool = False) -> dict:
++    """Pacote de evidência. `semantica`: nunca | auto (só se o léxico achar < 3) | sempre."""
++    if acesso not in ("public", "project", "private"):
++        raise ValueError("acesso fora da lista")
++    permitidos = {"public": ("public",), "project": ("public", "project"), "private": ("public", "project", "private")}[acesso]
++    ps = busca_texto.palavras(consulta)
++    avisos, resultados, metodos = [], [], []
++    m = meta()
++    con = _con()
++    try:
++        if ps:
++            linhas = con.execute(
++                "SELECT t.object_id, t.linha, t.texto, o.caminho, o.commit_, o.sha256, o.entrada, o.classification,"
++                " o.editorial_status, bm25(trechos_fts) AS r FROM trechos_fts JOIN trechos t ON t.rowid = trechos_fts.rowid"
++                " JOIN objects o ON o.object_id = t.object_id WHERE trechos_fts MATCH ? AND o.classification IN (%s)"
++                " ORDER BY r LIMIT 400" % ",".join("?" * len(permitidos)), (_fts_query(ps), *permitidos)).fetchall()
++            inteiras = [re.compile(r"(?<![a-z0-9])" + re.escape(p) + r"(?![a-z0-9])") for p in ps]
++
++            def chave(row):
++                norm = busca_texto._norm(row["texto"])
++                return (-sum(p in norm for p in ps), -sum(bool(x.search(norm)) for x in inteiras), row["r"])
++            vistos = set()
++            for row in sorted(linhas, key=chave):
++                if row["object_id"] in vistos:
++                    continue
++                vistos.add(row["object_id"])
++                norm = busca_texto._norm(row["texto"])
++                resultados.append({"object_id": row["object_id"], "caminho": row["caminho"], "linha": row["linha"],
++                                   "entrada": row["entrada"], "trecho": row["texto"][:300], "commit": row["commit_"],
++                                   "sha256": row["sha256"], "classification": row["classification"],
++                                   "editorial_status": row["editorial_status"], "metodo": "lexico",
++                                   "palavras": f"{sum(p in norm for p in ps)}/{len(ps)}"})
++                if len(resultados) >= n:
++                    break
++            if resultados:
++                metodos.append("lexico")
++            # relações: entradas citadas pelos dois primeiros resultados (cita), rotuladas
++            ja = {r["entrada"] for r in resultados if r["entrada"] is not None}
++            for r in resultados[:2]:
++                for (dst,) in con.execute("SELECT dst_entrada FROM relations WHERE src = ? LIMIT 3", (r["object_id"],)):
++                    if dst in ja:
++                        continue
++                    alvo = _alvo(con, dst, permitidos)
++                    if alvo:
++                        ja.add(dst)
++                        resultados.append({"object_id": alvo["object_id"], "caminho": alvo["caminho"], "linha": alvo["linha"],
++                                           "entrada": dst, "trecho": None, "commit": alvo["commit_"], "sha256": alvo["sha256"],
++                                           "classification": alvo["classification"],
++                                           "editorial_status": alvo["editorial_status"], "metodo": "relacao",
++                                           "via": r["object_id"]})
++                        if "relacao" not in metodos:
++                            metodos.append("relacao")
++        n_lex = sum(r["metodo"] == "lexico" for r in resultados)
++        if semantica == "sempre" or (semantica == "auto" and n_lex < 3):
++            try:
++                achados = (buscar_semantica or _semantica_padrao)(consulta, n)
++                ja = {r["entrada"] for r in resultados if r["entrada"] is not None}
++                for a in achados:
++                    num = a.get("num")
++                    alvo = _alvo(con, num, permitidos) if num else None
++                    if not alvo or num in ja:
++                        continue
++                    ja.add(num)
++                    resultados.append({"object_id": alvo["object_id"], "caminho": alvo["caminho"], "linha": alvo["linha"],
++                                       "entrada": num, "trecho": (a.get("trecho") or "")[:300], "commit": alvo["commit_"],
++                                       "sha256": alvo["sha256"], "classification": alvo["classification"],
++                                       "editorial_status": alvo["editorial_status"], "metodo": "semantica",
++                                       "score": a.get("score")})
++                if any(r["metodo"] == "semantica" for r in resultados):
++                    metodos.append("semantica")
++            except Exception as e:  # noqa: BLE001 — endpoint fora: degrada para léxico, com aviso
++                avisos.append(f"busca semântica indisponível ({e.__class__.__name__}); resultado só léxico")
++    finally:
++        con.close()
++    pacote = {"schema_version": 1, "consulta_sha256": hashlib.sha256(consulta.encode()).hexdigest(),
++              "commit": m.get("commit"), "indice_gerado_em": m.get("gerado_em"), "acesso": acesso,
++              "gerado_em": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "metodos": metodos, "avisos": avisos,
++              "estado": "encontrado" if resultados else NAO_ENCONTRADO, "palavras": ps, "resultados": resultados}
++    pacote["context_id"] = "ctx:" + hashlib.sha256(json.dumps([pacote["consulta_sha256"], m.get("commit"),
++                                                              [r["object_id"] for r in resultados]]).encode()).hexdigest()[:16]
++    if salvar:
++        destino = eventos.dados() / "alexandria" / "contextos" / (pacote["context_id"].split(":")[1] + ".json")
++        destino.parent.mkdir(parents=True, exist_ok=True)
++        destino.write_text(json.dumps(pacote, ensure_ascii=False, indent=1), encoding="utf-8")
++    return pacote
++
++
++def contexto_valido(pacote: dict) -> dict:
++    """Um pacote antigo ainda vale? Compara o sha de cada objeto com o índice atual."""
++    con = _con()
++    try:
++        pend = []
++        for r in pacote.get("resultados", []):
++            row = con.execute("SELECT sha256 FROM objects WHERE object_id = ?", (r["object_id"],)).fetchone()
++            if row is None or row["sha256"] != r["sha256"]:
++                pend.append(r["object_id"])
++    finally:
++        con.close()
++    return {"valido": not pend, "pendentes": pend}
++
++
++def estado() -> dict:
++    base = eventos.dados()
++    contagem = {}
++    for rel in ESTRUTURA:
++        if rel.startswith("alexandria/acervo/") and not rel.endswith("snapshots"):
++            p = base / rel
++            contagem[rel.rsplit("/", 1)[1]] = sum(1 for _ in p.iterdir()) if p.exists() else None
++    m = meta()
++    snaps = sorted(p.name for p in (base / "alexandria/acervo/snapshots").glob("*")) if (base / "alexandria/acervo/snapshots").exists() else []
++    return {"iniciado": (base / "LEIA-ME.md").exists(), "indice": m or None, "snapshots": snaps, "editorial": contagem}
++
++
++def main(argv: list[str]) -> int:
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    sub = ap.add_subparsers(dest="cmd", required=True)
++    sub.add_parser("iniciar")
++    s = sub.add_parser("snapshot"); s.add_argument("commit", nargs="?", default="HEAD")
++    i = sub.add_parser("indexar"); i.add_argument("--raiz", type=Path)
++    c = sub.add_parser("consultar"); c.add_argument("consulta"); c.add_argument("-n", type=int, default=8)
++    c.add_argument("--acesso", default="public"); c.add_argument("--semantica", default="auto", choices=("nunca", "auto", "sempre"))
++    c.add_argument("--salvar", action="store_true")
++    sub.add_parser("estado")
++    a = ap.parse_args(argv)
++    if a.cmd == "iniciar":
++        print(iniciar())
++    elif a.cmd == "snapshot":
++        print(snapshot(a.commit))
++    elif a.cmd == "indexar":
++        print(json.dumps(indexar(a.raiz), ensure_ascii=False))
++    elif a.cmd == "consultar":
++        p = consultar(a.consulta, acesso=a.acesso, n=a.n, semantica=a.semantica, salvar=a.salvar)
++        print(json.dumps(p, ensure_ascii=False, indent=1))
++        return 0 if p["resultados"] else 1
++    else:
++        print(json.dumps(estado(), ensure_ascii=False, indent=1))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/redesign/alexandria/skills.py b/redesign/alexandria/skills.py
+new file mode 100644
+index 00000000..b1f3d40d
+--- /dev/null
++++ b/redesign/alexandria/skills.py
+@@ -0,0 +1,140 @@
++#!/usr/bin/env python3
++"""Alexandria — índice de skills separado do índice de documentos, e seleção léxica.
++
++Skill é procedimento; documento é conteúdo (Experimento GPT, Alexandria §8–§9, (063)–(065)).
++Por isso as skills têm tabela e FTS próprios. Junta os três índices que hoje estão
++desconexos, sem alterar nenhum deles:
++- `.agents/skills/*/SKILL.md` (próprias; dono em `.agents/skills/INDICE.md`);
++- `.claude/skills/*/SKILL.md` (terceiros instaladas);
++- `ferramentas/indice.json` (catálogo de fontes externas, com a quarentena de
++  `ferramentas/ferramentas.py`: peça em quarentena é listada, nunca sugerida).
++
++Seleção: menção explícita do nome tem prioridade; depois busca léxica por nome e
++descrição. Registra `disponivel`/`selecionada` e o sha256 do SKILL.md. NÃO lê o corpo
++para executar, NÃO carrega, NÃO instala: escolher não é executar (invariante do briefing).
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import re
++import sqlite3
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++sys.path.insert(0, str(REPO / "ferramentas"))
++sys.path.insert(0, str(REPO / "scripts"))
++import busca_texto  # noqa: E402
++
++try:
++    from ferramentas import QUARENTENA  # noqa: E402
++except Exception:  # noqa: BLE001 — sem o catálogo, nada fica fora da quarentena por engano
++    QUARENTENA = re.compile(r".*")
++
++
++def _frontmatter(p: Path) -> dict:
++    try:
++        texto = p.read_text(encoding="utf-8", errors="replace")
++    except OSError:
++        return {}
++    if not texto.startswith("---"):
++        return {}
++    fm = {}
++    for ln in texto.split("---", 2)[1].splitlines():
++        if ":" in ln and not ln.startswith(" "):
++            k, v = ln.split(":", 1)
++            fm[k.strip()] = v.strip().strip('"')
++    return fm
++
++
++def _sha(p: Path) -> str | None:
++    try:
++        return hashlib.sha256(p.read_bytes()).hexdigest()
++    except OSError:
++        return None
++
++
++def varrer(raiz: Path) -> list[dict]:
++    out, vistos = [], set()
++    for origem, base in (("propria", raiz / ".agents" / "skills"), ("terceiro", raiz / ".claude" / "skills")):
++        for p in sorted(base.glob("*/SKILL.md")) if base.exists() else []:
++            fm = _frontmatter(p)
++            nome = fm.get("name") or p.parent.name
++            rel = p.relative_to(raiz).as_posix()
++            if (nome, origem) in vistos:
++                continue
++            vistos.add((nome, origem))
++            out.append({"skill_id": f"skill:{origem}:{nome}", "nome": nome, "origem": origem, "caminho": rel,
++                        "descricao": fm.get("description", ""), "sha256": _sha(p), "estado": "disponivel",
++                        "quarentena": 0})
++    try:
++        catalogo = json.loads((raiz / "ferramentas" / "indice.json").read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        catalogo = []
++    for item in catalogo if isinstance(catalogo, list) else []:
++        nome = str(item.get("nome", ""))
++        if not nome or item.get("tipo") != "skill" or any(nome == s["nome"] for s in out if s["origem"] == "propria"):
++            continue
++        q = 1 if QUARENTENA.match(nome) else 0
++        out.append({"skill_id": f"skill:{item.get('fonte', 'catalogo')}:{nome}", "nome": nome,
++                    "origem": f"catalogo:{item.get('fonte', '?')}", "caminho": item.get("caminho", ""),
++                    "descricao": item.get("resumo", ""), "sha256": _sha(raiz / item.get("caminho", "")) if item.get("caminho") else None,
++                    "estado": "quarentena" if q else "disponivel", "quarentena": q})
++    return out
++
++
++def popular(con: sqlite3.Connection, raiz: Path) -> int:
++    lista = varrer(Path(raiz))
++    for s in lista:
++        cur = con.execute("INSERT OR IGNORE INTO skills VALUES (?,?,?,?,?,?,?,?)",
++                          (s["skill_id"], s["nome"], s["origem"], s["caminho"], s["descricao"], s["sha256"],
++                           s["estado"], s["quarentena"]))
++        if cur.rowcount == 0:
++            continue
++        con.execute("INSERT INTO skills_fts(rowid, nome, descricao) VALUES (?,?,?)",
++                    (cur.lastrowid, s["nome"].replace("-", " "), s["descricao"]))
++    return con.execute("SELECT count(*) FROM skills").fetchone()[0]
++
++
++def selecionar(consulta: str, n: int = 3, con: sqlite3.Connection | None = None) -> dict:
++    sys.path.insert(0, str(AQUI))
++    import acervo  # noqa: E402
++    proprio = con is None
++    con = con or acervo._con()
++    con.row_factory = sqlite3.Row
++    try:
++        norm = busca_texto._norm(consulta)
++        candidatos, vistos = [], set()
++        # 1) menção explícita do nome, entre as permitidas (fora da quarentena)
++        for row in con.execute("SELECT * FROM skills WHERE quarentena = 0"):
++            if re.search(r"(?<![\w-])" + re.escape(row["nome"].lower()) + r"(?![\w-])", norm):
++                candidatos.append({**dict(row), "motivo": "mencao_explicita"}); vistos.add(row["skill_id"])
++        # 2) léxico por nome e descrição
++        ps = busca_texto.palavras(consulta)
++        if ps and len(candidatos) < n:
++            q = " OR ".join('"' + p + '"*' for p in ps)
++            for row in con.execute("SELECT s.*, bm25(skills_fts) AS r FROM skills_fts JOIN skills s ON s.rowid = skills_fts.rowid"
++                                   " WHERE skills_fts MATCH ? AND s.quarentena = 0 ORDER BY r LIMIT ?", (q, n * 3)):
++                if row["skill_id"] not in vistos:
++                    vistos.add(row["skill_id"]); d = dict(row); d.pop("r", None)
++                    candidatos.append({**d, "motivo": "lexico"})
++                if len(candidatos) >= n:
++                    break
++    finally:
++        if proprio:
++            con.close()
++    for c in candidatos:
++        c["estado"] = "selecionada"   # sugestão: ninguém leu nem aplicou
++        c["aplicada"] = False
++    return {"schema_version": 1, "candidatos": candidatos[:n],
++            "nota": "seleção consultiva: o executor ainda precisa ler o SKILL.md inteiro; nada foi executado"}
++
++
++if __name__ == "__main__":
++    if len(sys.argv) == 3 and sys.argv[1] == "selecionar":
++        print(json.dumps(selecionar(sys.argv[2]), ensure_ascii=False, indent=1))
++        sys.exit(0)
++    print(__doc__)
++    sys.exit(2)
+diff --git a/redesign/alexandria/spec/acceptance.json b/redesign/alexandria/spec/acceptance.json
+new file mode 100644
+index 00000000..cd698c34
+--- /dev/null
++++ b/redesign/alexandria/spec/acceptance.json
+@@ -0,0 +1,56 @@
++[
++  {
++    "criterion": "o índice é reconstruível e determinístico",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_indice_reconstruivel_e_deterministico"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "hash que muda marca o derivado como pendente",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_hash_muda_e_derivado_fica_pendente"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "objeto privado não aparece em consulta pública",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_privado_nao_aparece_em_consulta_publica"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "busca semântica fora do ar degrada para léxico com rótulo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_semantica_fora_degrada_para_lexico_com_rotulo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "ausência sai como não encontrado nesta busca",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_ausencia_e_nao_encontrado_nesta_busca"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "skill selecionada não é executada e a quarentena fica fora",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_skill_selecionada_nao_executa_e_quarentena_fica_fora"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/alexandria/spec/spec.md b/redesign/alexandria/spec/spec.md
+new file mode 100644
+index 00000000..c2312858
+--- /dev/null
++++ b/redesign/alexandria/spec/spec.md
+@@ -0,0 +1,51 @@
++# Spec — Alexandria (acervo, consulta e skills)
++
++Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Origem: Experimento GPT, `proposta-tecnica-alexandria-editorial.md` §4–§9 e (068)–(075). Não tem autoridade normativa: organiza e recupera, não decide.
++
++## Jornadas críticas
++
++1. Um modelo ou o Humano consulta o acervo e recebe pacote de evidência com objeto, trecho, linha, commit e sha.
++2. O Humano reindexa pelo painel depois de um merge; objetos que mudaram ficam registrados e os pacotes antigos que os citam deixam de valer.
++3. Um pedido recebe sugestão de skill, sem que nada seja carregado ou executado.
++
++## Contrato
++
++- `acervo.py iniciar` cria as pastas de trabalho (`ESTRUTURA`) e o `LEIA-ME.md` em `AGATA_NV_DIR`, 0700.
++- `acervo.py snapshot <commit>` faz cópia fixa do repo com `git archive` (extração com `filter="data"`) e marca `.commit`/`.completo`; repetir o mesmo commit não recopia.
++- `acervo.py indexar` reconstrói `AGATA_NV_CACHE/indice.sqlite3` do zero, em arquivo temporário trocado atomicamente. Fontes fixas, nunca vindas da consulta: canon (`REGRAS`, `PROTOCOLOS`, `FALHAS`, `PROJETO`, `PROJETO_REFERENCIA`, `MEMÓRIAS`, `AGENTS`, `PROMPT_CARREGAMENTO`), `memoria/**/*.md`, `extras/**/*.md`, `propostas/*.md`, `redesign/*/README.md` e `redesign/*/spec/spec.md`. `INDICE_MEMORIAS*.md` fica fora porque é derivado.
++- Cada linha que começa com `(N) ` vira objeto `alex:entrada:N@caminho`; as citações `(M)` dentro dela viram relações `cita` (a mesma regra `REF_ENTRADA` do vault). Arquivo inteiro vira `alex:arquivo:caminho`. Trechos são parágrafos com a linha inicial.
++- Classificação: caminho com `privado/`, `private/` ou `mod-*/` vira `private`; o resto, `public`. Estado editorial: `revisado` para canon e `memoria/`, `catalogado` para o resto. Verificação: identidade `git:<commit>`, integridade `sha256`, suporte factual `not_checked`.
++- Ao reindexar, objetos com sha diferente ou que saíram geram evento `drift` (`derivados_pendentes`) no ledger; `contexto_valido(pacote)` diz quais objetos de um pacote antigo mudaram.
++- `consultar` filtra acesso, busca no FTS5 (`unicode61 remove_diacritics 2`) com a normalização de `scripts/busca_texto.py` e ordena como ela (mais palavras, depois palavra inteira, depois bm25). Depois segue até 3 relações `cita` dos 2 primeiros resultados, só para canon e memória, e usa a semântica secundária (`scripts/busca_semantica.py --json`) quando `semantica=sempre` ou quando, em `auto`, o léxico achou menos de 3. Cada resultado leva o método: `lexico`, `relacao` ou `semantica`. Semântica fora do ar vira aviso, e o resultado continua só léxico. Sem resultado, o estado é `não encontrado nesta busca`. Nunca chama LLM.
++- `skills.py` indexa em tabela e FTS próprios `.agents/skills/*/SKILL.md`, `.claude/skills/*/SKILL.md` e as skills de `ferramentas/indice.json`; peça que casa a `QUARENTENA` de `ferramentas/ferramentas.py` é listada, mas nunca sugerida. `selecionar` põe a menção explícita do nome primeiro, depois o léxico; marca `selecionada`, `aplicada: false` e o sha do SKILL.md. Não lê o corpo para executar.
++
++## Critérios de aceite
++
++- [ ] o índice é reconstruível e determinístico
++- [ ] hash que muda marca o derivado como pendente
++- [ ] objeto privado não aparece em consulta pública
++- [ ] busca semântica fora do ar degrada para léxico com rótulo
++- [ ] ausência sai como não encontrado nesta busca
++- [ ] skill selecionada não é executada e a quarentena fica fora
++
++## Desenho e alternativas
++
++FTS5 do SQLite (medido disponível em 04/11, SQLite 3.54.0), sem dependência nova. Descartados: banco vetorial como base ((115)); servidor de grafo (o grafo é a tabela `relations`); reescrever o `busca_texto` (a normalização é importada dele).
++
++## Implementação e testes
++
++`acervo.py` e `skills.py`; testes em `tests/test_alexandria.py`, com repositório git temporário.
++
++## Migração e reversão
++
++Índice e pastas são derivados e ficam fora do repo: apagar `AGATA_NV_CACHE` e rodar `indexar` de novo reconstrói tudo. Reversão do código por revert.
++
++## Riscos e dependências
++
++Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "suspend travamento" devolve (99) e (124) nos dois primeiros lugares. Enumerações "(1)", "(2)" no texto viram citação, como no vault. A qualidade da recuperação em paráfrases não foi medida (lote 3).
++
++## Código
++
++- `acervo.py`
++- `skills.py`
++- `tests/`
+diff --git a/redesign/alexandria/tests/test_alexandria.py b/redesign/alexandria/tests/test_alexandria.py
+new file mode 100644
+index 00000000..352568dd
+--- /dev/null
++++ b/redesign/alexandria/tests/test_alexandria.py
+@@ -0,0 +1,114 @@
++import json
++import os
++import sqlite3
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import acervo  # noqa: E402
++import skills  # noqa: E402
++
++GIT = ["git", "-c", "user.email=t@t", "-c", "user.name=t"]
++
++
++def commit(repo: Path, msg="x"):
++    subprocess.run([*GIT, "-C", str(repo), "add", "-A"], check=True)
++    subprocess.run([*GIT, "-C", str(repo), "commit", "-qm", msg], check=True)
++
++
++class Base(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        t = Path(self.tmp.name)
++        os.environ["AGATA_NV_DIR"] = str(t / "dados")
++        os.environ["AGATA_NV_CACHE"] = str(t / "cache")
++        self.repo = t / "repo"
++        (self.repo / "memoria" / "privado").mkdir(parents=True)
++        (self.repo / ".agents" / "skills" / "foo-bar").mkdir(parents=True)
++        (self.repo / "ferramentas").mkdir()
++        (self.repo / "MEMÓRIAS.md").write_text(
++            "# M\n\n(10) DIÁRIO — x · travamento no suspend, ver (11)\n\n(11) DIÁRIO — y · base do suspend\n", encoding="utf-8")
++        (self.repo / "memoria" / "privado" / "nota.md").write_text("segredo do jardim travamento\n", encoding="utf-8")
++        (self.repo / ".agents" / "skills" / "foo-bar" / "SKILL.md").write_text(
++            "---\nname: foo-bar\ndescription: aplicar proposta assinada no repositório\n---\ncorpo\n", encoding="utf-8")
++        (self.repo / "ferramentas" / "indice.json").write_text(json.dumps([
++            {"nome": "continuous-learning-x", "tipo": "skill", "fonte": "ecc", "caminho": "", "resumo": "aplicar proposta sozinho"},
++            {"nome": "doc-helper", "tipo": "skill", "fonte": "ecc", "caminho": "", "resumo": "escrever documentação"}]), encoding="utf-8")
++        subprocess.run(["git", "init", "-q", str(self.repo)], check=True)
++        commit(self.repo)
++        acervo.iniciar()
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def indexar(self):
++        return acervo.indexar(acervo.snapshot("HEAD", self.repo))
++
++
++class AlexandriaTests(Base):
++    def test_indice_reconstruivel_e_deterministico(self):
++        self.indexar()
++        con = sqlite3.connect(acervo.indice_path())
++        a = con.execute("SELECT object_id, sha256, classification FROM objects ORDER BY 1").fetchall()
++        con.close()
++        os.remove(acervo.indice_path())
++        self.indexar()
++        con = sqlite3.connect(acervo.indice_path())
++        b = con.execute("SELECT object_id, sha256, classification FROM objects ORDER BY 1").fetchall()
++        con.close()
++        self.assertEqual(a, b)
++        self.assertTrue(any(o.startswith("alex:entrada:10@") for o, *_ in a))
++
++    def test_hash_muda_e_derivado_fica_pendente(self):
++        self.indexar()
++        pac = acervo.consultar("suspend travamento", semantica="nunca")
++        self.assertTrue(acervo.contexto_valido(pac)["valido"])
++        (self.repo / "MEMÓRIAS.md").write_text(
++            "# M\n\n(10) DIÁRIO — x · travamento no suspend corrigido\n\n(11) DIÁRIO — y · base do suspend\n", encoding="utf-8")
++        commit(self.repo, "muda")
++        r = self.indexar()
++        self.assertGreaterEqual(r["mudaram"], 1)
++        v = acervo.contexto_valido(pac)
++        self.assertFalse(v["valido"])
++        ledger = Path(os.environ["AGATA_NV_DIR"]) / "eventos" / "ledger.jsonl"
++        self.assertTrue(any(json.loads(x)["kind"] == "drift" for x in ledger.read_text().splitlines()))
++
++    def test_privado_nao_aparece_em_consulta_publica(self):
++        self.indexar()
++        pub = acervo.consultar("jardim", semantica="nunca")
++        self.assertEqual(pub["estado"], acervo.NAO_ENCONTRADO)
++        priv = acervo.consultar("jardim", acesso="private", semantica="nunca")
++        self.assertTrue(priv["resultados"] and priv["resultados"][0]["classification"] == "private")
++
++    def test_semantica_fora_degrada_para_lexico_com_rotulo(self):
++        self.indexar()
++
++        def cai(q, n):
++            raise ConnectionError("e5 fora")
++        p = acervo.consultar("suspend", semantica="sempre", buscar_semantica=cai)
++        self.assertEqual(p["metodos"][0], "lexico")
++        self.assertTrue(any("semântica indisponível" in a for a in p["avisos"]))
++        q = acervo.consultar("xyzwq", semantica="sempre", buscar_semantica=lambda q, n: [{"num": 11, "score": 0.8}])
++        self.assertEqual([r["metodo"] for r in q["resultados"]], ["semantica"])
++
++    def test_ausencia_e_nao_encontrado_nesta_busca(self):
++        self.indexar()
++        p = acervo.consultar("palavrainexistentezz", semantica="nunca")
++        self.assertEqual(p["estado"], "não encontrado nesta busca")
++        self.assertEqual(p["resultados"], [])
++
++    def test_skill_selecionada_nao_executa_e_quarentena_fica_fora(self):
++        self.indexar()
++        s = skills.selecionar("use foo-bar para aplicar proposta")
++        self.assertEqual(s["candidatos"][0]["nome"], "foo-bar")
++        self.assertEqual(s["candidatos"][0]["motivo"], "mencao_explicita")
++        self.assertTrue(all(c["aplicada"] is False and c["estado"] == "selecionada" for c in s["candidatos"]))
++        self.assertFalse(any(c["nome"] == "continuous-learning-x" for c in s["candidatos"]))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/corpo/fotografar.py b/redesign/corpo/fotografar.py
+new file mode 100644
+index 00000000..61d4ac0b
+--- /dev/null
++++ b/redesign/corpo/fotografar.py
+@@ -0,0 +1,165 @@
++#!/usr/bin/env python3
++"""Corpo operacional — fotografia datada da Máquina, só leitura.
++
++Origem: Experimento GPT, conclusões (034)–(036) e `inventario-servicos-agata-2026-11-04.md`;
++promove a coleta de `auditoria-2026-11-04/coletar_evidencias.py` a componente.
++
++O que lê (GET e comandos de leitura, nunca POST, nunca reinício, nunca geração):
++- `systemctl --user show` das unidades declaradas em UNIDADES;
++- portas em escuta (`ss -ltn`);
++- Ollama `/api/tags` (instalado) e OmniRoute `/api/models` (anunciado) e `/api/combos` (em fila);
++- disco, memória, carga e temperatura (`/proc`, `/sys`, `shutil.disk_usage`).
++
++Para cada modelo ou rota, separa os campos que o inventário pede (§5): instalado, anunciado,
++elegível, testado, em fila e pronto. "Testado" e "elegível" só vêm de medição própria
++(lote 2) — aqui ficam `null` (não medido), nunca deduzidos do catálogo.
++
++Grava `<dados>/corpo/fotografias.jsonl` (append) e devolve o dicionário.
++"""
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import subprocess
++import sys
++import time
++import urllib.request
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parents[0] / "nova_versao"))
++import eventos  # noqa: E402
++
++UNIDADES = ("omniroute.service", "omniroute-sanitizer.service", "seth-gateway.service", "seth-escriba.service",
++            "seth-verificador.service", "openvino-embeddings.service", "laya-roteador.service",
++            "painel-operacional.service", "ollama.service")
++OLLAMA = "http://127.0.0.1:11434"
++OMNI = "http://127.0.0.1:20128"
++REVALIDAR_S = 3600  # inventário datado não é monitor contínuo: depois disso, refotografar
++
++
++def _cmd(*argv, timeout=10) -> dict:
++    try:
++        p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
++        return {"ok": p.returncode == 0, "saida": p.stdout}
++    except (OSError, subprocess.TimeoutExpired) as e:
++        return {"ok": False, "erro": e.__class__.__name__}
++
++
++def _get(url: str, timeout=4):
++    """Só GET. Devolve (dados, erro)."""
++    req = urllib.request.Request(url, method="GET")
++    try:
++        with urllib.request.urlopen(req, timeout=timeout) as r:
++            return json.loads(r.read()), None
++    except Exception as e:  # noqa: BLE001
++        return None, f"{e.__class__.__name__} {getattr(e, 'code', '') or ''}".strip()
++
++
++def servicos(show=None) -> dict:
++    r = (show or _cmd)("systemctl", "--user", "show", *UNIDADES, "-p", "Id", "-p", "ActiveState", "-p", "SubState")
++    out, atual = {}, {}
++    for ln in (r.get("saida") or "").splitlines() + [""]:
++        if not ln.strip():
++            if atual.get("Id"):
++                out[atual["Id"]] = f"{atual.get('ActiveState', '?')}/{atual.get('SubState', '?')}"
++            atual = {}
++            continue
++        k, _, v = ln.partition("=")
++        atual[k] = v
++    return out
++
++
++def portas(ss=None) -> list[int]:
++    r = (ss or _cmd)("ss", "-ltnH")
++    vistas = set()
++    for ln in (r.get("saida") or "").splitlines():
++        partes = ln.split()
++        if len(partes) >= 4 and ":" in partes[3]:
++            p = partes[3].rsplit(":", 1)[1]
++            if p.isdigit():
++                vistas.add(int(p))
++    return sorted(vistas)
++
++
++def recursos() -> dict:
++    d = {}
++    try:
++        u = shutil.disk_usage(str(Path.home()))
++        d["disco_livre_pct"] = round(100 * u.free / u.total, 1)
++    except OSError:
++        d["disco_livre_pct"] = None
++    try:
++        mem = dict(ln.split(":", 1) for ln in Path("/proc/meminfo").read_text().splitlines() if ":" in ln)
++        total = int(mem["MemTotal"].split()[0]); disp = int(mem["MemAvailable"].split()[0])
++        d["memoria_disponivel_pct"] = round(100 * disp / total, 1)
++    except (OSError, KeyError, ValueError):
++        d["memoria_disponivel_pct"] = None
++    try:
++        d["carga_1min_por_cpu"] = round(os.getloadavg()[0] / (os.cpu_count() or 1), 2)
++    except OSError:
++        d["carga_1min_por_cpu"] = None
++    temps = []
++    for z in Path("/sys/class/thermal").glob("thermal_zone*/temp"):
++        try:
++            temps.append(int(z.read_text().strip()) / 1000)
++        except (OSError, ValueError):
++            pass
++    d["temperatura_max_c"] = max(temps) if temps else None
++    return d
++
++
++def modelos(get=None) -> dict:
++    get = get or _get
++    tags, e1 = get(f"{OLLAMA}/api/tags")
++    cat, e2 = get(f"{OMNI}/api/models")
++    combos, e3 = get(f"{OMNI}/api/combos")
++    tab: dict[str, dict] = {}
++
++    def linha(m):
++        return tab.setdefault(m, {"instalado": None, "anunciado": None, "elegivel": None, "testado": None,
++                                  "em_fila": [], "pronto": None})
++    for m in (tags or {}).get("models", []) if tags else []:
++        linha("ollama-local/" + m.get("name", "?"))["instalado"] = True
++    for m in (cat or {}).get("models", []) if cat else []:
++        nome = m.get("fullModel") or m.get("id")
++        if nome:
++            linha(nome)["anunciado"] = bool(m.get("available"))
++    for c in (combos or {}).get("combos", []) if combos else []:
++        for el in c.get("models", []):
++            nome = el.get("model") if isinstance(el, dict) else el
++            if nome:
++                linha(nome)["em_fila"].append(c.get("name"))
++    erros = {k: v for k, v in (("ollama", e1), ("catalogo", e2), ("combos", e3)) if v}
++    return {"tabela": tab, "erros": erros}
++
++
++def fotografar(gravar: bool = True, **fontes) -> dict:
++    agora = time.time()
++    foto = {"schema_version": 1, "quando": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(agora)),
++            "revalidar_ate": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(agora + REVALIDAR_S)),
++            "escopo": "leitura: GET e comandos de estado; sem POST, sem reinício, sem geração",
++            "servicos": servicos(fontes.get("show")), "portas": portas(fontes.get("ss")),
++            "recursos": fontes.get("recursos") or recursos(), "modelos": modelos(fontes.get("get"))}
++    if gravar:
++        p = eventos.dados() / "corpo" / "fotografias.jsonl"
++        p.parent.mkdir(parents=True, exist_ok=True)
++        with open(p, "a", encoding="utf-8") as f:
++            f.write(json.dumps(foto, ensure_ascii=False) + "\n")
++    return foto
++
++
++def ultima() -> dict | None:
++    p = eventos.dados() / "corpo" / "fotografias.jsonl"
++    try:
++        *_, fim = p.read_text(encoding="utf-8").splitlines()
++        return json.loads(fim)
++    except (OSError, ValueError):
++        return None
++
++
++if __name__ == "__main__":
++    f = fotografar()
++    print(json.dumps({k: f[k] for k in ("quando", "servicos", "recursos")} | {"modelos": len(f["modelos"]["tabela"]),
++                     "erros": f["modelos"]["erros"]}, ensure_ascii=False, indent=1))
+diff --git a/redesign/corpo/saude.py b/redesign/corpo/saude.py
+new file mode 100644
+index 00000000..b164f0ab
+--- /dev/null
++++ b/redesign/corpo/saude.py
+@@ -0,0 +1,77 @@
++#!/usr/bin/env python3
++"""Corpo operacional — estado de saúde a partir de uma fotografia.
++
++Estados (matriz de redundância §4): normal · pressionado · degradado · isolado · indisponivel.
++Os limiares abaixo são PROVISÓRIOS e declarados na spec; mudá-los é decisão do Humano.
++Dado ausente nunca é estimado: vira "não medido" e não conta como normal.
++
++- indisponivel: Ollama (rota local de fundo) sem resposta E OmniRoute sem resposta;
++- isolado: só o local responde (sem catálogo/combos remotos);
++- degradado: recurso crítico (disco < 5%, memória < 5%, temperatura >= 95 °C) ou
++  unidade essencial (omniroute, ollama) fora;
++- pressionado: disco < 15%, memória < 15%, carga >= 1,5 por CPU ou temperatura >= 85 °C;
++- normal: nada acima e nada essencial sem medida.
++
++Unidade sob demanda inativa (gateway, embeddings, painel — decisão de 29/10, sistema sob
++demanda) NÃO rebaixa o estado: inativo não é quebrado.
++"""
++from __future__ import annotations
++
++import json
++import sys
++
++LIMIARES = {"disco_critico": 5, "disco_pressao": 15, "mem_critico": 5, "mem_pressao": 15,
++            "carga_pressao": 1.5, "temp_critico": 95, "temp_pressao": 85}
++ESSENCIAIS = ("omniroute.service",)
++
++
++def classificar(foto: dict, lim: dict = LIMIARES) -> dict:
++    r = foto.get("recursos") or {}
++    erros = (foto.get("modelos") or {}).get("erros") or {}
++    serv = foto.get("servicos") or {}
++    motivos, nao_medido = [], [k for k, v in r.items() if v is None]
++    local_ok = "ollama" not in erros
++    remoto_ok = "catalogo" not in erros and "combos" not in erros
++    if not local_ok and not remoto_ok:
++        return {"estado": "indisponivel", "motivos": ["Ollama e OmniRoute sem resposta"], "nao_medido": nao_medido}
++    if local_ok and not remoto_ok:
++        return {"estado": "isolado", "motivos": ["só a rota local respondeu"], "nao_medido": nao_medido}
++
++    def abaixo(chave, limite):
++        v = r.get(chave)
++        return v is not None and v < limite
++
++    def acima(chave, limite):
++        v = r.get(chave)
++        return v is not None and v >= limite
++    if abaixo("disco_livre_pct", lim["disco_critico"]):
++        motivos.append("disco crítico")
++    if abaixo("memoria_disponivel_pct", lim["mem_critico"]):
++        motivos.append("memória crítica")
++    if acima("temperatura_max_c", lim["temp_critico"]):
++        motivos.append("temperatura crítica")
++    for u in ESSENCIAIS:
++        if u in serv and not serv[u].startswith("active"):
++            motivos.append(f"{u} {serv[u]}")
++    if not local_ok:
++        motivos.append("Ollama sem resposta")
++    if motivos:
++        return {"estado": "degradado", "motivos": motivos, "nao_medido": nao_medido}
++    if abaixo("disco_livre_pct", lim["disco_pressao"]):
++        motivos.append("disco abaixo de 15%")
++    if abaixo("memoria_disponivel_pct", lim["mem_pressao"]):
++        motivos.append("memória abaixo de 15%")
++    if acima("carga_1min_por_cpu", lim["carga_pressao"]):
++        motivos.append("carga alta")
++    if acima("temperatura_max_c", lim["temp_pressao"]):
++        motivos.append("temperatura alta")
++    if motivos:
++        return {"estado": "pressionado", "motivos": motivos, "nao_medido": nao_medido}
++    return {"estado": "normal", "motivos": [], "nao_medido": nao_medido}
++
++
++if __name__ == "__main__":
++    sys.path.insert(0, __file__.rsplit("/", 1)[0])
++    import fotografar  # noqa: E402
++    f = fotografar.ultima() or fotografar.fotografar()
++    print(json.dumps({"quando": f["quando"], **classificar(f)}, ensure_ascii=False, indent=1))
+diff --git a/redesign/corpo/spec/acceptance.json b/redesign/corpo/spec/acceptance.json
+new file mode 100644
+index 00000000..853b3723
+--- /dev/null
++++ b/redesign/corpo/spec/acceptance.json
+@@ -0,0 +1,20 @@
++[
++  {
++    "criterion": "a fotografia só lê com GET e separa os campos do inventário",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/corpo/tests/test_corpo.py::FotografiaTests::test_so_le_com_get_e_separa_campos"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a saúde tem cinco estados e serviço sob demanda não rebaixa",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/corpo/tests/test_corpo.py::SaudeTests::test_cinco_estados_e_sob_demanda_nao_rebaixa"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/corpo/spec/spec.md b/redesign/corpo/spec/spec.md
+new file mode 100644
+index 00000000..86ebf575
+--- /dev/null
++++ b/redesign/corpo/spec/spec.md
+@@ -0,0 +1,42 @@
++# Spec — Corpo operacional (fotografia e saúde)
++
++Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Origem: Experimento GPT, (034)–(036), `inventario-servicos-agata-2026-11-04.md` e `auditoria-2026-11-04/coletar_evidencias.py`, promovido aqui a componente. "Guardião do próprio corpo" quer dizer monitorar e reduzir escopo, nunca autopreservação nem agir sem autorização.
++
++## Jornadas críticas
++
++1. O Humano clica em "Fotografar agora" no painel e vê serviços, recursos e saúde com data e prazo de revalidação.
++2. Um modelo consulta a última fotografia antes de escolher rota e não deduz saúde do catálogo.
++
++## Contrato
++
++- `fotografar.fotografar()` só lê: `systemctl --user show` das `UNIDADES`, `ss -ltnH`, `/proc/meminfo`, `os.getloadavg`, `/sys/class/thermal`, `shutil.disk_usage` e GET em Ollama `/api/tags`, OmniRoute `/api/models` e `/api/combos`. Nunca faz POST, nunca reinicia, nunca gera texto.
++- A tabela de modelos separa `instalado`, `anunciado`, `elegivel`, `testado`, `em_fila` e `pronto`. `testado`, `elegivel` e `pronto` ficam `null` até haver medição própria (lote 2).
++- Cada fotografia tem `quando` e `revalidar_ate` (1 h) e é acrescentada em `AGATA_NV_DIR/corpo/fotografias.jsonl`.
++- `saude.classificar(foto)` devolve `normal`, `pressionado`, `degradado`, `isolado` ou `indisponivel`, com motivos. Os limiares (`LIMIARES`) são provisórios e mudá-los é decisão do Humano. Dado ausente vai para `nao_medido`. Unidade sob demanda inativa (decisão de 29/10) não rebaixa o estado.
++
++## Critérios de aceite
++
++- [ ] a fotografia só lê com GET e separa os campos do inventário
++- [ ] a saúde tem cinco estados e serviço sob demanda não rebaixa
++
++## Desenho e alternativas
++
++Biblioteca padrão, sem agente nem timer novo: fotografia sob pedido (sistema sob demanda, 29/10). Descartado: monitor contínuo (o inventário datado não é monitor, §5).
++
++## Implementação e testes
++
++`fotografar.py` e `saude.py`; testes em `tests/test_corpo.py`, com `urlopen` e comandos substituídos.
++
++## Migração e reversão
++
++Sem dados a migrar; o JSONL pode ser apagado.
++
++## Riscos e dependências
++
++Temperatura depende de `/sys/class/thermal` e pode faltar (fica não medido). Medido em 04/11 às 16:38: estado `normal`; gateway, verificador, embeddings, Laya e painel inativos (sob demanda).
++
++## Código
++
++- `fotografar.py`
++- `saude.py`
++- `tests/`
+diff --git a/redesign/corpo/tests/test_corpo.py b/redesign/corpo/tests/test_corpo.py
+new file mode 100644
+index 00000000..922f9db3
+--- /dev/null
++++ b/redesign/corpo/tests/test_corpo.py
+@@ -0,0 +1,70 @@
++import os
++import sys
++import tempfile
++import unittest
++import urllib.request
++from pathlib import Path
++from unittest import mock
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import fotografar  # noqa: E402
++import saude  # noqa: E402
++
++SHOW = {"ok": True, "saida": "Id=omniroute.service\nActiveState=active\nSubState=running\n\n"
++                              "Id=seth-gateway.service\nActiveState=inactive\nSubState=dead\n"}
++SS = {"ok": True, "saida": "LISTEN 0 128 127.0.0.1:20128 0.0.0.0:*\nLISTEN 0 128 [::1]:11434 [::]:*\n"}
++REC = {"disco_livre_pct": 40.0, "memoria_disponivel_pct": 60.0, "carga_1min_por_cpu": 0.2, "temperatura_max_c": 60.0}
++
++
++def foto(**kw):
++    base = {"servicos": {"omniroute.service": "active/running", "seth-gateway.service": "inactive/dead"},
++            "recursos": dict(REC), "modelos": {"erros": {}}}
++    base.update(kw)
++    return base
++
++
++class FotografiaTests(unittest.TestCase):
++    def test_so_le_com_get_e_separa_campos(self):
++        metodos = []
++
++        class Resp:
++            def __init__(self, corpo): self.corpo = corpo
++            def __enter__(self): return self
++            def __exit__(self, *a): return False
++            def read(self): return self.corpo
++
++        def urlopen(req, timeout=None):
++            metodos.append(req.get_method())
++            if req.full_url.endswith("/api/tags"):
++                return Resp(b'{"models":[{"name":"qwen3:4b"}]}')
++            if req.full_url.endswith("/api/models"):
++                return Resp(b'{"models":[{"fullModel":"g/x","available":true}]}')
++            return Resp(b'{"combos":[{"name":"seth-livre","models":[{"model":"g/x"}]}]}')
++        with tempfile.TemporaryDirectory() as t, mock.patch.object(urllib.request, "urlopen", urlopen):
++            os.environ["AGATA_NV_DIR"] = t
++            f = fotografar.fotografar(show=lambda *a: SHOW, ss=lambda *a: SS, recursos=REC)
++            self.assertTrue((Path(t) / "corpo" / "fotografias.jsonl").exists())
++        self.assertEqual(set(metodos), {"GET"})
++        tab = f["modelos"]["tabela"]
++        self.assertTrue(tab["ollama-local/qwen3:4b"]["instalado"])
++        self.assertEqual(tab["g/x"]["em_fila"], ["seth-livre"])
++        self.assertIsNone(tab["g/x"]["testado"])   # testado só vem de medição própria
++        self.assertEqual(f["servicos"]["seth-gateway.service"], "inactive/dead")
++        self.assertEqual(f["portas"], [11434, 20128])
++
++
++class SaudeTests(unittest.TestCase):
++    def test_cinco_estados_e_sob_demanda_nao_rebaixa(self):
++        self.assertEqual(saude.classificar(foto())["estado"], "normal")
++        self.assertEqual(saude.classificar(foto(recursos={**REC, "disco_livre_pct": 10}))["estado"], "pressionado")
++        self.assertEqual(saude.classificar(foto(recursos={**REC, "memoria_disponivel_pct": 2}))["estado"], "degradado")
++        self.assertEqual(saude.classificar(foto(modelos={"erros": {"catalogo": "x", "combos": "x"}}))["estado"], "isolado")
++        self.assertEqual(saude.classificar(foto(modelos={"erros": {"ollama": "x", "catalogo": "x", "combos": "x"}}))["estado"],
++                         "indisponivel")
++        sem = saude.classificar(foto(recursos={**REC, "temperatura_max_c": None}))
++        self.assertEqual(sem["nao_medido"], ["temperatura_max_c"])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/metacognicao/posterior.py b/redesign/metacognicao/posterior.py
+new file mode 100644
+index 00000000..a330907b
+--- /dev/null
++++ b/redesign/metacognicao/posterior.py
+@@ -0,0 +1,56 @@
++#!/usr/bin/env python3
++"""Metacognição: o DEPOIS do turno — estado de saída da resposta.
++
++Origem: `proposta-tecnica-metacognicao-llm.md` §5. Os estados possíveis são
++apto · parcial · inconclusivo · bloqueado · aguardando_humano. "Apto" não cria
++autorização para efeito protegido.
++
++Não cria verificador novo: o que pode ser decidido por Máquina já está em
++`redesign/router/auditoria_turno.verificar_resposta_atual` (Jev sem consulta, P-n,
++entrada e caminho inexistentes, citação inventada, ação sem chamada...). Este módulo só
++junta esses achados com a classificação do antes (`previo.py`) e devolve o estado.
++
++Uso: `python3 redesign/metacognicao/posterior.py < resposta.txt`  (sai 1 se não for apto)
++"""
++from __future__ import annotations
++
++import json
++import re
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parents[0] / "router"))
++
++RE_LACUNA = re.compile(r"\b(n[aã]o medid[oa]|lacuna|n[aã]o encontrad[oa] nesta busca|n[aã]o verificad[oa]|parcial)\b", re.I)
++ESTADOS = ("apto", "parcial", "inconclusivo", "bloqueado", "aguardando_humano")
++
++
++def classificar(texto: str, previo: dict | None = None, *, msgs: list | None = None, rota_remota: bool = False,
++                achados: list | None = None) -> dict:
++    previo = previo or {}
++    if achados is None:
++        import auditoria_turno  # noqa: E402
++        achados = auditoria_turno.verificar_resposta_atual(texto, msgs or [])
++    motivos = []
++    if previo.get("privado") and rota_remota:
++        estado = "bloqueado"; motivos.append("dado pessoal em rota remota")
++    elif achados:
++        estado = "inconclusivo"; motivos += [str(a) for a in achados[:5]]
++    elif previo.get("risco") == "efeito":
++        estado = "aguardando_humano"; motivos.append("efeito pedido: só o Humano autoriza")
++    elif RE_LACUNA.search(texto):
++        estado = "parcial"; motivos.append("a resposta declara lacuna")
++    else:
++        estado = "apto"
++    return {"estado": estado, "motivos": motivos, "achados_mecanicos": len(achados),
++            "nota": "apto não autoriza efeito protegido" if estado == "apto" else None}
++
++
++if __name__ == "__main__":
++    if sys.stdin.isatty():
++        print(__doc__)
++        sys.exit(2)
++    r = classificar(sys.stdin.read())
++    print(json.dumps(r, ensure_ascii=False, indent=1))
++    sys.exit(0 if r["estado"] == "apto" else 1)
+diff --git a/redesign/metacognicao/previo.py b/redesign/metacognicao/previo.py
+new file mode 100644
+index 00000000..2f5edcd6
+--- /dev/null
++++ b/redesign/metacognicao/previo.py
+@@ -0,0 +1,94 @@
++#!/usr/bin/env python3
++"""Metacognição: o ANTES do turno, determinístico e em sombra.
++
++Origem: Experimento GPT, conclusões (026)–(029), (013), (014) e
++`proposta-tecnica-metacognicao-llm.md` §3. Não é uma nova persona e não chama modelo:
++classifica o pedido para que a estratégia (memória, skill, modelo, pesquisa externa)
++seja escolhida com os fatos à mão. A classificação é sujeita a erro (regex), por isso
++só fica em sombra até a avaliação (lote 3) medir a utilidade.
++
++Reaproveita `redesign/router/sombra_capacidade.requisitos` (tokens, ferramentas,
++código, JSON, dado pessoal pela régua do `sanitizar.py`) e acrescenta:
++- atualidade: pedido volátil (hoje, preço, estado da arte...) pede consulta local E
++  externa em paralelo, se permitido (Alexandria §6), nunca espera serial;
++- risco: pedido com efeito (apagar, enviar, publicar, instalar...) passa pelo portão
++  humano; "apto" depois não autoriza o efeito;
++- "problema" polissêmico (014): marca os sentidos a distinguir;
++- limite de interação combinado (013): "três perguntas", "no máximo 2" — conta o que
++  já foi usado no histórico, para o modelo não perder a conta.
++"""
++from __future__ import annotations
++
++import re
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parents[0] / "router"))
++
++RE_VOLATIL = re.compile(r"\b(hoje|agora|atual(mente|izad[oa])?|[uú]ltim[oa]s?|recente|estado da arte|not[ií]cia|"
++                        r"pre[cç]o|cota[cç][aã]o|esta semana|este m[eê]s|lan[cç]amento|vers[aã]o nova|20\d\d)\b", re.I)
++RE_EFEITO = re.compile(r"\b(apag|delet|remov|exclu|envi[ae]|mand[ae]|public|commit|push|merge|instal|desinstal|"
++                       r"reinici|sudo|pag[ae]r?|compr[ae]|assin[ae]|aplic[ae]|grav[ae])\w*", re.I)
++RE_PROBLEMA = re.compile(r"\bproblemas?\b", re.I)
++SENTIDOS_PROBLEMA = ("obstáculo", "pergunta", "erro", "risco", "discrepância", "tarefa", "estado pendente", "oportunidade")
++NUM = {"uma": 1, "um": 1, "duas": 2, "dois": 2, "três": 3, "tres": 3, "quatro": 4, "cinco": 5}
++RE_LIMITE = re.compile(r"\b(?:no m[aá]ximo\s+)?(\d+|uma|um|duas|dois|tr[eê]s|quatro|cinco)\s+perguntas?\b", re.I)
++RE_SISTEMA = re.compile(r"\b(mem[oó]ria|entrada|decis[aã]o|regra|proposta|canon|protocolo|falha|hist[oó]ric|"
++                        r"o que (foi|ficou) decidido|quando)\b", re.I)
++
++
++def _texto(c) -> str:
++    if isinstance(c, str):
++        return c
++    if isinstance(c, list):
++        return "\n".join(p.get("text", "") for p in c if isinstance(p, dict) and p.get("type") == "text")
++    return ""
++
++
++def limite_interacao(msgs: list) -> dict | None:
++    """Procura um limite de perguntas declarado e conta as perguntas do Humano depois dele."""
++    users = [_texto(m.get("content")) for m in msgs if isinstance(m, dict) and m.get("role") == "user"]
++    for i, t in enumerate(users):
++        m = RE_LIMITE.search(t)
++        if m:
++            v = m.group(1).lower()
++            total = int(v) if v.isdigit() else NUM.get(v, 0)
++            usadas = sum("?" in u for u in users[i + 1:])
++            return {"declarado": total, "usadas": usadas, "restantes": max(total - usadas, 0)}
++    return None
++
++
++def classificar(payload: dict, varrer_pessoal=None) -> dict:
++    import sombra_capacidade  # noqa: E402  (mesmo diretório do gateway)
++    msgs = payload.get("messages") or []
++    ultima = next((_texto(m.get("content")) for m in reversed(msgs)
++                   if isinstance(m, dict) and m.get("role") == "user"), "")
++    req = sombra_capacidade.requisitos(payload, varrer_pessoal)
++    volatil = bool(RE_VOLATIL.search(ultima))
++    efeito = sorted({m.group(0).lower() for m in RE_EFEITO.finditer(ultima)})[:5]
++    estrategia = []
++    if RE_SISTEMA.search(ultima):
++        estrategia.append("consultar Alexandria (local) antes de afirmar")
++    if volatil:
++        estrategia.append("local e externa em paralelo, se permitido; egresso minimizado")
++    if req["privado"]:
++        estrategia.append("dado pessoal: só rota local, nada sai")
++    if efeito:
++        estrategia.append("efeito pedido: preparar e passar pelo portão do Humano")
++    out = {"tipo": req["tipo"], "tokens_est": req["tokens_est"], "ferramentas": req["ferramentas"],
++           "privado": req["privado"], "atualidade": "volatil" if volatil else "estavel",
++           "risco": "efeito" if efeito else "leitura", "sinais_efeito": efeito,
++           "problema_ambiguo": list(SENTIDOS_PROBLEMA) if RE_PROBLEMA.search(ultima) else None,
++           "limite_interacao": limite_interacao(msgs), "estrategia": estrategia or ["resposta direta"]}
++    return out
++
++
++if __name__ == "__main__":
++    import json
++    if len(sys.argv) == 2:
++        print(json.dumps(classificar({"messages": [{"role": "user", "content": sys.argv[1]}]}, lambda t: []),
++                         ensure_ascii=False, indent=1))
++        sys.exit(0)
++    print(__doc__)
++    sys.exit(2)
+diff --git a/redesign/metacognicao/spec/acceptance.json b/redesign/metacognicao/spec/acceptance.json
+new file mode 100644
+index 00000000..bb663ad6
+--- /dev/null
++++ b/redesign/metacognicao/spec/acceptance.json
+@@ -0,0 +1,38 @@
++[
++  {
++    "criterion": "o prévio marca risco, privacidade, atualidade e problema ambíguo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/metacognicao/tests/test_metacognicao.py::PrevioTests::test_marca_risco_privacidade_atualidade_e_problema"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o prévio conta o limite de perguntas combinado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/metacognicao/tests/test_metacognicao.py::PrevioTests::test_conta_o_limite_de_perguntas_combinado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o posterior devolve os cinco estados de saída",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/metacognicao/tests/test_metacognicao.py::PosteriorTests::test_estados_de_saida"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a sombra não altera o pedido e não grava o texto",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/metacognicao/tests/test_metacognicao.py::SombraTests::test_sombra_nao_altera_o_pedido_e_nao_grava_texto"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/metacognicao/spec/spec.md b/redesign/metacognicao/spec/spec.md
+new file mode 100644
+index 00000000..e1679e9b
+--- /dev/null
++++ b/redesign/metacognicao/spec/spec.md
+@@ -0,0 +1,44 @@
++# Spec — Metacognição (antes e depois do turno)
++
++Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Origem: Experimento GPT, (026)–(029), (013), (014), `proposta-tecnica-metacognicao-llm.md` e a transcrição da etapa 1 (inspiração, não evidência). Não é persona nem modelo: é controle do laço, e fica em sombra até o lote 3 medir a utilidade.
++
++## Jornadas críticas
++
++1. Com `SETH_SOMBRA_NOVA_VERSAO=1`, cada pedido do Humano gera no `sombra.jsonl` a classificação do antes, os objetos da Alexandria e as skills sugeridas, sem o texto.
++2. Um modelo na CLI passa a resposta por `posterior.py` e recebe o estado de saída.
++3. O Humano testa a classificação de um pedido pelo painel.
++
++## Contrato
++
++- `previo.classificar(payload)` reaproveita `sombra_capacidade.requisitos` (tokens, ferramentas, código, JSON, dado pessoal pela régua do `sanitizar.py`) e acrescenta atualidade (`volatil`/`estavel`), risco (`efeito`/`leitura`), "problema" ambíguo (os oito sentidos de (014)), limite de perguntas combinado (declarado, usadas, restantes; (013)) e a estratégia sugerida. É determinístico e sujeito a erro de regex.
++- `posterior.classificar(texto, previo)` usa `auditoria_turno.verificar_resposta_atual` e devolve `apto`, `parcial`, `inconclusivo`, `bloqueado` ou `aguardando_humano`. "Apto" não autoriza efeito protegido.
++- `redesign/router/sombra_nova_versao.py`, no padrão de `sombra_capacidade.py`: desligado por padrão, Semaphore(1) que não espera, thread daemon. Um único gancho no `seth_gateway.py`, ao lado da sombra de capacidade, só no alvo `seth-livre`, fora de chamada utilitária e de continuação. Grava `pedido_sha256`, rota, classificação, ids da Alexandria (léxico e relações; sem semântica, para não carregar a iGPU), skills sugeridas e ms. Nunca grava o texto nem os trechos e nunca altera o payload.
++
++## Critérios de aceite
++
++- [ ] o prévio marca risco, privacidade, atualidade e problema ambíguo
++- [ ] o prévio conta o limite de perguntas combinado
++- [ ] o posterior devolve os cinco estados de saída
++- [ ] a sombra não altera o pedido e não grava o texto
++
++## Desenho e alternativas
++
++Regras determinísticas antes de qualquer LLM ((028)). Descartados: nove serviços para nove papéis (proposta §6); uma LLM classificadora por turno (custo sem baseline); `posterior` ligado ao gateway já neste lote (o gateway já segura a resposta com a M6a; a integração é do lote 4).
++
++## Implementação e testes
++
++`previo.py` e `posterior.py`; testes em `tests/test_metacognicao.py`. A sombra do gateway tem selftest próprio (`sombra_nova_versao.py --selftest`) e teste aqui.
++
++## Migração e reversão
++
++Sem dados a migrar. Desligar é não exportar `SETH_SOMBRA_NOVA_VERSAO`; o log fica em `AGATA_NV_DIR/metacognicao/sombra.jsonl`.
++
++## Riscos e dependências
++
++O verbo de efeito é detectado por raiz ("aplic", "envi", "remov"...) e terá falsos positivos. A janela do turno é a do gateway; modelos fora dele usam `posterior.py` à mão.
++
++## Código
++
++- `previo.py`
++- `posterior.py`
++- `tests/`
+diff --git a/redesign/metacognicao/tests/test_metacognicao.py b/redesign/metacognicao/tests/test_metacognicao.py
+new file mode 100644
+index 00000000..0d34661f
+--- /dev/null
++++ b/redesign/metacognicao/tests/test_metacognicao.py
+@@ -0,0 +1,64 @@
++import copy
++import json
++import os
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++sys.path.insert(0, str(AQUI.parents[1] / "router"))
++import posterior  # noqa: E402
++import previo  # noqa: E402
++
++NADA = lambda t: []  # noqa: E731
++
++
++def msg(*textos):
++    return {"messages": [{"role": "user" if i % 2 == 0 else "assistant", "content": t} for i, t in enumerate(textos)]}
++
++
++class PrevioTests(unittest.TestCase):
++    def test_marca_risco_privacidade_atualidade_e_problema(self):
++        r = previo.classificar(msg("apague o log de hoje, o problema é meu e-mail a@b.c"), lambda t: [1] if "@" in t else [])
++        self.assertEqual(r["risco"], "efeito")
++        self.assertTrue(r["privado"])
++        self.assertEqual(r["atualidade"], "volatil")
++        self.assertIn("erro", r["problema_ambiguo"])
++        self.assertTrue(any("só rota local" in e for e in r["estrategia"]))
++        leitura = previo.classificar(msg("explique a regra 2"), NADA)
++        self.assertEqual((leitura["risco"], leitura["atualidade"], leitura["problema_ambiguo"]), ("leitura", "estavel", None))
++
++    def test_conta_o_limite_de_perguntas_combinado(self):
++        r = previo.classificar(msg("você tem três perguntas", "ok", "primeira?", "r", "segunda?"), NADA)
++        self.assertEqual(r["limite_interacao"], {"declarado": 3, "usadas": 2, "restantes": 1})
++
++
++class PosteriorTests(unittest.TestCase):
++    def test_estados_de_saida(self):
++        self.assertEqual(posterior.classificar("ok", {}, achados=[])["estado"], "apto")
++        self.assertEqual(posterior.classificar("custo não medido", {}, achados=[])["estado"], "parcial")
++        self.assertEqual(posterior.classificar("x", {}, achados=["P-99 inexistente"])["estado"], "inconclusivo")
++        self.assertEqual(posterior.classificar("x", {"risco": "efeito"}, achados=[])["estado"], "aguardando_humano")
++        self.assertEqual(posterior.classificar("x", {"privado": True}, rota_remota=True, achados=[])["estado"], "bloqueado")
++
++
++class SombraTests(unittest.TestCase):
++    def test_sombra_nao_altera_o_pedido_e_nao_grava_texto(self):
++        import sombra_nova_versao as s
++        with tempfile.TemporaryDirectory() as t:
++            os.environ["AGATA_NV_DIR"] = t
++            os.environ["AGATA_NV_CACHE"] = t + "/c"
++            payload = msg("mande o relatório-sigiloso-4471 hoje")
++            antes = copy.deepcopy(payload)
++            linha = s.observar(payload, "seth-livre", NADA)
++            self.assertEqual(payload, antes)
++            bruto = json.dumps(linha, ensure_ascii=False)
++            self.assertNotIn("sigiloso", bruto)
++            self.assertNotIn("relatório", bruto)
++            self.assertEqual(linha["previo"]["risco"], "efeito")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nova_versao/eventos.py b/redesign/nova_versao/eventos.py
+new file mode 100644
+index 00000000..2a9c5d39
+--- /dev/null
++++ b/redesign/nova_versao/eventos.py
+@@ -0,0 +1,100 @@
++#!/usr/bin/env python3
++"""Eventos da nova versão: camada fina sobre o `redesign/evidence_ledger`.
++
++Não cria um terceiro log. Todo evento da nova versão (Alexandria, metacognição,
++corpo, orçamento) vai para UM ledger encadeado por hash, com `flock` (escritor
++único), em `<dados>/eventos/ledger.jsonl`. Este módulo só acrescenta:
++
++- chave idempotente: o mesmo `chave` não grava duas vezes;
++- transição das sete palavras (Apresentação ... Aprimoramento), com Remoção
++  opcional: `estado_anterior`, `estado_seguinte`, `evidencia`, `autorizacao`,
++  `retorno`. Registro, não máquina autônoma: nenhuma transição executa efeito.
++
++Pastas: `AGATA_NV_DIR` (padrão ~/.local/share/agata/nova-versao), fora do repo.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import sys
++import time
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent / "evidence_ledger"))
++import ledger  # noqa: E402
++
++SETE = ("apresentacao", "compreensao", "assimilacao", "simbiose", "transicao", "remocao", "aprimoramento")
++# destino normal e retornos (tabela da spec Alexandria §11); Remoção é opcional
++TRANSICOES = {
++    "apresentacao": {"compreensao"},
++    "compreensao": {"assimilacao", "apresentacao"},
++    "assimilacao": {"simbiose", "compreensao"},
++    "simbiose": {"transicao", "assimilacao"},
++    "transicao": {"aprimoramento", "remocao", "simbiose"},
++    "remocao": {"aprimoramento", "transicao"},
++    "aprimoramento": {"apresentacao", "compreensao", "assimilacao", "simbiose", "transicao"},
++}
++
++
++def dados() -> Path:
++    return Path(os.environ.get("AGATA_NV_DIR", Path.home() / ".local" / "share" / "agata" / "nova-versao"))
++
++
++def caminho_ledger() -> Path:
++    return dados() / "eventos" / "ledger.jsonl"
++
++
++def _agora() -> str:
++    return time.strftime("%Y-%m-%dT%H:%M:%S%z")
++
++
++def registrar(kind: str, status: str, source: str, *, actor: str = "maquina", componente: str = "nova-versao",
++              classification: str = "project", chave: str | None = None, **campos) -> dict:
++    """Acrescenta um evento. Com `chave`, é idempotente: devolve o existente."""
++    caminho = caminho_ledger()
++    if chave is not None:
++        for e in ledger.read(caminho):
++            if e.get("chave") == chave:
++                return {**e, "repetido": True}
++    ev = {"id": "nv:" + hashlib.sha256(f"{time.time_ns()}{os.getpid()}{kind}{source}".encode()).hexdigest()[:16],
++          "timestamp": _agora(), "actor": actor, "project": "nova-versao", "kind": kind, "status": status,
++          "source": source, "classification": classification, "componente": componente, **campos}
++    if chave is not None:
++        ev["chave"] = chave
++    ledger.append(caminho, ev)
++    return ev
++
++
++def transicao(objeto: str, anterior: str | None, seguinte: str, evidencia: str, *, autorizacao: str | None = None,
++              retorno: str | None = None, actor: str = "maquina", componente: str = "nova-versao") -> dict:
++    """Registra a passagem de um objeto pelas sete palavras. Recusa salto fora da tabela."""
++    if seguinte not in SETE or (anterior is not None and anterior not in SETE):
++        raise ValueError("estado fora das sete palavras")
++    if anterior is not None and seguinte not in TRANSICOES[anterior]:
++        raise ValueError(f"transição não prevista: {anterior} -> {seguinte}")
++    if seguinte == "remocao" and not autorizacao:
++        raise ValueError("Remoção exige autorização explícita")
++    return registrar("observation", "registrada", objeto, actor=actor, componente=componente,
++                     estado_anterior=anterior, estado_seguinte=seguinte, evidencia=evidencia,
++                     autorizacao=autorizacao, retorno=retorno)
++
++
++def ultimos(n: int = 20) -> list[dict]:
++    return ledger.read(caminho_ledger())[-n:]
++
++
++def verificar() -> bool:
++    caminho = caminho_ledger()
++    return True if not caminho.exists() else ledger.verify(caminho)
++
++
++if __name__ == "__main__":
++    if sys.argv[1:] == ["ultimos"]:
++        print(json.dumps(ultimos(), ensure_ascii=False, indent=1))
++    elif sys.argv[1:] == ["verificar"]:
++        print("OK" if verificar() else "FALHA")
++    else:
++        print(__doc__)
++        sys.exit(2)
+diff --git a/redesign/nova_versao/nv.py b/redesign/nova_versao/nv.py
+new file mode 100644
+index 00000000..7b7e78ba
+--- /dev/null
++++ b/redesign/nova_versao/nv.py
+@@ -0,0 +1,116 @@
++#!/usr/bin/env python3
++"""nv — a nova versão do Agata (Experimento GPT) num só comando, para terminal e painel.
++
++Spec-mãe: `redesign/nova_versao/spec/spec.md`. Componentes do lote 1 (sombra, sem
++inferência): Alexandria (acervo, consulta, skills), metacognição (antes/depois),
++corpo (fotografia e saúde), orçamento e eventos.
++
++  nv.py iniciar          cria as pastas de trabalho, tira snapshot do HEAD e indexa
++  nv.py estado           estado de todos os componentes (JSON)
++  nv.py verificar        confere o ledger encadeado e o índice
++  nv.py --selftest       teste offline, em pasta temporária
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import tempfile
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++RED = AQUI.parent
++for _p in (AQUI, RED / "alexandria", RED / "corpo", RED / "metacognicao"):
++    sys.path.insert(0, str(_p))
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++
++
++def iniciar(commit: str = "HEAD") -> dict:
++    import acervo  # noqa: E402
++    base = acervo.iniciar()
++    snap = acervo.snapshot(commit)
++    return {"dados": str(base), "snapshot": str(snap), **acervo.indexar(snap)}
++
++
++def _sombra() -> dict:
++    p = eventos.dados() / "metacognicao" / "sombra.jsonl"
++    try:
++        linhas = p.read_text(encoding="utf-8").splitlines()
++    except OSError:
++        return {"registros": 0, "ultimo": None}
++    ultimo = json.loads(linhas[-1]) if linhas else None
++    return {"registros": len(linhas), "ultimo": ultimo}
++
++
++def estado() -> dict:
++    import acervo  # noqa: E402
++    import fotografar  # noqa: E402
++    import saude  # noqa: E402
++    foto = fotografar.ultima()
++    try:
++        ledger_ok = eventos.verificar()
++    except Exception as e:  # noqa: BLE001
++        ledger_ok = f"FALHA: {e}"
++    return {"schema_version": 1, "dados": str(eventos.dados()), "alexandria": acervo.estado(),
++            "orcamento": orcamento.ler(),
++            "corpo": {"fotografia": {k: foto[k] for k in ("quando", "revalidar_ate", "servicos", "recursos")} if foto else None,
++                      "saude": saude.classificar(foto) if foto else {"estado": "não medido"}},
++            "sombra": _sombra(), "ledger_ok": ledger_ok, "eventos": eventos.ultimos(12)}
++
++
++def verificar() -> dict:
++    import acervo  # noqa: E402
++    out = {"ledger": eventos.verificar(), "indice": bool(acervo.meta())}
++    return out
++
++
++def _selftest() -> int:
++    import subprocess
++    with tempfile.TemporaryDirectory() as t:
++        os.environ["AGATA_NV_DIR"] = t + "/dados"
++        os.environ["AGATA_NV_CACHE"] = t + "/cache"
++        repo = Path(t) / "repo"
++        (repo / "memoria").mkdir(parents=True)
++        (repo / "MEMÓRIAS.md").write_text("# M\n\n(10) DIÁRIO — x · travamento no suspend, ver (11)\n\n(11) DIÁRIO — y · base\n", encoding="utf-8")
++        subprocess.run(["git", "init", "-q", str(repo)], check=True)
++        subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", "add", "."], check=True)
++        subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "x"], check=True)
++        import acervo  # noqa: E402
++        acervo.iniciar()
++        snap = acervo.snapshot("HEAD", repo)
++        r = acervo.indexar(snap, skills=False)
++        pac = acervo.consultar("suspend travamento", semantica="nunca")
++        vazio = acervo.consultar("palavrainexistentezz", semantica="nunca")
++        casos = [
++            ("estrutura criada", (Path(t) / "dados" / "LEIA-ME.md").exists()),
++            ("índice com 2 entradas", r["objetos"] >= 2),
++            ("consulta acha (10) com sha e commit", pac["resultados"] and pac["resultados"][0]["entrada"] == 10
++             and len(pac["resultados"][0]["sha256"]) == 64 and pac["commit"]),
++            ("relação (10)->(11) segue", any(x["metodo"] == "relacao" and x["entrada"] == 11 for x in pac["resultados"])),
++            ("ausência diz 'não encontrado nesta busca'", vazio["estado"] == acervo.NAO_ENCONTRADO),
++            ("orçamento padrão só local", orcamento.ler()["provedores"] == {"local": True, "gratuito": False, "pago": False}),
++            ("ledger íntegro", eventos.verificar()),
++        ]
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++def main(argv: list[str]) -> int:
++    if argv == ["--selftest"]:
++        return _selftest()
++    if argv[:1] == ["iniciar"]:
++        print(json.dumps(iniciar(*(argv[1:2] or ["HEAD"])), ensure_ascii=False, indent=1)); return 0
++    if argv == ["estado"]:
++        print(json.dumps(estado(), ensure_ascii=False, indent=1)); return 0
++    if argv == ["verificar"]:
++        r = verificar(); print(json.dumps(r, ensure_ascii=False)); return 0 if r["ledger"] else 1
++    print(__doc__)
++    return 2
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/redesign/nova_versao/orcamento.py b/redesign/nova_versao/orcamento.py
+new file mode 100644
+index 00000000..b9f92510
+--- /dev/null
++++ b/redesign/nova_versao/orcamento.py
+@@ -0,0 +1,92 @@
++#!/usr/bin/env python3
++"""Orçamento de inferência da nova versão, editado pelo painel.
++
++Decisão do Humano (04/11/2026): "tudo que estiver disponível, configurável pelo painel".
++Este arquivo guarda QUAIS provedores podem ser usados e com QUAL teto. O padrão de
++fábrica é só local, porque nenhum provedor remoto foi escolhido ainda. Quem muda é o
++Humano, pelo painel. Cada mudança vira evento no ledger, com o valor anterior e o novo.
++
++No lote 1 ninguém consome inferência: o orçamento é lido e mostrado. `permite()` é a
++porta que os lotes 2 e 3 vão consultar antes de chamar qualquer modelo.
++
++Arquivo: `<dados>/config/orcamento.json` (fora do repo; sem segredo, só política).
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import tempfile
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI))
++import eventos  # noqa: E402
++
++PROVEDORES = ("local", "gratuito", "pago")
++PADRAO = {"schema_version": 1, "provedores": {"local": True, "gratuito": False, "pago": False},
++          "max_chamadas": 200, "max_tokens": 2_000_000, "timeout_s": 120, "teto_reais": 0.0}
++LIMITES = {"max_chamadas": (0, 100000), "max_tokens": (0, 50_000_000), "timeout_s": (1, 3600), "teto_reais": (0.0, 10000.0)}
++
++
++def caminho() -> Path:
++    return eventos.dados() / "config" / "orcamento.json"
++
++
++def ler() -> dict:
++    try:
++        d = json.loads(caminho().read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return json.loads(json.dumps(PADRAO))
++    return validar(d)
++
++
++def validar(d: dict) -> dict:
++    if not isinstance(d, dict):
++        raise ValueError("orçamento inválido")
++    prov = d.get("provedores") or {}
++    if not isinstance(prov, dict) or set(prov) - set(PROVEDORES):
++        raise ValueError("provedor fora da lista")
++    out = {"schema_version": 1, "provedores": {p: bool(prov.get(p, PADRAO["provedores"][p])) for p in PROVEDORES}}
++    for campo, (lo, hi) in LIMITES.items():
++        v = d.get(campo, PADRAO[campo])
++        if isinstance(v, bool) or not isinstance(v, (int, float)):
++            raise ValueError(f"{campo} não é número")
++        if not lo <= v <= hi:
++            raise ValueError(f"{campo} fora do limite [{lo}, {hi}]")
++        out[campo] = float(v) if campo == "teto_reais" else int(v)
++    return out
++
++
++def salvar(novo: dict, actor: str = "humano-painel") -> dict:
++    """Grava atômico e registra o evento (antes -> depois)."""
++    novo = validar(novo)
++    antes = ler()
++    if novo == antes:
++        return {**novo, "mudou": False}
++    p = caminho()
++    p.parent.mkdir(parents=True, exist_ok=True)
++    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".orcamento.")
++    with os.fdopen(fd, "w", encoding="utf-8") as f:
++        json.dump(novo, f, ensure_ascii=False, indent=1)
++    os.replace(tmp, p)
++    eventos.registrar("decision", "aplicada", "orcamento", actor=actor, componente="orcamento", antes=antes, depois=novo)
++    return {**novo, "mudou": True}
++
++
++def permite(provedor: str, chamadas_ja: int = 0) -> tuple[bool, str]:
++    """Porta para os lotes 2 e 3: pode chamar este provedor agora?"""
++    o = ler()
++    if provedor not in PROVEDORES:
++        return False, "provedor fora da lista"
++    if not o["provedores"][provedor]:
++        return False, f"provedor '{provedor}' desligado no painel"
++    if chamadas_ja >= o["max_chamadas"]:
++        return False, "teto de chamadas atingido"
++    if provedor == "pago" and o["teto_reais"] <= 0:
++        return False, "pago ligado sem teto em R$: nada é gasto"
++    return True, "permitido"
++
++
++if __name__ == "__main__":
++    print(json.dumps(ler(), ensure_ascii=False, indent=1))
+diff --git a/redesign/nova_versao/spec/acceptance.json b/redesign/nova_versao/spec/acceptance.json
+new file mode 100644
+index 00000000..21318674
+--- /dev/null
++++ b/redesign/nova_versao/spec/acceptance.json
+@@ -0,0 +1,38 @@
++[
++  {
++    "criterion": "a chave idempotente não grava duas vezes",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_chave_idempotente_nao_grava_duas_vezes"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "escritas concorrentes no ledger preservam a cadeia",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_transicao_recusa_salto_e_remocao_sem_autorizacao"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/nova_versao/spec/brainstorm.md b/redesign/nova_versao/spec/brainstorm.md
+new file mode 100644
+index 00000000..6213812b
+--- /dev/null
++++ b/redesign/nova_versao/spec/brainstorm.md
+@@ -0,0 +1,53 @@
++# Brainstorm — nova versão (Experimento GPT)
++
++Leitura integral da pasta em 04/11/2026: `conclusoes.md` (001–080), Alexandria, metacognição, avaliação, contrato, fundamentos, inventário, matriz de redundância, skill do experimento, briefings, fontes, transcrição e scripts da auditoria.
++
++## O que a pasta pede
++
++- Memória externa governada e substituibilidade de LLM (060–062, 066).
++- Biblioteca operacional: acervo com proveniência, busca local primeiro e externa para atualidade (068–075).
++- Seleção de skills separada da busca em documentos (063–065).
++- Metacognição como controle do laço: antes, durante e depois (026–029); contar limites combinados (013); "problema" polissêmico (014).
++- Consciência operacional: o corpo material entra no raciocínio sobre o que se pode fazer (034–036).
++- Redundância real, testada por capacidade (043–047); paralelismo com orçamento e sincronização (048).
++- Papéis com escopo, nunca posse (054–055); nada de uma LLM por "área cerebral" (039–040).
++- Avaliação independente, com baseline, split reservado e métricas por dimensão (018, 024, 037–038).
++- Sete palavras como ciclo, com Remoção opcional (032, 057–059).
++
++## O que já existe e evita código novo
++
++Hidratação, vault, índices, cache do Conselho, memória semanal, fila de revisão do inbox, auditoria do turno, sombras do gateway, `evidence_ledger`, `sdd_flow`, medidores e o painel. Lacunas medidas: nenhum acervo com hash por objeto, nenhum FTS, três índices de skills desconexos, nenhum registro de antes do turno nem de saúde datada, nenhum `run_id` comum nos medidores.
++
++## Achados da entrada 021, conferidos em 04/11
++
++1. Instruções de assinatura divergentes: não reproduzido (README de propostas e AGENTS.md coincidem).
++2. Atualização que descarta mudanças: não reproduzido (`scripts/atualizar.sh` recusa árvore suja e manda usar `git revert`).
++3. `agata-carregar` chamava de read-only um script que grava cache: confirmado; corrigido neste lote.
++
++## Usuários
++
++O Humano (painel, decisões de orçamento e assinatura) e os modelos do sistema (Seth pelo gateway; Claude Code, Codex e Gemini pela CLI), que consultam o acervo e passam pela metacognição.
++
++## Estado que muda
++
++Só fora do repo: `AGATA_NV_DIR` (pastas de trabalho, ledger, sombra, fotografias, orçamento) e `AGATA_NV_CACHE` (índice derivado). No repo, só o código e as specs desta proposta.
++
++## Erros e concorrência
++
++Ledger único com `flock` e chave idempotente; índice trocado atomicamente; sombra com Semaphore(1) que pula se ocupada; lock por ação no painel; semântica fora do ar degrada para léxico com aviso; erro de componente na sombra vira campo `erros`.
++
++## Migração
++
++Nenhuma no canon. O acervo é um snapshot do repo por commit; reindexar é reconstruir.
++
++## Observabilidade
++
++Painel, grupo "Nova versão" (quatro páginas); `nv.py estado`; eventos no ledger (`iniciar`, `snapshot`, `indexar`, `drift`, `orcamento`); `sombra.jsonl`.
++
++## Reversão
++
++Revert do commit de aplicação; apagar `AGATA_NV_DIR` e `AGATA_NV_CACHE`; a sombra nasce desligada.
++
++## Sucesso
++
++Lote 1: testes e âncora verdes na CI, painel funcionando no navegador, consulta real com evidência e sombra que não altera a resposta. Valor da nova versão: só o lote 3 mede, contra baseline, em conjunto reservado.
+diff --git a/redesign/nova_versao/spec/criterion-drift.md b/redesign/nova_versao/spec/criterion-drift.md
+new file mode 100644
+index 00000000..b7fcbdff
+--- /dev/null
++++ b/redesign/nova_versao/spec/criterion-drift.md
+@@ -0,0 +1,6 @@
++# Criterion drift report
++
++- `a chave idempotente não grava duas vezes` — **pass** — verified
++- `escritas concorrentes no ledger preservam a cadeia` — **pass** — verified
++- `a transição recusa salto fora da tabela e Remoção sem autorização` — **pass** — verified
++- `o orçamento padrão é só local e pago sem teto não gasta` — **pass** — verified
+diff --git a/redesign/nova_versao/spec/decision.md b/redesign/nova_versao/spec/decision.md
+new file mode 100644
+index 00000000..9a10cedd
+--- /dev/null
++++ b/redesign/nova_versao/spec/decision.md
+@@ -0,0 +1,10 @@
++# Decisão — nova versão (Experimento GPT)
++
++- **Direção do produto:** Humano, (077), "Essa será a nova versão do agata ok".
++- **Plano:** aprovado pelo Humano em 04/11/2026 (plano de 4 lotes, mais o lote 0 de verificação).
++- **Acervo do piloto:** só o que já está no repositório; a Alexandria tem estrutura própria de pastas de trabalho (Humano, 04/11).
++- **Orçamento:** "tudo que estiver disponivel configuravel pelo painel" (Humano, 04/11). Padrão de fábrica só local até o Humano mudar no painel.
++- **Assinatura:** F0 e F1 num lote só (Humano, 04/11; regra "uma assinatura por implementação").
++- **Escolhas técnicas deste lote:** SQLite FTS5 (medido: disponível no SQLite 3.54.0 da Máquina) como índice léxico derivado; `evidence_ledger` como diário único; sombra no gateway desligada por padrão; nenhum serviço novo, nenhuma porta nova, nenhum timer novo.
++
++DECISAO: aceita — plano aprovado pelo Humano nesta sessão (04/11/2026), em modo de plano; a assinatura P-8 da aplicação continua sendo dele.
+diff --git a/redesign/nova_versao/spec/evidence.json b/redesign/nova_versao/spec/evidence.json
+new file mode 100644
+index 00000000..265906e4
+--- /dev/null
++++ b/redesign/nova_versao/spec/evidence.json
+@@ -0,0 +1,58 @@
++[
++  {
++    "criterion": "a chave idempotente não grava duas vezes",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_chave_idempotente_nao_grava_duas_vezes"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
++    "stderr": "",
++    "at": "2026-11-04T19:49:04+00:00"
++  },
++  {
++    "criterion": "escritas concorrentes no ledger preservam a cadeia",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
++    "stderr": "",
++    "at": "2026-11-04T19:49:04+00:00"
++  },
++  {
++    "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_transicao_recusa_salto_e_remocao_sem_autorizacao"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
++    "stderr": "",
++    "at": "2026-11-04T19:49:04+00:00"
++  },
++  {
++    "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
++    "stderr": "",
++    "at": "2026-11-04T19:49:05+00:00"
++  }
++]
+diff --git a/redesign/nova_versao/spec/spec.md b/redesign/nova_versao/spec/spec.md
+new file mode 100644
+index 00000000..11df0fa7
+--- /dev/null
++++ b/redesign/nova_versao/spec/spec.md
+@@ -0,0 +1,78 @@
++# Spec — Nova versão do Agata (Experimento GPT)
++
++Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `conclusoes.md` 001–080 e os documentos derivados), lido inteiro em 04/11/2026. Direção aprovada pelo Humano em (077): "Essa será a nova versão do agata ok". Esta spec não é assinatura P-8; a assinatura é a do par `propostas/nova-versao-piloto-20261104`.
++
++## Jornadas críticas
++
++1. O Humano abre o painel, grupo "Nova versão", e vê o estado real de cada componente; o que não foi medido aparece como não medido.
++2. Um modelo pergunta algo sobre o sistema e recebe um pacote de evidência com objeto, trecho, linha, commit e sha, ou "não encontrado nesta busca".
++3. O gateway, com a sombra ligada, registra o que a nova versão teria feito com cada pedido, sem o texto e sem mudar a resposta, para a avaliação comparar.
++4. O Humano decide no painel quais provedores a nova versão pode usar e com qual teto; cada mudança fica no ledger.
++
++## Contrato
++
++**Tese ((066)).** Os pesos dão a capacidade; o Agata dá memória, contexto, corpo, ferramentas, seleção de skills, papéis, redundância, sincronização, metacognição, auditoria e autoridade. A unidade vem do estado comum, das fontes rastreáveis e da decisão humana, não de uma LLM.
++
++**Nove componentes e o que cada um reaproveita:**
++
++| # | Componente | Reaproveita | Código novo (lote) |
++|---|---|---|---|
++| C1 | Governança e contrato | canon, P-8, `propostas/`, `scripts/equipe/aplicar.py`, `redesign/mcp/capability.py` | nenhum; seção em `PROJETO_REFERENCIA.md` (1) |
++| C2 | Memória em camadas | hidratação do gateway, MEMÓRIAS quente/morna/fria, vault, `cache_conselho.py`, `memoria_semanal.py`, `vault_importar_inbox.py` | nenhum; mapa abaixo; teste de troca de LLM (3) |
++| C3 | Alexandria | `busca_texto.py`, `busca_semantica.py`, `cita` do vault, `gerar_indice_derivado.py`, `evidence_ledger` | `redesign/alexandria/` (1) |
++| C4 | Seleção de skills | `.agents/skills/INDICE.md`, `ferramentas/ferramentas.py` (quarentena), `qualidade_llm.py` | `redesign/alexandria/skills.py` (1) |
++| C5 | Metacognição | `_classificar_rota` do gateway, `auditoria_turno.py`, `sombra_capacidade.py`, `detector_estado_sem_prova.py` | `redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py` (1) |
++| C6 | Corpo operacional | `estado_para_eco.sh`, `perimetro.sh`, `coletar_evidencias.py` da auditoria, `config/portas-*.txt` | `redesign/corpo/` (1) |
++| C7 | Redundância | combos OmniRoute, `conselho_remoto.py`, `config/capacidades_modelos.json`, `teste_portugues.py` | `redesign/corpo/testar_rotas.py` (2) |
++| C8 | Coordenação e papéis | `grafo/durabilidade.py` (WAL), `evidence_ledger`, `idempotency_key` do Conselho, semáforos das sombras | `redesign/nova_versao/tarefas.py` (2) |
++| C9 | Avaliação | `medir_recuperacao.py`, `teste_portugues.py`, `seth_golden.py`, `seth_autodev.py`, `medir_contexto_efetivo.py` | registro por execução comum (3) |
++
++**Mapa de memória (C2), camada → mecanismo existente:** autoridade = canon; memória de trabalho = hidratação (`seth_gateway.py`, `_hidratacao`); episódica = MEMÓRIAS e `memoria/` (quente, morna, fria); semântica derivada = vault e índices; operacional entre modelos = `cache_conselho.py`; procedural = skills e scripts; corporal = `redesign/corpo/`; acervo com proveniência = Alexandria. Nenhuma camada nova é criada para substituir outra.
++
++**Pastas de trabalho** (decisão do Humano, 04/11): `AGATA_NV_DIR`, padrão `~/.local/share/agata/nova-versao/` (0700, fora do repo público), criadas por `redesign/alexandria/acervo.py iniciar`, com `LEIA-ME.md` gerado. Fluxo editorial (`recebido`, `quarentena`, `catalogado`, `revisado`, `contestado`, `restrito`, `arquivado`, `rejeitado`), ciclo de skills (`rascunho`, `quarentena`, `em-teste`, `elegivel`, `revogada`), `contextos/`, `metacognicao/`, `corpo/`, `redundancia/`, `coordenacao/`, `avaliacao/{dev,calibracao,teste-reservado,execucoes}`, `eventos/` e `config/`. Índice derivado em `AGATA_NV_CACHE` (padrão `~/.cache/agata/nova-versao/`).
++
++**Proveniência.** Todo objeto do acervo tem `object_id`, caminho, commit do snapshot, `sha256`, classificação de acesso (`public`, `project`, `private`), estado editorial e verificação (`identidade`, `integridade`, `suporte factual`) como dimensões separadas. Hash prova conservação de bytes, não verdade.
++
++**Estados separados.** Editorial (acima); execução (`criada`, `em_execucao`, `em_revisao`, `concluida`, `falhou`, `cancelada`, `aguardando_humano`, lote 2); saúde (`normal`, `pressionado`, `degradado`, `isolado`, `indisponivel`); saída do turno (`apto`, `parcial`, `inconclusivo`, `bloqueado`, `aguardando_humano`).
++
++**Sete palavras.** Apresentação → Compreensão → Assimilação → Simbiose → Transição → Aprimoramento, com Remoção opcional e retornos da tabela da proposta Alexandria §11. `eventos.transicao()` grava estado anterior e seguinte, evidência, autorização e retorno; recusa salto fora da tabela e Remoção sem autorização. É registro, não máquina autônoma.
++
++**Permissões.** Consulta pública não vê `private`; a sombra grava hash, nunca o texto; nenhuma peça lê `~/.config/agata/.env`; nada escreve no canon; skill selecionada não é carregada nem executada; a fotografia só faz GET e comandos de leitura.
++
++**Concorrência e falha.** Um ledger único (`redesign/evidence_ledger`, `flock`), com chave idempotente. Índice reconstruído em arquivo temporário e trocado atomicamente. Sombra com Semaphore(1), que pula o pedido se ocupada. Painel com lock por ação. Busca semântica fora do ar degrada para léxico com aviso. Falha de um componente da sombra vira campo `erros`, nunca exceção no gateway.
++
++**Orçamento** (decisão do Humano, 04/11: "tudo que estiver disponivel configuravel pelo painel"). `redesign/nova_versao/orcamento.py`: provedores `local`, `gratuito` e `pago`, mais tetos de chamadas, tokens, tempo e R$. Padrão de fábrica só local; pago sem teto em R$ não gasta; cada mudança vira evento. No lote 1 nada consome inferência.
++
++**Invariantes (handoff do executor).** Canon, permissões, silos e autoridade humana vêm antes de descoberta e roteamento. Alexandria não é cânone paralelo. A recusa de vetor/GraphRAG como camada primária ((115)) permanece; a semântica é secundária ((327)). Skill é procedimento; livro é conteúdo. Catálogo, health check, inferência real e fila ativa são medições diferentes. Ausência na busca é "não encontrado nesta busca".
++
++**Fases.** F0 spec e F1 sombra no lote 1 (esta proposta); C7 e C8 no lote 2; F2 avaliação no lote 3 (30 tarefas, split reservado, gabarito revisado pelo Humano, métricas por dimensão com `null` em denominador zero); F3 integração protegida no lote 4, cada item em proposta própria e só com ganho medido sem regressão crítica.
++
++## Critérios de aceite
++
++- [ ] a chave idempotente não grava duas vezes
++- [ ] escritas concorrentes no ledger preservam a cadeia
++- [ ] a transição recusa salto fora da tabela e Remoção sem autorização
++- [ ] o orçamento padrão é só local e pago sem teto não gasta
++
++## Desenho e alternativas
++
++Ver `brainstorm.md` e `decision.md`. Alternativas descartadas: um serviço por papel (039–040: custo e pontos de falha sem ganho medido); banco vetorial como base (recusa (115)); terceiro log de eventos (o `evidence_ledger` já cobre); dados dentro do repo (remote público).
++
++## Implementação e testes
++
++`eventos.py`, `orcamento.py` e `nv.py` (CLI e selftest). Testes em `tests/`; cada critério aponta o teste em `acceptance.json`.
++
++## Migração e reversão
++
++Sem migração de dados do canon. Reversão: revert do commit de aplicação e remoção de `AGATA_NV_DIR` e `AGATA_NV_CACHE`. A sombra já nasce desligada.
++
++## Riscos e dependências
++
++O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve em sombra até o lote 3 medir. O acervo do piloto é só o repo (decisão de 04/11); o vault fica fora porque é derivado e está fora do git. A nota de `PROJETO_REFERENCIA.md` que diz que o vault "não tem embedding" está defasada pela (670): fica registrada como achado, sem mudança neste lote.
++
++## Código
++
++- `eventos.py`
++- `orcamento.py`
++- `nv.py`
++- `tests/`
+diff --git a/redesign/nova_versao/tests/test_nova_versao.py b/redesign/nova_versao/tests/test_nova_versao.py
+new file mode 100644
+index 00000000..800d2880
+--- /dev/null
++++ b/redesign/nova_versao/tests/test_nova_versao.py
+@@ -0,0 +1,63 @@
++import os
++import sys
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++
++
++class Base(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        os.environ["AGATA_NV_DIR"] = self.tmp.name
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++
++class EventosTests(Base):
++    def test_chave_idempotente_nao_grava_duas_vezes(self):
++        a = eventos.registrar("execution", "ok", "x", chave="k1")
++        b = eventos.registrar("execution", "ok", "x", chave="k1")
++        self.assertEqual(a["id"], b["id"])
++        self.assertTrue(b.get("repetido"))
++        self.assertEqual(len(eventos.ultimos(100)), 1)
++
++    def test_escritas_concorrentes_preservam_a_cadeia(self):
++        ts = [threading.Thread(target=eventos.registrar, args=("observation", "ok", f"t{i}")) for i in range(20)]
++        [t.start() for t in ts]
++        [t.join() for t in ts]
++        self.assertEqual(len(eventos.ultimos(100)), 20)
++        self.assertTrue(eventos.verificar())
++
++    def test_transicao_recusa_salto_e_remocao_sem_autorizacao(self):
++        eventos.transicao("obj", None, "apresentacao", "pergunta definida")
++        eventos.transicao("obj", "apresentacao", "compreensao", "fontes descritas")
++        with self.assertRaises(ValueError):
++            eventos.transicao("obj", "compreensao", "transicao", "pulou")
++        with self.assertRaises(ValueError):
++            eventos.transicao("obj", "transicao", "remocao", "sem ok")
++        ev = eventos.transicao("obj", "transicao", "remocao", "alvo exato", autorizacao="Humano 04/11")
++        self.assertEqual(ev["estado_seguinte"], "remocao")
++
++
++class OrcamentoTests(Base):
++    def test_padrao_so_local_e_pago_sem_teto_nao_gasta(self):
++        o = orcamento.ler()
++        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "pago": False})
++        self.assertFalse(orcamento.permite("gratuito")[0])
++        orcamento.salvar({**o, "provedores": {"local": True, "gratuito": False, "pago": True}})
++        ok, motivo = orcamento.permite("pago")
++        self.assertFalse(ok)
++        self.assertIn("teto", motivo)
++        self.assertTrue(orcamento.permite("local")[0])
++        self.assertFalse(orcamento.permite("local", chamadas_ja=10**6)[0])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+new file mode 100644
+index 00000000..07470670
+--- /dev/null
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -0,0 +1,155 @@
++// Nova versão do Agata no painel (Experimento GPT, lote 1): Alexandria, metacognição, corpo, orçamento.
++// Arquivo externo por causa da CSP (script-src 'self'). Usa fetchJson/byId de prototipo.js.
++// Todo texto vindo do servidor entra por textContent, nunca como HTML.
++(function () {
++  "use strict";
++  const H = {"Content-Type": "application/json", Accept: "application/json"};
++  const el = (tag, texto) => { const e = document.createElement(tag); if (texto !== undefined) e.textContent = texto; return e; };
++  const li = (alvo, texto) => { const x = el("li", texto); byId(alvo).append(x); return x; };
++  const limpar = (...ids) => ids.forEach((i) => byId(i) && byId(i).replaceChildren());
++  const kpi = (alvo, rotulo, valor) => {
++    const d = el("div"); d.className = "kpi";
++    const l = el("div", rotulo); l.className = "label";
++    const v = el("div", String(valor)); v.className = "value";
++    d.append(l, v); byId(alvo).append(d);
++  };
++  let estado = null;
++
++  async function ler() {
++    try { estado = await fetchJson("/api/nova-versao/estado", {headers: {Accept: "application/json"}}); }
++    catch (_) { estado = null; }
++    return estado;
++  }
++  async function executar(acao, extra) {
++    return fetchJson("/api/nova-versao/executar", {method: "POST", headers: H, body: JSON.stringify({acao, ...(extra || {})})}, 120000);
++  }
++  function confirmar(botao, rotulo, fazer) {
++    if (!botao) return;
++    let armado = false;
++    botao.addEventListener("click", async () => {
++      if (!armado) { armado = true; botao.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
++      armado = false; botao.textContent = rotulo; botao.disabled = true;
++      try { await fazer(); } finally { botao.disabled = false; }
++    });
++  }
++
++  function alexandria() {
++    limpar("nv-alex-kpis");
++    const a = (estado && estado.alexandria) || {};
++    const ind = a.indice || {};
++    kpi("nv-alex-kpis", "Objetos no índice", ind.objetos || "não medido");
++    kpi("nv-alex-kpis", "Trechos", ind.trechos || "não medido");
++    kpi("nv-alex-kpis", "Skills catalogadas", ind.skills || "não medido");
++    kpi("nv-alex-kpis", "Commit do acervo", ind.commit ? ind.commit.slice(0, 12) : "sem snapshot");
++    byId("nv-alex-titulo").textContent = a.iniciado ? "Pastas criadas" : "Pastas ainda não criadas";
++    byId("nv-alex-nota").textContent = ind.gerado_em ? "Índice gerado em " + ind.gerado_em + "." : "Sem índice: crie as pastas e indexe.";
++  }
++  function mostrarPacote(p) {
++    limpar("nv-resultados");
++    byId("nv-consulta-titulo").textContent = p.estado + (p.metodos.length ? " · " + p.metodos.join(" + ") : "");
++    (p.avisos || []).forEach((a) => li("nv-resultados", "Aviso: " + a));
++    (p.resultados || []).forEach((r) => {
++      const ref = r.caminho + ":" + r.linha + (r.entrada !== null ? " (" + r.entrada + ")" : "");
++      li("nv-resultados", "[" + r.metodo + "] " + ref + " · sha " + r.sha256.slice(0, 10) + (r.trecho ? " — " + r.trecho.slice(0, 160) : ""));
++    });
++  }
++  function mostrarSkills(s) {
++    limpar("nv-resultados");
++    byId("nv-consulta-titulo").textContent = "Skills sugeridas (nada foi carregado)";
++    (s.candidatos || []).forEach((c) => li("nv-resultados", "[" + c.motivo + "] " + c.nome + " · " + c.origem + " — " + (c.descricao || "").slice(0, 140)));
++    if (!(s.candidatos || []).length) li("nv-resultados", "Nenhuma skill: não encontrado nesta busca.");
++  }
++
++  function metacognicao() {
++    limpar("nv-sombra");
++    const s = (estado && estado.sombra) || {registros: 0};
++    byId("nv-sombra-titulo").textContent = s.registros + " registros";
++    if (!s.ultimo) { li("nv-sombra", "Sem registro. A sombra liga com SETH_SOMBRA_NOVA_VERSAO=1 no gateway."); return; }
++    const u = s.ultimo; const p = u.previo || {};
++    li("nv-sombra", "Último: " + u.ts + " · rota " + u.rota + " · " + u.ms + " ms");
++    li("nv-sombra", "Prévio: " + [p.tipo, p.atualidade, p.risco, p.privado ? "privado" : "sem dado pessoal"].join(" · "));
++    li("nv-sombra", "Alexandria: " + ((u.alexandria || {}).estado || "não medido") + " · " + ((u.alexandria || {}).objetos || []).length + " objetos");
++    li("nv-sombra", "Skills: " + ((u.skills || []).join(", ") || "nenhuma"));
++  }
++
++  function corpo() {
++    limpar("nv-corpo-kpis", "nv-corpo-lista");
++    const c = (estado && estado.corpo) || {};
++    const sa = c.saude || {estado: "não medido"};
++    kpi("nv-corpo-kpis", "Saúde", sa.estado);
++    const f = c.fotografia;
++    if (!f) { byId("nv-corpo-titulo").textContent = "Sem fotografia"; return; }
++    const r = f.recursos || {};
++    kpi("nv-corpo-kpis", "Disco livre", r.disco_livre_pct === null ? "não medido" : r.disco_livre_pct + "%");
++    kpi("nv-corpo-kpis", "Memória livre", r.memoria_disponivel_pct === null ? "não medido" : r.memoria_disponivel_pct + "%");
++    kpi("nv-corpo-kpis", "Temperatura máx.", r.temperatura_max_c === null ? "não medido" : r.temperatura_max_c + " °C");
++    byId("nv-corpo-titulo").textContent = "Fotografia de " + f.quando + " (revalidar até " + f.revalidar_ate + ")";
++    (sa.motivos || []).forEach((m) => li("nv-corpo-lista", "Motivo: " + m));
++    Object.entries(f.servicos || {}).forEach(([u, s]) => li("nv-corpo-lista", u + ": " + s));
++  }
++
++  function orcamento() {
++    const o = (estado && estado.orcamento) || null;
++    if (o) {
++      byId("nv-orc-local").checked = !!o.provedores.local;
++      byId("nv-orc-gratuito").checked = !!o.provedores.gratuito;
++      byId("nv-orc-pago").checked = !!o.provedores.pago;
++      byId("nv-orc-chamadas").value = o.max_chamadas; byId("nv-orc-tokens").value = o.max_tokens;
++      byId("nv-orc-timeout").value = o.timeout_s; byId("nv-orc-reais").value = o.teto_reais;
++    }
++    limpar("nv-eventos");
++    const ev = (estado && estado.eventos) || [];
++    byId("nv-eventos-titulo").textContent = ev.length + " últimos eventos · ledger " + (estado && estado.ledger_ok === true ? "íntegro" : "não verificado");
++    ev.slice().reverse().forEach((e) => li("nv-eventos", e.timestamp + " · " + e.componente + " · " + e.kind + " · " + e.status + " · " + e.source));
++  }
++
++  const telas = {"nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento};
++  window.carregarNovaVersao = async function (nome) {
++    await ler();
++    if (!estado) { const t = {"nv-alexandria": "nv-alex-nota", "nv-metacognicao": "nv-sombra-titulo", "nv-corpo": "nv-corpo-titulo", "nv-orcamento": "nv-orc-nota"}[nome]; if (t && byId(t)) byId(t).textContent = "Nova versão indisponível no servidor."; return; }
++    (telas[nome] || (() => {}))();
++  };
++
++  confirmar(byId("nv-iniciar"), "Criar pastas e indexar", async () => {
++    try { const r = await executar("iniciar"); byId("nv-alex-nota").textContent = "Indexado: " + r.resultado.objetos + " objetos."; }
++    catch (_) { byId("nv-alex-nota").textContent = "Não foi possível (ocupado?)."; }
++    window.carregarNovaVersao("nv-alexandria");
++  });
++  confirmar(byId("nv-indexar"), "Reindexar a partir do HEAD", async () => {
++    try { const r = await executar("indexar"); byId("nv-alex-nota").textContent = "Reindexado: " + r.resultado.objetos + " objetos, " + r.resultado.mudaram + " mudaram."; }
++    catch (_) { byId("nv-alex-nota").textContent = "Não foi possível (crie as pastas antes?)."; }
++    window.carregarNovaVersao("nv-alexandria");
++  });
++  const consultar = (acao) => async () => {
++    const q = byId("nv-consulta").value.trim(); if (!q) return;
++    try {
++      const r = await executar(acao, {consulta: q, semantica: byId("nv-semantica").value});
++      acao === "consultar" ? mostrarPacote(r.resultado) : mostrarSkills(r.resultado);
++    } catch (_) { limpar("nv-resultados"); li("nv-resultados", "Sem resposta: índice ausente ou servidor ocupado."); }
++  };
++  if (byId("nv-consultar")) byId("nv-consultar").addEventListener("click", consultar("consultar"));
++  if (byId("nv-skills")) byId("nv-skills").addEventListener("click", consultar("skills"));
++  if (byId("nv-classificar")) byId("nv-classificar").addEventListener("click", async () => {
++    const q = byId("nv-pedido").value.trim(); if (!q) return;
++    limpar("nv-classificacao");
++    try {
++      const r = (await executar("classificar", {consulta: q})).resultado;
++      li("nv-classificacao", "Tipo " + r.tipo + " · " + r.atualidade + " · risco " + r.risco + (r.privado ? " · dado pessoal" : ""));
++      r.estrategia.forEach((e) => li("nv-classificacao", "Estratégia: " + e));
++      if (r.problema_ambiguo) li("nv-classificacao", "\"Problema\" é ambíguo: distinguir " + r.problema_ambiguo.join(", "));
++      if (r.limite_interacao) li("nv-classificacao", "Limite combinado: " + r.limite_interacao.restantes + " de " + r.limite_interacao.declarado + " restantes");
++    } catch (_) { li("nv-classificacao", "Não foi possível classificar."); }
++  });
++  confirmar(byId("nv-fotografar"), "Fotografar agora", async () => {
++    try { await executar("fotografar"); } catch (_) { byId("nv-corpo-titulo").textContent = "Não foi possível fotografar."; }
++    window.carregarNovaVersao("nv-corpo");
++  });
++  confirmar(byId("nv-orc-salvar"), "Salvar orçamento", async () => {
++    const n = (id) => Number(byId(id).value);
++    const orc = {provedores: {local: byId("nv-orc-local").checked, gratuito: byId("nv-orc-gratuito").checked, pago: byId("nv-orc-pago").checked},
++      max_chamadas: n("nv-orc-chamadas"), max_tokens: n("nv-orc-tokens"), timeout_s: n("nv-orc-timeout"), teto_reais: n("nv-orc-reais")};
++    try { const r = await executar("salvar_orcamento", {orcamento: orc}); byId("nv-orc-nota").textContent = r.resultado.mudou ? "Salvo e registrado no ledger." : "Nada mudou."; }
++    catch (_) { byId("nv-orc-nota").textContent = "Recusado: valor fora do limite."; }
++    window.carregarNovaVersao("nv-orcamento");
++  });
++})();
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+new file mode 100644
+index 00000000..0ce01708
+--- /dev/null
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -0,0 +1,64 @@
++#!/usr/bin/env python3
++"""Nova versão do Agata no painel: Alexandria, skills, metacognição, corpo, orçamento e eventos.
++
++Leitura em `estado()`; execução por lista fechada em `executar()`, uma por vez (lock).
++A consulta vem do Humano pelo painel, limitada a 300 caracteres, e só vira pacote de
++evidência (nunca comando). O orçamento só aceita os campos e limites de
++`redesign/nova_versao/orcamento.py`; cada mudança vira evento no ledger.
++Nada aqui escreve no repositório: os dados ficam em ~/.local/share/agata/nova-versao.
++"""
++from __future__ import annotations
++
++import sys
++import threading
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++for _p in ("nova_versao", "alexandria", "corpo", "metacognicao"):
++    sys.path.insert(0, str(ROOT / "redesign" / _p))
++
++ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar")
++_LOCK = threading.Lock()
++
++
++def estado() -> dict:
++    import nv  # noqa: E402
++    return nv.estado()
++
++
++def executar(acao, dados: dict | None = None) -> dict:
++    if acao not in ACOES:
++        raise ValueError("ação fora da lista")
++    dados = dados if isinstance(dados, dict) else {}
++    texto = dados.get("consulta")
++    if acao in ("consultar", "skills", "classificar"):
++        if not isinstance(texto, str) or not texto.strip() or len(texto) > 300:
++            raise ValueError("consulta vazia ou longa demais")
++    if not _LOCK.acquire(blocking=False):
++        raise RuntimeError("ocupado")
++    try:
++        if acao == "iniciar":
++            import nv  # noqa: E402
++            return {"acao": acao, "resultado": nv.iniciar()}
++        if acao == "indexar":
++            import acervo  # noqa: E402
++            return {"acao": acao, "resultado": acervo.indexar(acervo.snapshot("HEAD", ROOT))}
++        if acao == "consultar":
++            import acervo  # noqa: E402
++            sem = dados.get("semantica") if dados.get("semantica") in ("nunca", "auto", "sempre") else "auto"
++            return {"acao": acao, "resultado": acervo.consultar(texto, semantica=sem, salvar=True)}
++        if acao == "skills":
++            import skills  # noqa: E402
++            return {"acao": acao, "resultado": skills.selecionar(texto, n=5)}
++        if acao == "classificar":
++            import previo  # noqa: E402
++            return {"acao": acao, "resultado": previo.classificar({"messages": [{"role": "user", "content": texto}]})}
++        if acao == "fotografar":
++            import fotografar  # noqa: E402
++            import saude  # noqa: E402
++            f = fotografar.fotografar()
++            return {"acao": acao, "resultado": {"quando": f["quando"], **saude.classificar(f)}}
++        import orcamento  # noqa: E402
++        return {"acao": acao, "resultado": orcamento.salvar(dados.get("orcamento") or {})}
++    finally:
++        _LOCK.release()
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 78b45b43..88c83811 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -35,6 +35,12 @@
+       <button data-page="lacunas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M8 12h8M12 8v8" stroke-dasharray="2 2"/></svg>Lacunas</button>
+       <button data-page="capacidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5M20.5 12h-5M12 20.5v-5M3.5 12h5"/></svg>O que posso fazer</button>
+     </div></div>
++    <div class="nav-group" data-group="novaversao"><button type="button" class="nav-group-toggle" aria-expanded="false" aria-controls="sub-novaversao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16 7l3.5-1 3 13-3.5 1z"/></svg>Nova versão<span class="nav-caret" aria-hidden="true"></span></button><div class="nav-sub" id="sub-novaversao" hidden>
++      <button data-page="nv-alexandria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16 7l3.5-1 3 13-3.5 1z"/></svg>Alexandria</button>
++      <button data-page="nv-metacognicao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M9 10h.01M15 10h.01M9 15c1.5 1.2 4.5 1.2 6 0"/></svg>Metacognição</button>
++      <button data-page="nv-corpo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>Corpo operacional</button>
++      <button data-page="nv-orcamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.5"/></svg>Orçamento e eventos</button>
++    </div></div>
+   </nav></div>
+   <div class="abrir-lista" aria-label="Serviços do sistema"><div class="abrir-titulo">Serviços</div>
+     <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
+@@ -227,12 +233,17 @@
+     <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Configuração local</div><h2 class="panel-title">Tarefas da janela</h2></div></div><div class="service-list" id="live-tasks"><p>Sem leitura.</p></div><p class="subnote">Cadência configurada não comprova sucesso de execução.</p></article>
+ 
+   </section>
++<section class="page" id="page-nv-alexandria" data-title="Alexandria"><div class="section-heading"><div><div class="eyebrow">Nova versão · piloto em sombra</div><h1>Alexandria</h1><p>Acervo do repositório com origem, commit e hash. A busca é por texto primeiro; a busca por sentido é secundária e sempre rotulada. Sem resultado quer dizer não encontrado nesta busca.</p></div></div><div class="kpis" id="nv-alex-kpis"></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Acervo</div><h2 class="panel-title" id="nv-alex-titulo">Índice</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px"><button type="button" class="text-link" style="margin-right:14px" id="nv-iniciar">Criar pastas e indexar</button><button type="button" class="text-link" style="margin-right:14px" id="nv-indexar">Reindexar a partir do HEAD</button></div><p class="note" id="nv-alex-nota" style="margin:8px 0 0">Sem leitura.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Consulta</div><h2 class="panel-title" id="nv-consulta-titulo">Pacote de evidência</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><input id="nv-consulta" type="search" maxlength="300" placeholder="o que procurar no acervo" aria-label="Consulta ao acervo" style="flex:1;min-width:240px"><select id="nv-semantica" aria-label="Busca por sentido"><option value="auto">sentido: só se o texto achar pouco</option><option value="nunca">sentido: nunca</option><option value="sempre">sentido: sempre</option></select><button type="button" class="text-link" style="margin-right:14px" id="nv-consultar">Consultar</button><button type="button" class="text-link" style="margin-right:14px" id="nv-skills">Sugerir skills</button></div><ul id="nv-resultados" style="margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
++<section class="page" id="page-nv-metacognicao" data-title="Metacognição"><div class="section-heading"><div><div class="eyebrow">Nova versão · antes e depois do turno</div><h1>Metacognição</h1><p>Classificação determinística do pedido: tipo, atualidade, privacidade, risco e limite combinado. Em sombra no gateway, só com SETH_SOMBRA_NOVA_VERSAO=1. O registro guarda o hash do pedido, nunca o texto.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Sombra do gateway</div><h2 class="panel-title" id="nv-sombra-titulo">Registros</h2></div></div><ul id="nv-sombra" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Testar</div><h2 class="panel-title" id="nv-classificar-titulo">Classificar um pedido</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><input id="nv-pedido" type="text" maxlength="300" placeholder="um pedido de exemplo" aria-label="Pedido para classificar" style="flex:1;min-width:240px"><button type="button" class="text-link" style="margin-right:14px" id="nv-classificar">Classificar</button></div><ul id="nv-classificacao" style="margin:10px 0 0;padding-left:18px"></ul></article></section>
++<section class="page" id="page-nv-corpo" data-title="Corpo operacional"><div class="section-heading"><div><div class="eyebrow">Nova versão · estado da Máquina</div><h1>Corpo operacional</h1><p>Fotografia datada, só leitura: serviços, portas, recursos e modelos. Saúde em cinco estados. Dado ausente aparece como não medido; serviço sob demanda inativo não é falha.</p></div></div><div class="kpis" id="nv-corpo-kpis"></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fotografia</div><h2 class="panel-title" id="nv-corpo-titulo">Serviços e recursos</h2></div></div><button type="button" class="text-link" style="margin-right:14px" id="nv-fotografar">Fotografar agora</button><ul id="nv-corpo-lista" style="margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
++<section class="page" id="page-nv-orcamento" data-title="Orçamento e eventos"><div class="section-heading"><div><div class="eyebrow">Nova versão · decisão do Humano</div><h1>Orçamento e eventos</h1><p>Quais provedores a nova versão pode usar e com qual teto. O padrão é só local. Cada mudança vira evento no ledger encadeado. Nesta fase nenhuma inferência é feita.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orçamento</div><h2 class="panel-title" id="nv-orc-titulo">Provedores e tetos</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center"><label style="margin-right:14px"><input type="checkbox" id="nv-orc-local"> local</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-gratuito"> gratuito</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-pago"> pago</label><label style="margin-right:14px">chamadas <input type="number" id="nv-orc-chamadas" min="0" max="100000" style="width:90px"></label><label style="margin-right:14px">tokens <input type="number" id="nv-orc-tokens" min="0" max="50000000" style="width:110px"></label><label style="margin-right:14px">tempo (s) <input type="number" id="nv-orc-timeout" min="1" max="3600" style="width:70px"></label><label style="margin-right:14px">teto R$ <input type="number" id="nv-orc-reais" min="0" max="10000" step="0.01" style="width:90px"></label><button type="button" class="text-link" style="margin-right:14px" id="nv-orc-salvar">Salvar orçamento</button></div><p class="note" id="nv-orc-nota" style="margin:8px 0 0">Pago só gasta com teto em R$ maior que zero.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ledger</div><h2 class="panel-title" id="nv-eventos-titulo">Últimos eventos</h2></div></div><ul id="nv-eventos" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
+ </main>
+ </div>
+ <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+ <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
+ <script src="prototipo.js"></script>
+ <script src="abrir.js"></script>
++<script src="nova_versao.js"></script>
+ <script src="conselho-rede/app.js" defer></script>
+ </body>
+ </html>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 6f594d26..a48d6b5e 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -77,6 +77,7 @@ function showPage(name) {
+   if (name === "visao") carregarVisaoSistema();
+   if (name === "qualidade") { carregarQualidade(); carregarMedicoes(); }
+   if (name === "sdd") carregarSdd();
++  if (name.startsWith("nv-") && typeof window.carregarNovaVersao === "function") window.carregarNovaVersao(name);
+   if (name === "conselho") loadRelayCatalog();
+ }
+ nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 1da2b38a..f3d67148 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -33,6 +33,7 @@ import armazem  # noqa: E402
+ import qualidade_llm  # noqa: E402
+ import medicoes_painel  # noqa: E402
+ import sdd_painel  # noqa: E402
++import nova_versao_painel  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
+@@ -101,6 +102,7 @@ _ASSETS = {
+     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
++    "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
+     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
+@@ -1035,6 +1037,10 @@ class Handler(BaseHTTPRequestHandler):
+             observed_at, fresh_until = _reading_window()
+             body = json.dumps({**medicoes_painel.estado(), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/nova-versao/estado":
++            observed_at, fresh_until = _reading_window()
++            body = json.dumps({**nova_versao_painel.estado(), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/sdd/estado":
+             observed_at, fresh_until = _reading_window()
+             body = json.dumps({**sdd_painel.estado(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
+@@ -1124,7 +1130,7 @@ class Handler(BaseHTTPRequestHandler):
+             return self._seth_chat()
+         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
+             return self._seth_conversa(self.path.endswith("/apagar"))
+-        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
++        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
+         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
+@@ -1150,6 +1156,17 @@ class Handler(BaseHTTPRequestHandler):
+                 return self._send(429, "text/plain; charset=utf-8", b"measurement busy")
+             body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
+             return self._send(202, "application/json; charset=utf-8", body)
++        if self.path == "/api/nova-versao/executar":
++            try:
++                resultado = nova_versao_painel.executar(payload.get("acao"), payload)
++            except ValueError:
++                return self._send(400, "text/plain; charset=utf-8", b"invalid nova-versao action")
++            except RuntimeError:
++                return self._send(429, "text/plain; charset=utf-8", b"nova-versao busy")
++            except FileNotFoundError:
++                return self._send(409, "text/plain; charset=utf-8", b"nova-versao index missing")
++            body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/sdd/executar":
+             if not _SDD_LOCK.acquire(blocking=False):
+                 return self._send(429, "text/plain; charset=utf-8", b"sdd busy")
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index a1d3d8d7..dccf1a1e 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -89,5 +89,14 @@
+       "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_nova_versao_painel.py"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 5440cb3c..59f42f84 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -14,7 +14,8 @@
+ - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
+ - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+ - `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha`, `varias`, `rastreio` ou `agregacao`, de lista fechada, com `raciocinio` `desligado` ou `ligado`), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+-- A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
++- `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`).
++- A navegação lateral agrupa as 21 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
+ - A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+@@ -30,6 +31,7 @@
+ - [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
+ - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
+ - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
++- [ ] a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento
+ 
+ ## Desenho e alternativas
+ 
+@@ -37,7 +39,7 @@ Servidor HTTP da biblioteca padrão com módulos pequenos por assunto (`armazem`
+ 
+ ## Implementação e testes
+ 
+-Testes em `test_painel.py`, `test_qualidade_llm.py`, `test_sdd_painel.py`, `test_relay_catalog.py` e `test_conselho_rede.py`. Cada critério acima está ligado a um teste em `spec/acceptance.json`.
++Testes em `test_painel.py`, `test_qualidade_llm.py`, `test_sdd_painel.py`, `test_nova_versao_painel.py`, `test_relay_catalog.py` e `test_conselho_rede.py`. Cada critério acima está ligado a um teste em `spec/acceptance.json`.
+ 
+ ## Migração e reversão
+ 
+@@ -57,6 +59,8 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+ - `qualidade_llm.py`
+ - `sdd_painel.py`
+ - `medicoes_painel.py`
++- `nova_versao_painel.py`
++- `nova_versao.js`
+ - `abrir.js`
+ - `app.js`
+ - `prototipo.js`
+@@ -70,6 +74,7 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+ - `test_sdd_painel.py`
+ - `test_menu_painel.py`
+ - `test_medicoes_painel.py`
++- `test_nova_versao_painel.py`
+ - `test_relay_catalog.py`
+ - `test_conselho_rede.py`
+ - `conselho-rede/`
+diff --git a/redesign/painel_operacional/test_menu_painel.py b/redesign/painel_operacional/test_menu_painel.py
+index a92e087e..a1e66d86 100644
+--- a/redesign/painel_operacional/test_menu_painel.py
++++ b/redesign/painel_operacional/test_menu_painel.py
+@@ -4,10 +4,12 @@ from pathlib import Path
+ 
+ HERE = Path(__file__).resolve().parent
+ PAGINAS = {"panorama", "conselho", "operacao", "visao", "integracoes", "modelos", "manutencao", "plano",
+-           "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades"}
++           "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades",
++           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}
+ GRUPOS = {"sistema": {"operacao", "visao", "integracoes", "modelos", "manutencao", "plano"},
+           "memoria": {"memoria", "grafo", "documentacao", "conversa"},
+-          "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"}}
++          "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"},
++          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}}
+ 
+ 
+ class Menu(HTMLParser):
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+new file mode 100644
+index 00000000..48a73332
+--- /dev/null
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -0,0 +1,57 @@
++import json
++import os
++import tempfile
++import unittest
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++
++
++class NovaVersaoPainelTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        os.environ["AGATA_NV_DIR"] = self.tmp.name + "/dados"
++        os.environ["AGATA_NV_CACHE"] = self.tmp.name + "/cache"
++        import nova_versao_painel
++        self.m = nova_versao_painel
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def test_recusa_acao_e_consulta_fora_do_contrato(self):
++        with self.assertRaises(ValueError):
++            self.m.executar("rm -rf", {})
++        with self.assertRaises(ValueError):
++            self.m.executar("consultar", {"consulta": "x" * 301})
++        with self.assertRaises(ValueError):
++            self.m.executar("skills", {"consulta": "   "})
++
++    def test_orcamento_recusa_fora_do_limite_e_registra_mudanca(self):
++        with self.assertRaises(ValueError):
++            self.m.executar("salvar_orcamento", {"orcamento": {"max_chamadas": -1}})
++        with self.assertRaises(ValueError):
++            self.m.executar("salvar_orcamento", {"orcamento": {"provedores": {"outro": True}}})
++        r = self.m.executar("salvar_orcamento", {"orcamento": {"provedores": {"local": True, "gratuito": True},
++                                                               "max_chamadas": 50}})
++        self.assertTrue(r["resultado"]["mudou"])
++        ledger = Path(os.environ["AGATA_NV_DIR"]) / "eventos" / "ledger.jsonl"
++        ev = [json.loads(x) for x in ledger.read_text().splitlines()]
++        self.assertEqual(ev[-1]["source"], "orcamento")
++        self.assertEqual(ev[-1]["antes"]["provedores"]["gratuito"], False)
++        self.assertEqual(ev[-1]["depois"]["provedores"]["gratuito"], True)
++
++    def test_estado_sem_dados_diz_nao_medido(self):
++        e = self.m.estado()
++        self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")
++        self.assertIsNone(e["alexandria"]["indice"])
++        self.assertEqual(e["orcamento"]["provedores"], {"local": True, "gratuito": False, "pago": False})
++
++    def test_js_externo_e_sem_innerhtml(self):
++        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
++        self.assertIn('<script src="nova_versao.js"></script>', html)
++        js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
++        self.assertNotIn("innerHTML", js)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index f9f27da3..20089b87 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -614,6 +614,7 @@ import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/1
+ import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
+ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteamento, 23/10/2026; desligado por padrão)
+ import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
++import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
+ import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+ 
+ _PERFIS = {"mtime": None, "dados": {}}
+@@ -1192,6 +1193,9 @@ class _Handler(BaseHTTPRequestHandler):
+                             sombra_capacidade.registrar(payload, self._rota,
+                                                         {m: capivara_perfis.janela(_pf, m)
+                                                          for m in (_pf.get("modelos") or {})})
++                        # nova versão (Alexandria + metacognição): só registra o que faria (sombra)
++                        if sombra_nova_versao.ligado():
++                            sombra_nova_versao.registrar(payload, self._rota)
+                     payload["model"] = self._rota
+                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
+                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
+diff --git a/redesign/router/sombra_nova_versao.py b/redesign/router/sombra_nova_versao.py
+new file mode 100644
+index 00000000..0a332dec
+--- /dev/null
++++ b/redesign/router/sombra_nova_versao.py
+@@ -0,0 +1,134 @@
++#!/usr/bin/env python3
++"""sombra_nova_versao.py — a nova versão (Experimento GPT) observando o gateway, só em SOMBRA.
++
++Mesmo padrão de `sombra_capacidade.py`: desligado por padrão (`SETH_SOMBRA_NOVA_VERSAO=1`
++liga), uma por vez (Semaphore), thread daemon, nunca derruba nem altera a resposta.
++
++A cada pedido do Humano (não utilitário, não continuação), registra o que a nova versão
++TERIA feito, para a avaliação (lote 3) comparar com o caminho atual:
++- metacognição (antes): tipo, atualidade, privacidade, risco, limite combinado;
++- Alexandria: os objetos que o pacote de evidência traria (só léxico + relações; a
++  semântica fica fora da sombra para não carregar a iGPU a cada turno);
++- skills: as candidatas que o seletor sugeriria (nenhuma é carregada).
++
++Grava em `<dados>/metacognicao/sombra.jsonl` o hash do pedido, a classificação e os ids
++devolvidos — NUNCA o texto do pedido nem os trechos.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import sys
++import threading
++import time
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++RAIZ = AQUI.parents[1]
++for _p in (RAIZ / "redesign" / "nova_versao", RAIZ / "redesign" / "alexandria", RAIZ / "redesign" / "metacognicao", AQUI):
++    if str(_p) not in sys.path:
++        sys.path.insert(0, str(_p))
++
++_TRAVA = threading.Semaphore(1)
++
++
++def ligado() -> bool:
++    return os.environ.get("SETH_SOMBRA_NOVA_VERSAO") == "1"
++
++
++def log_path() -> Path:
++    import eventos  # noqa: E402
++    return eventos.dados() / "metacognicao" / "sombra.jsonl"
++
++
++def _ultima(payload: dict) -> str:
++    import previo  # noqa: E402
++    msgs = payload.get("messages") or []
++    return next((previo._texto(m.get("content")) for m in reversed(msgs)
++                 if isinstance(m, dict) and m.get("role") == "user"), "")
++
++
++def observar(payload: dict, rota: str, varrer_pessoal=None) -> dict:
++    """O que a nova versão faria com este pedido. Sem efeito, sem texto no resultado."""
++    import previo  # noqa: E402
++    t0 = time.monotonic()
++    ultima = _ultima(payload)
++    linha = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "rota": rota,
++             "pedido_sha256": hashlib.sha256(ultima.encode()).hexdigest(), "erros": []}
++    try:
++        p = previo.classificar(payload, varrer_pessoal)
++        linha["previo"] = {k: p[k] for k in ("tipo", "tokens_est", "ferramentas", "privado", "atualidade", "risco",
++                                              "limite_interacao", "estrategia")}
++        linha["previo"]["problema_ambiguo"] = bool(p["problema_ambiguo"])
++        linha["previo"]["n_sinais_efeito"] = len(p["sinais_efeito"])
++    except Exception as e:  # noqa: BLE001
++        linha["erros"].append(f"previo: {e.__class__.__name__}")
++    try:
++        import acervo  # noqa: E402
++        pac = acervo.consultar(ultima, n=5, semantica="nunca")
++        linha["alexandria"] = {"estado": pac["estado"], "metodos": pac["metodos"], "commit": (pac["commit"] or "")[:12],
++                               "objetos": [r["object_id"] for r in pac["resultados"]]}
++    except FileNotFoundError:
++        linha["alexandria"] = {"estado": "sem índice"}
++    except Exception as e:  # noqa: BLE001
++        linha["erros"].append(f"alexandria: {e.__class__.__name__}")
++    try:
++        import skills  # noqa: E402
++        linha["skills"] = [c["skill_id"] for c in skills.selecionar(ultima, n=3)["candidatos"]]
++    except FileNotFoundError:
++        linha["skills"] = None
++    except Exception as e:  # noqa: BLE001
++        linha["erros"].append(f"skills: {e.__class__.__name__}")
++    linha["ms"] = round((time.monotonic() - t0) * 1000, 1)
++    return linha
++
++
++def registrar(payload: dict, rota: str) -> None:
++    """Dispara a sombra sem esperar; uma por vez. Nunca levanta."""
++    if not ligado() or not _TRAVA.acquire(blocking=False):
++        return
++
++    def _rodar():
++        try:
++            linha = observar(payload, rota)
++            p = log_path()
++            p.parent.mkdir(parents=True, exist_ok=True)
++            with open(p, "a", encoding="utf-8") as f:
++                f.write(json.dumps(linha, ensure_ascii=False) + "\n")
++        except Exception as e:  # noqa: BLE001
++            print(f"sombra_nova_versao: não registrou ({e.__class__.__name__})", file=sys.stderr, flush=True)
++        finally:
++            _TRAVA.release()
++    threading.Thread(target=_rodar, daemon=True).start()
++
++
++def _selftest() -> int:
++    import tempfile
++    with tempfile.TemporaryDirectory() as t:
++        os.environ["AGATA_NV_DIR"] = t
++        os.environ["AGATA_NV_CACHE"] = t + "/cache"
++        segredo = "frase-que-nao-pode-ir-para-o-log-7781"
++        payload = {"messages": [{"role": "user", "content": f"apague o arquivo {segredo} hoje"}]}
++        linha = observar(payload, "seth-livre", lambda x: [])
++        bruto = json.dumps(linha, ensure_ascii=False)
++        casos = [
++            ("texto do pedido não vai para o registro", segredo not in bruto and "apague" not in bruto),
++            ("hash do pedido registrado", len(linha["pedido_sha256"]) == 64),
++            ("prévio marca efeito e atualidade", linha.get("previo", {}).get("risco") == "efeito"
++             and linha["previo"]["atualidade"] == "volatil"),
++            ("sem índice não quebra", linha.get("alexandria", {}).get("estado") == "sem índice"),
++            ("desligado por padrão", os.environ.get("SETH_SOMBRA_NOVA_VERSAO") == "1" or not ligado()),
++        ]
++    for nome, ok in casos:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in casos)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    if sys.argv[1:] == ["--selftest"]:
++        sys.exit(_selftest())
++    print(__doc__)
++    sys.exit(2)
+diff --git a/scripts/busca_texto.py b/scripts/busca_texto.py
+index 3b3c88c4..0ba0e7ca 100644
+--- a/scripts/busca_texto.py
++++ b/scripts/busca_texto.py
+@@ -13,8 +13,13 @@ Entre as que casam, palavra INTEIRA vem antes de pedaço de palavra (MEMÓRIAS
+ Onde procura (fixo, nunca vem da consulta): memoria/obsidian/ e extras/ inteiro
+ (inclusive extras/arquivo-redesign/, decisão do Humano em (682)). Só .md.
+ 
+-Uso: python3 scripts/busca_texto.py -- "frase"     |     --selftest
++Uso: python3 scripts/busca_texto.py [--json] -- "frase"     |     --selftest
++
++`--json` (04/11/2026, nova versão / Alexandria): a mesma busca, em JSON, com o sha256
++do arquivo de cada achado — é o baseline léxico que a avaliação compara com a Alexandria.
+ """
++import hashlib
++import json
+ import os
+ import re
+ import sys
+@@ -86,15 +91,35 @@ def buscar(consulta, raiz=REPO):
+     return [(n, rel, i, t) for n, _w, rel, i, t in achados[:MAX_LINHAS]], melhor, ps
+ 
+ 
++def em_json(achados, melhor, ps, raiz=REPO):
++    shas = {}
++    for _n, rel, _i, _t in achados:
++        if rel not in shas:
++            try:
++                with open(os.path.join(raiz, rel), "rb") as f:
++                    shas[rel] = hashlib.sha256(f.read()).hexdigest()
++            except OSError:
++                shas[rel] = None
++    return {"palavras": ps, "casaram": melhor, "estado": "encontrado" if achados else "não encontrado nesta busca",
++            "resultados": [{"caminho": rel, "linha": i, "trecho": t, "palavras": f"{n}/{len(ps)}", "sha256": shas[rel]}
++                           for n, rel, i, t in achados]}
++
++
+ def main(argv):
+     if argv[:1] == ["--selftest"]:
+         return _selftest()
++    como_json = argv[:1] == ["--json"]
++    if como_json:
++        argv = argv[1:]
+     if "--" in argv:
+         argv = argv[argv.index("--") + 1:]
+     if len(argv) != 1:
+-        print("uso: busca_texto.py -- \"frase\"", file=sys.stderr)
++        print("uso: busca_texto.py [--json] -- \"frase\"", file=sys.stderr)
+         return 2
+     achados, melhor, ps = buscar(argv[0])
++    if como_json:
++        print(json.dumps(em_json(achados, melhor, ps), ensure_ascii=False))
++        return 0 if achados else 1
+     if not achados:
+         print(f"nenhuma ocorrência de {ps} (sem acento, sem maiúscula)")
+         return 1
+@@ -126,6 +151,9 @@ def _selftest():
+         open(os.path.join(t, "memoria", "obsidian", "z.md"), "w").write("medido: `laya` 10/20\n")
+         d, _, _ = buscar("Laya", t)
+         ok = ok and d and d[0][1].endswith("z.md") and any(x[1].endswith("a.md") for x in d)
++        j = em_json(d, 1, ["laya"], t)
++        ok = ok and j["resultados"][0]["caminho"].endswith("z.md") and len(j["resultados"][0]["sha256"]) == 64
++        ok = ok and em_json([], 0, ["xy"], t)["estado"] == "não encontrado nesta busca"
+     print("SELFTEST", "OK" if ok else f"FALHA {a} {b}")
+     return 0 if ok else 1
+ 
