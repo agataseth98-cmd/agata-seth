@@ -1143,7 +1143,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", b"invalid search")
         if self.path == "/api/medicoes/executar":
             try:
-                resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"), tarefa=payload.get("tarefa"))
+                resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"), tarefa=payload.get("tarefa"), raciocinio=payload.get("raciocinio"))
             except ValueError:
                 return self._send(400, "text/plain; charset=utf-8", b"invalid measurement")
             except RuntimeError:

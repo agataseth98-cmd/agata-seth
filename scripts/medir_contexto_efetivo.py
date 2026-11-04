@@ -13,7 +13,7 @@ Tarefas: `agulha` (um fato), `varias` (8 fatos parecidos espalhados, pergunta po
 (5 palavras inventadas repetidas 12 vezes entre 40 que aparecem uma vez: extração de palavras comuns do RULER). Só fala com o endpoint local do Ollama (padrão http://127.0.0.1:11434/api/chat). Gasta GPU e minutos: só roda
 quando pedido. Com --salvar escreve em AGATA_MEDICOES_DIR (padrão ~/.cache/agata/painel/medicoes).
   medir_contexto_efetivo.py --modelo TAG [--url URL] [--comprimentos 2048,4096,8192,16384,32768]
-                            [--tarefa agulha|varias|rastreio|agregacao] [--tentativas 3] [--salvar]     |     --selftest
+                            [--tarefa agulha|varias|rastreio|agregacao] [--raciocinio] [--ctx-maximo 65536] [--tentativas 3] [--salvar]     |     --selftest
 Exit 0 = medido; 2 = uso; 4 = o endpoint não respondeu.
 """
 import json
@@ -68,12 +68,17 @@ def montar_varias(chars: int, codigos: list[str], alvo: int, base: str) -> str:
 # Tarefas de várias respostas fazem o qwen3 raciocinar no texto da resposta (medido em 04/11: com 400 tokens a saída
 # vem cortada, done_reason=length, e a medição vira falso zero). Dão mais espaço e só a parte depois de </think> vale.
 NUM_PREDICT = {"agulha": 400, "varias": 400, "rastreio": 2500, "agregacao": 2000}
+NUM_PREDICT_RACIOCINIO = 8000  # com o raciocínio ligado o modelo pensa antes de responder (medido: 1.400 a 1.500 tokens no qwen3:4b)
+CTX_MAXIMO = 65536
 
 
 def so_resposta(texto: str, tarefa: str) -> str:
     if tarefa in ("agulha", "varias") or "</think>" not in texto:
         return texto
     return texto.rsplit("</think>", 1)[1]
+
+
+_VISTOS: list = []  # só o selftest usa: o que o servidor falso recebeu
 
 
 def _inserir(miolo: str, pares: list) -> str:
@@ -118,8 +123,8 @@ def montar_agregacao(chars: int, rnd, base: str) -> tuple[str, list, list]:
             marcadores, distratores)
 
 
-def perguntar(url: str, modelo: str, prompt: str, num_ctx: int, timeout: int = 900, num_predict: int = 400) -> dict:
-    corpo = json.dumps({"model": modelo, "stream": False, "think": False,
+def perguntar(url: str, modelo: str, prompt: str, num_ctx: int, timeout: int = 900, num_predict: int = 400, raciocinio: bool = False) -> dict:
+    corpo = json.dumps({"model": modelo, "stream": False, "think": raciocinio,
                         "messages": [{"role": "user", "content": prompt}],
                         "options": {"temperature": 0, "num_ctx": num_ctx, "num_predict": num_predict}}).encode()
     req = urllib.request.Request(url, data=corpo, headers={"Content-Type": "application/json"})
@@ -137,7 +142,7 @@ def efetivo(linhas: list[dict]) -> int | None:
     return melhor
 
 
-def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3, base: str = "", progresso=None, tarefa: str = "agulha") -> dict:
+def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3, base: str = "", progresso=None, tarefa: str = "agulha", raciocinio: bool = False, ctx_maximo: int = CTX_MAXIMO) -> dict:
     if tarefa not in TAREFAS:
         raise ValueError("tarefa fora da lista")
     linhas = []
@@ -160,7 +165,8 @@ def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3,
             else:
                 prompt, certos, errados = montar_agregacao(tam, rnd, base)
             t0 = time.time()
-            r = perguntar(url, modelo, prompt, min(65536, alvo + NUM_PREDICT[tarefa] + 600), num_predict=NUM_PREDICT[tarefa])
+            limite = NUM_PREDICT_RACIOCINIO if raciocinio else NUM_PREDICT[tarefa]
+            r = perguntar(url, modelo, prompt, min(ctx_maximo, alvo + limite + 600), num_predict=limite, raciocinio=raciocinio)
             segundos += time.time() - t0
             tokens.append(r.get("prompt_eval_count"))
             resposta = so_resposta(r.get("message", {}).get("content", "") or "", tarefa).lower()
@@ -173,7 +179,8 @@ def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3,
               "varias": f"{N_VARIAS} fatos parecidos espalhados, pergunta por um (multi-chave do RULER); resposta com outro código conta como erro",
               "rastreio": f"cadeia de {N_CADEIA} variáveis que herdam um valor, com {N_DISTRATORAS} distratoras (rastreio de variáveis do RULER); acerta se lista as {N_CADEIA} e nenhuma distratora",
               "agregacao": f"{N_MARCADORES} palavras inventadas repetidas {REPETICOES} vezes entre {N_DISTRATORES} que aparecem uma vez (extração de palavras comuns do RULER); acerta se lista as {N_MARCADORES} e nenhuma única"}[tarefa]
-    return {"modelo": modelo, "tarefa": tarefa, "metodo": metodo,
+    metodo += "; raciocínio LIGADO (think: true, até %d tokens de saída)" % NUM_PREDICT_RACIOCINIO if raciocinio else "; raciocínio desligado (think: false)"
+    return {"modelo": modelo, "tarefa": tarefa, "raciocinio": "ligado" if raciocinio else "desligado", "metodo": metodo,
             "linhas": linhas, "efetivo_tokens": efetivo(linhas),
             "nao_medido": ["outros modelos", "tarefas do RULER não rodadas neste arquivo: " + ", ".join(x for x in TAREFAS if x != tarefa)],
             "medido_em": datetime.now().astimezone().isoformat(timespec="seconds")}
@@ -182,7 +189,7 @@ def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3,
 def _salvar(resultado: dict) -> Path:
     pasta = Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
     pasta.mkdir(parents=True, exist_ok=True, mode=0o700)
-    sufixo = "" if resultado.get("tarefa", "agulha") == "agulha" else "-" + resultado["tarefa"]
+    sufixo = ("" if resultado.get("tarefa", "agulha") == "agulha" else "-" + resultado["tarefa"]) + ("-raciocinio" if resultado.get("raciocinio") == "ligado" else "")
     arq = pasta / ("contexto-" + re.sub(r"[^a-z0-9._-]", "_", resultado["modelo"].lower()) + sufixo + ".json")
     arq.write_text(json.dumps(resultado, ensure_ascii=False), encoding="utf-8")
     return arq
@@ -199,6 +206,7 @@ def _selftest() -> int:
         def do_POST(self):
             dados = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
             prompt = dados["messages"][0]["content"]
+            _VISTOS.append((dados.get("think"), dados["options"]["num_predict"]))
             if "Quais variáveis têm o valor" in prompt:
                 valor = re.search(r"valor (\d+)\?", prompt).group(1)
                 dono = {a: v for a, v in re.findall(r"A variável (VAR_[A-Z]+) recebe (\d+)\.", prompt)}
@@ -243,6 +251,14 @@ def _selftest() -> int:
     rv = medir(f"http://127.0.0.1:{srv2.server_address[1]}/api/chat", "falso:1", (1000, 4000), 3, "Texto de enchimento do canon. ", tarefa="varias")
     srv2.shutdown(); srv2.server_close()
     conferir("varias: acerta o alvo no curto e perde no longo", rv["tarefa"] == "varias" and [l["acertos"] for l in rv["linhas"]] == [3, 0])
+    srv4 = ThreadingHTTPServer(("127.0.0.1", 0), Falso); threading.Thread(target=srv4.serve_forever, daemon=True).start()
+    _VISTOS.clear()
+    medir(f"http://127.0.0.1:{srv4.server_address[1]}/api/chat", "falso:1", (1000,), 1, "Texto. ", tarefa="rastreio")
+    medir(f"http://127.0.0.1:{srv4.server_address[1]}/api/chat", "falso:1", (1000,), 1, "Texto. ", tarefa="rastreio", raciocinio=True)
+    srv4.shutdown(); srv4.server_close()
+    conferir("raciocínio: padrão manda think false e saída curta; --raciocinio manda think true e 8000", _VISTOS == [(False, 2500), (True, NUM_PREDICT_RACIOCINIO)])
+    rr = medir(f"http://127.0.0.1:1/api/chat", "falso:1", (), 1, "x ", tarefa="rastreio", raciocinio=True)
+    conferir("raciocínio: o resultado declara ligado e o método diz", rr["raciocinio"] == "ligado" and "LIGADO" in rr["metodo"])
     for tarefa in ("rastreio", "agregacao"):
         srv3 = ThreadingHTTPServer(("127.0.0.1", 0), Falso); threading.Thread(target=srv3.serve_forever, daemon=True).start()
         rt = medir(f"http://127.0.0.1:{srv3.server_address[1]}/api/chat", "falso:1", (1000, 4000), 3, "Texto de enchimento do canon. ", tarefa=tarefa)
@@ -264,6 +280,7 @@ def _selftest() -> int:
         conferir("tarefa fora da lista levanta erro", True)
     os.environ["AGATA_MEDICOES_DIR"] = tempfile.mkdtemp()
     conferir("salvar usa nome distinto para a tarefa varias", _salvar({"modelo": "m", "tarefa": "varias"}).name == "contexto-m-varias.json")
+    conferir("salvar usa sufixo -raciocinio quando ligado", _salvar({"modelo": "m", "tarefa": "rastreio", "raciocinio": "ligado"}).name == "contexto-m-rastreio-raciocinio.json")
     conferir("salvar usa nome seguro por modelo", _salvar({"modelo": "Qwen3:4B/../x"}).name == "contexto-qwen3_4b_.._x.json")
     return 1 if falhou else 0
 
@@ -285,6 +302,7 @@ def main(argv: list[str]) -> int:
         return 2
     try:
         resultado = medir(opt("--url", URL_PADRAO), modelo, comprimentos, int(opt("--tentativas", "3")), base, tarefa=tarefa,
+                          raciocinio="--raciocinio" in argv, ctx_maximo=int(opt("--ctx-maximo", str(CTX_MAXIMO))),
                           progresso=lambda l: print(f"{l['alvo_tokens']} tokens: {l['acertos']}/{l['tentativas']} em {l['segundos']} s", file=sys.stderr))
     except (urllib.error.URLError, OSError, ValueError) as exc:
         print(f"endpoint não respondeu: {exc}", file=sys.stderr)

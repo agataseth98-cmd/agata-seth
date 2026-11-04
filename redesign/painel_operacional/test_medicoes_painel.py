@@ -84,6 +84,11 @@ class MedicoesTests(unittest.TestCase):
             for nova in ("rastreio", "agregacao"):
                 med.executar("contexto", "qwen3:4b", sincrono=True, tarefa=nova)
                 self.assertEqual(chamadas[-1][0][-2:], ["--tarefa", nova])
+            med.executar("contexto", "qwen3:4b", sincrono=True, tarefa="rastreio", raciocinio="ligado")
+            self.assertEqual(chamadas[-1][0][-3:], ["--tarefa", "rastreio", "--raciocinio"])
+            med.executar("contexto", "qwen3:4b", sincrono=True, raciocinio="desligado")
+            self.assertNotIn("--raciocinio", chamadas[-1][0])
+            self.assertEqual(self.post({"acao": "contexto", "modelo": "qwen3:4b", "raciocinio": "$(rm -rf)"})[0], 400)
 
     def test_estado_traz_resultados_salvos_e_lista_de_modelos(self):
         Path(self.dir.name, "recuperacao.json").write_text(json.dumps({"n": 3, "recall": {"1": 1.0, "5": 1.0}, "mrr": 1.0}), encoding="utf-8")
@@ -103,7 +108,7 @@ class MedicoesTests(unittest.TestCase):
 
     def test_pagina_tem_os_controles_e_o_js_so_chama_as_rotas_das_medicoes(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
-        for i in ("medir-recuperacao", "medir-semantica", "medir-modelo", "medir-tarefa", "medir-contexto", "medir-nota"):
+        for i in ("medir-recuperacao", "medir-semantica", "medir-modelo", "medir-tarefa", "medir-raciocinio", "medir-contexto", "medir-nota"):
             self.assertIn(f'id="{i}"', html)
         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
         self.assertIn("/api/medicoes/estado", js); self.assertIn("/api/medicoes/executar", js)

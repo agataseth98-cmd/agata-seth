@@ -26,20 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bc09ba7e9b444fdea10de0c228b3060816c5c2eb
-  Escrito em: 04/11/2026 11:02 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5d8f68ab9fa78f2492a26b35ab81107d41b9a18c
+  Escrito em: 04/11/2026 11:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc09ba7e9b444fdea10de0c228b3060816c5c2eb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc09ba7e9b444fdea10de0c228b3060816c5c2eb/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc09ba7e9b444fdea10de0c228b3060816c5c2eb/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc09ba7e9b444fdea10de0c228b3060816c5c2eb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bc09ba7e9b444fdea10de0c228b3060816c5c2eb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d8f68ab9fa78f2492a26b35ab81107d41b9a18c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d8f68ab9fa78f2492a26b35ab81107d41b9a18c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d8f68ab9fa78f2492a26b35ab81107d41b9a18c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d8f68ab9fa78f2492a26b35ab81107d41b9a18c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5d8f68ab9fa78f2492a26b35ab81107d41b9a18c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(935) DIÁRIO — 04/11/2026 · **Registra o `lumi-4b` (CEIA-UFG) no manifesto de modelos e na reconstrução.** Proposta `manifesto-lumi-4b-20261104`: `models/manifest.json` (entrada nova, `n_modelos` 10, SHA-256 do GGUF `185d2add…`) e `models/RECONSTRUCAO.md` (classe D, GGUF de terceiros: origem, SHA-256 e comando de reconstrução). O modelo foi importado no Ollama em 04/11/2026 a pedido do Humano (GGUF Q4_K_M de 2,7 GB de `HyperScale/lumi-4b-GGUF`, conversão de terceiros do `ceia-br/lumi-4b`). Licença do CEIA não declarada: sem uso em produto nem ajuste fino até declarar. Fora do backup obrigatório do P-12 (decisão do Humano). Medições: agulha 3/3 até o alvo de 128k; rastreio de variáveis 0/3 sem raciocínio e 1/3 com. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+
+(936) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha a opção de raciocínio ligado (`--raciocinio`) e o painel ganha o seletor.** Proposta `medicao-raciocinio-ligado-20261104`: `scripts/medir_contexto_efetivo.py` (`think: true`, até 8.000 tokens de saída, `--ctx-maximo`, resultado salvo com sufixo `-raciocinio` e declarado no JSON), `redesign/painel_operacional` (lista fechada `desligado|ligado`, seletor, spec e teste). Motivo: o `qwen3.5-9b-64k` sem raciocínio lista só os primeiros elos da cadeia no rastreio. Medido pelo caminho do CLI (texto do canon como enchimento): com raciocínio ligado o 9b acertou 1/3 em 4k e 1/3 em 16k; as três respostas de 4k inspecionadas foram erros reais (uma cadeia completa, uma com 2 elos, uma com 1), sem corte de saída. Com enchimento simples (script avulso, sem registro) tinha dado 3/3 em 4k e 16k: o resultado depende do texto de enchimento. Não medido: 32k e 61k com raciocínio, outros modelos. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+
 (934) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha as tarefas de rastreio de variáveis e agregação (RULER completo).** Proposta `medicao-ruler-completo-20261104`: `scripts/medir_contexto_efetivo.py` (tarefas `rastreio` e `agregacao`, espaço de saída por tarefa e só o texto depois de `</think>` vale), lista fechada e menu do painel, spec e teste. Medido em `qwen3:4b` (04/11): rastreio 3/3 em 2k, 8k, 16k e 32k e 1/3 em 4k (efetivo pela regra do medidor: 2.048); agregação 0/3 em 2k e 8k (repetição do modelo, um prompt cru inspecionado). A primeira rodada deu falsos zeros por saída cortada em 400 tokens; o medidor foi corrigido antes. Não medido: outros modelos, agregação acima de 8k. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
 
 (933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 tópico(s) de 123 entrada(s) do cache do Conselho.** Texto em `extras/memoria-semanal/semana-2026-11-03.md`, assinado pelo Humano (V9 §37, M3; (849)). Origem: proposta do modelo ollama-local/qwen3.5-9b-64k:latest, conferida pela Máquina. A Máquina cortou 2 tópico(s) sem sustentação nas entradas citadas.
