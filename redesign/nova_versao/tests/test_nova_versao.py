@@ -49,9 +49,9 @@ class EventosTests(Base):
 class OrcamentoTests(Base):
     def test_padrao_so_local_e_pago_sem_teto_nao_gasta(self):
         o = orcamento.ler()
-        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "pago": False})
+        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
         self.assertFalse(orcamento.permite("gratuito")[0])
-        orcamento.salvar({**o, "provedores": {"local": True, "gratuito": False, "pago": True}})
+        orcamento.salvar({**o, "provedores": {"local": True, "gratuito": False, "assinatura": False, "pago": True}})
         ok, motivo = orcamento.permite("pago")
         self.assertFalse(ok)
         self.assertIn("teto", motivo)

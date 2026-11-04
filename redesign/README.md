@@ -44,6 +44,7 @@ regime normal:
 | `nova_versao/` | spec-mãe da nova versão (Experimento GPT), ledger de eventos e orçamento (`nv.py`) | painel, grupo Nova versão |
 | `alexandria/` | acervo com proveniência, índice FTS5 derivado, consulta com pacote de evidência, índice de skills | `acervo.py` · painel |
 | `metacognicao/` | antes (`previo.py`) e depois (`posterior.py`) do turno; sombra no gateway por `router/sombra_nova_versao.py` | `SETH_SOMBRA_NOVA_VERSAO=1` |
+| `conexoes/` | conexões de modelos (navegador, programa, API), cofre de chaves só de escrita, teste de redundância por capacidade; guia em `conexoes/README.md` | painel · `testar_rotas.py` |
 | `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
 
 ## Docs de planejamento — arquivados

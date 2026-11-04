@@ -23,8 +23,8 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 import eventos  # noqa: E402
 
-PROVEDORES = ("local", "gratuito", "pago")
-PADRAO = {"schema_version": 1, "provedores": {"local": True, "gratuito": False, "pago": False},
+PROVEDORES = ("local", "gratuito", "assinatura", "pago")  # assinatura = CLI do plano do usuário (cota, não R$)
+PADRAO = {"schema_version": 1, "provedores": {"local": True, "gratuito": False, "assinatura": False, "pago": False},
           "max_chamadas": 200, "max_tokens": 2_000_000, "timeout_s": 120, "teto_reais": 0.0}
 LIMITES = {"max_chamadas": (0, 100000), "max_tokens": (0, 50_000_000), "timeout_s": (1, 3600), "teto_reais": (0.0, 10000.0)}
 

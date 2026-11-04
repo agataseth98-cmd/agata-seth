@@ -11,7 +11,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-04T19:49:04+00:00"
+    "at": "2026-11-04T21:29:28+00:00"
   },
   {
     "criterion": "escritas concorrentes no ledger preservam a cadeia",
@@ -25,7 +25,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-04T19:49:04+00:00"
+    "at": "2026-11-04T21:29:28+00:00"
   },
   {
     "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
@@ -39,7 +39,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-04T19:49:04+00:00"
+    "at": "2026-11-04T21:29:28+00:00"
   },
   {
     "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
@@ -53,6 +53,34 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-04T19:49:05+00:00"
+    "at": "2026-11-04T21:29:28+00:00"
+  },
+  {
+    "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_gpu_em_fila_unica_e_teto_de_chamadas"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.08s\n",
+    "stderr": "",
+    "at": "2026-11-04T21:29:29+00:00"
+  },
+  {
+    "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
+    "stderr": "",
+    "at": "2026-11-04T21:29:29+00:00"
   }
 ]

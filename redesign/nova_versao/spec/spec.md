@@ -23,7 +23,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 | C4 | Seleção de skills | `.agents/skills/INDICE.md`, `ferramentas/ferramentas.py` (quarentena), `qualidade_llm.py` | `redesign/alexandria/skills.py` (1) |
 | C5 | Metacognição | `_classificar_rota` do gateway, `auditoria_turno.py`, `sombra_capacidade.py`, `detector_estado_sem_prova.py` | `redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py` (1) |
 | C6 | Corpo operacional | `estado_para_eco.sh`, `perimetro.sh`, `coletar_evidencias.py` da auditoria, `config/portas-*.txt` | `redesign/corpo/` (1) |
-| C7 | Redundância | combos OmniRoute, `conselho_remoto.py`, `config/capacidades_modelos.json`, `teste_portugues.py` | `redesign/corpo/testar_rotas.py` (2) |
+| C7 | Redundância e conexões | combos OmniRoute, Conselho em Rede (`relay_catalog.py`), `sanitizar.py`, `teste_portugues.py` | `redesign/conexoes/` (2): Claude e ChatGPT como exemplos nos três caminhos, cofre de chaves, teste por capacidade |
 | C8 | Coordenação e papéis | `grafo/durabilidade.py` (WAL), `evidence_ledger`, `idempotency_key` do Conselho, semáforos das sombras | `redesign/nova_versao/tarefas.py` (2) |
 | C9 | Avaliação | `medir_recuperacao.py`, `teste_portugues.py`, `seth_golden.py`, `seth_autodev.py`, `medir_contexto_efetivo.py` | registro por execução comum (3) |
 
@@ -45,7 +45,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 
 **Invariantes (handoff do executor).** Canon, permissões, silos e autoridade humana vêm antes de descoberta e roteamento. Alexandria não é cânone paralelo. A recusa de vetor/GraphRAG como camada primária ((115)) permanece; a semântica é secundária ((327)). Skill é procedimento; livro é conteúdo. Catálogo, health check, inferência real e fila ativa são medições diferentes. Ausência na busca é "não encontrado nesta busca".
 
-**Fases.** F0 spec e F1 sombra no lote 1 (esta proposta); C7 e C8 no lote 2; F2 avaliação no lote 3 (30 tarefas, split reservado, gabarito revisado pelo Humano, métricas por dimensão com `null` em denominador zero); F3 integração protegida no lote 4, cada item em proposta própria e só com ganho medido sem regressão crítica.
+**Fases.** F0 spec e F1 sombra no lote 1 (`nova-versao-piloto-20261104`, aplicado, (939)); C7 e C8 no lote 2 (`nova-versao-conexoes-20261104`); F2 avaliação no lote 3 (30 tarefas, split reservado, gabarito revisado pelo Humano, métricas por dimensão com `null` em denominador zero); F3 integração protegida no lote 4, cada item em proposta própria e só com ganho medido sem regressão crítica.
 
 ## Critérios de aceite
 
@@ -53,6 +53,8 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 - [ ] escritas concorrentes no ledger preservam a cadeia
 - [ ] a transição recusa salto fora da tabela e Remoção sem autorização
 - [ ] o orçamento padrão é só local e pago sem teto não gasta
+- [ ] a GPU local tem fila única e o teto de chamadas da tarefa vale
+- [ ] cancelar impede novos itens e contexto mudado manda o resultado para revisão
 
 ## Desenho e alternativas
 
@@ -60,7 +62,7 @@ Ver `brainstorm.md` e `decision.md`. Alternativas descartadas: um serviço por p
 
 ## Implementação e testes
 
-`eventos.py`, `orcamento.py` e `nv.py` (CLI e selftest). Testes em `tests/`; cada critério aponta o teste em `acceptance.json`.
+`eventos.py`, `orcamento.py` (categorias `local`, `gratuito`, `assinatura` e `pago`), `tarefas.py` (coordenação: `task_id`, versão de contexto, prazo, teto de chamadas, cancelamento, fila de GPU, escritor único) e `nv.py` (CLI e selftest). Testes em `tests/`; cada critério aponta o teste em `acceptance.json`.
 
 ## Migração e reversão
 
@@ -75,4 +77,5 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve 
 - `eventos.py`
 - `orcamento.py`
 - `nv.py`
+- `tarefas.py`
 - `tests/`
