@@ -1,21 +1,28 @@
 {
-  "_nota": "Perfil de capacidades por modelo local, lido por scripts/teste_portugues.py (condição 'adaptativo') e destinado ao roteador. Cada valor vem de uma medição datada em 'evidencia'; valor sem medição fica no 'padrao'. Hipótese a confirmar: a v2 do teste tem UMA execução por célula, e o perfil foi escrito olhando as mesmas tarefas em que será avaliado (circular até haver repetições e tarefas novas). Mude um valor só com medição nova e registre a evidência.",
-  "padrao": {"json_estruturado": true, "orcamento_saida": 600},
+  "_nota": "Perfil de capacidades por modelo local, lido por scripts/teste_portugues.py (condição 'adaptativo') e destinado ao roteador. \"estrategia\": \"formato_simples\" = prompt com instrução e exemplo de formato sobre o material inteiro, sem recuperação, penalidade, JSON estruturado nem retentativa; \"harness\" = o harness completo. Cada valor vem de uma medição datada em 'evidencia'; valor sem medição fica no 'padrao'. Hipótese a confirmar: a v2 do teste tem UMA execução por célula, e o perfil foi escrito olhando as mesmas tarefas em que será avaliado (circular até haver repetições e tarefas novas). Mude um valor só com medição nova e registre a evidência.",
+  "padrao": {
+    "estrategia": "harness",
+    "json_estruturado": true,
+    "orcamento_saida": 600
+  },
   "modelos": {
     "lumi-4b": {
+      "estrategia": "harness",
       "json_estruturado": true,
       "orcamento_saida": 600,
-      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 4/6 -> harness 6/6; T10 cru 0/1 -> harness 4/4."
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 4/6 -> harness 6/6; T10 cru 0/1 -> harness 4/4. Rodada completa (3 repetições, T=0,3, 30 execuções por célula): tarefas totalmente certas cru 11, cru_formato 22, harness 26, adaptativo 26."
     },
     "qwen3.5-9b-64k": {
+      "estrategia": "formato_simples",
       "json_estruturado": true,
       "orcamento_saida": 600,
-      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 0/6 -> harness 6/6; T10 cru 3/4 -> harness 4/4."
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 0/6 -> harness 6/6; T10 cru 3/4 -> harness 4/4. Rodada completa (3 repetições, T=0,3, 30 execuções por célula): cru 15, cru_formato 30/30, harness 26 (falhas em T4 e T9, 2 cada); por isso a estratégia é formato_simples."
     },
     "qwen3:4b": {
+      "estrategia": "harness",
       "json_estruturado": false,
       "orcamento_saida": 3000,
-      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 6/6 -> harness com JSON estruturado 0/6 (objeto de erro inventado); T10 cru 1/4 -> harness 4/4. Raciocina no texto da resposta: com 600 tokens a saída é cortada (motivo=length)."
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 6/6 -> harness com JSON estruturado 0/6 (objeto de erro inventado); T10 cru 1/4 -> harness 4/4. Raciocina no texto da resposta: com 600 tokens a saída é cortada (motivo=length). Rodada completa (3 repetições, T=0,3, 30 execuções por célula): cru 16, cru_formato 22, harness 23, adaptativo 25 (T5 falha nas 3 repetições em todas as condições com recuperação ou formato)."
     }
   }
 }

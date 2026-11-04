@@ -8,8 +8,9 @@ Condições:
   harness      -- trechos recuperados em vez do documento inteiro, formato explícito com exemplo, penalidade de repetição,
                   teto de saída, JSON estruturado onde cabe, e UMA nova tentativa (em mensagem separada, com a resposta
                   anterior no papel do modelo) com a lista do que falhou na checagem mecânica.
-  adaptativo   -- o harness, mas cada peça só entra se o perfil do modelo (config/capacidades_modelos.json) permitir:
-                  JSON estruturado ligado ou desligado e orçamento de saída próprio.
+  adaptativo   -- escolhe a estratégia do perfil do modelo (config/capacidades_modelos.json): "formato_simples" roda
+                  como cru_formato; "harness" roda o harness, com cada peça só se o perfil permitir (JSON estruturado
+                  ligado ou desligado, orçamento de saída próprio).
 
 Pontuação: 100% mecânica (formato, âncoras de fato, números inventados, palavras proibidas). Não mede qualidade
 de prosa. Os critérios estão escritos no código ANTES de qualquer execução. Saídas ficam salvas para leitura humana.
@@ -52,7 +53,7 @@ def so_resposta(t: str) -> str:
 
 
 CONDICOES = ("cru", "cru_formato", "harness", "adaptativo")
-PERFIL_PADRAO = {"json_estruturado": True, "orcamento_saida": 600}
+PERFIL_PADRAO = {"estrategia": "harness", "json_estruturado": True, "orcamento_saida": 600}
 
 
 def perfil(modelo: str, caminho: Path | None = None) -> dict:
@@ -69,9 +70,16 @@ def perfil(modelo: str, caminho: Path | None = None) -> dict:
 ORCAMENTO = {"qwen3:4b": 3000}
 
 
+def condicao_efetiva(modelo: str, cond: str, perfis: dict | None = None) -> str:
+    """'adaptativo' vira 'cru_formato' quando o perfil do modelo manda 'formato_simples'; as demais condições não mudam."""
+    pf = {**PERFIL_PADRAO, **((perfis or {}).get(modelo) or perfil(modelo))}
+    return "cru_formato" if cond == "adaptativo" and pf["estrategia"] == "formato_simples" else cond
+
+
 def opcoes_da_condicao(modelo: str, cond: str, formato: str | None, perfis: dict | None = None) -> dict:
     """Parâmetros da chamada por condição. Pura: o selftest confere sem falar com o Ollama."""
-    pf = (perfis or {}).get(modelo) or perfil(modelo)
+    pf = {**PERFIL_PADRAO, **((perfis or {}).get(modelo) or perfil(modelo))}
+    cond = condicao_efetiva(modelo, cond, perfis)
     harness = cond in ("harness", "adaptativo")
     orcamento = ORCAMENTO.get(modelo, 600 if harness else 1200)
     if cond == "adaptativo":
@@ -236,6 +244,7 @@ def montar_tarefas() -> list[dict]:
 
 
 def executar_celula(modelo: str, t: dict, cond: str, rep: int, repeticoes: int) -> tuple[str, dict, list[tuple[str, bool]]]:
+    cond = condicao_efetiva(modelo, cond)
     com_harness = cond in ("harness", "adaptativo")
     prompt = t["harness"] if com_harness else t.get("cru_formato", t["harness"]) if cond == "cru_formato" else t["cru"]
     texto, meta = chamar(modelo, [{"role": "user", "content": prompt}], cond, t.get("formato"), rep, repeticoes)
@@ -316,6 +325,12 @@ def _selftest() -> int:
     conferir("cru_formato não usa penalidade nem JSON", opcoes_da_condicao("b", "cru_formato", "json", pf)["format"] is None and opcoes_da_condicao("b", "cru_formato", "json", pf)["repeat_penalty"] is None)
     m = mensagens_retentativa("TAREFA", "RESP", ["x", "y"])
     conferir("retentativa em turnos separados", [x["role"] for x in m] == ["user", "assistant", "user"] and m[0]["content"] == "TAREFA" and "TAREFA" not in m[2]["content"] and "x; y" in m[2]["content"])
+    conferir("adaptativo com formato_simples vira cru_formato", condicao_efetiva("c", "adaptativo", {"c": {"estrategia": "formato_simples"}}) == "cru_formato")
+    conferir("adaptativo com estratégia harness continua adaptativo", condicao_efetiva("b", "adaptativo", {"b": {"estrategia": "harness"}}) == "adaptativo")
+    conferir("harness e cru não são reescritos pelo perfil", condicao_efetiva("c", "harness", {"c": {"estrategia": "formato_simples"}}) == "harness")
+    conferir("formato_simples não usa penalidade nem JSON", opcoes_da_condicao("c", "adaptativo", "json", {"c": {"estrategia": "formato_simples", "json_estruturado": True, "orcamento_saida": 600}}) == {"num_predict": 1200, "repeat_penalty": None, "format": None})
+    conferir("perfil: qwen3.5-9b-64k usa formato_simples", perfil("qwen3.5-9b-64k")["estrategia"] == "formato_simples")
+    conferir("perfil: lumi-4b usa harness", perfil("lumi-4b")["estrategia"] == "harness")
     conferir("perfil: modelo desconhecido recebe o padrão", perfil("modelo-que-nao-existe") == PERFIL_PADRAO)
     conferir("perfil: qwen3:4b sem JSON estruturado", perfil("qwen3:4b")["json_estruturado"] is False)
     exemplo = {"modelos": ["m"], "condicoes": ["cru", "harness"], "execucoes": [
