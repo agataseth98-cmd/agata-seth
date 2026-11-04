@@ -16,6 +16,7 @@ on:
       - "redesign/painel_operacional/**"
       - ".agents/skills/**"
       - "scripts/medir_*.py"
+      - "scripts/agata_falar.py"
       - ".github/workflows/sdd.yml"
   workflow_dispatch: {}
 
@@ -53,3 +54,6 @@ jobs:
         run: |
           python3 -I scripts/medir_recuperacao.py --selftest
           python3 -I scripts/medir_contexto_efetivo.py --selftest
+
+      - name: Voz do sistema (selftest offline)
+        run: python3 -I scripts/agata_falar.py --selftest

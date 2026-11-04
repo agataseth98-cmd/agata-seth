@@ -17,6 +17,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada 
 | `agata-relay-provedores` | adaptadores de chats web no RelayCouncil | Codex |
 | `agata-ferramentas` | achar skill ou agente por tema (testes, segurança, revisão, banco, frontend) | Claude |
 | `agata-llm-fundamentos` | como uma LLM funciona; custo, contexto, alucinação, esforço, RAG, MCP e skills, com fonte e lacuna | Claude |
+| `agata-voz` | ler em voz alta, falar, narrar, voz do sistema; todo modelo que fala usa a voz do Agata | Claude |
 
 ## Skills de terceiros (cópias fixas, não editar aqui)
 - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills` só como cópias locais fora do git (`.git/info/exclude`): um clone limpo e a CI não as têm. São cópias do mesmo conteúdo; a fonte de atualização é externa.
