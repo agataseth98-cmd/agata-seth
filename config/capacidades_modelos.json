@@ -1,0 +1,21 @@
+{
+  "_nota": "Perfil de capacidades por modelo local, lido por scripts/teste_portugues.py (condição 'adaptativo') e destinado ao roteador. Cada valor vem de uma medição datada em 'evidencia'; valor sem medição fica no 'padrao'. Hipótese a confirmar: a v2 do teste tem UMA execução por célula, e o perfil foi escrito olhando as mesmas tarefas em que será avaliado (circular até haver repetições e tarefas novas). Mude um valor só com medição nova e registre a evidência.",
+  "padrao": {"json_estruturado": true, "orcamento_saida": 600},
+  "modelos": {
+    "lumi-4b": {
+      "json_estruturado": true,
+      "orcamento_saida": 600,
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 4/6 -> harness 6/6; T10 cru 0/1 -> harness 4/4."
+    },
+    "qwen3.5-9b-64k": {
+      "json_estruturado": true,
+      "orcamento_saida": 600,
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 0/6 -> harness 6/6; T10 cru 3/4 -> harness 4/4."
+    },
+    "qwen3:4b": {
+      "json_estruturado": false,
+      "orcamento_saida": 3000,
+      "evidencia": "teste_portugues v2, 04/11/2026, 1 execução: T8 cru 6/6 -> harness com JSON estruturado 0/6 (objeto de erro inventado); T10 cru 1/4 -> harness 4/4. Raciocina no texto da resposta: com 600 tokens a saída é cortada (motivo=length)."
+    }
+  }
+}
