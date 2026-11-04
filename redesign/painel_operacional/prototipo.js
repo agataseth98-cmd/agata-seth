@@ -841,7 +841,7 @@ async function carregarSdd() {
   try { dados = await fetchJson("/api/sdd/estado", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
   if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
   const falhas = dados.items.filter((i) => i.ancora !== "ok").length;
-  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta";
+  if (titulo) titulo.textContent = dados.items.length + " componentes · " + falhas + " com âncora incompleta · " + (dados.externos || []).length + " projetos externos";
   dados.items.forEach((item) => {
     const linha = document.createElement("div"); linha.className = "cap-card";
     const nome = document.createElement("strong"); nome.textContent = item.componente;
@@ -860,6 +860,25 @@ async function carregarSdd() {
       acoes.append(b);
     });
     linha.append(nome, resumo, nota, acoes); lista.append(linha);
+  });
+  (dados.externos || []).forEach((ext) => {
+    const linha = document.createElement("div"); linha.className = "cap-card";
+    const nome = document.createElement("strong"); nome.textContent = ext.nome + " · projeto externo";
+    const resumo = document.createElement("div"); resumo.className = "note";
+    resumo.textContent = ext.valido ? ext.raiz : "descritor inválido: " + (ext.erro || "");
+    const nota = document.createElement("div"); nota.className = "note";
+    nota.textContent = ext.ultimo ? "Última execução: " + (ext.ultimo.ok ? "OK" : "FALHOU") + " (" + ext.ultimo.run_id + ")" : "Sem execução: não medido.";
+    linha.append(nome, resumo, nota);
+    if (ext.valido) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = "Rodar ciclo do projeto";
+      let armado = false;
+      b.addEventListener("click", async () => {
+        if (!armado) { armado = true; b.textContent = "Confirmar: rodar ciclo do projeto"; return; }
+        b.disabled = true; await executarSdd("projeto", ext.nome, nota); b.disabled = false; armado = false; b.textContent = "Rodar ciclo do projeto";
+      });
+      linha.append(b);
+    }
+    lista.append(linha);
   });
 }
 let medicaoTimer = null;

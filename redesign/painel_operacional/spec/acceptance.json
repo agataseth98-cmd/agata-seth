@@ -80,5 +80,14 @@
       "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_indicador_de_recuperacao_usa_a_medicao_salva"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
+    ],
+    "cwd": null
   }
 ]

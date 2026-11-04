@@ -15,6 +15,7 @@ from pathlib import Path
 
 
 SOURCE = (".py", ".sh", ".js", ".html")
+IGNORADOS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache", ".pytest_cache"}
 REQUIRED = ("Contrato", "Critérios de aceite", "Código")
 
 
@@ -34,7 +35,7 @@ def check_component(root: Path, scope: str) -> list[str]:
     files = sorted(
         p.relative_to(base).as_posix()
         for p in base.rglob("*")
-        if p.is_file() and p.suffix in SOURCE and "__pycache__" not in p.parts
+        if p.is_file() and p.suffix in SOURCE and not IGNORADOS & set(p.relative_to(base).parts)
     )
     for rel in files:
         if not any(rel == own or (own.endswith("/") and rel.startswith(own)) for own in owned):

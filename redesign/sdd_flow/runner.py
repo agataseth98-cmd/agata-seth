@@ -139,10 +139,10 @@ def criterion_drift(state: dict, spec: Path, evidence: Path, output: Path) -> No
     run("redesign/sdd_flow/criterion_drift.py", str(spec), str(evidence), str(output)); artifact(state, "criterion_drift", output)
 
 
-def cycle(state: dict, root: Path, manifest: Path, scopes: list[str]) -> None:
-    """Mechanical gates in order; stops at the first one that fails."""
+def cycle(state: dict, root: Path, manifest: Path, scopes: list[str], repo: Path = ROOT) -> None:
+    """Mechanical gates in order; stops at the first one that fails. `repo` é a base das âncoras (padrão: este repositório)."""
     run("redesign/sdd_flow/spec_gate.py", "check", str(root))
-    run("redesign/sdd_flow/anchor.py", str(ROOT), *scopes)
+    run("redesign/sdd_flow/anchor.py", str(repo), *scopes)
     evidence = root / "evidence.json"
     try:
         run("redesign/sdd_flow/acceptance_runner.py", str(manifest), str(evidence))
@@ -182,6 +182,21 @@ def proposal(state: dict, name: str, worktree: Path, base: str, out: Path, tests
     record(state, "proposal", f"{name}:{hashlib.sha256(diff.encode()).hexdigest()[:12]}:{out.resolve()}")
 
 
+def project_cmd(state: dict, descriptor: Path, state_path: Path) -> None:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import project
+    try:
+        r = project.executar(descriptor)
+    except project.DescritorInvalido as exc:
+        raise SystemExit(f"descritor inválido: {exc}")
+    record(state, "project", f"{r['nome']}:{r['run_id']}:{'ok' if r['ok'] else 'falhou'}")
+    save(state_path, state)
+    for p in r["passos"]:
+        print(f"{'OK' if p['ok'] else 'FALHOU'} · {p['passo']}: {p['detalhe']}")
+    if not r["ok"]:
+        raise SystemExit(1)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("state", type=Path)
@@ -201,7 +216,8 @@ def main() -> int:
     rc = sub.add_parser("review-check"); rc.add_argument("reviews", type=Path); rc.add_argument("output", type=Path)
     ac = sub.add_parser("acceptance"); ac.add_argument("manifest", type=Path); ac.add_argument("output", type=Path)
     cd = sub.add_parser("criterion-drift"); cd.add_argument("spec", type=Path); cd.add_argument("evidence", type=Path); cd.add_argument("output", type=Path)
-    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True)
+    cy = sub.add_parser("cycle"); cy.add_argument("root", type=Path); cy.add_argument("manifest", type=Path); cy.add_argument("--scope", nargs="+", required=True); cy.add_argument("--repo", type=Path, default=ROOT)
+    pj = sub.add_parser("project"); pj.add_argument("descriptor", type=Path)
     pr = sub.add_parser("proposal"); pr.add_argument("name"); pr.add_argument("worktree", type=Path); pr.add_argument("out", type=Path)
     pr.add_argument("--base", default="origin/main"); pr.add_argument("--test", nargs="*", default=[]); pr.add_argument("--pytest-bin", default="pytest")
     sub.add_parser("status")
@@ -221,7 +237,8 @@ def main() -> int:
     elif args.cmd == "review-check": review_check(state, args.reviews, args.output)
     elif args.cmd == "acceptance": acceptance(state, args.manifest, args.output)
     elif args.cmd == "criterion-drift": criterion_drift(state, args.spec, args.evidence, args.output)
-    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope)
+    elif args.cmd == "cycle": cycle(state, args.root.resolve(), args.manifest.resolve(), args.scope, args.repo.resolve())
+    elif args.cmd == "project": project_cmd(state, args.descriptor, args.state)
     elif args.cmd == "proposal": proposal(state, args.name, args.worktree, args.base, args.out.resolve(), args.test, args.pytest_bin)
     else: print(json.dumps(state, ensure_ascii=False, indent=2))
     if args.cmd != "status":
