@@ -1,0 +1,1833 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index 2bb26842..c71d19f2 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -17,6 +17,7 @@ on:
+       - "redesign/alexandria/**"
+       - "redesign/metacognicao/**"
+       - "redesign/corpo/**"
++      - "redesign/conexoes/**"
+       - "redesign/router/sombra_nova_versao.py"
+       - "ferramentas/**"
+       - "scripts/busca_texto.py"
+@@ -39,7 +40,7 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests ferramentas/test_ferramentas.py
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests ferramentas/test_ferramentas.py
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+@@ -49,8 +50,8 @@ jobs:
+ 
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo
+-          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo; do
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes
++          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+           done
+diff --git a/CHAVES.md b/CHAVES.md
+index ea8c4a16..d8fdcdeb 100644
+--- a/CHAVES.md
++++ b/CHAVES.md
+@@ -14,6 +14,7 @@ lendo prosa espalhada.
+ | arquivo | o quê |
+ |---|---|
+ | `~/.config/agata/.env` | chaves de API dos provedores de modelo (`GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`/`GEMINI_API_KEY`, `ZHIPU_API_KEY`, `CEREBRAS_API_KEY`, …). Era `~/.hermes/.env` até a remoção do Hermes (03/09/2026, MEMÓRIAS (312)). |
++| `~/.config/agata/conexoes/<id>.chave` | chaves de API das **conexões da nova versão** (Claude, ChatGPT e provedores que o usuário acrescentar), gravadas só pelo painel (Nova versão → Conexões de modelos), pasta `700`, arquivo `600`. O painel mostra só se existe. Alternativa: `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` no ambiente. Ver `redesign/conexoes/README.md` |
+ | `~/.config/agata/restic.pass` | senha do repo restic no HD `AgataBkup01` |
+ | `~/.config/agata/obsidian.token` | bearer do plugin `obsidian-local-rest-api` (`:27124`) |
+ | `~/.config/agata/google-project/` | credencial OAuth da conta do projeto (`agata.seth98@gmail.com`, escopo `drive.file`) para o índice → Drive/NotebookLM |
+diff --git a/PROJETO_REFERENCIA.md b/PROJETO_REFERENCIA.md
+index 8c2f60cf..22fef571 100644
+--- a/PROJETO_REFERENCIA.md
++++ b/PROJETO_REFERENCIA.md
+@@ -84,6 +84,7 @@ Direção do Humano em 04/11/2026: a arquitetura do Experimento GPT (`~/Área de
+ - **Fases:** F0 spec · F1 sombra · F2 avaliação · F3 integração protegida. Lote 1 (este): spec de tudo e sombra de Alexandria (`redesign/alexandria/`), metacognição (`redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py`) e corpo (`redesign/corpo/`), sem inferência. Lote 2: redundância por capacidade e coordenação. Lote 3: avaliação com split reservado. Lote 4: integração, item por item.
+ - **Papéis:** o Humano decide objetivo, orçamento e efeito protegido; o Modelo interpreta, pesquisa e propõe; a Máquina guarda, executa e mede. Hash prova bytes, não verdade. Nenhum componente se autoaprova nem ganha autoridade normativa: Alexandria organiza o acervo, não é cânone paralelo.
+ - **Reaproveitamento:** a nova versão não cria segundo cache, indexador, roteador nem avaliador. O ledger é o `evidence_ledger`; a memória comum é o `cache_conselho`; a semântica continua secundária ((327)) e a recusa de vetor/GraphRAG como camada primária ((115)) permanece.
++- **Conexões (lote 2):** `redesign/conexoes/` liga qualquer modelo por três caminhos — navegador (Conselho em Rede, aprovação por envio), programa da assinatura e API com chave do cofre do painel —, com Claude e ChatGPT como exemplos para outros usuários. Redundância só conta para a capacidade testada (`testar_rotas.py`).
+ - **Dados:** fora do repo, em `~/.local/share/agata/nova-versao/` (pastas de trabalho) e `~/.cache/agata/nova-versao/` (índice derivado). Orçamento de inferência configurável no painel, grupo "Nova versão"; o padrão de fábrica é só local.
+ 
+ ## Diagnóstico
+diff --git a/redesign/README.md b/redesign/README.md
+index d173192c..a49baeb0 100644
+--- a/redesign/README.md
++++ b/redesign/README.md
+@@ -44,6 +44,7 @@ regime normal:
+ | `nova_versao/` | spec-mãe da nova versão (Experimento GPT), ledger de eventos e orçamento (`nv.py`) | painel, grupo Nova versão |
+ | `alexandria/` | acervo com proveniência, índice FTS5 derivado, consulta com pacote de evidência, índice de skills | `acervo.py` · painel |
+ | `metacognicao/` | antes (`previo.py`) e depois (`posterior.py`) do turno; sombra no gateway por `router/sombra_nova_versao.py` | `SETH_SOMBRA_NOVA_VERSAO=1` |
++| `conexoes/` | conexões de modelos (navegador, programa, API), cofre de chaves só de escrita, teste de redundância por capacidade; guia em `conexoes/README.md` | painel · `testar_rotas.py` |
+ | `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
+ 
+ ## Docs de planejamento — arquivados
+diff --git a/redesign/conexoes/README.md b/redesign/conexoes/README.md
+new file mode 100644
+index 00000000..6ed8fac5
+--- /dev/null
++++ b/redesign/conexoes/README.md
+@@ -0,0 +1,38 @@
++# Conexões de modelos — como ligar o seu
++
++A nova versão do Agata fala com qualquer modelo pelo mesmo contrato. Claude e ChatGPT são os exemplos preenchidos (decisão do Humano, 04/11/2026). Use-os como molde para o provedor que você preferir.
++
++## Os três caminhos
++
++| Caminho | Como funciona | Quem paga | Quando usar |
++|---|---|---|---|
++| **navegador** | O Conselho em Rede do painel digita no site do provedor, com a sua sessão aberta no Chromium do projeto. | a sua conta no site | quando você quer aprovar cada envio; o Agata nunca envia sozinho por aqui |
++| **programa (CLI)** | Roda o programa da sua assinatura (`claude -p`, `codex exec`) em pasta temporária vazia, sem ferramentas e sem sessão salva. | a cota do seu plano | sem chave de API; categoria `assinatura` no orçamento |
++| **API** | HTTP direto, com a chave que você gravou no painel. | por token | o caminho mais portátil; categoria `pago` no orçamento |
++
++## Ligar um provedor pelo painel
++
++1. Abra o painel, grupo **Nova versão** e depois **Orçamento e eventos**. Ligue a categoria (`assinatura` ou `pago`) e defina os tetos. Para `pago`, o teto em R$ precisa ser maior que zero.
++2. Vá a **Conexões de modelos**:
++   - **programa:** basta o CLI estar instalado e com login feito. O painel mostra "instalado"; o login só se confirma no primeiro teste;
++   - **API:** escolha o provedor, informe o modelo e a tarifa (US$ por milhão de tokens de entrada e de saída, câmbio, a página oficial de preços e a data em que você conferiu), e cole a chave. Ela vai para `~/.config/agata/conexoes/<id>.chave` com permissão `0600` e nunca volta para a tela;
++   - **outro provedor:** em "Adicionar pelo mesmo formato", informe id, nome, formato (`openai` serve para qualquer API compatível) e a URL `https` do endpoint de chat.
++3. Clique em **Testar rotas**. São três provas fixas (conversa, JSON, código), sem nenhum texto seu. O resultado diz qual rota passou em qual capacidade. Só a rota testada conta como redundância.
++
++## Ligar um provedor pelo catálogo (para quem mantém o repo)
++
++Acrescente um bloco em `provedores.json`, copiando o de `claude` ou `chatgpt`:
++
++- `api.formato`: `anthropic` ou `openai`; `api.url`, `api.env` (variável opcional), `api.prefixo_chave` e `api.modelo`;
++- `cli.argv`: o comando, com `{prompt}` no fim; `cli.argv_modelo` é o par que escolhe o modelo e entra antes do prompt; `cli.saida` é `json_result` (lê o campo `result`) ou `arquivo` (lê `{saida_arquivo}`);
++- `categoria_orcamento`: qual categoria do orçamento cada caminho consome.
++
++Comando de programa **só entra pelo catálogo versionado**, revisado e assinado (P-8). O painel nunca cadastra comando para executar.
++
++## Antes de qualquer chamada sair
++
++1. **Orçamento:** a categoria está ligada e dentro do teto de chamadas.
++2. **Privacidade:** texto com dado pessoal, pela régua do `redesign/router/sanitizar.py`, não sai para provedor remoto.
++3. **Custo** (API): sem tarifa datada a chamada é recusada; o gasto estimado acumulado (`~/.local/share/agata/nova-versao/conexoes/gasto.jsonl`) não passa do teto em R$.
++
++Falha de qualquer porta vira `falha_etapa` (`orcamento`, `privacidade`, `custo`, `configuracao`, `autorizacao`, `transporte`), nunca uma chamada feita às escondidas.
+diff --git a/redesign/conexoes/adaptadores.py b/redesign/conexoes/adaptadores.py
+new file mode 100644
+index 00000000..5e0a3429
+--- /dev/null
++++ b/redesign/conexoes/adaptadores.py
+@@ -0,0 +1,299 @@
++#!/usr/bin/env python3
++"""Conexões de modelos da nova versão — um contrato, três modos.
++
++Decisão do Humano (04/11/2026): Claude e ChatGPT entram como exemplos de conexão, por
++todas as vias disponíveis, para futuros usuários ligarem os modelos de sua preferência:
++
++- `navegador`: o Conselho em Rede (relay do painel, já existente). Cada envio exige a
++  aprovação do Humano na fila do painel; por isso este módulo NUNCA envia por essa via,
++  só informa o estado do adaptador (`relay_catalog.py`).
++- `cli`: o programa de linha de comando da assinatura (`claude -p`, `codex exec`),
++  rodado em pasta temporária vazia, sem ferramentas e sem sessão persistida.
++- `api`: HTTP com chave do cofre (`segredos.py`). Formatos `anthropic` e `openai`
++  (este serve para qualquer API compatível com a da OpenAI).
++
++Toda chamada passa por três portas antes de sair: (1) orçamento do painel
++(`redesign/nova_versao/orcamento.py`: a categoria precisa estar ligada e dentro do teto);
++(2) privacidade: texto com dado pessoal (régua do `sanitizar.py`) não sai para provedor
++remoto; (3) custo: modo API só chama com tarifa datada informada pelo Humano, e o gasto
++estimado acumulado não passa do teto em R$.
++
++Catálogo: `provedores.json` (repo) + `provedores.local.json` no cofre (provedores que o
++usuário acrescentou pelo painel: só API, só https). Ajustes do usuário (modelo, tarifa,
++câmbio) ficam em `ajustes.local.json` no cofre. CLI só vem do catálogo versionado:
++o painel nunca cadastra comando para executar.
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++import shutil
++import subprocess
++import sys
++import tempfile
++import time
++import urllib.error
++import urllib.request
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++for _p in (AQUI, REPO / "redesign" / "nova_versao", REPO / "redesign" / "router", REPO / "redesign" / "painel_operacional"):
++    if str(_p) not in sys.path:
++        sys.path.insert(0, str(_p))
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++import segredos  # noqa: E402
++
++MODOS = ("navegador", "cli", "api")
++FORMATOS = ("anthropic", "openai")
++RE_MODELO = re.compile(r"^[A-Za-z0-9._:/@-]{1,80}$")
++
++
++def _ler_json(p: Path, padrao):
++    try:
++        return json.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return padrao
++
++
++def _gravar_json(p: Path, dado) -> None:
++    p.parent.mkdir(parents=True, exist_ok=True)
++    os.chmod(p.parent, 0o700)
++    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".tmp-")
++    with os.fdopen(fd, "w", encoding="utf-8") as f:
++        json.dump(dado, f, ensure_ascii=False, indent=1)
++    os.replace(tmp, p)
++
++
++def catalogo() -> list[dict]:
++    base = _ler_json(AQUI / "provedores.json", {}).get("provedores", [])
++    locais = _ler_json(segredos.pasta() / "provedores.local.json", [])
++    ids = {p["id"] for p in base}
++    out = [dict(p, origem="catalogo") for p in base]
++    for p in locais if isinstance(locais, list) else []:
++        if isinstance(p, dict) and p.get("id") not in ids:
++            out.append({**p, "origem": "local"})
++    aj = _ler_json(segredos.pasta() / "ajustes.local.json", {})
++    for p in out:
++        a = aj.get(p["id"]) or {}
++        if p.get("api") and a.get("api_modelo"):
++            p["api"] = {**p["api"], "modelo": a["api_modelo"]}
++        if p.get("cli") and a.get("cli_modelo"):
++            p["cli"] = {**p["cli"], "modelo": a["cli_modelo"]}
++        p["tarifa"] = a.get("tarifa")
++    return out
++
++
++def provedor(pid: str) -> dict:
++    for p in catalogo():
++        if p["id"] == pid:
++            return p
++    raise ValueError("provedor fora do catálogo")
++
++
++def adicionar_local(pid: str, nome: str, formato: str, url: str, env: str | None, modelo: str | None) -> dict:
++    """Provedor novo pelo painel: só API, só https, sem comando."""
++    if not segredos.RE_ID.match(pid or "") or formato not in FORMATOS:
++        raise ValueError("id ou formato inválido")
++    if not isinstance(url, str) or not re.match(r"^https://[A-Za-z0-9.-]+(:\d+)?(/[\w./%-]*)?$", url):
++        raise ValueError("a URL precisa ser https e sem parâmetros")
++    if modelo is not None and not RE_MODELO.match(modelo):
++        raise ValueError("modelo inválido")
++    if env is not None and not re.match(r"^[A-Z][A-Z0-9_]{2,60}$", env):
++        raise ValueError("nome de variável inválido")
++    if any(p["id"] == pid for p in catalogo()):
++        raise ValueError("id já existe")
++    nome = str(nome or pid)[:60]
++    caminho = segredos.pasta() / "provedores.local.json"
++    locais = _ler_json(caminho, [])
++    locais.append({"id": pid, "nome": nome, "categoria_orcamento": {"api": "pago"},
++                   "api": {"formato": formato, "url": url, "env": env, "prefixo_chave": None, "modelo": modelo}})
++    _gravar_json(caminho, locais)
++    eventos.registrar("decision", "provedor_adicionado", f"conexao:{pid}", actor="humano-painel", componente="conexoes",
++                      formato=formato, url=url)
++    return provedor(pid)
++
++
++def ajustar(pid: str, *, api_modelo=None, cli_modelo=None, tarifa=None) -> dict:
++    """Modelo e tarifa escolhidos pelo Humano. Tarifa: USD por milhão de tokens, com fonte e data."""
++    provedor(pid)
++    for m in (api_modelo, cli_modelo):
++        if m is not None and m != "" and not RE_MODELO.match(m):
++            raise ValueError("modelo inválido")
++    if tarifa is not None:
++        if not isinstance(tarifa, dict):
++            raise ValueError("tarifa inválida")
++        try:
++            ent, sai, cambio = float(tarifa["entrada_usd_mtok"]), float(tarifa["saida_usd_mtok"]), float(tarifa["cambio_brl"])
++        except (KeyError, TypeError, ValueError):
++            raise ValueError("tarifa precisa de entrada, saída e câmbio numéricos") from None
++        if not (0 <= ent <= 1000 and 0 <= sai <= 1000 and 0 < cambio <= 100):
++            raise ValueError("tarifa fora do limite")
++        fonte = str(tarifa.get("fonte") or "")[:200]
++        data = str(tarifa.get("data") or "")
++        if not fonte or not re.match(r"^\d{4}-\d{2}-\d{2}$", data):
++            raise ValueError("tarifa precisa de fonte e data (AAAA-MM-DD)")
++        tarifa = {"entrada_usd_mtok": ent, "saida_usd_mtok": sai, "cambio_brl": cambio, "fonte": fonte, "data": data}
++    caminho = segredos.pasta() / "ajustes.local.json"
++    aj = _ler_json(caminho, {})
++    atual = dict(aj.get(pid) or {})
++    if api_modelo is not None:
++        atual["api_modelo"] = api_modelo or None
++    if cli_modelo is not None:
++        atual["cli_modelo"] = cli_modelo or None
++    if tarifa is not None:
++        atual["tarifa"] = tarifa
++    aj[pid] = atual
++    _gravar_json(caminho, aj)
++    eventos.registrar("decision", "ajuste", f"conexao:{pid}", actor="humano-painel", componente="conexoes", depois=atual)
++    return provedor(pid)
++
++
++def _relay_estado(relay_id: str | None):
++    try:
++        import relay_catalog  # noqa: E402
++        p = relay_catalog.PROVIDER_BY_ID.get(relay_id)
++        return p.get("adapter_state") if p else None
++    except Exception:  # noqa: BLE001
++        return None
++
++
++def estado() -> list[dict]:
++    out = []
++    for p in catalogo():
++        modos = {}
++        if p.get("navegador"):
++            modos["navegador"] = {"disponivel": False, "adaptador": _relay_estado(p["navegador"].get("relay_id")),
++                                  "motivo": "envio só pelo Conselho em Rede, com aprovação do Humano por envio"}
++        if p.get("cli"):
++            achado = shutil.which(p["cli"]["binario"])
++            modos["cli"] = {"disponivel": bool(achado), "instalado": bool(achado), "login": "não medido",
++                            "modelo": p["cli"].get("modelo"), "categoria": p["categoria_orcamento"].get("cli")}
++        if p.get("api"):
++            ch = segredos.estado_de(p["id"], p["api"].get("env"))
++            tem = ch["no_cofre"] or ch["no_ambiente"]
++            falta = [x for x, ok in (("chave", tem), ("modelo", p["api"].get("modelo")), ("tarifa", p.get("tarifa"))) if not ok]
++            modos["api"] = {"disponivel": not falta, "falta": falta, "chave": ch, "modelo": p["api"].get("modelo"),
++                            "formato": p["api"]["formato"], "url": p["api"]["url"], "tarifa": p.get("tarifa"),
++                            "categoria": p["categoria_orcamento"].get("api")}
++        out.append({"id": p["id"], "nome": p["nome"], "origem": p["origem"], "modos": modos})
++    return out
++
++
++def _gasto_path() -> Path:
++    return eventos.dados() / "conexoes" / "gasto.jsonl"
++
++
++def gasto_total_reais() -> float:
++    try:
++        return round(sum(json.loads(x).get("reais", 0) for x in _gasto_path().read_text().splitlines() if x.strip()), 6)
++    except OSError:
++        return 0.0
++
++
++def _privado(texto: str) -> bool:
++    try:
++        import sanitizar  # noqa: E402
++        return bool(sanitizar.varrer_pessoal(texto, sanitizar._nomes_projeto()))
++    except Exception:  # noqa: BLE001 — sem a régua, não se arrisca: trata como privado
++        return True
++
++
++def _post(url: str, cabecalhos: dict, corpo: dict, timeout: int):
++    req = urllib.request.Request(url, data=json.dumps(corpo).encode(), method="POST",
++                                 headers={"Content-Type": "application/json", **cabecalhos})
++    with urllib.request.urlopen(req, timeout=timeout) as r:
++        return json.loads(r.read())
++
++
++def _chamar_api(p: dict, prompt: str, max_tokens: int, timeout: int, post=None) -> dict:
++    api = p["api"]
++    chave = segredos._para_chamada(p["id"], api.get("env"))
++    if not chave:
++        return {"ok": False, "falha_etapa": "configuracao", "erro": "sem chave no cofre nem no ambiente"}
++    post = post or _post
++    if api["formato"] == "anthropic":
++        d = post(api["url"], {"x-api-key": chave, "anthropic-version": "2023-06-01"},
++                 {"model": api["modelo"], "max_tokens": max_tokens, "messages": [{"role": "user", "content": prompt}]}, timeout)
++        texto = "".join(b.get("text", "") for b in d.get("content", []) if isinstance(b, dict))
++        u = d.get("usage") or {}
++        usage = {"input_tokens": u.get("input_tokens"), "output_tokens": u.get("output_tokens")}
++    else:
++        d = post(api["url"], {"Authorization": f"Bearer {chave}"},
++                 {"model": api["modelo"], "max_completion_tokens": max_tokens, "messages": [{"role": "user", "content": prompt}]}, timeout)
++        texto = ((d.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
++        u = d.get("usage") or {}
++        usage = {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}
++    return {"ok": True, "texto": texto, "usage": usage, "modelo": d.get("model") or api["modelo"]}
++
++
++def _chamar_cli(p: dict, prompt: str, timeout: int, rodar=None) -> dict:
++    cli = p["cli"]
++    rodar = rodar or subprocess.run
++    with tempfile.TemporaryDirectory(prefix="agata-cli-") as t:
++        saida = os.path.join(t, "ultima.txt")
++        argv = [a.replace("{prompt}", prompt).replace("{saida_arquivo}", saida) for a in cli["argv"]]
++        if cli.get("modelo") and cli.get("argv_modelo"):
++            par = [a.replace("{modelo}", cli["modelo"]) for a in cli["argv_modelo"]]
++            argv = argv[:-1] + par + argv[-1:]
++        r = rodar(argv, cwd=t, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
++        if r.returncode != 0:
++            return {"ok": False, "falha_etapa": "transporte", "erro": (r.stderr or r.stdout or "").strip()[-200:]}
++        usage = {"input_tokens": None, "output_tokens": None}
++        if cli.get("saida") == "json_result":
++            d = json.loads(r.stdout)
++            texto = d.get("result") or ""
++            u = d.get("usage") or {}
++            usage = {"input_tokens": u.get("input_tokens"), "output_tokens": u.get("output_tokens")}
++        else:
++            texto = Path(saida).read_text(encoding="utf-8") if os.path.exists(saida) else r.stdout
++    return {"ok": True, "texto": texto.strip(), "usage": usage, "modelo": cli.get("modelo") or "padrão do CLI"}
++
++
++def chamar(pid: str, modo: str, prompt: str, *, max_tokens: int = 200, chamadas_ja: int = 0, post=None, rodar=None) -> dict:
++    """Uma chamada. Nunca levanta por falha do provedor: devolve `ok: False` com a etapa."""
++    if modo not in MODOS:
++        raise ValueError("modo fora da lista")
++    p = provedor(pid)
++    base = {"provedor": pid, "modo": modo, "latencia_ms": None, "usage": {"input_tokens": None, "output_tokens": None}}
++    if modo == "navegador" or not p.get(modo):
++        return {**base, "ok": False, "falha_etapa": "autorizacao",
++                "erro": "via navegador só com aprovação do Humano por envio (Conselho em Rede)" if modo == "navegador"
++                else "modo não disponível para este provedor"}
++    categoria = p["categoria_orcamento"].get(modo)
++    ok, motivo = orcamento.permite(categoria, chamadas_ja)
++    if not ok:
++        return {**base, "ok": False, "falha_etapa": "orcamento", "erro": motivo}
++    if _privado(prompt):
++        return {**base, "ok": False, "falha_etapa": "privacidade", "erro": "dado pessoal não sai para provedor remoto"}
++    o = orcamento.ler()
++    if modo == "api":
++        if not p["api"].get("modelo"):
++            return {**base, "ok": False, "falha_etapa": "configuracao", "erro": "modelo da API não escolhido"}
++        if not p.get("tarifa"):
++            return {**base, "ok": False, "falha_etapa": "custo", "erro": "sem tarifa datada: custo não estimável"}
++        t = p["tarifa"]
++        teto_chamada = (len(prompt) / 3 * t["entrada_usd_mtok"] + max_tokens * t["saida_usd_mtok"]) / 1e6 * t["cambio_brl"]
++        if gasto_total_reais() + teto_chamada > o["teto_reais"]:
++            return {**base, "ok": False, "falha_etapa": "custo", "erro": "teto em R$ seria ultrapassado"}
++    t0 = time.monotonic()
++    try:
++        r = _chamar_api(p, prompt, max_tokens, o["timeout_s"], post) if modo == "api" else _chamar_cli(p, prompt, o["timeout_s"], rodar)
++    except (urllib.error.URLError, OSError, ValueError, subprocess.TimeoutExpired, KeyError) as e:
++        r = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
++    r = {**base, **r, "latencia_ms": round((time.monotonic() - t0) * 1000)}
++    if modo == "api" and r.get("ok"):
++        t = p["tarifa"]; u = r["usage"]
++        reais = ((u.get("input_tokens") or 0) * t["entrada_usd_mtok"] + (u.get("output_tokens") or 0) * t["saida_usd_mtok"]) / 1e6 * t["cambio_brl"]
++        r["reais_estimado"] = round(reais, 6)
++        _gasto_path().parent.mkdir(parents=True, exist_ok=True)
++        with open(_gasto_path(), "a", encoding="utf-8") as f:
++            f.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "provedor": pid, "reais": r["reais_estimado"],
++                                "usage": u, "tarifa_fonte": t["fonte"], "tarifa_data": t["data"]}) + "\n")
++    return r
++
++
++if __name__ == "__main__":
++    print(json.dumps(estado(), ensure_ascii=False, indent=1))
+diff --git a/redesign/conexoes/provedores.json b/redesign/conexoes/provedores.json
+new file mode 100644
+index 00000000..1ac8a6a3
+--- /dev/null
++++ b/redesign/conexoes/provedores.json
+@@ -0,0 +1,81 @@
++{
++  "schema_version": 1,
++  "nota": "Catálogo de conexões da nova versão. Claude e ChatGPT são os exemplos preenchidos (decisão do Humano, 04/11/2026). Para ligar outro provedor, copie um bloco: 'api.formato' 'openai' serve para qualquer API compatível com a da OpenAI. Chave nunca entra aqui: vai pelo painel, aba Conexões, para o cofre só de escrita.",
++  "provedores": [
++    {
++      "id": "claude",
++      "nome": "Claude (Anthropic)",
++      "categoria_orcamento": {
++        "api": "pago",
++        "cli": "assinatura"
++      },
++      "navegador": {
++        "relay_id": "claude"
++      },
++      "cli": {
++        "binario": "claude",
++        "argv": [
++          "claude",
++          "-p",
++          "--output-format",
++          "json",
++          "--tools",
++          "",
++          "--no-session-persistence",
++          "{prompt}"
++        ],
++        "modelo": "haiku",
++        "saida": "json_result",
++        "argv_modelo": [
++          "--model",
++          "{modelo}"
++        ]
++      },
++      "api": {
++        "formato": "anthropic",
++        "url": "https://api.anthropic.com/v1/messages",
++        "env": "ANTHROPIC_API_KEY",
++        "prefixo_chave": "sk-ant-",
++        "modelo": "claude-haiku-5-5"
++      }
++    },
++    {
++      "id": "chatgpt",
++      "nome": "ChatGPT (OpenAI)",
++      "categoria_orcamento": {
++        "api": "pago",
++        "cli": "assinatura"
++      },
++      "navegador": {
++        "relay_id": "chatgpt"
++      },
++      "cli": {
++        "binario": "codex",
++        "argv": [
++          "codex",
++          "exec",
++          "--sandbox",
++          "read-only",
++          "--skip-git-repo-check",
++          "--ephemeral",
++          "-o",
++          "{saida_arquivo}",
++          "{prompt}"
++        ],
++        "modelo": null,
++        "saida": "arquivo",
++        "argv_modelo": [
++          "-m",
++          "{modelo}"
++        ]
++      },
++      "api": {
++        "formato": "openai",
++        "url": "https://api.openai.com/v1/chat/completions",
++        "env": "OPENAI_API_KEY",
++        "prefixo_chave": "sk-",
++        "modelo": null
++      }
++    }
++  ]
++}
+diff --git a/redesign/conexoes/segredos.py b/redesign/conexoes/segredos.py
+new file mode 100644
+index 00000000..75c4a7ef
+--- /dev/null
++++ b/redesign/conexoes/segredos.py
+@@ -0,0 +1,92 @@
++#!/usr/bin/env python3
++"""Cofre de chaves das conexões — só de escrita para quem está de fora.
++
++A chave de API é digitada pelo Humano no painel (aba Conexões) e vem para cá. Regras:
++- fica em `AGATA_CONEXOES_DIR` (padrão ~/.config/agata/conexoes/), pasta 0700, um arquivo
++  0600 por provedor (`<id>.chave`). NÃO é o `~/.config/agata/.env`: nada aqui lê nem
++  escreve aquele arquivo;
++- nenhuma função devolve a chave para o painel, para o log, para o ledger ou para um
++  modelo. `estado()` só diz se existe e desde quando;
++- `_para_chamada()` é o único leitor, usado pelo adaptador no instante da chamada HTTP;
++- variável de ambiente com o mesmo nome (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`...) também
++  vale, e o estado diz só que ela existe;
++- gravar e remover viram evento no ledger, sem valor nem hash da chave.
++"""
++from __future__ import annotations
++
++import os
++import re
++import sys
++import tempfile
++import time
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent / "nova_versao"))
++import eventos  # noqa: E402
++
++RE_ID = re.compile(r"^[a-z0-9][a-z0-9_-]{1,40}$")
++RE_CHAVE = re.compile(r"^[A-Za-z0-9_\-.]{20,300}$")
++
++
++def pasta() -> Path:
++    return Path(os.environ.get("AGATA_CONEXOES_DIR", Path.home() / ".config" / "agata" / "conexoes"))
++
++
++def _arquivo(pid: str) -> Path:
++    if not RE_ID.match(pid or ""):
++        raise ValueError("id de provedor inválido")
++    return pasta() / f"{pid}.chave"
++
++
++def gravar(pid: str, chave: str, prefixo: str | None = None, actor: str = "humano-painel") -> dict:
++    if not isinstance(chave, str):
++        raise ValueError("chave ausente")
++    chave = chave.strip()
++    if not RE_CHAVE.match(chave):
++        raise ValueError("formato de chave recusado (20 a 300 caracteres, sem espaço)")
++    if prefixo and not chave.startswith(prefixo):
++        raise ValueError("a chave não tem o prefixo esperado para este provedor")
++    p = _arquivo(pid)
++    p.parent.mkdir(parents=True, exist_ok=True)
++    os.chmod(p.parent, 0o700)
++    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".tmp-")
++    try:
++        os.fchmod(fd, 0o600)
++        with os.fdopen(fd, "w", encoding="utf-8") as f:
++            f.write(chave)
++        os.replace(tmp, p)
++    except BaseException:
++        if os.path.exists(tmp):
++            os.unlink(tmp)
++        raise
++    eventos.registrar("decision", "chave_gravada", f"conexao:{pid}", actor=actor, componente="conexoes",
++                      classification="private")
++    return estado_de(pid)
++
++
++def remover(pid: str, actor: str = "humano-painel") -> dict:
++    p = _arquivo(pid)
++    existia = p.exists()
++    if existia:
++        p.unlink()
++        eventos.registrar("decision", "chave_removida", f"conexao:{pid}", actor=actor, componente="conexoes",
++                          classification="private")
++    return {**estado_de(pid), "removida": existia}
++
++
++def estado_de(pid: str, env: str | None = None) -> dict:
++    p = _arquivo(pid)
++    no_cofre = p.exists()
++    return {"no_cofre": no_cofre,
++            "desde": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(p.stat().st_mtime)) if no_cofre else None,
++            "permissao_ok": (no_cofre and (p.stat().st_mode & 0o077) == 0) or None,
++            "no_ambiente": bool(env and os.environ.get(env))}
++
++
++def _para_chamada(pid: str, env: str | None = None) -> str | None:
++    """Único leitor da chave. Uso exclusivo do adaptador HTTP, no momento da chamada."""
++    p = _arquivo(pid)
++    if p.exists():
++        return p.read_text(encoding="utf-8").strip() or None
++    return os.environ.get(env) if env else None
+diff --git a/redesign/conexoes/spec/acceptance.json b/redesign/conexoes/spec/acceptance.json
+new file mode 100644
+index 00000000..7e5623f2
+--- /dev/null
++++ b/redesign/conexoes/spec/acceptance.json
+@@ -0,0 +1,47 @@
++[
++  {
++    "criterion": "a chave vai para o cofre 0600 e nunca volta em estado, resposta ou ledger",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_conexoes.py::CofreTests::test_chave_vai_para_o_cofre_0600_e_nunca_volta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "orçamento, privacidade e custo barram a chamada antes de sair",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_portas_orcamento_privacidade_e_custo_antes_de_sair"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o programa da assinatura roda em pasta vazia, sem ferramentas e sem sessão",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_cli_roda_em_pasta_vazia_sem_ferramentas"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "provedor novo pelo painel é só API com https e sem id repetido",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_conexoes.py::ChamadaTests::test_provedor_novo_so_api_https"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o teste de rotas é por capacidade, descreve a independência e não guarda a resposta",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_conexoes.py::RedundanciaTests::test_testa_por_capacidade_sem_guardar_resposta_e_com_independencia"
++    ],
++    "cwd": null
++  }
++]
+\ No newline at end of file
+diff --git a/redesign/conexoes/spec/spec.md b/redesign/conexoes/spec/spec.md
+new file mode 100644
+index 00000000..4c5f1cf1
+--- /dev/null
++++ b/redesign/conexoes/spec/spec.md
+@@ -0,0 +1,50 @@
++# Spec — Conexões de modelos e redundância por capacidade (nova versão, lote 2)
++
++Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C7). Origem: Experimento GPT, (040), (043)–(047), matriz de redundância. Decisões do Humano em 04/11/2026: "as duas são: Claude e Chat GPT. Devem servir de exemplo para futuros usuarios conseguirem conectar as de sua preferencia"; "todas as opções disponiveis e o preenchimento de API deve ter aba segura de configuração onde fizer mais sentido no painel".
++
++## Jornadas críticas
++
++1. O Humano grava a chave de API de um provedor no painel; a chave fica no cofre e nunca volta à tela.
++2. O Humano liga uma categoria no orçamento e manda testar as rotas; vê por capacidade quais rotas passaram e por quê as outras não.
++3. Um usuário futuro acrescenta o provedor de sua preferência pelo mesmo formato, pelo painel (API) ou pelo catálogo (CLI).
++
++## Contrato
++
++- `provedores.json`: catálogo versionado com `claude` e `chatgpt` nos três caminhos (`navegador` via `relay_id`, `cli` com `argv`/`argv_modelo`/`saida`, `api` com `formato` `anthropic`|`openai`, `url`, `env`, `prefixo_chave`, `modelo`) e a `categoria_orcamento` de cada caminho (`cli` → `assinatura`, `api` → `pago`).
++- `segredos.py`: cofre em `AGATA_CONEXOES_DIR` (padrão `~/.config/agata/conexoes/`, pasta 0700, `<id>.chave` 0600, gravação atômica). Valida id e formato da chave (20–300 caracteres, sem espaço, prefixo do provedor). `estado_de` diz só se existe, desde quando e se a permissão está fechada; `_para_chamada` é o único leitor. Gravar e remover viram evento `private` no ledger, sem valor. Não lê nem escreve `~/.config/agata/.env`.
++- `adaptadores.py`: `catalogo()` junta o versionado com `provedores.local.json` (só API, só https, nunca comando) e `ajustes.local.json` (modelo, tarifa com fonte e data). `chamar(pid, modo, prompt)` nunca envia pelo navegador; antes de sair confere orçamento, privacidade (`sanitizar.varrer_pessoal`; sem a régua, trata como privado) e, na API, tarifa e teto em R$ pelo gasto acumulado em `gasto.jsonl`. CLI roda em pasta temporária vazia, com `stdin` fechado. Falha vira `falha_etapa`, nunca exceção.
++- `testar_rotas.py`: rotas permitidas pelo orçamento (`local` = tags do Ollama sem embedding; `gratuito` = modelos `available` do OmniRoute, sem `/auto`; `assinatura` e `pago` = conexões prontas), três provas fixas e mecânicas (conversa, JSON, código), coordenadas por `redesign/nova_versao/tarefas.py` (GPU em fila única, remoto em paralelo, teto de chamadas, cancelamento). Guarda veredito, etapa de falha, latência, uso e independência; nunca guarda a resposta. Não altera filas do OmniRoute.
++- O corpo (`redesign/corpo/fotografar.py`) preenche `testado` e `pronto` pelo último teste.
++
++## Critérios de aceite
++
++- [ ] a chave vai para o cofre 0600 e nunca volta em estado, resposta ou ledger
++- [ ] orçamento, privacidade e custo barram a chamada antes de sair
++- [ ] o programa da assinatura roda em pasta vazia, sem ferramentas e sem sessão
++- [ ] provedor novo pelo painel é só API com https e sem id repetido
++- [ ] o teste de rotas é por capacidade, descreve a independência e não guarda a resposta
++
++## Desenho e alternativas
++
++Biblioteca padrão (`urllib`, `subprocess`), sem SDK de provedor. Descartados: chave no `~/.config/agata/.env` (o modelo não pode tocar nesse arquivo; um cofre próprio deixa a escrita com o painel); chave no OmniRoute (fora do repo e sem trilha no ledger); comando de CLI cadastrável pelo painel (execução arbitrária). A API sai direto, sem passar pelo `sanitizar.py` de egresso: neste lote só as provas fixas saem, e a integração com o caminho real (lote 4) precisa passar pelo sanitizador.
++
++## Implementação e testes
++
++`provedores.json`, `segredos.py`, `adaptadores.py`, `testar_rotas.py` e `README.md` (guia para outros usuários). Testes em `tests/test_conexoes.py`, sem rede: HTTP e programa substituídos.
++
++## Migração e reversão
++
++Nada no canon. Reversão por revert; apagar `~/.config/agata/conexoes/` remove chaves e ajustes.
++
++## Riscos e dependências
++
++Login do CLI só se confirma no primeiro teste (`login: não medido`). O modelo padrão do ChatGPT ficou vazio de propósito: o identificador vigente não foi medido nesta sessão e é escolhido no painel. A tarifa é informada pelo Humano, com fonte; o custo é estimativa e não substitui a fatura.
++
++## Código
++
++- `provedores.json`
++- `segredos.py`
++- `adaptadores.py`
++- `testar_rotas.py`
++- `README.md`
++- `tests/`
+diff --git a/redesign/conexoes/testar_rotas.py b/redesign/conexoes/testar_rotas.py
+new file mode 100644
+index 00000000..fdccf860
+--- /dev/null
++++ b/redesign/conexoes/testar_rotas.py
+@@ -0,0 +1,185 @@
++#!/usr/bin/env python3
++"""Redundância por capacidade — teste funcional mínimo de cada rota (Experimento GPT,
++(043)–(047) e `matriz-redundancia-agata-2026-11-04.md`).
++
++Uma rota só conta como redundância para uma capacidade depois de passar num teste
++pertinente. Catálogo, flag `available` e instalação não contam. Este script:
++
++- monta as rotas que o orçamento do painel permite: `local` (tags do Ollama),
++  `gratuito` (modelos marcados disponíveis no OmniRoute), `assinatura` (CLI dos
++  provedores de `provedores.json`) e `pago` (API com chave, modelo e tarifa);
++- roda três provas sintéticas e fixas (nada do Humano sai da Máquina): conversa, formato
++  JSON e código. Verificação é mecânica (regex ou `json.loads`), não juízo de modelo;
++- descreve a independência de cada rota (família, provedor, cota, hardware, rede):
++  provedor diferente reduz algumas dependências, não garante verdade;
++- coordena pela `tarefas.py` (paralelo para remoto, fila única para a GPU local, teto
++  de chamadas do orçamento, cancelamento) e grava em
++  `<dados>/redundancia/testes/<run_id>.json`. Não muda fila nenhuma do OmniRoute.
++
++Uso: testar_rotas.py [--categorias local,gratuito,assinatura,pago] [--limite N]
++Só roda quando o Humano pede (painel ou terminal): consome inferência.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import re
++import sys
++import time
++import urllib.request
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++for _p in (AQUI, REPO / "redesign" / "nova_versao"):
++    sys.path.insert(0, str(_p))
++import adaptadores  # noqa: E402
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++import tarefas  # noqa: E402
++
++OLLAMA = "http://127.0.0.1:11434"
++OMNI = "http://127.0.0.1:20128"
++
++
++def _json_ok(t: str) -> bool:
++    m = re.search(r"\{.*\}", t or "", re.S)
++    try:
++        return bool(m) and json.loads(m.group(0)).get("ok") is True
++    except ValueError:
++        return False
++
++
++PROVAS = {
++    "conversa": ("Responda apenas com a palavra: pronto", lambda t: bool(re.search(r"\bpronto\b", (t or "").lower()))),
++    "formato": ('Responda somente com este JSON, sem mais nada: {"ok": true}', _json_ok),
++    "codigo": ("Escreva só a expressão em Python que soma 2 e 3, sem explicação.",
++               lambda t: bool(re.search(r"2\s*\+\s*3", t or ""))),
++}
++
++
++def _get(url):
++    with urllib.request.urlopen(url, timeout=5) as r:
++        return json.loads(r.read())
++
++
++def _post(url, corpo, timeout):
++    req = urllib.request.Request(url, data=json.dumps(corpo).encode(), method="POST",
++                                 headers={"Content-Type": "application/json"})
++    with urllib.request.urlopen(req, timeout=timeout) as r:
++        return json.loads(r.read())
++
++
++def rotas(categorias: set[str], get=None) -> list[dict]:
++    get = get or _get
++    o = orcamento.ler()
++    out = []
++    if "local" in categorias and o["provedores"]["local"]:
++        try:
++            for m in get(f"{OLLAMA}/api/tags").get("models", []):
++                n = m.get("name", "")
++                if n and "embed" not in n.lower():
++                    out.append({"rota": f"ollama-local/{n}", "categoria": "local", "tipo": "ollama", "modelo": n,
++                                "independencia": {"familia": n.split(":")[0], "provedor": "local", "cota": "nenhuma",
++                                                  "hardware": "GPU local (fila única)", "rede": "nenhuma"}})
++        except Exception:  # noqa: BLE001
++            pass
++    if "gratuito" in categorias and o["provedores"]["gratuito"]:
++        try:
++            for m in get(f"{OMNI}/api/models").get("models", []):
++                n = m.get("fullModel")
++                if n and m.get("available") and not n.endswith("/auto"):
++                    out.append({"rota": n, "categoria": "gratuito", "tipo": "omniroute", "modelo": n,
++                                "independencia": {"familia": n.split("/")[-1].split("-")[0], "provedor": n.split("/")[0],
++                                                  "cota": "gratuita do provedor", "hardware": "remoto", "rede": "internet"}})
++        except Exception:  # noqa: BLE001
++            pass
++    for p in adaptadores.estado():
++        for modo in ("cli", "api"):
++            info = p["modos"].get(modo)
++            if info and info["disponivel"] and info.get("categoria") in categorias and o["provedores"].get(info["categoria"]):
++                out.append({"rota": f"{p['id']}:{modo}", "categoria": info["categoria"], "tipo": "conexao", "provedor": p["id"],
++                            "modo": modo, "modelo": info.get("modelo"),
++                            "independencia": {"familia": p["id"], "provedor": p["id"],
++                                              "cota": "assinatura do usuário" if modo == "cli" else "por token",
++                                              "hardware": "remoto", "rede": "internet"}})
++    return out
++
++
++def _executor(timeout_s: int, post=None):
++    post = post or _post
++
++    def f(item):
++        prompt, _ = PROVAS[item["capacidade"]]
++        r = item["rota_info"]
++        t0 = time.monotonic()
++        if r["tipo"] == "conexao":
++            res = adaptadores.chamar(r["provedor"], r["modo"], prompt, max_tokens=60)
++        else:
++            ok, motivo = orcamento.permite(r["categoria"])
++            if not ok:
++                return {"ok": False, "falha_etapa": "orcamento", "erro": motivo}
++            try:
++                if r["tipo"] == "ollama":
++                    d = post(f"{OLLAMA}/api/chat", {"model": r["modelo"], "stream": False, "think": False,
++                                                     "messages": [{"role": "user", "content": prompt}],
++                                                     "options": {"temperature": 0, "num_predict": 60}}, timeout_s)
++                    res = {"ok": True, "texto": (d.get("message") or {}).get("content", ""),
++                           "usage": {"input_tokens": d.get("prompt_eval_count"), "output_tokens": d.get("eval_count")}}
++                else:
++                    d = post(f"{OMNI}/v1/chat/completions", {"model": r["modelo"], "max_tokens": 60, "temperature": 0,
++                                                             "messages": [{"role": "user", "content": prompt}]}, timeout_s)
++                    u = d.get("usage") or {}
++                    res = {"ok": True, "texto": ((d.get("choices") or [{}])[0].get("message") or {}).get("content", ""),
++                           "usage": {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}}
++            except Exception as e:  # noqa: BLE001
++                res = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
++            res["latencia_ms"] = round((time.monotonic() - t0) * 1000)
++        res["passou"] = bool(res.get("ok")) and PROVAS[item["capacidade"]][1](res.get("texto"))
++        res.pop("texto", None)   # a resposta não é guardada: só o veredito mecânico
++        return res
++    return f
++
++
++def testar(categorias: set[str] | None = None, limite: int | None = None, *, get=None, post=None) -> dict:
++    o = orcamento.ler()
++    categorias = categorias or {c for c, ligado in o["provedores"].items() if ligado}
++    lista = rotas(categorias, get)[: limite or None]
++    itens = [{"chave": f"{r['rota']}|{cap}", "capacidade": cap, "rota_info": r,
++              "recurso": "gpu" if r["categoria"] == "local" else None} for r in lista for cap in PROVAS]
++    t = tarefas.criar("redundancia", itens, max_chamadas=o["max_chamadas"], prazo_s=max(o["timeout_s"] * 3, 300))
++    t = tarefas.executar(t, _executor(o["timeout_s"], post), paralelo=True)
++    resultados = []
++    for i in itens:
++        r = t["resultados"].get(i["chave"], {})
++        resultados.append({"rota": i["rota_info"]["rota"], "categoria": i["rota_info"]["categoria"], "capacidade": i["capacidade"],
++                           "passou": r.get("passou", False), "ok": r.get("ok", False), "falha_etapa": r.get("falha_etapa"),
++                           "erro": r.get("erro"), "latencia_ms": r.get("latencia_ms"), "usage": r.get("usage"),
++                           "independencia": i["rota_info"]["independencia"]})
++    resumo = {cap: sorted({x["rota"] for x in resultados if x["capacidade"] == cap and x["passou"]}) for cap in PROVAS}
++    run = {"schema_version": 1, "run_id": t["task_id"], "commit": t["contexto_versao"], "quando": t.get("fim"),
++           "estado": t["estado"], "obsoleto": t["obsoleto"], "categorias": sorted(categorias), "chamadas": t["chamadas"],
++           "provas": {k: v[0] for k, v in PROVAS.items()}, "resultados": resultados,
++           "rotas_que_passaram": resumo,
++           "nota": "redundância demonstrada só para a capacidade testada; independência é descrita, não garantida"}
++    p = eventos.dados() / "redundancia" / "testes" / f"{t['task_id']}.json"
++    p.parent.mkdir(parents=True, exist_ok=True)
++    p.write_text(json.dumps(run, ensure_ascii=False, indent=1), encoding="utf-8")
++    eventos.registrar("verification", t["estado"], f"redundancia:{t['task_id']}", componente="redundancia",
++                      rotas=len(lista), passaram={k: len(v) for k, v in resumo.items()})
++    return run
++
++
++def ultimo() -> dict | None:
++    pasta = eventos.dados() / "redundancia" / "testes"
++    arqs = sorted(pasta.glob("t-*.json")) if pasta.exists() else []
++    return json.loads(arqs[-1].read_text(encoding="utf-8")) if arqs else None
++
++
++if __name__ == "__main__":
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--categorias")
++    ap.add_argument("--limite", type=int)
++    a = ap.parse_args()
++    r = testar(set(a.categorias.split(",")) if a.categorias else None, a.limite)
++    print(json.dumps({k: r[k] for k in ("run_id", "estado", "chamadas", "rotas_que_passaram")}, ensure_ascii=False, indent=1))
+diff --git a/redesign/conexoes/tests/test_conexoes.py b/redesign/conexoes/tests/test_conexoes.py
+new file mode 100644
+index 00000000..274bc190
+--- /dev/null
++++ b/redesign/conexoes/tests/test_conexoes.py
+@@ -0,0 +1,135 @@
++import json
++import os
++import stat
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest import mock
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++sys.path.insert(0, str(AQUI.parents[1] / "nova_versao"))
++import adaptadores  # noqa: E402
++import orcamento  # noqa: E402
++import segredos  # noqa: E402
++import testar_rotas  # noqa: E402
++
++CHAVE = "sk-ant-" + "x" * 40
++TARIFA = {"entrada_usd_mtok": 1.0, "saida_usd_mtok": 5.0, "cambio_brl": 5.5, "fonte": "https://exemplo/precos", "data": "2026-11-04"}
++
++
++class Base(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        t = Path(self.tmp.name)
++        os.environ["AGATA_NV_DIR"] = str(t / "dados")
++        os.environ["AGATA_NV_CACHE"] = str(t / "cache")
++        os.environ["AGATA_CONEXOES_DIR"] = str(t / "cofre")
++        for v in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY"):
++            os.environ.pop(v, None)
++        self.privado = mock.patch.object(adaptadores, "_privado", lambda t: "@" in t)
++        self.privado.start()
++
++    def tearDown(self):
++        self.privado.stop()
++        self.tmp.cleanup()
++
++    def ledger(self) -> str:
++        p = Path(os.environ["AGATA_NV_DIR"]) / "eventos" / "ledger.jsonl"
++        return p.read_text(encoding="utf-8") if p.exists() else ""
++
++
++class CofreTests(Base):
++    def test_chave_vai_para_o_cofre_0600_e_nunca_volta(self):
++        e = segredos.gravar("claude", CHAVE, "sk-ant-")
++        p = Path(os.environ["AGATA_CONEXOES_DIR"]) / "claude.chave"
++        self.assertEqual(stat.S_IMODE(p.stat().st_mode), 0o600)
++        self.assertEqual(stat.S_IMODE(p.parent.stat().st_mode), 0o700)
++        self.assertTrue(e["no_cofre"])
++        bruto = json.dumps([e, adaptadores.estado()], ensure_ascii=False) + self.ledger()
++        self.assertNotIn(CHAVE, bruto)
++        self.assertNotIn("x" * 40, bruto)
++        with self.assertRaises(ValueError):
++            segredos.gravar("claude", "sk-errado-" + "y" * 30, "sk-ant-")
++        with self.assertRaises(ValueError):
++            segredos.gravar("../fora", CHAVE)
++        self.assertTrue(segredos.remover("claude")["removida"])
++        self.assertFalse(p.exists())
++
++
++class ChamadaTests(Base):
++    def test_portas_orcamento_privacidade_e_custo_antes_de_sair(self):
++        r = adaptadores.chamar("claude", "api", "oi")
++        self.assertEqual(r["falha_etapa"], "orcamento")              # pago desligado por padrão
++        o = orcamento.ler(); o["provedores"]["pago"] = True; o["teto_reais"] = 1.0; orcamento.salvar(o)
++        segredos.gravar("claude", CHAVE, "sk-ant-")
++        self.assertEqual(adaptadores.chamar("claude", "api", "oi")["falha_etapa"], "custo")   # sem tarifa datada
++        adaptadores.ajustar("claude", tarifa=TARIFA)
++        self.assertEqual(adaptadores.chamar("claude", "api", "meu e-mail a@b.c")["falha_etapa"], "privacidade")
++        visto = {}
++
++        def post(url, cab, corpo, timeout):
++            visto.update(url=url, cab=cab, corpo=corpo)
++            return {"model": "claude-haiku-5-5", "content": [{"type": "text", "text": "pronto"}],
++                    "usage": {"input_tokens": 10, "output_tokens": 2}}
++        r = adaptadores.chamar("claude", "api", "oi", post=post)
++        self.assertTrue(r["ok"]); self.assertEqual(r["texto"], "pronto")
++        self.assertEqual(visto["cab"]["x-api-key"], CHAVE)
++        self.assertGreater(r["reais_estimado"], 0)
++        self.assertEqual(adaptadores.chamar("claude", "navegador", "oi")["falha_etapa"], "autorizacao")
++        o["teto_reais"] = 0.0000001; orcamento.salvar(o)
++        self.assertEqual(adaptadores.chamar("claude", "api", "oi", post=post)["falha_etapa"], "custo")
++
++    def test_cli_roda_em_pasta_vazia_sem_ferramentas(self):
++        o = orcamento.ler(); o["provedores"]["assinatura"] = True; orcamento.salvar(o)
++        visto = {}
++
++        class R:
++            returncode = 0
++            stdout = json.dumps({"result": "pronto", "usage": {"input_tokens": 5, "output_tokens": 1}})
++            stderr = ""
++
++        def rodar(argv, cwd, **k):
++            visto.update(argv=argv, cwd=cwd, vazio=not os.listdir(cwd))
++            return R()
++        r = adaptadores.chamar("claude", "cli", "oi", rodar=rodar)
++        self.assertTrue(r["ok"])
++        self.assertEqual(visto["argv"][visto["argv"].index("--tools") + 1], "")
++        self.assertIn("--no-session-persistence", visto["argv"])
++        self.assertEqual(visto["argv"][-1], "oi")
++        self.assertTrue(visto["vazio"])
++
++    def test_provedor_novo_so_api_https(self):
++        with self.assertRaises(ValueError):
++            adaptadores.adicionar_local("x1", "X", "openai", "http://inseguro/v1", None, "m")
++        with self.assertRaises(ValueError):
++            adaptadores.adicionar_local("claude", "dup", "openai", "https://a.b/v1", None, "m")
++        p = adaptadores.adicionar_local("mistral", "Mistral", "openai", "https://api.mistral.ai/v1/chat/completions",
++                                        "MISTRAL_API_KEY", "mistral-small-latest")
++        self.assertEqual(p["origem"], "local")
++        self.assertNotIn("cli", p)
++        self.assertIn("mistral", [x["id"] for x in adaptadores.estado()])
++
++
++class RedundanciaTests(Base):
++    def test_testa_por_capacidade_sem_guardar_resposta_e_com_independencia(self):
++        def get(url):
++            if url.endswith("/api/tags"):
++                return {"models": [{"name": "qwen3:4b"}, {"name": "nomic-embed-text"}]}
++            return {"models": []}
++
++        def post(url, corpo, timeout):
++            pedido = corpo["messages"][0]["content"]
++            texto = "pronto" if pedido.startswith("Responda apenas") else '{"ok": true}' if pedido.startswith("Responda somente") else "x"
++            return {"message": {"content": texto}, "prompt_eval_count": 3, "eval_count": 1}
++        run = testar_rotas.testar({"local"}, get=get, post=post)
++        self.assertEqual(run["rotas_que_passaram"]["conversa"], ["ollama-local/qwen3:4b"])
++        self.assertEqual(run["rotas_que_passaram"]["codigo"], [])
++        self.assertTrue(all("texto" not in r for r in run["resultados"]))
++        self.assertEqual(run["resultados"][0]["independencia"]["rede"], "nenhuma")
++        self.assertEqual(len(run["resultados"]), 3)   # embedding fica fora
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/corpo/fotografar.py b/redesign/corpo/fotografar.py
+index 61d4ac0b..2b837ebb 100644
+--- a/redesign/corpo/fotografar.py
++++ b/redesign/corpo/fotografar.py
+@@ -11,8 +11,9 @@ O que lê (GET e comandos de leitura, nunca POST, nunca reinício, nunca geraç
+ - disco, memória, carga e temperatura (`/proc`, `/sys`, `shutil.disk_usage`).
+ 
+ Para cada modelo ou rota, separa os campos que o inventário pede (§5): instalado, anunciado,
+-elegível, testado, em fila e pronto. "Testado" e "elegível" só vêm de medição própria
+-(lote 2) — aqui ficam `null` (não medido), nunca deduzidos do catálogo.
++elegível, testado, em fila e pronto. "Testado" e "pronto" só vêm do último teste funcional
++(`redesign/conexoes/testar_rotas.py`); sem teste ficam `null` (não medido), nunca deduzidos
++do catálogo. "Elegível" (política) continua `null` até haver regra declarada.
+ 
+ Grava `<dados>/corpo/fotografias.jsonl` (append) e devolve o dicionário.
+ """
+@@ -132,9 +133,29 @@ def modelos(get=None) -> dict:
+             if nome:
+                 linha(nome)["em_fila"].append(c.get("name"))
+     erros = {k: v for k, v in (("ollama", e1), ("catalogo", e2), ("combos", e3)) if v}
++    # "testado"/"pronto" só vêm do último teste funcional (redesign/conexoes/testar_rotas.py)
++    teste = ultimo_teste()
++    if teste:
++        por_rota: dict[str, list] = {}
++        for r in teste.get("resultados", []):
++            por_rota.setdefault(r["rota"], []).append(r)
++        for rota, rs in por_rota.items():
++            passou = sum(bool(r.get("passou")) for r in rs)
++            ln = linha(rota)
++            ln["testado"] = {"quando": teste.get("quando"), "run_id": teste.get("run_id"), "passou": f"{passou}/{len(rs)}"}
++            ln["pronto"] = passou == len(rs) and not teste.get("obsoleto")
+     return {"tabela": tab, "erros": erros}
+ 
+ 
++def ultimo_teste() -> dict | None:
++    pasta = eventos.dados() / "redundancia" / "testes"
++    arqs = sorted(pasta.glob("t-*.json")) if pasta.exists() else []
++    try:
++        return json.loads(arqs[-1].read_text(encoding="utf-8")) if arqs else None
++    except (OSError, ValueError):
++        return None
++
++
+ def fotografar(gravar: bool = True, **fontes) -> dict:
+     agora = time.time()
+     foto = {"schema_version": 1, "quando": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(agora)),
+diff --git a/redesign/nova_versao/nv.py b/redesign/nova_versao/nv.py
+index 7b7e78ba..c47da05d 100644
+--- a/redesign/nova_versao/nv.py
++++ b/redesign/nova_versao/nv.py
+@@ -89,7 +89,7 @@ def _selftest() -> int:
+              and len(pac["resultados"][0]["sha256"]) == 64 and pac["commit"]),
+             ("relação (10)->(11) segue", any(x["metodo"] == "relacao" and x["entrada"] == 11 for x in pac["resultados"])),
+             ("ausência diz 'não encontrado nesta busca'", vazio["estado"] == acervo.NAO_ENCONTRADO),
+-            ("orçamento padrão só local", orcamento.ler()["provedores"] == {"local": True, "gratuito": False, "pago": False}),
++            ("orçamento padrão só local", orcamento.ler()["provedores"] == {"local": True, "gratuito": False, "assinatura": False, "pago": False}),
+             ("ledger íntegro", eventos.verificar()),
+         ]
+     for nome, ok in casos:
+diff --git a/redesign/nova_versao/orcamento.py b/redesign/nova_versao/orcamento.py
+index b9f92510..9c4ce647 100644
+--- a/redesign/nova_versao/orcamento.py
++++ b/redesign/nova_versao/orcamento.py
+@@ -23,8 +23,8 @@ AQUI = Path(__file__).resolve().parent
+ sys.path.insert(0, str(AQUI))
+ import eventos  # noqa: E402
+ 
+-PROVEDORES = ("local", "gratuito", "pago")
+-PADRAO = {"schema_version": 1, "provedores": {"local": True, "gratuito": False, "pago": False},
++PROVEDORES = ("local", "gratuito", "assinatura", "pago")  # assinatura = CLI do plano do usuário (cota, não R$)
++PADRAO = {"schema_version": 1, "provedores": {"local": True, "gratuito": False, "assinatura": False, "pago": False},
+           "max_chamadas": 200, "max_tokens": 2_000_000, "timeout_s": 120, "teto_reais": 0.0}
+ LIMITES = {"max_chamadas": (0, 100000), "max_tokens": (0, 50_000_000), "timeout_s": (1, 3600), "teto_reais": (0.0, 10000.0)}
+ 
+diff --git a/redesign/nova_versao/spec/acceptance.json b/redesign/nova_versao/spec/acceptance.json
+index 21318674..ce27db3e 100644
+--- a/redesign/nova_versao/spec/acceptance.json
++++ b/redesign/nova_versao/spec/acceptance.json
+@@ -34,5 +34,23 @@
+       "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_gpu_em_fila_unica_e_teto_de_chamadas"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/nova_versao/spec/criterion-drift.md b/redesign/nova_versao/spec/criterion-drift.md
+index b7fcbdff..6fe009b2 100644
+--- a/redesign/nova_versao/spec/criterion-drift.md
++++ b/redesign/nova_versao/spec/criterion-drift.md
+@@ -4,3 +4,5 @@
+ - `escritas concorrentes no ledger preservam a cadeia` — **pass** — verified
+ - `a transição recusa salto fora da tabela e Remoção sem autorização` — **pass** — verified
+ - `o orçamento padrão é só local e pago sem teto não gasta` — **pass** — verified
++- `a GPU local tem fila única e o teto de chamadas da tarefa vale` — **pass** — verified
++- `cancelar impede novos itens e contexto mudado manda o resultado para revisão` — **pass** — verified
+diff --git a/redesign/nova_versao/spec/evidence.json b/redesign/nova_versao/spec/evidence.json
+index 265906e4..41142dd5 100644
+--- a/redesign/nova_versao/spec/evidence.json
++++ b/redesign/nova_versao/spec/evidence.json
+@@ -11,7 +11,7 @@
+     "returncode": 0,
+     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+     "stderr": "",
+-    "at": "2026-11-04T19:49:04+00:00"
++    "at": "2026-11-04T21:29:28+00:00"
+   },
+   {
+     "criterion": "escritas concorrentes no ledger preservam a cadeia",
+@@ -25,7 +25,7 @@
+     "returncode": 0,
+     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
+     "stderr": "",
+-    "at": "2026-11-04T19:49:04+00:00"
++    "at": "2026-11-04T21:29:28+00:00"
+   },
+   {
+     "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
+@@ -39,7 +39,7 @@
+     "returncode": 0,
+     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+     "stderr": "",
+-    "at": "2026-11-04T19:49:04+00:00"
++    "at": "2026-11-04T21:29:28+00:00"
+   },
+   {
+     "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
+@@ -53,6 +53,34 @@
+     "returncode": 0,
+     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+     "stderr": "",
+-    "at": "2026-11-04T19:49:05+00:00"
++    "at": "2026-11-04T21:29:28+00:00"
++  },
++  {
++    "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_gpu_em_fila_unica_e_teto_de_chamadas"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.08s\n",
++    "stderr": "",
++    "at": "2026-11-04T21:29:29+00:00"
++  },
++  {
++    "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
++    "status": "pass",
++    "classification": "verified",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
++    ],
++    "returncode": 0,
++    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
++    "stderr": "",
++    "at": "2026-11-04T21:29:29+00:00"
+   }
+ ]
+diff --git a/redesign/nova_versao/spec/spec.md b/redesign/nova_versao/spec/spec.md
+index 11df0fa7..04658536 100644
+--- a/redesign/nova_versao/spec/spec.md
++++ b/redesign/nova_versao/spec/spec.md
+@@ -23,7 +23,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
+ | C4 | Seleção de skills | `.agents/skills/INDICE.md`, `ferramentas/ferramentas.py` (quarentena), `qualidade_llm.py` | `redesign/alexandria/skills.py` (1) |
+ | C5 | Metacognição | `_classificar_rota` do gateway, `auditoria_turno.py`, `sombra_capacidade.py`, `detector_estado_sem_prova.py` | `redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py` (1) |
+ | C6 | Corpo operacional | `estado_para_eco.sh`, `perimetro.sh`, `coletar_evidencias.py` da auditoria, `config/portas-*.txt` | `redesign/corpo/` (1) |
+-| C7 | Redundância | combos OmniRoute, `conselho_remoto.py`, `config/capacidades_modelos.json`, `teste_portugues.py` | `redesign/corpo/testar_rotas.py` (2) |
++| C7 | Redundância e conexões | combos OmniRoute, Conselho em Rede (`relay_catalog.py`), `sanitizar.py`, `teste_portugues.py` | `redesign/conexoes/` (2): Claude e ChatGPT como exemplos nos três caminhos, cofre de chaves, teste por capacidade |
+ | C8 | Coordenação e papéis | `grafo/durabilidade.py` (WAL), `evidence_ledger`, `idempotency_key` do Conselho, semáforos das sombras | `redesign/nova_versao/tarefas.py` (2) |
+ | C9 | Avaliação | `medir_recuperacao.py`, `teste_portugues.py`, `seth_golden.py`, `seth_autodev.py`, `medir_contexto_efetivo.py` | registro por execução comum (3) |
+ 
+@@ -45,7 +45,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
+ 
+ **Invariantes (handoff do executor).** Canon, permissões, silos e autoridade humana vêm antes de descoberta e roteamento. Alexandria não é cânone paralelo. A recusa de vetor/GraphRAG como camada primária ((115)) permanece; a semântica é secundária ((327)). Skill é procedimento; livro é conteúdo. Catálogo, health check, inferência real e fila ativa são medições diferentes. Ausência na busca é "não encontrado nesta busca".
+ 
+-**Fases.** F0 spec e F1 sombra no lote 1 (esta proposta); C7 e C8 no lote 2; F2 avaliação no lote 3 (30 tarefas, split reservado, gabarito revisado pelo Humano, métricas por dimensão com `null` em denominador zero); F3 integração protegida no lote 4, cada item em proposta própria e só com ganho medido sem regressão crítica.
++**Fases.** F0 spec e F1 sombra no lote 1 (`nova-versao-piloto-20261104`, aplicado, (939)); C7 e C8 no lote 2 (`nova-versao-conexoes-20261104`); F2 avaliação no lote 3 (30 tarefas, split reservado, gabarito revisado pelo Humano, métricas por dimensão com `null` em denominador zero); F3 integração protegida no lote 4, cada item em proposta própria e só com ganho medido sem regressão crítica.
+ 
+ ## Critérios de aceite
+ 
+@@ -53,6 +53,8 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
+ - [ ] escritas concorrentes no ledger preservam a cadeia
+ - [ ] a transição recusa salto fora da tabela e Remoção sem autorização
+ - [ ] o orçamento padrão é só local e pago sem teto não gasta
++- [ ] a GPU local tem fila única e o teto de chamadas da tarefa vale
++- [ ] cancelar impede novos itens e contexto mudado manda o resultado para revisão
+ 
+ ## Desenho e alternativas
+ 
+@@ -60,7 +62,7 @@ Ver `brainstorm.md` e `decision.md`. Alternativas descartadas: um serviço por p
+ 
+ ## Implementação e testes
+ 
+-`eventos.py`, `orcamento.py` e `nv.py` (CLI e selftest). Testes em `tests/`; cada critério aponta o teste em `acceptance.json`.
++`eventos.py`, `orcamento.py` (categorias `local`, `gratuito`, `assinatura` e `pago`), `tarefas.py` (coordenação: `task_id`, versão de contexto, prazo, teto de chamadas, cancelamento, fila de GPU, escritor único) e `nv.py` (CLI e selftest). Testes em `tests/`; cada critério aponta o teste em `acceptance.json`.
+ 
+ ## Migração e reversão
+ 
+@@ -75,4 +77,5 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve
+ - `eventos.py`
+ - `orcamento.py`
+ - `nv.py`
++- `tarefas.py`
+ - `tests/`
+diff --git a/redesign/nova_versao/tarefas.py b/redesign/nova_versao/tarefas.py
+new file mode 100644
+index 00000000..53a94be7
+--- /dev/null
++++ b/redesign/nova_versao/tarefas.py
+@@ -0,0 +1,155 @@
++#!/usr/bin/env python3
++"""Coordenação da nova versão — tarefas com versão de contexto, orçamento, cancelamento e
++fila de GPU (Experimento GPT, conclusões (048), (054)–(055), (071); Alexandria §10).
++
++- Cada tarefa tem `task_id`, `contexto_versao` (commit do repo ao criar), prazo e teto
++  de chamadas. Estados: criada → em_execucao → concluida, com saídas falhou, cancelada e
++  em_revisao (quando o contexto mudou durante a execução: o resultado é marcado obsoleto e
++  volta à verificação, nunca é consolidado em silêncio).
++- Itens independentes podem rodar em paralelo (threads); itens marcados como `gpu`
++  passam por UMA trava de arquivo (duas tags na mesma GPU não são dois recursos).
++- Cancelar (`cancelar(task_id)`) impede que novos itens comecem; o que já rodou fica
++  registrado.
++- Escritor único: só a thread principal grava o arquivo da tarefa (troca atômica) e os
++  eventos no ledger; os trabalhadores só devolvem resultado. Chave idempotente por item.
++- Papéis (hidratador, recuperador, revisor, vigia...) são funções passadas aqui, não
++  serviços: nada de uma LLM por papel ((039)–(040)).
++
++Reaproveita o padrão de `redesign/grafo/durabilidade.py` (intenção antes do efeito,
++registro depois) e o `evidence_ledger` (via `eventos.py`).
++"""
++from __future__ import annotations
++
++import fcntl
++import hashlib
++import json
++import os
++import subprocess
++import sys
++import tempfile
++import time
++from concurrent.futures import ThreadPoolExecutor
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++sys.path.insert(0, str(AQUI))
++import eventos  # noqa: E402
++
++ESTADOS = ("criada", "em_execucao", "em_revisao", "concluida", "falhou", "cancelada", "aguardando_humano")
++
++
++def _pasta() -> Path:
++    return eventos.dados() / "coordenacao" / "tarefas"
++
++
++def _gpu_lock() -> Path:
++    return Path(os.environ.get("AGATA_NV_CACHE", Path.home() / ".cache" / "agata" / "nova-versao")) / "gpu.lock"
++
++
++def versao_contexto(repo: Path = REPO) -> str:
++    try:
++        return subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"], capture_output=True, text=True,
++                              timeout=10).stdout.strip() or "sem-git"
++    except (OSError, subprocess.TimeoutExpired):
++        return "sem-git"
++
++
++def _gravar(t: dict) -> None:
++    p = _pasta() / f"{t['task_id']}.json"
++    p.parent.mkdir(parents=True, exist_ok=True)
++    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".tmp-")
++    with os.fdopen(fd, "w", encoding="utf-8") as f:
++        json.dump(t, f, ensure_ascii=False, indent=1)
++    os.replace(tmp, p)
++
++
++def criar(tipo: str, itens: list[dict], *, max_chamadas: int, prazo_s: int, repo: Path = REPO) -> dict:
++    tid = "t-" + time.strftime("%Y%m%d-%H%M%S") + "-" + hashlib.sha256(os.urandom(8)).hexdigest()[:6]
++    t = {"task_id": tid, "tipo": tipo, "estado": "criada", "contexto_versao": versao_contexto(repo),
++         "criada_em": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "prazo_s": prazo_s, "max_chamadas": max_chamadas,
++         "itens": itens, "resultados": {}, "chamadas": 0, "obsoleto": False}
++    _gravar(t)
++    eventos.registrar("execution", "criada", f"tarefa:{tid}", componente="coordenacao", tipo=tipo, n_itens=len(itens))
++    return t
++
++
++def cancelar(task_id: str) -> None:
++    (_pasta() / f"{task_id}.cancelar").parent.mkdir(parents=True, exist_ok=True)
++    (_pasta() / f"{task_id}.cancelar").write_text(time.strftime("%Y-%m-%dT%H:%M:%S%z"), encoding="utf-8")
++
++
++def ler(task_id: str) -> dict | None:
++    try:
++        return json.loads((_pasta() / f"{task_id}.json").read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++
++
++def listar(n: int = 10) -> list[dict]:
++    arqs = sorted(_pasta().glob("t-*.json"))[-n:] if _pasta().exists() else []
++    out = []
++    for a in arqs:
++        t = json.loads(a.read_text(encoding="utf-8"))
++        out.append({k: t[k] for k in ("task_id", "tipo", "estado", "criada_em", "chamadas", "obsoleto")})
++    return out
++
++
++def executar(t: dict, funcao, *, paralelo: bool = True, max_workers: int = 3, repo: Path = REPO) -> dict:
++    """`funcao(item) -> dict`. Item com `"recurso": "gpu"` passa pela trava da GPU."""
++    t = dict(t, estado="em_execucao", inicio=time.strftime("%Y-%m-%dT%H:%M:%S%z"))
++    _gravar(t)
++    fim = time.monotonic() + t["prazo_s"]
++    flag = _pasta() / f"{t['task_id']}.cancelar"
++    lock = _gpu_lock()
++    lock.parent.mkdir(parents=True, exist_ok=True)
++    pendentes = [i for i in t["itens"] if i["chave"] not in t["resultados"]]
++
++    def rodar(item):
++        if flag.exists():
++            return item["chave"], {"ok": False, "falha_etapa": "cancelada", "erro": "tarefa cancelada antes de começar"}
++        if time.monotonic() > fim:
++            return item["chave"], {"ok": False, "falha_etapa": "prazo", "erro": "prazo da tarefa esgotado"}
++        try:
++            if item.get("recurso") == "gpu":
++                with open(lock, "w") as fh:
++                    fcntl.flock(fh, fcntl.LOCK_EX)
++                    try:
++                        return item["chave"], funcao(item)
++                    finally:
++                        fcntl.flock(fh, fcntl.LOCK_UN)
++            return item["chave"], funcao(item)
++        except Exception as e:  # noqa: BLE001 — falha de um item não derruba a tarefa
++            return item["chave"], {"ok": False, "falha_etapa": "execucao", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
++
++    # teto de chamadas: só entram itens até o teto; os demais ficam registrados como não rodados
++    cabem = max(t["max_chamadas"] - t["chamadas"], 0)
++    agora, fora = pendentes[:cabem], pendentes[cabem:]
++    remotos = [i for i in agora if i.get("recurso") != "gpu"]
++    locais = [i for i in agora if i.get("recurso") == "gpu"]
++    resultados = []
++    if paralelo and remotos:
++        with ThreadPoolExecutor(max_workers=max_workers) as ex:
++            futuros = [ex.submit(rodar, i) for i in remotos]
++            resultados += [rodar(i) for i in locais]   # GPU em série, na thread principal
++            resultados += [f.result() for f in futuros]
++    else:
++        resultados += [rodar(i) for i in remotos + locais]
++    for chave, r in resultados:                         # escritor único
++        t["resultados"][chave] = r
++        if r.get("falha_etapa") not in ("cancelada", "prazo", "orcamento", "privacidade", "configuracao", "custo", "autorizacao"):
++            t["chamadas"] += 1
++    for i in fora:
++        t["resultados"][i["chave"]] = {"ok": False, "falha_etapa": "orcamento", "erro": "teto de chamadas da tarefa"}
++    t["fim"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
++    if versao_contexto(repo) != t["contexto_versao"]:
++        t["obsoleto"] = True
++        t["estado"] = "em_revisao"
++    elif flag.exists():
++        t["estado"] = "cancelada"
++    else:
++        t["estado"] = "concluida"
++    _gravar(t)
++    eventos.registrar("execution", t["estado"], f"tarefa:{t['task_id']}", componente="coordenacao",
++                      chamadas=t["chamadas"], obsoleto=t["obsoleto"], chave=f"fim:{t['task_id']}")
++    return t
+diff --git a/redesign/nova_versao/tests/test_nova_versao.py b/redesign/nova_versao/tests/test_nova_versao.py
+index 800d2880..859817fe 100644
+--- a/redesign/nova_versao/tests/test_nova_versao.py
++++ b/redesign/nova_versao/tests/test_nova_versao.py
+@@ -49,9 +49,9 @@ class EventosTests(Base):
+ class OrcamentoTests(Base):
+     def test_padrao_so_local_e_pago_sem_teto_nao_gasta(self):
+         o = orcamento.ler()
+-        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "pago": False})
++        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
+         self.assertFalse(orcamento.permite("gratuito")[0])
+-        orcamento.salvar({**o, "provedores": {"local": True, "gratuito": False, "pago": True}})
++        orcamento.salvar({**o, "provedores": {"local": True, "gratuito": False, "assinatura": False, "pago": True}})
+         ok, motivo = orcamento.permite("pago")
+         self.assertFalse(ok)
+         self.assertIn("teto", motivo)
+diff --git a/redesign/nova_versao/tests/test_tarefas.py b/redesign/nova_versao/tests/test_tarefas.py
+new file mode 100644
+index 00000000..e602dd3f
+--- /dev/null
++++ b/redesign/nova_versao/tests/test_tarefas.py
+@@ -0,0 +1,56 @@
++import os
++import sys
++import tempfile
++import threading
++import time
++import unittest
++from pathlib import Path
++from unittest import mock
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import tarefas  # noqa: E402
++
++
++class TarefasTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        os.environ["AGATA_NV_DIR"] = self.tmp.name + "/d"
++        os.environ["AGATA_NV_CACHE"] = self.tmp.name + "/c"
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def test_gpu_em_fila_unica_e_teto_de_chamadas(self):
++        ativos, pico, trava = [0], [0], threading.Lock()
++
++        def f(item):
++            with trava:
++                ativos[0] += 1; pico[0] = max(pico[0], ativos[0])
++            time.sleep(0.02)
++            with trava:
++                ativos[0] -= 1
++            return {"ok": True}
++        itens = [{"chave": f"g{i}", "recurso": "gpu"} for i in range(4)]
++        t = tarefas.criar("x", itens, max_chamadas=3, prazo_s=60)
++        t = tarefas.executar(t, f, paralelo=True)
++        self.assertEqual(pico[0], 1)
++        self.assertEqual(t["chamadas"], 3)
++        self.assertEqual(t["resultados"]["g3"]["falha_etapa"], "orcamento")
++        self.assertEqual(t["estado"], "concluida")
++
++    def test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao(self):
++        t = tarefas.criar("x", [{"chave": "a"}, {"chave": "b"}], max_chamadas=10, prazo_s=60)
++        tarefas.cancelar(t["task_id"])
++        r = tarefas.executar(t, lambda i: {"ok": True}, paralelo=False)
++        self.assertEqual(r["estado"], "cancelada")
++        self.assertTrue(all(v["falha_etapa"] == "cancelada" for v in r["resultados"].values()))
++        t2 = tarefas.criar("y", [{"chave": "a"}], max_chamadas=10, prazo_s=60)
++        with mock.patch.object(tarefas, "versao_contexto", return_value="outro-commit"):
++            r2 = tarefas.executar(t2, lambda i: {"ok": True})
++        self.assertTrue(r2["obsoleto"])
++        self.assertEqual(r2["estado"], "em_revisao")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+index 07470670..10ddd1d0 100644
+--- a/redesign/painel_operacional/nova_versao.js
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -93,6 +93,7 @@
+     if (o) {
+       byId("nv-orc-local").checked = !!o.provedores.local;
+       byId("nv-orc-gratuito").checked = !!o.provedores.gratuito;
++      byId("nv-orc-assinatura").checked = !!o.provedores.assinatura;
+       byId("nv-orc-pago").checked = !!o.provedores.pago;
+       byId("nv-orc-chamadas").value = o.max_chamadas; byId("nv-orc-tokens").value = o.max_tokens;
+       byId("nv-orc-timeout").value = o.timeout_s; byId("nv-orc-reais").value = o.teto_reais;
+@@ -103,10 +104,35 @@
+     ev.slice().reverse().forEach((e) => li("nv-eventos", e.timestamp + " · " + e.componente + " · " + e.kind + " · " + e.status + " · " + e.source));
+   }
+ 
+-  const telas = {"nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento};
++
++  function conexoes() {
++    limpar("nv-con-lista", "nv-red-lista");
++    const cs = (estado && estado.conexoes) || [];
++    byId("nv-con-titulo").textContent = cs.length + " provedores · gasto estimado R$ " + ((estado && estado.gasto_reais) || 0).toFixed(4);
++    const sel = byId("nv-api-provedor"); const atual = sel.value; sel.replaceChildren();
++    cs.forEach((c) => {
++      const m = c.modos || {}; const partes = [];
++      if (m.navegador) partes.push("navegador: adaptador " + (m.navegador.adaptador || "não medido") + ", envio só com sua aprovação");
++      if (m.cli) partes.push("programa: " + (m.cli.instalado ? "instalado" : "não instalado") + ", login " + m.cli.login + (m.cli.modelo ? ", modelo " + m.cli.modelo : ""));
++      if (m.api) {
++        const ch = m.api.chave || {};
++        partes.push("API: " + (m.api.disponivel ? "pronta" : "falta " + m.api.falta.join(", ")) + " · chave " + (ch.no_cofre ? "no cofre desde " + ch.desde : ch.no_ambiente ? "no ambiente" : "ausente") + (m.api.modelo ? " · modelo " + m.api.modelo : ""));
++        const o = document.createElement("option"); o.value = c.id; o.textContent = c.nome; sel.append(o);
++      }
++      li("nv-con-lista", c.nome + (c.origem === "local" ? " (adicionado por você)" : "") + " — " + partes.join(" | "));
++    });
++    if (atual) sel.value = atual;
++    const tr = (estado && estado.teste_rotas) || {};
++    const j = tr.job || {}; const u = tr.ultimo;
++    byId("nv-red-titulo").textContent = j.estado === "rodando" ? "Testando…" : u ? "Último teste " + u.run_id + " · " + u.estado + (u.obsoleto ? " (contexto mudou: revalidar)" : "") : "Sem teste";
++    if (j.estado === "rodando") setTimeout(() => window.carregarNovaVersao("nv-conexoes"), 5000);
++    if (u) Object.entries(u.rotas_que_passaram || {}).forEach(([cap, rs]) => li("nv-red-lista", cap + ": " + (rs.length ? rs.join(", ") : "nenhuma rota passou")));
++    (tr.resultados || []).filter((r) => !r.passou).slice(0, 12).forEach((r) => li("nv-red-lista", "não passou · " + r.rota + " · " + r.capacidade + " · " + (r.falha_etapa || "resposta fora da prova") + (r.erro ? " — " + r.erro : "")));
++  }
++  const telas = {"nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento};
+   window.carregarNovaVersao = async function (nome) {
+     await ler();
+-    if (!estado) { const t = {"nv-alexandria": "nv-alex-nota", "nv-metacognicao": "nv-sombra-titulo", "nv-corpo": "nv-corpo-titulo", "nv-orcamento": "nv-orc-nota"}[nome]; if (t && byId(t)) byId(t).textContent = "Nova versão indisponível no servidor."; return; }
++    if (!estado) { const t = {"nv-alexandria": "nv-alex-nota", "nv-metacognicao": "nv-sombra-titulo", "nv-corpo": "nv-corpo-titulo", "nv-orcamento": "nv-orc-nota", "nv-conexoes": "nv-con-titulo"}[nome]; if (t && byId(t)) byId(t).textContent = "Nova versão indisponível no servidor."; return; }
+     (telas[nome] || (() => {}))();
+   };
+ 
+@@ -146,10 +172,45 @@
+   });
+   confirmar(byId("nv-orc-salvar"), "Salvar orçamento", async () => {
+     const n = (id) => Number(byId(id).value);
+-    const orc = {provedores: {local: byId("nv-orc-local").checked, gratuito: byId("nv-orc-gratuito").checked, pago: byId("nv-orc-pago").checked},
++    const orc = {provedores: {local: byId("nv-orc-local").checked, gratuito: byId("nv-orc-gratuito").checked, assinatura: byId("nv-orc-assinatura").checked, pago: byId("nv-orc-pago").checked},
+       max_chamadas: n("nv-orc-chamadas"), max_tokens: n("nv-orc-tokens"), timeout_s: n("nv-orc-timeout"), teto_reais: n("nv-orc-reais")};
+     try { const r = await executar("salvar_orcamento", {orcamento: orc}); byId("nv-orc-nota").textContent = r.resultado.mudou ? "Salvo e registrado no ledger." : "Nada mudou."; }
+     catch (_) { byId("nv-orc-nota").textContent = "Recusado: valor fora do limite."; }
+     window.carregarNovaVersao("nv-orcamento");
+   });
++  const val = (id) => byId(id).value.trim();
++  const nota = (id, t) => { byId(id).textContent = t; };
++  confirmar(byId("nv-api-ajustar"), "Salvar modelo e tarifa", async () => {
++    const pid = val("nv-api-provedor"); if (!pid) return;
++    const corpo = {provedor: pid, api_modelo: val("nv-api-modelo") || null, cli_modelo: val("nv-cli-modelo") || null};
++    if (val("nv-tar-entrada") || val("nv-tar-saida")) corpo.tarifa = {entrada_usd_mtok: Number(val("nv-tar-entrada")), saida_usd_mtok: Number(val("nv-tar-saida")), cambio_brl: Number(val("nv-tar-cambio")), fonte: val("nv-tar-fonte"), data: val("nv-tar-data")};
++    try { await executar("ajustar_conexao", corpo); nota("nv-api-nota", "Ajuste salvo e registrado no ledger."); }
++    catch (_) { nota("nv-api-nota", "Recusado: confira modelo, tarifa (com fonte e data) e câmbio."); }
++    window.carregarNovaVersao("nv-conexoes");
++  });
++  confirmar(byId("nv-api-gravar"), "Gravar chave", async () => {
++    const campo = byId("nv-api-chave"); const chave = campo.value; campo.value = "";
++    const pid = val("nv-api-provedor"); if (!pid || !chave) return;
++    try { await executar("gravar_chave", {provedor: pid, chave}); nota("nv-api-nota", "Chave gravada no cofre. Ela não volta para a tela."); }
++    catch (_) { nota("nv-api-nota", "Recusada: formato ou prefixo não confere com o provedor."); }
++    window.carregarNovaVersao("nv-conexoes");
++  });
++  confirmar(byId("nv-api-remover"), "Remover chave", async () => {
++    const pid = val("nv-api-provedor"); if (!pid) return;
++    try { const r = await executar("remover_chave", {provedor: pid}); nota("nv-api-nota", r.resultado.removida ? "Chave removida do cofre." : "Não havia chave no cofre."); }
++    catch (_) { nota("nv-api-nota", "Não foi possível remover."); }
++    window.carregarNovaVersao("nv-conexoes");
++  });
++  confirmar(byId("nv-add-salvar"), "Adicionar provedor", async () => {
++    try { await executar("adicionar_provedor", {provedor: val("nv-add-id"), nome: val("nv-add-nome"), formato: val("nv-add-formato"), url: val("nv-add-url"), env: val("nv-add-env") || null, api_modelo: val("nv-add-modelo") || null}); nota("nv-add-nota", "Provedor adicionado. Agora grave a chave e a tarifa acima."); }
++    catch (_) { nota("nv-add-nota", "Recusado: id, formato ou URL (só https) inválidos, ou id repetido."); }
++    window.carregarNovaVersao("nv-conexoes");
++  });
++  confirmar(byId("nv-red-testar"), "Testar rotas permitidas pelo orçamento", async () => {
++    try { await executar("testar_rotas", {}); nota("nv-red-nota", "Teste iniciado."); } catch (_) { nota("nv-red-nota", "Já há um teste rodando."); }
++    window.carregarNovaVersao("nv-conexoes");
++  });
++  confirmar(byId("nv-red-cancelar"), "Cancelar teste", async () => {
++    try { await executar("cancelar_teste", {}); nota("nv-red-nota", "Cancelamento pedido: nenhum item novo começa."); } catch (_) { nota("nv-red-nota", "Nada para cancelar."); }
++  });
+ })();
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+index 0ce01708..f7271d27 100644
+--- a/redesign/painel_operacional/nova_versao_painel.py
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -5,25 +5,51 @@ Leitura em `estado()`; execução por lista fechada em `executar()`, uma por vez
+ A consulta vem do Humano pelo painel, limitada a 300 caracteres, e só vira pacote de
+ evidência (nunca comando). O orçamento só aceita os campos e limites de
+ `redesign/nova_versao/orcamento.py`; cada mudança vira evento no ledger.
+-Nada aqui escreve no repositório: os dados ficam em ~/.local/share/agata/nova-versao.
++Nada aqui escreve no repositório: os dados ficam em ~/.local/share/agata/nova-versao; chaves de API, no
++cofre só de escrita de `redesign/conexoes/segredos.py` (~/.config/agata/conexoes/) — a resposta nunca traz a chave.
+ """
+ from __future__ import annotations
+ 
+ import sys
+ import threading
++import time
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-for _p in ("nova_versao", "alexandria", "corpo", "metacognicao"):
++for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes"):
+     sys.path.insert(0, str(ROOT / "redesign" / _p))
+ 
+-ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar")
++ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
++         "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste")
++_TESTE: dict = {"estado": "ocioso"}
++_TESTE_LOCK = threading.Lock()
+ _LOCK = threading.Lock()
+ 
+ 
+ def estado() -> dict:
+     import nv  # noqa: E402
+-    return nv.estado()
++    import adaptadores  # noqa: E402
++    import testar_rotas  # noqa: E402
++    import tarefas  # noqa: E402
++    with _TESTE_LOCK:
++        job = dict(_TESTE)
++    ult = testar_rotas.ultimo()
++    return {**nv.estado(), "conexoes": adaptadores.estado(), "gasto_reais": adaptadores.gasto_total_reais(),
++            "teste_rotas": {"job": job, "ultimo": {k: ult[k] for k in ("run_id", "quando", "estado", "chamadas",
++                                                                       "rotas_que_passaram", "obsoleto")} if ult else None,
++                            "resultados": (ult or {}).get("resultados", [])[:60]},
++            "tarefas": tarefas.listar(5)}
++
++
++def _rodar_teste(categorias):
++    import testar_rotas  # noqa: E402
++    try:
++        r = testar_rotas.testar(categorias)
++        novo = {"estado": r["estado"], "run_id": r["run_id"]}
++    except Exception as e:  # noqa: BLE001
++        novo = {"estado": "falhou", "detalhe": f"{e.__class__.__name__}: {str(e)[:160]}"}
++    with _TESTE_LOCK:
++        _TESTE.clear(); _TESTE.update(novo, fim=time.time())
+ 
+ 
+ def executar(acao, dados: dict | None = None) -> dict:
+@@ -34,6 +60,22 @@ def executar(acao, dados: dict | None = None) -> dict:
+     if acao in ("consultar", "skills", "classificar"):
+         if not isinstance(texto, str) or not texto.strip() or len(texto) > 300:
+             raise ValueError("consulta vazia ou longa demais")
++    if acao == "testar_rotas":
++        cats = dados.get("categorias")
++        if cats is not None and (not isinstance(cats, list) or not set(cats) <= {"local", "gratuito", "assinatura", "pago"}):
++            raise ValueError("categoria fora da lista")
++        with _TESTE_LOCK:
++            if _TESTE.get("estado") == "rodando":
++                raise RuntimeError("ocupado")
++            _TESTE.clear(); _TESTE.update(estado="rodando", inicio=time.time())
++        threading.Thread(target=_rodar_teste, args=(set(cats) if cats else None,), daemon=True).start()
++        return {"acao": acao, "resultado": {"estado": "rodando"}}
++    if acao == "cancelar_teste":
++        import tarefas  # noqa: E402
++        rodando = [t for t in tarefas.listar(20) if t["estado"] == "em_execucao"]
++        for t in rodando:
++            tarefas.cancelar(t["task_id"])
++        return {"acao": acao, "resultado": {"canceladas": [t["task_id"] for t in rodando]}}
+     if not _LOCK.acquire(blocking=False):
+         raise RuntimeError("ocupado")
+     try:
+@@ -58,6 +100,26 @@ def executar(acao, dados: dict | None = None) -> dict:
+             import saude  # noqa: E402
+             f = fotografar.fotografar()
+             return {"acao": acao, "resultado": {"quando": f["quando"], **saude.classificar(f)}}
++        if acao in ("gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor"):
++            import adaptadores  # noqa: E402
++            import segredos  # noqa: E402
++            pid = dados.get("provedor")
++            if acao == "gravar_chave":
++                p = adaptadores.provedor(pid)
++                if not p.get("api"):
++                    raise ValueError("provedor sem modo API")
++                segredos.gravar(pid, dados.get("chave"), (p.get("api") or {}).get("prefixo_chave"))
++                return {"acao": acao, "resultado": {"provedor": pid, "gravada": True}}   # a chave nunca volta
++            if acao == "remover_chave":
++                adaptadores.provedor(pid)
++                return {"acao": acao, "resultado": {"provedor": pid, **segredos.remover(pid)}}
++            if acao == "ajustar_conexao":
++                adaptadores.ajustar(pid, api_modelo=dados.get("api_modelo"), cli_modelo=dados.get("cli_modelo"),
++                                    tarifa=dados.get("tarifa"))
++                return {"acao": acao, "resultado": {"provedor": pid, "ajustado": True}}
++            adaptadores.adicionar_local(pid, dados.get("nome"), dados.get("formato"), dados.get("url"),
++                                        dados.get("env"), dados.get("api_modelo"))
++            return {"acao": acao, "resultado": {"provedor": pid, "adicionado": True}}
+         import orcamento  # noqa: E402
+         return {"acao": acao, "resultado": orcamento.salvar(dados.get("orcamento") or {})}
+     finally:
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 88c83811..d106fc8d 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -39,6 +39,7 @@
+       <button data-page="nv-alexandria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16 7l3.5-1 3 13-3.5 1z"/></svg>Alexandria</button>
+       <button data-page="nv-metacognicao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M9 10h.01M15 10h.01M9 15c1.5 1.2 4.5 1.2 6 0"/></svg>Metacognição</button>
+       <button data-page="nv-corpo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>Corpo operacional</button>
++      <button data-page="nv-conexoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg>Conexões de modelos</button>
+       <button data-page="nv-orcamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.5"/></svg>Orçamento e eventos</button>
+     </div></div>
+   </nav></div>
+@@ -236,7 +237,8 @@
+ <section class="page" id="page-nv-alexandria" data-title="Alexandria"><div class="section-heading"><div><div class="eyebrow">Nova versão · piloto em sombra</div><h1>Alexandria</h1><p>Acervo do repositório com origem, commit e hash. A busca é por texto primeiro; a busca por sentido é secundária e sempre rotulada. Sem resultado quer dizer não encontrado nesta busca.</p></div></div><div class="kpis" id="nv-alex-kpis"></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Acervo</div><h2 class="panel-title" id="nv-alex-titulo">Índice</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px"><button type="button" class="text-link" style="margin-right:14px" id="nv-iniciar">Criar pastas e indexar</button><button type="button" class="text-link" style="margin-right:14px" id="nv-indexar">Reindexar a partir do HEAD</button></div><p class="note" id="nv-alex-nota" style="margin:8px 0 0">Sem leitura.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Consulta</div><h2 class="panel-title" id="nv-consulta-titulo">Pacote de evidência</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><input id="nv-consulta" type="search" maxlength="300" placeholder="o que procurar no acervo" aria-label="Consulta ao acervo" style="flex:1;min-width:240px"><select id="nv-semantica" aria-label="Busca por sentido"><option value="auto">sentido: só se o texto achar pouco</option><option value="nunca">sentido: nunca</option><option value="sempre">sentido: sempre</option></select><button type="button" class="text-link" style="margin-right:14px" id="nv-consultar">Consultar</button><button type="button" class="text-link" style="margin-right:14px" id="nv-skills">Sugerir skills</button></div><ul id="nv-resultados" style="margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
+ <section class="page" id="page-nv-metacognicao" data-title="Metacognição"><div class="section-heading"><div><div class="eyebrow">Nova versão · antes e depois do turno</div><h1>Metacognição</h1><p>Classificação determinística do pedido: tipo, atualidade, privacidade, risco e limite combinado. Em sombra no gateway, só com SETH_SOMBRA_NOVA_VERSAO=1. O registro guarda o hash do pedido, nunca o texto.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Sombra do gateway</div><h2 class="panel-title" id="nv-sombra-titulo">Registros</h2></div></div><ul id="nv-sombra" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Testar</div><h2 class="panel-title" id="nv-classificar-titulo">Classificar um pedido</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><input id="nv-pedido" type="text" maxlength="300" placeholder="um pedido de exemplo" aria-label="Pedido para classificar" style="flex:1;min-width:240px"><button type="button" class="text-link" style="margin-right:14px" id="nv-classificar">Classificar</button></div><ul id="nv-classificacao" style="margin:10px 0 0;padding-left:18px"></ul></article></section>
+ <section class="page" id="page-nv-corpo" data-title="Corpo operacional"><div class="section-heading"><div><div class="eyebrow">Nova versão · estado da Máquina</div><h1>Corpo operacional</h1><p>Fotografia datada, só leitura: serviços, portas, recursos e modelos. Saúde em cinco estados. Dado ausente aparece como não medido; serviço sob demanda inativo não é falha.</p></div></div><div class="kpis" id="nv-corpo-kpis"></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fotografia</div><h2 class="panel-title" id="nv-corpo-titulo">Serviços e recursos</h2></div></div><button type="button" class="text-link" style="margin-right:14px" id="nv-fotografar">Fotografar agora</button><ul id="nv-corpo-lista" style="margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
+-<section class="page" id="page-nv-orcamento" data-title="Orçamento e eventos"><div class="section-heading"><div><div class="eyebrow">Nova versão · decisão do Humano</div><h1>Orçamento e eventos</h1><p>Quais provedores a nova versão pode usar e com qual teto. O padrão é só local. Cada mudança vira evento no ledger encadeado. Nesta fase nenhuma inferência é feita.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orçamento</div><h2 class="panel-title" id="nv-orc-titulo">Provedores e tetos</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center"><label style="margin-right:14px"><input type="checkbox" id="nv-orc-local"> local</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-gratuito"> gratuito</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-pago"> pago</label><label style="margin-right:14px">chamadas <input type="number" id="nv-orc-chamadas" min="0" max="100000" style="width:90px"></label><label style="margin-right:14px">tokens <input type="number" id="nv-orc-tokens" min="0" max="50000000" style="width:110px"></label><label style="margin-right:14px">tempo (s) <input type="number" id="nv-orc-timeout" min="1" max="3600" style="width:70px"></label><label style="margin-right:14px">teto R$ <input type="number" id="nv-orc-reais" min="0" max="10000" step="0.01" style="width:90px"></label><button type="button" class="text-link" style="margin-right:14px" id="nv-orc-salvar">Salvar orçamento</button></div><p class="note" id="nv-orc-nota" style="margin:8px 0 0">Pago só gasta com teto em R$ maior que zero.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ledger</div><h2 class="panel-title" id="nv-eventos-titulo">Últimos eventos</h2></div></div><ul id="nv-eventos" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
++<section class="page" id="page-nv-conexoes" data-title="Conexões de modelos"><div class="section-heading"><div><div class="eyebrow">Nova versão · como cada modelo se liga</div><h1>Conexões de modelos</h1><p>Cada provedor tem até três caminhos: navegador (Conselho em Rede, você aprova cada envio), programa da assinatura e API com chave. Claude e ChatGPT são os exemplos; outros entram pelo mesmo formato. A chave vai para um cofre só de escrita e nunca volta para a tela.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Provedores</div><h2 class="panel-title" id="nv-con-titulo">Estado por caminho</h2></div></div><ul id="nv-con-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">API com chave</div><h2 class="panel-title" id="nv-api-titulo">Configurar um provedor</h2></div></div><div><select id="nv-api-provedor" aria-label="Provedor a configurar" style="margin:0 10px 6px 0"></select><input id="nv-api-modelo" type="text" placeholder="modelo da API" aria-label="modelo da API"  style="margin:0 10px 6px 0;min-width:250px"><input id="nv-cli-modelo" type="text" placeholder="modelo do programa (opcional)" aria-label="modelo do programa (opcional)"  style="margin:0 10px 6px 0;min-width:250px"></div><div><input id="nv-tar-entrada" type="text" placeholder="US$ por milhão de tokens de entrada" aria-label="US$ por milhão de tokens de entrada" inputmode="decimal" style="margin:0 10px 6px 0;min-width:250px"><input id="nv-tar-saida" type="text" placeholder="US$ por milhão de tokens de saída" aria-label="US$ por milhão de tokens de saída" inputmode="decimal" style="margin:0 10px 6px 0;min-width:250px"><input id="nv-tar-cambio" type="text" placeholder="câmbio R$ por US$" aria-label="câmbio R$ por US$" inputmode="decimal" style="margin:0 10px 6px 0;min-width:250px"><input id="nv-tar-fonte" type="text" placeholder="fonte da tarifa (página oficial)" aria-label="fonte da tarifa (página oficial)"  style="margin:0 10px 6px 0;min-width:250px"><input id="nv-tar-data" type="text" placeholder="data da tarifa AAAA-MM-DD" aria-label="data da tarifa AAAA-MM-DD"  style="margin:0 10px 6px 0;min-width:250px"></div><button type="button" class="text-link" style="margin-right:14px" id="nv-api-ajustar">Salvar modelo e tarifa</button><div style="margin-top:10px"><input id="nv-api-chave" type="password" autocomplete="new-password" spellcheck="false" placeholder="cole a chave de API aqui" aria-label="Chave de API" style="margin:0 10px 6px 0;min-width:280px"><button type="button" class="text-link" style="margin-right:14px" id="nv-api-gravar">Gravar chave</button><button type="button" class="text-link" style="margin-right:14px" id="nv-api-remover">Remover chave</button></div><p class="note" id="nv-api-nota" style="margin:8px 0 0">A chave fica em ~/.config/agata/conexoes/, com permissão só para o seu usuário. O painel mostra apenas se ela existe.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Outro provedor</div><h2 class="panel-title" id="nv-add-titulo">Adicionar pelo mesmo formato</h2></div></div><div><input id="nv-add-id" type="text" placeholder="id (ex.: mistral)" aria-label="id (ex.: mistral)"  style="margin:0 10px 6px 0;min-width:250px"><input id="nv-add-nome" type="text" placeholder="nome" aria-label="nome"  style="margin:0 10px 6px 0;min-width:250px"><select id="nv-add-formato" aria-label="Formato da API" style="margin:0 10px 6px 0"><option value="openai">formato OpenAI (compatível)</option><option value="anthropic">formato Anthropic</option></select><input id="nv-add-url" type="text" placeholder="URL https do endpoint de chat" aria-label="URL https do endpoint de chat"  style="margin:0 10px 6px 0;min-width:250px"><input id="nv-add-env" type="text" placeholder="variável de ambiente (opcional)" aria-label="variável de ambiente (opcional)"  style="margin:0 10px 6px 0;min-width:250px"><input id="nv-add-modelo" type="text" placeholder="modelo" aria-label="modelo"  style="margin:0 10px 6px 0;min-width:250px"></div><button type="button" class="text-link" style="margin-right:14px" id="nv-add-salvar">Adicionar provedor</button><p class="note" id="nv-add-nota" style="margin:8px 0 0">Só API com https. Programa de linha de comando só entra pelo catálogo versionado (redesign/conexoes/provedores.json).</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Redundância por capacidade</div><h2 class="panel-title" id="nv-red-titulo">Testar rotas</h2></div></div><button type="button" class="text-link" style="margin-right:14px" id="nv-red-testar">Testar rotas permitidas pelo orçamento</button><button type="button" class="text-link" style="margin-right:14px" id="nv-red-cancelar">Cancelar teste</button><p class="note" id="nv-red-nota" style="margin:8px 0 0">Três provas fixas (conversa, formato JSON, código), sem nenhum texto seu. Consome inferência das categorias ligadas no orçamento.</p><ul id="nv-red-lista" style="margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px"></ul></article></section>
++<section class="page" id="page-nv-orcamento" data-title="Orçamento e eventos"><div class="section-heading"><div><div class="eyebrow">Nova versão · decisão do Humano</div><h1>Orçamento e eventos</h1><p>Quais provedores a nova versão pode usar e com qual teto. O padrão é só local. Cada mudança vira evento no ledger encadeado. Nesta fase nenhuma inferência é feita.</p></div></div><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orçamento</div><h2 class="panel-title" id="nv-orc-titulo">Provedores e tetos</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center"><label style="margin-right:14px"><input type="checkbox" id="nv-orc-local"> local</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-gratuito"> gratuito</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-assinatura"> assinatura (programa)</label><label style="margin-right:14px"><input type="checkbox" id="nv-orc-pago"> pago</label><label style="margin-right:14px">chamadas <input type="number" id="nv-orc-chamadas" min="0" max="100000" style="width:90px"></label><label style="margin-right:14px">tokens <input type="number" id="nv-orc-tokens" min="0" max="50000000" style="width:110px"></label><label style="margin-right:14px">tempo (s) <input type="number" id="nv-orc-timeout" min="1" max="3600" style="width:70px"></label><label style="margin-right:14px">teto R$ <input type="number" id="nv-orc-reais" min="0" max="10000" step="0.01" style="width:90px"></label><button type="button" class="text-link" style="margin-right:14px" id="nv-orc-salvar">Salvar orçamento</button></div><p class="note" id="nv-orc-nota" style="margin:8px 0 0">Pago só gasta com teto em R$ maior que zero.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ledger</div><h2 class="panel-title" id="nv-eventos-titulo">Últimos eventos</h2></div></div><ul id="nv-eventos" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px"></ul></article></section>
+ </main>
+ </div>
+ <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index dccf1a1e..8b3fb42a 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -98,5 +98,14 @@
+       "redesign/painel_operacional/test_nova_versao_painel.py"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a chave gravada pelo painel não volta na resposta nem no estado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_chave_gravada_nao_volta_na_resposta_nem_no_estado"
++    ],
++    "cwd": null
+   }
+ ]
+\ No newline at end of file
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 59f42f84..f521d304 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -14,8 +14,8 @@
+ - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
+ - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+ - `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha`, `varias`, `rastreio` ou `agregacao`, de lista fechada, com `raciocinio` `desligado` ou `ligado`), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+-- `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`).
+-- A navegação lateral agrupa as 21 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
++- `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`, `gravar_chave`, `remover_chave`, `ajustar_conexao`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`). A chave de API digitada em Conexões vai para o cofre de `redesign/conexoes/segredos.py` e nenhuma resposta do painel a devolve; o campo é `password` e é limpo ao enviar.
++- A navegação lateral agrupa as 22 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
+ - A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+@@ -32,6 +32,7 @@
+ - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
+ - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
+ - [ ] a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento
++- [ ] a chave gravada pelo painel não volta na resposta nem no estado
+ 
+ ## Desenho e alternativas
+ 
+diff --git a/redesign/painel_operacional/test_menu_painel.py b/redesign/painel_operacional/test_menu_painel.py
+index a1e66d86..2999b0b7 100644
+--- a/redesign/painel_operacional/test_menu_painel.py
++++ b/redesign/painel_operacional/test_menu_painel.py
+@@ -5,11 +5,11 @@ from pathlib import Path
+ HERE = Path(__file__).resolve().parent
+ PAGINAS = {"panorama", "conselho", "operacao", "visao", "integracoes", "modelos", "manutencao", "plano",
+            "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades",
+-           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}
++           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento"}
+ GRUPOS = {"sistema": {"operacao", "visao", "integracoes", "modelos", "manutencao", "plano"},
+           "memoria": {"memoria", "grafo", "documentacao", "conversa"},
+           "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"},
+-          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}}
++          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento"}}
+ 
+ 
+ class Menu(HTMLParser):
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+index 48a73332..311099b0 100644
+--- a/redesign/painel_operacional/test_nova_versao_painel.py
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -12,6 +12,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         self.tmp = tempfile.TemporaryDirectory()
+         os.environ["AGATA_NV_DIR"] = self.tmp.name + "/dados"
+         os.environ["AGATA_NV_CACHE"] = self.tmp.name + "/cache"
++        os.environ["AGATA_CONEXOES_DIR"] = self.tmp.name + "/cofre"
+         import nova_versao_painel
+         self.m = nova_versao_painel
+ 
+@@ -44,7 +45,20 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         e = self.m.estado()
+         self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")
+         self.assertIsNone(e["alexandria"]["indice"])
+-        self.assertEqual(e["orcamento"]["provedores"], {"local": True, "gratuito": False, "pago": False})
++        self.assertEqual(e["orcamento"]["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
++
++    def test_chave_gravada_nao_volta_na_resposta_nem_no_estado(self):
++        chave = "sk-ant-" + "q" * 48
++        r = self.m.executar("gravar_chave", {"provedor": "claude", "chave": chave})
++        bruto = json.dumps([r, self.m.estado()], ensure_ascii=False)
++        self.assertNotIn("q" * 48, bruto)
++        self.assertIn('"no_cofre": true', bruto)
++        with self.assertRaises(ValueError):
++            self.m.executar("gravar_chave", {"provedor": "claude", "chave": "curta"})
++        with self.assertRaises(ValueError):
++            self.m.executar("testar_rotas", {"categorias": ["tudo"]})
++        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
++        self.assertIn('id="nv-api-chave" type="password" autocomplete="new-password"', html)
+ 
+     def test_js_externo_e_sem_innerhtml(self):
+         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
