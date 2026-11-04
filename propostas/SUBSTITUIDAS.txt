@@ -4,3 +4,4 @@ painel-dinamico-leitura-wiki-20261023 | painel-correcoes-20261026, painel-formac
 retrato-original-20261026 | retrato-original-r2-20261026 | falha de aplicação por conflito com prototipo-csp-20261026 (27/10/2026)
 agata-robustez-codeql-medicoes-20261103 | agata-robustez-codeql-medicoes-v2-20261103 | CodeQL py/regex-injection no selftest do medidor de contexto; refeita sem regex dinâmico (PR 842 fechado sem merge)
 agata-voz-do-sistema-20261103 | agata-voz-do-sistema-v2-20261103 | os diffs da voz e da robustez conflitavam no contexto do INDICE.md de skills; a robustez foi aplicada primeiro e a voz refeita em cima
+agata-ro-proxy-guarda-20261103 | agata-ro-proxy-guarda-v2-20261103 | o diff conflitava com o da voz no contexto do sdd.yml; a voz foi aplicada primeiro (PR 849) e este refeito em cima
