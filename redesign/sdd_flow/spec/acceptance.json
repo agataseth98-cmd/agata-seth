@@ -79,5 +79,41 @@
       "redesign/sdd_flow/tests/test_runner.py::test_verify_cai_para_python_m_pytest_quando_o_binario_nao_esta_no_path"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o ciclo de projeto roda sem escrever no projeto e registra no ledger",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_project.py::test_ciclo_roda_sem_escrever_no_projeto_e_registra_no_ledger"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "critério reprovado vira evidência e código de saída 1",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_project.py::test_falha_de_criterio_vira_evidencia_e_codigo_de_saida_1"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o drift de arquivos compara com a execução anterior",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_project.py::test_segunda_execucao_mede_o_drift_de_arquivos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "comando livre no manifesto do projeto é recusado sem executar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sdd_flow/tests/test_project.py::test_comando_livre_no_manifesto_e_recusado_sem_executar"
+    ],
+    "cwd": null
   }
 ]

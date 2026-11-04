@@ -15,6 +15,7 @@
 - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
 - `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha` ou `varias`, de lista fechada), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
 - A navegação lateral agrupa as 17 páginas em Panorama, Conselho e três submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade); o submenu da página aberta fica expandido.
+- A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
 - Proposta, assinatura, PR e merge não são executados pelo painel.
 
 ## Critérios de aceite
@@ -26,6 +27,7 @@
 - [ ] a execução do SDD recusa ação e componente fora da lista
 - [ ] a execução do SDD recusa comando fora do padrão pytest
 - [ ] o menu agrupa as páginas em submenus sem perder nenhuma
+- [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
 - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
 - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
 

@@ -11,6 +11,8 @@
 - `anchor.py <repo> <pasta>...` falha se faltar spec, seção obrigatória, dono de arquivo-fonte ou se a spec citar arquivo inexistente.
 - `runner.py <state> proposal <nome> <worktree> <saida.diff> [--base origin/main] [--test alvo...]` gera o `.diff` único do lote e só o grava depois de aplicá-lo, conferi-lo (`git diff --check`) e testá-lo num checkout limpo da base; não assina, não abre PR.
 - `github_flow.py` só inicia o handoff com `--state` de um ciclo que registrou a etapa `cycle`.
+- `runner.py <state> project <descritor.json>` roda o ciclo mecânico (gates da spec, âncora, critérios, drift por critério e drift de arquivos) sobre QUALQUER projeto descrito por um descritor JSON, grava tudo fora do projeto e acrescenta o resultado, pass ou fail, a um ledger encadeado por hash; os critérios só podem ser `pytest` com alvos relativos dentro da raiz do projeto.
+- `runner.py ... cycle ... --repo DIR` ancora contra outro repositório; `anchor.py` ignora `.git`, ambientes virtuais, `node_modules` e caches.
 - Nenhum comando decide pelo Humano: `DECISAO: aceita` só entra em `decision.md` junto da assinatura P-8 que aplica este arquivo.
 
 ## Critérios de aceite
@@ -24,6 +26,10 @@
 - [ ] proposta com diff vazio ou erro de espaço é recusada sem gravar
 - [ ] handoff do GitHub exige ciclo registrado
 - [ ] a verificação usa python -m pytest quando o binário não está no PATH
+- [ ] o ciclo de projeto roda sem escrever no projeto e registra no ledger
+- [ ] critério reprovado vira evidência e código de saída 1
+- [ ] o drift de arquivos compara com a execução anterior
+- [ ] comando livre no manifesto do projeto é recusado sem executar
 
 ## Desenho e alternativas
 
@@ -44,6 +50,7 @@ A spec pode divergir do código em comportamento que nenhum teste cobre; a ânco
 ## Código
 
 - `runner.py`
+- `project.py`
 - `anchor.py`
 - `spec_gate.py`
 - `acceptance_runner.py`

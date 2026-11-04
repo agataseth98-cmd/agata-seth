@@ -19,7 +19,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = Path(os.environ.get("AGATA_PAINEL_CACHE", Path.home() / ".cache" / "agata" / "painel" / "sdd"))
-ACOES = ("ancora", "criterios")
+ACOES = ("ancora", "criterios", "projeto")
+DESCRITORES = "config/sdd"
 NOME = re.compile(r"[a-z][a-z0-9_]{0,40}")
 TIMEOUT_S = 300
 
@@ -67,6 +68,38 @@ def _ultima(nome: str) -> dict | None:
         return None
 
 
+def _project():
+    spec = importlib.util.spec_from_file_location("sdd_project", ROOT / "redesign" / "sdd_flow" / "project.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def externos(raiz: Path = ROOT) -> dict:
+    """{nome: {"arquivo": Path, "descritor": dict | None, "erro": str | None}} dos descritores em config/sdd/*.json."""
+    pasta = raiz / DESCRITORES
+    saida = {}
+    if not pasta.is_dir():
+        return saida
+    projeto = _project()
+    for arq in sorted(pasta.glob("*.json")):
+        try:
+            d = projeto.carregar(arq)
+            saida[d["nome"]] = {"arquivo": arq, "descritor": d, "erro": None}
+        except projeto.DescritorInvalido as exc:
+            saida[arq.stem] = {"arquivo": arq, "descritor": None, "erro": str(exc)[:160]}
+    return saida
+
+
+def _ultimo_externo(d: dict) -> dict | None:
+    base = Path(d["saida"]) if d.get("saida") else Path.home() / ".cache" / "agata" / "sdd" / d["nome"]
+    try:
+        u = json.loads((base / "ultimo.json").read_text(encoding="utf-8"))
+        return {"run_id": u.get("run_id"), "ok": u.get("ok")}
+    except (OSError, ValueError):
+        return None
+
+
 def estado(raiz: Path = ROOT) -> dict:
     anchor = _anchor()
     itens = []
@@ -76,20 +109,40 @@ def estado(raiz: Path = ROOT) -> dict:
         itens.append({"componente": nome, "spec": spec.relative_to(raiz).as_posix(), "criterios": len(_criterios(spec)),
                       "manifesto": _manifesto(raiz, nome).exists(), "ancora": "ok" if not lacunas else "falha",
                       "lacunas": lacunas[:5], "ultima": _ultima(nome)})
-    return {"schema_version": 1, "acoes": list(ACOES), "items": itens}
+    ext = [{"nome": n, "raiz": e["descritor"]["raiz"] if e["descritor"] else None, "valido": e["descritor"] is not None, "erro": e["erro"],
+            "ultimo": _ultimo_externo(e["descritor"]) if e["descritor"] else None} for n, e in externos(raiz).items()]
+    return {"schema_version": 1, "acoes": list(ACOES), "items": itens, "externos": ext}
 
 
-def _rodar(args: list[str], cwd: Path) -> tuple[int, str]:
+def _rodar(args: list[str], cwd: Path, limite: int = TIMEOUT_S) -> tuple[int, str]:
     try:
-        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=TIMEOUT_S)
+        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=limite)
         return r.returncode, (r.stdout + r.stderr)[-600:]
     except subprocess.TimeoutExpired:
-        return 124, f"tempo esgotado ({TIMEOUT_S} s)"
+        return 124, f"tempo esgotado ({limite} s)"
     except OSError as exc:
         return 127, str(exc)[:200]
 
 
+def _executar_externo(nome, raiz: Path) -> dict:
+    """Roda o ciclo de um projeto externo registrado em config/sdd/. O descritor vem do repositório (assinado);
+    o manifesto de critérios, do projeto, só passa se for `pytest` com alvos relativos (ver sdd_flow/project.py)."""
+    permitidos = {n: e for n, e in externos(raiz).items() if e["descritor"] is not None}
+    if not isinstance(nome, str) or nome not in permitidos:
+        raise ValueError("projeto fora de config/sdd")
+    escolhido = permitidos[nome]
+    d = escolhido["descritor"]
+    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    estado_arq = CACHE / f"projeto-{d['nome']}.state.json"
+    rc, saida = _rodar([sys.executable, str(raiz / "redesign" / "sdd_flow" / "runner.py"), str(estado_arq), "project", str(escolhido["arquivo"])], raiz, min(d["limite_s"] * 10 + 120, 4000))
+    passos = [{"passo": "ciclo do projeto", "ok": rc == 0, "detalhe": saida.strip().replace("\n", " | ")[-300:] or ("ok" if rc == 0 else f"saída {rc}")}]
+    ultimo = _ultimo_externo(d)
+    return {"acao": "projeto", "componente": d["nome"], "ok": rc == 0, "passos": passos, "criterios": [], "ultimo": ultimo}
+
+
 def executar(acao: str, nome: str, raiz: Path = ROOT) -> dict:
+    if acao == "projeto":
+        return _executar_externo(nome, raiz)
     permitidos = {c: c for c in componentes(raiz)}
     if acao not in ACOES or not isinstance(nome, str) or nome not in permitidos:
         raise ValueError("ação ou componente fora da lista")

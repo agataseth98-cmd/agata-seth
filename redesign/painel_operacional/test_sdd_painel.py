@@ -103,5 +103,42 @@ class SddPainelTests(unittest.TestCase):
         self.assertIn("/api/sdd/estado", js); self.assertIn("/api/sdd/executar", js)
 
 
+def projeto_externo(tmp_path):
+    raiz = tmp_path / "ext"
+    (raiz / "tests").mkdir(parents=True); (raiz / "spec").mkdir()
+    (raiz / "app.py").write_text("def um():\n    return 1\n", encoding="utf-8"); (raiz / "conftest.py").write_text("", encoding="utf-8")
+    (raiz / "tests" / "test_app.py").write_text("from app import um\n\n\ndef test_um():\n    assert um() == 1\n", encoding="utf-8")
+    nomes_b = ("Usuários", "Estado que muda", "Erros e concorrência", "Migração", "Observabilidade", "Reversão", "Sucesso")
+    nomes_s = ("Jornadas críticas", "Contrato", "Critérios de aceite", "Desenho e alternativas", "Implementação e testes", "Migração e reversão", "Riscos e dependências")
+    (raiz / "spec" / "brainstorm.md").write_text("# B\n\n" + "".join(f"## {n}\n\ntexto\n\n" for n in nomes_b), encoding="utf-8")
+    (raiz / "spec" / "spec.md").write_text("# S\n\n" + "".join(f"## {n}\n\n" + ("- [ ] devolve um\n" if n == "Critérios de aceite" else "texto\n") + "\n" for n in nomes_s) + "## Código\n\n- `app.py`\n- `conftest.py`\n- `tests/`\n", encoding="utf-8")
+    (raiz / "spec" / "decision.md").write_text("# D\n\nDECISAO: aceita\n", encoding="utf-8")
+    (raiz / "spec" / "acceptance.json").write_text(json.dumps([{"criterion": "devolve um", "command": ["pytest", "-q", "tests/test_app.py::test_um"]}]), encoding="utf-8")
+    return raiz
+
+
+class ProjetosExternosTests(unittest.TestCase):
+    def test_estado_lista_descritores_validos_e_invalidos_de_config_sdd(self):
+        with tempfile.TemporaryDirectory() as t:
+            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
+            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida")}), encoding="utf-8")
+            (base / "config" / "sdd" / "ruim.json").write_text(json.dumps({"nome": "ruim", "raiz": "relativa"}), encoding="utf-8")
+            ext = {e["nome"]: e for e in sdd.estado(base)["externos"]}
+            self.assertTrue(ext["ext"]["valido"]); self.assertFalse(ext["ruim"]["valido"]); self.assertIn("raiz", ext["ruim"]["erro"])
+
+    def test_executar_projeto_roda_o_ciclo_e_recusa_o_que_nao_esta_em_config_sdd(self):
+        with tempfile.TemporaryDirectory() as t:
+            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
+            (base / "redesign").symlink_to(sdd.ROOT / "redesign")
+            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida"), "ambiente": {"PYTHONPATH": "."}}), encoding="utf-8")
+            antes = sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file())
+            r = sdd.executar("projeto", "ext", base)
+            self.assertTrue(r["ok"], r["passos"]); self.assertTrue(r["ultimo"]["ok"])
+            self.assertEqual(sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file()), antes)
+            for nome in ("outro", "../ext", 7, None):
+                with self.assertRaises(ValueError):
+                    sdd.executar("projeto", nome, base)
+
+
 if __name__ == "__main__":
     unittest.main()

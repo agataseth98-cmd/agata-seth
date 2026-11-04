@@ -25,6 +25,16 @@ python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow
 
 `cycle` roda gates de spec, âncora, critérios de aceite e drift por critério, e para no primeiro que falha. `anchor.py` ancora componente existente: a spec (`spec/spec.md` ou `SPEC.md`) lista o código que possui; arquivo-fonte sem dono ou citação de arquivo inexistente falha. O job `sdd` da CI repete isso.
 
+## Projeto SDD declarativo (qualquer projeto, sem escrever nele)
+
+Um descritor JSON diz onde está o projeto e o que conferir; o ciclo roda contra a raiz dele e grava **fora** (padrão `~/.cache/agata/sdd/<nome>/`):
+
+```bash
+python3 redesign/sdd_flow/runner.py work/state.json project redesign/sdd_flow/exemplo-projeto.json
+```
+
+Passos: gates da spec, âncora (contra a raiz do projeto), critérios de aceite (`pytest` com alvos relativos, no ambiente do descritor), drift por critério e drift de arquivos contra a execução anterior. Cada execução vira uma pasta com `relatorio.md`, `evidence.json` e os drifts, e um evento `pass` ou `fail` no `ledger.jsonl` (encadeado por hash; `python3 redesign/evidence_ledger/ledger.py verify`). Falha também é evidência. Para aparecer na aba SDD do painel, o descritor vai em `config/sdd/<nome>.json` por proposta P-8.
+
 ## Proposta e handoff
 
 ```bash

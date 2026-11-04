@@ -1,0 +1,13 @@
+{
+  "nome": "contador",
+  "raiz": "/caminho/absoluto/do/projeto",
+  "spec": "spec",
+  "escopos": [
+    "."
+  ],
+  "criterios": "spec/acceptance.json",
+  "ambiente": {
+    "PYTHONPATH": "."
+  },
+  "limite_s": 300
+}
