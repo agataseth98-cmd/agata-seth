@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags"
 ACOES = ("recuperacao", "recuperacao_semantica", "contexto")
-TAREFAS = ("agulha", "varias")
+TAREFAS = ("agulha", "varias", "rastreio", "agregacao")
 TIMEOUT_S = {"recuperacao": 300, "recuperacao_semantica": 300, "contexto": 3600}
 _LOCK = threading.Lock()
 _JOB: dict = {"estado": "ocioso"}

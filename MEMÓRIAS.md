@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 354885bfe7468c7c7e106de9641149ad41ab9a22
-  Escrito em: 04/11/2026 09:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): aa9105de474beb98326ad1246c0409e6b52a8eb1
+  Escrito em: 04/11/2026 09:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/354885bfe7468c7c7e106de9641149ad41ab9a22/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/354885bfe7468c7c7e106de9641149ad41ab9a22/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/354885bfe7468c7c7e106de9641149ad41ab9a22/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/354885bfe7468c7c7e106de9641149ad41ab9a22/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/354885bfe7468c7c7e106de9641149ad41ab9a22/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa9105de474beb98326ad1246c0409e6b52a8eb1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa9105de474beb98326ad1246c0409e6b52a8eb1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa9105de474beb98326ad1246c0409e6b52a8eb1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa9105de474beb98326ad1246c0409e6b52a8eb1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/aa9105de474beb98326ad1246c0409e6b52a8eb1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(934) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha as tarefas de rastreio de variáveis e agregação (RULER completo).** Proposta `medicao-ruler-completo-20261104`: `scripts/medir_contexto_efetivo.py` (tarefas `rastreio` e `agregacao`, espaço de saída por tarefa e só o texto depois de `</think>` vale), lista fechada e menu do painel, spec e teste. Medido em `qwen3:4b` (04/11): rastreio 3/3 em 2k, 8k, 16k e 32k e 1/3 em 4k (efetivo pela regra do medidor: 2.048); agregação 0/3 em 2k e 8k (repetição do modelo, um prompt cru inspecionado). A primeira rodada deu falsos zeros por saída cortada em 400 tokens; o medidor foi corrigido antes. Não medido: outros modelos, agregação acima de 8k. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+
 (933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 tópico(s) de 123 entrada(s) do cache do Conselho.** Texto em `extras/memoria-semanal/semana-2026-11-03.md`, assinado pelo Humano (V9 §37, M3; (849)). Origem: proposta do modelo ollama-local/qwen3.5-9b-64k:latest, conferida pela Máquina. A Máquina cortou 2 tópico(s) sem sustentação nas entradas citadas.
 Modelo: ollama-local/qwen3.5-9b-64k:latest propôs; a Máquina conferiu (`scripts/memoria_semanal.py`) · vetor: cache do Conselho, cadeia íntegra · Autorização: Humano (assinatura do par)
 

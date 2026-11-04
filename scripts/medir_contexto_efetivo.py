@@ -8,11 +8,12 @@ devolvê-lo. É o caso mais fácil do RULER (recuperação simples); tarefas de 
 estão cobertas. Comprimento efetivo = o maior comprimento até o qual TODAS as tentativas acertaram. Acerto = o código correto
 aparece na resposta (modelos que expõem o raciocínio no texto contam se citarem o código certo).
 
-Tarefas: `agulha` (um fato) e `varias` (8 fatos parecidos espalhados, pergunta por um: é o multi-chave do
-RULER, mais duro porque os distratores são semelhantes). Só fala com o endpoint local do Ollama (padrão http://127.0.0.1:11434/api/chat). Gasta GPU e minutos: só roda
+Tarefas: `agulha` (um fato), `varias` (8 fatos parecidos espalhados, pergunta por um: multi-chave do RULER),
+`rastreio` (cadeia de 4 variáveis que herdam um valor, com 3 distratoras: rastreio de variáveis do RULER) e `agregacao`
+(5 palavras inventadas repetidas 12 vezes entre 40 que aparecem uma vez: extração de palavras comuns do RULER). Só fala com o endpoint local do Ollama (padrão http://127.0.0.1:11434/api/chat). Gasta GPU e minutos: só roda
 quando pedido. Com --salvar escreve em AGATA_MEDICOES_DIR (padrão ~/.cache/agata/painel/medicoes).
   medir_contexto_efetivo.py --modelo TAG [--url URL] [--comprimentos 2048,4096,8192,16384,32768]
-                            [--tarefa agulha|varias] [--tentativas 3] [--salvar]     |     --selftest
+                            [--tarefa agulha|varias|rastreio|agregacao] [--tentativas 3] [--salvar]     |     --selftest
 Exit 0 = medido; 2 = uso; 4 = o endpoint não respondeu.
 """
 import json
@@ -35,8 +36,10 @@ COMPRIMENTOS = (2048, 4096, 8192, 16384, 32768)
 PROFUNDIDADES = (0.25, 0.5, 0.75)
 CHARS_POR_TOKEN = 3.0
 PERGUNTA = "Qual é o código de verificação do lote? Responda apenas o código, sem mais nada."
-TAREFAS = ("agulha", "varias")
+TAREFAS = ("agulha", "varias", "rastreio", "agregacao")
 N_VARIAS = 8
+N_CADEIA, N_DISTRATORAS = 4, 3
+N_MARCADORES, REPETICOES, N_DISTRATORES = 5, 12, 40
 
 
 def palheiro(chars: int, base: str) -> str:
@@ -62,10 +65,63 @@ def montar_varias(chars: int, codigos: list[str], alvo: int, base: str) -> str:
     return "".join(pedacos) + f"\n\nQual é o código de verificação do lote-{alvo + 1}? Responda apenas o código, sem mais nada."
 
 
-def perguntar(url: str, modelo: str, prompt: str, num_ctx: int, timeout: int = 900) -> dict:
+# Tarefas de várias respostas fazem o qwen3 raciocinar no texto da resposta (medido em 04/11: com 400 tokens a saída
+# vem cortada, done_reason=length, e a medição vira falso zero). Dão mais espaço e só a parte depois de </think> vale.
+NUM_PREDICT = {"agulha": 400, "varias": 400, "rastreio": 2500, "agregacao": 2000}
+
+
+def so_resposta(texto: str, tarefa: str) -> str:
+    if tarefa in ("agulha", "varias") or "</think>" not in texto:
+        return texto
+    return texto.rsplit("</think>", 1)[1]
+
+
+def _inserir(miolo: str, pares: list) -> str:
+    """Insere (fração, texto) no miolo; da última posição para a primeira, para não deslocar as outras."""
+    total = len(miolo)
+    cortes = sorted(((int(total * fracao), i, texto) for i, (fracao, texto) in enumerate(pares)), reverse=True)
+    for corte, _, texto in cortes:
+        miolo = miolo[:corte] + texto + miolo[corte:]
+    return miolo
+
+
+def _nome(rnd, prefixo: str, n: int, alfabeto: str) -> str:
+    return prefixo + "".join(rnd.choice(alfabeto) for _ in range(n))
+
+
+def montar_rastreio(chars: int, rnd, base: str) -> tuple[str, list, list]:
+    valor = str(rnd.randrange(10**5, 10**6))
+    nomes = [_nome(rnd, "VAR_", 4, "ABCDEFGHJKLMNPQRSTUVWXYZ") for _ in range(N_CADEIA + N_DISTRATORAS)]
+    cadeia, distrat = nomes[:N_CADEIA], nomes[N_CADEIA:]
+    frases = [f" A variável {cadeia[0]} recebe {valor}. "] + [f" A variável {cadeia[i]} recebe o valor de {cadeia[i - 1]}. " for i in range(1, N_CADEIA)]
+    outras = [f" A variável {d} recebe {rnd.randrange(10**5, 10**6)}. " for d in distrat]
+    fracoes = sorted(rnd.sample(range(5, 96), len(frases) + len(outras)))
+    posicao_cadeia = sorted(rnd.sample(range(len(fracoes)), len(frases)))
+    pares, resto = [], iter(outras)
+    for i, f in enumerate(fracoes):
+        pares.append((f / 100, frases[posicao_cadeia.index(i)] if i in posicao_cadeia else next(resto)))
+    texto = _inserir(palheiro(chars, base), pares)
+    return (texto + f"\n\nQuais variáveis têm o valor {valor}? Liste os nomes de todas elas, separados por vírgula, sem mais nada.",
+            [n.lower() for n in cadeia], [n.lower() for n in distrat])
+
+
+def montar_agregacao(chars: int, rnd, base: str) -> tuple[str, list, list]:
+    palavras = []
+    while len(palavras) < N_MARCADORES + N_DISTRATORES:
+        w = _nome(rnd, "pal_", 5, "abcdefghijklmnopqrstuvwxyz")
+        if w not in palavras:
+            palavras.append(w)
+    marcadores, distratores = palavras[:N_MARCADORES], palavras[N_MARCADORES:]
+    pares = [(rnd.randrange(3, 98) / 100, f" {w} ") for w in marcadores for _ in range(REPETICOES)] + [(rnd.randrange(3, 98) / 100, f" {w} ") for w in distratores]
+    texto = _inserir(palheiro(chars, base), pares)
+    return (texto + f"\n\nNeste texto aparecem palavras inventadas que começam com pal_. Quais são as {N_MARCADORES} que mais se repetem? Responda só as palavras, separadas por vírgula.",
+            marcadores, distratores)
+
+
+def perguntar(url: str, modelo: str, prompt: str, num_ctx: int, timeout: int = 900, num_predict: int = 400) -> dict:
     corpo = json.dumps({"model": modelo, "stream": False, "think": False,
                         "messages": [{"role": "user", "content": prompt}],
-                        "options": {"temperature": 0, "num_ctx": num_ctx, "num_predict": 400}}).encode()
+                        "options": {"temperature": 0, "num_ctx": num_ctx, "num_predict": num_predict}}).encode()
     req = urllib.request.Request(url, data=corpo, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
@@ -89,30 +145,37 @@ def medir(url: str, modelo: str, comprimentos=COMPRIMENTOS, tentativas: int = 3,
         acertos, tokens, segundos = 0, [], 0.0
         for t in range(tentativas):
             rnd = random.Random(alvo * 31 + t)
+            tam = int(alvo * CHARS_POR_TOKEN)
             if tarefa == "agulha":
                 codigo = "%06x" % rnd.randrange(16**6)
-                prompt = montar(int(alvo * CHARS_POR_TOKEN), PROFUNDIDADES[t % len(PROFUNDIDADES)], codigo, base)
+                prompt = montar(tam, PROFUNDIDADES[t % len(PROFUNDIDADES)], codigo, base)
                 certos, errados = [codigo], []
-            else:
+            elif tarefa == "varias":
                 codigos = ["%06x" % rnd.randrange(16**6) for _ in range(N_VARIAS)]
                 indice = (t * 3 + 1) % N_VARIAS
-                prompt = montar_varias(int(alvo * CHARS_POR_TOKEN), codigos, indice, base)
+                prompt = montar_varias(tam, codigos, indice, base)
                 certos, errados = [codigos[indice]], [c for i, c in enumerate(codigos) if i != indice]
+            elif tarefa == "rastreio":
+                prompt, certos, errados = montar_rastreio(tam, rnd, base)
+            else:
+                prompt, certos, errados = montar_agregacao(tam, rnd, base)
             t0 = time.time()
-            r = perguntar(url, modelo, prompt, min(65536, alvo + 1024))
+            r = perguntar(url, modelo, prompt, min(65536, alvo + NUM_PREDICT[tarefa] + 600), num_predict=NUM_PREDICT[tarefa])
             segundos += time.time() - t0
             tokens.append(r.get("prompt_eval_count"))
-            resposta = (r.get("message", {}).get("content", "") or "").lower()
+            resposta = so_resposta(r.get("message", {}).get("content", "") or "", tarefa).lower()
             acertos += all(c in resposta for c in certos) and not any(c in resposta for c in errados)
         linhas.append({"alvo_tokens": alvo, "tokens_reais": [x for x in tokens if x], "acertos": acertos,
                        "tentativas": tentativas, "segundos": round(segundos, 1)})
         if progresso:
             progresso(linhas[-1])
-    metodo = ("agulha no palheiro, 3 profundidades; só recuperação simples" if tarefa == "agulha"
-              else f"{N_VARIAS} fatos parecidos espalhados, pergunta por um (multi-chave do RULER); resposta com outro código conta como erro")
+    metodo = {"agulha": "agulha no palheiro, 3 profundidades; só recuperação simples",
+              "varias": f"{N_VARIAS} fatos parecidos espalhados, pergunta por um (multi-chave do RULER); resposta com outro código conta como erro",
+              "rastreio": f"cadeia de {N_CADEIA} variáveis que herdam um valor, com {N_DISTRATORAS} distratoras (rastreio de variáveis do RULER); acerta se lista as {N_CADEIA} e nenhuma distratora",
+              "agregacao": f"{N_MARCADORES} palavras inventadas repetidas {REPETICOES} vezes entre {N_DISTRATORES} que aparecem uma vez (extração de palavras comuns do RULER); acerta se lista as {N_MARCADORES} e nenhuma única"}[tarefa]
     return {"modelo": modelo, "tarefa": tarefa, "metodo": metodo,
             "linhas": linhas, "efetivo_tokens": efetivo(linhas),
-            "nao_medido": ["agregação e rastreio de variáveis (RULER completo)", "outros modelos"],
+            "nao_medido": ["outros modelos", "tarefas do RULER não rodadas neste arquivo: " + ", ".join(x for x in TAREFAS if x != tarefa)],
             "medido_em": datetime.now().astimezone().isoformat(timespec="seconds")}
 
 
@@ -136,6 +199,23 @@ def _selftest() -> int:
         def do_POST(self):
             dados = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
             prompt = dados["messages"][0]["content"]
+            if "Quais variáveis têm o valor" in prompt:
+                valor = re.search(r"valor (\d+)\?", prompt).group(1)
+                dono = {a: v for a, v in re.findall(r"A variável (VAR_[A-Z]+) recebe (\d+)\.", prompt)}
+                herda = dict(re.findall(r"A variável (VAR_[A-Z]+) recebe o valor de (VAR_[A-Z]+)\.", prompt))
+                nomes = [n for n, v in dono.items() if v == valor]
+                for _ in range(N_CADEIA):
+                    nomes += [n for n, de in herda.items() if de in nomes and n not in nomes]
+                resp = ", ".join(nomes) if len(prompt) <= LIMITE_CHARS else "não sei"
+                corpo = json.dumps({"message": {"content": resp}, "prompt_eval_count": len(prompt) // 3}).encode()
+                self.send_response(200); self.send_header("Content-Length", str(len(corpo))); self.end_headers(); self.wfile.write(corpo); return
+            if "mais se repetem" in prompt:
+                cont = {}
+                for w in re.findall(r"pal_[a-z]{5}", prompt):
+                    cont[w] = cont.get(w, 0) + 1
+                resp = ", ".join(w for w, _ in sorted(cont.items(), key=lambda x: -x[1])[:N_MARCADORES]) if len(prompt) <= LIMITE_CHARS else "não sei"
+                corpo = json.dumps({"message": {"content": resp}, "prompt_eval_count": len(prompt) // 3}).encode()
+                self.send_response(200); self.send_header("Content-Length", str(len(corpo))); self.end_headers(); self.wfile.write(corpo); return
             q = re.search(r"lote-(\d+)\? Responda", prompt)
             if q:  # sem regex montado com dado do pedido: procura o trecho literal e lê o código depois dele
                 chave = f"lote-{q.group(1)} é "
@@ -163,6 +243,19 @@ def _selftest() -> int:
     rv = medir(f"http://127.0.0.1:{srv2.server_address[1]}/api/chat", "falso:1", (1000, 4000), 3, "Texto de enchimento do canon. ", tarefa="varias")
     srv2.shutdown(); srv2.server_close()
     conferir("varias: acerta o alvo no curto e perde no longo", rv["tarefa"] == "varias" and [l["acertos"] for l in rv["linhas"]] == [3, 0])
+    for tarefa in ("rastreio", "agregacao"):
+        srv3 = ThreadingHTTPServer(("127.0.0.1", 0), Falso); threading.Thread(target=srv3.serve_forever, daemon=True).start()
+        rt = medir(f"http://127.0.0.1:{srv3.server_address[1]}/api/chat", "falso:1", (1000, 4000), 3, "Texto de enchimento do canon. ", tarefa=tarefa)
+        srv3.shutdown(); srv3.server_close()
+        conferir(f"{tarefa}: acerta no curto e perde no longo", [l["acertos"] for l in rt["linhas"]] == [3, 0])
+    conferir("so_resposta: ignora o raciocínio nas tarefas novas e mantém o texto inteiro nas antigas",
+             so_resposta("pensa var_x </think>\nvar_a", "rastreio").strip() == "var_a" and so_resposta("pensa </think> ab", "agulha") == "pensa </think> ab" and so_resposta("sem tag", "rastreio") == "sem tag")
+    prompt, certos, errados = montar_rastreio(3000, random.Random(5), "x ")
+    conferir("rastreio: a cadeia tem 4 nomes, há 3 distratoras e nenhum nome se repete", len(certos) == N_CADEIA and len(errados) == N_DISTRATORAS and len(set(certos + errados)) == N_CADEIA + N_DISTRATORAS)
+    conferir("rastreio: a pergunta traz o valor e as frases de herança aparecem depois da primeira", prompt.rstrip().endswith("sem mais nada.") and prompt.index(certos[0].upper()) < prompt.index(f"recebe o valor de {certos[0].upper()}"))
+    prompt, certos, errados = montar_agregacao(6000, random.Random(5), "x ")
+    conferir("agregacao: marcadores aparecem 12 vezes e as outras uma vez", all(prompt.count(w) == REPETICOES for w in certos) and all(prompt.count(w) == 1 for w in errados))
+    conferir("agregacao: mesma semente, mesmo prompt", montar_agregacao(6000, random.Random(5), "x ")[0] == prompt)
     p = montar_varias(3000, ["aaaaaa", "bbbbbb", "cccccc"], 1, "x ")
     conferir("varias: 3 fatos espalhados e a pergunta pelo segundo", p.count("O código de verificação do lote-") == 3 and p.rstrip().endswith("lote-2? Responda apenas o código, sem mais nada."))
     try:

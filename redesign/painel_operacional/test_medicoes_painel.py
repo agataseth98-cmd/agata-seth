@@ -81,6 +81,9 @@ class MedicoesTests(unittest.TestCase):
             self.assertNotIn("--semantico", chamadas[2][0])
             med.executar("recuperacao_semantica", sincrono=True)
             self.assertEqual(chamadas[3][0][-1], "--semantico")
+            for nova in ("rastreio", "agregacao"):
+                med.executar("contexto", "qwen3:4b", sincrono=True, tarefa=nova)
+                self.assertEqual(chamadas[-1][0][-2:], ["--tarefa", nova])
 
     def test_estado_traz_resultados_salvos_e_lista_de_modelos(self):
         Path(self.dir.name, "recuperacao.json").write_text(json.dumps({"n": 3, "recall": {"1": 1.0, "5": 1.0}, "mrr": 1.0}), encoding="utf-8")
