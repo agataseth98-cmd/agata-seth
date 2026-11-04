@@ -49,6 +49,14 @@ ollama create qwen3.5-9b-64k:latest -f /tmp/mf
 | `nomic-embed-text` | está na **library** do Ollama (o manifesto classifica "custom" por heurística de P0-01, mas é registry) | `ollama pull nomic-embed-text` |
 | `rlm-qwen3-8b-teste` | **GGUF em `memoria/missoes/rlm-3caminhos/modelo/rlm-qwen3-8b-v0.1-q4_k_m.gguf`** (4,7 GB) | `ollama create rlm-qwen3-8b-teste:latest -f <Modelfile do manifesto, FROM = esse gguf>` |
 
+### Classe D — GGUF baixado de terceiros (1 modelo, 04/11/2026)
+
+| modelo | fonte | reconstrução |
+|---|---|---|
+| `lumi-4b` | `https://huggingface.co/HyperScale/lumi-4b-GGUF/resolve/main/lumi-4b-Q4_K_M.gguf` (2.837.073.248 bytes; conversão de terceiros do `ceia-br/lumi-4b`, revisão `1c8928e1`) | baixar, conferir `sha256sum` = `185d2adda388c4afbe7bba2141539b49196ac4ba02f4e89a945b1e2d22d15194`, e `ollama create lumi-4b:latest -f <Modelfile do manifesto>` com `FROM` apontando o GGUF |
+
+Cópia local em `~/.cache/agata/models/lumi-4b/`. **Licença não declarada** pelo CEIA (cartão e página do GGUF dizem isso): sem uso em produto nem ajuste fino até declarar. Fora da lista de backup obrigatório do P-12 (2,7 GB, refazível do Hugging Face); incluir é decisão do Humano. Medições e história: `pesquisa/lumi-ceia-ufg.md` (fora do repositório).
+
 **`rlm-qwen3-8b-teste` é o único que depende de um arquivo local não-registry.**
 O `sha256` do GGUF (`c3b6bfbc3a9d36d6…`) **é idêntico** ao `blob_sha256` do modelo no
 Ollama — o Ollama importou verbatim. Reconstrói bit a bit **enquanto esse GGUF existir**.
