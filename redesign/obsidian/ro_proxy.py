@@ -62,19 +62,9 @@ def _token():
         return ""
 
 
-def _listar_disco(caminho_url: str):
-    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
-    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
-    from urllib.parse import unquote
-    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
-    if any(p.startswith(".") for p in rel.split("/") if p):
-        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
-    if not rel:
-        alvo = VAULT
-    else:
-        alvo = os.path.realpath(os.path.join(VAULT, rel))
-        if not alvo.startswith(VAULT + os.sep):
-            return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
+def _itens_do_diretorio(alvo: str):
+    """(codigo, corpo_json) da listagem de `alvo`, ou None se não é diretório. `alvo` chega aqui JÁ dentro do
+    vault: ou é o próprio VAULT (raiz) ou um caminho que passou pelo guarda de `_listar_disco`."""
     if not os.path.isdir(alvo):
         return None
     def _tem_arquivo(d):
@@ -96,6 +86,21 @@ def _listar_disco(caminho_url: str):
         else:
             itens.append(nome)
     return 200, {"files": itens}
+
+
+def _listar_disco(caminho_url: str):
+    """(codigo, corpo_json) da listagem de um diretório do vault, ou None se o
+    caminho não é diretório (aí repassa ao plugin, que dá o 404 de sempre)."""
+    from urllib.parse import unquote
+    rel = unquote(caminho_url.split("?", 1)[0][len("/vault/"):]).strip("/")
+    if any(p.startswith(".") for p in rel.split("/") if p):
+        return 403, {"error": "read_only_proxy", "motivo": "caminho oculto"}
+    if not rel:
+        return _itens_do_diretorio(VAULT)
+    alvo = os.path.realpath(os.path.join(VAULT, rel))
+    if not alvo.startswith(VAULT + os.sep):
+        return 403, {"error": "read_only_proxy", "motivo": "fora do vault"}
+    return _itens_do_diretorio(alvo)
 
 
 def _bloqueia_mcp(body: bytes) -> str | None:
