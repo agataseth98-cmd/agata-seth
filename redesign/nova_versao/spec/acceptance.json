@@ -34,5 +34,23 @@
       "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_gpu_em_fila_unica_e_teto_de_chamadas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
+    ],
+    "cwd": null
   }
 ]

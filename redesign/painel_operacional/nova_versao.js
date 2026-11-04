@@ -93,6 +93,7 @@
     if (o) {
       byId("nv-orc-local").checked = !!o.provedores.local;
       byId("nv-orc-gratuito").checked = !!o.provedores.gratuito;
+      byId("nv-orc-assinatura").checked = !!o.provedores.assinatura;
       byId("nv-orc-pago").checked = !!o.provedores.pago;
       byId("nv-orc-chamadas").value = o.max_chamadas; byId("nv-orc-tokens").value = o.max_tokens;
       byId("nv-orc-timeout").value = o.timeout_s; byId("nv-orc-reais").value = o.teto_reais;
@@ -103,10 +104,35 @@
     ev.slice().reverse().forEach((e) => li("nv-eventos", e.timestamp + " · " + e.componente + " · " + e.kind + " · " + e.status + " · " + e.source));
   }
 
-  const telas = {"nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento};
+
+  function conexoes() {
+    limpar("nv-con-lista", "nv-red-lista");
+    const cs = (estado && estado.conexoes) || [];
+    byId("nv-con-titulo").textContent = cs.length + " provedores · gasto estimado R$ " + ((estado && estado.gasto_reais) || 0).toFixed(4);
+    const sel = byId("nv-api-provedor"); const atual = sel.value; sel.replaceChildren();
+    cs.forEach((c) => {
+      const m = c.modos || {}; const partes = [];
+      if (m.navegador) partes.push("navegador: adaptador " + (m.navegador.adaptador || "não medido") + ", envio só com sua aprovação");
+      if (m.cli) partes.push("programa: " + (m.cli.instalado ? "instalado" : "não instalado") + ", login " + m.cli.login + (m.cli.modelo ? ", modelo " + m.cli.modelo : ""));
+      if (m.api) {
+        const ch = m.api.chave || {};
+        partes.push("API: " + (m.api.disponivel ? "pronta" : "falta " + m.api.falta.join(", ")) + " · chave " + (ch.no_cofre ? "no cofre desde " + ch.desde : ch.no_ambiente ? "no ambiente" : "ausente") + (m.api.modelo ? " · modelo " + m.api.modelo : ""));
+        const o = document.createElement("option"); o.value = c.id; o.textContent = c.nome; sel.append(o);
+      }
+      li("nv-con-lista", c.nome + (c.origem === "local" ? " (adicionado por você)" : "") + " — " + partes.join(" | "));
+    });
+    if (atual) sel.value = atual;
+    const tr = (estado && estado.teste_rotas) || {};
+    const j = tr.job || {}; const u = tr.ultimo;
+    byId("nv-red-titulo").textContent = j.estado === "rodando" ? "Testando…" : u ? "Último teste " + u.run_id + " · " + u.estado + (u.obsoleto ? " (contexto mudou: revalidar)" : "") : "Sem teste";
+    if (j.estado === "rodando") setTimeout(() => window.carregarNovaVersao("nv-conexoes"), 5000);
+    if (u) Object.entries(u.rotas_que_passaram || {}).forEach(([cap, rs]) => li("nv-red-lista", cap + ": " + (rs.length ? rs.join(", ") : "nenhuma rota passou")));
+    (tr.resultados || []).filter((r) => !r.passou).slice(0, 12).forEach((r) => li("nv-red-lista", "não passou · " + r.rota + " · " + r.capacidade + " · " + (r.falha_etapa || "resposta fora da prova") + (r.erro ? " — " + r.erro : "")));
+  }
+  const telas = {"nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento};
   window.carregarNovaVersao = async function (nome) {
     await ler();
-    if (!estado) { const t = {"nv-alexandria": "nv-alex-nota", "nv-metacognicao": "nv-sombra-titulo", "nv-corpo": "nv-corpo-titulo", "nv-orcamento": "nv-orc-nota"}[nome]; if (t && byId(t)) byId(t).textContent = "Nova versão indisponível no servidor."; return; }
+    if (!estado) { const t = {"nv-alexandria": "nv-alex-nota", "nv-metacognicao": "nv-sombra-titulo", "nv-corpo": "nv-corpo-titulo", "nv-orcamento": "nv-orc-nota", "nv-conexoes": "nv-con-titulo"}[nome]; if (t && byId(t)) byId(t).textContent = "Nova versão indisponível no servidor."; return; }
     (telas[nome] || (() => {}))();
   };
 
@@ -146,10 +172,45 @@
   });
   confirmar(byId("nv-orc-salvar"), "Salvar orçamento", async () => {
     const n = (id) => Number(byId(id).value);
-    const orc = {provedores: {local: byId("nv-orc-local").checked, gratuito: byId("nv-orc-gratuito").checked, pago: byId("nv-orc-pago").checked},
+    const orc = {provedores: {local: byId("nv-orc-local").checked, gratuito: byId("nv-orc-gratuito").checked, assinatura: byId("nv-orc-assinatura").checked, pago: byId("nv-orc-pago").checked},
       max_chamadas: n("nv-orc-chamadas"), max_tokens: n("nv-orc-tokens"), timeout_s: n("nv-orc-timeout"), teto_reais: n("nv-orc-reais")};
     try { const r = await executar("salvar_orcamento", {orcamento: orc}); byId("nv-orc-nota").textContent = r.resultado.mudou ? "Salvo e registrado no ledger." : "Nada mudou."; }
     catch (_) { byId("nv-orc-nota").textContent = "Recusado: valor fora do limite."; }
     window.carregarNovaVersao("nv-orcamento");
+  });
+  const val = (id) => byId(id).value.trim();
+  const nota = (id, t) => { byId(id).textContent = t; };
+  confirmar(byId("nv-api-ajustar"), "Salvar modelo e tarifa", async () => {
+    const pid = val("nv-api-provedor"); if (!pid) return;
+    const corpo = {provedor: pid, api_modelo: val("nv-api-modelo") || null, cli_modelo: val("nv-cli-modelo") || null};
+    if (val("nv-tar-entrada") || val("nv-tar-saida")) corpo.tarifa = {entrada_usd_mtok: Number(val("nv-tar-entrada")), saida_usd_mtok: Number(val("nv-tar-saida")), cambio_brl: Number(val("nv-tar-cambio")), fonte: val("nv-tar-fonte"), data: val("nv-tar-data")};
+    try { await executar("ajustar_conexao", corpo); nota("nv-api-nota", "Ajuste salvo e registrado no ledger."); }
+    catch (_) { nota("nv-api-nota", "Recusado: confira modelo, tarifa (com fonte e data) e câmbio."); }
+    window.carregarNovaVersao("nv-conexoes");
+  });
+  confirmar(byId("nv-api-gravar"), "Gravar chave", async () => {
+    const campo = byId("nv-api-chave"); const chave = campo.value; campo.value = "";
+    const pid = val("nv-api-provedor"); if (!pid || !chave) return;
+    try { await executar("gravar_chave", {provedor: pid, chave}); nota("nv-api-nota", "Chave gravada no cofre. Ela não volta para a tela."); }
+    catch (_) { nota("nv-api-nota", "Recusada: formato ou prefixo não confere com o provedor."); }
+    window.carregarNovaVersao("nv-conexoes");
+  });
+  confirmar(byId("nv-api-remover"), "Remover chave", async () => {
+    const pid = val("nv-api-provedor"); if (!pid) return;
+    try { const r = await executar("remover_chave", {provedor: pid}); nota("nv-api-nota", r.resultado.removida ? "Chave removida do cofre." : "Não havia chave no cofre."); }
+    catch (_) { nota("nv-api-nota", "Não foi possível remover."); }
+    window.carregarNovaVersao("nv-conexoes");
+  });
+  confirmar(byId("nv-add-salvar"), "Adicionar provedor", async () => {
+    try { await executar("adicionar_provedor", {provedor: val("nv-add-id"), nome: val("nv-add-nome"), formato: val("nv-add-formato"), url: val("nv-add-url"), env: val("nv-add-env") || null, api_modelo: val("nv-add-modelo") || null}); nota("nv-add-nota", "Provedor adicionado. Agora grave a chave e a tarifa acima."); }
+    catch (_) { nota("nv-add-nota", "Recusado: id, formato ou URL (só https) inválidos, ou id repetido."); }
+    window.carregarNovaVersao("nv-conexoes");
+  });
+  confirmar(byId("nv-red-testar"), "Testar rotas permitidas pelo orçamento", async () => {
+    try { await executar("testar_rotas", {}); nota("nv-red-nota", "Teste iniciado."); } catch (_) { nota("nv-red-nota", "Já há um teste rodando."); }
+    window.carregarNovaVersao("nv-conexoes");
+  });
+  confirmar(byId("nv-red-cancelar"), "Cancelar teste", async () => {
+    try { await executar("cancelar_teste", {}); nota("nv-red-nota", "Cancelamento pedido: nenhum item novo começa."); } catch (_) { nota("nv-red-nota", "Nada para cancelar."); }
   });
 })();

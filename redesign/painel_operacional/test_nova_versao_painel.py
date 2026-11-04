@@ -12,6 +12,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         os.environ["AGATA_NV_DIR"] = self.tmp.name + "/dados"
         os.environ["AGATA_NV_CACHE"] = self.tmp.name + "/cache"
+        os.environ["AGATA_CONEXOES_DIR"] = self.tmp.name + "/cofre"
         import nova_versao_painel
         self.m = nova_versao_painel
 
@@ -44,7 +45,20 @@ class NovaVersaoPainelTests(unittest.TestCase):
         e = self.m.estado()
         self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")
         self.assertIsNone(e["alexandria"]["indice"])
-        self.assertEqual(e["orcamento"]["provedores"], {"local": True, "gratuito": False, "pago": False})
+        self.assertEqual(e["orcamento"]["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
+
+    def test_chave_gravada_nao_volta_na_resposta_nem_no_estado(self):
+        chave = "sk-ant-" + "q" * 48
+        r = self.m.executar("gravar_chave", {"provedor": "claude", "chave": chave})
+        bruto = json.dumps([r, self.m.estado()], ensure_ascii=False)
+        self.assertNotIn("q" * 48, bruto)
+        self.assertIn('"no_cofre": true', bruto)
+        with self.assertRaises(ValueError):
+            self.m.executar("gravar_chave", {"provedor": "claude", "chave": "curta"})
+        with self.assertRaises(ValueError):
+            self.m.executar("testar_rotas", {"categorias": ["tudo"]})
+        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+        self.assertIn('id="nv-api-chave" type="password" autocomplete="new-password"', html)
 
     def test_js_externo_e_sem_innerhtml(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")

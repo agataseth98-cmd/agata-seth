@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "nota": "Catálogo de conexões da nova versão. Claude e ChatGPT são os exemplos preenchidos (decisão do Humano, 04/11/2026). Para ligar outro provedor, copie um bloco: 'api.formato' 'openai' serve para qualquer API compatível com a da OpenAI. Chave nunca entra aqui: vai pelo painel, aba Conexões, para o cofre só de escrita.",
+  "provedores": [
+    {
+      "id": "claude",
+      "nome": "Claude (Anthropic)",
+      "categoria_orcamento": {
+        "api": "pago",
+        "cli": "assinatura"
+      },
+      "navegador": {
+        "relay_id": "claude"
+      },
+      "cli": {
+        "binario": "claude",
+        "argv": [
+          "claude",
+          "-p",
+          "--output-format",
+          "json",
+          "--tools",
+          "",
+          "--no-session-persistence",
+          "{prompt}"
+        ],
+        "modelo": "haiku",
+        "saida": "json_result",
+        "argv_modelo": [
+          "--model",
+          "{modelo}"
+        ]
+      },
+      "api": {
+        "formato": "anthropic",
+        "url": "https://api.anthropic.com/v1/messages",
+        "env": "ANTHROPIC_API_KEY",
+        "prefixo_chave": "sk-ant-",
+        "modelo": "claude-haiku-5-5"
+      }
+    },
+    {
+      "id": "chatgpt",
+      "nome": "ChatGPT (OpenAI)",
+      "categoria_orcamento": {
+        "api": "pago",
+        "cli": "assinatura"
+      },
+      "navegador": {
+        "relay_id": "chatgpt"
+      },
+      "cli": {
+        "binario": "codex",
+        "argv": [
+          "codex",
+          "exec",
+          "--sandbox",
+          "read-only",
+          "--skip-git-repo-check",
+          "--ephemeral",
+          "-o",
+          "{saida_arquivo}",
+          "{prompt}"
+        ],
+        "modelo": null,
+        "saida": "arquivo",
+        "argv_modelo": [
+          "-m",
+          "{modelo}"
+        ]
+      },
+      "api": {
+        "formato": "openai",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "env": "OPENAI_API_KEY",
+        "prefixo_chave": "sk-",
+        "modelo": null
+      }
+    }
+  ]
+}

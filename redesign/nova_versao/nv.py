@@ -89,7 +89,7 @@ def _selftest() -> int:
              and len(pac["resultados"][0]["sha256"]) == 64 and pac["commit"]),
             ("relação (10)->(11) segue", any(x["metodo"] == "relacao" and x["entrada"] == 11 for x in pac["resultados"])),
             ("ausência diz 'não encontrado nesta busca'", vazio["estado"] == acervo.NAO_ENCONTRADO),
-            ("orçamento padrão só local", orcamento.ler()["provedores"] == {"local": True, "gratuito": False, "pago": False}),
+            ("orçamento padrão só local", orcamento.ler()["provedores"] == {"local": True, "gratuito": False, "assinatura": False, "pago": False}),
             ("ledger íntegro", eventos.verificar()),
         ]
     for nome, ok in casos:
