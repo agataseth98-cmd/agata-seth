@@ -1,0 +1,58 @@
+[
+  {
+    "criterion": "a chave idempotente não grava duas vezes",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_chave_idempotente_nao_grava_duas_vezes"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-04T19:49:04+00:00"
+  },
+  {
+    "criterion": "escritas concorrentes no ledger preservam a cadeia",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
+    "stderr": "",
+    "at": "2026-11-04T19:49:04+00:00"
+  },
+  {
+    "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_transicao_recusa_salto_e_remocao_sem_autorizacao"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-04T19:49:04+00:00"
+  },
+  {
+    "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-04T19:49:05+00:00"
+  }
+]

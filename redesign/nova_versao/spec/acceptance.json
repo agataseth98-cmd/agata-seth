@@ -1,0 +1,38 @@
+[
+  {
+    "criterion": "a chave idempotente não grava duas vezes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_chave_idempotente_nao_grava_duas_vezes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "escritas concorrentes no ledger preservam a cadeia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_transicao_recusa_salto_e_remocao_sem_autorizacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_padrao_so_local_e_pago_sem_teto_nao_gasta"
+    ],
+    "cwd": null
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "criterion": "o prévio marca risco, privacidade, atualidade e problema ambíguo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_metacognicao.py::PrevioTests::test_marca_risco_privacidade_atualidade_e_problema"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o prévio conta o limite de perguntas combinado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_metacognicao.py::PrevioTests::test_conta_o_limite_de_perguntas_combinado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o posterior devolve os cinco estados de saída",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_metacognicao.py::PosteriorTests::test_estados_de_saida"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a sombra não altera o pedido e não grava o texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_metacognicao.py::SombraTests::test_sombra_nao_altera_o_pedido_e_nao_grava_texto"
+    ],
+    "cwd": null
+  }
+]

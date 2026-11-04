@@ -4,10 +4,12 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PAGINAS = {"panorama", "conselho", "operacao", "visao", "integracoes", "modelos", "manutencao", "plano",
-           "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades"}
+           "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades",
+           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}
 GRUPOS = {"sistema": {"operacao", "visao", "integracoes", "modelos", "manutencao", "plano"},
           "memoria": {"memoria", "grafo", "documentacao", "conversa"},
-          "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"}}
+          "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"},
+          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-orcamento"}}
 
 
 class Menu(HTMLParser):

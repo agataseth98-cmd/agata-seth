@@ -89,5 +89,14 @@
       "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_nova_versao_painel.py"
+    ],
+    "cwd": null
   }
 ]

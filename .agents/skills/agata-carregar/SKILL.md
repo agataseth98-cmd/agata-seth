@@ -13,7 +13,7 @@ Use só para iniciar ou retomar uma sessão sem estado atual injetado. Ao termin
 Por quê: sessão que não sincroniza e mede trabalha sobre cópia velha sem saber (MEMÓRIAS (248)-(252)).
 O bloco de estado que o `seth_gateway` injeta já traz quase tudo; se ele veio, use-o. Se não veio, meça.
 
-1. `bash ~/agata/scripts/estado_para_eco.sh` — read-only. Dá HEAD, topo de MEMÓRIAS, `sync:`, idade da
+1. `bash ~/agata/scripts/estado_para_eco.sh` — não escreve no repo (só grava o cache do `ls-remote` em `~/.cache/agata/`). Dá HEAD, topo de MEMÓRIAS, `sync:`, idade da
    hidratação, propostas abertas, hora da Máquina e `HASH-ESTADO`. É a fonte dos campos; não estime nenhum.
 2. Se `sync:` não for `PASS`: `git -C ~/agata fetch -q` e `git -C ~/agata status -sb`. **Nunca** descarte
    mudança local (`checkout --`, `reset`, `restore`, `stash`) pra "consertar" sync — pode ser aplicação
