@@ -1,0 +1,56 @@
+[
+  {
+    "criterion": "o índice é reconstruível e determinístico",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_indice_reconstruivel_e_deterministico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "hash que muda marca o derivado como pendente",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_hash_muda_e_derivado_fica_pendente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "objeto privado não aparece em consulta pública",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_privado_nao_aparece_em_consulta_publica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "busca semântica fora do ar degrada para léxico com rótulo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_semantica_fora_degrada_para_lexico_com_rotulo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "ausência sai como não encontrado nesta busca",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_ausencia_e_nao_encontrado_nesta_busca"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "skill selecionada não é executada e a quarentena fica fora",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_skill_selecionada_nao_executa_e_quarentena_fica_fora"
+    ],
+    "cwd": null
+  }
+]

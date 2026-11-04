@@ -41,6 +41,10 @@ regime normal:
 | `LOG.md` | histórico append-only do redesenho — **fica aqui** porque PROJETO.md e MEMÓRIAS.md citam este caminho (MEMÓRIAS não se edita) | — |
 | `ACESSO-GRADUADO.md` | método de acesso graduado (R0–R3) — **fica aqui** porque `librechat/canon-mcp.mjs` (dict `CANON`, quarentena P-8) aponta pra este caminho | — |
 | `propostas/` | os pares `.diff`/`APROVADO-` das Fases 0–8 | — |
+| `nova_versao/` | spec-mãe da nova versão (Experimento GPT), ledger de eventos e orçamento (`nv.py`) | painel, grupo Nova versão |
+| `alexandria/` | acervo com proveniência, índice FTS5 derivado, consulta com pacote de evidência, índice de skills | `acervo.py` · painel |
+| `metacognicao/` | antes (`previo.py`) e depois (`posterior.py`) do turno; sombra no gateway por `router/sombra_nova_versao.py` | `SETH_SOMBRA_NOVA_VERSAO=1` |
+| `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
 
 ## Docs de planejamento — arquivados
 

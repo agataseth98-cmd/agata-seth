@@ -614,6 +614,7 @@ import limpa_cabecalho  # noqa: E402  (mesmo diretório; cabeçalho único, 17/1
 import limpa_laco  # noqa: E402  (mesmo diretório; trava de laço de repetição, 18/10/2026)
 import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteamento, 23/10/2026; desligado por padrão)
 import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
+import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -1192,6 +1193,9 @@ class _Handler(BaseHTTPRequestHandler):
                             sombra_capacidade.registrar(payload, self._rota,
                                                         {m: capivara_perfis.janela(_pf, m)
                                                          for m in (_pf.get("modelos") or {})})
+                        # nova versão (Alexandria + metacognição): só registra o que faria (sombra)
+                        if sombra_nova_versao.ligado():
+                            sombra_nova_versao.registrar(payload, self._rota)
                     payload["model"] = self._rota
                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).

@@ -13,8 +13,13 @@ Entre as que casam, palavra INTEIRA vem antes de pedaço de palavra (MEMÓRIAS
 Onde procura (fixo, nunca vem da consulta): memoria/obsidian/ e extras/ inteiro
 (inclusive extras/arquivo-redesign/, decisão do Humano em (682)). Só .md.
 
-Uso: python3 scripts/busca_texto.py -- "frase"     |     --selftest
+Uso: python3 scripts/busca_texto.py [--json] -- "frase"     |     --selftest
+
+`--json` (04/11/2026, nova versão / Alexandria): a mesma busca, em JSON, com o sha256
+do arquivo de cada achado — é o baseline léxico que a avaliação compara com a Alexandria.
 """
+import hashlib
+import json
 import os
 import re
 import sys
@@ -86,15 +91,35 @@ def buscar(consulta, raiz=REPO):
     return [(n, rel, i, t) for n, _w, rel, i, t in achados[:MAX_LINHAS]], melhor, ps
 
 
+def em_json(achados, melhor, ps, raiz=REPO):
+    shas = {}
+    for _n, rel, _i, _t in achados:
+        if rel not in shas:
+            try:
+                with open(os.path.join(raiz, rel), "rb") as f:
+                    shas[rel] = hashlib.sha256(f.read()).hexdigest()
+            except OSError:
+                shas[rel] = None
+    return {"palavras": ps, "casaram": melhor, "estado": "encontrado" if achados else "não encontrado nesta busca",
+            "resultados": [{"caminho": rel, "linha": i, "trecho": t, "palavras": f"{n}/{len(ps)}", "sha256": shas[rel]}
+                           for n, rel, i, t in achados]}
+
+
 def main(argv):
     if argv[:1] == ["--selftest"]:
         return _selftest()
+    como_json = argv[:1] == ["--json"]
+    if como_json:
+        argv = argv[1:]
     if "--" in argv:
         argv = argv[argv.index("--") + 1:]
     if len(argv) != 1:
-        print("uso: busca_texto.py -- \"frase\"", file=sys.stderr)
+        print("uso: busca_texto.py [--json] -- \"frase\"", file=sys.stderr)
         return 2
     achados, melhor, ps = buscar(argv[0])
+    if como_json:
+        print(json.dumps(em_json(achados, melhor, ps), ensure_ascii=False))
+        return 0 if achados else 1
     if not achados:
         print(f"nenhuma ocorrência de {ps} (sem acento, sem maiúscula)")
         return 1
@@ -126,6 +151,9 @@ def _selftest():
         open(os.path.join(t, "memoria", "obsidian", "z.md"), "w").write("medido: `laya` 10/20\n")
         d, _, _ = buscar("Laya", t)
         ok = ok and d and d[0][1].endswith("z.md") and any(x[1].endswith("a.md") for x in d)
+        j = em_json(d, 1, ["laya"], t)
+        ok = ok and j["resultados"][0]["caminho"].endswith("z.md") and len(j["resultados"][0]["sha256"]) == 64
+        ok = ok and em_json([], 0, ["xy"], t)["estado"] == "não encontrado nesta busca"
     print("SELFTEST", "OK" if ok else f"FALHA {a} {b}")
     return 0 if ok else 1
 

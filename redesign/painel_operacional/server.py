@@ -33,6 +33,7 @@ import armazem  # noqa: E402
 import qualidade_llm  # noqa: E402
 import medicoes_painel  # noqa: E402
 import sdd_painel  # noqa: E402
+import nova_versao_painel  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
@@ -101,6 +102,7 @@ _ASSETS = {
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
+    "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
@@ -1035,6 +1037,10 @@ class Handler(BaseHTTPRequestHandler):
             observed_at, fresh_until = _reading_window()
             body = json.dumps({**medicoes_painel.estado(), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/nova-versao/estado":
+            observed_at, fresh_until = _reading_window()
+            body = json.dumps({**nova_versao_painel.estado(), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/sdd/estado":
             observed_at, fresh_until = _reading_window()
             body = json.dumps({**sdd_painel.estado(ROOT), "observed_at": observed_at, "fresh_until": fresh_until}, ensure_ascii=False).encode("utf-8")
@@ -1124,7 +1130,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_chat()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
-        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+        if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
@@ -1150,6 +1156,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(429, "text/plain; charset=utf-8", b"measurement busy")
             body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
             return self._send(202, "application/json; charset=utf-8", body)
+        if self.path == "/api/nova-versao/executar":
+            try:
+                resultado = nova_versao_painel.executar(payload.get("acao"), payload)
+            except ValueError:
+                return self._send(400, "text/plain; charset=utf-8", b"invalid nova-versao action")
+            except RuntimeError:
+                return self._send(429, "text/plain; charset=utf-8", b"nova-versao busy")
+            except FileNotFoundError:
+                return self._send(409, "text/plain; charset=utf-8", b"nova-versao index missing")
+            body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/sdd/executar":
             if not _SDD_LOCK.acquire(blocking=False):
                 return self._send(429, "text/plain; charset=utf-8", b"sdd busy")

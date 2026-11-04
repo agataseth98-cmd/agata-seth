@@ -3264,6 +3264,14 @@
   "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partid"
  },
  {
+  "nome": "agata-llm-fundamentos",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-llm-fundamentos/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "agata-mudanca-segura",
   "tipo": "skill",
   "fonte": "agata",
@@ -3286,6 +3294,14 @@
   "tema": "agata",
   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+ },
+ {
+  "nome": "agata-voz",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-voz/SKILL.md",
+  "resumo": "-"
  },
  {
   "nome": "design-taste-frontend",

@@ -78,6 +78,14 @@ Não é deliberação registrada aqui por hábito — é decisão. Sem esta tabe
 
 **Nota 2 — `scripts/busca_semantica.py`, ferramenta SECUNDÁRIA (decisão do Humano, 04/09/2026, MEMÓRIAS (327)):** o gatilho de (115) não foi atingido (276 entradas, não a ordem de grandeza medida em 118). A recusa como camada PRIMÁRIA continua de pé — grep/query_canon seguem a fonte de verdade, nada foi injetado em hidratação. O que mudou: o Humano autorizou por escrito uma ferramenta opcional, sob demanda, que usa o embedding já em produção (`:20134`, iGPU) pra rankear entradas por sentido. Medido ao vivo, não presumido: útil pra tema concreto/narrativo (busca sobre os travamentos de suspend achou (124)/(99)/(125) nos 3 primeiros lugares), fraca pra pergunta abstrata sobre o próprio sistema (busca sobre "por que evitar vetor" não achou (115) nem (293) nos top-30 — rank real 116º e 150º de 276). Registrado sem suavizar: a limitação de modelo pequeno em corpus técnico denso que (115) já apontava se confirma de novo, agora com medição desta ferramenta específica.
 
+## Nova versão (Experimento GPT) — Alexandria e demais componentes
+Direção do Humano em 04/11/2026: a arquitetura do Experimento GPT (`~/Área de trabalho/Experimento GPT/`, diário `conclusoes.md` 001–080) é a base da nova versão do Agata, com Alexandria como subsistema. Spec-mãe: `redesign/nova_versao/spec/spec.md`. A direção não substitui P-8: cada lote entra por proposta assinada.
+
+- **Fases:** F0 spec · F1 sombra · F2 avaliação · F3 integração protegida. Lote 1 (este): spec de tudo e sombra de Alexandria (`redesign/alexandria/`), metacognição (`redesign/metacognicao/`, `redesign/router/sombra_nova_versao.py`) e corpo (`redesign/corpo/`), sem inferência. Lote 2: redundância por capacidade e coordenação. Lote 3: avaliação com split reservado. Lote 4: integração, item por item.
+- **Papéis:** o Humano decide objetivo, orçamento e efeito protegido; o Modelo interpreta, pesquisa e propõe; a Máquina guarda, executa e mede. Hash prova bytes, não verdade. Nenhum componente se autoaprova nem ganha autoridade normativa: Alexandria organiza o acervo, não é cânone paralelo.
+- **Reaproveitamento:** a nova versão não cria segundo cache, indexador, roteador nem avaliador. O ledger é o `evidence_ledger`; a memória comum é o `cache_conselho`; a semântica continua secundária ((327)) e a recusa de vetor/GraphRAG como camada primária ((115)) permanece.
+- **Dados:** fora do repo, em `~/.local/share/agata/nova-versao/` (pastas de trabalho) e `~/.cache/agata/nova-versao/` (índice derivado). Orçamento de inferência configurável no painel, grupo "Nova versão"; o padrão de fábrica é só local.
+
 ## Diagnóstico
 `agata status` (grafo) · `bash scripts/perimetro.sh` (P-1..P-12) · `systemctl --user status agata.target`. Prontidão da Agata: definida nas REGRAS. (Era `hermes doctor` / `hermes status` até a remoção do Hermes em (312).)
 

@@ -77,6 +77,7 @@ function showPage(name) {
   if (name === "visao") carregarVisaoSistema();
   if (name === "qualidade") { carregarQualidade(); carregarMedicoes(); }
   if (name === "sdd") carregarSdd();
+  if (name.startsWith("nv-") && typeof window.carregarNovaVersao === "function") window.carregarNovaVersao(name);
   if (name === "conselho") loadRelayCatalog();
 }
 nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
