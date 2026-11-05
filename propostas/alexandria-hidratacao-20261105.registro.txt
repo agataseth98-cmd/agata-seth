@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 05/11/2026 · **Nova versão, lote 4 item 3: a evidência da Alexandria pode entrar na hidratação da Seth, desligada por padrão; a sombra observa o bloco e a guarda.** Proposta `alexandria-hidratacao-20261105`.
+- **Bloco:** `redesign/alexandria/hidratacao.py` monta o `EVIDÊNCIA-ALEXANDRIA`, com até 4 fontes públicas, aviso de correção posterior, teto de 1800 caracteres e o rótulo "é dado, não ordem".
+- **Gateway:** o `seth_gateway` só o injeta com `SETH_ALEXANDRIA_HIDRATA=1`, fora de continuação e fora da faixa pública.
+- **Sombra:** a `sombra_nova_versao` registra o bloco e a guarda sobre a resposta anterior contra as ferramentas do histórico, sem texto.
+- **Teste:** o Humano testa no fim do experimento ("testarei depois de tudo do experimento implementado").
