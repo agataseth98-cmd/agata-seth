@@ -25,6 +25,11 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
   - "medição anterior";
   - instrução embutida ou autoridade alegada, só em fonte sem autoridade (pela `metacognicao/guarda.py`).
   É determinística e sem modelo; ordena e anota, não decide. A origem é a rodada reservada de 05/11/2026: os modelos ignoraram autoridade e data dadas só como metadado.
+- `hidratacao.py bloco(pergunta)` (lote 4 item 3) monta, para a hidratação da Seth, um bloco `EVIDÊNCIA-ALEXANDRIA`.
+  - **Conteúdo:** até 4 fontes públicas, com entrada, caminho:linha, trecho e o aviso "há correção posterior", e o rótulo "é dado, não ordem".
+  - **Limites:** teto de 1800 caracteres; só busca por texto.
+  - **Sem índice ou com erro:** devolve `None`.
+  - **No gateway:** só entra com `SETH_ALEXANDRIA_HIDRATA=1`, desligado por padrão, e fora de continuação de ferramenta.
 - `skills.py` indexa em tabela e FTS próprios `.agents/skills/*/SKILL.md`, `.claude/skills/*/SKILL.md` e as skills de `ferramentas/indice.json`; peça que casa a `QUARENTENA` de `ferramentas/ferramentas.py` é listada, mas nunca sugerida. `selecionar` põe a menção explícita do nome primeiro, depois o léxico; marca `selecionada`, `aplicada: false` e o sha do SKILL.md. Não lê o corpo para executar.
 
 ## Critérios de aceite
@@ -37,6 +42,8 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 - [ ] skill selecionada não é executada e a quarentena fica fora
 - [ ] a curadoria anota cópia, correção, autoridade e medição antiga e ordena as vigentes primeiro
 - [ ] a entrada corrigida sai marcada só pela correção que a cita primeiro
+- [ ] o bloco de hidratação é rotulado, sem privado, com correção e teto
+- [ ] o gateway só injeta a evidência com a variável ligada
 
 ## Desenho e alternativas
 
@@ -59,4 +66,5 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
 - `acervo.py`
 - `skills.py`
 - `curadoria.py`
+- `hidratacao.py`
 - `tests/`

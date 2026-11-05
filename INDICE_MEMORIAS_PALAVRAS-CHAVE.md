@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(946) DIÁRIO — 05/11/2026 · **Nova versão, lote 4 item 3: a evidência da Alexandria pode entrar na hidratação da Seth, desligada por padrão; a sombra observa o bloco e a guarda.** Proposta `alexandria-hidratacao-20261105`.
+  palavras-chave: nova, versão, lote, item, evidência, alexandria, pode, entrar, hidratação, seth, desligada, padrão, sombra, observa, bloco, guarda, proposta, hidratacao
 (945) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forjada (nova versão, lote 4 item 2): a resposta que repete segredo ou frase mandada por fonte suspeita ou privada vira recusa.** Proposta `metacognicao-guarda-20261105`.
   palavras-chave: guarda, contra, instrução, embutida, autoridade, forjada, nova, versão, lote, item, resposta, repete, segredo, frase, mandada, fonte, suspeita, privada, vira, recusa, proposta, metacognicao
 (944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, rede, parser, estrito, revisa, integração, completa, após, alerta, codeql, expansão, entidades, xml, agora, aceita, tags, planas, allowlist, regex, nem, testes, selftest, passaram, worktree, descartável, versão, anterior, aplicação, encerrada, requer, assinatura, própria, aplicar
 (916) DIÁRIO — 28/10/2026 · **Nova proposta P-8 `conselho-em-rede-seguro-20261028` substitui a aplicação inicialmente preparada após alerta CodeQL de alta severidade.** O parser com regex foi trocado por leitura XML linha a linha; 36 testes e selftest passaram numa cópia descartável baseada em `origin/main`. A assinatura do P-8 anterior não cobre esta versão revisada; aguarda assinatura própria antes de aplicação.
   palavras-chave: nova, proposta, rede, seguro, substitui, aplicação, inicialmente, preparada, após, alerta, codeql, alta, severidade, parser, regex, trocado, leitura, xml, linha, testes, selftest, passaram, cópia, descartável, baseada, origin, main, assinatura, anterior, cobre, versão, revisada, aguarda, própria
-(915) DIÁRIO — 28/10/2026 · **Conselho em Rede preparado para incorporação na mesma entrega do painel, em proposta P-8 ainda sem assinatura.** A página, a fila humana, o histórico e a extensão Chromium foram reunidos sob o servidor do painel; nove adaptadores passaram rodada simulada. `git apply --check` e testes em worktree descartável passaram: 34 testes, selftest do painel e sintaxe dos scripts. A prévia local confirmou prompt e ferramenta pendentes. Nenhum provedor real foi chamado; integração em runtime não aplicada.
-  palavras-chave: rede, preparado, incorporação, mesma, entrega, painel, proposta, assinatura, página, fila, humana, histórico, extensão, chromium, foram, reunidos, sob, servidor, nove, adaptadores, passaram, rodada, simulada, git, apply, check, testes, worktree, descartável, selftest, sintaxe, scripts, prévia, local, confirmou, prompt, ferramenta, pendentes, provedor, real, chamado, integração, runtime, aplicada
+(915) DIÁRIO — 28/10/2026 · **Conselho em Rede preparado para incorporação na me …
+  palavras-chave: rede, preparado, incorporação
 (914) DIÁRIO — 28/10/2026 · **Interface do Conselho aplicada em branch após vali …
   palavras-chave: interface, aplicada, branch, após, vali
 (913) DIÁRIO — 28/10/2026 · **Proposta P-8 da interface do Conselho refeita sobr …

@@ -9,7 +9,10 @@ TERIA feito, para a avaliação (lote 3) comparar com o caminho atual:
 - metacognição (antes): tipo, atualidade, privacidade, risco, limite combinado;
 - Alexandria: os objetos que o pacote de evidência traria (só léxico + relações; a
   semântica fica fora da sombra para não carregar a iGPU a cada turno);
-- skills: as candidatas que o seletor sugeriria (nenhuma é carregada).
+- skills: as candidatas que o seletor sugeriria (nenhuma é carregada);
+- hidratação (lote 4): se o bloco de evidência da Alexandria seria entregue e com quantos caracteres;
+- guarda (lote 4): se a resposta ANTERIOR da Seth repetiu segredo ou frase mandada por uma ferramenta
+  do histórico. Só registra; quem bloqueia fora da sombra é outra proposta.
 
 Grava em `<dados>/metacognicao/sombra.jsonl` o hash do pedido, a classificação e os ids
 devolvidos — NUNCA o texto do pedido nem os trechos.
@@ -73,6 +76,25 @@ def observar(payload: dict, rota: str, varrer_pessoal=None) -> dict:
         linha["alexandria"] = {"estado": "sem índice"}
     except Exception as e:  # noqa: BLE001
         linha["erros"].append(f"alexandria: {e.__class__.__name__}")
+    try:
+        import hidratacao  # noqa: E402 — o bloco que a hidratação entregaria (lote 4 item 3)
+        _b, meta = hidratacao.bloco(ultima)
+        linha["hidratacao"] = {"entregaria": bool(_b), "chars": meta["chars"], "context_id": meta["context_id"],
+                               "ligada": os.environ.get("SETH_ALEXANDRIA_HIDRATA") == "1"}
+    except Exception as e:  # noqa: BLE001
+        linha["erros"].append(f"hidratacao: {e.__class__.__name__}")
+    try:
+        import guarda  # noqa: E402 — a resposta ANTERIOR da Seth repetiu algo que uma ferramenta trouxe? (só registra)
+        msgs = payload.get("messages") or []
+        idx = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "assistant"), default=None)
+        if idx is not None:
+            fontes = [{"id": f"t{i}", "texto": previo._texto(m.get("content"))} for i, m in enumerate(msgs[:idx])
+                      if isinstance(m, dict) and m.get("role") == "tool"]
+            g = guarda.checar(previo._texto(msgs[idx].get("content")), fontes)
+            linha["guarda_turno_anterior"] = {"estado": g["estado"], "ecos": [e["eco"] for e in g["ecos"]],
+                                              "fontes_ferramenta": len(fontes)}
+    except Exception as e:  # noqa: BLE001
+        linha["erros"].append(f"guarda: {e.__class__.__name__}")
     try:
         import skills  # noqa: E402
         linha["skills"] = [c["skill_id"] for c in skills.selecionar(ultima, n=3)["candidatos"]]

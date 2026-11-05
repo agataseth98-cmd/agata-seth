@@ -70,5 +70,23 @@
       "redesign/alexandria/tests/test_curadoria.py::CorrecaoNoAcervoTests::test_entrada_corrigida_sai_marcada_so_pela_primeira_citada"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o bloco de hidratação é rotulado, sem privado, com correção e teto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_hidratacao.py::BlocoTests::test_bloco_rotulado_com_correcao_sem_privado_e_com_teto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gateway só injeta a evidência com a variável ligada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_hidratacao.py::GatewayTests::test_gateway_so_injeta_com_a_variavel"
+    ],
+    "cwd": null
   }
 ]

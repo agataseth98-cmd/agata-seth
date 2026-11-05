@@ -1102,6 +1102,17 @@ def _injeta(payload: dict) -> dict:
         _cc = ""
     if _cc and os.environ.get("SETH_CACHE_CONSELHO_HIDRATA") != "0":
         auditoria = (auditoria + "\n" if auditoria else "") + _cc
+    # (05/11/2026, nova versão lote 4 item 3) evidência da Alexandria para a pergunta da vez, com as notas da
+    # curadoria; DESLIGADA por padrão (SETH_ALEXANDRIA_HIDRATA=1 liga). Só no 1º passo da resposta (não em
+    # continuação de ferramenta); sem índice ou com erro, segue sem o bloco.
+    if os.environ.get("SETH_ALEXANDRIA_HIDRATA") == "1" and not auditoria_turno.e_continuacao(msgs):
+        try:
+            import hidratacao  # redesign/alexandria (caminho posto por sombra_nova_versao)
+            _ev, _ = hidratacao.bloco(registro_pedidos.ultima_pergunta(msgs))
+        except Exception:  # noqa: BLE001
+            _ev = None
+        if _ev:
+            auditoria = (auditoria + "\n" if auditoria else "") + _ev
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
