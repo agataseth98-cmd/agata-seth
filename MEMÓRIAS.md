@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6bd484fdbf37cdc0ec009687cb2abe93c07bd16d
-  Escrito em: 05/11/2026 16:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 660da59e791e24df3c39ac7026e17e5b05a62a12
+  Escrito em: 05/11/2026 16:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/660da59e791e24df3c39ac7026e17e5b05a62a12/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/660da59e791e24df3c39ac7026e17e5b05a62a12/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/660da59e791e24df3c39ac7026e17e5b05a62a12/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/660da59e791e24df3c39ac7026e17e5b05a62a12/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/660da59e791e24df3c39ac7026e17e5b05a62a12/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(951) DIÁRIO — 05/11/2026 · **Rodada que bate no prazo vira "incompleta", não "concluída" (avaliação, lote 7): a rodada do reservado teste2 com 3.482 itens tinha teto de 900 s, rodou 190 e saiu "concluída".** Proposta `avaliacao-prazo-20261105`.
+- **Mecanismo:** `redesign/avaliacao/avaliar.py` calcula o prazo pelo tamanho da rodada e marca "incompleta" quando algum item bate no prazo.
+- **Registro:** a rodada `r-20261105-161356-d7f91b` fica como está, com 190 de 3.482 itens rodados.
+- **Ressalva:** os 190 itens já olharam as 60 tarefas do teste2. O veredito sai só da rodada completa.
+
 (950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
 - **Pedido do Humano (05/11/2026):** "sim" a registrar os gratuitos do OpenRouter; "pode colocar" o Z.AI; cota esgotada deve ser sinalizada.
 - **Mecanismo:** `config/gratuitos_omniroute.json` (lista; `crouton-alpha` fora por origem anônima) e `chamar_rota` com `cota_esgotada`.
