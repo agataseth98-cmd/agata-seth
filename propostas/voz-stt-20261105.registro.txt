@@ -1,0 +1,4 @@
+({N}) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
+- **Causa medida:** a ponte e o serviço respondem. O upload em chunked dava 411 dentro do contêiner do LibreChat.
+- **Medição:** selftest do ouvido 2/2; 11 testes de sentidos verdes.
+- **Pendente:** a conversa com microfone no navegador, a ser testada pelo Humano depois da aplicação.
