@@ -1,0 +1,93 @@
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 4b487f11..ac108638 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -266,7 +266,7 @@ speech:
+     advancedMode: false
+     speechToText:
+       engineSTT: "external"
+-      languageSTT: "Portuguese (Brazil)"
++      languageSTT: "pt"
+       autoTranscribeAudio: true
+       decibelValue: -45
+       autoSendText: 0
+diff --git a/redesign/sentidos/servidor_ouvido.py b/redesign/sentidos/servidor_ouvido.py
+index 955db9f3..9ee1f2dd 100644
+--- a/redesign/sentidos/servidor_ouvido.py
++++ b/redesign/sentidos/servidor_ouvido.py
+@@ -55,6 +55,44 @@ def idioma(campos: dict) -> str:
+     return IDIOMAS.get((campos.get("language") or "pt").lower(), "Portuguese")
+ 
+ 
++def ler_corpo(rfile, headers) -> bytes:
++    """Corpo da requisição: Content-Length, ou Transfer-Encoding: chunked (o Node/LibreChat envia assim,
++    sem Content-Length; sem isto a voz do LibreChat dava 411). Levanta ValueError com a razão."""
++    if "chunked" in (headers.get("Transfer-Encoding") or "").lower():
++        out = bytearray()
++        while True:
++            linha = rfile.readline(64)
++            if not linha:
++                raise ValueError("corpo chunked truncado")
++            try:
++                tam = int(linha.split(b";")[0].strip(), 16)
++            except ValueError:
++                raise ValueError("chunk inválido")
++            if tam == 0:
++                while rfile.readline(1024) not in (b"\r\n", b"\n", b""):
++                    pass
++                return bytes(out)
++            if len(out) + tam > LIMITE:
++                raise ValueError("corpo grande demais")
++            falta = tam
++            while falta:
++                bloco = rfile.read(falta)
++                if not bloco:
++                    raise ValueError("corpo chunked truncado")
++                out += bloco
++                falta -= len(bloco)
++            rfile.readline(2)
++    try:
++        n = int(headers.get("Content-Length") or 0)
++    except ValueError:
++        raise ValueError("Content-Length inválido")
++    if n <= 0:
++        raise ValueError("tamanho inválido")
++    if n > LIMITE:
++        raise ValueError("corpo grande demais")
++    return rfile.read(n)
++
++
+ class Handler(BaseHTTPRequestHandler):
+     transcrever = staticmethod(ouvido.transcrever)
+ 
+@@ -75,12 +113,9 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path.split("?")[0] != "/v1/audio/transcriptions":
+             return self._send(404, {"error": "not_found"})
+         try:
+-            n = int(self.headers.get("Content-Length") or 0)
+-        except ValueError:
+-            n = -1
+-        if n <= 0 or n > LIMITE:
+-            return self._send(413 if n > LIMITE else 411, {"error": "tamanho inválido"})
+-        corpo = self.rfile.read(n)
++            corpo = ler_corpo(self.rfile, self.headers)
++        except ValueError as e:
++            return self._send(413 if "grande" in str(e) else 411, {"error": str(e)})
+         try:
+             dados, campos = ler_multipart(self.headers.get("Content-Type", ""), corpo)
+         except ValueError as e:
+@@ -122,6 +157,14 @@ def _selftest() -> int:
+     r = json.loads(urllib.request.urlopen(req, timeout=5).read())
+     ok = r == {"text": "ok:English:3"}
+     print("PASS" if ok else f"FALHA {r}", "multipart OpenAI → texto")
++    import http.client  # chunked, como o Node/LibreChat envia (sem Content-Length)
++    conn = http.client.HTTPConnection(HOST, porta, timeout=5)
++    conn.request("POST", "/v1/audio/transcriptions", body=iter([corpo[:40], corpo[40:]]),
++                 headers={"Content-Type": f"multipart/form-data; boundary={b}"}, encode_chunked=True)
++    r2 = json.loads(conn.getresponse().read())
++    ok2 = r2 == {"text": "ok:English:3"}
++    print("PASS" if ok2 else f"FALHA chunked {r2}", "chunked sem Content-Length → texto")
++    ok = ok and ok2
+     srv.shutdown()
+     return 0 if ok else 1
+ 
