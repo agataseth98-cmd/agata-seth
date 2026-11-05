@@ -266,7 +266,7 @@ speech:
     advancedMode: false
     speechToText:
       engineSTT: "external"
-      languageSTT: "Portuguese (Brazil)"
+      languageSTT: "pt"
       autoTranscribeAudio: true
       decibelValue: -45
       autoSendText: 0

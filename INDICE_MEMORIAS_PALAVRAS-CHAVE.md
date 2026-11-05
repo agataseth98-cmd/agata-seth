@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
+  palavras-chave: voz, librechat, transcreve, novo, conversa, sentidos, ouvido, aceita, corpo, chunked, envia, content, length, idioma, stt, passa, código, válido, proposta
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
   palavras-chave: nvidia, gemma, lista, gratuitos, nova, versão, lote, complemento, modelo, respondeu, conta, entra, avaliação, passagem, omniroute, proposta
 (952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova versão, lote 7, complemento): origem anônima, usada só com dados redigidos e um modelo de contingência nomeado.** Proposta `crouton-condicoes-20261105`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: revisão, abas, chromium, amplia, skill, mapa, descobertas, operacionais, registrados, localmente, resultados, permanecem, históricos, proposta, mantém, nove, adaptadores, experimentais, confirmação, formal, extensão, oficial, runtime, provedor, alterado, testado
 (925) DIÁRIO — 29/10/2026 · **P-8 preparada para levar o Conselho às abas Chromium já abertas, com nove adaptadores experimentais e aprovação humana por prompt.** A proposta substitui o executor por API, preserva as abas persistentes do launcher e não cria abas ausentes; runtime e provedores reais não foram alterados ou testados. Inclui a skill `agata-relay-provedores`.
   palavras-chave: preparada, levar, abas, chromium, abertas, nove, adaptadores, experimentais, aprovação, humana, prompt, proposta, substitui, executor, api, preserva, persistentes, launcher, cria, ausentes, runtime, provedores, reais, foram, alterados, testados, inclui, skill, agata, relay
-(924) DIÁRIO — 28/10/2026 · **P-8 do executor API entrou em produção após o merge humano do PR #701.** Merge `ca80dacc`; `painel-operacional.service` reiniciado em 21:05:25 -03 e ativo. `GET /conselho-rede` e `/api/relay-council/catalog` responderam HTTP 200; fila vazia; poll observado com 4,3 s. O painel reaberto no Brave mostrou o formulário e o fluxo de aprovação. Catálogo contém 17 provedores, mas só cinco APIs estão mapeadas para execução. Nenhum prompt foi enviado. Não confirmei que o Chromium carregou a nova versão da extensão: a política do navegador bloqueou `chrome://extensions`; falta o Humano recarregar manualmente a RelayCouncil v2. Perímetro após reinício: 22 OK, 1 SKIP, 3 PARCIAL, 0 FALHA.
-  palavras-chave: executor, api, entrou, produção, após, merge, humano, dacc, painel, operacional, service, reiniciado, ativo, get, rede, relay, council, catalog, responderam, http, fila, vazia, poll, observado, reaberto, brave, mostrou, formulário, fluxo, aprovação, catálogo, contém, provedores, cinco, apis, estão, mapeadas, execução, prompt, enviado, confirmei, chromium, carregou, nova, versão, extensão, política, navegador, bloqueou, chrome, extensions, falta, recarregar, manualmente, relaycouncil, perímetro, reinício, skip, parcial, falha
+(924) DIÁRIO — 28/10/2026 · **P-8 do executor API entrou em produção após o merg …
+  palavras-chave: executor, api, entrou, produção, após, merg
 (922) DIÁRIO — 28/10/2026 · **Assinatura P-8 validada e proposta aplicada em wor …
   palavras-chave: assinatura, validada, proposta, aplicada, wor
 (921) DIÁRIO — 28/10/2026 · **Proposta P-8 preparada para substituir o executor …
