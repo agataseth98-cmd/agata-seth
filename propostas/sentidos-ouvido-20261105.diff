@@ -1,0 +1,766 @@
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index bf0fa479..41542b9e 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -19,6 +19,7 @@ on:
+       - "redesign/corpo/**"
+       - "redesign/conexoes/**"
+       - "redesign/avaliacao/**"
++      - "redesign/sentidos/**"
+       - "redesign/router/sombra_nova_versao.py"
+       - "ferramentas/**"
+       - "scripts/busca_texto.py"
+@@ -41,7 +42,7 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests ferramentas/test_ferramentas.py
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests ferramentas/test_ferramentas.py
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+@@ -51,8 +52,8 @@ jobs:
+ 
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao
+-          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao; do
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
++          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+           done
+diff --git a/PROJETO_REFERENCIA.md b/PROJETO_REFERENCIA.md
+index 69b8ba5d..903e21ae 100644
+--- a/PROJETO_REFERENCIA.md
++++ b/PROJETO_REFERENCIA.md
+@@ -86,6 +86,7 @@ Direção do Humano em 04/11/2026: a arquitetura do Experimento GPT (`~/Área de
+ - **Reaproveitamento:** a nova versão não cria segundo cache, indexador, roteador nem avaliador. O ledger é o `evidence_ledger`; a memória comum é o `cache_conselho`; a semântica continua secundária ((327)) e a recusa de vetor/GraphRAG como camada primária ((115)) permanece.
+ - **Conexões (lote 2):** `redesign/conexoes/` liga qualquer modelo por três caminhos — navegador (Conselho em Rede, aprovação por envio), programa da assinatura e API com chave do cofre do painel —, com Claude e ChatGPT como exemplos para outros usuários. Redundância só conta para a capacidade testada (`testar_rotas.py`).
+ - **Avaliação (lote 3):** `redesign/avaliacao/` compara o caminho atual (busca por texto) com a Alexandria nas mesmas tarefas e rotas: 30 tarefas em seis grupos, 12 reservadas fora do repo e do acervo, revisão do Humano no hash e política fixada antes de rodar, registro comum por execução, métricas por dimensão com `null` em denominador zero e veto por falha crítica. Página Avaliação no painel.
++- **Sentidos (lote 4, item 1):** `redesign/sentidos/ouvido.py` é o ouvido local: `lfm3-audio` (Liquid AI) pelo Ollama, com o Whisper da iGPU de reserva só se já estiver no ar. A voz do sistema continua o piper `agata-last`. Medido em 05/11 com voz sintética: 3 a 5% de erro por palavra, contra 14 a 18% do Whisper base.
+ - **Dados:** fora do repo, em `~/.local/share/agata/nova-versao/` (pastas de trabalho) e `~/.cache/agata/nova-versao/` (índice derivado). Orçamento de inferência configurável no painel, grupo "Nova versão"; o padrão de fábrica é só local.
+ 
+ ## Diagnóstico
+diff --git a/redesign/README.md b/redesign/README.md
+index 3e62afaa..3987ab4a 100644
+--- a/redesign/README.md
++++ b/redesign/README.md
+@@ -47,6 +47,7 @@ regime normal:
+ | `conexoes/` | conexões de modelos (navegador, programa, API), cofre de chaves só de escrita, teste de redundância por capacidade; guia em `conexoes/README.md` | painel · `testar_rotas.py` |
+ | `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
+ | `avaliacao/` | avaliação da nova versão (F2): registro comum por execução, 30 tarefas (reservado fora do repo), condições pareadas, métricas por dimensão e veredito | `avaliar.py` · `recuperacao.py` · painel |
++| `sentidos/` | projeto 5 sentidos: ouvido local (fala → texto) com `lfm3-audio` e Whisper de reserva, e a medição sintética do ouvido | `ouvido.py` · `medir_ouvido.py` · painel |
+ 
+ ## Docs de planejamento — arquivados
+ 
+diff --git a/redesign/avaliacao/avaliar.py b/redesign/avaliacao/avaliar.py
+index 50b2db78..bacf4cb7 100644
+--- a/redesign/avaliacao/avaliar.py
++++ b/redesign/avaliacao/avaliar.py
+@@ -367,7 +367,7 @@ def estado() -> dict:
+     return {"conjuntos": {s: len(conjunto.carregar(s)) for s in ("dev", "calibracao")},
+             "reservado": conjunto.estado_reservado(), "politica": politica(), "condicoes": list(CONDICOES),
+             "execucoes": [{k: r.get(k) for k in ("run_id", "split", "inicio", "fim", "estado", "rotas", "condicoes", "resumo")}
+-                          for r in registro.listar(5)]}
++                          for r in registro.listar(15) if r.get("medidor") in ("avaliar", "recuperacao")][:5]}
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+index 551fb1cc..d72e78b0 100644
+--- a/redesign/painel_operacional/nova_versao.js
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -281,7 +281,27 @@
+     por("nv-out", blocos);
+   }
+ 
+-  const telas = {"nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
++  // ---------------------------------------------------------------- Sentidos
++  function sentidos() {
++    const s = (estado && estado.sentidos) || {};
++    const o = s.ouvido || {}; const u = s.ultima_medicao; const job = ((estado && estado.avaliacao) || {}).job || {};
++    const pm = (u && u.resumo && u.resumo.por_motor) || {};
++    const lfm = pm["lfm3|limpo"]; const wh = pm["whisper|limpo"];
++    por("nv-sen-kpis", kpi("Ouvido principal", o.principal || "—", "teal"), kpi("Erro do principal", lfm ? pct(lfm.wer) : null, "teal", "frases limpas"),
++      kpi("Erro da reserva", wh && wh.wer !== null ? pct(wh.wer) : null, "gold", "Whisper"), kpi("Voz", "agata-last", "violet", "inalterada"));
++    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["voz", o.voz || "—"],
++      ["última medição", u ? quando(u.inicio) + " · " + (u.estado || "") : "nenhuma"]]));
++    const rodando = job.estado === "rodando" && job.tipo === "ouvido";
++    byId("nv-sen-titulo").textContent = rodando ? "Medindo o ouvido…" : "Fala → texto";
++    if (rodando) setTimeout(() => recarregar("nv-sentidos"), 5000);
++    const linhas = Object.values(pm);
++    mostrar("nv-sen-wrap", linhas.length > 0);
++    por("nv-sen-lista", linhas.map((x) => h("tr", {}, h("td", {text: x.motor === "lfm3" ? "lfm3-audio" : "Whisper (reserva)"}), h("td", {text: x.condicao === "limpo" ? "limpo" : "com ruído"}),
++      h("td", {class: "num", text: x.wer === null ? "não medido" : pct(x.wer)}), h("td", {class: "num", text: x.perfeitas === null ? "—" : x.perfeitas + "/20"}),
++      h("td", {class: "num", text: x.tempo_mediano_s === null ? "—" : x.tempo_mediano_s.toFixed(2) + " s"}))));
++  }
++
++  const telas = {"nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
+   window.carregarNovaVersao = async function (nome) {
+     await ler();
+     if (!estado) { const pg = byId("page-" + nome); if (pg) { const k = pg.querySelector(".kpis"); if (k) k.replaceChildren(kpi("Nova versão", "indisponível", "rose", "o servidor não respondeu")); } return; }
+@@ -406,5 +426,9 @@
+     try { await executar("medir_recuperacao", {split: val("nv-run-split")}); nota("nv-run-nota", "Medindo a busca, sem modelo.", "ok"); } catch (e) { nota("nv-run-nota", motivoErro(e), "erro"); }
+     recarregar("nv-avaliacao");
+   });
++  confirmar(byId("nv-sen-medir"), async () => {
++    try { await executar("medir_ouvido"); nota("nv-sen-nota", "Medição iniciada: leva uns dois minutos.", "ok"); } catch (e) { nota("nv-sen-nota", motivoErro(e), "erro"); }
++    recarregar("nv-sentidos");
++  });
+   if (byId("nv-out-run")) byId("nv-out-run").addEventListener("change", () => avaliacao());
+ })();
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+index 41d609f2..4170fad4 100644
+--- a/redesign/painel_operacional/nova_versao_painel.py
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -16,13 +16,13 @@ import time
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao"):
++for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao", "sentidos"):
+     sys.path.insert(0, str(ROOT / "redesign" / _p))
+ 
+ ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
+          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
+          "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
+-         "cancelar_avaliacao", "ver_execucao")
++         "cancelar_avaliacao", "ver_execucao", "medir_ouvido")
+ _TESTE: dict = {"estado": "ocioso"}
+ _AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
+ _TESTE_LOCK = threading.Lock()
+@@ -41,7 +41,16 @@ def estado() -> dict:
+             "teste_rotas": {"job": job, "ultimo": {k: ult[k] for k in ("run_id", "quando", "estado", "chamadas",
+                                                                        "rotas_que_passaram", "obsoleto")} if ult else None,
+                             "resultados": (ult or {}).get("resultados", [])[:60]},
+-            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao()}
++            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao(), "sentidos": _estado_sentidos()}
++
++
++def _estado_sentidos() -> dict:
++    import ouvido  # noqa: E402
++    import registro  # noqa: E402
++    ult = next((r for r in registro.listar(20) if r.get("medidor") == "ouvido"), None)
++    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)",
++                       "voz": "piper pt_BR-agata-last (inalterada)"},
++            "ultima_medicao": {k: ult.get(k) for k in ("run_id", "inicio", "fim", "estado", "resumo")} if ult else None}
+ 
+ 
+ def _estado_avaliacao() -> dict:
+@@ -96,6 +105,9 @@ def _avaliacao(acao: str, dados: dict) -> dict:
+         for t in rodando:
+             tarefas.cancelar(t["task_id"])
+         return {"canceladas": [t["task_id"] for t in rodando]}
++    if acao == "medir_ouvido":
++        import medir_ouvido  # noqa: E402
++        return _iniciar_avaliacao(lambda: medir_ouvido.medir(), "ouvido")
+     if acao == "medir_recuperacao":
+         import recuperacao  # noqa: E402
+         split = dados.get("split") if dados.get("split") in ("dev", "calibracao", "teste") else "dev"
+@@ -146,7 +158,7 @@ def executar(acao, dados: dict | None = None) -> dict:
+         threading.Thread(target=_rodar_teste, args=(set(cats) if cats else None,), daemon=True).start()
+         return {"acao": acao, "resultado": {"estado": "rodando"}}
+     if acao in ("salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar",
+-                "medir_recuperacao", "cancelar_avaliacao", "ver_execucao"):
++                "medir_recuperacao", "cancelar_avaliacao", "ver_execucao", "medir_ouvido"):
+         return {"acao": acao, "resultado": _avaliacao(acao, dados)}
+     if acao == "cancelar_teste":
+         import tarefas  # noqa: E402
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 5eae2f24..3a4f69cf 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -43,6 +43,7 @@
+       <button data-page="nv-conexoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg>Conexões de modelos</button>
+       <button data-page="nv-orcamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.5"/></svg>Orçamento e eventos</button>
+       <button data-page="nv-avaliacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20h16M7 16V10M12 16V5M17 16v-4"/></svg>Avaliação</button>
++      <button data-page="nv-sentidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6a5 5 0 0 1 9 3c0 3-3 4-3 7a3 3 0 0 1-6 0M6 9a7 7 0 0 1 2-5"/></svg>Sentidos</button>
+     </div></div>
+   </nav></div>
+   <div class="abrir-lista" aria-label="Serviços do sistema"><div class="abrir-titulo">Serviços</div>
+@@ -275,6 +276,11 @@
+ <div class="nv-form estreito"><label class="nv-campo"><span>chamadas por rodada</span><input type="number" id="nv-orc-chamadas" min="0" max="100000"></label><label class="nv-campo"><span>tokens por rodada</span><input type="number" id="nv-orc-tokens" min="0" max="50000000"></label><label class="nv-campo"><span>tempo por chamada (s)</span><input type="number" id="nv-orc-timeout" min="1" max="3600"></label><label class="nv-campo"><span>teto em R$</span><input type="number" id="nv-orc-reais" min="0" max="10000" step="0.01"></label></div>
+ <div class="nv-acoes"><button type="button" class="btn" id="nv-orc-salvar">Salvar orçamento</button></div><p class="nv-nota" id="nv-orc-nota" role="status"></p></article>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ledger</div><h2 class="panel-title" id="nv-eventos-titulo">Últimos eventos</h2></div></div><div class="nv-tabela-wrap"><table class="nv-tabela"><thead><tr><th>quando</th><th>componente</th><th>tipo</th><th>estado</th><th>origem</th></tr></thead><tbody id="nv-eventos"></tbody></table></div></article></section>
++<section class="page nv-page" id="page-nv-sentidos" data-title="Sentidos"><div class="section-heading"><div><div class="eyebrow">Nova versão · projeto 5 sentidos</div><h1>Sentidos</h1><p>O primeiro sentido é o ouvido: fala vira texto, tudo na Máquina. O motor principal é o lfm3-audio, e o Whisper da GPU integrada fica de reserva. A voz do sistema continua a mesma (piper agata-last).</p></div></div>
++<div class="kpis" id="nv-sen-kpis"></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ouvido · medição sintética</div><h2 class="panel-title" id="nv-sen-titulo">Fala → texto</h2></div><div class="nv-acoes"><button type="button" class="btn" id="nv-sen-medir">Medir o ouvido</button></div></div>
++<dl class="nv-dl" id="nv-sen-dl"></dl><p class="nv-nota" id="nv-sen-nota" role="status">Vinte frases fixas, faladas pela voz do sistema, limpas e com ruído leve. Nenhuma gravação sua. O Whisper só entra se já estiver ligado.</p>
++<div class="nv-tabela-wrap" id="nv-sen-wrap" hidden><table class="nv-tabela"><thead><tr><th>motor</th><th>áudio</th><th>erro por palavra</th><th>frases perfeitas</th><th>tempo por frase</th></tr></thead><tbody id="nv-sen-lista"></tbody></table></div></article></section>
+ <section class="page nv-page" id="page-nv-avaliacao" data-title="Avaliação"><div class="section-heading"><div><div class="eyebrow">Nova versão · F2, medir antes de integrar</div><h1>Avaliação</h1><p>A Alexandria melhora as respostas sem aumentar erro crítico nem custo? Cada rodada compara o caminho atual (busca por texto) com a versão nova, nas mesmas tarefas e na mesma rota. Trinta tarefas em seis grupos; doze ficam reservadas, fora do repositório.</p></div></div>
+ <div class="kpis" id="nv-ava-kpis"></div>
+ <div class="nv-cols"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Antes de medir o reservado</div><h2 class="panel-title">O que falta</h2></div></div><ol class="nv-passos" id="nv-ava-passos"></ol></article>
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 9a1c890e..7b519dfc 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -14,8 +14,8 @@
+ - `GET /api/sdd/estado` lista os componentes ancorados, seus critérios e o estado da âncora.
+ - `POST /api/sdd/executar` aceita só `{acao: ancora|criterios, componente}` de componente ancorado, exige JSON, origem igual e roda um por vez; os comandos do manifesto precisam ser `pytest -q redesign/...`.
+ - `GET /api/medicoes/estado` e `POST /api/medicoes/executar` rodam só `medir_recuperacao.py` (lexical ou `--semantico`) e `medir_contexto_efetivo.py` (tarefa `agulha`, `varias`, `rastreio` ou `agregacao`, de lista fechada, com `raciocinio` `desligado` ou `ligado`), um por vez e em segundo plano; o modelo da medição de contexto precisa estar na lista de tags do Ollama local; resultados ficam fora do repositório (`AGATA_MEDICOES_DIR`).
+-- `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`, `gravar_chave`, `remover_chave`, `ajustar_conexao`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste` e, no lote 3, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `rotas_disponiveis`, `avaliar`, `medir_recuperacao`, `cancelar_avaliacao`, `ver_execucao`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`). A chave de API digitada em Conexões vai para o cofre de `redesign/conexoes/segredos.py` e nenhuma resposta do painel a devolve; o campo é `password` e é limpo ao enviar. As páginas da nova versão usam só classes de `nova_versao.css` (a CSP tem `style-src 'self'`, que ignora atributo `style`); a Avaliação recusa o reservado sem revisão do Humano e sem política fixada, e o estado nunca traz o gabarito.
+-- A navegação lateral agrupa as 23 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
++- `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`, `gravar_chave`, `remover_chave`, `ajustar_conexao`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste` e, no lote 3, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `rotas_disponiveis`, `avaliar`, `medir_recuperacao`, `cancelar_avaliacao`, `ver_execucao` e, no lote 4, `medir_ouvido`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`). A chave de API digitada em Conexões vai para o cofre de `redesign/conexoes/segredos.py` e nenhuma resposta do painel a devolve; o campo é `password` e é limpo ao enviar. As páginas da nova versão usam só classes de `nova_versao.css` (a CSP tem `style-src 'self'`, que ignora atributo `style`); a Avaliação recusa o reservado sem revisão do Humano e sem política fixada, e o estado nunca traz o gabarito.
++- A navegação lateral agrupa as 24 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
+ - A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+diff --git a/redesign/painel_operacional/test_menu_painel.py b/redesign/painel_operacional/test_menu_painel.py
+index d818c01b..e5bbd9ce 100644
+--- a/redesign/painel_operacional/test_menu_painel.py
++++ b/redesign/painel_operacional/test_menu_painel.py
+@@ -5,11 +5,11 @@ from pathlib import Path
+ HERE = Path(__file__).resolve().parent
+ PAGINAS = {"panorama", "conselho", "operacao", "visao", "integracoes", "modelos", "manutencao", "plano",
+            "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades",
+-           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao"}
++           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao", "nv-sentidos"}
+ GRUPOS = {"sistema": {"operacao", "visao", "integracoes", "modelos", "manutencao", "plano"},
+           "memoria": {"memoria", "grafo", "documentacao", "conversa"},
+           "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"},
+-          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao"}}
++          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao", "nv-sentidos"}}
+ 
+ 
+ class Menu(HTMLParser):
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+index f68c5f71..2bfe3cfc 100644
+--- a/redesign/painel_operacional/test_nova_versao_painel.py
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -73,7 +73,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         self.assertIn('<link rel="stylesheet" href="nova_versao.css">', html)
+         for sec in re.findall(r'<section class="page nv-page".*?</section>', html, re.S):
+             self.assertNotIn("style=", sec)
+-        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 6)
++        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 7)
+         js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
+         self.assertNotIn(".style.", js)
+         self.assertNotIn('"style"', js)
+diff --git a/redesign/sentidos/frases_ouvido.txt b/redesign/sentidos/frases_ouvido.txt
+new file mode 100644
+index 00000000..55951006
+--- /dev/null
++++ b/redesign/sentidos/frases_ouvido.txt
+@@ -0,0 +1,20 @@
++Bom dia, Seth. Qual é a previsão do tempo para hoje?
++Abra o painel e mostre o estado dos serviços.
++Quantas entradas novas foram registradas nas memórias esta semana?
++A Alexandria encontrou alguma fonte sobre o travamento no suspend?
++Desligue o OmniRoute depois que o teste terminar.
++Me lembre de assinar a proposta amanhã às nove horas.
++O modelo local respondeu em três segundos e meio.
++Qual é a porta do painel operacional?
++Leia em voz alta o resumo da última conversa.
++Preciso de uma lista de compras: arroz, feijão, café e pão.
++A temperatura da placa de vídeo passou de oitenta graus?
++Compare a busca por texto com a busca por sentido.
++Não quero que nenhum dado pessoal saia da máquina.
++Quanto custou a rodada de avaliação de ontem?
++Faça um backup do cofre antes de mudar a configuração.
++O Conselho em Rede precisa da minha aprovação para enviar.
++Explique em poucas palavras o que é metacognição.
++Toque uma música calma enquanto eu trabalho.
++A reunião foi adiada para quinta-feira à tarde.
++Obrigado, por hoje é só isso.
+diff --git a/redesign/sentidos/medir_ouvido.py b/redesign/sentidos/medir_ouvido.py
+new file mode 100644
+index 00000000..e7cea2d6
+--- /dev/null
++++ b/redesign/sentidos/medir_ouvido.py
+@@ -0,0 +1,109 @@
++#!/usr/bin/env python3
++"""Mede o ouvido (fala → texto) com frases sintéticas da voz do sistema: WER e tempo por motor.
++
++As 20 frases fixas de `frases_ouvido.txt` são faladas pelo piper `pt_BR-agata-last`
++(`scripts/agata_falar.py`, sem tocar) e misturadas a ruído rosa leve (ffmpeg). Cada motor transcreve
++cada clipe: `lfm3` (Ollama) e `whisper` (iGPU, só se já estiver no ar; senão sai "não medido"). O WER é
++calculado sem acento, sem pontuação e em minúsculas. Grava no registro comum da avaliação
++(`redesign/avaliacao/registro.py`, medidor `ouvido`), com a frase de referência e a transcrição.
++
++Limite: a voz é sintética, não a do Humano; o ruído é leve. Mede o caso fácil. Só roda a pedido
++(painel ou terminal): liga o piper só durante a geração, como o `agata_falar.py` já faz.
++Uso: medir_ouvido.py [--motores lfm3,whisper]
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import re
++import statistics
++import subprocess
++import sys
++import tempfile
++import time
++import unicodedata
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++for _p in (AQUI, REPO / "redesign" / "avaliacao", REPO / "redesign" / "nova_versao", REPO / "scripts"):
++    sys.path.insert(0, str(_p))
++import ouvido  # noqa: E402
++import registro  # noqa: E402
++
++FRASES = AQUI / "frases_ouvido.txt"
++
++
++def norm(t: str) -> list[str]:
++    t = unicodedata.normalize("NFKD", (t or "").lower())
++    t = "".join(c for c in t if not unicodedata.combining(c))
++    return re.sub(r"[^a-z0-9 ]", " ", t).split()
++
++
++def wer(ref: str, hip: str) -> float:
++    r, h = norm(ref), norm(hip)
++    d = list(range(len(h) + 1))
++    for i in range(1, len(r) + 1):
++        p, d[0] = d[0], i
++        for j in range(1, len(h) + 1):
++            p, d[j] = d[j], min(d[j] + 1, d[j - 1] + 1, p + (r[i - 1] != h[j - 1]))
++    return d[len(h)] / max(len(r), 1)
++
++
++def gerar(frases: list[str], pasta: Path, falar=None) -> list[tuple[str, Path, Path]]:
++    if falar is None:
++        import agata_falar
++        falar = agata_falar.falar
++    out = []
++    for i, f in enumerate(frases, 1):
++        d = pasta / f"f{i:02d}"
++        d.mkdir()
++        if falar(f, tocar=False, salvar=d) != 0:
++            raise RuntimeError("a voz do sistema não gerou o áudio")
++        bruto = sorted(d.glob("fala-*.wav"))[0]
++        limpo, ruido = pasta / f"limpo{i:02d}.wav", pasta / f"ruido{i:02d}.wav"
++        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(bruto), "-ar", "16000", "-ac", "1", str(limpo)], check=True)
++        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(limpo), "-filter_complex",
++                        "anoisesrc=d=60:c=pink:a=0.03:r=16000[n];[0][n]amix=inputs=2:duration=first:normalize=0",
++                        "-ar", "16000", "-ac", "1", str(ruido)], check=True)
++        out.append((f, limpo, ruido))
++    return out
++
++
++def medir(motores=("lfm3", "whisper"), *, falar=None, transcrever=None) -> dict:
++    frases = [x for x in FRASES.read_text(encoding="utf-8").splitlines() if x.strip()]
++    transcrever = transcrever or ouvido.transcrever
++    run = registro.abrir("ouvido", "dev", registro.hash_conjunto([{"task_id": f"f{i:02d}", "frase": f}
++                                                                 for i, f in enumerate(frases, 1)]),
++                         extra={"motores": list(motores), "voz": "piper pt_BR-agata-last (sintética)"})
++    resumo = {}
++    with tempfile.TemporaryDirectory(prefix="medir-ouvido-") as t:
++        clipes = gerar(frases, Path(t), falar)
++        for m in motores:
++            for cond in ("limpo", "ruido"):
++                ws, ts, nao = [], [], 0
++                for i, (ref, limpo, ruido) in enumerate(clipes, 1):
++                    r = transcrever(limpo if cond == "limpo" else ruido, motor=m)
++                    if not r["text"]:
++                        nao += 1
++                        registro.linha(run, task_id=f"f{i:02d}", condition=f"{m}|{cond}", model_id=m, outcome="nao_rodou",
++                                       failure_stage=r["falha_etapa"], erro=r["erro"])
++                        continue
++                    w = wer(ref, r["text"])
++                    ws.append(w); ts.append(r["proc_s"])
++                    registro.linha(run, task_id=f"f{i:02d}", condition=f"{m}|{cond}", model_id=r["motor"],
++                                   outcome="passou" if w == 0 else "falhou", latency_ms=round(r["proc_s"] * 1000),
++                                   referencia=ref, transcricao=r["text"], wer=round(w, 4))
++                resumo[f"{m}|{cond}"] = {"motor": m, "condicao": cond, "n": len(ws), "nao_rodou": nao,
++                                         "wer": round(statistics.mean(ws), 4) if ws else None,
++                                         "perfeitas": sum(w == 0 for w in ws) if ws else None,
++                                         "tempo_mediano_s": round(statistics.median(ts), 3) if ts else None}
++    return registro.fechar(run, {"por_motor": resumo, "nota": "voz sintética e ruído leve: mede o caso fácil"})
++
++
++if __name__ == "__main__":
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--motores", default="lfm3,whisper")
++    a = ap.parse_args()
++    r = medir(tuple(a.motores.split(",")))
++    print(json.dumps({"run_id": r["run_id"], **r["resumo"]}, ensure_ascii=False, indent=1))
+diff --git a/redesign/sentidos/ouvido.py b/redesign/sentidos/ouvido.py
+new file mode 100644
+index 00000000..7ebc48cb
+--- /dev/null
++++ b/redesign/sentidos/ouvido.py
+@@ -0,0 +1,170 @@
++#!/usr/bin/env python3
++"""Ouvido do Agata (projeto 5 sentidos, nova versão, lote 4 item 1): fala → texto, tudo local.
++
++Motor principal: `lfm3-audio:2b` (Liquid AI) pelo Ollama local. Reserva: o Whisper da iGPU
++(`redesign/igpu/whisper_server.py`, porta 20130), só se o serviço já estiver no ar. Este módulo não liga
++serviço nenhum (decisão de 29/10: tudo sob demanda).
++
++Medido em 05/11/2026 (20 frases da voz do sistema, `medir_ouvido.py`): lfm3-audio teve WER de 3,4%
++(limpo) e 4,0% (com ruído), com 0,14 s por frase; o Whisper base teve 18% e 0,6 s.
++A instrução de transcrever vai como mensagem de SISTEMA, como no card oficial. Na mensagem do usuário
++o modelo entra em laço e o Ollama aborta com "token repeat limit". O áudio vai em base64 no campo
++`images` da mensagem (o campo `audio` dá 500 no Ollama 0.40.14).
++
++Só ouve: a voz do sistema continua o piper `pt_BR-agata-last` (`scripts/agata_falar.py`); este módulo
++nunca gera fala. O áudio não sai da Máquina; nada é gravado além do arquivo temporário convertido.
++
++Uso: ouvido.py ARQUIVO [--motor auto|lfm3|whisper] [--idioma Portuguese]     |     --selftest
++Saída: JSON {text, motor, proc_s, audio_s, falha_etapa, erro}. Exit 0 = transcreveu; 3 = nenhum motor.
++"""
++from __future__ import annotations
++
++import base64
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import time
++import urllib.error
++import urllib.request
++from pathlib import Path
++
++OLLAMA = os.environ.get("AGATA_OLLAMA", "http://127.0.0.1:11434")
++MODELO = os.environ.get("AGATA_OUVIDO_MODELO", "lfm3-audio:2b")
++WHISPER = os.environ.get("AGATA_WHISPER", "http://127.0.0.1:20130")
++PASTA_WHISPER = Path(os.path.realpath(os.path.expanduser(
++    os.environ.get("OVW_PASTA_ENTRADA", "~/.cache/agata/whisper-entrada"))))
++MOTORES = ("auto", "lfm3", "whisper")
++MAX_BYTES = 50 * 1024 * 1024
++
++
++def _post(url: str, corpo: dict, timeout: int) -> dict:
++    req = urllib.request.Request(url, data=json.dumps(corpo).encode(), headers={"Content-Type": "application/json"})
++    with urllib.request.urlopen(req, timeout=timeout) as r:
++        return json.loads(r.read())
++
++
++def para_16k(origem: Path, destino: Path) -> float | None:
++    """Converte para wav mono 16 kHz (o que os dois motores esperam). Devolve a duração em segundos."""
++    if not shutil.which("ffmpeg"):
++        raise RuntimeError("ffmpeg ausente")
++    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(origem), "-ar", "16000", "-ac", "1", str(destino)],
++                   check=True, timeout=60, stdin=subprocess.DEVNULL)
++    try:
++        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(destino)],
++                             capture_output=True, text=True, timeout=20).stdout.strip()
++        return round(float(out), 2)
++    except (ValueError, OSError, subprocess.SubprocessError):
++        return None
++
++
++def lfm3(wav16: Path, idioma: str = "Portuguese", *, post=None, timeout: int = 120) -> str:
++    post = post or _post
++    b = base64.b64encode(wav16.read_bytes()).decode()
++    d = post(f"{OLLAMA}/api/chat", {"model": MODELO, "stream": False, "keep_alive": "10m",
++                                    "messages": [{"role": "system", "content": f"Perform ASR in {idioma}."},
++                                                 {"role": "user", "content": "", "images": [b]}]}, timeout)
++    return ((d.get("message") or {}).get("content") or "").strip()
++
++
++def whisper_no_ar(get=None) -> bool:
++    try:
++        (get or urllib.request.urlopen)(f"{WHISPER}/", timeout=2)
++        return True
++    except urllib.error.HTTPError:
++        return True          # respondeu (404 na raiz): está no ar
++    except Exception:  # noqa: BLE001
++        return False
++
++
++def whisper(wav16: Path, *, post=None, timeout: int = 120) -> str:
++    """Usa o servidor existente pelo caminho permitido (OVW_PASTA_ENTRADA), sem mexer nele."""
++    post = post or _post
++    PASTA_WHISPER.mkdir(parents=True, exist_ok=True)
++    fd, nome = tempfile.mkstemp(suffix=".wav", dir=PASTA_WHISPER)
++    os.close(fd)
++    try:
++        shutil.copyfile(wav16, nome)
++        return (post(f"{WHISPER}/transcribe", {"path": nome}, timeout).get("text") or "").strip()
++    finally:
++        os.remove(nome)
++
++
++def transcrever(arquivo: str | Path, *, motor: str = "auto", idioma: str = "Portuguese",
++                chamar_lfm3=None, chamar_whisper=None, whisper_ativo=None) -> dict:
++    if motor not in MOTORES:
++        raise ValueError("motor fora da lista")
++    origem = Path(arquivo)
++    if not origem.is_file() or origem.stat().st_size > MAX_BYTES:
++        raise ValueError("arquivo ausente ou grande demais")
++    chamar_lfm3 = chamar_lfm3 or lfm3
++    chamar_whisper = chamar_whisper or whisper
++    ativo = whisper_ativo or whisper_no_ar
++    with tempfile.TemporaryDirectory(prefix="ouvido-") as tmp:
++        wav = Path(tmp) / "16k.wav"
++        audio_s = para_16k(origem, wav)
++        tentativas = []
++        ordem = {"auto": ("lfm3", "whisper"), "lfm3": ("lfm3",), "whisper": ("whisper",)}[motor]
++        for m in ordem:
++            if m == "whisper" and not ativo():
++                tentativas.append({"motor": m, "falha_etapa": "indisponivel", "erro": "whisper fora do ar (sob demanda)"})
++                continue
++            t0 = time.monotonic()
++            try:
++                texto = chamar_lfm3(wav, idioma) if m == "lfm3" else chamar_whisper(wav)
++            except urllib.error.HTTPError as e:
++                corpo = e.read()[:200].decode(errors="replace") if hasattr(e, "read") else ""
++                tentativas.append({"motor": m, "falha_etapa": "execucao", "erro": f"HTTP {e.code}: {corpo}"})
++                continue
++            except Exception as e:  # noqa: BLE001 — próximo motor
++                tentativas.append({"motor": m, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"})
++                continue
++            if not texto:
++                tentativas.append({"motor": m, "falha_etapa": "execucao", "erro": "transcrição vazia"})
++                continue
++            return {"text": texto, "motor": m if m == "whisper" else MODELO, "proc_s": round(time.monotonic() - t0, 3),
++                    "audio_s": audio_s, "falha_etapa": None, "erro": None, "tentativas": tentativas}
++    return {"text": None, "motor": None, "proc_s": None, "audio_s": audio_s, "falha_etapa": "indisponivel",
++            "erro": "nenhum motor transcreveu", "tentativas": tentativas}
++
++
++def _selftest() -> int:
++    ok = True
++    if not shutil.which("ffmpeg"):
++        print("SKIP sem ffmpeg")
++        return 0
++    with tempfile.TemporaryDirectory() as t:
++        a = Path(t) / "x.wav"
++        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "sine=f=440:d=1", str(a)], check=True)
++        r = transcrever(a, chamar_lfm3=lambda w, i: "olá", whisper_ativo=lambda: False)
++        ok &= r["text"] == "olá" and r["motor"] == MODELO
++        print(("PASS" if ok else "FALHA"), "motor principal")
++
++        def cai(w, i):
++            raise ConnectionError("fora")
++        r = transcrever(a, chamar_lfm3=cai, chamar_whisper=lambda w: "reserva", whisper_ativo=lambda: True)
++        ok &= r["motor"] == "whisper" and r["tentativas"][0]["falha_etapa"] == "transporte"
++        print(("PASS" if ok else "FALHA"), "reserva quando o principal cai")
++        r = transcrever(a, chamar_lfm3=cai, whisper_ativo=lambda: False)
++        ok &= r["text"] is None and r["falha_etapa"] == "indisponivel"
++        print(("PASS" if ok else "FALHA"), "sem motor: indisponível, sem ligar serviço")
++    return 0 if ok else 1
++
++
++def main(argv: list[str]) -> int:
++    if argv[:1] == ["--selftest"]:
++        return _selftest()
++    if not argv or argv[0].startswith("-"):
++        print(__doc__, file=sys.stderr)
++        return 2
++    motor = argv[argv.index("--motor") + 1] if "--motor" in argv else "auto"
++    idioma = argv[argv.index("--idioma") + 1] if "--idioma" in argv else "Portuguese"
++    r = transcrever(argv[0], motor=motor, idioma=idioma)
++    print(json.dumps(r, ensure_ascii=False))
++    return 0 if r["text"] else 3
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/redesign/sentidos/spec/acceptance.json b/redesign/sentidos/spec/acceptance.json
+new file mode 100644
+index 00000000..c4f640e0
+--- /dev/null
++++ b/redesign/sentidos/spec/acceptance.json
+@@ -0,0 +1,38 @@
++[
++  {
++    "criterion": "o lfm3 recebe a instrução no sistema e o áudio no campo images",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_lfm3_recebe_instrucao_no_sistema_e_audio_em_images"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a reserva só entra se o Whisper já estiver no ar e nenhum serviço é ligado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_reserva_so_se_o_whisper_ja_estiver_no_ar_e_nunca_liga_servico"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o WER ignora acento, pontuação e caixa",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_wer_sem_acento_pontuacao_e_caixa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a medição grava o registro comum com referência e WER e não toca no alto-falante",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_medicao_grava_registro_comum_com_referencia_e_wer"
++    ],
++    "cwd": null
++  }
++]
+diff --git a/redesign/sentidos/spec/spec.md b/redesign/sentidos/spec/spec.md
+new file mode 100644
+index 00000000..6c91c14b
+--- /dev/null
++++ b/redesign/sentidos/spec/spec.md
+@@ -0,0 +1,58 @@
++# Spec — Sentidos: ouvido (nova versão, lote 4 item 1; projeto 5 sentidos)
++
++Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Decisões do Humano em 05/11/2026:
++- "temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos";
++- "pode fazer os testes sinteticos mesmo, e vamos prosseguir";
++- "faça".
++
++## Jornadas críticas
++
++1. Um componente do sistema entrega um áudio e recebe o texto, tudo local, com o motor e o tempo.
++2. O Humano mede o ouvido pelo painel (página Sentidos) e vê o erro por palavra e o tempo de cada motor.
++3. Com o motor principal fora (Ollama parado ou com erro), o ouvido usa a reserva, se já estiver no ar, ou diz que não ouviu. Nunca inventa texto.
++
++## Contrato
++
++- `ouvido.py transcrever(arquivo, motor=auto|lfm3|whisper, idioma)` converte para wav mono 16 kHz (ffmpeg) e tenta, em ordem:
++  1. `lfm3-audio:2b` pelo Ollama: instrução `Perform ASR in <idioma>.` como mensagem de sistema, áudio em base64 no campo `images` da mensagem do usuário;
++  2. o Whisper da iGPU (`/transcribe`, porta 20130), pelo caminho permitido `OVW_PASTA_ENTRADA`, só se já estiver no ar.
++
++  Devolve `text`, `motor`, `proc_s`, `audio_s`, `falha_etapa`, `erro` e as `tentativas`. Não liga serviço, não gera fala e não grava nada além do temporário. Aceita até 50 MB.
++- `medir_ouvido.py medir(motores)` fala as 20 frases fixas de `frases_ouvido.txt` com a voz do sistema, sem tocar, mistura ruído rosa leve e calcula o WER (sem acento, pontuação e caixa) e o tempo mediano por motor e condição. Motor fora do ar sai `null`, nunca zero. Grava no registro comum (`redesign/avaliacao/registro.py`, medidor `ouvido`), com referência e transcrição.
++- O painel tem a página Sentidos: motor principal, reserva, voz, última medição e a ação `medir_ouvido`, em segundo plano e uma por vez com as rodadas de avaliação.
++- A voz do sistema não muda: continua o piper `pt_BR-agata-last` (`scripts/agata_falar.py`).
++
++## Critérios de aceite
++
++- [ ] o lfm3 recebe a instrução no sistema e o áudio no campo images
++- [ ] a reserva só entra se o Whisper já estiver no ar e nenhum serviço é ligado
++- [ ] o WER ignora acento, pontuação e caixa
++- [ ] a medição grava o registro comum com referência e WER e não toca no alto-falante
++
++## Desenho e alternativas
++
++Biblioteca e linha de comando, sem servidor novo: hoje nada no sistema chama o ouvido (o LibreChat usa a voz do navegador). O servidor HTTP compatível com `/v1/audio/transcriptions` fica para quando a conversa por voz for ligada, em proposta própria.
++- **Descartado:** trocar o modelo do `whisper_server.py` (outra arquitetura) e usar a fala do LFM3. A voz do sistema é decisão do Humano de 03/11 e o LFM3 não clona voz.
++- **Descartado:** Whisper maior: não instalado, não medido.
++
++## Implementação e testes
++
++`ouvido.py`, `medir_ouvido.py`, `frases_ouvido.txt`. Testes em `tests/test_sentidos.py`, sem rede: HTTP, voz e motores substituídos. Os que precisam de ffmpeg pulam sem ele.
++
++## Migração e reversão
++
++Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm`.
++
++## Riscos e dependências
++
++- **Medição (05/11):** lfm3-audio com WER de 3,4 a 5% e 0,14 s; Whisper base com 14 a 18% e 0,7 s. A voz é sintética e o ruído é leve, então não vale para a voz do Humano.
++- **GPU:** o lfm3-audio usa 1,7 GB da NVIDIA, a mesma dos modelos de texto. A reserva fica na iGPU.
++- **Versão do Ollama:** exige 0.40.13 ou mais novo (a Máquina tem 0.40.14).
++- **Nomes próprios:** podem sair trocados ("OmniRoute" virou "Mi Route").
++
++## Código
++
++- `ouvido.py`
++- `medir_ouvido.py`
++- `frases_ouvido.txt`
++- `tests/`
+diff --git a/redesign/sentidos/tests/test_sentidos.py b/redesign/sentidos/tests/test_sentidos.py
+new file mode 100644
+index 00000000..9caba1d4
+--- /dev/null
++++ b/redesign/sentidos/tests/test_sentidos.py
+@@ -0,0 +1,96 @@
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import medir_ouvido  # noqa: E402
++import ouvido  # noqa: E402
++
++TEM_FFMPEG = bool(shutil.which("ffmpeg"))
++
++
++def wav(pasta: Path, nome="a.wav") -> Path:
++    p = pasta / nome
++    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "sine=f=440:d=1", str(p)], check=True)
++    return p
++
++
++class OuvidoTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        self.t = Path(self.tmp.name)
++        os.environ["AGATA_NV_DIR"] = str(self.t / "dados")
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def test_lfm3_recebe_instrucao_no_sistema_e_audio_em_images(self):
++        visto = {}
++
++        def post(url, corpo, timeout):
++            visto.update(url=url, corpo=corpo)
++            return {"message": {"content": " olá "}}
++        a = self.t / "x.wav"
++        a.write_bytes(b"RIFF0000WAVE")
++        self.assertEqual(ouvido.lfm3(a, post=post), "olá")
++        msgs = visto["corpo"]["messages"]
++        self.assertEqual(msgs[0], {"role": "system", "content": "Perform ASR in Portuguese."})
++        self.assertEqual(msgs[1]["content"], "")
++        self.assertEqual(len(msgs[1]["images"]), 1)          # o campo `audio` dá 500 no Ollama 0.40.14
++        self.assertTrue(visto["url"].endswith("/api/chat"))
++
++    @unittest.skipUnless(TEM_FFMPEG, "sem ffmpeg")
++    def test_reserva_so_se_o_whisper_ja_estiver_no_ar_e_nunca_liga_servico(self):
++        a = wav(self.t)
++
++        def cai(w, i):
++            raise ConnectionError("ollama fora")
++        r = ouvido.transcrever(a, chamar_lfm3=cai, chamar_whisper=lambda w: "reserva", whisper_ativo=lambda: True)
++        self.assertEqual((r["text"], r["motor"]), ("reserva", "whisper"))
++        r = ouvido.transcrever(a, chamar_lfm3=cai, chamar_whisper=lambda w: self.fail("não deveria chamar"),
++                               whisper_ativo=lambda: False)
++        self.assertIsNone(r["text"])
++        self.assertEqual(r["falha_etapa"], "indisponivel")
++        self.assertEqual([x["falha_etapa"] for x in r["tentativas"]], ["transporte", "indisponivel"])
++        with self.assertRaises(ValueError):
++            ouvido.transcrever(a, motor="nuvem")
++        with self.assertRaises(ValueError):
++            ouvido.transcrever(self.t / "nao-existe.wav")
++
++    def test_wer_sem_acento_pontuacao_e_caixa(self):
++        self.assertEqual(medir_ouvido.wer("Olá, Seth!", "ola seth"), 0)
++        self.assertAlmostEqual(medir_ouvido.wer("abra o painel", "abro o painel"), 1 / 3)
++        self.assertEqual(medir_ouvido.wer("a b", ""), 1)
++
++    @unittest.skipUnless(TEM_FFMPEG, "sem ffmpeg")
++    def test_medicao_grava_registro_comum_com_referencia_e_wer(self):
++        def falar(texto, tocar=True, salvar=None, manter=False):
++            self.assertFalse(tocar)                          # a medição nunca toca no alto-falante
++            wav(salvar, "fala-01.wav")
++            return 0
++        frases = medir_ouvido.FRASES.read_text(encoding="utf-8").splitlines()
++
++        def transcrever(arq, motor="auto"):
++            if motor == "whisper":
++                return {"text": None, "falha_etapa": "indisponivel", "erro": "fora", "proc_s": None}
++            i = int(Path(arq).stem[-2:])
++            return {"text": frases[i - 1], "motor": "lfm3-audio:2b", "proc_s": 0.1, "falha_etapa": None, "erro": None}
++        r = medir_ouvido.medir(("lfm3", "whisper"), falar=falar, transcrever=transcrever)
++        pm = r["resumo"]["por_motor"]
++        self.assertEqual(pm["lfm3|limpo"]["wer"], 0)
++        self.assertEqual(pm["lfm3|limpo"]["perfeitas"], 20)
++        self.assertIsNone(pm["whisper|limpo"]["wer"])       # sem o serviço: não medido, nunca zero
++        self.assertEqual(pm["whisper|limpo"]["nao_rodou"], 20)
++        import registro
++        ls = registro.linhas(r["run_id"])
++        self.assertEqual(len(ls), 80)
++        self.assertTrue({"referencia", "transcricao", "wer"} <= set(next(x for x in ls if x["outcome"] == "passou")))
++
++
++if __name__ == "__main__":
++    unittest.main()
