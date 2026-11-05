@@ -34,5 +34,23 @@
       "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_medicao_grava_registro_comum_com_referencia_e_wer"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o servidor aceita o multipart da OpenAI, mapeia o idioma e escuta só em loopback",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::ServidorTests::test_multipart_openai_idioma_e_recusas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a porta nova está no relé, no librechat.yaml, na lista de portas e na unit juntos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::ServidorTests::test_porta_declarada_no_rele_no_yaml_e_na_lista_juntos"
+    ],
+    "cwd": null
   }
 ]

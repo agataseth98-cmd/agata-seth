@@ -6,11 +6,11 @@
 # Formato: porta|nome|bind_esperado -- um por linha, `#` comenta.
 # `bind_esperado` é o endereço IPv4 que a porta TEM que usar; loopback IPv6
 # (::1) é sempre aceito também, por equivalência.
-# Pode ser uma LISTA separada por vírgula (MEMÓRIAS (539)), sem espaço: as 7
+# Pode ser uma LISTA separada por vírgula (MEMÓRIAS (539)), sem espaço: as 8
 # portas que o LibreChat usa aceitam também 172.29.7.1 -- o relé socat do B8
 # (`librechat-ponte-host`) escuta nelas no gateway da bridge `br-librechat`.
 # Esse endereço só é alcançável da própria Máquina e da bridge; o ufw libera
-# só essas 7 portas na `br-librechat`. Porta nova no relé = compose +
+# só essas 8 portas na `br-librechat`. Porta nova no relé = compose +
 # librechat.yaml + ufw + ESTA lista, juntos.
 #
 # Adicionar serviço novo aqui é obrigatório pra ele entrar na checagem de
@@ -47,6 +47,7 @@
 20141|seth-verificador|127.0.0.1,172.29.7.1
 27125|obsidian-ro-proxy|127.0.0.1,172.29.7.1
 8890|piper-tts|127.0.0.1,172.29.7.1
+20137|ouvido-agata|127.0.0.1,172.29.7.1
 11434|ollama|127.0.0.1
 20129|llamacpp-agata|127.0.0.1
 20142|llamacpp-nemotron|127.0.0.1

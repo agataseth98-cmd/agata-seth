@@ -1,0 +1,26 @@
+[Unit]
+Description=Agata -- ouvido local (5 sentidos): transcrição OpenAI-compat :20137 para o LibreChat (lfm3-audio, Whisper de reserva)
+Documentation=file:///home/orusoua/agata/redesign/sentidos/servidor_ouvido.py
+# Sobe com o agata.target, como o piper (:8890): a conversa por voz do LibreChat precisa dos dois.
+PartOf=agata.target
+
+[Service]
+Type=simple
+Environment=AGATA_OUVIDO_PORTA=20137
+ExecStart=/usr/bin/python3 %h/agata/redesign/sentidos/servidor_ouvido.py
+Restart=on-failure
+RestartSec=3
+Nice=5
+# Só lê o código e fala com o Ollama (:11434) e o Whisper (:20130) em loopback; escreve só em
+# temporário (PrivateTmp) e, na reserva, na pasta de entrada do Whisper.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths=%h/agata
+ReadWritePaths=%h/.cache/agata/whisper-entrada
+
+[Install]
+WantedBy=agata.target

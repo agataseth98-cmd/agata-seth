@@ -289,7 +289,7 @@
     const lfm = pm["lfm3|limpo"]; const wh = pm["whisper|limpo"];
     por("nv-sen-kpis", kpi("Ouvido principal", o.principal || "—", "teal"), kpi("Erro do principal", lfm ? pct(lfm.wer) : null, "teal", "frases limpas"),
       kpi("Erro da reserva", wh && wh.wer !== null ? pct(wh.wer) : null, "gold", "Whisper"), kpi("Voz", "agata-last", "violet", "inalterada"));
-    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["voz", o.voz || "—"],
+    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["conversa no LibreChat", o.servidor || "—"], ["voz", o.voz || "—"],
       ["última medição", u ? quando(u.inicio) + " · " + (u.estado || "") : "nenhuma"]]));
     const rodando = job.estado === "rodando" && job.tipo === "ouvido";
     byId("nv-sen-titulo").textContent = rodando ? "Medindo o ouvido…" : "Fala → texto";

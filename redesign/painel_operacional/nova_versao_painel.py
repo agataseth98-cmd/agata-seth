@@ -48,7 +48,13 @@ def _estado_sentidos() -> dict:
     import ouvido  # noqa: E402
     import registro  # noqa: E402
     ult = next((r for r in registro.listar(20) if r.get("medidor") == "ouvido"), None)
-    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)",
+    import urllib.request
+    try:
+        urllib.request.urlopen("http://127.0.0.1:20137/health", timeout=1).read()
+        servidor = "no ar (porta 20137, LibreChat)"
+    except Exception:  # noqa: BLE001
+        servidor = "parado (sobe com o sistema)"
+    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)", "servidor": servidor,
                        "voz": "piper pt_BR-agata-last (inalterada)"},
             "ultima_medicao": {k: ult.get(k) for k in ("run_id", "inicio", "fim", "estado", "resumo")} if ult else None}
 

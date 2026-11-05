@@ -1,6 +1,6 @@
 # Spec — Sentidos: ouvido (nova versão, lote 4 item 1; projeto 5 sentidos)
 
-Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Decisões do Humano em 05/11/2026:
+Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Decisões do Humano em 05/11/2026 (item 2: "vamos já deixar a conversa natural disponivel no librechat"):
 - "temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos";
 - "pode fazer os testes sinteticos mesmo, e vamos prosseguir";
 - "faça".
@@ -20,6 +20,8 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Deci
   Devolve `text`, `motor`, `proc_s`, `audio_s`, `falha_etapa`, `erro` e as `tentativas`. Não liga serviço, não gera fala e não grava nada além do temporário. Aceita até 50 MB.
 - `medir_ouvido.py medir(motores)` fala as 20 frases fixas de `frases_ouvido.txt` com a voz do sistema, sem tocar, mistura ruído rosa leve e calcula o WER (sem acento, pontuação e caixa) e o tempo mediano por motor e condição. Motor fora do ar sai `null`, nunca zero. Grava no registro comum (`redesign/avaliacao/registro.py`, medidor `ouvido`), com referência e transcrição.
 - O painel tem a página Sentidos: motor principal, reserva, voz, última medição e a ação `medir_ouvido`, em segundo plano e uma por vez com as rodadas de avaliação.
+- `servidor_ouvido.py` serve `POST /v1/audio/transcriptions` (formato OpenAI: multipart com `file` e `language` opcional) e `GET /health`, só em 127.0.0.1:20137, com limite de 25 MB, sem chave e sem log do texto. Unit `redesign/systemd/ouvido-agata.service`, membro do `agata.target`. O LibreChat chega pelo relé `librechat-ponte-host` (172.29.7.1:20137); a porta entra junto no compose, no `librechat.yaml` (`speech.stt` e `allowedAddresses`), em `config/portas-agata.txt` e numa regra do ufw, que é do Humano.
+- O `librechat.yaml` liga a conversa natural por padrão (`speechTab`): transcrição externa em português, envio automático, fala automática pelo piper e `conversationMode`.
 - A voz do sistema não muda: continua o piper `pt_BR-agata-last` (`scripts/agata_falar.py`).
 
 ## Critérios de aceite
@@ -28,10 +30,12 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Deci
 - [ ] a reserva só entra se o Whisper já estiver no ar e nenhum serviço é ligado
 - [ ] o WER ignora acento, pontuação e caixa
 - [ ] a medição grava o registro comum com referência e WER e não toca no alto-falante
+- [ ] o servidor aceita o multipart da OpenAI, mapeia o idioma e escuta só em loopback
+- [ ] a porta nova está no relé, no librechat.yaml, na lista de portas e na unit juntos
 
 ## Desenho e alternativas
 
-Biblioteca e linha de comando, sem servidor novo: hoje nada no sistema chama o ouvido (o LibreChat usa a voz do navegador). O servidor HTTP compatível com `/v1/audio/transcriptions` fica para quando a conversa por voz for ligada, em proposta própria.
+Biblioteca e linha de comando (item 1). No item 2, um servidor HTTP mínimo da biblioteca padrão, no formato OpenAI que o LibreChat já fala.
 - **Descartado:** trocar o modelo do `whisper_server.py` (outra arquitetura) e usar a fala do LFM3. A voz do sistema é decisão do Humano de 03/11 e o LFM3 não clona voz.
 - **Descartado:** Whisper maior: não instalado, não medido.
 
@@ -55,4 +59,5 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
 - `ouvido.py`
 - `medir_ouvido.py`
 - `frases_ouvido.txt`
+- `servidor_ouvido.py`
 - `tests/`
