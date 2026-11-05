@@ -86,7 +86,8 @@
       const [txt, tipo] = rot[r.metodo] || [r.metodo, ""];
       return h("li", {class: "nv-item"},
         h("div", {class: "nv-item-topo"}, selo(txt, tipo), h("span", {class: "nv-ref", text: r.caminho + ":" + r.linha + (r.entrada !== null ? "  (" + r.entrada + ")" : "")}),
-          h("span", {class: "nv-sha", text: "sha " + r.sha256.slice(0, 10) + " · " + r.editorial_status})),
+          h("span", {class: "nv-sha", text: "sha " + r.sha256.slice(0, 10) + " · " + r.editorial_status}),
+          (r.corrigida_por || []).length ? selo("corrigida por (" + r.corrigida_por.join("), (") + ")", "aviso") : null),
         r.trecho ? h("p", {text: r.trecho.slice(0, 280)}) : null);
     }));
     mostrar("nv-resultados-vazio", !(p.resultados || []).length);

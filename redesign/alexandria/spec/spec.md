@@ -17,6 +17,13 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 - Classificação: caminho com `privado/`, `private/` ou `mod-*/` vira `private`; o resto, `public`. Estado editorial: `revisado` para canon e `memoria/`, `catalogado` para o resto. Verificação: identidade `git:<commit>`, integridade `sha256`, suporte factual `not_checked`.
 - Ao reindexar, objetos com sha diferente ou que saíram geram evento `drift` (`derivados_pendentes`) no ledger; `contexto_valido(pacote)` diz quais objetos de um pacote antigo mudaram.
 - `consultar` filtra acesso, busca no FTS5 (`unicode61 remove_diacritics 2`) com a normalização de `scripts/busca_texto.py` e ordena como ela (mais palavras, depois palavra inteira, depois bm25). Depois segue até 3 relações `cita` dos 2 primeiros resultados, só para canon e memória, e usa a semântica secundária (`scripts/busca_semantica.py --json`) quando `semantica=sempre` ou quando, em `auto`, o léxico achou menos de 3. Cada resultado leva o método: `lexico`, `relacao` ou `semantica`. Semântica fora do ar vira aviso, e o resultado continua só léxico. Sem resultado, o estado é `não encontrado nesta busca`. Nunca chama LLM.
+- `consultar` marca `corrigida_por` na entrada (N) que é a 1ª citada no cabeçalho de uma entrada `(M) CORREÇÃO`. A Regra 4 manda corrigir com entrada nova; quem lê a antiga precisa saber da nova. As outras citações do cabeçalho são contexto e não são marcadas.
+- `curadoria.py organizar(fontes)` ordena um pacote por autoridade (canon, medição, decisão do Humano e spec antes do resto), põe as fontes superadas depois das vigentes e, por fim, ordena pela data mais recente. Também anota em texto, por fonte:
+  - "sem autoridade";
+  - cópia (texto idêntico ou mesma origem declarada);
+  - "corrigida por";
+  - "medição anterior".
+  É determinística e sem modelo; ordena e anota, não decide. A origem é a rodada reservada de 05/11/2026: os modelos ignoraram autoridade e data dadas só como metadado.
 - `skills.py` indexa em tabela e FTS próprios `.agents/skills/*/SKILL.md`, `.claude/skills/*/SKILL.md` e as skills de `ferramentas/indice.json`; peça que casa a `QUARENTENA` de `ferramentas/ferramentas.py` é listada, mas nunca sugerida. `selecionar` põe a menção explícita do nome primeiro, depois o léxico; marca `selecionada`, `aplicada: false` e o sha do SKILL.md. Não lê o corpo para executar.
 
 ## Critérios de aceite
@@ -27,6 +34,8 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 - [ ] busca semântica fora do ar degrada para léxico com rótulo
 - [ ] ausência sai como não encontrado nesta busca
 - [ ] skill selecionada não é executada e a quarentena fica fora
+- [ ] a curadoria anota cópia, correção, autoridade e medição antiga e ordena as vigentes primeiro
+- [ ] a entrada corrigida sai marcada só pela correção que a cita primeiro
 
 ## Desenho e alternativas
 
@@ -48,4 +57,5 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
 
 - `acervo.py`
 - `skills.py`
+- `curadoria.py`
 - `tests/`

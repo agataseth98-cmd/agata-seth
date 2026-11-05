@@ -52,5 +52,23 @@
       "redesign/alexandria/tests/test_alexandria.py::AlexandriaTests::test_skill_selecionada_nao_executa_e_quarentena_fica_fora"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a curadoria anota cópia, correção, autoridade e medição antiga e ordena as vigentes primeiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_curadoria.py::CuradoriaTests::test_copia_correcao_autoridade_e_medicao_anotadas_e_ordenadas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a entrada corrigida sai marcada só pela correção que a cita primeiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_curadoria.py::CorrecaoNoAcervoTests::test_entrada_corrigida_sai_marcada_so_pela_primeira_citada"
+    ],
+    "cwd": null
   }
 ]

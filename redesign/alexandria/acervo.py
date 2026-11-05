@@ -369,6 +369,7 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
                     metodos.append("semantica")
             except Exception as e:  # noqa: BLE001 — endpoint fora: degrada para léxico, com aviso
                 avisos.append(f"busca semântica indisponível ({e.__class__.__name__}); resultado só léxico")
+        _marcar_correcoes(con, resultados)
     finally:
         con.close()
     pacote = {"schema_version": 1, "consulta_sha256": hashlib.sha256(consulta.encode()).hexdigest(),
@@ -382,6 +383,29 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
         destino.parent.mkdir(parents=True, exist_ok=True)
         destino.write_text(json.dumps(pacote, ensure_ascii=False, indent=1), encoding="utf-8")
     return pacote
+
+
+RE_CORRECAO = re.compile(r"^\((\d{1,4})\)\s+CORRE[CÇ][AÃ]O\b")
+
+
+def _marcar_correcoes(con, resultados: list[dict]) -> None:
+    """A 1ª entrada citada no cabeçalho de uma entrada CORREÇÃO ganha `corrigida_por` (Regra 4: a correção é entrada
+    nova; a antiga fica, mas quem lê precisa saber). Achado da avaliação de 05/11/2026."""
+    for r in resultados:
+        n = r.get("entrada")
+        if n is None:
+            continue
+        por = set()
+        for (src,) in con.execute("SELECT src FROM relations WHERE dst_entrada = ?", (n,)):
+            row = con.execute("SELECT t.texto FROM trechos t JOIN objects o ON o.object_id = t.object_id"
+                              " WHERE t.object_id = ? AND t.linha = o.linha", (src,)).fetchone()
+            cab = (row["texto"] if row else "").split("\n", 1)[0]
+            m = RE_CORRECAO.match(cab)
+            citadas = [int(c) for c in RE_CITA.findall(cab) if int(c) != int(m.group(1))] if m else []
+            if m and citadas and citadas[0] == n:   # só a 1ª citada no cabeçalho é a corrigida; as outras são contexto
+                por.add(int(m.group(1)))
+        if por:
+            r["corrigida_por"] = sorted(por)
 
 
 def contexto_valido(pacote: dict) -> dict:
