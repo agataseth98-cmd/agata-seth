@@ -73,7 +73,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
         self.assertIn('<link rel="stylesheet" href="nova_versao.css">', html)
         for sec in re.findall(r'<section class="page nv-page".*?</section>', html, re.S):
             self.assertNotIn("style=", sec)
-        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 6)
+        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 7)
         js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
         self.assertNotIn(".style.", js)
         self.assertNotIn('"style"', js)

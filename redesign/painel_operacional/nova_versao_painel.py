@@ -16,13 +16,13 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao"):
+for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao", "sentidos"):
     sys.path.insert(0, str(ROOT / "redesign" / _p))
 
 ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
          "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
-         "cancelar_avaliacao", "ver_execucao")
+         "cancelar_avaliacao", "ver_execucao", "medir_ouvido")
 _TESTE: dict = {"estado": "ocioso"}
 _AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
 _TESTE_LOCK = threading.Lock()
@@ -41,7 +41,16 @@ def estado() -> dict:
             "teste_rotas": {"job": job, "ultimo": {k: ult[k] for k in ("run_id", "quando", "estado", "chamadas",
                                                                        "rotas_que_passaram", "obsoleto")} if ult else None,
                             "resultados": (ult or {}).get("resultados", [])[:60]},
-            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao()}
+            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao(), "sentidos": _estado_sentidos()}
+
+
+def _estado_sentidos() -> dict:
+    import ouvido  # noqa: E402
+    import registro  # noqa: E402
+    ult = next((r for r in registro.listar(20) if r.get("medidor") == "ouvido"), None)
+    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)",
+                       "voz": "piper pt_BR-agata-last (inalterada)"},
+            "ultima_medicao": {k: ult.get(k) for k in ("run_id", "inicio", "fim", "estado", "resumo")} if ult else None}
 
 
 def _estado_avaliacao() -> dict:
@@ -96,6 +105,9 @@ def _avaliacao(acao: str, dados: dict) -> dict:
         for t in rodando:
             tarefas.cancelar(t["task_id"])
         return {"canceladas": [t["task_id"] for t in rodando]}
+    if acao == "medir_ouvido":
+        import medir_ouvido  # noqa: E402
+        return _iniciar_avaliacao(lambda: medir_ouvido.medir(), "ouvido")
     if acao == "medir_recuperacao":
         import recuperacao  # noqa: E402
         split = dados.get("split") if dados.get("split") in ("dev", "calibracao", "teste") else "dev"
@@ -146,7 +158,7 @@ def executar(acao, dados: dict | None = None) -> dict:
         threading.Thread(target=_rodar_teste, args=(set(cats) if cats else None,), daemon=True).start()
         return {"acao": acao, "resultado": {"estado": "rodando"}}
     if acao in ("salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar",
-                "medir_recuperacao", "cancelar_avaliacao", "ver_execucao"):
+                "medir_recuperacao", "cancelar_avaliacao", "ver_execucao", "medir_ouvido"):
         return {"acao": acao, "resultado": _avaliacao(acao, dados)}
     if acao == "cancelar_teste":
         import tarefas  # noqa: E402

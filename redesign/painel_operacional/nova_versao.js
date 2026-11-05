@@ -281,7 +281,27 @@
     por("nv-out", blocos);
   }
 
-  const telas = {"nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
+  // ---------------------------------------------------------------- Sentidos
+  function sentidos() {
+    const s = (estado && estado.sentidos) || {};
+    const o = s.ouvido || {}; const u = s.ultima_medicao; const job = ((estado && estado.avaliacao) || {}).job || {};
+    const pm = (u && u.resumo && u.resumo.por_motor) || {};
+    const lfm = pm["lfm3|limpo"]; const wh = pm["whisper|limpo"];
+    por("nv-sen-kpis", kpi("Ouvido principal", o.principal || "—", "teal"), kpi("Erro do principal", lfm ? pct(lfm.wer) : null, "teal", "frases limpas"),
+      kpi("Erro da reserva", wh && wh.wer !== null ? pct(wh.wer) : null, "gold", "Whisper"), kpi("Voz", "agata-last", "violet", "inalterada"));
+    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["voz", o.voz || "—"],
+      ["última medição", u ? quando(u.inicio) + " · " + (u.estado || "") : "nenhuma"]]));
+    const rodando = job.estado === "rodando" && job.tipo === "ouvido";
+    byId("nv-sen-titulo").textContent = rodando ? "Medindo o ouvido…" : "Fala → texto";
+    if (rodando) setTimeout(() => recarregar("nv-sentidos"), 5000);
+    const linhas = Object.values(pm);
+    mostrar("nv-sen-wrap", linhas.length > 0);
+    por("nv-sen-lista", linhas.map((x) => h("tr", {}, h("td", {text: x.motor === "lfm3" ? "lfm3-audio" : "Whisper (reserva)"}), h("td", {text: x.condicao === "limpo" ? "limpo" : "com ruído"}),
+      h("td", {class: "num", text: x.wer === null ? "não medido" : pct(x.wer)}), h("td", {class: "num", text: x.perfeitas === null ? "—" : x.perfeitas + "/20"}),
+      h("td", {class: "num", text: x.tempo_mediano_s === null ? "—" : x.tempo_mediano_s.toFixed(2) + " s"}))));
+  }
+
+  const telas = {"nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
   window.carregarNovaVersao = async function (nome) {
     await ler();
     if (!estado) { const pg = byId("page-" + nome); if (pg) { const k = pg.querySelector(".kpis"); if (k) k.replaceChildren(kpi("Nova versão", "indisponível", "rose", "o servidor não respondeu")); } return; }
@@ -405,6 +425,10 @@
   if (byId("nv-run-recuperacao")) byId("nv-run-recuperacao").addEventListener("click", async () => {
     try { await executar("medir_recuperacao", {split: val("nv-run-split")}); nota("nv-run-nota", "Medindo a busca, sem modelo.", "ok"); } catch (e) { nota("nv-run-nota", motivoErro(e), "erro"); }
     recarregar("nv-avaliacao");
+  });
+  confirmar(byId("nv-sen-medir"), async () => {
+    try { await executar("medir_ouvido"); nota("nv-sen-nota", "Medição iniciada: leva uns dois minutos.", "ok"); } catch (e) { nota("nv-sen-nota", motivoErro(e), "erro"); }
+    recarregar("nv-sentidos");
   });
   if (byId("nv-out-run")) byId("nv-out-run").addEventListener("change", () => avaliacao());
 })();

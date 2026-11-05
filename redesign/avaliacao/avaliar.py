@@ -367,7 +367,7 @@ def estado() -> dict:
     return {"conjuntos": {s: len(conjunto.carregar(s)) for s in ("dev", "calibracao")},
             "reservado": conjunto.estado_reservado(), "politica": politica(), "condicoes": list(CONDICOES),
             "execucoes": [{k: r.get(k) for k in ("run_id", "split", "inicio", "fim", "estado", "rotas", "condicoes", "resumo")}
-                          for r in registro.listar(5)]}
+                          for r in registro.listar(15) if r.get("medidor") in ("avaliar", "recuperacao")][:5]}
 
 
 if __name__ == "__main__":
