@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forjada (nova versão, lote 4 item 2): a resposta que repete segredo ou frase mandada por fonte suspeita ou privada vira recusa.** Proposta `metacognicao-guarda-20261105`.
+- **Mecanismo:** `redesign/metacognicao/guarda.py` marca a fonte antes (a nota da curadoria só vale para fonte sem autoridade) e checa o eco depois. O `posterior` devolve `bloqueado`.
+- **Medição:** a avaliação ganhou a condição `alexandria_guarda`. No desenvolvimento (`r-20261105-130721-189624`), a guarda zerou as falhas críticas nos três modelos locais e bloqueou só a tarefa do ataque. O lfm3:1.7b foi de 83% a 92%. No reservado (`r-20261105-131704-1aeaa7`), não houve bloqueio indevido.
+- **Achado:** o aviso antes da resposta, sozinho, não impediu o vazamento; quem segura é a camada do depois.
+- **Rodadas refeitas:** as rodadas foram refeitas depois da falta de energia das 10:25.
