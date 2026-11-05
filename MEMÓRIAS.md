@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7763000ad67cc02d742058b74cdf842d1736d50b
-  Escrito em: 05/11/2026 09:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): da5c86a9c625ea89c6168af70568b1ffc24a2a9e
+  Escrito em: 05/11/2026 10:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7763000ad67cc02d742058b74cdf842d1736d50b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7763000ad67cc02d742058b74cdf842d1736d50b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7763000ad67cc02d742058b74cdf842d1736d50b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7763000ad67cc02d742058b74cdf842d1736d50b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7763000ad67cc02d742058b74cdf842d1736d50b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da5c86a9c625ea89c6168af70568b1ffc24a2a9e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da5c86a9c625ea89c6168af70568b1ffc24a2a9e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da5c86a9c625ea89c6168af70568b1ffc24a2a9e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da5c86a9c625ea89c6168af70568b1ffc24a2a9e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/da5c86a9c625ea89c6168af70568b1ffc24a2a9e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
+- **Ouvido:** `redesign/sentidos/servidor_ouvido.py` responde no formato OpenAI (`/v1/audio/transcriptions`) em 127.0.0.1:20137, com a unit `ouvido-agata.service` no `agata.target`.
+- **Relé:** o `librechat-ponte-host` passa a encaminhar 8 portas.
+- **`librechat.yaml`:** recebe `speech.stt` e o `speechTab` com modo conversa, transcrição externa em português e fala automática pela voz do sistema.
+- **Firewall:** a porta exige regra do ufw, medido de dentro do container (porta não liberada dá timeout); a regra fica com o Humano.
+- **Não medido:** a conversa no navegador, que o Humano vai testar ao fim do experimento.
+
 (943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
 - **Ouvido:** `redesign/sentidos/ouvido.py` transcreve fala com o `lfm3-audio:2b` (Liquid AI) pelo Ollama local. A reserva é o Whisper da iGPU, usado só se já estiver no ar; o ouvido nunca liga serviço e nunca gera fala.
 - **Medição:** `medir_ouvido.py` mede 20 frases da voz do sistema, limpas e com ruído leve, e grava no registro comum da avaliação. A página Sentidos no painel mostra o resultado e roda a medição.

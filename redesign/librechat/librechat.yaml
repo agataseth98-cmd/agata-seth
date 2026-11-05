@@ -259,6 +259,30 @@ endpoints:
 # de voz feminina pt-BR voltar: caminho e XTTS-v2 (opcao B da (412)/(413)), nao
 # pf_dora em CPU.
 speech:
+  # Conversa natural (5 sentidos, 05/11/2026, pedido do Humano): o ouvido local transcreve (lfm3-audio,
+  # Whisper de reserva; redesign/sentidos/servidor_ouvido.py) e o piper agata-last fala. Nada sai da Máquina.
+  speechTab:
+    conversationMode: true
+    advancedMode: false
+    speechToText:
+      engineSTT: "external"
+      languageSTT: "Portuguese (Brazil)"
+      autoTranscribeAudio: true
+      decibelValue: -45
+      autoSendText: 0
+    textToSpeech:
+      engineTTS: "external"
+      voice: "pt-br"
+      languageTTS: "pt"
+      automaticPlayback: true
+      playbackRate: 1.0
+      cacheTTS: true
+  stt:
+    allowedAddresses: ["172.29.7.1:20137"]
+    openai:
+      url: "http://172.29.7.1:20137/v1/audio/transcriptions"
+      apiKey: "loopback-sem-chave"
+      model: "lfm3-audio"
   tts:
     allowedAddresses: ["172.29.7.1:8890"]
     openai:

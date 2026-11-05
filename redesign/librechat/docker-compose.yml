@@ -10,9 +10,10 @@
 # porta), nao so as que precisa. Agora fica na bridge `librechat` (subnet fixa
 # 172.29.7.0/24) e so alcanca a Maquina pelo `librechat-ponte-host`: um container
 # minusculo (socat, sem interpretador de proposito geral) em network_mode:host que
-# encaminha SO as 7 portas que a app usa, a partir do gateway da bridge (172.29.7.1):
+# encaminha SO as 8 portas que a app usa, a partir do gateway da bridge (172.29.7.1):
 #   20126 seth_gateway · 8890 piper-tts · 27125 obsidian-ro-proxy (canon)
 #   20135 discord-mcp · 20136 navegador-mcp · 20140 seth_escriba · 20141 seth_verificador
+#   20137 ouvido (transcrição da conversa por voz, 5 sentidos, 05/11/2026)
 # A tentativa de 21/09 cobria 4 e esqueceu escriba/verificador/piper -- e o
 # librechat.yaml meio-convertido derrubou a Seth em 22/09 ((517)). Porta nova que a
 # app precise = entra aqui E no librechat.yaml, nos dois, no mesmo commit.
@@ -58,7 +59,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        for p in 20126 8890 27125 20135 20136 20140 20141; do
+        for p in 20126 8890 20137 27125 20135 20136 20140 20141; do
           socat TCP-LISTEN:$$p,bind=172.29.7.1,fork,reuseaddr TCP:127.0.0.1:$$p &
         done
         wait
@@ -129,7 +130,7 @@ services:
 networks:
   librechat:
     name: librechat
-    # Nome FIXO da interface (MEMÓRIAS (538)): a regra do ufw que libera as 7 portas
+    # Nome FIXO da interface (MEMÓRIAS (538)): a regra do ufw que libera as 8 portas
     # do rele casa por interface (`in on br-librechat`); com o nome aleatorio do
     # docker (br-<hash>) a regra quebraria a cada recriacao da rede. Na 1a tentativa
     # (532) o ufw bloqueou tudo justamente por falta dessa regra.

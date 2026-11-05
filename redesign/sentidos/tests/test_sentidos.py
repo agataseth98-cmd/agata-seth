@@ -10,6 +10,7 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parent))
 import medir_ouvido  # noqa: E402
 import ouvido  # noqa: E402
+import servidor_ouvido  # noqa: E402
 
 TEM_FFMPEG = bool(shutil.which("ffmpeg"))
 
@@ -90,6 +91,33 @@ class OuvidoTests(unittest.TestCase):
         ls = registro.linhas(r["run_id"])
         self.assertEqual(len(ls), 80)
         self.assertTrue({"referencia", "transcricao", "wer"} <= set(next(x for x in ls if x["outcome"] == "passou")))
+
+
+class ServidorTests(unittest.TestCase):
+    def test_multipart_openai_idioma_e_recusas(self):
+        b = "XyZ"
+        corpo = (f"--{b}\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\npt\r\n"
+                 f"--{b}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"a.webm\"\r\n"
+                 f"Content-Type: audio/webm\r\n\r\n").encode() + b"\x00\x01" + f"\r\n--{b}--\r\n".encode()
+        dados, campos = servidor_ouvido.ler_multipart(f"multipart/form-data; boundary={b}", corpo)
+        self.assertEqual(dados, b"\x00\x01")
+        self.assertEqual(servidor_ouvido.idioma(campos), "Portuguese")
+        self.assertEqual(servidor_ouvido.idioma({"language": "en"}), "English")
+        self.assertEqual(servidor_ouvido.idioma({"language": "klingon"}), "Portuguese")
+        with self.assertRaises(ValueError):
+            servidor_ouvido.ler_multipart("application/json", b"{}")
+        self.assertEqual(servidor_ouvido.HOST, "127.0.0.1")       # só loopback; a bridge chega pelo relé
+        self.assertEqual(servidor_ouvido._selftest(), 0)
+
+    def test_porta_declarada_no_rele_no_yaml_e_na_lista_juntos(self):
+        raiz = AQUI.parents[2]
+        self.assertIn("20137|ouvido-agata|127.0.0.1,172.29.7.1", (raiz / "config/portas-agata.txt").read_text())
+        self.assertIn(" 20137 ", (raiz / "redesign/librechat/docker-compose.yml").read_text())
+        y = (raiz / "redesign/librechat/librechat.yaml").read_text()
+        self.assertIn('url: "http://172.29.7.1:20137/v1/audio/transcriptions"', y)
+        self.assertIn('allowedAddresses: ["172.29.7.1:20137"]', y)
+        self.assertIn("ExecStart=/usr/bin/python3 %h/agata/redesign/sentidos/servidor_ouvido.py",
+                      (raiz / "redesign/systemd/ouvido-agata.service").read_text())
 
 
 if __name__ == "__main__":
