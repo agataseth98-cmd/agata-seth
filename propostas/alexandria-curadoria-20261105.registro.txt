@@ -1,0 +1,6 @@
+({N}) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
+- **Curadoria:** `redesign/alexandria/curadoria.py` ordena as fontes por autoridade, deixa as vigentes antes das superadas e a mais recente antes da antiga, e anota em texto cópia, correção, fonte sem autoridade e medição anterior.
+- **Entrada corrigida:** o `acervo.consultar` marca `corrigida_por` na entrada citada primeiro no cabeçalho de uma CORREÇÃO (39 no acervo).
+- **Verificador:** a rubrica v2 reconhece a abstenção em 3ª pessoa.
+- **Reservado** (`r-20261105-085539-6c774d`): com a Alexandria, os três modelos locais (lfm3:1.7b, lumi-4b, qwen3-30b) tiveram +10 pontos sobre a busca de hoje e zero falha crítica de dado privado, contra uma por modelo. O veredito é inconclusivo com 10 pares.
+- **Reservado gasto:** ele fica gasto para medir a curadoria, que nasceu das falhas vistas nele; é preciso um conjunto novo.
