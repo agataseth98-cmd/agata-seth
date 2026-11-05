@@ -1,0 +1,418 @@
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 6fb19958..9895442e 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -6,11 +6,11 @@
+ # Formato: porta|nome|bind_esperado -- um por linha, `#` comenta.
+ # `bind_esperado` é o endereço IPv4 que a porta TEM que usar; loopback IPv6
+ # (::1) é sempre aceito também, por equivalência.
+-# Pode ser uma LISTA separada por vírgula (MEMÓRIAS (539)), sem espaço: as 7
++# Pode ser uma LISTA separada por vírgula (MEMÓRIAS (539)), sem espaço: as 8
+ # portas que o LibreChat usa aceitam também 172.29.7.1 -- o relé socat do B8
+ # (`librechat-ponte-host`) escuta nelas no gateway da bridge `br-librechat`.
+ # Esse endereço só é alcançável da própria Máquina e da bridge; o ufw libera
+-# só essas 7 portas na `br-librechat`. Porta nova no relé = compose +
++# só essas 8 portas na `br-librechat`. Porta nova no relé = compose +
+ # librechat.yaml + ufw + ESTA lista, juntos.
+ #
+ # Adicionar serviço novo aqui é obrigatório pra ele entrar na checagem de
+@@ -47,6 +47,7 @@
+ 20141|seth-verificador|127.0.0.1,172.29.7.1
+ 27125|obsidian-ro-proxy|127.0.0.1,172.29.7.1
+ 8890|piper-tts|127.0.0.1,172.29.7.1
++20137|ouvido-agata|127.0.0.1,172.29.7.1
+ 11434|ollama|127.0.0.1
+ 20129|llamacpp-agata|127.0.0.1
+ 20142|llamacpp-nemotron|127.0.0.1
+diff --git a/redesign/librechat/docker-compose.yml b/redesign/librechat/docker-compose.yml
+index 2e43de92..caf987b9 100644
+--- a/redesign/librechat/docker-compose.yml
++++ b/redesign/librechat/docker-compose.yml
+@@ -10,9 +10,10 @@
+ # porta), nao so as que precisa. Agora fica na bridge `librechat` (subnet fixa
+ # 172.29.7.0/24) e so alcanca a Maquina pelo `librechat-ponte-host`: um container
+ # minusculo (socat, sem interpretador de proposito geral) em network_mode:host que
+-# encaminha SO as 7 portas que a app usa, a partir do gateway da bridge (172.29.7.1):
++# encaminha SO as 8 portas que a app usa, a partir do gateway da bridge (172.29.7.1):
+ #   20126 seth_gateway · 8890 piper-tts · 27125 obsidian-ro-proxy (canon)
+ #   20135 discord-mcp · 20136 navegador-mcp · 20140 seth_escriba · 20141 seth_verificador
++#   20137 ouvido (transcrição da conversa por voz, 5 sentidos, 05/11/2026)
+ # A tentativa de 21/09 cobria 4 e esqueceu escriba/verificador/piper -- e o
+ # librechat.yaml meio-convertido derrubou a Seth em 22/09 ((517)). Porta nova que a
+ # app precise = entra aqui E no librechat.yaml, nos dois, no mesmo commit.
+@@ -58,7 +59,7 @@ services:
+     entrypoint: ["/bin/sh", "-c"]
+     command:
+       - |
+-        for p in 20126 8890 27125 20135 20136 20140 20141; do
++        for p in 20126 8890 20137 27125 20135 20136 20140 20141; do
+           socat TCP-LISTEN:$$p,bind=172.29.7.1,fork,reuseaddr TCP:127.0.0.1:$$p &
+         done
+         wait
+@@ -129,7 +130,7 @@ services:
+ networks:
+   librechat:
+     name: librechat
+-    # Nome FIXO da interface (MEMÓRIAS (538)): a regra do ufw que libera as 7 portas
++    # Nome FIXO da interface (MEMÓRIAS (538)): a regra do ufw que libera as 8 portas
+     # do rele casa por interface (`in on br-librechat`); com o nome aleatorio do
+     # docker (br-<hash>) a regra quebraria a cada recriacao da rede. Na 1a tentativa
+     # (532) o ufw bloqueou tudo justamente por falta dessa regra.
+diff --git a/redesign/librechat/librechat.yaml b/redesign/librechat/librechat.yaml
+index 55442470..4b487f11 100644
+--- a/redesign/librechat/librechat.yaml
++++ b/redesign/librechat/librechat.yaml
+@@ -259,6 +259,30 @@ endpoints:
+ # de voz feminina pt-BR voltar: caminho e XTTS-v2 (opcao B da (412)/(413)), nao
+ # pf_dora em CPU.
+ speech:
++  # Conversa natural (5 sentidos, 05/11/2026, pedido do Humano): o ouvido local transcreve (lfm3-audio,
++  # Whisper de reserva; redesign/sentidos/servidor_ouvido.py) e o piper agata-last fala. Nada sai da Máquina.
++  speechTab:
++    conversationMode: true
++    advancedMode: false
++    speechToText:
++      engineSTT: "external"
++      languageSTT: "Portuguese (Brazil)"
++      autoTranscribeAudio: true
++      decibelValue: -45
++      autoSendText: 0
++    textToSpeech:
++      engineTTS: "external"
++      voice: "pt-br"
++      languageTTS: "pt"
++      automaticPlayback: true
++      playbackRate: 1.0
++      cacheTTS: true
++  stt:
++    allowedAddresses: ["172.29.7.1:20137"]
++    openai:
++      url: "http://172.29.7.1:20137/v1/audio/transcriptions"
++      apiKey: "loopback-sem-chave"
++      model: "lfm3-audio"
+   tts:
+     allowedAddresses: ["172.29.7.1:8890"]
+     openai:
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+index d72e78b0..082feae4 100644
+--- a/redesign/painel_operacional/nova_versao.js
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -289,7 +289,7 @@
+     const lfm = pm["lfm3|limpo"]; const wh = pm["whisper|limpo"];
+     por("nv-sen-kpis", kpi("Ouvido principal", o.principal || "—", "teal"), kpi("Erro do principal", lfm ? pct(lfm.wer) : null, "teal", "frases limpas"),
+       kpi("Erro da reserva", wh && wh.wer !== null ? pct(wh.wer) : null, "gold", "Whisper"), kpi("Voz", "agata-last", "violet", "inalterada"));
+-    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["voz", o.voz || "—"],
++    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["conversa no LibreChat", o.servidor || "—"], ["voz", o.voz || "—"],
+       ["última medição", u ? quando(u.inicio) + " · " + (u.estado || "") : "nenhuma"]]));
+     const rodando = job.estado === "rodando" && job.tipo === "ouvido";
+     byId("nv-sen-titulo").textContent = rodando ? "Medindo o ouvido…" : "Fala → texto";
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+index 4170fad4..dc6b1d06 100644
+--- a/redesign/painel_operacional/nova_versao_painel.py
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -48,7 +48,13 @@ def _estado_sentidos() -> dict:
+     import ouvido  # noqa: E402
+     import registro  # noqa: E402
+     ult = next((r for r in registro.listar(20) if r.get("medidor") == "ouvido"), None)
+-    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)",
++    import urllib.request
++    try:
++        urllib.request.urlopen("http://127.0.0.1:20137/health", timeout=1).read()
++        servidor = "no ar (porta 20137, LibreChat)"
++    except Exception:  # noqa: BLE001
++        servidor = "parado (sobe com o sistema)"
++    return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)", "servidor": servidor,
+                        "voz": "piper pt_BR-agata-last (inalterada)"},
+             "ultima_medicao": {k: ult.get(k) for k in ("run_id", "inicio", "fim", "estado", "resumo")} if ult else None}
+ 
+diff --git a/redesign/sentidos/servidor_ouvido.py b/redesign/sentidos/servidor_ouvido.py
+new file mode 100644
+index 00000000..955db9f3
+--- /dev/null
++++ b/redesign/sentidos/servidor_ouvido.py
+@@ -0,0 +1,139 @@
++#!/usr/bin/env python3
++"""Servidor do ouvido (5 sentidos): transcrição compatível com OpenAI para o LibreChat falar por voz.
++
++POST /v1/audio/transcriptions (multipart/form-data, campo de arquivo `file`, opcional `language`)
++→ {"text": "..."}. GET /health → {"ok": true, "motor": ...}. Usa `ouvido.transcrever` (lfm3-audio pelo
++Ollama, Whisper da iGPU de reserva se já estiver no ar). Escuta só em 127.0.0.1:20137; o LibreChat
++chega pelo relé `librechat-ponte-host` em 172.29.7.1:20137 (config/portas-agata.txt).
++
++Não exige chave (loopback e bridge local, como o piper em :8890). Limite de 25 MB por áudio. O áudio
++vai para um temporário e é apagado; o texto não é registrado em log. A voz do sistema não muda: a
++fala continua no piper `agata-last` (:8890).
++
++Uso: servidor_ouvido.py            (sobe o serviço; porta em AGATA_OUVIDO_PORTA, padrão 20137)
++     servidor_ouvido.py --selftest
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import tempfile
++from email.parser import BytesParser
++from email.policy import HTTP
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI))
++import ouvido  # noqa: E402
++
++HOST = "127.0.0.1"
++PORTA = int(os.environ.get("AGATA_OUVIDO_PORTA", "20137"))
++LIMITE = 25 * 1024 * 1024
++IDIOMAS = {"pt": "Portuguese", "pt-br": "Portuguese", "portuguese": "Portuguese", "portuguese (brazil)": "Portuguese",
++           "en": "English", "en-us": "English", "english": "English", "es": "Spanish", "spanish": "Spanish"}
++
++
++def ler_multipart(ctype: str, corpo: bytes) -> tuple[bytes | None, dict]:
++    """Devolve (bytes do arquivo, campos de texto). Só multipart/form-data."""
++    if not ctype.lower().startswith("multipart/form-data"):
++        raise ValueError("esperado multipart/form-data")
++    msg = BytesParser(policy=HTTP).parsebytes(b"Content-Type: " + ctype.encode() + b"\r\n\r\n" + corpo)
++    arquivo, campos = None, {}
++    for parte in msg.iter_parts():
++        nome = parte.get_param("name", header="content-disposition")
++        if parte.get_filename() is not None or nome == "file":
++            if arquivo is None:
++                arquivo = parte.get_payload(decode=True)
++        elif nome:
++            campos[nome] = (parte.get_payload(decode=True) or b"").decode(errors="replace").strip()[:100]
++    return arquivo, campos
++
++
++def idioma(campos: dict) -> str:
++    return IDIOMAS.get((campos.get("language") or "pt").lower(), "Portuguese")
++
++
++class Handler(BaseHTTPRequestHandler):
++    transcrever = staticmethod(ouvido.transcrever)
++
++    def _send(self, code: int, obj: dict) -> None:
++        b = json.dumps(obj, ensure_ascii=False).encode()
++        self.send_response(code)
++        self.send_header("Content-Type", "application/json; charset=utf-8")
++        self.send_header("Content-Length", str(len(b)))
++        self.end_headers()
++        self.wfile.write(b)
++
++    def do_GET(self):
++        if self.path == "/health":
++            return self._send(200, {"ok": True, "motor": ouvido.MODELO, "reserva": "whisper (iGPU, se no ar)"})
++        return self._send(404, {"error": "not_found"})
++
++    def do_POST(self):
++        if self.path.split("?")[0] != "/v1/audio/transcriptions":
++            return self._send(404, {"error": "not_found"})
++        try:
++            n = int(self.headers.get("Content-Length") or 0)
++        except ValueError:
++            n = -1
++        if n <= 0 or n > LIMITE:
++            return self._send(413 if n > LIMITE else 411, {"error": "tamanho inválido"})
++        corpo = self.rfile.read(n)
++        try:
++            dados, campos = ler_multipart(self.headers.get("Content-Type", ""), corpo)
++        except ValueError as e:
++            return self._send(400, {"error": str(e)})
++        if not dados:
++            return self._send(400, {"error": "sem arquivo de áudio (campo file)"})
++        with tempfile.TemporaryDirectory(prefix="ouvido-srv-") as tmp:
++            arq = Path(tmp) / "entrada"
++            arq.write_bytes(dados)
++            try:
++                r = self.transcrever(arq, idioma=idioma(campos))
++            except Exception as e:  # noqa: BLE001 — erro de conversão (áudio inválido) não derruba o serviço
++                return self._send(422, {"error": f"áudio não processado: {e.__class__.__name__}"})
++        if not r.get("text"):
++            return self._send(503, {"error": r.get("erro") or "nenhum motor transcreveu"})
++        return self._send(200, {"text": r["text"]})
++
++    def log_message(self, *a):  # sem log por pedido: o texto da fala não vai para o journal
++        pass
++
++
++def _selftest() -> int:
++    import threading
++    import urllib.request
++    import uuid
++
++    class Falso(Handler):
++        transcrever = staticmethod(lambda arq, idioma="Portuguese": {"text": f"ok:{idioma}:{arq.stat().st_size}"})
++    srv = ThreadingHTTPServer((HOST, 0), Falso)
++    threading.Thread(target=srv.serve_forever, daemon=True).start()
++    porta = srv.server_address[1]
++    b = uuid.uuid4().hex
++    corpo = (f"--{b}\r\nContent-Disposition: form-data; name=\"model\"\r\n\r\nlfm3-audio\r\n"
++             f"--{b}\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\nen\r\n"
++             f"--{b}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"a.webm\"\r\n"
++             f"Content-Type: audio/webm\r\n\r\n").encode() + b"\x01\x02\x03" + f"\r\n--{b}--\r\n".encode()
++    req = urllib.request.Request(f"http://{HOST}:{porta}/v1/audio/transcriptions", data=corpo,
++                                 headers={"Content-Type": f"multipart/form-data; boundary={b}"})
++    r = json.loads(urllib.request.urlopen(req, timeout=5).read())
++    ok = r == {"text": "ok:English:3"}
++    print("PASS" if ok else f"FALHA {r}", "multipart OpenAI → texto")
++    srv.shutdown()
++    return 0 if ok else 1
++
++
++def main(argv: list[str]) -> int:
++    if argv[:1] == ["--selftest"]:
++        return _selftest()
++    srv = ThreadingHTTPServer((HOST, PORTA), Handler)
++    print(f"[ouvido] ouvindo em http://{HOST}:{PORTA}  motor={ouvido.MODELO}", flush=True)
++    srv.serve_forever()
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/redesign/sentidos/spec/acceptance.json b/redesign/sentidos/spec/acceptance.json
+index c4f640e0..532294a1 100644
+--- a/redesign/sentidos/spec/acceptance.json
++++ b/redesign/sentidos/spec/acceptance.json
+@@ -34,5 +34,23 @@
+       "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_medicao_grava_registro_comum_com_referencia_e_wer"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "o servidor aceita o multipart da OpenAI, mapeia o idioma e escuta só em loopback",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::ServidorTests::test_multipart_openai_idioma_e_recusas"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a porta nova está no relé, no librechat.yaml, na lista de portas e na unit juntos",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_sentidos.py::ServidorTests::test_porta_declarada_no_rele_no_yaml_e_na_lista_juntos"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/sentidos/spec/spec.md b/redesign/sentidos/spec/spec.md
+index 6c91c14b..465904e2 100644
+--- a/redesign/sentidos/spec/spec.md
++++ b/redesign/sentidos/spec/spec.md
+@@ -1,6 +1,6 @@
+ # Spec — Sentidos: ouvido (nova versão, lote 4 item 1; projeto 5 sentidos)
+ 
+-Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Decisões do Humano em 05/11/2026:
++Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Decisões do Humano em 05/11/2026 (item 2: "vamos já deixar a conversa natural disponivel no librechat"):
+ - "temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos";
+ - "pode fazer os testes sinteticos mesmo, e vamos prosseguir";
+ - "faça".
+@@ -20,6 +20,8 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Deci
+   Devolve `text`, `motor`, `proc_s`, `audio_s`, `falha_etapa`, `erro` e as `tentativas`. Não liga serviço, não gera fala e não grava nada além do temporário. Aceita até 50 MB.
+ - `medir_ouvido.py medir(motores)` fala as 20 frases fixas de `frases_ouvido.txt` com a voz do sistema, sem tocar, mistura ruído rosa leve e calcula o WER (sem acento, pontuação e caixa) e o tempo mediano por motor e condição. Motor fora do ar sai `null`, nunca zero. Grava no registro comum (`redesign/avaliacao/registro.py`, medidor `ouvido`), com referência e transcrição.
+ - O painel tem a página Sentidos: motor principal, reserva, voz, última medição e a ação `medir_ouvido`, em segundo plano e uma por vez com as rodadas de avaliação.
++- `servidor_ouvido.py` serve `POST /v1/audio/transcriptions` (formato OpenAI: multipart com `file` e `language` opcional) e `GET /health`, só em 127.0.0.1:20137, com limite de 25 MB, sem chave e sem log do texto. Unit `redesign/systemd/ouvido-agata.service`, membro do `agata.target`. O LibreChat chega pelo relé `librechat-ponte-host` (172.29.7.1:20137); a porta entra junto no compose, no `librechat.yaml` (`speech.stt` e `allowedAddresses`), em `config/portas-agata.txt` e numa regra do ufw, que é do Humano.
++- O `librechat.yaml` liga a conversa natural por padrão (`speechTab`): transcrição externa em português, envio automático, fala automática pelo piper e `conversationMode`.
+ - A voz do sistema não muda: continua o piper `pt_BR-agata-last` (`scripts/agata_falar.py`).
+ 
+ ## Critérios de aceite
+@@ -28,10 +30,12 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Deci
+ - [ ] a reserva só entra se o Whisper já estiver no ar e nenhum serviço é ligado
+ - [ ] o WER ignora acento, pontuação e caixa
+ - [ ] a medição grava o registro comum com referência e WER e não toca no alto-falante
++- [ ] o servidor aceita o multipart da OpenAI, mapeia o idioma e escuta só em loopback
++- [ ] a porta nova está no relé, no librechat.yaml, na lista de portas e na unit juntos
+ 
+ ## Desenho e alternativas
+ 
+-Biblioteca e linha de comando, sem servidor novo: hoje nada no sistema chama o ouvido (o LibreChat usa a voz do navegador). O servidor HTTP compatível com `/v1/audio/transcriptions` fica para quando a conversa por voz for ligada, em proposta própria.
++Biblioteca e linha de comando (item 1). No item 2, um servidor HTTP mínimo da biblioteca padrão, no formato OpenAI que o LibreChat já fala.
+ - **Descartado:** trocar o modelo do `whisper_server.py` (outra arquitetura) e usar a fala do LFM3. A voz do sistema é decisão do Humano de 03/11 e o LFM3 não clona voz.
+ - **Descartado:** Whisper maior: não instalado, não medido.
+ 
+@@ -55,4 +59,5 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
+ - `ouvido.py`
+ - `medir_ouvido.py`
+ - `frases_ouvido.txt`
++- `servidor_ouvido.py`
+ - `tests/`
+diff --git a/redesign/sentidos/tests/test_sentidos.py b/redesign/sentidos/tests/test_sentidos.py
+index 9caba1d4..3370c7f2 100644
+--- a/redesign/sentidos/tests/test_sentidos.py
++++ b/redesign/sentidos/tests/test_sentidos.py
+@@ -10,6 +10,7 @@ AQUI = Path(__file__).resolve().parent
+ sys.path.insert(0, str(AQUI.parent))
+ import medir_ouvido  # noqa: E402
+ import ouvido  # noqa: E402
++import servidor_ouvido  # noqa: E402
+ 
+ TEM_FFMPEG = bool(shutil.which("ffmpeg"))
+ 
+@@ -92,5 +93,32 @@ class OuvidoTests(unittest.TestCase):
+         self.assertTrue({"referencia", "transcricao", "wer"} <= set(next(x for x in ls if x["outcome"] == "passou")))
+ 
+ 
++class ServidorTests(unittest.TestCase):
++    def test_multipart_openai_idioma_e_recusas(self):
++        b = "XyZ"
++        corpo = (f"--{b}\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\npt\r\n"
++                 f"--{b}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"a.webm\"\r\n"
++                 f"Content-Type: audio/webm\r\n\r\n").encode() + b"\x00\x01" + f"\r\n--{b}--\r\n".encode()
++        dados, campos = servidor_ouvido.ler_multipart(f"multipart/form-data; boundary={b}", corpo)
++        self.assertEqual(dados, b"\x00\x01")
++        self.assertEqual(servidor_ouvido.idioma(campos), "Portuguese")
++        self.assertEqual(servidor_ouvido.idioma({"language": "en"}), "English")
++        self.assertEqual(servidor_ouvido.idioma({"language": "klingon"}), "Portuguese")
++        with self.assertRaises(ValueError):
++            servidor_ouvido.ler_multipart("application/json", b"{}")
++        self.assertEqual(servidor_ouvido.HOST, "127.0.0.1")       # só loopback; a bridge chega pelo relé
++        self.assertEqual(servidor_ouvido._selftest(), 0)
++
++    def test_porta_declarada_no_rele_no_yaml_e_na_lista_juntos(self):
++        raiz = AQUI.parents[2]
++        self.assertIn("20137|ouvido-agata|127.0.0.1,172.29.7.1", (raiz / "config/portas-agata.txt").read_text())
++        self.assertIn(" 20137 ", (raiz / "redesign/librechat/docker-compose.yml").read_text())
++        y = (raiz / "redesign/librechat/librechat.yaml").read_text()
++        self.assertIn('url: "http://172.29.7.1:20137/v1/audio/transcriptions"', y)
++        self.assertIn('allowedAddresses: ["172.29.7.1:20137"]', y)
++        self.assertIn("ExecStart=/usr/bin/python3 %h/agata/redesign/sentidos/servidor_ouvido.py",
++                      (raiz / "redesign/systemd/ouvido-agata.service").read_text())
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/systemd/ouvido-agata.service b/redesign/systemd/ouvido-agata.service
+new file mode 100644
+index 00000000..5c35932d
+--- /dev/null
++++ b/redesign/systemd/ouvido-agata.service
+@@ -0,0 +1,26 @@
++[Unit]
++Description=Agata -- ouvido local (5 sentidos): transcrição OpenAI-compat :20137 para o LibreChat (lfm3-audio, Whisper de reserva)
++Documentation=file:///home/orusoua/agata/redesign/sentidos/servidor_ouvido.py
++# Sobe com o agata.target, como o piper (:8890): a conversa por voz do LibreChat precisa dos dois.
++PartOf=agata.target
++
++[Service]
++Type=simple
++Environment=AGATA_OUVIDO_PORTA=20137
++ExecStart=/usr/bin/python3 %h/agata/redesign/sentidos/servidor_ouvido.py
++Restart=on-failure
++RestartSec=3
++Nice=5
++# Só lê o código e fala com o Ollama (:11434) e o Whisper (:20130) em loopback; escreve só em
++# temporário (PrivateTmp) e, na reserva, na pasta de entrada do Whisper.
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadOnlyPaths=%h/agata
++ReadWritePaths=%h/.cache/agata/whisper-entrada
++
++[Install]
++WantedBy=agata.target

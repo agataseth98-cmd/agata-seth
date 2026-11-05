@@ -1,0 +1,6 @@
+({N}) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
+- **Ouvido:** `redesign/sentidos/servidor_ouvido.py` responde no formato OpenAI (`/v1/audio/transcriptions`) em 127.0.0.1:20137, com a unit `ouvido-agata.service` no `agata.target`.
+- **Relé:** o `librechat-ponte-host` passa a encaminhar 8 portas.
+- **`librechat.yaml`:** recebe `speech.stt` e o `speechTab` com modo conversa, transcrição externa em português e fala automática pela voz do sistema.
+- **Firewall:** a porta exige regra do ufw, medido de dentro do container (porta não liberada dá timeout); a regra fica com o Humano.
+- **Não medido:** a conversa no navegador, que o Humano vai testar ao fim do experimento.
