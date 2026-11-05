@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 622265af8b9186f5470748cc4c5d1d23f4ebd1c5
-  Escrito em: 05/11/2026 16:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6bd484fdbf37cdc0ec009687cb2abe93c07bd16d
+  Escrito em: 05/11/2026 16:42 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/622265af8b9186f5470748cc4c5d1d23f4ebd1c5/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/622265af8b9186f5470748cc4c5d1d23f4ebd1c5/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/622265af8b9186f5470748cc4c5d1d23f4ebd1c5/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/622265af8b9186f5470748cc4c5d1d23f4ebd1c5/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/622265af8b9186f5470748cc4c5d1d23f4ebd1c5/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6bd484fdbf37cdc0ec009687cb2abe93c07bd16d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
+- **Pedido do Humano (05/11/2026):** "sim" a registrar os gratuitos do OpenRouter; "pode colocar" o Z.AI; cota esgotada deve ser sinalizada.
+- **Mecanismo:** `config/gratuitos_omniroute.json` (lista; `crouton-alpha` fora por origem anônima) e `chamar_rota` com `cota_esgotada`.
+- **Medição:** pytest verde; os 11 OpenRouter responderam por passagem.
+- **Limite:** a cota real não foi medida; os limites de agregadores divergem.
+
 (949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
 - **Mecanismo:** `redesign/router/sombra_nova_versao.py` ganha o bloco `suporte_turno_anterior`, só registro. Não altera a resposta, não bloqueia, não chama modelo.
 - **Medição:** selftest 6 de 6 (inclui o caso de número sem fonte e de texto que não vai ao registro).
