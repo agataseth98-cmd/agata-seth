@@ -193,6 +193,40 @@ class HttpTests(unittest.TestCase):
         finally:
             conn.close()
 
+    def test_upload_de_fonte_aceita_md_e_recusa_o_resto(self):
+        import os
+        import tempfile
+        tmp = tempfile.TemporaryDirectory()
+        antigo = os.environ.get("AGATA_NV_DIR")
+        os.environ["AGATA_NV_DIR"] = tmp.name + "/dados"          # nunca escreve nos dados reais
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/octet-stream", "X-Extensao": "md", "X-Nome": "nota%20teste.md"}
+        try:
+            code, body, _ = self.request("POST", "/api/nova-versao/upload", b"# Nota\nhortas\n", base)
+            self.assertEqual(code, 201)
+            sha = json.loads(body)["sha256"]
+            code2, body2, _ = self.request("POST", "/api/nova-versao/upload", b"# Nota\nhortas\n", base)
+            self.assertEqual((code2, json.loads(body2)["duplicado"]), (200, True))
+            self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"x", {**base, "Origin": "http://evil"})[0], 403)
+            self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"x", {**base, "Content-Type": "application/json"})[0], 415)
+            self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"x", {**base, "X-Extensao": "exe"})[0], 422)
+            self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"\x7fELF\x02", base)[0], 422)
+            entrada = Path(tmp.name) / "dados" / "alexandria" / "entrada"
+            self.assertTrue((entrada / f"{sha}.md").exists())
+            self.assertEqual(list(entrada.glob(".up-*")), [])      # nenhum temporário sobrou
+        finally:
+            if antigo is None:
+                os.environ.pop("AGATA_NV_DIR", None)
+            else:
+                os.environ["AGATA_NV_DIR"] = antigo
+            tmp.cleanup()
+
+    def test_upload_acima_do_teto_e_recusado_antes_de_ler(self):
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/octet-stream", "X-Extensao": "md"}
+        big = {**base, "Content-Length": str(26 * 1024 * 1024)}     # 26 MiB > 25 MiB: 413 pelo cabeçalho
+        self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"x", big)[0], 413)
+
     def test_html_e_status_sao_servidos_e_origem_cruzada_recusada(self):
         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
@@ -371,6 +405,14 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("POST", "/api/relay-council/evaluations", large, base)[0], 413)
         deeply_nested = "{" + '"a":{' * 1500 + '"x":0' + "}" * 1501
         self.assertEqual(self.request("POST", "/api/relay-council/evaluations", deeply_nested, base)[0], 400)
+
+    def test_json_post_aceita_ate_64k_e_recusa_acima(self):
+        # teto geral de POST JSON (decisão do Humano, 05/11: "aumenta tudo"): 64 KB, não 4 KB
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
+        medio = json.dumps({"acao": "nao-existe", "pad": "x" * 10000})
+        self.assertEqual(self.request("POST", "/api/nova-versao/executar", medio, base)[0], 400)
+        grande = json.dumps({"acao": "nao-existe", "pad": "x" * 70000})
+        self.assertEqual(self.request("POST", "/api/nova-versao/executar", grande, base)[0], 413)
 
     def test_relay_quota_and_idempotent_receipts(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",

@@ -52,5 +52,14 @@
       "redesign/sentidos/tests/test_sentidos.py::ServidorTests::test_porta_declarada_no_rele_no_yaml_e_na_lista_juntos"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a visão descreve imagem com o modelo local e falha vira estado, não exceção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_visao_revisao.py::VisaoTests::test_descreve_com_chamada_injetada"
+    ],
+    "cwd": null
   }
 ]

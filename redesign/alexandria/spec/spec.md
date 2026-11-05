@@ -44,6 +44,28 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 - [ ] a entrada corrigida sai marcada só pela correção que a cita primeiro
 - [ ] o bloco de hidratação é rotulado, sem privado, com correção e teto
 - [ ] o gateway só injeta a evidência com a variável ligada
+- [ ] transições automáticas só vão até a quarentena e o Humano decide o resto
+- [ ] o índice mostra externo só revisado com direitos; desconhecido vira referência sem texto
+- [ ] o índice de schema antigo é recusado com mensagem clara
+- [ ] upload e pasta recusam extensão, assinatura de executável e cabeçalho errado
+- [ ] a quarentena sinaliza instrução embutida e restringe dado pessoal
+- [ ] URL é baixada pelo egresso seguro, sem query, e só com status 200
+- [ ] a suficiência pede pesquisa externa para pergunta volátil
+- [ ] pergunta com dado pessoal não sai para a pesquisa externa
+- [ ] skill revogada some da sugestão e não pode ser usada
+- [ ] a entrada corrigida sai marcada só pela correção que a cita primeiro
+- [ ] o gateway troca eco de segredo por recusa e mantém o fim do fluxo
+- [ ] o gateway não troca resposta com chamada de ferramenta
+- [ ] com as flags desligadas, o estado e a guarda não mudam a Seth
+
+## Lote 5 (05/11/2026)
+
+- `cadastro.py`: fonte de verdade dos externos, um JSON por objeto, transições por ator e decisão de direitos só do Humano.
+- `aquisicao.py`: três entradas (upload, pasta, URL) num só caminho, quarentena e parse isolado (PDF só no sandbox, sem rede).
+- `correcoes.py`: definição única de entrada CORREÇÃO (antes eram duas, com regras diferentes).
+- `externa.py`: pesquisa externa como evidência efêmera, com pergunta limpa e egresso por destino.
+- `ciclo_skills.py`: rascunho, quarentena, em-teste, elegível e revogada; elegível só gera um `.diff` para o P-8.
+- Suficiência (`acervo.suficiencia`) e defesa de consulta: externo não revisado nunca aparece.
 
 ## Desenho e alternativas
 
@@ -68,3 +90,8 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
 - `curadoria.py`
 - `hidratacao.py`
 - `tests/`
+- `cadastro.py`
+- `aquisicao.py`
+- `correcoes.py`
+- `externa.py`
+- `ciclo_skills.py`

@@ -79,5 +79,77 @@
       "redesign/avaliacao/tests/test_avaliacao.py::RodadaTests::test_condicao_guarda_troca_o_eco_por_recusa"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o split reservado v2 exige revisão do Humano e política fixada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::B1Tests::test_split_reservado2_exige_revisao_e_politica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a contaminação segue a família do autor, não só a palavra Claude",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::B1Tests::test_contaminado_pela_familia_do_autor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a troca de LLM pareia as mesmas tarefas e diz qual rota é melhor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_b3.py::B3Tests::test_troca_de_llm_pareia_tarefas_e_diz_qual_e_melhor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o teto de tokens do orçamento para a rodada de verdade",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_b3.py::B3Tests::test_teto_de_tokens_do_orcamento_e_aplicado_de_verdade"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a restauração reconstrói num cache isolado e compara objetos e consultas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_b3.py::B3Tests::test_restauracao_reconstroi_em_cache_isolado_e_compara"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rubrica humana é às cegas: sem condição nem rota",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_revisoes_skills.py::RevisoesTests::test_cegas_nao_revela_condicao_nem_rota"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a seleção de skill mede omissão, falso positivo e sucesso",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_revisoes_skills.py::SkillsTests::test_omissao_falso_positivo_e_sucesso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os medidores antigos gravam o registro comum com a flag --registro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_registro_medidor.py::RegistroMedidorTests::test_grava_um_run_com_uma_linha_por_item_e_evento_no_ledger"
+    ],
+    "cwd": null
   }
 ]

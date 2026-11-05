@@ -32,6 +32,11 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Deci
 - [ ] a medição grava o registro comum com referência e WER e não toca no alto-falante
 - [ ] o servidor aceita o multipart da OpenAI, mapeia o idioma e escuta só em loopback
 - [ ] a porta nova está no relé, no librechat.yaml, na lista de portas e na unit juntos
+- [ ] a visão descreve imagem com o modelo local e falha vira estado, não exceção
+
+## Lote 5 (05/11/2026)
+
+- `visao.py`: descrição de imagem pelo lfm3-vl (entrada apenas; a imagem não é gravada).
 
 ## Desenho e alternativas
 
@@ -61,3 +66,4 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
 - `frases_ouvido.txt`
 - `servidor_ouvido.py`
 - `tests/`
+- `visao.py`

@@ -61,5 +61,32 @@
       "redesign/metacognicao/tests/test_guarda.py::GuardaTests::test_curadoria_anota_so_fonte_sem_autoridade_e_posterior_bloqueia"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a verificação mecânica acha citação inventada e número sem fonte",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_visao_revisao.py::RevisaoSuporteTests::test_mecanico_pega_citacao_inventada_e_numero_sem_fonte"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o revisor de suporte é proporcional ao risco",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_visao_revisao.py::RevisaoSuporteTests::test_plano_proporcional_ao_risco"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o revisor vê só o par afirmação e trecho, e divergência vira inconclusivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_visao_revisao.py::RevisaoSuporteTests::test_revisor_ve_so_o_par_e_divergencia_vira_inconclusivo"
+    ],
+    "cwd": null
   }
 ]

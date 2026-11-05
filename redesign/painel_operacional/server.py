@@ -13,12 +13,13 @@ import re
 import secrets
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import uuid
 import urllib.error
 import urllib.request
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -89,6 +90,7 @@ _RELAY_RATE_LIMIT = 60
 _SEM_CONVERSA_EM_CURSO = threading.BoundedSemaphore(1)
 _PROPOSAL_LOCK = threading.BoundedSemaphore(1)
 _SDD_LOCK = threading.Lock()
+_UPLOAD_LOCK = threading.Lock()   # lote 5: um upload de fonte por vez
 _DETAILS_LOCK = threading.Lock()
 _DETAILS_CACHE: dict | None = None
 _DETAILS_CACHE_AT: float | None = None
@@ -922,6 +924,14 @@ _CONSELHO_ULTIMA: dict = {}
 ABRIR_OBSIDIAN = ("flatpak", "run", "md.obsidian.Obsidian")
 
 
+class _RespostaUpload(Exception):
+    """Resposta de erro do upload, levantada dentro do try para que a limpeza rode antes de responder."""
+
+    def __init__(self, codigo: int, corpo: bytes):
+        super().__init__(codigo)
+        self.codigo, self.corpo = codigo, corpo
+
+
 class Handler(BaseHTTPRequestHandler):
     def _abrir_programa(self) -> None:
         if (self.headers.get("Origin") != ALLOWED_ORIGIN
@@ -1131,6 +1141,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_chat()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
+        if self.path == "/api/nova-versao/upload":
+            return self._nova_versao_upload()
         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
             return self._send(405, "text/plain; charset=utf-8", b"read only", (("Allow", "GET, POST"),))
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
@@ -1140,7 +1152,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
             return self._send(415, "text/plain; charset=utf-8", b"JSON required")
         raw_length = self.headers.get("Content-Length", "")
-        if not raw_length.isdecimal() or int(raw_length) > 4096:
+        if not raw_length.isdecimal() or int(raw_length) > 65_536:
             return self._send(413, "text/plain; charset=utf-8", b"request too large")
         try:
             payload = json.loads(self.rfile.read(int(raw_length)))
@@ -1276,6 +1288,67 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "application/json; charset=utf-8", b'{"error":"invalid task"}')
         return self._send(200, "application/json; charset=utf-8",
                           json.dumps(recorded).encode("utf-8"))
+
+    def _nova_versao_upload(self) -> None:
+        """Upload de fonte externa (lote 5, C4): corpo binário, em blocos, para o temporário da pasta de entrada.
+        Mesmas checagens de origem das outras rotas; sem JSON; um por vez; prazo total e timeout por leitura.
+        A limpeza do temporário acontece ANTES da resposta: o cliente nunca vê a pasta com resto de upload."""
+        if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+            self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
+        ):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/octet-stream":
+            return self._send(415, "text/plain; charset=utf-8", b"octet-stream required")
+        if self.headers.get("Transfer-Encoding"):
+            return self._send(411, "text/plain; charset=utf-8", b"content-length required")
+        import aquisicao  # noqa: E402  (alexandria já está no sys.path via nova_versao_painel)
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > aquisicao.MAX_BYTES:
+            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        extensao = (self.headers.get("X-Extensao") or "").strip().lower()
+        if extensao not in aquisicao.EXTENSOES:
+            return self._send(422, "text/plain; charset=utf-8", b"extension not accepted")
+        nome = unquote(self.headers.get("X-Nome") or "upload")[:200]   # o navegador envia encodeURIComponent (cabeçalho é latin-1)
+        if not _UPLOAD_LOCK.acquire(blocking=False):
+            return self._send(429, "text/plain; charset=utf-8", b"upload busy")
+        tmp_path = None
+        resposta = None
+        try:
+            fd, tmp_path = tempfile.mkstemp(dir=aquisicao.entrada(), prefix=".up-")
+            restante = int(raw_length)
+            prazo = time.monotonic() + 60
+            self.connection.settimeout(10)
+            with os.fdopen(fd, "wb") as f:
+                while restante > 0:
+                    if time.monotonic() > prazo:
+                        raise _RespostaUpload(408, b"upload timeout")
+                    bloco = self.rfile.read(min(65536, restante))
+                    if not bloco:
+                        break
+                    f.write(bloco)
+                    restante -= len(bloco)
+            if restante:
+                raise _RespostaUpload(400, b"incomplete body")
+            r = aquisicao.guardar_arquivo(Path(tmp_path), extensao, nome, origem_tipo="upload")
+            tmp_path = None
+            c = r["cadastro"]
+            body = json.dumps({"schema_version": 1, "sha256": c["sha256"], "duplicado": r["duplicado"],
+                               "editorial_status": c["editorial_status"], "extensao": c["extensao"],
+                               "tamanho": c["tamanho"]}, ensure_ascii=False).encode("utf-8")
+            resposta = (201 if not r["duplicado"] else 200, body)
+        except _RespostaUpload as r:
+            resposta = (r.codigo, r.corpo)
+        except socket.timeout:
+            resposta = (408, b"upload timeout")
+        except ValueError as e:
+            resposta = (422, str(e).encode("utf-8")[:200])
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            _UPLOAD_LOCK.release()
+        codigo, corpo = resposta
+        ctype = "application/json; charset=utf-8" if codigo in (200, 201) else "text/plain; charset=utf-8"
+        return self._send(codigo, ctype, corpo)
 
     def _relay_evaluation(self) -> None:
         if (self.headers.get("Origin") != ALLOWED_ORIGIN

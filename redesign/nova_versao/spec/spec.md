@@ -55,6 +55,19 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 - [ ] o orçamento padrão é só local e pago sem teto não gasta
 - [ ] a GPU local tem fila única e o teto de chamadas da tarefa vale
 - [ ] cancelar impede novos itens e contexto mudado manda o resultado para revisão
+- [ ] nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado
+- [ ] papel só recebe rota que passou na prova e de família diferente do sintetizador
+- [ ] o ensaio de retorno usa a rota alternativa quando a principal cai
+- [ ] o orçamento do turno esgota por rodadas, chamadas ou prazo
+- [ ] as sete palavras andam só pelos passos previstos e não repetem o registro
+
+## Lote 5 (05/11/2026)
+
+- `caminhos.py`: confinamento de nomes vindos de fora (usado por cadastro, upload, revisões e reservado v2).
+- `papeis.py` + `config/papeis.json`: papel → rota, só com capacidade provada e independência do sintetizador. Sem serviço por papel.
+- `redundancia.py`: escolha de rota alternativa e ensaio de falha com injeção (sem parar serviço).
+- `orcamento_turno.py`: rodadas, chamadas e prazo do turno; o `posterior` marca `parcial` quando esgota.
+- `nv.py sincronizar`: as sete palavras ligadas a propostas reais (apresentação, assinatura, aplicação), pelo ledger, com chave idempotente. Remoção nunca é automática.
 
 ## Desenho e alternativas
 
@@ -79,3 +92,7 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve 
 - `nv.py`
 - `tarefas.py`
 - `tests/`
+- `caminhos.py`
+- `papeis.py`
+- `redundancia.py`
+- `orcamento_turno.py`

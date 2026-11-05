@@ -22,7 +22,8 @@ for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "av
 ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
          "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
-         "cancelar_avaliacao", "ver_execucao", "medir_ouvido")
+         "cancelar_avaliacao", "ver_execucao", "medir_ouvido",
+         "acervo_listar", "acervo_importar", "acervo_url", "acervo_processar", "acervo_direitos", "acervo_transicionar")
 _TESTE: dict = {"estado": "ocioso"}
 _AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
 _TESTE_LOCK = threading.Lock()
@@ -41,7 +42,15 @@ def estado() -> dict:
             "teste_rotas": {"job": job, "ultimo": {k: ult[k] for k in ("run_id", "quando", "estado", "chamadas",
                                                                        "rotas_que_passaram", "obsoleto")} if ult else None,
                             "resultados": (ult or {}).get("resultados", [])[:60]},
-            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao(), "sentidos": _estado_sentidos()}
+            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao(), "sentidos": _estado_sentidos(),
+            "acervo": _estado_acervo()}
+
+
+def _estado_acervo() -> dict:
+    try:
+        return _acervo("acervo_listar", {})
+    except Exception as e:  # noqa: BLE001 — o acervo não derruba o painel
+        return {"itens": [], "erro": f"{e.__class__.__name__}"}
 
 
 def _estado_sentidos() -> dict:
@@ -96,9 +105,11 @@ def _avaliacao(acao: str, dados: dict) -> dict:
         return avaliar.salvar_politica(dados.get("margem_minima"), dados.get("teto_latencia_ms"), dados.get("teto_reais"))
     if acao == "ver_reservado":
         # só o painel local mostra o gabarito, ao Humano revisor; nunca entra em prompt nem no acervo
-        return {"tarefas": conjunto.carregar("teste"), **conjunto.estado_reservado()}
+        split = dados.get("split") if dados.get("split") in conjunto.RESERVADOS else "teste"
+        return {"tarefas": conjunto.carregar(split), **conjunto.estado_reservado(split)}
     if acao == "revisar_reservado":
-        return conjunto.marcar_revisado("humano (painel)")
+        split = dados.get("split") if dados.get("split") in conjunto.RESERVADOS else "teste"
+        return conjunto.marcar_revisado("humano (painel)", split)
     if acao == "rotas_disponiveis":
         import testar_rotas  # noqa: E402
         return {"rotas": [{k: r.get(k) for k in ("rota", "categoria", "modelo")}
@@ -116,14 +127,14 @@ def _avaliacao(acao: str, dados: dict) -> dict:
         return _iniciar_avaliacao(lambda: medir_ouvido.medir(), "ouvido")
     if acao == "medir_recuperacao":
         import recuperacao  # noqa: E402
-        split = dados.get("split") if dados.get("split") in ("dev", "calibracao", "teste") else "dev"
+        split = dados.get("split") if dados.get("split") in conjunto.SPLITS else "dev"
         return _iniciar_avaliacao(lambda: recuperacao.rodar(split), "recuperacao")
     # avaliar: confere tudo antes de abrir a thread, para a recusa voltar na hora
     split = dados.get("split")
     rotas = dados.get("rotas")
     conds = dados.get("condicoes") or list(avaliar.CONDICOES)
     rep = dados.get("repeticoes", 1)
-    if split not in ("dev", "calibracao", "teste") or not isinstance(rotas, list) or not rotas \
+    if split not in conjunto.SPLITS or not isinstance(rotas, list) or not rotas \
             or not all(isinstance(x, str) and len(x) < 200 for x in rotas) or not isinstance(conds, list) \
             or not isinstance(rep, int):
         raise ValueError("pedido de avaliação inválido")
@@ -163,6 +174,8 @@ def executar(acao, dados: dict | None = None) -> dict:
             _TESTE.clear(); _TESTE.update(estado="rodando", inicio=time.time())
         threading.Thread(target=_rodar_teste, args=(set(cats) if cats else None,), daemon=True).start()
         return {"acao": acao, "resultado": {"estado": "rodando"}}
+    if acao.startswith("acervo_"):
+        return {"acao": acao, "resultado": _acervo(acao, dados)}
     if acao in ("salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar",
                 "medir_recuperacao", "cancelar_avaliacao", "ver_execucao", "medir_ouvido"):
         return {"acao": acao, "resultado": _avaliacao(acao, dados)}
@@ -223,3 +236,43 @@ def executar(acao, dados: dict | None = None) -> dict:
         return {"acao": acao, "resultado": orcamento.salvar(dados.get("orcamento") or {})}
     finally:
         _LOCK.release()
+
+def _resumo_cadastro(c: dict) -> dict:
+    return {k: c.get(k) for k in ("sha256", "rotulo", "extensao", "tamanho", "origem_tipo", "origem_uri",
+                                  "editorial_status", "direitos", "analise", "adquirido_em")}
+
+
+def _reindexar() -> dict:
+    """Depois de decisão que muda o que é pesquisável, o índice é refeito a partir do HEAD."""
+    import acervo  # noqa: E402
+    return acervo.indexar(acervo.snapshot("HEAD", ROOT))
+
+
+def _acervo(acao: str, dados: dict) -> dict:
+    """Acervo da Alexandria no painel (lote 5, C4). Toda decisão é do Humano; a máquina só faz a quarentena."""
+    import aquisicao  # noqa: E402
+    import cadastro  # noqa: E402
+    if acao == "acervo_listar":
+        return {"itens": [_resumo_cadastro(c) for c in cadastro.listar()],
+                "estados": list(cadastro.ESTADOS), "direitos": list(cadastro.DIREITOS)}
+    if acao == "acervo_importar":
+        return {"pasta": aquisicao.importar_pasta(), "processados": [
+            _resumo_cadastro(aquisicao.processar(c["sha256"])) for c in cadastro.listar()
+            if c["editorial_status"] == "recebido"]}
+    if acao == "acervo_url":
+        url = dados.get("url")
+        if not isinstance(url, str) or len(url) > 2048:
+            raise ValueError("url inválida")
+        return {"cadastro": _resumo_cadastro(aquisicao.receber_url(url))}
+    if acao == "acervo_processar":
+        if not dados.get("sha256"):   # sem sha: processa tudo o que está em `recebido`
+            return {"processados": [_resumo_cadastro(aquisicao.processar(c["sha256"])) for c in cadastro.listar()
+                                    if c["editorial_status"] == "recebido"]}
+        return {"cadastro": _resumo_cadastro(aquisicao.processar(dados.get("sha256")))}
+    if acao == "acervo_direitos":
+        obj = cadastro.definir_direitos(dados.get("sha256"), dados.get("status"), dados.get("evidencia"), "humano")
+        return {"cadastro": _resumo_cadastro(obj), "reindexado": _reindexar()}
+    if acao == "acervo_transicionar":
+        obj = cadastro.transicionar(dados.get("sha256"), dados.get("para"), "humano", dados.get("motivo") or "")
+        return {"cadastro": _resumo_cadastro(obj), "reindexado": _reindexar()}
+    raise ValueError("ação de acervo desconhecida")

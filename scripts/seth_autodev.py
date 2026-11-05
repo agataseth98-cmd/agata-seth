@@ -508,6 +508,12 @@ def main(argv):
         instr = Path(opt("--instrucao", "")).read_text(encoding="utf-8") if "--instrucao" in argv else None
         d = rodar(opt("--suite", "tudo"), int(opt("--max-casos", 60)), int(opt("--max-chamadas", 200)), opt("--saida", None),
                   ids=ids, instrucao=instr, abrir="--abrir" in argv)
+        if "--registro" in argv:   # lote 5, A5: um item por caso; passou None vira nao_rodou
+            import registro_medidor  # noqa: E402
+            itens = [{"task_id": r.get("id", "?"), "condition": d.get("suite", "?"), "model_id": d.get("modelo"),
+                      "outcome": "nao_rodou" if r.get("passou") is None else ("passou" if r["passou"] else "falhou"),
+                      "failure_stage": r.get("causa") if r.get("passou") is False else None} for r in d["registros"]]
+            print("registro:", registro_medidor.gravar("seth_autodev", "dev", itens, {"n": len(itens)}))
         return 0 if all(r.get("passou") for r in d["registros"] if r.get("passou") is not None) else 1
     if argv[:1] == ["--diagnosticar"] and len(argv) >= 2:
         relatorio_diagnostico(json.loads(Path(argv[1]).read_text(encoding="utf-8")))

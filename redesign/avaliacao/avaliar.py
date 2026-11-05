@@ -29,8 +29,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import statistics
+import threading
 import sys
 import time
 from pathlib import Path
@@ -46,7 +48,8 @@ import orcamento  # noqa: E402
 import registro  # noqa: E402
 import tarefas  # noqa: E402
 
-CONDICOES = ("sem_contexto", "busca_texto", "alexandria", "alexandria_semantica", "alexandria_guarda")
+CONDICOES = ("sem_contexto", "busca_texto", "alexandria", "alexandria_semantica", "alexandria_guarda",
+               "alexandria_externa")
 BASELINE = "busca_texto"
 MIN_PARES = 10
 AUTOR_PADRAO = "Claude Opus 5.5 (Claude Code)"
@@ -91,7 +94,7 @@ def _fontes_documentos(t: dict, condicao: str) -> list[dict] | None:
                                 for d in docs if d.get("classification", "public") == "public"])
 
 
-def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None) -> tuple[list[dict] | None, str | None]:
+def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_externa=None) -> tuple[list[dict] | None, str | None]:
     if condicao == "sem_contexto":
         return None, None
     consulta = t.get("consulta") or t["pedido"]
@@ -106,6 +109,10 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None) -> tupl
         consultar = acervo.consultar
     pac = consultar(consulta, n=6, semantica="sempre" if condicao == "alexandria_semantica" else "nunca")
     fontes = []
+    if condicao == "alexandria_externa":   # lote 5 (C3): evidência externa efêmera, só com busca injetada
+        import externa  # noqa: E402
+        ext = externa.pesquisar(consulta, buscar=buscar_externa)
+        fontes += externa.para_contexto(ext)
     for i, r in enumerate(pac["resultados"][:6], 1):
         fid = str(r["entrada"]) if r.get("entrada") is not None else f"f{i}"
         fontes.append({"id": fid, "texto": r.get("trecho") or "(entrada relacionada; trecho não incluído)",
@@ -116,7 +123,7 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None) -> tupl
 
 
 def fontes(t: dict, condicao: str, **kw) -> tuple[list[dict] | None, str | None]:
-    if t.get("documentos"):
+    if t.get("documentos") and condicao != "alexandria_externa":
         return _fontes_documentos(t, condicao), None
     return _fontes_repo(t, condicao, **kw)
 
@@ -151,21 +158,75 @@ def _mec_rede() -> dict:
     return {"ok": True, "passou": ok, "detalhe": {"metodos": pac["metodos"], "avisos": pac["avisos"]}}
 
 
-MECANICOS = {"reconstrucao_indice": _mec_reconstrucao, "rede_indisponivel": _mec_rede}
+CONSULTAS_FIXAS = ("porta painel", "vector store memoria", "suspend travamento", "entrada diario correcao")
+
+
+def _mec_restauracao() -> dict:
+    """Restauração (protocolo §2): apaga o índice num cache temporário, reconstrói do snapshot e compara
+    objetos, hashes e os resultados de consultas fixas. Não toca o índice vivo."""
+    import acervo  # noqa: E402
+    import tempfile as _tf
+    m = acervo.meta()
+    if not m.get("commit"):
+        return {"ok": False, "falha_etapa": "configuracao", "erro": "sem índice"}
+    snap = eventos.dados() / "alexandria" / "acervo" / "snapshots" / str(m["commit"])[:12]
+    if not snap.exists():
+        return {"ok": False, "falha_etapa": "configuracao", "erro": "sem snapshot do commit"}
+    antes_objs = {o: h for o, h in acervo.objetos_indice()}
+    antes_consultas = {q: [r["object_id"] for r in acervo.consultar(q, semantica="nunca")["resultados"]]
+                       for q in CONSULTAS_FIXAS}
+    antigo = os.environ.get("AGATA_NV_CACHE")
+    with _tf.TemporaryDirectory(prefix="restaura-") as tmp:
+        os.environ["AGATA_NV_CACHE"] = tmp
+        try:
+            acervo.indexar(snap, skills=False)
+            depois_objs = {o: h for o, h in acervo.objetos_indice()}
+            depois_consultas = {q: [r["object_id"] for r in acervo.consultar(q, semantica="nunca")["resultados"]]
+                                for q in CONSULTAS_FIXAS}
+        finally:
+            if antigo is None:
+                os.environ.pop("AGATA_NV_CACHE", None)
+            else:
+                os.environ["AGATA_NV_CACHE"] = antigo
+    iguais = antes_objs == depois_objs and antes_consultas == depois_consultas
+    return {"ok": True, "passou": iguais,
+            "detalhe": {"objetos": len(depois_objs), "diferencas_objetos": len(set(antes_objs.items()) ^ set(depois_objs.items())),
+                        "consultas_diferentes": sum(antes_consultas[q] != depois_consultas[q] for q in CONSULTAS_FIXAS)}}
+
+
+MECANICOS = {"reconstrucao_indice": _mec_reconstrucao, "rede_indisponivel": _mec_rede,
+             "restauracao_indice": _mec_restauracao}
 
 
 # --- execução ---------------------------------------------------------------------------------------
+# Família de modelo pelo nome (mapa próprio: conselho_remoto._familia não cobre Claude nem OpenAI).
+FAMILIAS = {"claude": ("claude", "anthropic", "haiku", "opus", "sonnet"),
+            "openai": ("gpt", "chatgpt", "openai", "codex"),
+            "qwen": ("qwen",), "lfm": ("lfm", "liquid"), "lumi": ("lumi",), "gemini": ("gemini",),
+            "mistral": ("mistral", "devstral", "ministral", "codestral"), "llama": ("llama",),
+            "nemotron": ("nemotron",), "glm": ("glm",), "deepseek": ("deepseek",)}
+
+
+def familia_de(texto: str) -> str | None:
+    t = (texto or "").lower()
+    return next((f for f, kws in FAMILIAS.items() if any(k in t for k in kws)), None)
+
+
 def _contaminado(rota: dict, t: dict) -> bool:
-    fam = (rota.get("independencia") or {}).get("familia", "") + " " + (rota.get("rota") or "")
-    return "claude" in fam.lower() and "claude" in (t.get("autor") or AUTOR_PADRAO).lower()
+    """A rota é da mesma família que escreveu as tarefas: o veredito não conta para ela (plano, pacote B1)."""
+    autor = familia_de(t.get("autor") or AUTOR_PADRAO)
+    if autor is None:
+        return False
+    rota_fam = familia_de(((rota.get("independencia") or {}).get("familia", "") + " " + (rota.get("rota") or "")))
+    return rota_fam == autor
 
 
 def preparar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repeticoes: int = 1, *, todas_rotas=None):
     ts = conjunto.carregar(split)
     if not ts:
         raise ValueError("conjunto vazio")
-    if split == "teste":
-        est = conjunto.estado_reservado()
+    if split in conjunto.RESERVADOS:
+        est = conjunto.estado_reservado(split)
         if not est["revisado_por"]:
             raise PermissionError("reservado sem revisão do Humano para o hash atual")
         if not politica():
@@ -185,7 +246,7 @@ def preparar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repet
 
 
 def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repeticoes: int = 1, *,
-          todas_rotas=None, chamar=None, fontes_kw: dict | None = None) -> dict:
+          todas_rotas=None, chamar=None, fontes_kw: dict | None = None, paralelo: bool = True) -> dict:
     ts, rs = preparar(split, rotas_escolhidas, condicoes, repeticoes, todas_rotas=todas_rotas)
     o = orcamento.ler()
     pol = politica()
@@ -198,6 +259,9 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
         def chamar(r, p):
             return testar_rotas.chamar_rota(r, p, o["timeout_s"], max_tokens=400)
     cache_fontes: dict = {}
+    gasto = {"tokens": 0}          # teto de tokens do orçamento, somado sobre todas as chamadas da rodada
+    trava_gasto = threading.Lock()
+    inicio = time.monotonic()
     itens = []
     for t in ts:
         if t.get("mecanico"):
@@ -217,7 +281,13 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
         if chave_f not in cache_fontes:
             cache_fontes[chave_f] = fontes(t, item["condicao"], **(fontes_kw or {}))
         fs, ctx = cache_fontes[chave_f]
+        with trava_gasto:
+            if gasto["tokens"] >= o["max_tokens"]:
+                return {"ok": False, "falha_etapa": "orcamento", "erro": "teto de tokens do orçamento atingido"}
         res = chamar(item["rota_info"], conjunto.prompt(t, fs))
+        uso = res.get("usage") or {}
+        with trava_gasto:
+            gasto["tokens"] += int(uso.get("input_tokens") or 0) + int(uso.get("output_tokens") or 0)
         res["context_id"] = ctx
         if item["condicao"] == "alexandria_guarda" and res.get("ok"):
             import guarda   # o depois da metacognição vê todas as fontes que o sistema tinha, inclusive as privadas
@@ -228,7 +298,7 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
         return res
 
     tf = tarefas.criar("avaliacao", itens, max_chamadas=o["max_chamadas"], prazo_s=max(o["timeout_s"] * 10, 900))
-    tf = tarefas.executar(tf, executor, paralelo=True)
+    tf = tarefas.executar(tf, executor, paralelo=paralelo)
     linhas_ = []
     for item in itens:
         r = tf["resultados"].get(item["chave"]) or {"ok": False, "falha_etapa": "execucao", "erro": "não rodou (teto de chamadas)"}
@@ -257,6 +327,9 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
             contaminado=_contaminado(rota, t), resposta=(r.get("texto") or "")[:4000] or None))
     resumo = metricas(linhas_, pol)
     resumo["chamadas"] = tf["chamadas"]
+    resumo["paralelo"] = paralelo
+    resumo["duracao_s"] = round(time.monotonic() - inicio, 2)
+    resumo["tokens_usados"] = gasto["tokens"]
     resumo["obsoleto"] = tf["obsoleto"]
     return registro.fechar(run, resumo, estado="cancelada" if tf["estado"] == "cancelada" else "concluida")
 
@@ -351,6 +424,27 @@ def comparar(linhas_: list[dict], pol: dict | None, *, seed: int = 7) -> list[di
     return out
 
 
+def comparar_rotas(linhas_: list[dict], rota_a: str, rota_b: str, *, condicao: str = "alexandria", seed: int = 7) -> dict:
+    """Troca de LLM (continuidade, protocolo §4): mesmas tarefas, mesma condição, duas rotas. Pares e IC95."""
+    la = [x for x in linhas_ if x["rota"] == rota_a and x["condition"] == condicao]
+    lb = [x for x in linhas_ if x["rota"] == rota_b and x["condition"] == condicao]
+    ma, mb = _media_por_tarefa(la), _media_por_tarefa(lb)
+    pares = [mb[k] - ma[k] for k in sorted(set(ma) & set(mb))]
+    n = len(pares)
+    ic = _bootstrap(pares, seed) if n >= 2 else None
+    if n < MIN_PARES or ic is None:
+        v = "inconclusivo"
+    elif ic[0] > 0:
+        v = "b_melhor"
+    elif ic[1] < 0:
+        v = "a_melhor"
+    else:
+        v = "inconclusivo"
+    return {"rota_a": rota_a, "rota_b": rota_b, "condicao": condicao, "n_pares": n,
+            "diferenca_media": round(statistics.mean(pares), 4) if pares else None, "ic95": ic, "veredito": v,
+            "corpus_snapshot": next((x.get("corpus_snapshot") for x in la + lb if x.get("corpus_snapshot")), None)}
+
+
 def _media_por_tarefa(ls: list[dict]) -> dict:
     acc: dict = {}
     for x in ls:
@@ -376,7 +470,7 @@ def estado() -> dict:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--split", default="dev", choices=("dev", "calibracao", "teste"))
+    ap.add_argument("--split", default="dev", choices=conjunto.SPLITS)
     ap.add_argument("--rotas", required=False)
     ap.add_argument("--condicoes", default=",".join(CONDICOES))
     ap.add_argument("--repeticoes", type=int, default=1)

@@ -355,6 +355,12 @@ def main(argv: list[str]) -> int:
         raise SystemExit(f"parâmetros inválidos: repeticoes>=1 e condicoes em {CONDICOES}")
     res = rodar(modelos, so, saida, repeticoes, condicoes)
     print(resumo(res))
+    if "--registro" in argv:   # lote 5, A5: mesmo registro comum da avaliação (sem a flag, nada muda)
+        import registro_medidor  # noqa: E402  (importado aqui: o selftest roda com -I)
+        itens = [{"task_id": e["tarefa"], "condition": e["condicao"], "model_id": e["modelo"],
+                  "outcome": "passou" if e["passou_tudo"] else "falhou",
+                  "failure_stage": None if not e.get("erro") else "execucao"} for e in res["execucoes"]]
+        print("registro:", registro_medidor.gravar("teste_portugues", "dev", itens, {"n": len(itens)}))
     return 0
 
 

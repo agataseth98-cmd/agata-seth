@@ -209,6 +209,33 @@ def _anteriores() -> dict:
         return {}
 
 
+SCHEMA = "2"   # 2 (lote 5): objetos externos do cadastro, INSERT nomeado; índice de schema 1 é recusado
+
+
+def _projetar_externos(con) -> int:
+    """Objetos do cadastro (`cadastro.py`) viram linhas `externo`. Só `revisado` com direitos diferentes de
+    `desconhecido` tem trechos (texto); os demais guardam só a referência e não aparecem na busca."""
+    import cadastro  # noqa: E402
+    n = 0
+    for c in cadastro.listar():
+        est = c["editorial_status"]
+        con.execute("INSERT OR REPLACE INTO objects (object_id, tipo, entrada, caminho, linha, commit_, sha256,"
+                    " classification, editorial_status, origem, v_identidade, v_integridade, v_suporte)"
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (c["object_id"], "externo", None, c["object_id"], 1, "cadastro", c["sha256"],
+                     "public" if est == "revisado" else "project", est, "externo",
+                     "cadastro", "sha256", c["verificacao"]["suporte"]))
+        if est == "revisado" and c["direitos"]["status"] != "desconhecido":
+            tp = cadastro.texto_path(c["sha256"])
+            if tp.exists():
+                for linha, bloco in _blocos(tp.read_text(encoding="utf-8", errors="replace").splitlines()):
+                    cur = con.execute("INSERT INTO trechos(object_id, linha, texto) VALUES (?,?,?)",
+                                      (c["object_id"], linha, bloco[:4000]))
+                    con.execute("INSERT INTO trechos_fts(rowid, texto) VALUES (?,?)", (cur.lastrowid, bloco[:4000]))
+        n += 1
+    return n
+
+
 def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
     """Reconstrói o índice inteiro a partir do snapshot (determinístico; troca atômica)."""
     raiz = Path(raiz) if raiz else snapshot("HEAD")
@@ -222,7 +249,9 @@ def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
         con.executescript(ESQUEMA)
         n_obj = n_tr = 0
         for obj, trechos in _objetos(raiz, commit):
-            con.execute("INSERT OR REPLACE INTO objects VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            con.execute("INSERT OR REPLACE INTO objects (object_id, tipo, entrada, caminho, linha, commit_, sha256,"
+                        " classification, editorial_status, origem, v_identidade, v_integridade, v_suporte)"
+                        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (obj["object_id"], obj["tipo"], obj["entrada"], obj["caminho"], obj["linha"], commit,
                          obj["sha256"], obj["classification"], obj["editorial_status"], obj["origem"],
                          f"git:{commit[:12]}", "sha256", "not_checked"))
@@ -233,6 +262,7 @@ def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
                 con.execute("INSERT INTO trechos_fts(rowid, texto) VALUES (?,?)", (cur.lastrowid, texto[:4000]))
                 n_tr += 1
             n_obj += 1
+        n_ext = _projetar_externos(con)
         n_sk = 0
         if skills:
             sys.path.insert(0, str(AQUI))
@@ -240,7 +270,8 @@ def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
             n_sk = _sk.popular(con, raiz)
         con.executemany("INSERT INTO meta VALUES (?,?)", [("commit", commit), ("raiz", str(raiz)),
                         ("gerado_em", time.strftime("%Y-%m-%dT%H:%M:%S%z")), ("objetos", str(n_obj)),
-                        ("trechos", str(n_tr)), ("skills", str(n_sk)), ("schema", "1")])
+                        ("trechos", str(n_tr)), ("skills", str(n_sk)), ("externos", str(n_ext)),
+                        ("schema", SCHEMA)])
         novos = dict(con.execute("SELECT object_id, sha256 FROM objects"))
         con.commit()
     finally:
@@ -253,7 +284,8 @@ def indexar(raiz: Path | None = None, skills: bool = True) -> dict:
                           mudaram=mudou[:200], sairam=saiu[:200], n_mudaram=len(mudou), n_sairam=len(saiu))
     eventos.registrar("execution", "ok", "indexar", componente="alexandria", commit=commit, objetos=n_obj,
                       trechos=n_tr, skills=n_sk)
-    return {"commit": commit, "objetos": n_obj, "trechos": n_tr, "skills": n_sk, "mudaram": len(mudou), "sairam": len(saiu)}
+    return {"commit": commit, "objetos": n_obj, "trechos": n_tr, "skills": n_sk, "externos": n_ext,
+            "mudaram": len(mudou), "sairam": len(saiu)}
 
 
 def _con() -> sqlite3.Connection:
@@ -261,7 +293,20 @@ def _con() -> sqlite3.Connection:
         raise FileNotFoundError("índice ausente: rode `acervo.py indexar`")
     con = sqlite3.connect(f"file:{indice_path()}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
+    row = con.execute("SELECT valor FROM meta WHERE chave = 'schema'").fetchone()
+    if not row or row["valor"] != SCHEMA:
+        con.close()
+        raise FileNotFoundError("índice de outra versão do schema: rode `acervo.py indexar`")
     return con
+
+
+def objetos_indice() -> list[tuple[str, str]]:
+    """(object_id, sha256) de todos os objetos do índice: a comparação da restauração (lote 5, B3)."""
+    con = _con()
+    try:
+        return [(r[0], r[1]) for r in con.execute("SELECT object_id, sha256 FROM objects ORDER BY object_id")]
+    finally:
+        con.close()
 
 
 def meta() -> dict:
@@ -296,6 +341,40 @@ def _semantica_padrao(consulta: str, n: int) -> list[dict]:
     return d if isinstance(d, list) else d.get("resultados", [])
 
 
+LIMITE_COBERTURA = 0.6   # fração das palavras da pergunta que os trechos locais precisam cobrir (heurística declarada)
+
+
+def suficiencia(pacote: dict, *, volatil: bool = False) -> dict:
+    """A fonte local basta para a pergunta? Mecânico, sem modelo (lote 5, C2).
+
+    Cobertura = fração das palavras da pergunta que aparecem em algum trecho devolvido. Pergunta volátil
+    (hoje, atual, última...) nunca é suficiente só com o acervo: a pesquisa externa é indicada. Correção
+    posterior não torna a resposta insuficiente, mas vai junto como lacuna de atualidade.
+    """
+    import busca_texto  # noqa: E402  — mesma normalização da busca por texto
+    ps = list(pacote.get("palavras") or [])
+    rs = pacote.get("resultados") or []
+    if not ps:
+        return {"suficiente": False, "cobertura": None, "lacunas": [], "precisa_externa": True,
+                "motivo": "pergunta sem palavras de busca"}
+    trechos = " ".join(busca_texto._norm(r.get("trecho") or "") for r in rs)
+    cobertas = {p for p in ps if p in trechos}
+    cobertura = round(len(cobertas) / len(ps), 4)
+    lacunas = [p for p in ps if p not in cobertas]
+    motivos = []
+    if not rs:
+        motivos.append("nenhum trecho local")
+    if cobertura < LIMITE_COBERTURA:
+        motivos.append(f"cobertura {cobertura} abaixo de {LIMITE_COBERTURA}")
+    if volatil:
+        motivos.append("pergunta pede atualidade")
+    if any(r.get("corrigida_por") for r in rs):
+        motivos.append("há correção posterior na evidência")
+    precisa = bool(not rs or cobertura < LIMITE_COBERTURA or volatil)
+    return {"suficiente": not precisa, "cobertura": cobertura, "lacunas": lacunas,
+            "precisa_externa": precisa, "motivo": "; ".join(motivos) or "cobertura suficiente"}
+
+
 def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: str = "auto",
               buscar_semantica=None, salvar: bool = False) -> dict:
     """Pacote de evidência. `semantica`: nunca | auto (só se o léxico achar < 3) | sempre."""
@@ -312,6 +391,7 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
                 "SELECT t.object_id, t.linha, t.texto, o.caminho, o.commit_, o.sha256, o.entrada, o.classification,"
                 " o.editorial_status, bm25(trechos_fts) AS r FROM trechos_fts JOIN trechos t ON t.rowid = trechos_fts.rowid"
                 " JOIN objects o ON o.object_id = t.object_id WHERE trechos_fts MATCH ? AND o.classification IN (%s)"
+                " AND (o.origem != 'externo' OR o.editorial_status = 'revisado')"
                 " ORDER BY r LIMIT 400" % ",".join("?" * len(permitidos)), (_fts_query(ps), *permitidos)).fetchall()
             inteiras = [re.compile(r"(?<![a-z0-9])" + re.escape(p) + r"(?![a-z0-9])") for p in ps]
 
@@ -336,7 +416,7 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
             # relações: entradas citadas pelos dois primeiros resultados (cita), rotuladas
             ja = {r["entrada"] for r in resultados if r["entrada"] is not None}
             for r in resultados[:2]:
-                for (dst,) in con.execute("SELECT dst_entrada FROM relations WHERE src = ? LIMIT 3", (r["object_id"],)):
+                for (dst,) in con.execute("SELECT dst_entrada FROM relations WHERE src = ? AND tipo = 'cita' LIMIT 3", (r["object_id"],)):
                     if dst in ja:
                         continue
                     alvo = _alvo(con, dst, permitidos)
@@ -376,6 +456,14 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
               "commit": m.get("commit"), "indice_gerado_em": m.get("gerado_em"), "acesso": acesso,
               "gerado_em": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "metodos": metodos, "avisos": avisos,
               "estado": "encontrado" if resultados else NAO_ENCONTRADO, "palavras": ps, "resultados": resultados}
+    try:
+        sys.path.insert(0, str(AQUI.parents[0] / "metacognicao"))
+        import previo  # noqa: E402
+        volatil = bool(previo.RE_VOLATIL.search(consulta))
+    except Exception:  # noqa: BLE001 — sem o prévio, a volatilidade fica como não medida (False), e sinalizamos
+        volatil = False
+        avisos.append("atualidade não medida (prévio indisponível)")
+    pacote["suficiencia"] = suficiencia(pacote, volatil=volatil)
     pacote["context_id"] = "ctx:" + hashlib.sha256(json.dumps([pacote["consulta_sha256"], m.get("commit"),
                                                               [r["object_id"] for r in resultados]]).encode()).hexdigest()[:16]
     if salvar:
@@ -385,25 +473,21 @@ def consultar(consulta: str, *, acesso: str = "public", n: int = 8, semantica: s
     return pacote
 
 
-RE_CORRECAO = re.compile(r"^\((\d{1,4})\)\s+CORRE[CÇ][AÃ]O\b")
-
-
 def _marcar_correcoes(con, resultados: list[dict]) -> None:
     """A 1ª entrada citada no cabeçalho de uma entrada CORREÇÃO ganha `corrigida_por` (Regra 4: a correção é entrada
-    nova; a antiga fica, mas quem lê precisa saber). Achado da avaliação de 05/11/2026."""
+    nova; a antiga fica, mas quem lê precisa saber). Definição única em `correcoes.correcao_de` (lote 5, C1)."""
+    import correcoes  # noqa: E402
     for r in resultados:
         n = r.get("entrada")
         if n is None:
             continue
         por = set()
-        for (src,) in con.execute("SELECT src FROM relations WHERE dst_entrada = ?", (n,)):
+        for (src,) in con.execute("SELECT src FROM relations WHERE dst_entrada = ? AND tipo = 'cita'", (n,)):
             row = con.execute("SELECT t.texto FROM trechos t JOIN objects o ON o.object_id = t.object_id"
                               " WHERE t.object_id = ? AND t.linha = o.linha", (src,)).fetchone()
-            cab = (row["texto"] if row else "").split("\n", 1)[0]
-            m = RE_CORRECAO.match(cab)
-            citadas = [int(c) for c in RE_CITA.findall(cab) if int(c) != int(m.group(1))] if m else []
-            if m and citadas and citadas[0] == n:   # só a 1ª citada no cabeçalho é a corrigida; as outras são contexto
-                por.add(int(m.group(1)))
+            par = correcoes.correcao_de(row["texto"] if row else "")
+            if par and par[1] == n:
+                por.add(par[0])
         if por:
             r["corrigida_por"] = sorted(por)
 

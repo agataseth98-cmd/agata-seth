@@ -68,7 +68,8 @@ def registrar(kind: str, status: str, source: str, *, actor: str = "maquina", co
 
 
 def transicao(objeto: str, anterior: str | None, seguinte: str, evidencia: str, *, autorizacao: str | None = None,
-              retorno: str | None = None, actor: str = "maquina", componente: str = "nova-versao") -> dict:
+              retorno: str | None = None, actor: str = "maquina", componente: str = "nova-versao",
+              chave: str | None = None) -> dict:
     """Registra a passagem de um objeto pelas sete palavras. Recusa salto fora da tabela."""
     if seguinte not in SETE or (anterior is not None and anterior not in SETE):
         raise ValueError("estado fora das sete palavras")
@@ -76,9 +77,43 @@ def transicao(objeto: str, anterior: str | None, seguinte: str, evidencia: str, 
         raise ValueError(f"transição não prevista: {anterior} -> {seguinte}")
     if seguinte == "remocao" and not autorizacao:
         raise ValueError("Remoção exige autorização explícita")
-    return registrar("observation", "registrada", objeto, actor=actor, componente=componente,
+    return registrar("observation", "registrada", objeto, actor=actor, componente=componente, chave=chave,
                      estado_anterior=anterior, estado_seguinte=seguinte, evidencia=evidencia,
                      autorizacao=autorizacao, retorno=retorno)
+
+
+def caminho_ate(atual: str | None, alvo: str) -> list[str]:
+    """Passos previstos na tabela de TRANSICOES para ir de `atual` até `alvo` (BFS). Nunca pula uma palavra."""
+    if atual == alvo:
+        return []
+    from collections import deque
+    fila, visto = deque([(atual or "apresentacao", [])]), {atual or "apresentacao"}
+    while fila:
+        no, passos = fila.popleft()
+        for viz in sorted(TRANSICOES.get(no, ())):
+            if viz in visto:
+                continue
+            if viz == alvo:
+                return passos + [viz]
+            visto.add(viz)
+            fila.append((viz, passos + [viz]))
+    raise ValueError(f"sem caminho de {atual} para {alvo}")
+
+
+def ultimo_estado(objeto: str) -> str | None:
+    """Último `estado_seguinte` registrado para o objeto, lido do ledger (a fonte de verdade)."""
+    ult = None
+    caminho = caminho_ledger()
+    if not caminho.exists():
+        return None
+    for linha in caminho.read_text(encoding="utf-8").splitlines():
+        try:
+            ev = json.loads(linha)
+        except ValueError:
+            continue
+        if ev.get("source") == objeto and ev.get("estado_seguinte"):
+            ult = ev["estado_seguinte"]
+    return ult
 
 
 def ultimos(n: int = 20) -> list[dict]:

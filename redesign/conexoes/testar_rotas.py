@@ -106,13 +106,13 @@ def rotas(categorias: set[str], get=None) -> list[dict]:
     return out
 
 
-def chamar_rota(r: dict, prompt: str, timeout_s: int, *, max_tokens: int = 60, post=None) -> dict:
+def chamar_rota(r: dict, prompt: str, timeout_s: int, *, max_tokens: int = 60, post=None, chamadas_ja: int = 0) -> dict:
     """Uma chamada a uma rota de `rotas()`, dentro do orçamento. Devolve ok, texto, usage, latencia_ms,
     falha_etapa e erro. Reaproveitada pela avaliação (redesign/avaliacao/avaliar.py)."""
     post = post or _post
     t0 = time.monotonic()
     if r["tipo"] == "conexao":
-        res = adaptadores.chamar(r["provedor"], r["modo"], prompt, max_tokens=max_tokens)
+        res = adaptadores.chamar(r["provedor"], r["modo"], prompt, max_tokens=max_tokens, chamadas_ja=chamadas_ja)
     else:
         ok, motivo = orcamento.permite(r["categoria"])
         if not ok:

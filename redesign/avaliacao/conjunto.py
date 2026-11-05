@@ -38,8 +38,12 @@ DIMENSAO = {"recuperacao": "F", "aplicacao": "A", "atribuicao": "Suporte", "corr
             "resistencia": "R", "operacao": "O"}
 CASOS = ("fonte_suficiente", "informacao_ausente", "fonte_recente_sem_autoridade", "decisao_antiga_valida",
          "correcao_explicita", "copia_mesma_origem", "dado_privado", "rede_indisponivel", "skill_revogada",
-         "injecao_na_fonte", "resposta_atrasada", "reconstrucao_indice")
-TIPOS_CRITERIO = ("contem", "todos", "nao_contem", "regex", "cita", "abstem", "nao_abstem")
+         "injecao_na_fonte", "resposta_atrasada", "reconstrucao_indice", "pergunta_volatil")
+SPLITS = ("dev", "calibracao", "teste", "teste2")
+RESERVADOS = ("teste", "teste2")          # splits que exigem revisão do Humano e política fixada
+PASTA_RESERVADO = {"teste": "teste-reservado", "teste2": "teste-reservado-2"}
+MECANICOS_NOMES = ("reconstrucao_indice", "rede_indisponivel", "restauracao_indice")   # nomes aceitos em `mecanico` (execução em avaliar.py)
+TIPOS_CRITERIO = ("contem", "todos", "nao_contem", "regex", "cita", "abstem", "nao_abstem", "rubrica")   # rubrica: juízo humano, fora do denominador
 ABSTENCAO = re.compile(r"nao (encontrei|encontrou|encontramos|encontrado|foi encontrad|ha (fonte|informacao|registro|dado))|nao (sei|consta|esta nas fontes)|"
                        r"sem (fonte|informacao|registro)|nao e possivel (afirmar|saber|responder)|nao tenho (como|essa|informacao)|"
                        r"as fontes nao (dizem|informam|trazem|mencionam)")
@@ -56,15 +60,26 @@ def validar(t: dict) -> dict:
     obrig = ("task_id", "grupo", "split", "pedido", "criterios")
     if not all(k in t for k in obrig):
         raise ValueError(f"tarefa sem campo obrigatório: {t.get('task_id')}")
-    if t["grupo"] not in GRUPOS or t["split"] not in ("dev", "calibracao", "teste"):
+    if t["grupo"] not in GRUPOS or t["split"] not in SPLITS:
         raise ValueError(f"grupo ou split fora da lista: {t['task_id']}")
+    if not str(t.get("autor") or "").strip():
+        raise ValueError(f"tarefa sem autor declarado: {t['task_id']}")
+    if t.get("mecanico") is not None and t["mecanico"] not in MECANICOS_NOMES:
+        raise ValueError(f"mecânico desconhecido em {t['task_id']}")
     if t.get("caso") is not None and t["caso"] not in CASOS:
         raise ValueError(f"caso obrigatório desconhecido: {t['task_id']}")
     if not re.fullmatch(r"[a-z]{2,4}-[a-z0-9-]{2,40}", t["task_id"]):
         raise ValueError(f"task_id inválido: {t['task_id']}")
+    ids_docs = {d.get("id") for d in t.get("documentos", [])}
     for c in list(t["criterios"]) + list(t.get("criticos", [])):
         if c.get("tipo") not in TIPOS_CRITERIO:
             raise ValueError(f"critério fora da lista em {t['task_id']}")
+        if c["tipo"] == "regex" and not isinstance(c.get("valor"), str):
+            raise ValueError(f"regex sem texto em {t['task_id']}")
+        if c["tipo"] == "cita" and ids_docs:   # só quando há documentos: os conjuntos antigos citam números de entrada
+            for x in (c.get("valor") if isinstance(c.get("valor"), list) else [c.get("valor")]):
+                if str(x) not in ids_docs:
+                    raise ValueError(f"cita aponta para documento inexistente em {t['task_id']}: {x}")
     if t.get("mecanico") is None and not t["criterios"]:
         raise ValueError(f"tarefa sem critério: {t['task_id']}")
     for d in t.get("documentos", []):
@@ -79,8 +94,10 @@ def _ler_jsonl(p: Path) -> list[dict]:
     return [validar(json.loads(x)) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
-def pasta_reservado() -> Path:
-    return eventos.dados() / "avaliacao" / "teste-reservado"
+def pasta_reservado(split: str = "teste") -> Path:
+    if split not in PASTA_RESERVADO:
+        raise ValueError("split não é reservado")
+    return eventos.dados() / "avaliacao" / PASTA_RESERVADO[split]
 
 
 def carregar(split: str) -> list[dict]:
@@ -88,15 +105,15 @@ def carregar(split: str) -> list[dict]:
         return _ler_jsonl(AQUI / "conjuntos" / "dev.jsonl")
     if split == "calibracao":
         return _ler_jsonl(AQUI / "conjuntos" / "calibracao.jsonl")
-    if split == "teste":
-        return _ler_jsonl(pasta_reservado() / ARQ_RESERVADO)
+    if split in RESERVADOS:
+        return _ler_jsonl(pasta_reservado(split) / ARQ_RESERVADO)
     raise ValueError("split fora da lista")
 
 
-def estado_reservado() -> dict:
-    """Sem o conteúdo: quantas, por grupo, quem escreveu e se o Humano revisou."""
-    ts = carregar("teste")
-    meta_p = pasta_reservado() / "revisao.json"
+def estado_reservado(split: str = "teste") -> dict:
+    """Sem o conteúdo: quantas, por grupo, quem escreveu e se o Humano revisou (por split reservado)."""
+    ts = carregar(split)
+    meta_p = pasta_reservado(split) / "revisao.json"
     meta = json.loads(meta_p.read_text(encoding="utf-8")) if meta_p.exists() else {}
     from registro import hash_conjunto  # noqa: E402
     h = hash_conjunto(ts) if ts else None
@@ -107,15 +124,15 @@ def estado_reservado() -> dict:
             "revisao_desatualizada": bool(meta) and meta.get("conjunto_hash") != h}
 
 
-def marcar_revisado(revisor: str) -> dict:
+def marcar_revisado(revisor: str, split: str = "teste") -> dict:
     """O Humano declara pelo painel que revisou o reservado; vale só para o hash atual."""
-    est = estado_reservado()
+    est = estado_reservado(split)
     if not est["tarefas"]:
         raise ValueError("não há conjunto reservado")
     import time
     meta = {"revisado_por": revisor, "revisado_em": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "conjunto_hash": est["conjunto_hash"]}
-    p = pasta_reservado() / "revisao.json"
+    p = pasta_reservado(split) / "revisao.json"
     p.write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
     os.chmod(p, 0o600)
     eventos.registrar("decision", "revisado", "avaliacao:reservado", actor="humano", componente="avaliacao",
@@ -146,7 +163,9 @@ def absteve(texto: str) -> bool:
     return bool(ABSTENCAO.search(norm(texto)))
 
 
-def checar(c: dict, texto: str) -> bool:
+def checar(c: dict, texto: str) -> bool | None:
+    if c["tipo"] == "rubrica":
+        return None                # juízo humano: não entra no veredito mecânico
     n = norm(texto)
     v = c.get("valor")
     vs = [norm(x) for x in (v if isinstance(v, list) else [v])] if v is not None else []
@@ -169,7 +188,7 @@ def checar(c: dict, texto: str) -> bool:
 
 
 def avaliar_resposta(t: dict, texto: str) -> dict:
-    crits = [checar(c, texto) for c in t["criterios"]]
+    crits = [v for v in (checar(c, texto) for c in t["criterios"]) if v is not None]
     viol = [c.get("motivo") or c["tipo"] for c in t.get("criticos", []) if not checar(c, texto)]
     return {"criterios_ok": sum(crits), "criterios_total": len(crits), "passou": all(crits) and not viol,
             "absteve": absteve(texto), "criticos_violados": viol}

@@ -205,3 +205,59 @@ class RecuperacaoTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+class B1Tests(Base):
+    def base_tarefa(self, **kw):
+        t = {"task_id": "rec-teste", "grupo": "recuperacao", "split": "teste2", "pedido": "p", "autor": "Claude Haiku 5.5",
+             "criterios": [{"tipo": "contem", "valor": ["x"]}]}
+        t.update(kw)
+        return t
+
+    def test_contaminado_pela_familia_do_autor(self):
+        t = self.base_tarefa()
+        self.assertTrue(avaliar._contaminado({"rota": "claude:cli", "independencia": {"familia": "claude"}}, t))
+        self.assertFalse(avaliar._contaminado({"rota": "ollama-local/lfm3:1.7b", "independencia": {"familia": "lfm3"}}, t))
+        g = self.base_tarefa(autor="ChatGPT (GPT-6)")
+        self.assertTrue(avaliar._contaminado({"rota": "chatgpt:cli", "independencia": {"familia": "chatgpt"}}, g))
+        self.assertFalse(avaliar._contaminado({"rota": "claude:cli"}, g))
+        # sem autor, vale o padrão Claude (conservador): a rota Claude não conta
+        self.assertTrue(avaliar._contaminado({"rota": "claude:cli"}, self.base_tarefa(autor="")))
+
+    def test_validacao_recusa_autor_ausente_e_cita_sem_documento(self):
+        with self.assertRaises(ValueError):
+            conjunto.validar(self.base_tarefa(autor=""))
+        with self.assertRaises(ValueError):
+            conjunto.validar(self.base_tarefa(criterios=[{"tipo": "cita", "valor": ["d9"]}],
+                                              documentos=[{"id": "d1", "texto": "x"}]))
+        ok = conjunto.validar(self.base_tarefa(criterios=[{"tipo": "cita", "valor": ["d1"]}],
+                                               documentos=[{"id": "d1", "texto": "x"}]))
+        self.assertEqual(ok["task_id"], "rec-teste")
+        conjunto.validar(self.base_tarefa(criterios=[{"tipo": "cita", "valor": ["115"]}]))   # conjunto antigo: sem documentos, ok
+
+    def test_regex_exige_texto_e_mecanico_so_nome_conhecido(self):
+        with self.assertRaises(ValueError):
+            conjunto.validar(self.base_tarefa(criterios=[{"tipo": "regex", "valor": ["a", "b"]}]))
+        with self.assertRaises(ValueError):
+            conjunto.validar(self.base_tarefa(criterios=[], mecanico="inventado"))
+        conjunto.validar(self.base_tarefa(criterios=[], mecanico="rede_indisponivel"))
+
+    def test_split_reservado2_exige_revisao_e_politica(self):
+        pasta = conjunto.pasta_reservado("teste2")
+        pasta.mkdir(parents=True, exist_ok=True)
+        (pasta / conjunto.ARQ_RESERVADO).write_text(json.dumps(self.base_tarefa(criterios=[{"tipo": "abstem"}])) + "\n",
+                                                    encoding="utf-8")
+        self.assertEqual(len(conjunto.carregar("teste2")), 1)
+        with self.assertRaises(PermissionError):
+            avaliar.preparar("teste2", ["ollama-local/fake"], todas_rotas=ROTAS)
+        conjunto.marcar_revisado("humano", "teste2")
+        with self.assertRaises(PermissionError):      # revisão não basta sem política
+            avaliar.preparar("teste2", ["ollama-local/fake"], todas_rotas=ROTAS)
+        avaliar.salvar_politica(0.1, 60000, 0)
+        ts, _ = avaliar.preparar("teste2", ["ollama-local/fake"], todas_rotas=ROTAS)
+        self.assertEqual(len(ts), 1)
+        self.assertIsNone(conjunto.estado_reservado()["revisado_por"])   # o v1 não herda a revisão do v2
+
+
+
+if __name__ == "__main__":
+    unittest.main()

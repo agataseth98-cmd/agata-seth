@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO / "redesign" / "nova_versao"))
 import eventos  # noqa: E402
 
 SCHEMA = 1
-SPLITS = ("dev", "calibracao", "teste")
+SPLITS = ("dev", "calibracao", "teste", "teste2")
 OUTCOMES = ("pending", "passou", "falhou", "absteve", "nao_rodou")
 RE_RUN = re.compile(r"r-\d{8}-\d{6}-[0-9a-f]{6}")
 FAILURE_STAGES = (None, "transporte", "indisponivel", "orcamento", "privacidade", "custo", "configuracao",

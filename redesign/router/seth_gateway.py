@@ -296,8 +296,31 @@ def _estado_medir() -> str:
                                     "IDADE-HIDRATACAO:", "HORA-MAQUINA:",
                                     "HASH-ESTADO:", "TOPO-PROPOSTA-JA-APLICADA:",
                                     "ALERTA-HISTORIA:", "SYNC-REMOTO-IDADE:"))]
-        return "\n".join(linhas + [_linha_propostas()])
+        return "\n".join(x for x in (linhas + [_linha_propostas(), _linha_saude()]) if x)
     except Exception:
+        return ""
+
+
+def _linha_saude() -> str:
+    """(lote 5, A1) Saúde datada da Máquina numa linha do estado da Seth. Desligada por padrão (SETH_SAUDE_NO_ESTADO=1).
+    Sem fotografia, diz 'não medida'; fotografia velha (passou de revalidar_ate) diz 'velha'. Nada é estimado."""
+    if os.environ.get("SETH_SAUDE_NO_ESTADO") != "1":
+        return ""
+    try:
+        for sub in ("corpo", "nova_versao"):
+            p = str(REPO / "redesign" / sub)
+            if p not in sys.path:
+                sys.path.insert(0, p)
+        import fotografar  # noqa: E402
+        import saude  # noqa: E402
+        from datetime import datetime
+        f = fotografar.ultima()
+        if not f:
+            return "SAUDE-MAQUINA: não medida (sem fotografia)"
+        estado = saude.classificar(f).get("estado", "não medido")
+        velha = datetime.now().astimezone().isoformat() > str(f.get("revalidar_ate") or "")
+        return f"SAUDE-MAQUINA: {estado} · {'velha' if velha else 'medida ' + str(f.get('quando', ''))[:16]}"
+    except Exception:  # noqa: BLE001 — nunca derruba o estado
         return ""
 
 
@@ -1013,6 +1036,40 @@ def _bloco_verificacao(achados: list) -> str:
     return f"\n\n---\n**Verificação da Máquina** (antes de você ler; mecânica, sem modelo):\n{itens}"
 
 
+def _guarda_bloqueia(texto: str, msgs: list) -> bool:
+    """(lote 5, A3) Eco de segredo ou frase mandada por uma ferramenta suspeita/privada no histórico.
+    Só age com SETH_GUARDA_BLOQUEIA=1; sem ferramenta no histórico, nunca bloqueia."""
+    if os.environ.get("SETH_GUARDA_BLOQUEIA") != "1" or not (texto or "").strip():
+        return False
+    try:
+        p = str(REPO / "redesign" / "metacognicao")
+        if p not in sys.path:
+            sys.path.insert(0, p)
+        import guarda  # noqa: E402
+        fontes = [{"id": f"t{i}", "texto": str(m.get("content") or ""), "classification": "public"}
+                  for i, m in enumerate(msgs or []) if isinstance(m, dict) and m.get("role") == "tool"]
+        return bool(fontes) and guarda.checar(texto, fontes)["estado"] == "bloqueado"
+    except Exception:  # noqa: BLE001 — guarda quebrada nunca segura a resposta
+        return False
+
+
+def _recusa_no_stream(retidos: list, modelo: str) -> list:
+    """Troca os chunks de conteúdo por uma recusa, mantendo o finish e o [DONE] (não quebra o cliente)."""
+    import guarda  # noqa: E402
+    saida, inserida = [], False
+    for ch in retidos:
+        if b"data: [DONE]" in ch:
+            if not inserida:
+                saida.append(_chunk_texto(guarda.RECUSA, modelo)); inserida = True
+            saida.append(ch)
+        elif _texto_do_sse([ch]).strip():
+            if not inserida:
+                saida.append(_chunk_texto(guarda.RECUSA, modelo)); inserida = True
+        else:
+            saida.append(ch)
+    return saida
+
+
 def _chunk_texto(texto: str, modelo: str = "") -> bytes:
     ev = {"id": "seth-verificacao", "object": "chat.completion.chunk", "created": 0, "model": modelo,
           "choices": [{"index": 0, "delta": {"content": texto}, "finish_reason": None}]}
@@ -1113,6 +1170,15 @@ def _injeta(payload: dict) -> dict:
             _ev = None
         if _ev:
             auditoria = (auditoria + "\n" if auditoria else "") + _ev
+    # (lote 5, A2) skills sugeridas: só nomes e descrição, nada é carregado. Desligado (SETH_SKILLS_SUGERE=1).
+    if os.environ.get("SETH_SKILLS_SUGERE") == "1" and not auditoria_turno.e_continuacao(msgs):
+        try:
+            import skills as _sk  # noqa: E402  (redesign/alexandria já está no sys.path via sombra_nova_versao)
+            _bs = _sk.bloco_skills(registro_pedidos.ultima_pergunta(msgs))
+        except Exception:  # noqa: BLE001
+            _bs = None
+        if _bs:
+            auditoria = (auditoria + "\n" if auditoria else "") + _bs
     ja_hidratado = any(
         isinstance(m, dict) and m.get("role") == "system"
         and isinstance(m.get("content"), str) and MARCADOR in m["content"]
@@ -1398,6 +1464,10 @@ class _Handler(BaseHTTPRequestHandler):
                             _ach = auditoria_turno.verificar_resposta_atual(m["content"], self._msgs_pedido)
                         except Exception:  # noqa: BLE001
                             _ach = []
+                        if not m.get("tool_calls") and _guarda_bloqueia(m["content"], self._msgs_pedido):
+                            import guarda as _g  # noqa: E402  (lote 5, A3: recusa no lugar da resposta)
+                            m["content"] = _g.RECUSA
+                            _ach = []
                         if _ach:
                             m["content"] = m["content"] + _bloco_verificacao(_ach)
                     if (m.get("content") or "").strip():
@@ -1553,6 +1623,10 @@ class _Handler(BaseHTTPRequestHandler):
                 achados = auditoria_turno.verificar_resposta_atual(texto, getattr(self, "_msgs_pedido", []) or [])
             except Exception as e:  # noqa: BLE001 -- verificação quebrada nunca segura a resposta
                 print(f"gateway: verificação falhou ({e})", file=sys.stderr, flush=True)
+        tool_calls = any(b'"tool_calls"' in ch for ch in retidos)
+        if not tool_calls and _guarda_bloqueia(texto, getattr(self, "_msgs_pedido", []) or []):
+            retidos = _recusa_no_stream(retidos, getattr(self, "_modelo_para_log", "") or "")
+            achados = []
         if achados:
             bloco = _chunk_texto(_bloco_verificacao(achados), getattr(self, "_modelo_para_log", "") or "")
             i = next((k for k, ch in enumerate(retidos) if b"data: [DONE]" in ch), len(retidos))  # como o resgate

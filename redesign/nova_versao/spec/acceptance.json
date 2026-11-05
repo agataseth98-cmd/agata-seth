@@ -52,5 +52,50 @@
       "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_caminhos.py::CaminhosTests::test_recusa_symlink_que_aponta_para_fora"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "papel só recebe rota que passou na prova e de família diferente do sintetizador",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::PapeisTests::test_revisor_e_de_familia_diferente_do_sintetizador"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ensaio de retorno usa a rota alternativa quando a principal cai",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::RedundanciaTests::test_ensaio_de_retorno_usa_alternativa_quando_a_principal_cai"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o orçamento do turno esgota por rodadas, chamadas ou prazo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::OrcamentoTurnoTests::test_esgota_por_rodadas_chamadas_e_prazo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as sete palavras andam só pelos passos previstos e não repetem o registro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_sincronizar.py::SincronizarTests::test_propostas_andam_pelos_passos_e_a_segunda_rodada_nao_repete"
+    ],
+    "cwd": null
   }
 ]
