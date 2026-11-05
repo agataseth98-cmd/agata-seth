@@ -1,0 +1,32 @@
+diff --git a/config/gratuitos_omniroute.json b/config/gratuitos_omniroute.json
+index c7a6c074..bd0573d3 100644
+--- a/config/gratuitos_omniroute.json
++++ b/config/gratuitos_omniroute.json
+@@ -66,6 +66,11 @@
+       "id": "openrouter/stealth/crouton-alpha",
+       "ativo": true,
+       "nota": "Origem anônima (stealth). Uso autorizado pelo Humano em 05/11/2026 SOMENTE com: dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e um modelo nomeado como plano de contingência."
++    },
++    {
++      "id": "nvidia/google/gemma-4-31b-it",
++      "ativo": true,
++      "nota": "NVIDIA NIM (gratuito, conexão nvidia no OmniRoute). Testado em 05/11/2026: respondeu 200. Outros modelos NVIDIA testados deram 404 (sem acesso na conta) ou 410 (descontinuados)."
+     }
+   ]
+ }
+diff --git a/redesign/conexoes/tests/test_gratuitos.py b/redesign/conexoes/tests/test_gratuitos.py
+index cfae774d..3a3335e1 100644
+--- a/redesign/conexoes/tests/test_gratuitos.py
++++ b/redesign/conexoes/tests/test_gratuitos.py
+@@ -11,8 +11,9 @@ import testar_rotas  # noqa: E402
+ def test_lista_versionada_tem_so_ativos_e_crouton_fora():
+     ids = testar_rotas.gratuitos_configurados()
+     assert "zai/glm-4.7-flash" in ids
+-    assert "openrouter/stealth/crouton-alpha" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
+-    assert all(i.startswith(("openrouter/", "zai/")) for i in ids)
++    assert "openrouter/stealth/crouton-alpha" in ids
++    assert "nvidia/google/gemma-4-31b-it" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
++    assert all(i.startswith(("openrouter/", "zai/", "nvidia/")) for i in ids)
+ 
+ 
+ def test_cota_esgotada_vira_estado_proprio(monkeypatch):

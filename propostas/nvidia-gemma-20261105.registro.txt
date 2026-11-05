@@ -1,0 +1,4 @@
+({N}) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
+- **Pedido do Humano (05/11/2026):** incluir o NVIDIA já, com assinatura.
+- **Medição:** `nvidia/google/gemma-4-31b-it` respondeu 200. `gpt-oss-20b` e `nemotron-3-super` deram 404 (sem acesso). `qwen3.5-122b` e `mistral-small-4` deram 410.
+- **Limite:** a cota da conta NVIDIA não foi medida.
