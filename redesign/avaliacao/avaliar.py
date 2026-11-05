@@ -86,8 +86,9 @@ def _fontes_documentos(t: dict, condicao: str) -> list[dict] | None:
         return None
     if condicao == BASELINE:   # o que a busca por texto entrega hoje: o texto, sem metadado e sem filtro
         return [{"id": d["id"], "texto": d["texto"]} for d in docs]
-    return [{k: d.get(k) for k in ("id", "texto", "origem", "autoridade", "data", "estado")}
-            for d in docs if d.get("classification", "public") == "public"]
+    import curadoria   # Alexandria: filtra o privado, ordena por autoridade e data e anota cópia, correção e medição antiga
+    return curadoria.organizar([{k: d.get(k) for k in ("id", "texto", "origem", "autoridade", "data", "estado")}
+                                for d in docs if d.get("classification", "public") == "public"])
 
 
 def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None) -> tuple[list[dict] | None, str | None]:
@@ -108,7 +109,9 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None) -> tupl
     for i, r in enumerate(pac["resultados"][:6], 1):
         fid = str(r["entrada"]) if r.get("entrada") is not None else f"f{i}"
         fontes.append({"id": fid, "texto": r.get("trecho") or "(entrada relacionada; trecho não incluído)",
-                       "origem": r["caminho"], "estado": f"{r['editorial_status']}, via {r['metodo']}"})
+                       "origem": r["caminho"], "estado": f"{r['editorial_status']}, via {r['metodo']}",
+                       "notas": [f"há correção posterior ({m}) sobre esta entrada; confira antes de usar"
+                                 for m in r.get("corrigida_por") or []]})
     return fontes, pac.get("context_id")
 
 

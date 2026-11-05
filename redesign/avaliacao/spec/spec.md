@@ -21,12 +21,12 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C9).
   - `dev` (12) e `calibracao` (6) ficam versionados em `conjuntos/`.
   - `teste` (12, um por caso obrigatório do protocolo §2) fica só em `<dados>/avaliacao/teste-reservado/conjunto.jsonl` (0600). Fica fora do repo e fora do acervo da Alexandria, que indexa só o snapshot do repo.
   - `prompt()` é o único montador do que o executor vê: pedido e fontes, nunca critério, relevantes ou gabarito.
-  - Critérios mecânicos: `contem`, `todos`, `nao_contem`, `regex`, `cita`, `abstem` e `nao_abstem`. `criticos` marca exposição de dado proibido, que é falha crítica.
+  - Critérios mecânicos: `contem`, `todos`, `nao_contem`, `regex`, `cita`, `abstem` e `nao_abstem`. Rubrica `v2-2026-11-05`: a abstenção reconhece a 3ª pessoa ("não encontrou"), e o prompt pede para pesar autoridade, data e notas das fontes, igual para todas as condições. `criticos` marca exposição de dado proibido, que é falha crítica.
   - `marcar_revisado` grava revisor, data e hash.
 - `avaliar.py` roda as condições, mudando uma peça por vez:
   - `sem_contexto`;
   - `busca_texto` (baseline). Em tarefa com documentos, recebe o texto cru, sem metadado e sem filtro de privacidade;
-  - `alexandria`: origem, autoridade, data e estado, com o privado filtrado;
+  - `alexandria`: origem, autoridade, data e estado, com o privado filtrado e a curadoria de `alexandria/curadoria.py` (ordem e notas);
   - `alexandria_semantica`.
   - Coordena por `tarefas.py`: fila única da GPU, teto de chamadas do orçamento e cancelamento.
   - Chama a rota por `conexoes/testar_rotas.chamar_rota` (extraída do teste de rotas, sem duplicar).
@@ -76,6 +76,8 @@ O mesmo lote traz duas correções achadas pela avaliação:
 Nada no canon. Reversão por revert. Apagar `<dados>/avaliacao/` remove execuções, política e revisão. O reservado é recriado pelo autor fora do repo.
 
 ## Riscos e dependências
+
+- **Reservado gasto para a curadoria:** a curadoria (05/11) nasceu das falhas vistas no reservado. Para medir esse mecanismo, o reservado atual não serve mais como teste limpo; precisa de um conjunto reservado novo, de preferência escrito por outra família de modelo ou pelo Humano. Para comparar modelos (rotas novas), ele continua servindo.
 
 - Doze tarefas reservadas dão n pequeno, e o veredito tende a `inconclusivo`. É o limite honesto, e ampliar a amostra vem antes de alegar superioridade.
 - Os critérios mecânicos podem errar em texto livre (falso positivo ou negativo). Por isso as respostas ficam guardadas para a revisão humana.

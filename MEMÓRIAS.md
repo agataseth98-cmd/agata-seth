@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9
-  Escrito em: 05/11/2026 09:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2e679130e3a0211aa5a84562fb9a4362779d8402
+  Escrito em: 05/11/2026 09:08 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0e9f9da275325d8f52b19ca9ab0b3a5aaa5df4b9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e679130e3a0211aa5a84562fb9a4362779d8402/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e679130e3a0211aa5a84562fb9a4362779d8402/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e679130e3a0211aa5a84562fb9a4362779d8402/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e679130e3a0211aa5a84562fb9a4362779d8402/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2e679130e3a0211aa5a84562fb9a4362779d8402/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
+- **Curadoria:** `redesign/alexandria/curadoria.py` ordena as fontes por autoridade, deixa as vigentes antes das superadas e a mais recente antes da antiga, e anota em texto cópia, correção, fonte sem autoridade e medição anterior.
+- **Entrada corrigida:** o `acervo.consultar` marca `corrigida_por` na entrada citada primeiro no cabeçalho de uma CORREÇÃO (39 no acervo).
+- **Verificador:** a rubrica v2 reconhece a abstenção em 3ª pessoa.
+- **Reservado** (`r-20261105-085539-6c774d`): com a Alexandria, os três modelos locais (lfm3:1.7b, lumi-4b, qwen3-30b) tiveram +10 pontos sobre a busca de hoje e zero falha crítica de dado privado, contra uma por modelo. O veredito é inconclusivo com 10 pares.
+- **Reservado gasto:** ele fica gasto para medir a curadoria, que nasceu das falhas vistas nele; é preciso um conjunto novo.
+
 (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) e painel da Nova versão refeito.** Proposta `nova-versao-avaliacao-20261104`, depois do "pode prosseguir" do Humano em 04/11, que conferiu o lote 2 e o achou "desreipetosamente tosca mas é um bom projeto".
 - **Avaliação:** `redesign/avaliacao/` traz o registro comum por execução, no esquema do protocolo §5, e 30 tarefas em seis grupos: 12 de desenvolvimento e 6 de calibração versionadas, e 12 reservadas, uma por caso obrigatório, só nos dados locais, fora do repo e do acervo. Compara condições pareadas (sem contexto, busca por texto, Alexandria, Alexandria com sentido). As métricas são por dimensão, com `null` em denominador zero. O veredito usa IC95, veto por falha crítica e `nao_conta` para a rota da família do autor das tarefas (Claude Opus 5.5). O reservado exige revisão do Humano no hash atual e política fixada antes.
 - **Alexandria:** `MEMORIAS-MORNO.md` entra no acervo; faltava, e (670) e (692) só existem lá.

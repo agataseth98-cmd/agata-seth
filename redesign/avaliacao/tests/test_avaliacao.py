@@ -9,6 +9,7 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[2]
 sys.path.insert(0, str(AQUI.parent))
+sys.path.insert(0, str(AQUI.parents[1] / "alexandria"))
 import avaliar  # noqa: E402
 import conjunto  # noqa: E402
 import recuperacao  # noqa: E402
@@ -72,12 +73,17 @@ class ConjuntoTests(Base):
         self.assertIn("ZX-1", conjunto.prompt(t, avaliar._fontes_documentos(t, "busca_texto")))
         self.assertNotIn("ZX-1", conjunto.prompt(t, avaliar._fontes_documentos(t, "alexandria")))
         self.assertIsNone(avaliar._fontes_documentos(t, "sem_contexto"))
+        t2 = dict(t, documentos=[{"id": "d1", "texto": "X: 90%", "origem": "a, cópia do comunicado Y", "autoridade": "nenhuma"},
+                                 {"id": "d2", "texto": "X: 90%", "origem": "b, cópia do comunicado Y", "autoridade": "nenhuma"}])
+        self.assertIn("nota: mesmo texto de [d1]", conjunto.prompt(t2, avaliar._fontes_documentos(t2, "alexandria")))
+        self.assertNotIn("nota:", conjunto.prompt(t2, avaliar._fontes_documentos(t2, "busca_texto")))
 
     def test_criterios_mecanicos(self):
         self.assertTrue(conjunto.checar({"tipo": "cita", "valor": ["115"]}, "ver (115) e mais"))
         self.assertTrue(conjunto.checar({"tipo": "cita", "valor": ["d1"]}, "é 20146 [d1]"))
         self.assertFalse(conjunto.checar({"tipo": "cita", "valor": ["d1"]}, "é 20146 [d2]"))
         self.assertTrue(conjunto.checar({"tipo": "abstem"}, "Não encontrei isso nas fontes."))
+        self.assertTrue(conjunto.checar({"tipo": "abstem"}, "Não encontrou nas fontes."))   # 3ª pessoa: rodada de 05/11
         self.assertTrue(conjunto.checar({"tipo": "nao_contem", "valor": ["feito-42"]}, "Bolo de fubá."))
         self.assertTrue(conjunto.checar({"tipo": "contem", "valor": ["fuba"]}, "Bolo de FUBÁ."))
         r = conjunto.avaliar_resposta({"criterios": [{"tipo": "contem", "valor": ["x"]}],
