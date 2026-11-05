@@ -1,0 +1,177 @@
+diff --git a/config/gratuitos_omniroute.json b/config/gratuitos_omniroute.json
+new file mode 100644
+index 00000000..1fc8f7b4
+--- /dev/null
++++ b/config/gratuitos_omniroute.json
+@@ -0,0 +1,71 @@
++{
++  "descricao": "Modelos gratuitos que o OmniRoute aceita por passagem (provider/id). Lista do Humano em 05/11/2026 (pedido: 'sim', registrar os gratuitos do OpenRouter; Z.AI na avaliação). Cota pode esgotar: a rota é sinalizada como cota_esgotada.",
++  "verificado_em": "2026-11-05",
++  "modelos": [
++    {
++      "id": "openrouter/nvidia/nemotron-3.5-lightning:free",
++      "ativo": true,
++      "nota": "NVIDIA Nemotron (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
++      "ativo": true,
++      "nota": "NVIDIA Nemotron Ultra (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/nvidia/nemotron-3.5-super-vl:free",
++      "ativo": true,
++      "nota": "NVIDIA, visão (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
++      "ativo": true,
++      "nota": "NVIDIA (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/google/gemma-4-31b-it:free",
++      "ativo": true,
++      "nota": "Google Gemma (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/google/gemma-4-26b-a4b-it:free",
++      "ativo": true,
++      "nota": "Google Gemma (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/liquid/lfm-2.5-2.6b:free",
++      "ativo": true,
++      "nota": "Liquid (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/cohere/north-mini-code:free",
++      "ativo": true,
++      "nota": "Cohere (OpenRouter free)"
++    },
++    {
++      "id": "openrouter/xingchen-agi/xing4.0-29b-a4b:free",
++      "ativo": true,
++      "nota": "OpenRouter free"
++    },
++    {
++      "id": "openrouter/dots-studio/dots-3-note-preview:free",
++      "ativo": true,
++      "nota": "OpenRouter free (preview)"
++    },
++    {
++      "id": "openrouter/recursive/flint-v1.0:free",
++      "ativo": true,
++      "nota": "OpenRouter free"
++    },
++    {
++      "id": "zai/glm-4.7-flash",
++      "ativo": true,
++      "nota": "Z.AI GLM-4.7-Flash (conexão zai no OmniRoute); compartilha o combo conselho"
++    },
++    {
++      "id": "openrouter/stealth/crouton-alpha",
++      "ativo": false,
++      "nota": "Origem anônima (stealth). OpenRouter: prompts podem ser retidos pelo provedor, não usados para treino. Fora até o Humano decidir."
++    }
++  ]
++}
+diff --git a/redesign/conexoes/testar_rotas.py b/redesign/conexoes/testar_rotas.py
+index 7e52995e..073ffbf2 100644
+--- a/redesign/conexoes/testar_rotas.py
++++ b/redesign/conexoes/testar_rotas.py
+@@ -70,6 +70,19 @@ def _post(url, corpo, timeout):
+         return json.loads(r.read())
+ 
+ 
++GRATUITOS = REPO / "config" / "gratuitos_omniroute.json"
++
++
++def gratuitos_configurados() -> list[str]:
++    """Ids de modelos gratuitos ativos, que o OmniRoute aceita por passagem (ex.: openrouter/<id>:free).
++    Lista versionada em config/gratuitos_omniroute.json; `ativo: false` deixa de fora (ex.: origem anônima)."""
++    try:
++        d = json.loads(GRATUITOS.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return []
++    return [x["id"] for x in d.get("modelos", []) if x.get("ativo") and x.get("id")]
++
++
+ def rotas(categorias: set[str], get=None) -> list[dict]:
+     get = get or _get
+     o = orcamento.ler()
+@@ -94,6 +107,14 @@ def rotas(categorias: set[str], get=None) -> list[dict]:
+                                                   "cota": "gratuita do provedor", "hardware": "remoto", "rede": "internet"}})
+         except Exception:  # noqa: BLE001
+             pass
++    if "gratuito" in categorias and o["provedores"]["gratuito"]:
++        ja = {r["rota"] for r in out}
++        for n in gratuitos_configurados():
++            if n not in ja:
++                out.append({"rota": n, "categoria": "gratuito", "tipo": "omniroute", "modelo": n,
++                            "independencia": {"familia": n.split("/")[-1].split("-")[0], "provedor": n.split("/")[0],
++                                              "cota": "gratuita do provedor (cota pode esgotar: sinalizada)",
++                                              "hardware": "remoto", "rede": "internet"}})
+     for p in adaptadores.estado():
+         for modo in ("cli", "api"):
+             info = p["modos"].get(modo)
+@@ -131,7 +152,10 @@ def chamar_rota(r: dict, prompt: str, timeout_s: int, *, max_tokens: int = 60, p
+                 res = {"ok": True, "texto": ((d.get("choices") or [{}])[0].get("message") or {}).get("content", ""),
+                        "usage": {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}}
+         except Exception as e:  # noqa: BLE001
+-            res = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
++            # cota esgotada (429, limite, quota) é estado próprio: a rota fica sinalizada, não "quebrada"
++            cota = bool(re.search(r"\b429\b|rate.?limit|quota|exhaust|too many requests", str(e), re.I))
++            res = {"ok": False, "falha_etapa": "cota_esgotada" if cota else "transporte",
++                   "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
+     if res.get("latencia_ms") is None:
+         res["latencia_ms"] = round((time.monotonic() - t0) * 1000)
+     return res
+diff --git a/redesign/conexoes/tests/test_gratuitos.py b/redesign/conexoes/tests/test_gratuitos.py
+new file mode 100644
+index 00000000..e85cac68
+--- /dev/null
++++ b/redesign/conexoes/tests/test_gratuitos.py
+@@ -0,0 +1,43 @@
++"""Gratuitos por passagem (config/gratuitos_omniroute.json) e cota esgotada como estado próprio (lote 7)."""
++import json
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(AQUI))
++import testar_rotas  # noqa: E402
++
++
++def test_lista_versionada_tem_so_ativos_e_crouton_fora():
++    ids = testar_rotas.gratuitos_configurados()
++    assert "zai/glm-4.7-flash" in ids
++    assert not any("crouton" in i for i in ids)  # origem anônima: fora até decisão do Humano
++    assert all(i.startswith(("openrouter/", "zai/")) for i in ids)
++
++
++def test_cota_esgotada_vira_estado_proprio(monkeypatch):
++    import orcamento
++    monkeypatch.setattr(orcamento, "permite", lambda *a, **k: (True, ""))
++
++    def post_429(url, body, timeout):
++        raise RuntimeError("HTTP Error 429: Too Many Requests")
++
++    def post_rede(url, body, timeout):
++        raise RuntimeError("connection reset by peer")
++
++    r = {"tipo": "omniroute", "categoria": "gratuito", "modelo": "x", "rota": "x"}
++    assert testar_rotas.chamar_rota(r, "oi", 5, post=post_429)["falha_etapa"] == "cota_esgotada"
++    assert testar_rotas.chamar_rota(r, "oi", 5, post=post_rede)["falha_etapa"] == "transporte"
++
++
++def test_rotas_gratuitas_entram_quando_categoria_ligada(monkeypatch):
++    import orcamento
++    monkeypatch.setattr(orcamento, "ler", lambda: {"provedores": {"local": False, "gratuito": True,
++                                                                  "assinatura": False, "pago": False}})
++
++    def get(url):
++        return {"models": [{"fullModel": "groq/llama-x", "available": True}]}
++
++    rs = testar_rotas.rotas({"gratuito"}, get=get)
++    nomes = {r["rota"] for r in rs}
++    assert "groq/llama-x" in nomes and "zai/glm-4.7-flash" in nomes
