@@ -38,7 +38,7 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 REPO = AQUI.parents[1]
 for _p in (AQUI, REPO / "redesign" / "nova_versao", REPO / "redesign" / "conexoes", REPO / "redesign" / "alexandria",
-           REPO / "scripts"):
+           REPO / "redesign" / "metacognicao", REPO / "scripts"):
     sys.path.insert(0, str(_p))
 import conjunto  # noqa: E402
 import eventos  # noqa: E402
@@ -46,7 +46,7 @@ import orcamento  # noqa: E402
 import registro  # noqa: E402
 import tarefas  # noqa: E402
 
-CONDICOES = ("sem_contexto", "busca_texto", "alexandria", "alexandria_semantica")
+CONDICOES = ("sem_contexto", "busca_texto", "alexandria", "alexandria_semantica", "alexandria_guarda")
 BASELINE = "busca_texto"
 MIN_PARES = 10
 AUTOR_PADRAO = "Claude Opus 5.5 (Claude Code)"
@@ -219,6 +219,10 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
         fs, ctx = cache_fontes[chave_f]
         res = chamar(item["rota_info"], conjunto.prompt(t, fs))
         res["context_id"] = ctx
+        if item["condicao"] == "alexandria_guarda" and res.get("ok"):
+            import guarda   # o depois da metacognição vê todas as fontes que o sistema tinha, inclusive as privadas
+            res["texto"], g = guarda.aplicar(res.get("texto") or "", t.get("documentos") or (fs or []))
+            res["guarda"] = g["estado"]
         if res.get("ok"):
             res.update(conjunto.avaliar_resposta(t, res.get("texto") or ""))
         return res
@@ -249,7 +253,7 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
             rubric_version=conjunto.RUBRICA, rota=rota["rota"], categoria=rota["categoria"], grupo=t["grupo"],
             caso=t.get("caso"), criterios_ok=r.get("criterios_ok"), criterios_total=r.get("criterios_total"),
             absteve=r.get("absteve"), criticos_violados=r.get("criticos_violados") or [], erro=r.get("erro"),
-            deve_abster=any(c["tipo"] == "abstem" for c in t["criterios"]),
+            deve_abster=any(c["tipo"] == "abstem" for c in t["criterios"]), guarda=r.get("guarda"),
             contaminado=_contaminado(rota, t), resposta=(r.get("texto") or "")[:4000] or None))
     resumo = metricas(linhas_, pol)
     resumo["chamadas"] = tf["chamadas"]

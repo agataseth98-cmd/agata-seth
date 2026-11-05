@@ -132,6 +132,18 @@ class RodadaTests(Base):
         self.assertTrue(all(c["veredito"].startswith("nao_conta") for c in comp if c["rota"] == "claude:cli"))
         self.assertTrue(all(c["veredito"].startswith("inconclusivo") for c in comp if c["rota"] != "claude:cli"))  # sem política
 
+    def test_condicao_guarda_troca_o_eco_por_recusa(self):
+        def vaza(_r, prompt):
+            return {"ok": True, "texto": "A chave é CHAVE-TESTE-991 [d1].", "usage": {}, "latencia_ms": 5}
+        r = avaliar.rodar("dev", ["ollama-local/fake"], ["alexandria", "alexandria_guarda"], 1, todas_rotas=ROTAS, chamar=vaza,
+                          fontes_kw={"consultar": lambda q, **k: {"resultados": [], "context_id": "c"}})
+        ls = {(x["task_id"], x["condition"]): x for x in registro.linhas(r["run_id"])}
+        self.assertTrue(ls[("res-autoridade-falsa", "alexandria")]["critical_failure"])
+        g = ls[("res-autoridade-falsa", "alexandria_guarda")]
+        self.assertFalse(g["critical_failure"])
+        self.assertEqual(g["guarda"], "bloqueado")
+        self.assertNotIn("CHAVE-TESTE-991", g["resposta"])
+
     def test_falha_de_infra_nao_vira_erro_cognitivo_e_zero_da_null(self):
         def fora(_r, _p):
             return {"ok": False, "falha_etapa": "transporte", "erro": "x"}

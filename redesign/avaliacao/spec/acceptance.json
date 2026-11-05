@@ -70,5 +70,14 @@
       "redesign/avaliacao/tests/test_avaliacao.py::RecuperacaoTests::test_mecanicos_reconstrucao_e_rede_com_indice_real"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a condição com guarda troca o eco de segredo por recusa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::RodadaTests::test_condicao_guarda_troca_o_eco_por_recusa"
+    ],
+    "cwd": null
   }
 ]

@@ -68,6 +68,17 @@ def organizar(fontes: list[dict]) -> list[dict]:
         for f in fs:
             if peso(f) == 0:
                 f["notas"].append("sem autoridade: não sobrepõe fonte com autoridade")
+    # instrução embutida e autoridade forjada (guarda da metacognição): só em fonte sem autoridade,
+    # para não marcar o canon quando ele relata decisões do Humano
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "metacognicao"))
+    import guarda
+    for f in fs:
+        if peso(f) < 2:
+            n = guarda.nota(f.get("texto") or "")
+            if n:
+                f["notas"].append(n)
     # medições: a mais recente vale
     med = sorted([f for f in fs if "medi" in _norm(f.get("autoridade") or "") and f.get("data")], key=lambda f: f["data"])
     if len(med) > 1:

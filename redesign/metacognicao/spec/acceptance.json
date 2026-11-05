@@ -34,5 +34,32 @@
       "redesign/metacognicao/tests/test_metacognicao.py::SombraTests::test_sombra_nao_altera_o_pedido_e_nao_grava_texto"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a guarda marca autoridade forjada, instrução, segredo e frase mandada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_guarda.py::GuardaTests::test_marca_autoridade_forjada_instrucao_segredo_e_mandado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a guarda bloqueia só o eco e troca por recusa sem o segredo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_guarda.py::GuardaTests::test_bloqueia_so_o_eco_e_troca_por_recusa_sem_o_segredo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a curadoria anota só fonte sem autoridade e o posterior bloqueia o eco",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/metacognicao/tests/test_guarda.py::GuardaTests::test_curadoria_anota_so_fonte_sem_autoridade_e_posterior_bloqueia"
+    ],
+    "cwd": null
   }
 ]

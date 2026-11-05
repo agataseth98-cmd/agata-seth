@@ -191,7 +191,7 @@
   }
 
   // ---------------------------------------------------------------- Avaliação
-  const NOME_COND = {sem_contexto: "sem contexto", busca_texto: "busca por texto (atual)", alexandria: "Alexandria", alexandria_semantica: "Alexandria + sentido"};
+  const NOME_COND = {sem_contexto: "sem contexto", busca_texto: "busca por texto (atual)", alexandria: "Alexandria", alexandria_semantica: "Alexandria + sentido", alexandria_guarda: "Alexandria + guarda"};
   const corVeredito = (v) => (v === "melhora" ? "ok" : v === "piora" || v.startsWith("vetado") ? "erro" : v.startsWith("nao_conta") ? "neutro" : "aviso");
   let rotasCarregadas = false;
   async function carregarRotas() {
