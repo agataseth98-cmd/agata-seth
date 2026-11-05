@@ -16,12 +16,15 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes"):
+for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao"):
     sys.path.insert(0, str(ROOT / "redesign" / _p))
 
 ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
-         "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste")
+         "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
+         "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
+         "cancelar_avaliacao", "ver_execucao")
 _TESTE: dict = {"estado": "ocioso"}
+_AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
 _TESTE_LOCK = threading.Lock()
 _LOCK = threading.Lock()
 
@@ -38,7 +41,79 @@ def estado() -> dict:
             "teste_rotas": {"job": job, "ultimo": {k: ult[k] for k in ("run_id", "quando", "estado", "chamadas",
                                                                        "rotas_que_passaram", "obsoleto")} if ult else None,
                             "resultados": (ult or {}).get("resultados", [])[:60]},
-            "tarefas": tarefas.listar(5)}
+            "tarefas": tarefas.listar(5), "avaliacao": _estado_avaliacao()}
+
+
+def _estado_avaliacao() -> dict:
+    import avaliar  # noqa: E402
+    with _TESTE_LOCK:
+        job = dict(_AVAL)
+    try:
+        return {**avaliar.estado(), "job": job}
+    except Exception as e:  # noqa: BLE001 — conjunto inválido não derruba o painel
+        return {"erro": f"{e.__class__.__name__}: {str(e)[:160]}", "job": job}
+
+
+def _rodar_avaliacao(fazer):
+    try:
+        r = fazer()
+        novo = {"estado": r.get("estado", "concluida"), "run_id": r.get("run_id")}
+    except Exception as e:  # noqa: BLE001
+        novo = {"estado": "falhou", "detalhe": f"{e.__class__.__name__}: {str(e)[:160]}"}
+    with _TESTE_LOCK:
+        _AVAL.clear(); _AVAL.update(novo, fim=time.time())
+
+
+def _iniciar_avaliacao(fazer, rotulo: str) -> dict:
+    with _TESTE_LOCK:
+        if _AVAL.get("estado") == "rodando" or _TESTE.get("estado") == "rodando":
+            raise RuntimeError("ocupado")
+        _AVAL.clear(); _AVAL.update(estado="rodando", tipo=rotulo, inicio=time.time())
+    threading.Thread(target=_rodar_avaliacao, args=(fazer,), daemon=True).start()
+    return {"estado": "rodando", "tipo": rotulo}
+
+
+def _avaliacao(acao: str, dados: dict) -> dict:
+    import avaliar  # noqa: E402
+    import conjunto  # noqa: E402
+    import registro  # noqa: E402
+    if acao == "salvar_politica":
+        return avaliar.salvar_politica(dados.get("margem_minima"), dados.get("teto_latencia_ms"), dados.get("teto_reais"))
+    if acao == "ver_reservado":
+        # só o painel local mostra o gabarito, ao Humano revisor; nunca entra em prompt nem no acervo
+        return {"tarefas": conjunto.carregar("teste"), **conjunto.estado_reservado()}
+    if acao == "revisar_reservado":
+        return conjunto.marcar_revisado("humano (painel)")
+    if acao == "rotas_disponiveis":
+        import testar_rotas  # noqa: E402
+        return {"rotas": [{k: r.get(k) for k in ("rota", "categoria", "modelo")}
+                          for r in testar_rotas.rotas({"local", "gratuito", "assinatura", "pago"})]}
+    if acao == "ver_execucao":
+        return {"linhas": registro.linhas(dados.get("run_id"))}
+    if acao == "cancelar_avaliacao":
+        import tarefas  # noqa: E402
+        rodando = [t for t in tarefas.listar(20) if t["estado"] == "em_execucao" and t.get("tipo") == "avaliacao"]
+        for t in rodando:
+            tarefas.cancelar(t["task_id"])
+        return {"canceladas": [t["task_id"] for t in rodando]}
+    if acao == "medir_recuperacao":
+        import recuperacao  # noqa: E402
+        split = dados.get("split") if dados.get("split") in ("dev", "calibracao", "teste") else "dev"
+        return _iniciar_avaliacao(lambda: recuperacao.rodar(split), "recuperacao")
+    # avaliar: confere tudo antes de abrir a thread, para a recusa voltar na hora
+    split = dados.get("split")
+    rotas = dados.get("rotas")
+    conds = dados.get("condicoes") or list(avaliar.CONDICOES)
+    rep = dados.get("repeticoes", 1)
+    if split not in ("dev", "calibracao", "teste") or not isinstance(rotas, list) or not rotas \
+            or not all(isinstance(x, str) and len(x) < 200 for x in rotas) or not isinstance(conds, list) \
+            or not isinstance(rep, int):
+        raise ValueError("pedido de avaliação inválido")
+    try:
+        avaliar.preparar(split, rotas, conds, rep)
+    except PermissionError as e:
+        return {"recusado": str(e)}
+    return _iniciar_avaliacao(lambda: avaliar.rodar(split, rotas, conds, rep), "avaliacao")
 
 
 def _rodar_teste(categorias):
@@ -65,11 +140,14 @@ def executar(acao, dados: dict | None = None) -> dict:
         if cats is not None and (not isinstance(cats, list) or not set(cats) <= {"local", "gratuito", "assinatura", "pago"}):
             raise ValueError("categoria fora da lista")
         with _TESTE_LOCK:
-            if _TESTE.get("estado") == "rodando":
+            if _TESTE.get("estado") == "rodando" or _AVAL.get("estado") == "rodando":
                 raise RuntimeError("ocupado")
             _TESTE.clear(); _TESTE.update(estado="rodando", inicio=time.time())
         threading.Thread(target=_rodar_teste, args=(set(cats) if cats else None,), daemon=True).start()
         return {"acao": acao, "resultado": {"estado": "rodando"}}
+    if acao in ("salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar",
+                "medir_recuperacao", "cancelar_avaliacao", "ver_execucao"):
+        return {"acao": acao, "resultado": _avaliacao(acao, dados)}
     if acao == "cancelar_teste":
         import tarefas  # noqa: E402
         rodando = [t for t in tarefas.listar(20) if t["estado"] == "em_execucao"]

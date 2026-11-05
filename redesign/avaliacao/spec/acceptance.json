@@ -1,0 +1,74 @@
+[
+  {
+    "criterion": "trinta tarefas em seis grupos, com o reservado fora do repositório",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::ConjuntoTests::test_trinta_tarefas_seis_grupos_reservado_fora_do_repo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o executor nunca vê critério nem relevantes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::ConjuntoTests::test_executor_nunca_ve_criterio_nem_relevantes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Alexandria filtra o privado que o baseline entrega cru",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::ConjuntoTests::test_privado_filtrado_na_alexandria_e_cru_no_baseline"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o reservado exige revisão do Humano no hash atual e política fixada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::ConjuntoTests::test_reservado_exige_revisao_no_hash_atual_e_politica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rodada grava o registro comum e marca a rota do autor como contaminada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::RodadaTests::test_rodada_grava_registro_comum_e_marca_contaminacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "falha de infraestrutura não vira erro cognitivo e denominador zero dá null",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::RodadaTests::test_falha_de_infra_nao_vira_erro_cognitivo_e_zero_da_null"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "falha crítica veta e amostra pequena é inconclusiva",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::RodadaTests::test_falha_critica_veta_e_n_pequeno_e_inconclusivo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "reconstrução de índice e rede indisponível são verificadas sem modelo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/avaliacao/tests/test_avaliacao.py::RecuperacaoTests::test_mecanicos_reconstrucao_e_rede_com_indice_real"
+    ],
+    "cwd": null
+  }
+]

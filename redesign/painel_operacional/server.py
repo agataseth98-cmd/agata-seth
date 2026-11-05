@@ -103,6 +103,7 @@ _ASSETS = {
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
+    "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
@@ -1165,6 +1166,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(429, "text/plain; charset=utf-8", b"nova-versao busy")
             except FileNotFoundError:
                 return self._send(409, "text/plain; charset=utf-8", b"nova-versao index missing")
+            except PermissionError:
+                return self._send(403, "text/plain; charset=utf-8", b"nova-versao action not allowed yet")
             body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/sdd/executar":

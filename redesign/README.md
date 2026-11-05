@@ -46,6 +46,7 @@ regime normal:
 | `metacognicao/` | antes (`previo.py`) e depois (`posterior.py`) do turno; sombra no gateway por `router/sombra_nova_versao.py` | `SETH_SOMBRA_NOVA_VERSAO=1` |
 | `conexoes/` | conexões de modelos (navegador, programa, API), cofre de chaves só de escrita, teste de redundância por capacidade; guia em `conexoes/README.md` | painel · `testar_rotas.py` |
 | `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
+| `avaliacao/` | avaliação da nova versão (F2): registro comum por execução, 30 tarefas (reservado fora do repo), condições pareadas, métricas por dimensão e veredito | `avaliar.py` · `recuperacao.py` · painel |
 
 ## Docs de planejamento — arquivados
 

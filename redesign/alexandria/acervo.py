@@ -74,7 +74,9 @@ ESTRUTURA = {
 }
 
 CANON = ("REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "PROJETO.md", "PROJETO_REFERENCIA.md", "MEMÓRIAS.md",
-         "AGENTS.md", "PROMPT_CARREGAMENTO.md")   # INDICE_MEMORIAS*.md é derivado: não é fonte
+         "MEMORIAS-MORNO.md", "AGENTS.md", "PROMPT_CARREGAMENTO.md")
+# INDICE_MEMORIAS*.md é derivado: não é fonte. MEMORIAS-MORNO.md é a camada morna de MEMÓRIAS (entradas
+# como (670) e (692) só existem lá); faltava no lote 1 e a avaliação (lote 3) achou a lacuna.
 GLOBS = ("memoria/**/*.md", "extras/**/*.md", "propostas/*.md", "redesign/*/README.md", "redesign/*/spec/spec.md")
 # acesso por caminho; o que não casar é "public" (tudo aqui está no repo público)
 PRIVADO = re.compile(r"(^|/)(privado|private|mod-[^/]+)/", re.I)

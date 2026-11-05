@@ -1,0 +1,110 @@
+/* Nova versão do Agata no painel: componentes visuais próprios (lote 3, 04/11/2026).
+   Tudo sob .nv-*, usando as variáveis do tema (prototipo.css), para valer no claro e no escuro. */
+.nv-page .panel{margin-bottom:14px}
+.nv-page .panel-head{align-items:center}
+.nv-page .panel-head .nv-acoes{margin:0}
+.nv-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:start}
+.nv-cols>.panel{margin-bottom:0}
+.nv-page .kpi .value{font-size:24px;overflow-wrap:anywhere}
+.nv-page .kpi .note{margin-top:4px}
+.kpi.rose .value{color:var(--rose)}
+
+/* botões e linha de ações */
+.nv-acoes{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.nv-page .btn{padding:9px 14px;font-size:12.5px;border:1px solid transparent;border-radius:8px;white-space:nowrap}
+.nv-page .btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.nv-page .btn.secondary:hover{border-color:var(--teal);color:var(--teal)}
+.nv-page .btn.perigo{background:transparent;color:var(--rose);border-color:var(--rose-soft)}
+.nv-page .btn.perigo:hover{border-color:var(--rose)}
+.nv-page .btn[data-armado="1"]{background:var(--gold);color:#1b1206;border-color:var(--gold)}
+.nv-page .btn:disabled{opacity:.5;cursor:progress}
+
+/* formulários: rótulo em cima, campo largo */
+.nv-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px 14px}
+.nv-form.estreito{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.nv-campo{display:flex;flex-direction:column;gap:5px;min-width:0}
+.nv-campo.largo{grid-column:1/-1}
+.nv-campo>span{font:11px var(--mono);color:var(--muted);letter-spacing:.01em}
+.nv-page input[type=text],.nv-page input[type=search],.nv-page input[type=password],.nv-page input[type=number],.nv-page select{
+  width:100%;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);
+  color:var(--ink);font:13px/1.4 var(--sans)}
+.nv-page input::placeholder{color:var(--muted);opacity:.75}
+.nv-page input:focus,.nv-page select:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:transparent}
+.nv-fieldset{grid-column:1/-1;border:1px dashed var(--line);border-radius:10px;padding:12px 14px 14px;margin:0}
+.nv-fieldset legend{font:11px var(--mono);color:var(--muted);padding:0 6px}
+.nv-fieldset .nv-form{margin-top:4px}
+.nv-busca{display:flex;gap:8px;flex-wrap:wrap}
+.nv-busca input{flex:1 1 320px;font-size:14px;padding:11px 13px}
+.nv-busca select{flex:0 1 260px;width:auto}
+
+/* interruptores de categoria do orçamento */
+.nv-toggles{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin-bottom:16px}
+.nv-toggle{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--paper)}
+.nv-toggle input{margin-top:3px;accent-color:var(--teal);width:16px;height:16px;flex:none}
+.nv-toggle b{display:block;font-weight:600;color:var(--ink)}
+.nv-toggle small{display:block;color:var(--muted);font-size:11.5px;line-height:1.4;margin-top:2px}
+.nv-toggle:has(input:checked){border-color:var(--teal);background:var(--teal-soft)}
+
+/* selos de estado */
+.nv-selo{display:inline-flex;align-items:center;gap:6px;font:11px var(--mono);border-radius:99px;padding:3px 9px;white-space:nowrap;
+  background:var(--blue-soft);color:var(--blue)}
+.nv-selo:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.nv-selo.ok{background:var(--teal-soft);color:var(--teal)}
+.nv-selo.aviso{background:var(--gold-soft);color:var(--gold)}
+.nv-selo.erro{background:var(--rose-soft);color:var(--rose)}
+.nv-selo.neutro{background:transparent;color:var(--muted);border:1px solid var(--line)}
+
+/* cartões de provedor */
+.nv-cartoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.nv-cartao{border:1px solid var(--line);border-radius:11px;padding:14px 15px;background:var(--paper)}
+.nv-cartao-topo{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.nv-cartao h3{margin:0;font:18px var(--serif);font-weight:400;color:var(--ink)}
+.nv-caminho{display:grid;grid-template-columns:92px 1fr;gap:4px 10px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
+.nv-caminho>b{font:11px var(--mono);color:var(--muted);font-weight:500;padding-top:3px}
+.nv-caminho small{display:block;color:var(--muted);font-size:11.5px;margin-top:4px;overflow-wrap:anywhere}
+
+/* lista de resultados (pacote de evidência, skills) */
+.nv-lista{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.nv-item{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--paper)}
+.nv-item-topo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nv-ref{font:12px var(--mono);color:var(--ink);overflow-wrap:anywhere}
+.nv-sha{font:10.5px var(--mono);color:var(--muted)}
+.nv-item p{margin:6px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
+.nv-vazio{border:1px dashed var(--line);border-radius:10px;padding:16px;color:var(--muted);font-size:13px;text-align:center;margin-top:12px}
+.nv-aviso{border-left:3px solid var(--gold);background:var(--gold-soft);color:var(--ink);padding:9px 12px;border-radius:0 8px 8px 0;font-size:12.5px;margin-top:10px}
+.nv-nota{font-size:12px;color:var(--muted);margin:10px 0 0;min-height:1.2em}
+.nv-nota.ok{color:var(--teal)}
+.nv-nota.erro{color:var(--rose)}
+
+/* pares rótulo/valor */
+.nv-dl{display:grid;grid-template-columns:max-content 1fr;gap:7px 16px;margin:0;font-size:13px}
+.nv-dl dt{font:11px var(--mono);color:var(--muted);padding-top:2px}
+.nv-dl dd{margin:0;color:var(--ink);overflow-wrap:anywhere}
+
+/* tabelas */
+.nv-tabela-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:10px}
+.nv-tabela{width:100%;border-collapse:collapse;font-size:12.5px}
+.nv-tabela th{text-align:left;font:11px var(--mono);font-weight:500;color:var(--muted);padding:9px 11px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--paper)}
+.nv-tabela td{padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+.nv-tabela tr:last-child td{border-bottom:0}
+.nv-tabela td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+.nv-tabela td.mono{font-family:var(--mono);font-size:11.5px;overflow-wrap:anywhere}
+
+/* passos numerados */
+.nv-passos{list-style:none;counter-reset:p;margin:0;padding:0;display:grid;gap:8px}
+.nv-passos li{counter-increment:p;display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:13px;color:var(--ink)}
+.nv-passos li:before{content:counter(p);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:11px var(--mono);background:var(--teal-soft);color:var(--teal)}
+.nv-passos li.feito:before{content:"✓"}
+.nv-passos li small{display:block;color:var(--muted);font-size:11.5px}
+
+/* respostas para revisão */
+.nv-detalhe{border:1px solid var(--line);border-radius:9px;margin-top:8px;background:var(--paper)}
+.nv-detalhe summary{cursor:pointer;padding:9px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+.nv-detalhe pre{margin:0;padding:10px 12px;border-top:1px solid var(--line);white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--muted)}
+.nv-checks{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px}
+.nv-checks label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.nv-checks input{accent-color:var(--teal)}
+.nv-mt{margin-top:14px}
+.nv-page select.nv-auto{width:auto}
+.nv-tabela td.mono{min-width:150px;overflow-wrap:normal;word-break:break-word}
+.nv-tabela td:first-child{min-width:110px}

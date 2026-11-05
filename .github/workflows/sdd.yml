@@ -18,6 +18,7 @@ on:
       - "redesign/metacognicao/**"
       - "redesign/corpo/**"
       - "redesign/conexoes/**"
+      - "redesign/avaliacao/**"
       - "redesign/router/sombra_nova_versao.py"
       - "ferramentas/**"
       - "scripts/busca_texto.py"
@@ -40,7 +41,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
 
       - name: Testes dos componentes SDD
-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests ferramentas/test_ferramentas.py
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests ferramentas/test_ferramentas.py
 
       - name: Ciclo SDD sobre o próprio sdd_flow
         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
@@ -50,8 +51,8 @@ jobs:
 
       - name: Âncora e critérios dos componentes existentes
         run: |
-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes
-          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes; do
+          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao
+          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao; do
             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
           done
