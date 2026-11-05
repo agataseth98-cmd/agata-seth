@@ -1,0 +1,6 @@
+({N}) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
+- **Ouvido:** `redesign/sentidos/ouvido.py` transcreve fala com o `lfm3-audio:2b` (Liquid AI) pelo Ollama local. A reserva é o Whisper da iGPU, usado só se já estiver no ar; o ouvido nunca liga serviço e nunca gera fala.
+- **Medição:** `medir_ouvido.py` mede 20 frases da voz do sistema, limpas e com ruído leve, e grava no registro comum da avaliação. A página Sentidos no painel mostra o resultado e roda a medição.
+- **Resultado** (05/11, voz sintética): lfm3-audio com 4 a 5% de erro por palavra e 0,15 s por frase; Whisper base com 14% e 0,7 s.
+- **Voz:** a voz do sistema continua o piper `agata-last`, sem mudança.
+- **Achado:** a instrução de transcrever precisa ir como mensagem de sistema; na do usuário, o modelo entra em laço.
