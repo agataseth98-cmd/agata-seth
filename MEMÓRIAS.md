@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): eed9cb2c6afce030871be7bb965ae4d5e08efad7
-  Escrito em: 05/11/2026 16:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3b16174913ce0f454e2ed85b84a432fe022ce070
+  Escrito em: 05/11/2026 16:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eed9cb2c6afce030871be7bb965ae4d5e08efad7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eed9cb2c6afce030871be7bb965ae4d5e08efad7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eed9cb2c6afce030871be7bb965ae4d5e08efad7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eed9cb2c6afce030871be7bb965ae4d5e08efad7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eed9cb2c6afce030871be7bb965ae4d5e08efad7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b16174913ce0f454e2ed85b84a432fe022ce070/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b16174913ce0f454e2ed85b84a432fe022ce070/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b16174913ce0f454e2ed85b84a432fe022ce070/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b16174913ce0f454e2ed85b84a432fe022ce070/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3b16174913ce0f454e2ed85b84a432fe022ce070/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
+- **Mecanismo:** `redesign/router/sombra_nova_versao.py` ganha o bloco `suporte_turno_anterior`, só registro. Não altera a resposta, não bloqueia, não chama modelo.
+- **Medição:** selftest 6 de 6 (inclui o caso de número sem fonte e de texto que não vai ao registro).
+- **Limites:** confere números, não afirmações; citações `(N)` ficam de fora; revisor de outra família segue sem ligação ao gateway.
+
 (948) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas gratuitas (Wikipédia pela API pública, PDF por pdftotext ou venv pypdf dentro do sandbox, falha de fornecedor como estado, sete palavras ligadas às propostas reais) e correção do CI: a varredura de segredo lê a raiz do checkout, não ~/agata.** Proposta `nova-versao-lote5b-20261105`, pedida pelo Humano em 05/11 ("resolva os Limites usando as melhores alternativas gratuitas possiveis, assinado").
 - **CI:** o check `sdd` do lote 5 falhava porque `sanitizar.py` (e `seth_gateway.py` e `seth_verificador.py`) procuravam o repositório em `~/agata`; agora leem a raiz do próprio arquivo, com `SETH_REPO` como sobrescrita.
 - **Pesquisa externa:** `alexandria/fornecedores.py` usa a API pública da Wikipédia em português (sem chave), pela política de egresso; o extrato entra em quarentena.

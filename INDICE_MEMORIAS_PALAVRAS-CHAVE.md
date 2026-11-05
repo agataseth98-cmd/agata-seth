@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
+  palavras-chave: revisão, suporte, mecânica, sombra, nova, versão, lote, máquina, confere, números, resposta, anterior, afirma, aparecem, fontes, turno, proposta
 (948) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas gratuitas (Wikipédia pela API pública, PDF por pdftotext ou venv pypdf dentro do sandbox, falha de fornecedor como estado, sete palavras ligadas às propostas reais) e correção do CI: a varredura de segredo lê a raiz do checkout, não ~/agata.** Proposta `nova-versao-lote5b-20261105`, pedida pelo Humano em 05/11 ("resolva os Limites usando as melhores alternativas gratuitas possiveis, assinado").
   palavras-chave: limites, lote, resolvidos, alternativas, gratuitas, wikipédia, api, pública, pdf, pdftotext, venv, pypdf, dentro, sandbox, falha, fornecedor, estado, sete, palavras, ligadas, propostas, reais, correção, varredura, segredo, raiz, checkout, agata, proposta, nova, versao, pedida, humano, resolva, usando, melhores, possiveis, assinado
 (947) DIÁRIO — 05/11/2026 · **Nova versão, lote 5: fecha as lacunas da especificação (entrada controlada de fontes, pesquisa externa efêmera, ciclo de skills, papéis e redundância, orçamento por turno, avaliação ampliada, painel do acervo), com as novidades da Seth atrás de flags desligadas.** Proposta `nova-versao-lote5-20261105`, pedida pelo Humano em 05/11 ("siga só pare quando eu tiver que assinar"), com as decisões dele: reservado v2 escrito pelo assistente e revisado pelo terminal; direitos caso a caso no painel; teto de POST de 64 KB em todas as rotas gerais; um lote, uma assinatura.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: serviço, oficial, tem, permissão, escrita, restrita, fila, dedicada, drop, config, systemd, user, painel, operacional, service, relay, council, data, conf, libera, somente, local, share, agata, official, usada, sqlite, reiniciou, permanece, ativo, respondeu, http, poll, extensão, tinha, idade, medição, banco, state, modo, histórico, legado, movido, selftest, testes, sintaxe, python, manifesto, passaram, porta, listener, provedores, reais, foram, testados, após, publicação
 (919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel oficial; porta de depuração 9222 fechada.**
   palavras-chave: chromium, projeto, volta, fazer, poll, painel, oficial, porta, depuração, fechada
-(918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` validado e aplicado em branch após assinatura humana.** Hash, assinatura Ed25519 e `git apply --check` passaram; 37 testes, selftest, sintaxe Python/JS e manifesto passaram. PR de aplicação aguarda revisão/merge humano; runtime não reiniciado e provedores reais não testados.
-  palavras-chave: rede, parser, estrito, validado, aplicado, branch, após, assinatura, humana, hash, git, apply, check, passaram, testes, selftest, sintaxe, python, manifesto, aplicação, aguarda, revisão, merge, humano, runtime, reiniciado, provedores, reais, testados
+(918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` val …
+  palavras-chave: rede, parser, estrito, val
 (917) DIÁRIO — 28/10/2026 · **Proposta P-8 `conselho-em-rede-parser-estrito-2026 …
   palavras-chave: proposta, rede, parser, estrito
 (916) DIÁRIO — 28/10/2026 · **Nova proposta P-8 `conselho-em-rede-seguro-2026102 …
