@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova versão, lote 7, complemento): origem anônima, usada só com dados redigidos e um modelo de contingência nomeado.** Proposta `crouton-condicoes-20261105`.
+- **Decisão do Humano (05/11/2026):** uso autorizado com dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e modelo de contingência sempre nomeado.
+- **Mecanismo:** `config/gratuitos_omniroute.json` (`ativo: true`, com a nota das condições) e o teste correspondente.
+- **Medição:** 8 testes de `redesign/conexoes` verdes.
+- **Limite:** o provedor é anônimo e pode reter os prompts; não foi medido o efeito nos dados reais.
