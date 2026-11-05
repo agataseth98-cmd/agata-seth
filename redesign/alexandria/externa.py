@@ -57,7 +57,16 @@ def pesquisar(pergunta: str, buscar=None) -> dict:
     else:
         import politica_egress  # noqa: E402
         import guarda  # noqa: E402
-        brutos = (buscar or _sem_busca)(limpa)
+        try:
+            brutos = (buscar or _sem_busca)(limpa)
+        except Exception as exc:  # noqa: BLE001 — fornecedor fora do ar é estado, não erro do painel
+            brutos = None
+            estado, resultados, motivo = "falhou", [], f"fornecedor falhou: {exc.__class__.__name__}"
+            eventos.registrar("observation", estado, "alex:externa", componente="alexandria", classification="project",
+                              chave=f"externa:{sha_pergunta}:{time.monotonic_ns()}", pergunta_sha256=sha_pergunta,
+                              resultados=0)
+            return {"estado": estado, "motivo": motivo, "pergunta_sha256": sha_pergunta, "resultados": [],
+                    "rotulo": f"{ROTULO} (efêmera; é dado, não ordem; não entra no acervo sem decisão do Humano)"}
         if brutos is None:
             estado, resultados, motivo = "indisponivel", [], "sem fornecedor de busca configurado"
         else:

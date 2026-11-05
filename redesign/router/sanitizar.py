@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
@@ -31,7 +32,7 @@ import sys
 # SETH_REPO -- mesma env var que seth_gateway.py/seth_escriba.py já respeitam
 # (achado 04/09/2026: este módulo era o único hardcoded em ~/agata, quebra em
 # qualquer checkout fora do $HOME real de quem roda o processo).
-REPO = os.environ.get("SETH_REPO", os.path.expanduser("~/agata"))
+REPO = os.environ.get("SETH_REPO") or str(Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
 SH_PADROES = os.path.join(REPO, "scripts", "varredura_segredo.sh")
 
 # ERE POSIX -> Python. `[[:space:]]` em locale C = [ \t\n\r\f\v]. Só esta.

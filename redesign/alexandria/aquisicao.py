@@ -168,13 +168,24 @@ def _texto_de(path: Path, ext: str) -> tuple[str | None, str | None]:
         return " ".join(" ".join(p.partes).split()), None
     if ext == "pdf":
         import sandbox  # noqa: E402
-        if not sandbox.disponivel() or not shutil.which("pdftotext"):
-            return None, "sem parser de PDF (bwrap ou pdftotext ausente)"
-        r = sandbox.run_sandboxed(["pdftotext", "-layout", "-enc", "UTF-8", str(path), "-"], ro=[str(path)],
-                                  net=False, timeout=60)
-        if r["exit_code"] != 0:
-            return None, f"parser de PDF falhou (rc {r['exit_code']})"
-        return r["stdout"], None
+        if not sandbox.disponivel():
+            return None, "sem sandbox bwrap: PDF não é lido fora do isolamento"
+        if shutil.which("pdftotext"):
+            r = sandbox.run_sandboxed(["pdftotext", "-layout", "-enc", "UTF-8", str(path), "-"], ro=[str(path)],
+                                      net=False, timeout=60)
+            if r["exit_code"] != 0:
+                return None, f"parser de PDF falhou (rc {r['exit_code']})"
+            return r["stdout"], None
+        venv = eventos.dados() / "alexandria" / "ferramentas" / "pdf-venv"
+        py = venv / "bin" / "python"
+        if py.exists():   # alternativa gratuita: pypdf num venv de usuário, dentro do mesmo sandbox
+            script = AQUI / "extrair_pdf.py"
+            r = sandbox.run_sandboxed([str(py), str(script), str(path)], ro=[str(venv), str(script), str(path)],
+                                      net=False, timeout=60)
+            if r["exit_code"] != 0:
+                return None, f"parser de PDF (pypdf) falhou: {r['stderr'].strip()[:120]}"
+            return r["stdout"], None
+        return None, "sem parser de PDF (instale pdftotext ou o venv pypdf)"
     return None, "extensão sem parser"
 
 

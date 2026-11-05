@@ -34,6 +34,9 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 
 ## Critérios de aceite
 
+- [ ] a Wikipédia entra só como evidência efêmera ou quarentena, pela política de egresso
+- [ ] PDF sem leitor disponível é recusado com motivo claro, dentro do sandbox
+- [ ] fornecedor que cai vira estado falhou, sem derrubar a pesquisa
 - [ ] o índice é reconstruível e determinístico
 - [ ] hash que muda marca o derivado como pendente
 - [ ] objeto privado não aparece em consulta pública
@@ -67,6 +70,12 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
 - `ciclo_skills.py`: rascunho, quarentena, em-teste, elegível e revogada; elegível só gera um `.diff` para o P-8.
 - Suficiência (`acervo.suficiencia`) e defesa de consulta: externo não revisado nunca aparece.
 
+## Lote 5b (05/11/2026, limites resolvidos com alternativas gratuitas)
+
+- `fornecedores.py`: Wikipédia em português pela API pública (sem chave, licença CC BY-SA). Toda chamada passa pela política de egresso. `wikipedia_pesquisar` dá evidência efêmera; `wikipedia_guardar` põe o extrato em quarentena com a origem do artigo.
+- `extrair_pdf.py`: leitura de PDF por pypdf num venv pessoal de usuário, dentro do sandbox e sem rede. Vale quando não há `pdftotext`. Sem nenhum dos dois, o PDF é recusado com motivo claro.
+- A falha do fornecedor vira estado `falhou`, e o painel mostra o motivo.
+
 ## Desenho e alternativas
 
 FTS5 do SQLite (medido disponível em 04/11, SQLite 3.54.0), sem dependência nova. Descartados: banco vetorial como base ((115)); servidor de grafo (o grafo é a tabela `relations`); reescrever o `busca_texto` (a normalização é importada dele).
@@ -95,3 +104,5 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
 - `correcoes.py`
 - `externa.py`
 - `ciclo_skills.py`
+- `fornecedores.py`
+- `extrair_pdf.py`

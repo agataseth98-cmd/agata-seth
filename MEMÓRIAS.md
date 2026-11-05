@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 637412ff6f39321b1ca74ceb2c97fb4fa15215eb
-  Escrito em: 05/11/2026 15:23 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 10f6d504e7c84e3098ad25d7d2c1ad55c73061ad
+  Escrito em: 05/11/2026 15:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/637412ff6f39321b1ca74ceb2c97fb4fa15215eb/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/637412ff6f39321b1ca74ceb2c97fb4fa15215eb/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/637412ff6f39321b1ca74ceb2c97fb4fa15215eb/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/637412ff6f39321b1ca74ceb2c97fb4fa15215eb/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/637412ff6f39321b1ca74ceb2c97fb4fa15215eb/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f6d504e7c84e3098ad25d7d2c1ad55c73061ad/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f6d504e7c84e3098ad25d7d2c1ad55c73061ad/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f6d504e7c84e3098ad25d7d2c1ad55c73061ad/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f6d504e7c84e3098ad25d7d2c1ad55c73061ad/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/10f6d504e7c84e3098ad25d7d2c1ad55c73061ad/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(948) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas gratuitas (Wikipédia pela API pública, PDF por pdftotext ou venv pypdf dentro do sandbox, falha de fornecedor como estado, sete palavras ligadas às propostas reais) e correção do CI: a varredura de segredo lê a raiz do checkout, não ~/agata.** Proposta `nova-versao-lote5b-20261105`, pedida pelo Humano em 05/11 ("resolva os Limites usando as melhores alternativas gratuitas possiveis, assinado").
+- **CI:** o check `sdd` do lote 5 falhava porque `sanitizar.py` (e `seth_gateway.py` e `seth_verificador.py`) procuravam o repositório em `~/agata`; agora leem a raiz do próprio arquivo, com `SETH_REPO` como sobrescrita.
+- **Pesquisa externa:** `alexandria/fornecedores.py` usa a API pública da Wikipédia em português (sem chave), pela política de egresso; o extrato entra em quarentena.
+- **PDF:** `alexandria/extrair_pdf.py` com pypdf num venv de usuário (fora do repositório, sem sudo), dentro do sandbox.
+- **Sete palavras:** `nv.py sincronizar` aplicado às propostas reais (63 objetos, idempotente); retroativo limitado às 50 aplicadas mais recentes.
+- **Não medido:** vereditos do reservado v2 (revisão do Humano), gateway com as flags em produção (teste final), voz do Humano.
+
 (947) DIÁRIO — 05/11/2026 · **Nova versão, lote 5: fecha as lacunas da especificação (entrada controlada de fontes, pesquisa externa efêmera, ciclo de skills, papéis e redundância, orçamento por turno, avaliação ampliada, painel do acervo), com as novidades da Seth atrás de flags desligadas.** Proposta `nova-versao-lote5-20261105`, pedida pelo Humano em 05/11 ("siga só pare quando eu tiver que assinar"), com as decisões dele: reservado v2 escrito pelo assistente e revisado pelo terminal; direitos caso a caso no painel; teto de POST de 64 KB em todas as rotas gerais; um lote, uma assinatura.
 - **Alexandria:** cadastro próprio dos externos, aquisição em quarentena (upload, pasta e URL), índice que mostra externo só revisado com direitos, suficiência e pesquisa externa efêmera, ciclo de skills com revogação.
 - **Avaliação:** split teste2, rubrica às cegas, troca de LLM, teto de tokens, restauração isolada, seleção de skill medida, medidores antigos com registro comum.

@@ -118,7 +118,7 @@ class AquisicaoTests(unittest.TestCase):
             r2 = aquisicao.guardar_arquivo(self.escrever("d.pdf", b"%PDF-1.4 conteudo"), "pdf", "d.pdf", origem_tipo="upload")
             o2 = aquisicao.processar(r2["cadastro"]["sha256"])
             self.assertEqual(o2["editorial_status"], "rejeitado")
-            self.assertIn("sem parser", o2["historico"][-1]["motivo"])
+            self.assertIn("sem sandbox", o2["historico"][-1]["motivo"])
         finally:
             sandbox.disponivel = original
 

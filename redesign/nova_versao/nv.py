@@ -99,7 +99,10 @@ def _selftest() -> int:
     return 1 if falhas else 0
 
 
-def sincronizar(repo: Path | None = None) -> dict:
+LIMITE_APLICADAS = 50   # retroativo limitado: só as mais recentes entram no ledger (evita inundar com ~1100 antigas)
+
+
+def sincronizar(repo: Path | None = None, limite_aplicadas: int = LIMITE_APLICADAS) -> dict:
     """(lote 5, A4) Liga as sete palavras a propostas reais. Cada proposta é um objeto:
     `.diff` aberto -> apresentacao; `APROVADO-` (assinada) -> assimilacao; em `propostas/aplicadas/` -> transicao.
     Só anda pelos passos previstos (eventos.caminho_ate) e grava cada passo com chave idempotente. Nunca Remoção."""
@@ -112,7 +115,8 @@ def sincronizar(repo: Path | None = None) -> dict:
         nome = a.name[len("APROVADO-"):]
         if nome in alvos or (pro / f"{nome}.diff").exists():
             alvos[nome] = "assimilacao"
-    for d in sorted((pro / "aplicadas").glob("*.diff")) if (pro / "aplicadas").exists() else []:
+    aplicadas = sorted((pro / "aplicadas").glob("*.diff"), key=lambda p: p.stat().st_mtime) if (pro / "aplicadas").exists() else []
+    for d in aplicadas[-limite_aplicadas:]:
         alvos[d.stem] = "transicao"
     feitos = []
     for nome, alvo in sorted(alvos.items()):
@@ -129,7 +133,7 @@ def sincronizar(repo: Path | None = None) -> dict:
             anterior = passo
         if passos:
             feitos.append({"objeto": objeto, "de": atual, "ate": alvo, "passos": passos})
-    return {"propostas": len(alvos), "movidas": feitos}
+    return {"propostas": len(alvos), "aplicadas_consideradas": min(len(aplicadas), limite_aplicadas), "movidas": feitos}
 
 
 def main(argv: list[str]) -> int:

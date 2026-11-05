@@ -522,4 +522,30 @@
     catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
     recarregar("nv-acervo");
   });
+
+  // ---------------------------------------------------------------- Pesquisa gratuita (lote 5b)
+  function mostrarExterna(r) {
+    por("nv-ext-lista", (r.resultados || []).map((x) => h("li", {class: "nv-item"},
+      h("div", {class: "nv-item-topo"}, h("span", {class: "nv-ref", text: x.titulo}), h("span", {class: "nv-sha", text: x.url})),
+      h("p", {text: x.trecho || ""}),
+      h("div", {class: "nv-acoes"}, (() => {
+        const b = h("button", {type: "button", class: "btn secondary", text: "Guardar no acervo (quarentena)"});
+        b.addEventListener("click", async () => {
+          b.disabled = true;
+          try {
+            const g = (await executar("acervo_externa_guardar", {titulo: x.titulo})).resultado;
+            nota("nv-ext-nota", (g.duplicado ? "Já estava no acervo" : "Guardado em quarentena") + ": " + g.cadastro.rotulo + ". Analise e decida na lista abaixo.", "ok");
+          } catch (e) { nota("nv-ext-nota", motivoErro(e), "erro"); }
+          b.disabled = false; recarregar("nv-acervo");
+        });
+        return b;
+      })()))));
+    if (!(r.resultados || []).length) nota("nv-ext-nota", "Sem resultado: " + (r.motivo || "nada encontrado nesta busca") + ".", r.estado === "falhou" ? "erro" : "");
+  }
+  if (byId("nv-ext-pesquisar")) byId("nv-ext-pesquisar").addEventListener("click", async () => {
+    const q = val("nv-ext-consulta"); if (!q) { nota("nv-ext-nota", "Escreva o que procurar.", "erro"); return; }
+    nota("nv-ext-nota", "Pesquisando…");
+    try { mostrarExterna((await executar("acervo_externa_pesquisar", {consulta: q})).resultado); }
+    catch (e) { nota("nv-ext-nota", motivoErro(e), "erro"); }
+  });
 })();
