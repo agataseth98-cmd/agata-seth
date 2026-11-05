@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
+- **Pedido do Humano (05/11/2026):** "sim" a registrar os gratuitos do OpenRouter; "pode colocar" o Z.AI; cota esgotada deve ser sinalizada.
+- **Mecanismo:** `config/gratuitos_omniroute.json` (lista; `crouton-alpha` fora por origem anônima) e `chamar_rota` com `cota_esgotada`.
+- **Medição:** pytest verde; os 11 OpenRouter responderam por passagem.
+- **Limite:** a cota real não foi medida; os limites de agregadores divergem.
