@@ -1,0 +1,71 @@
+{
+  "descricao": "Modelos gratuitos que o OmniRoute aceita por passagem (provider/id). Lista do Humano em 05/11/2026 (pedido: 'sim', registrar os gratuitos do OpenRouter; Z.AI na avaliação). Cota pode esgotar: a rota é sinalizada como cota_esgotada.",
+  "verificado_em": "2026-11-05",
+  "modelos": [
+    {
+      "id": "openrouter/nvidia/nemotron-3.5-lightning:free",
+      "ativo": true,
+      "nota": "NVIDIA Nemotron (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+      "ativo": true,
+      "nota": "NVIDIA Nemotron Ultra (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+      "ativo": true,
+      "nota": "NVIDIA, visão (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "ativo": true,
+      "nota": "NVIDIA (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/google/gemma-4-31b-it:free",
+      "ativo": true,
+      "nota": "Google Gemma (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/google/gemma-4-26b-a4b-it:free",
+      "ativo": true,
+      "nota": "Google Gemma (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/liquid/lfm-2.5-2.6b:free",
+      "ativo": true,
+      "nota": "Liquid (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/cohere/north-mini-code:free",
+      "ativo": true,
+      "nota": "Cohere (OpenRouter free)"
+    },
+    {
+      "id": "openrouter/xingchen-agi/xing4.0-29b-a4b:free",
+      "ativo": true,
+      "nota": "OpenRouter free"
+    },
+    {
+      "id": "openrouter/dots-studio/dots-3-note-preview:free",
+      "ativo": true,
+      "nota": "OpenRouter free (preview)"
+    },
+    {
+      "id": "openrouter/recursive/flint-v1.0:free",
+      "ativo": true,
+      "nota": "OpenRouter free"
+    },
+    {
+      "id": "zai/glm-4.7-flash",
+      "ativo": true,
+      "nota": "Z.AI GLM-4.7-Flash (conexão zai no OmniRoute); compartilha o combo conselho"
+    },
+    {
+      "id": "openrouter/stealth/crouton-alpha",
+      "ativo": false,
+      "nota": "Origem anônima (stealth). OpenRouter: prompts podem ser retidos pelo provedor, não usados para treino. Fora até o Humano decidir."
+    }
+  ]
+}

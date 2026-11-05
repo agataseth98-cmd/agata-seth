@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
+  palavras-chave: gratuitos, passagem, cota, esgotada, sinalizada, nova, versão, lote, modelos, openrouter, entram, avaliação, vira, estado, próprio, falha, rede, proposta
 (949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
   palavras-chave: revisão, suporte, mecânica, sombra, nova, versão, lote, máquina, confere, números, resposta, anterior, afirma, aparecem, fontes, turno, proposta
 (948) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas gratuitas (Wikipédia pela API pública, PDF por pdftotext ou venv pypdf dentro do sandbox, falha de fornecedor como estado, sete palavras ligadas às propostas reais) e correção do CI: a varredura de segredo lê a raiz do checkout, não ~/agata.** Proposta `nova-versao-lote5b-20261105`, pedida pelo Humano em 05/11 ("resolva os Limites usando as melhores alternativas gratuitas possiveis, assinado").
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, preparada, substituir, executor, dom, apis, oficiais, preserva, fila, aprovação, humana, limita, destinos, cinco, modelos, mapeados, roster, omniroute, remove, extensão, permissões, scripts, páginas, provedores, chamada, real, provedor, feita, mudança, aguarda, assinatura, aplicação
 (920) DIÁRIO — 28/10/2026 · **O serviço oficial do Conselho tem permissão de escrita restrita à fila dedicada.** O drop-in `~/.config/systemd/user/painel-operacional.service.d/relay-council-data.conf` libera escrita somente em `~/.local/share/agata/painel-conselho/official`, usada pela fila e pelo SQLite. O serviço reiniciou e permanece ativo em `127.0.0.1:20146`; o painel respondeu HTTP 200 e o poll da extensão oficial tinha 2,6 s de idade na medição. Banco `state.sqlite3` em modo `0600`; histórico legado não foi movido. Selftest, 33 testes, sintaxe Python/JS e manifesto passaram. Porta 9222 sem listener. Provedores reais não foram testados após a publicação.
   palavras-chave: serviço, oficial, tem, permissão, escrita, restrita, fila, dedicada, drop, config, systemd, user, painel, operacional, service, relay, council, data, conf, libera, somente, local, share, agata, official, usada, sqlite, reiniciou, permanece, ativo, respondeu, http, poll, extensão, tinha, idade, medição, banco, state, modo, histórico, legado, movido, selftest, testes, sintaxe, python, manifesto, passaram, porta, listener, provedores, reais, foram, testados, após, publicação
-(919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel oficial; porta de depuração 9222 fechada.**
-  palavras-chave: chromium, projeto, volta, fazer, poll, painel, oficial, porta, depuração, fechada
+(919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel o …
+  palavras-chave: chromium, projeto, volta, fazer, poll, painel
 (918) DIÁRIO — 28/10/2026 · **P-8 `conselho-em-rede-parser-estrito-20261028` val …
   palavras-chave: rede, parser, estrito, val
 (917) DIÁRIO — 28/10/2026 · **Proposta P-8 `conselho-em-rede-parser-estrito-2026 …

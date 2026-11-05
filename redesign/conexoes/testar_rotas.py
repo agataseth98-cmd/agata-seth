@@ -70,6 +70,19 @@ def _post(url, corpo, timeout):
         return json.loads(r.read())
 
 
+GRATUITOS = REPO / "config" / "gratuitos_omniroute.json"
+
+
+def gratuitos_configurados() -> list[str]:
+    """Ids de modelos gratuitos ativos, que o OmniRoute aceita por passagem (ex.: openrouter/<id>:free).
+    Lista versionada em config/gratuitos_omniroute.json; `ativo: false` deixa de fora (ex.: origem anônima)."""
+    try:
+        d = json.loads(GRATUITOS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [x["id"] for x in d.get("modelos", []) if x.get("ativo") and x.get("id")]
+
+
 def rotas(categorias: set[str], get=None) -> list[dict]:
     get = get or _get
     o = orcamento.ler()
@@ -94,6 +107,14 @@ def rotas(categorias: set[str], get=None) -> list[dict]:
                                                   "cota": "gratuita do provedor", "hardware": "remoto", "rede": "internet"}})
         except Exception:  # noqa: BLE001
             pass
+    if "gratuito" in categorias and o["provedores"]["gratuito"]:
+        ja = {r["rota"] for r in out}
+        for n in gratuitos_configurados():
+            if n not in ja:
+                out.append({"rota": n, "categoria": "gratuito", "tipo": "omniroute", "modelo": n,
+                            "independencia": {"familia": n.split("/")[-1].split("-")[0], "provedor": n.split("/")[0],
+                                              "cota": "gratuita do provedor (cota pode esgotar: sinalizada)",
+                                              "hardware": "remoto", "rede": "internet"}})
     for p in adaptadores.estado():
         for modo in ("cli", "api"):
             info = p["modos"].get(modo)
@@ -131,7 +152,10 @@ def chamar_rota(r: dict, prompt: str, timeout_s: int, *, max_tokens: int = 60, p
                 res = {"ok": True, "texto": ((d.get("choices") or [{}])[0].get("message") or {}).get("content", ""),
                        "usage": {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}}
         except Exception as e:  # noqa: BLE001
-            res = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
+            # cota esgotada (429, limite, quota) é estado próprio: a rota fica sinalizada, não "quebrada"
+            cota = bool(re.search(r"\b429\b|rate.?limit|quota|exhaust|too many requests", str(e), re.I))
+            res = {"ok": False, "falha_etapa": "cota_esgotada" if cota else "transporte",
+                   "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
     if res.get("latencia_ms") is None:
         res["latencia_ms"] = round((time.monotonic() - t0) * 1000)
     return res
