@@ -64,8 +64,8 @@
     },
     {
       "id": "openrouter/stealth/crouton-alpha",
-      "ativo": false,
-      "nota": "Origem anônima (stealth). OpenRouter: prompts podem ser retidos pelo provedor, não usados para treino. Fora até o Humano decidir."
+      "ativo": true,
+      "nota": "Origem anônima (stealth). Uso autorizado pelo Humano em 05/11/2026 SOMENTE com: dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e um modelo nomeado como plano de contingência."
     }
   ]
 }
