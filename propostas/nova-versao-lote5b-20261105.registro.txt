@@ -1,0 +1,6 @@
+({N}) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas gratuitas (Wikipédia pela API pública, PDF por pdftotext ou venv pypdf dentro do sandbox, falha de fornecedor como estado, sete palavras ligadas às propostas reais) e correção do CI: a varredura de segredo lê a raiz do checkout, não ~/agata.** Proposta `nova-versao-lote5b-20261105`, pedida pelo Humano em 05/11 ("resolva os Limites usando as melhores alternativas gratuitas possiveis, assinado").
+- **CI:** o check `sdd` do lote 5 falhava porque `sanitizar.py` (e `seth_gateway.py` e `seth_verificador.py`) procuravam o repositório em `~/agata`; agora leem a raiz do próprio arquivo, com `SETH_REPO` como sobrescrita.
+- **Pesquisa externa:** `alexandria/fornecedores.py` usa a API pública da Wikipédia em português (sem chave), pela política de egresso; o extrato entra em quarentena.
+- **PDF:** `alexandria/extrair_pdf.py` com pypdf num venv de usuário (fora do repositório, sem sudo), dentro do sandbox.
+- **Sete palavras:** `nv.py sincronizar` aplicado às propostas reais (63 objetos, idempotente); retroativo limitado às 50 aplicadas mais recentes.
+- **Não medido:** vereditos do reservado v2 (revisão do Humano), gateway com as flags em produção (teste final), voz do Humano.

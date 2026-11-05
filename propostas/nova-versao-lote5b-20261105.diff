@@ -1,0 +1,626 @@
+diff --git a/PROJETO_REFERENCIA.md b/PROJETO_REFERENCIA.md
+index a5463e3a..d6edceb9 100644
+--- a/PROJETO_REFERENCIA.md
++++ b/PROJETO_REFERENCIA.md
+@@ -88,6 +88,7 @@ Direção do Humano em 04/11/2026: a arquitetura do Experimento GPT (`~/Área de
+ - **Avaliação (lote 3):** `redesign/avaliacao/` compara o caminho atual (busca por texto) com a Alexandria nas mesmas tarefas e rotas: 30 tarefas em seis grupos, 12 reservadas fora do repo e do acervo, revisão do Humano no hash e política fixada antes de rodar, registro comum por execução, métricas por dimensão com `null` em denominador zero e veto por falha crítica. Página Avaliação no painel.
+ - **Sentidos (lote 4, item 1):** `redesign/sentidos/ouvido.py` é o ouvido local: `lfm3-audio` (Liquid AI) pelo Ollama, com o Whisper da iGPU de reserva só se já estiver no ar. A voz do sistema continua o piper `agata-last`. Medido em 05/11 com voz sintética: 3 a 5% de erro por palavra, contra 14 a 18% do Whisper base.
+ - **Lote 5 (05/11, um lote, uma proposta):** fecha as lacunas da especificação da Alexandria e do experimento, com flags desligadas no gateway. (a) Acervo com cadastro próprio (`alexandria/cadastro.py`), aquisição em quarentena (`alexandria/aquisicao.py`: upload pelo painel, pasta de entrada e URL pelo egresso seguro; PDF só no sandbox, sem rede), decisão de direitos e de revisão só do Humano, e índice que só mostra externo revisado. (b) Suficiência mecânica, pesquisa externa como evidência efêmera (`alexandria/externa.py`) e ciclo de skills com revogação (`alexandria/ciclo_skills.py`). (c) Papéis por config (`config/papeis.json`, `nova_versao/papeis.py`), redundância com ensaio de falha, orçamento por turno, revisão de suporte e revisor de outra família (`metacognicao/revisao_suporte.py`). (d) Avaliação: reservado v2 de 60 tarefas (fora do repo, revisão pelo `avaliacao/revisar.py`), troca de LLM, teto de tokens, restauração isolada, rubrica às cegas e seleção de skill medida. (e) Gateway, atrás de flags desligadas: saúde na linha de estado (`SETH_SAUDE_NO_ESTADO`), skills sugeridas (`SETH_SKILLS_SUGERE`), guarda que troca eco de segredo por recusa (`SETH_GUARDA_BLOQUEIA`). (f) `nv.py sincronizar` liga as sete palavras a propostas reais, pelo ledger. (g) Medidores antigos gravam o registro comum com `--registro`. (h) Visão (`sentidos/visao.py`). `PROJETO.md` não mudou (47.929 de 48.000 bytes).
++- **Lote 5b (05/11, limites resolvidos com alternativas gratuitas):** pesquisa externa pela Wikipédia em português (API pública, sem chave, `alexandria/fornecedores.py`, pela política de egresso; o extrato entra em quarentena), PDF por `pdftotext` ou pelo venv pessoal `pypdf` dentro do sandbox (`alexandria/extrair_pdf.py`), falha de fornecedor como estado, e `nv.py sincronizar` aplicado às propostas reais (63 objetos, 50 aplicadas mais recentes, idempotente). Correção: `sanitizar.py`, `seth_gateway.py` e `seth_verificador.py` lêem a raiz do checkout em vez de `~/agata` (a varredura falhava no CI).
+ - **Dados:** fora do repo, em `~/.local/share/agata/nova-versao/` (pastas de trabalho) e `~/.cache/agata/nova-versao/` (índice derivado). Orçamento de inferência configurável no painel, grupo "Nova versão"; o padrão de fábrica é só local.
+ 
+ ## Diagnóstico
+diff --git a/redesign/alexandria/aquisicao.py b/redesign/alexandria/aquisicao.py
+index 2da9de71..35d2ae5d 100644
+--- a/redesign/alexandria/aquisicao.py
++++ b/redesign/alexandria/aquisicao.py
+@@ -168,13 +168,24 @@ def _texto_de(path: Path, ext: str) -> tuple[str | None, str | None]:
+         return " ".join(" ".join(p.partes).split()), None
+     if ext == "pdf":
+         import sandbox  # noqa: E402
+-        if not sandbox.disponivel() or not shutil.which("pdftotext"):
+-            return None, "sem parser de PDF (bwrap ou pdftotext ausente)"
+-        r = sandbox.run_sandboxed(["pdftotext", "-layout", "-enc", "UTF-8", str(path), "-"], ro=[str(path)],
+-                                  net=False, timeout=60)
+-        if r["exit_code"] != 0:
+-            return None, f"parser de PDF falhou (rc {r['exit_code']})"
+-        return r["stdout"], None
++        if not sandbox.disponivel():
++            return None, "sem sandbox bwrap: PDF não é lido fora do isolamento"
++        if shutil.which("pdftotext"):
++            r = sandbox.run_sandboxed(["pdftotext", "-layout", "-enc", "UTF-8", str(path), "-"], ro=[str(path)],
++                                      net=False, timeout=60)
++            if r["exit_code"] != 0:
++                return None, f"parser de PDF falhou (rc {r['exit_code']})"
++            return r["stdout"], None
++        venv = eventos.dados() / "alexandria" / "ferramentas" / "pdf-venv"
++        py = venv / "bin" / "python"
++        if py.exists():   # alternativa gratuita: pypdf num venv de usuário, dentro do mesmo sandbox
++            script = AQUI / "extrair_pdf.py"
++            r = sandbox.run_sandboxed([str(py), str(script), str(path)], ro=[str(venv), str(script), str(path)],
++                                      net=False, timeout=60)
++            if r["exit_code"] != 0:
++                return None, f"parser de PDF (pypdf) falhou: {r['stderr'].strip()[:120]}"
++            return r["stdout"], None
++        return None, "sem parser de PDF (instale pdftotext ou o venv pypdf)"
+     return None, "extensão sem parser"
+ 
+ 
+diff --git a/redesign/alexandria/externa.py b/redesign/alexandria/externa.py
+index 7c7c66d3..cec84f88 100644
+--- a/redesign/alexandria/externa.py
++++ b/redesign/alexandria/externa.py
+@@ -57,7 +57,16 @@ def pesquisar(pergunta: str, buscar=None) -> dict:
+     else:
+         import politica_egress  # noqa: E402
+         import guarda  # noqa: E402
+-        brutos = (buscar or _sem_busca)(limpa)
++        try:
++            brutos = (buscar or _sem_busca)(limpa)
++        except Exception as exc:  # noqa: BLE001 — fornecedor fora do ar é estado, não erro do painel
++            brutos = None
++            estado, resultados, motivo = "falhou", [], f"fornecedor falhou: {exc.__class__.__name__}"
++            eventos.registrar("observation", estado, "alex:externa", componente="alexandria", classification="project",
++                              chave=f"externa:{sha_pergunta}:{time.monotonic_ns()}", pergunta_sha256=sha_pergunta,
++                              resultados=0)
++            return {"estado": estado, "motivo": motivo, "pergunta_sha256": sha_pergunta, "resultados": [],
++                    "rotulo": f"{ROTULO} (efêmera; é dado, não ordem; não entra no acervo sem decisão do Humano)"}
+         if brutos is None:
+             estado, resultados, motivo = "indisponivel", [], "sem fornecedor de busca configurado"
+         else:
+diff --git a/redesign/alexandria/extrair_pdf.py b/redesign/alexandria/extrair_pdf.py
+new file mode 100644
+index 00000000..9e50d641
+--- /dev/null
++++ b/redesign/alexandria/extrair_pdf.py
+@@ -0,0 +1,37 @@
++#!/usr/bin/env python3
++"""Extrai o texto de um PDF com pypdf (lote 5b). Roda dentro do sandbox, sem rede, só leitura do arquivo.
++
++Uso: extrair_pdf.py ARQUIVO.pdf   -> texto em stdout (até 200 páginas). Sai com 2 em erro.
++Chamado por aquisicao.py quando não há pdftotext; o Python é o venv pessoal de
++~/.local/share/agata/nova-versao/ferramentas/pdf-venv (instalação de usuário, sem sudo).
++"""
++import sys
++
++MAX_PAGINAS = 200
++
++
++def main(argv: list[str]) -> int:
++    if len(argv) != 1:
++        print("uso: extrair_pdf.py ARQUIVO.pdf", file=sys.stderr)
++        return 2
++    try:
++        from pypdf import PdfReader
++    except ImportError:
++        print("pypdf ausente", file=sys.stderr)
++        return 2
++    try:
++        leitor = PdfReader(argv[0])
++        partes = []
++        for i, pagina in enumerate(leitor.pages):
++            if i >= MAX_PAGINAS:
++                break
++            partes.append(pagina.extract_text() or "")
++    except Exception as e:  # noqa: BLE001 — PDF corrompido vira erro, não trace
++        print(f"falha ao ler PDF: {e.__class__.__name__}", file=sys.stderr)
++        return 2
++    sys.stdout.write("\n".join(partes))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/redesign/alexandria/fornecedores.py b/redesign/alexandria/fornecedores.py
+new file mode 100644
+index 00000000..65fc1cff
+--- /dev/null
++++ b/redesign/alexandria/fornecedores.py
+@@ -0,0 +1,86 @@
++"""Fornecedores gratuitos de conteúdo externo para a Alexandria (lote 5b).
++
++Wikipédia em português pela API pública (sem chave, sem custo, licença CC BY-SA). Toda chamada sai por
++`scripts/politica_egress.buscar_seguro`: cada salto é validado, IP pinado, teto de corpo, só HTTP 200.
++A pergunta que sai já passou pela varredura de `externa.py` (dado pessoal e segredo não saem).
++
++- `wikipedia_pesquisar(pergunta)`: resultados (título, trecho, endereço). É evidência efêmera.
++- `wikipedia_guardar(titulo)`: extrato em texto puro do artigo, que entra em QUARENTENA pelo mesmo caminho
++  de aquisição. Só vira consultável se o Humano revisar no painel.
++"""
++from __future__ import annotations
++
++import html
++import json
++import os
++import re
++import sys
++import tempfile
++import urllib.parse
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++RAIZ = AQUI.parents[1]
++for _p in (AQUI, RAIZ / "scripts", RAIZ / "redesign" / "nova_versao"):
++    sys.path.insert(0, str(_p))
++import eventos  # noqa: E402
++
++API = "https://pt.wikipedia.org/w/api.php"
++ARTIGO = "https://pt.wikipedia.org/wiki/"
++TETO_CORPO = 2 * 1024 * 1024
++
++
++def _busca(url: str) -> bytes:
++    import politica_egress  # noqa: E402
++    pasta = eventos.dados() / "alexandria" / "tmp"
++    pasta.mkdir(parents=True, exist_ok=True)
++    os.chmod(pasta, 0o700)
++    fd, tmp = tempfile.mkstemp(dir=pasta, prefix=".wiki-")
++    os.close(fd)
++    try:
++        ok, status, _final, motivo = politica_egress.buscar_seguro(url, tmp, max_bytes=TETO_CORPO)
++        if not ok or status != 200:
++            raise RuntimeError(f"Wikipédia não respondeu: {motivo or f'status {status}'}")
++        return Path(tmp).read_bytes()
++    finally:
++        Path(tmp).unlink(missing_ok=True)
++
++
++def _url(params: dict) -> str:
++    return API + "?" + urllib.parse.urlencode({**params, "format": "json", "formatversion": 2, "utf8": 1})
++
++
++def wikipedia_pesquisar(pergunta: str, *, limite: int = 5, buscar=None) -> list[dict]:
++    q = " ".join((pergunta or "").split())[:300]
++    if not q:
++        return []
++    corpo = (buscar or _busca)(_url({"action": "query", "list": "search", "srsearch": q, "srlimit": limite}))
++    dados = json.loads(corpo.decode("utf-8", errors="replace"))
++    out = []
++    for r in (dados.get("query") or {}).get("search", [])[:limite]:
++        titulo = r.get("title") or ""
++        trecho = html.unescape(re.sub(r"<[^>]+>", "", r.get("snippet") or ""))
++        out.append({"url": ARTIGO + urllib.parse.quote(titulo.replace(" ", "_")), "titulo": titulo,
++                    "trecho": " ".join(trecho.split())[:400]})
++    return out
++
++
++def wikipedia_guardar(titulo: str, *, buscar=None) -> dict:
++    """Extrato em texto puro do artigo, guardado em quarentena (aquisicao.guardar_arquivo)."""
++    import aquisicao  # noqa: E402
++    t = " ".join((titulo or "").split())[:200]
++    if not t:
++        raise ValueError("título vazio")
++    corpo = (buscar or _busca)(_url({"action": "query", "prop": "extracts", "explaintext": 1, "exlimit": 1,
++                                     "titles": t}))
++    paginas = (json.loads(corpo.decode("utf-8", errors="replace")).get("query") or {}).get("pages") or []
++    if not paginas or "missing" in paginas[0] or not (paginas[0].get("extract") or "").strip():
++        raise ValueError("artigo sem texto extraível")
++    texto = paginas[0]["extract"]
++    url = ARTIGO + urllib.parse.quote(t.replace(" ", "_"))
++    pasta = aquisicao.entrada()
++    fd, tmp = tempfile.mkstemp(dir=pasta, prefix=".wiki-txt-")
++    with os.fdopen(fd, "w", encoding="utf-8") as f:
++        f.write(texto)
++    r = aquisicao.guardar_arquivo(Path(tmp), "txt", f"Wikipédia: {t}", origem_tipo="wikipedia", origem_uri=url)
++    return r
+diff --git a/redesign/alexandria/spec/acceptance.json b/redesign/alexandria/spec/acceptance.json
+index b9a384b1..fdf0db84 100644
+--- a/redesign/alexandria/spec/acceptance.json
++++ b/redesign/alexandria/spec/acceptance.json
+@@ -205,5 +205,32 @@
+       "redesign/alexandria/tests/test_gateway_novo.py::FlagsDesligadasTests::test_saude_no_estado_so_com_a_flag"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a Wikipédia entra só como evidência efêmera ou quarentena, pela política de egresso",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_fornecedores.py::WikipediaTests::test_guardar_extrato_entra_em_quarentena_com_origem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "PDF sem leitor disponível é recusado com motivo claro, dentro do sandbox",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_fornecedores.py::PdfTests::test_sem_parser_nenhum_vira_motivo_claro"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "fornecedor que cai vira estado falhou, sem derrubar a pesquisa",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_externa.py::ExternaTests::test_fornecedor_que_cai_vira_estado_falhou_e_nao_quebra"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/alexandria/spec/spec.md b/redesign/alexandria/spec/spec.md
+index 40617f9f..685fbc41 100644
+--- a/redesign/alexandria/spec/spec.md
++++ b/redesign/alexandria/spec/spec.md
+@@ -34,6 +34,9 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
+ 
+ ## Critérios de aceite
+ 
++- [ ] a Wikipédia entra só como evidência efêmera ou quarentena, pela política de egresso
++- [ ] PDF sem leitor disponível é recusado com motivo claro, dentro do sandbox
++- [ ] fornecedor que cai vira estado falhou, sem derrubar a pesquisa
+ - [ ] o índice é reconstruível e determinístico
+ - [ ] hash que muda marca o derivado como pendente
+ - [ ] objeto privado não aparece em consulta pública
+@@ -67,6 +70,12 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
+ - `ciclo_skills.py`: rascunho, quarentena, em-teste, elegível e revogada; elegível só gera um `.diff` para o P-8.
+ - Suficiência (`acervo.suficiencia`) e defesa de consulta: externo não revisado nunca aparece.
+ 
++## Lote 5b (05/11/2026, limites resolvidos com alternativas gratuitas)
++
++- `fornecedores.py`: Wikipédia em português pela API pública (sem chave, licença CC BY-SA). Toda chamada passa pela política de egresso. `wikipedia_pesquisar` dá evidência efêmera; `wikipedia_guardar` põe o extrato em quarentena com a origem do artigo.
++- `extrair_pdf.py`: leitura de PDF por pypdf num venv pessoal de usuário, dentro do sandbox e sem rede. Vale quando não há `pdftotext`. Sem nenhum dos dois, o PDF é recusado com motivo claro.
++- A falha do fornecedor vira estado `falhou`, e o painel mostra o motivo.
++
+ ## Desenho e alternativas
+ 
+ FTS5 do SQLite (medido disponível em 04/11, SQLite 3.54.0), sem dependência nova. Descartados: banco vetorial como base ((115)); servidor de grafo (o grafo é a tabela `relations`); reescrever o `busca_texto` (a normalização é importada dele).
+@@ -95,3 +104,5 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
+ - `correcoes.py`
+ - `externa.py`
+ - `ciclo_skills.py`
++- `fornecedores.py`
++- `extrair_pdf.py`
+diff --git a/redesign/alexandria/tests/test_aquisicao.py b/redesign/alexandria/tests/test_aquisicao.py
+index 00ace061..851547e1 100644
+--- a/redesign/alexandria/tests/test_aquisicao.py
++++ b/redesign/alexandria/tests/test_aquisicao.py
+@@ -118,7 +118,7 @@ class AquisicaoTests(unittest.TestCase):
+             r2 = aquisicao.guardar_arquivo(self.escrever("d.pdf", b"%PDF-1.4 conteudo"), "pdf", "d.pdf", origem_tipo="upload")
+             o2 = aquisicao.processar(r2["cadastro"]["sha256"])
+             self.assertEqual(o2["editorial_status"], "rejeitado")
+-            self.assertIn("sem parser", o2["historico"][-1]["motivo"])
++            self.assertIn("sem sandbox", o2["historico"][-1]["motivo"])
+         finally:
+             sandbox.disponivel = original
+ 
+diff --git a/redesign/alexandria/tests/test_externa.py b/redesign/alexandria/tests/test_externa.py
+index 95db96e6..1a28e7e0 100644
+--- a/redesign/alexandria/tests/test_externa.py
++++ b/redesign/alexandria/tests/test_externa.py
+@@ -62,6 +62,14 @@ class ExternaTests(unittest.TestCase):
+         fontes = externa.para_contexto(r)
+         self.assertEqual(fontes[0]["estado"], "externo, efêmero")
+ 
++    def test_fornecedor_que_cai_vira_estado_falhou_e_nao_quebra(self):
++        def cai(q):
++            raise ConnectionError("sem rede")
++        r = externa.pesquisar("horta urbana", buscar=cai)
++        self.assertEqual(r["estado"], "falhou")
++        self.assertEqual(r["resultados"], [])
++        self.assertIn("ConnectionError", r["motivo"])
++
+     def test_ledger_guarda_hash_da_pergunta_e_nao_o_texto(self):
+         import hashlib
+         externa.pesquisar("pergunta única xyz", buscar=lambda q: [])
+diff --git a/redesign/alexandria/tests/test_fornecedores.py b/redesign/alexandria/tests/test_fornecedores.py
+new file mode 100644
+index 00000000..05afc704
+--- /dev/null
++++ b/redesign/alexandria/tests/test_fornecedores.py
+@@ -0,0 +1,121 @@
++import json
++import os
++import shutil
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++import aquisicao  # noqa: E402
++import cadastro  # noqa: E402
++import fornecedores  # noqa: E402
++import sandbox  # noqa: E402
++
++VENV_PY = Path.home() / ".local" / "share" / "agata" / "nova-versao" / "ferramentas" / "pdf-venv" / "bin" / "python"
++
++
++def pdf_minimo(texto: str) -> bytes:
++    """PDF de uma página com um texto em Helvetica; offsets do xref calculados aqui."""
++    stream = f"BT /F1 18 Tf 72 720 Td ({texto}) Tj ET".encode()
++    objs = [b"<< /Type /Catalog /Pages 2 0 R >>",
++            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
++            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
++            b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream",
++            b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
++    corpo = b"%PDF-1.4\n"
++    offs = []
++    for i, o in enumerate(objs, 1):
++        offs.append(len(corpo))
++        corpo += f"{i} 0 obj\n".encode() + o + b"\nendobj\n"
++    xref = len(corpo)
++    corpo += f"xref\n0 {len(objs)+1}\n0000000000 65535 f \n".encode()
++    for o in offs:
++        corpo += f"{o:010d} 00000 n \n".encode()
++    corpo += f"trailer\n<< /Size {len(objs)+1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode()
++    return corpo
++
++
++class PdfTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        os.environ["AGATA_NV_DIR"] = str(Path(self.tmp.name) / "dados")
++        self.arq = Path(self.tmp.name) / "horta.pdf"
++        self.arq.write_bytes(pdf_minimo("Horta urbana precisa de compostagem"))
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    @unittest.skipUnless(sandbox.disponivel() and shutil.which("pdftotext"), "precisa de bwrap e pdftotext")
++    def test_pdf_com_pdftotext_dentro_do_sandbox(self):
++        texto, motivo = aquisicao._texto_de(self.arq, "pdf")
++        self.assertIsNone(motivo)
++        self.assertIn("compostagem", texto)
++
++    @unittest.skipUnless(sandbox.disponivel() and VENV_PY.exists(), "precisa de bwrap e do venv pypdf")
++    def test_pdf_com_venv_pypdf_quando_nao_ha_pdftotext(self):
++        original = shutil.which
++        try:
++            shutil.which = lambda nome, *a, **k: None if nome == "pdftotext" else original(nome, *a, **k)
++            venv_dir = Path.home() / ".local" / "share" / "agata" / "nova-versao" / "ferramentas" / "pdf-venv"
++            link = Path(os.environ["AGATA_NV_DIR"]) / "alexandria" / "ferramentas"
++            link.mkdir(parents=True, exist_ok=True)
++            (link / "pdf-venv").symlink_to(venv_dir)
++            texto, motivo = aquisicao._texto_de(self.arq, "pdf")
++        finally:
++            shutil.which = original
++        self.assertIsNone(motivo)
++        self.assertIn("compostagem", texto)
++
++    def test_sem_parser_nenhum_vira_motivo_claro(self):
++        original = shutil.which
++        try:
++            shutil.which = lambda nome, *a, **k: None
++            sandbox_disp = sandbox.disponivel
++            sandbox.disponivel = lambda: True
++            texto, motivo = aquisicao._texto_de(self.arq, "pdf")
++        finally:
++            shutil.which = original
++            sandbox.disponivel = sandbox_disp
++        self.assertIsNone(texto)
++        self.assertIn("sem parser de PDF", motivo)
++
++
++class WikipediaTests(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        os.environ["AGATA_NV_DIR"] = str(Path(self.tmp.name) / "dados")
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def test_pesquisa_devolve_endereco_limpo_e_trecho_sem_html(self):
++        resposta = {"query": {"search": [{"title": "Horta urbana", "snippet": "uma <span>horta</span> &amp; compostagem"}]}}
++        r = fornecedores.wikipedia_pesquisar("horta", buscar=lambda url: json.dumps(resposta).encode())
++        self.assertEqual(r[0]["url"], "https://pt.wikipedia.org/wiki/Horta_urbana")
++        self.assertEqual(r[0]["trecho"], "uma horta & compostagem")
++
++    def test_pesquisa_vazia_nao_chama_a_rede(self):
++        chamou = []
++        self.assertEqual(fornecedores.wikipedia_pesquisar("   ", buscar=lambda u: chamou.append(u) or b""), [])
++        self.assertEqual(chamou, [])
++
++    def test_guardar_extrato_entra_em_quarentena_com_origem(self):
++        extrato = {"query": {"pages": [{"title": "Horta urbana", "extract": "Horta urbana é o cultivo em cidades."}]}}
++        r = fornecedores.wikipedia_guardar("Horta urbana", buscar=lambda url: json.dumps(extrato).encode())
++        c = r["cadastro"]
++        self.assertEqual(c["origem_tipo"], "wikipedia")
++        self.assertEqual(c["origem_uri"], "https://pt.wikipedia.org/wiki/Horta_urbana")
++        self.assertEqual(c["editorial_status"], "recebido")          # não vai direto ao índice
++        o = aquisicao.processar(c["sha256"])
++        self.assertEqual(o["editorial_status"], "catalogado")         # quarentena concluída, ainda sem revisão do Humano
++
++    def test_artigo_inexistente_e_recusado(self):
++        vazio = {"query": {"pages": [{"title": "X", "missing": True}]}}
++        with self.assertRaises(ValueError):
++            fornecedores.wikipedia_guardar("X", buscar=lambda url: json.dumps(vazio).encode())
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/avaliacao/avaliar.py b/redesign/avaliacao/avaliar.py
+index 215dfef6..46a01279 100644
+--- a/redesign/avaliacao/avaliar.py
++++ b/redesign/avaliacao/avaliar.py
+@@ -111,6 +111,9 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
+     fontes = []
+     if condicao == "alexandria_externa":   # lote 5 (C3): evidência externa efêmera, só com busca injetada
+         import externa  # noqa: E402
++        if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
++            import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
++            buscar_externa = fornecedores.wikipedia_pesquisar
+         ext = externa.pesquisar(consulta, buscar=buscar_externa)
+         fontes += externa.para_contexto(ext)
+     for i, r in enumerate(pac["resultados"][:6], 1):
+diff --git a/redesign/nova_versao/nv.py b/redesign/nova_versao/nv.py
+index cbc9c506..9a816d58 100644
+--- a/redesign/nova_versao/nv.py
++++ b/redesign/nova_versao/nv.py
+@@ -99,7 +99,10 @@ def _selftest() -> int:
+     return 1 if falhas else 0
+ 
+ 
+-def sincronizar(repo: Path | None = None) -> dict:
++LIMITE_APLICADAS = 50   # retroativo limitado: só as mais recentes entram no ledger (evita inundar com ~1100 antigas)
++
++
++def sincronizar(repo: Path | None = None, limite_aplicadas: int = LIMITE_APLICADAS) -> dict:
+     """(lote 5, A4) Liga as sete palavras a propostas reais. Cada proposta é um objeto:
+     `.diff` aberto -> apresentacao; `APROVADO-` (assinada) -> assimilacao; em `propostas/aplicadas/` -> transicao.
+     Só anda pelos passos previstos (eventos.caminho_ate) e grava cada passo com chave idempotente. Nunca Remoção."""
+@@ -112,7 +115,8 @@ def sincronizar(repo: Path | None = None) -> dict:
+         nome = a.name[len("APROVADO-"):]
+         if nome in alvos or (pro / f"{nome}.diff").exists():
+             alvos[nome] = "assimilacao"
+-    for d in sorted((pro / "aplicadas").glob("*.diff")) if (pro / "aplicadas").exists() else []:
++    aplicadas = sorted((pro / "aplicadas").glob("*.diff"), key=lambda p: p.stat().st_mtime) if (pro / "aplicadas").exists() else []
++    for d in aplicadas[-limite_aplicadas:]:
+         alvos[d.stem] = "transicao"
+     feitos = []
+     for nome, alvo in sorted(alvos.items()):
+@@ -129,7 +133,7 @@ def sincronizar(repo: Path | None = None) -> dict:
+             anterior = passo
+         if passos:
+             feitos.append({"objeto": objeto, "de": atual, "ate": alvo, "passos": passos})
+-    return {"propostas": len(alvos), "movidas": feitos}
++    return {"propostas": len(alvos), "aplicadas_consideradas": min(len(aplicadas), limite_aplicadas), "movidas": feitos}
+ 
+ 
+ def main(argv: list[str]) -> int:
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+index 660edbfe..265875c3 100644
+--- a/redesign/painel_operacional/nova_versao.js
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -522,4 +522,30 @@
+     catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+     recarregar("nv-acervo");
+   });
++
++  // ---------------------------------------------------------------- Pesquisa gratuita (lote 5b)
++  function mostrarExterna(r) {
++    por("nv-ext-lista", (r.resultados || []).map((x) => h("li", {class: "nv-item"},
++      h("div", {class: "nv-item-topo"}, h("span", {class: "nv-ref", text: x.titulo}), h("span", {class: "nv-sha", text: x.url})),
++      h("p", {text: x.trecho || ""}),
++      h("div", {class: "nv-acoes"}, (() => {
++        const b = h("button", {type: "button", class: "btn secondary", text: "Guardar no acervo (quarentena)"});
++        b.addEventListener("click", async () => {
++          b.disabled = true;
++          try {
++            const g = (await executar("acervo_externa_guardar", {titulo: x.titulo})).resultado;
++            nota("nv-ext-nota", (g.duplicado ? "Já estava no acervo" : "Guardado em quarentena") + ": " + g.cadastro.rotulo + ". Analise e decida na lista abaixo.", "ok");
++          } catch (e) { nota("nv-ext-nota", motivoErro(e), "erro"); }
++          b.disabled = false; recarregar("nv-acervo");
++        });
++        return b;
++      })()))));
++    if (!(r.resultados || []).length) nota("nv-ext-nota", "Sem resultado: " + (r.motivo || "nada encontrado nesta busca") + ".", r.estado === "falhou" ? "erro" : "");
++  }
++  if (byId("nv-ext-pesquisar")) byId("nv-ext-pesquisar").addEventListener("click", async () => {
++    const q = val("nv-ext-consulta"); if (!q) { nota("nv-ext-nota", "Escreva o que procurar.", "erro"); return; }
++    nota("nv-ext-nota", "Pesquisando…");
++    try { mostrarExterna((await executar("acervo_externa_pesquisar", {consulta: q})).resultado); }
++    catch (e) { nota("nv-ext-nota", motivoErro(e), "erro"); }
++  });
+ })();
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+index d7c3179e..185bd0ec 100644
+--- a/redesign/painel_operacional/nova_versao_painel.py
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -23,7 +23,8 @@ ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orca
+          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
+          "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
+          "cancelar_avaliacao", "ver_execucao", "medir_ouvido",
+-         "acervo_listar", "acervo_importar", "acervo_url", "acervo_processar", "acervo_direitos", "acervo_transicionar")
++         "acervo_listar", "acervo_importar", "acervo_url", "acervo_processar", "acervo_direitos", "acervo_transicionar",
++         "acervo_externa_pesquisar", "acervo_externa_guardar")
+ _TESTE: dict = {"estado": "ocioso"}
+ _AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
+ _TESTE_LOCK = threading.Lock()
+@@ -275,4 +276,14 @@ def _acervo(acao: str, dados: dict) -> dict:
+     if acao == "acervo_transicionar":
+         obj = cadastro.transicionar(dados.get("sha256"), dados.get("para"), "humano", dados.get("motivo") or "")
+         return {"cadastro": _resumo_cadastro(obj), "reindexado": _reindexar()}
++    if acao == "acervo_externa_pesquisar":
++        import externa  # noqa: E402
++        import fornecedores  # noqa: E402
++        res = externa.pesquisar(dados.get("consulta"), buscar=fornecedores.wikipedia_pesquisar)
++        return {"estado": res["estado"], "motivo": res["motivo"], "resultados": res["resultados"],
++                "fornecedor": "Wikipédia (pt, API pública, gratuita)"}
++    if acao == "acervo_externa_guardar":
++        import fornecedores  # noqa: E402
++        r = fornecedores.wikipedia_guardar(dados.get("titulo"))
++        return {"cadastro": _resumo_cadastro(r["cadastro"]), "duplicado": r["duplicado"]}
+     raise ValueError("ação de acervo desconhecida")
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index ee054cf2..d2f407b4 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -290,6 +290,10 @@
+ <div class="nv-form nv-mt"><label class="nv-campo largo"><span>ou cole um endereço https</span><input id="nv-acv-url" type="text" placeholder="https://…"></label></div>
+ <div class="nv-acoes"><button type="button" class="btn secondary" id="nv-acv-baixar">Baixar endereço</button></div>
+ <p class="nv-nota" id="nv-acv-nota" role="status">A quarentena roda sozinha. Cada decisão abaixo é sua.</p></article>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Pesquisa gratuita · Wikipédia em português</div><h2 class="panel-title">Buscar fora e guardar</h2></div></div>
++<div class="nv-busca"><input id="nv-ext-consulta" type="search" maxlength="300" placeholder="o que procurar na Wikipédia" aria-label="Consulta externa"><button type="button" class="btn" id="nv-ext-pesquisar">Pesquisar</button></div>
++<p class="nv-nota" id="nv-ext-nota" role="status">A pergunta sai limpa (sem dado pessoal nem segredo). O resultado é só leitura: para entrar no acervo, guarde e decida no painel.</p>
++<ul class="nv-lista" id="nv-ext-lista"></ul></article>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fontes no acervo</div><h2 class="panel-title" id="nv-acv-titulo">Lista</h2></div></div>
+ <div class="nv-tabela-wrap"><table class="nv-tabela"><thead><tr><th>fonte</th><th>origem</th><th>estado</th><th>sinais</th><th>decisão</th></tr></thead><tbody id="nv-acv-lista"></tbody></table></div>
+ <div class="nv-vazio" id="nv-acv-vazio">Nenhuma fonte ainda.</div></article></section>
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+index 93f62d6e..6b40221c 100644
+--- a/redesign/painel_operacional/test_nova_versao_painel.py
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -60,6 +60,12 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+         self.assertIn('id="nv-api-chave" type="password" autocomplete="new-password"', html)
+ 
++    def test_pesquisa_gratuita_recusa_entrada_vazia_sem_sair_para_a_rede(self):
++        with self.assertRaises(ValueError):
++            self.m.executar("acervo_externa_pesquisar", {"consulta": "   "})
++        with self.assertRaises(ValueError):
++            self.m.executar("acervo_externa_guardar", {"titulo": ""})
++
+     def test_js_externo_e_sem_innerhtml(self):
+         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+         self.assertIn('<script src="nova_versao.js"></script>', html)
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index 4edc31c4..81628f01 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -24,6 +24,7 @@ from __future__ import annotations
+ 
+ import json
+ import os
++from pathlib import Path
+ import re
+ import subprocess
+ import sys
+@@ -31,7 +32,7 @@ import sys
+ # SETH_REPO -- mesma env var que seth_gateway.py/seth_escriba.py já respeitam
+ # (achado 04/09/2026: este módulo era o único hardcoded em ~/agata, quebra em
+ # qualquer checkout fora do $HOME real de quem roda o processo).
+-REPO = os.environ.get("SETH_REPO", os.path.expanduser("~/agata"))
++REPO = os.environ.get("SETH_REPO") or str(Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
+ SH_PADROES = os.path.join(REPO, "scripts", "varredura_segredo.sh")
+ 
+ # ERE POSIX -> Python. `[[:space:]]` em locale C = [ \t\n\r\f\v]. Só esta.
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 2d493b1f..56f98b5b 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -80,7 +80,7 @@ def _token_interno() -> str:
+     import token_interno  # noqa: E402  (scripts/token_interno.py)
+     return token_interno.ler()
+ MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
+-REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
++REPO = Path(os.environ.get("SETH_REPO") or Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
+ sys.path.insert(0, str(REPO / "scripts"))
+ from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
+ 
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index b90615f8..33074915 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -56,7 +56,7 @@ from http.server import BaseHTTPRequestHandler
+ from pathlib import Path
+ 
+ BIND = os.environ.get("SETH_VERIFICADOR_BIND", "127.0.0.1:20141")
+-REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
++REPO = Path(os.environ.get("SETH_REPO") or Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
+ sys.path.insert(0, str(REPO / "scripts"))
+ from http_seguro import ServidorConcorrenciaLimitada  # noqa: E402
+ TETO_CHARS = int(os.environ.get("SETH_VERIFICADOR_TETO", "24000"))
