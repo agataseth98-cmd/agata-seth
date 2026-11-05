@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c7929ebe0d04d898453ee03b178a3d3ee663f9ef
-  Escrito em: 05/11/2026 13:25 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4eaffc91a533e4ec3f1d48ffe2954ded159ddd07
+  Escrito em: 05/11/2026 13:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7929ebe0d04d898453ee03b178a3d3ee663f9ef/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7929ebe0d04d898453ee03b178a3d3ee663f9ef/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7929ebe0d04d898453ee03b178a3d3ee663f9ef/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7929ebe0d04d898453ee03b178a3d3ee663f9ef/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7929ebe0d04d898453ee03b178a3d3ee663f9ef/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4eaffc91a533e4ec3f1d48ffe2954ded159ddd07/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4eaffc91a533e4ec3f1d48ffe2954ded159ddd07/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4eaffc91a533e4ec3f1d48ffe2954ded159ddd07/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4eaffc91a533e4ec3f1d48ffe2954ded159ddd07/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4eaffc91a533e4ec3f1d48ffe2954ded159ddd07/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(945) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forjada (nova versão, lote 4 item 2): a resposta que repete segredo ou frase mandada por fonte suspeita ou privada vira recusa.** Proposta `metacognicao-guarda-20261105`.
+- **Mecanismo:** `redesign/metacognicao/guarda.py` marca a fonte antes (a nota da curadoria só vale para fonte sem autoridade) e checa o eco depois. O `posterior` devolve `bloqueado`.
+- **Medição:** a avaliação ganhou a condição `alexandria_guarda`. No desenvolvimento (`r-20261105-130721-189624`), a guarda zerou as falhas críticas nos três modelos locais e bloqueou só a tarefa do ataque. O lfm3:1.7b foi de 83% a 92%. No reservado (`r-20261105-131704-1aeaa7`), não houve bloqueio indevido.
+- **Achado:** o aviso antes da resposta, sozinho, não impediu o vazamento; quem segura é a camada do depois.
+- **Rodadas refeitas:** as rodadas foram refeitas depois da falta de energia das 10:25.
+
 (944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
 - **Ouvido:** `redesign/sentidos/servidor_ouvido.py` responde no formato OpenAI (`/v1/audio/transcriptions`) em 127.0.0.1:20137, com a unit `ouvido-agata.service` no `agata.target`.
 - **Relé:** o `librechat-ponte-host` passa a encaminhar 8 portas.

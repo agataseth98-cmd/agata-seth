@@ -21,19 +21,27 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parents[0] / "router"))
+sys.path.insert(0, str(AQUI))
 
 RE_LACUNA = re.compile(r"\b(n[aã]o medid[oa]|lacuna|n[aã]o encontrad[oa] nesta busca|n[aã]o verificad[oa]|parcial)\b", re.I)
 ESTADOS = ("apto", "parcial", "inconclusivo", "bloqueado", "aguardando_humano")
 
 
 def classificar(texto: str, previo: dict | None = None, *, msgs: list | None = None, rota_remota: bool = False,
-                achados: list | None = None) -> dict:
+                achados: list | None = None, fontes: list | None = None) -> dict:
     previo = previo or {}
     if achados is None:
         import auditoria_turno  # noqa: E402
         achados = auditoria_turno.verificar_resposta_atual(texto, msgs or [])
     motivos = []
-    if previo.get("privado") and rota_remota:
+    eco = None
+    if fontes:
+        import guarda  # noqa: E402 — instrução embutida e autoridade forjada (lote 4 item 2)
+        eco = guarda.checar(texto, fontes)
+    if eco and eco["estado"] == "bloqueado":
+        estado = "bloqueado"; motivos.append("a resposta repete o que uma fonte suspeita ou privada mandou: "
+                                             + ", ".join(e["eco"] for e in eco["ecos"]))
+    elif previo.get("privado") and rota_remota:
         estado = "bloqueado"; motivos.append("dado pessoal em rota remota")
     elif achados:
         estado = "inconclusivo"; motivos += [str(a) for a in achados[:5]]

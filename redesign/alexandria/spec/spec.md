@@ -22,7 +22,8 @@ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spe
   - "sem autoridade";
   - cópia (texto idêntico ou mesma origem declarada);
   - "corrigida por";
-  - "medição anterior".
+  - "medição anterior";
+  - instrução embutida ou autoridade alegada, só em fonte sem autoridade (pela `metacognicao/guarda.py`).
   É determinística e sem modelo; ordena e anota, não decide. A origem é a rodada reservada de 05/11/2026: os modelos ignoraram autoridade e data dadas só como metadado.
 - `skills.py` indexa em tabela e FTS próprios `.agents/skills/*/SKILL.md`, `.claude/skills/*/SKILL.md` e as skills de `ferramentas/indice.json`; peça que casa a `QUARENTENA` de `ferramentas/ferramentas.py` é listada, mas nunca sugerida. `selecionar` põe a menção explícita do nome primeiro, depois o léxico; marca `selecionada`, `aplicada: false` e o sha do SKILL.md. Não lê o corpo para executar.
 

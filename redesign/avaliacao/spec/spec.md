@@ -27,7 +27,8 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C9).
   - `sem_contexto`;
   - `busca_texto` (baseline). Em tarefa com documentos, recebe o texto cru, sem metadado e sem filtro de privacidade;
   - `alexandria`: origem, autoridade, data e estado, com o privado filtrado e a curadoria de `alexandria/curadoria.py` (ordem e notas);
-  - `alexandria_semantica`.
+  - `alexandria_semantica`;
+  - `alexandria_guarda` (lote 4): a Alexandria e, depois da resposta, a guarda da metacognição. Mede o comportamento do sistema, não só o do modelo.
   - Coordena por `tarefas.py`: fila única da GPU, teto de chamadas do orçamento e cancelamento.
   - Chama a rota por `conexoes/testar_rotas.chamar_rota` (extraída do teste de rotas, sem duplicar).
   - As tarefas `mecanico` (reconstrução de índice e rede indisponível) verificam o mecanismo sem modelo.
@@ -55,6 +56,7 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C9).
 - [ ] falha de infraestrutura não vira erro cognitivo e denominador zero dá null
 - [ ] falha crítica veta e amostra pequena é inconclusiva
 - [ ] reconstrução de índice e rede indisponível são verificadas sem modelo
+- [ ] a condição com guarda troca o eco de segredo por recusa
 
 ## Desenho e alternativas
 
