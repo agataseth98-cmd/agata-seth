@@ -60,6 +60,12 @@ class NovaVersaoPainelTests(unittest.TestCase):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
         self.assertIn('id="nv-api-chave" type="password" autocomplete="new-password"', html)
 
+    def test_pesquisa_gratuita_recusa_entrada_vazia_sem_sair_para_a_rede(self):
+        with self.assertRaises(ValueError):
+            self.m.executar("acervo_externa_pesquisar", {"consulta": "   "})
+        with self.assertRaises(ValueError):
+            self.m.executar("acervo_externa_guardar", {"titulo": ""})
+
     def test_js_externo_e_sem_innerhtml(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
         self.assertIn('<script src="nova_versao.js"></script>', html)

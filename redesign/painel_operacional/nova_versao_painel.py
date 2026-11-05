@@ -23,7 +23,8 @@ ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orca
          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
          "salvar_politica", "ver_reservado", "revisar_reservado", "rotas_disponiveis", "avaliar", "medir_recuperacao",
          "cancelar_avaliacao", "ver_execucao", "medir_ouvido",
-         "acervo_listar", "acervo_importar", "acervo_url", "acervo_processar", "acervo_direitos", "acervo_transicionar")
+         "acervo_listar", "acervo_importar", "acervo_url", "acervo_processar", "acervo_direitos", "acervo_transicionar",
+         "acervo_externa_pesquisar", "acervo_externa_guardar")
 _TESTE: dict = {"estado": "ocioso"}
 _AVAL: dict = {"estado": "ocioso"}   # rodada de avaliação em segundo plano (uma por vez)
 _TESTE_LOCK = threading.Lock()
@@ -275,4 +276,14 @@ def _acervo(acao: str, dados: dict) -> dict:
     if acao == "acervo_transicionar":
         obj = cadastro.transicionar(dados.get("sha256"), dados.get("para"), "humano", dados.get("motivo") or "")
         return {"cadastro": _resumo_cadastro(obj), "reindexado": _reindexar()}
+    if acao == "acervo_externa_pesquisar":
+        import externa  # noqa: E402
+        import fornecedores  # noqa: E402
+        res = externa.pesquisar(dados.get("consulta"), buscar=fornecedores.wikipedia_pesquisar)
+        return {"estado": res["estado"], "motivo": res["motivo"], "resultados": res["resultados"],
+                "fornecedor": "Wikipédia (pt, API pública, gratuita)"}
+    if acao == "acervo_externa_guardar":
+        import fornecedores  # noqa: E402
+        r = fornecedores.wikipedia_guardar(dados.get("titulo"))
+        return {"cadastro": _resumo_cadastro(r["cadastro"]), "duplicado": r["duplicado"]}
     raise ValueError("ação de acervo desconhecida")

@@ -111,6 +111,9 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
     fontes = []
     if condicao == "alexandria_externa":   # lote 5 (C3): evidência externa efêmera, só com busca injetada
         import externa  # noqa: E402
+        if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
+            import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
+            buscar_externa = fornecedores.wikipedia_pesquisar
         ext = externa.pesquisar(consulta, buscar=buscar_externa)
         fontes += externa.para_contexto(ext)
     for i, r in enumerate(pac["resultados"][:6], 1):

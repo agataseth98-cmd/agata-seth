@@ -56,7 +56,7 @@ from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 BIND = os.environ.get("SETH_VERIFICADOR_BIND", "127.0.0.1:20141")
-REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+REPO = Path(os.environ.get("SETH_REPO") or Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
 sys.path.insert(0, str(REPO / "scripts"))
 from http_seguro import ServidorConcorrenciaLimitada  # noqa: E402
 TETO_CHARS = int(os.environ.get("SETH_VERIFICADOR_TETO", "24000"))

@@ -80,7 +80,7 @@ def _token_interno() -> str:
     import token_interno  # noqa: E402  (scripts/token_interno.py)
     return token_interno.ler()
 MODO = os.environ.get("SETH_HIDRATA_MODO", "compacto").lower()
-REPO = Path(os.environ.get("SETH_REPO", str(Path.home() / "agata")))
+REPO = Path(os.environ.get("SETH_REPO") or Path(__file__).resolve().parents[2])   # raiz do checkout (CI e casa)
 sys.path.insert(0, str(REPO / "scripts"))
 from http_seguro import ler_corpo_limitado, ServidorConcorrenciaLimitada  # noqa: E402
 

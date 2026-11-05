@@ -62,6 +62,14 @@ class ExternaTests(unittest.TestCase):
         fontes = externa.para_contexto(r)
         self.assertEqual(fontes[0]["estado"], "externo, efêmero")
 
+    def test_fornecedor_que_cai_vira_estado_falhou_e_nao_quebra(self):
+        def cai(q):
+            raise ConnectionError("sem rede")
+        r = externa.pesquisar("horta urbana", buscar=cai)
+        self.assertEqual(r["estado"], "falhou")
+        self.assertEqual(r["resultados"], [])
+        self.assertIn("ConnectionError", r["motivo"])
+
     def test_ledger_guarda_hash_da_pergunta_e_nao_o_texto(self):
         import hashlib
         externa.pesquisar("pergunta única xyz", buscar=lambda q: [])
