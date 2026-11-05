@@ -35,6 +35,14 @@
 - [ ] a chave gravada pelo painel não volta na resposta nem no estado
 - [ ] as páginas da nova versão não têm estilo inline porque a CSP o bloqueia
 - [ ] a avaliação pelo painel respeita revisão, política e não expõe o gabarito no estado
+- [ ] o upload de fonte aceita só md e recusa o resto, sem deixar temporário
+- [ ] o corpo de POST vai até 64 KB e recusa acima
+
+## Lote 5 (05/11/2026)
+
+- Página **Acervo e fontes** (upload, pasta, URL, quarentena e decisões do Humano).
+- Teto de POST JSON sobe para 64 KB em todas as rotas gerais (decisão do Humano, "aumenta tudo").
+- Rota `POST /api/nova-versao/upload`: corpo binário em blocos, um por vez, prazo e checagem de origem.
 
 ## Desenho e alternativas
 

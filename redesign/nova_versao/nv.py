@@ -99,6 +99,39 @@ def _selftest() -> int:
     return 1 if falhas else 0
 
 
+def sincronizar(repo: Path | None = None) -> dict:
+    """(lote 5, A4) Liga as sete palavras a propostas reais. Cada proposta é um objeto:
+    `.diff` aberto -> apresentacao; `APROVADO-` (assinada) -> assimilacao; em `propostas/aplicadas/` -> transicao.
+    Só anda pelos passos previstos (eventos.caminho_ate) e grava cada passo com chave idempotente. Nunca Remoção."""
+    raiz = Path(repo) if repo else Path(__file__).resolve().parents[2]
+    pro = raiz / "propostas"
+    alvos: dict[str, str] = {}
+    for d in sorted(pro.glob("*.diff")):
+        alvos[d.stem] = "apresentacao"
+    for a in sorted(pro.glob("APROVADO-*")):
+        nome = a.name[len("APROVADO-"):]
+        if nome in alvos or (pro / f"{nome}.diff").exists():
+            alvos[nome] = "assimilacao"
+    for d in sorted((pro / "aplicadas").glob("*.diff")) if (pro / "aplicadas").exists() else []:
+        alvos[d.stem] = "transicao"
+    feitos = []
+    for nome, alvo in sorted(alvos.items()):
+        objeto = f"proposta:{nome}"
+        atual = eventos.ultimo_estado(objeto)
+        try:
+            passos = ([] if atual else ["apresentacao"]) + eventos.caminho_ate(atual or "apresentacao", alvo)
+        except ValueError as e:
+            feitos.append({"objeto": objeto, "erro": str(e)}); continue
+        anterior = atual                      # None na primeira vez: a apresentação é o primeiro registro
+        for passo in passos:
+            eventos.transicao(objeto, anterior, passo, f"propostas/{nome}", chave=f"sete:{objeto}:{passo}",
+                              componente="nova-versao")
+            anterior = passo
+        if passos:
+            feitos.append({"objeto": objeto, "de": atual, "ate": alvo, "passos": passos})
+    return {"propostas": len(alvos), "movidas": feitos}
+
+
 def main(argv: list[str]) -> int:
     if argv == ["--selftest"]:
         return _selftest()
@@ -106,6 +139,8 @@ def main(argv: list[str]) -> int:
         print(json.dumps(iniciar(*(argv[1:2] or ["HEAD"])), ensure_ascii=False, indent=1)); return 0
     if argv == ["estado"]:
         print(json.dumps(estado(), ensure_ascii=False, indent=1)); return 0
+    if argv == ["sincronizar"]:
+        print(json.dumps(sincronizar(), ensure_ascii=False, indent=1)); return 0
     if argv == ["verificar"]:
         r = verificar(); print(json.dumps(r, ensure_ascii=False)); return 0 if r["ledger"] else 1
     print(__doc__)

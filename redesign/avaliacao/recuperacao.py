@@ -106,8 +106,33 @@ def rodar(split: str = "dev", k: int = 5, **kw) -> dict:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--split", default="dev", choices=("dev", "calibracao", "teste"))
+    ap.add_argument("--split", default="dev", choices=conjunto.SPLITS)
     ap.add_argument("--k", type=int, default=5)
     a = ap.parse_args()
     r = rodar(a.split, a.k)
     print(json.dumps({"run_id": r["run_id"], **r["resumo"]}, ensure_ascii=False, indent=1))
+
+
+def rodar_skills(tarefas: list[dict], selecionar=None, n: int = 3) -> dict:
+    """Seleção de skill medida (protocolo §4; lote 5, B3): omissão, falso positivo e sucesso final, sem modelo.
+    Cada tarefa tem `consulta` e `skill: {esperadas: [...], proibidas: [...]}`. Denominador zero dá None."""
+    if selecionar is None:
+        import skills  # noqa: E402
+        selecionar = lambda q: skills.selecionar(q, n=n)  # noqa: E731
+    casos = [t for t in tarefas if t.get("skill") and t.get("consulta")]
+    if not casos:
+        raise ValueError("nenhuma tarefa de seleção de skill")
+    om = fp = ok = esperadas_total = proibidas_total = 0
+    detalhe = []
+    for t in casos:
+        escolhidas = {c["nome"] for c in selecionar(t["consulta"])["candidatos"]}
+        esp, pro = set(t["skill"].get("esperadas", [])), set(t["skill"].get("proibidas", []))
+        omitidas, falsas = sorted(esp - escolhidas), sorted(pro & escolhidas)
+        om += len(omitidas); fp += len(falsas); esperadas_total += len(esp); proibidas_total += len(pro)
+        sucesso = not omitidas and not falsas
+        ok += sucesso
+        detalhe.append({"task_id": t.get("task_id"), "omitidas": omitidas, "falsas": falsas, "sucesso": sucesso})
+    return {"n": len(casos),
+            "omissao": round(om / esperadas_total, 4) if esperadas_total else None,
+            "falso_positivo": round(fp / proibidas_total, 4) if proibidas_total else None,
+            "sucesso": round(ok / len(casos), 4), "detalhe": detalhe}

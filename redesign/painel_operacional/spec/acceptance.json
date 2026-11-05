@@ -125,5 +125,23 @@
       "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_avaliacao_pelo_painel_respeita_os_portoes"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o upload de fonte aceita só md e recusa o resto, sem deixar temporário",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_upload_de_fonte_aceita_md_e_recusa_o_resto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o corpo de POST vai até 64 KB e recusa acima",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_json_post_aceita_ate_64k_e_recusa_acima"
+    ],
+    "cwd": null
   }
 ]

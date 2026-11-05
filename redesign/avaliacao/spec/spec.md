@@ -57,6 +57,20 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C9).
 - [ ] falha crítica veta e amostra pequena é inconclusiva
 - [ ] reconstrução de índice e rede indisponível são verificadas sem modelo
 - [ ] a condição com guarda troca o eco de segredo por recusa
+- [ ] o split reservado v2 exige revisão do Humano e política fixada
+- [ ] a contaminação segue a família do autor, não só a palavra Claude
+- [ ] a troca de LLM pareia as mesmas tarefas e diz qual rota é melhor
+- [ ] o teto de tokens do orçamento para a rodada de verdade
+- [ ] a restauração reconstrói num cache isolado e compara objetos e consultas
+- [ ] a rubrica humana é às cegas: sem condição nem rota
+- [ ] a seleção de skill mede omissão, falso positivo e sucesso
+- [ ] os medidores antigos gravam o registro comum com a flag --registro
+
+## Lote 5 (05/11/2026)
+
+- Reservado v2 (`teste2`, 60 tarefas, escritas pelo assistente): fora do repositório, só com revisão do Humano pelo `revisar.py` e política fixada.
+- Troca de LLM, teto de tokens e paralelo de verdade, restauração isolada, critério `rubrica` fora do denominador, revisão às cegas e seleção de skill medida.
+- Condição `alexandria_externa` (evidência efêmera) e `alexandria_guarda`.
 
 ## Desenho e alternativas
 
@@ -94,3 +108,6 @@ Nada no canon. Reversão por revert. Apagar `<dados>/avaliacao/` remove execuç�
 - `recuperacao.py`
 - `conjuntos/`
 - `tests/`
+- `registro_medidor.py`
+- `revisoes.py`
+- `revisar.py`

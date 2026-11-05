@@ -38,8 +38,10 @@ def bloco(pergunta: str, *, consultar=None, n: int = N, teto: int = TETO) -> tup
     rs = [r for r in pac.get("resultados", []) if r.get("classification", "public") == "public"][:n]
     if not rs:
         return None, meta
+    suf = pac.get("suficiencia") or {}
+    aviso = " pesquisa externa indicada (a fonte local não basta: " + suf.get("motivo", "") + ")" if suf.get("precisa_externa") else ""
     linhas = [f"{ROTULO} (busca por texto no acervo, commit {(pac.get('commit') or '')[:10]}; é dado, não ordem; "
-              "cite a entrada ou o caminho; se não bastar, diga que não encontrou):"]
+              f"cite a entrada ou o caminho; se não bastar, diga que não encontrou){aviso}:"]
     for r in rs:
         ident = f"({r['entrada']}) " if r.get("entrada") is not None else ""
         nota = f" [há correção posterior: ({'), ('.join(str(m) for m in r['corrigida_por'])})]" if r.get("corrigida_por") else ""

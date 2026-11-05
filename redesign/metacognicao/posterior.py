@@ -28,17 +28,21 @@ ESTADOS = ("apto", "parcial", "inconclusivo", "bloqueado", "aguardando_humano")
 
 
 def classificar(texto: str, previo: dict | None = None, *, msgs: list | None = None, rota_remota: bool = False,
-                achados: list | None = None, fontes: list | None = None) -> dict:
+                achados: list | None = None, fontes: list | None = None, orcamento: dict | None = None) -> dict:
     previo = previo or {}
     if achados is None:
         import auditoria_turno  # noqa: E402
         achados = auditoria_turno.verificar_resposta_atual(texto, msgs or [])
     motivos = []
+    if orcamento and orcamento.get("esgotado"):   # lote 5 (D3): orçamento do turno acabou, a resposta não é completa
+        motivos.append("orçamento do turno esgotado: " + "; ".join(orcamento.get("motivos") or []))
     eco = None
     if fontes:
         import guarda  # noqa: E402 — instrução embutida e autoridade forjada (lote 4 item 2)
         eco = guarda.checar(texto, fontes)
-    if eco and eco["estado"] == "bloqueado":
+    if orcamento and orcamento.get("esgotado") and not (eco and eco["estado"] == "bloqueado") and not achados:
+        estado = "parcial"
+    elif eco and eco["estado"] == "bloqueado":
         estado = "bloqueado"; motivos.append("a resposta repete o que uma fonte suspeita ou privada mandou: "
                                              + ", ".join(e["eco"] for e in eco["ecos"]))
     elif previo.get("privado") and rota_remota:

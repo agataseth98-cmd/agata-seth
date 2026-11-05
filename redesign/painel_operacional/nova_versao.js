@@ -301,7 +301,7 @@
       h("td", {class: "num", text: x.tempo_mediano_s === null ? "—" : x.tempo_mediano_s.toFixed(2) + " s"}))));
   }
 
-  const telas = {"nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
+  const telas = {"nv-acervo": acervo, "nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
   window.carregarNovaVersao = async function (nome) {
     await ler();
     if (!estado) { const pg = byId("page-" + nome); if (pg) { const k = pg.querySelector(".kpis"); if (k) k.replaceChildren(kpi("Nova versão", "indisponível", "rose", "o servidor não respondeu")); } return; }
@@ -431,4 +431,95 @@
     recarregar("nv-sentidos");
   });
   if (byId("nv-out-run")) byId("nv-out-run").addEventListener("change", () => avaliacao());
+
+  // ---------------------------------------------------------------- Acervo e fontes (lote 5, C4)
+  const ESTADO_TIPO = {revisado: "ok", catalogado: "neutro", quarentena: "aviso", recebido: "aviso", restrito: "erro", rejeitado: "erro", arquivado: "neutro", contestado: "aviso"};
+  const TAMANHO_MAX = 25 * 1024 * 1024;
+  function sinaisDe(c) {
+    const a = c.analise || {}; const s = a.sinais || {};
+    const partes = [];
+    if (a.parse === "falhou") partes.push("parse falhou: " + (a.motivo || ""));
+    if (s.instrucao_embutida) partes.push("instrução embutida");
+    if (s.autoridade_alegada) partes.push("alega autorização");
+    if (s.dado_pessoal) partes.push("dado pessoal ×" + s.dado_pessoal);
+    if (s.segredos) partes.push("segredo ×" + s.segredos);
+    return partes.length ? partes.join(" · ") : (a.parse === "ok" ? "sem sinais" : "não analisado");
+  }
+  function linhaAcervo(c) {
+    const d = c.direitos || {};
+    const sel = h("select", {"aria-label": "direitos"}, ["pendente", "livre", "permitido_pelo_humano", "desconhecido"].map((v) => h("option", {value: v, text: v, selected: v === d.status ? true : null})));
+    const ev = h("input", {type: "text", placeholder: "evidência dos direitos", "aria-label": "evidência dos direitos", value: d.evidencia || ""});
+    const bDir = h("button", {type: "button", class: "btn secondary", text: "Gravar direitos"});
+    bDir.addEventListener("click", async () => {
+      bDir.disabled = true;
+      try { await executar("acervo_direitos", {sha256: c.sha256, status: sel.value, evidencia: ev.value}); nota("nv-acv-nota", "Direitos gravados. Índice refeito.", "ok"); }
+      catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+      bDir.disabled = false; recarregar("nv-acervo");
+    });
+    const acoes = [];
+    const acao = (rotulo, para, cor) => {
+      const b = h("button", {type: "button", class: "btn " + (cor || "secondary"), text: rotulo});
+      confirmar(b, async () => {
+        try { await executar("acervo_transicionar", {sha256: c.sha256, para, motivo: "decisão no painel"}); nota("nv-acv-nota", "Estado: " + para + ". Índice refeito.", "ok"); }
+        catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+        recarregar("nv-acervo");
+      });
+      acoes.push(b);
+    };
+    if (c.editorial_status === "catalogado") acao("Revisar (aprovar)", "revisado", "");
+    if (["catalogado", "revisado"].includes(c.editorial_status)) acao("Contestar", "contestado");
+    if (c.editorial_status !== "arquivado" && c.editorial_status !== "rejeitado") acao("Arquivar", "arquivado");
+    if (["catalogado", "contestado"].includes(c.editorial_status)) acao("Rejeitar", "rejeitado", "perigo");
+    return h("tr", {},
+      h("td", {}, h("div", {class: "mono", text: c.rotulo || "(sem nome)"}), h("div", {class: "nv-sha", text: c.sha256.slice(0, 16) + " · " + c.extensao + " · " + (c.tamanho || 0) + " B"})),
+      h("td", {}, h("div", {text: c.origem_tipo || "—"}), c.origem_uri ? h("div", {class: "nv-sha", text: c.origem_uri}) : null),
+      h("td", {}, selo(c.editorial_status || "—", ESTADO_TIPO[c.editorial_status] || "neutro")),
+      h("td", {text: sinaisDe(c)}),
+      h("td", {}, h("div", {class: "nv-form estreito"}, sel, ev), h("div", {class: "nv-acoes"}, bDir, ...acoes)));
+  }
+  function acervo() {
+    const a = (estado && estado.acervo) || {itens: []};
+    const itens = a.itens || [];
+    por("nv-acv-kpis", kpi("Fontes", itens.length, "teal"), kpi("Revisadas", itens.filter((c) => c.editorial_status === "revisado").length, "teal"),
+      kpi("Em quarentena", itens.filter((c) => ["recebido", "quarentena"].includes(c.editorial_status)).length, "gold"),
+      kpi("Restritas ou rejeitadas", itens.filter((c) => ["restrito", "rejeitado"].includes(c.editorial_status)).length, "rose"));
+    byId("nv-acv-titulo").textContent = itens.length + " fontes · só as revisadas com direitos aparecem na busca";
+    por("nv-acv-lista", itens.map(linhaAcervo));
+    mostrar("nv-acv-vazio", itens.length === 0);
+  }
+  async function enviarArquivo() {
+    const campo = byId("nv-acv-arquivo"); const arq = campo.files && campo.files[0];
+    if (!arq) { nota("nv-acv-nota", "Escolha um arquivo primeiro.", "erro"); return; }
+    const ext = (arq.name.split(".").pop() || "").toLowerCase().replace("htm", "html");
+    if (!["md", "txt", "html", "pdf"].includes(ext)) { nota("nv-acv-nota", "Extensão não aceita: md, txt, html ou pdf.", "erro"); return; }
+    if (arq.size > TAMANHO_MAX) { nota("nv-acv-nota", "Arquivo acima de 25 MB: recusado antes do envio.", "erro"); return; }
+    nota("nv-acv-nota", "Enviando…");
+    try {
+      const r = await fetch("/api/nova-versao/upload", {method: "POST", credentials: "same-origin", cache: "no-store",
+        headers: {"Content-Type": "application/octet-stream", "X-Extensao": ext, "X-Nome": encodeURIComponent(arq.name)}, body: arq});
+      const txt = await r.text();
+      if (!r.ok) { nota("nv-acv-nota", "Recusado (" + r.status + "): " + (txt || "").slice(0, 160), "erro"); return; }
+      const j = JSON.parse(txt);
+      nota("nv-acv-nota", (j.duplicado ? "Já estava no acervo" : "Recebido") + ": " + j.sha256.slice(0, 16) + ", estado " + j.editorial_status + ". Rode 'Processar pendentes'.", "ok");
+    } catch (_) { nota("nv-acv-nota", "Sem resposta do servidor no envio.", "erro"); }
+    campo.value = "";
+    recarregar("nv-acervo");
+  }
+  if (byId("nv-acv-enviar")) byId("nv-acv-enviar").addEventListener("click", enviarArquivo);
+  if (byId("nv-acv-importar")) byId("nv-acv-importar").addEventListener("click", async () => {
+    try { const r = (await executar("acervo_importar")).resultado; nota("nv-acv-nota", "Pasta lida: " + r.pasta.length + " arquivo(s); " + r.processados.length + " analisado(s).", "ok"); }
+    catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+    recarregar("nv-acervo");
+  });
+  if (byId("nv-acv-processar")) byId("nv-acv-processar").addEventListener("click", async () => {
+    try { const r = (await executar("acervo_processar", {})).resultado; nota("nv-acv-nota", r.processados.length + " analisado(s) na quarentena.", "ok"); }
+    catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+    recarregar("nv-acervo");
+  });
+  if (byId("nv-acv-baixar")) byId("nv-acv-baixar").addEventListener("click", async () => {
+    const u = val("nv-acv-url"); if (!u) { nota("nv-acv-nota", "Cole um endereço https.", "erro"); return; }
+    try { await executar("acervo_url", {url: u}); nota("nv-acv-nota", "Endereço baixado e em quarentena. Rode 'Processar pendentes'.", "ok"); }
+    catch (e) { nota("nv-acv-nota", motivoErro(e), "erro"); }
+    recarregar("nv-acervo");
+  });
 })();

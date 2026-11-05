@@ -16,10 +16,14 @@ Nada aqui decide a resposta: só ordena (autoridade, depois data) e anota. Deter
 from __future__ import annotations
 
 import re
+import sys
 import unicodedata
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import correcoes  # noqa: E402 — definição única de CORREÇÃO (lote 5, C1)
 
 PESO = {"canon": 3, "humano": 3, "decisao": 3, "medicao": 3, "spec": 2, "nenhuma": 0}
-RE_CORRECAO = re.compile(r"^\((\d{1,4})\)\s+CORRE[CÇ][AÃ]O\b[^()]*?\((\d{1,4})\)", re.I)
 RE_ENTRADA = re.compile(r"^\((\d{1,4})\)\s")
 RE_COPIA_DE = re.compile(r"c[oó]pia (?:d[oae]s?|de) (.+)$", re.I)
 
@@ -39,9 +43,9 @@ def organizar(fontes: list[dict]) -> list[dict]:
     fs = [dict(f, notas=list(f.get("notas") or [])) for f in fontes]
     # correção explícita
     for f in fs:
-        m = RE_CORRECAO.match(f.get("texto") or "")
-        if m:
-            nova, velha = m.group(1), m.group(2)
+        par = correcoes.correcao_de(f.get("texto") or "")
+        if par and par[1] is not None:
+            nova, velha = str(par[0]), str(par[1])
             for g in fs:
                 mg = RE_ENTRADA.match(g.get("texto") or "")
                 if g is not f and mg and mg.group(1) == velha:

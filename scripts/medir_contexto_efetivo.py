@@ -309,6 +309,13 @@ def main(argv: list[str]) -> int:
         return 4
     if "--salvar" in argv:
         _salvar(resultado)
+    if "--registro" in argv:   # lote 5, A5: uma linha por comprimento, no registro comum
+        import registro_medidor  # noqa: E402
+        itens = [{"task_id": f"contexto-{l['alvo_tokens']}", "condition": resultado["tarefa"], "model_id": modelo,
+                  "outcome": "passou" if l["acertos"] == l["tentativas"] else ("falhou" if l["acertos"] == 0 else "parcial"),
+                  "usage": {"input_tokens": (sum(l["tokens_reais"]) // max(len(l["tokens_reais"]), 1)) if l.get("tokens_reais") else None},
+                  "latency_ms": int(float(l.get("segundos") or 0) * 1000)} for l in resultado["linhas"]]
+        print("registro:", registro_medidor.gravar("medir_contexto_efetivo", "dev", itens, {"efetivo_tokens": resultado.get("efetivo_tokens")}))
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
     return 0
 

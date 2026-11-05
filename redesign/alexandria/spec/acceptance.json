@@ -88,5 +88,122 @@
       "redesign/alexandria/tests/test_hidratacao.py::GatewayTests::test_gateway_so_injeta_com_a_variavel"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "transições automáticas só vão até a quarentena e o Humano decide o resto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_cadastro.py::CadastroTests::test_transicoes_automaticas_e_as_do_humano"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o índice mostra externo só revisado com direitos; desconhecido vira referência sem texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_cadastro.py::CadastroTests::test_indice_so_mostra_externo_revisado_com_direitos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o índice de schema antigo é recusado com mensagem clara",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_cadastro.py::CadastroTests::test_indice_de_schema_antigo_e_recusado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "upload e pasta recusam extensão, assinatura de executável e cabeçalho errado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_aquisicao.py::AquisicaoTests::test_recusa_extensao_assinatura_e_cabecalho_errado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a quarentena sinaliza instrução embutida e restringe dado pessoal",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_aquisicao.py::AquisicaoTests::test_quarentena_sinaliza_instrucao_e_restringe_dado_pessoal"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "URL é baixada pelo egresso seguro, sem query, e só com status 200",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_aquisicao.py::AquisicaoTests::test_url_com_egresso_falso_limpa_query_e_exige_200"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a suficiência pede pesquisa externa para pergunta volátil",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_suficiencia.py::SuficienciaTests::test_volatil_nunca_basta_so_com_o_acervo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "pergunta com dado pessoal não sai para a pesquisa externa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_externa.py::ExternaTests::test_pergunta_com_dado_pessoal_nao_sai"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "skill revogada some da sugestão e não pode ser usada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_ciclo_skills.py::CicloSkillsTests::test_revogada_e_terminal_e_some_da_sugestao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a entrada corrigida sai marcada só pela correção que a cita primeiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_curadoria.py::CorrecaoNoAcervoTests::test_entrada_corrigida_sai_marcada_so_pela_primeira_citada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gateway troca eco de segredo por recusa e mantém o fim do fluxo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_gateway_novo.py::FlagsLigadasTests::test_liberar_retidos_troca_eco_de_segredo_pelo_metodo_real"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gateway não troca resposta com chamada de ferramenta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_gateway_novo.py::FlagsLigadasTests::test_liberar_retidos_nao_troca_resposta_com_tool_calls"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com as flags desligadas, o estado e a guarda não mudam a Seth",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/alexandria/tests/test_gateway_novo.py::FlagsDesligadasTests::test_saude_no_estado_so_com_a_flag"
+    ],
+    "cwd": null
   }
 ]

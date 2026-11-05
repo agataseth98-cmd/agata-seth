@@ -38,6 +38,7 @@
     </div></div>
     <div class="nav-group" data-group="novaversao"><button type="button" class="nav-group-toggle" aria-expanded="false" aria-controls="sub-novaversao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16 7l3.5-1 3 13-3.5 1z"/></svg>Nova versão<span class="nav-caret" aria-hidden="true"></span></button><div class="nav-sub" id="sub-novaversao" hidden>
       <button data-page="nv-alexandria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16 7l3.5-1 3 13-3.5 1z"/></svg>Alexandria</button>
+      <button data-page="nv-acervo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4zM8 10h8M8 14h5"/></svg>Acervo e fontes</button>
       <button data-page="nv-metacognicao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M9 10h.01M15 10h.01M9 15c1.5 1.2 4.5 1.2 6 0"/></svg>Metacognição</button>
       <button data-page="nv-corpo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>Corpo operacional</button>
       <button data-page="nv-conexoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg>Conexões de modelos</button>
@@ -281,6 +282,17 @@
 <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ouvido · medição sintética</div><h2 class="panel-title" id="nv-sen-titulo">Fala → texto</h2></div><div class="nv-acoes"><button type="button" class="btn" id="nv-sen-medir">Medir o ouvido</button></div></div>
 <dl class="nv-dl" id="nv-sen-dl"></dl><p class="nv-nota" id="nv-sen-nota" role="status">Vinte frases fixas, faladas pela voz do sistema, limpas e com ruído leve. Nenhuma gravação sua. O Whisper só entra se já estiver ligado.</p>
 <div class="nv-tabela-wrap" id="nv-sen-wrap" hidden><table class="nv-tabela"><thead><tr><th>motor</th><th>áudio</th><th>erro por palavra</th><th>frases perfeitas</th><th>tempo por frase</th></tr></thead><tbody id="nv-sen-lista"></tbody></table></div></article></section>
+<section class="page nv-page" id="page-nv-acervo" data-title="Acervo e fontes"><div class="section-heading"><div><div class="eyebrow">Nova versão · entrada controlada</div><h1>Acervo e fontes</h1><p>Fonte externa entra em quarentena: parse isolado, análise de instrução embutida e de dado pessoal. Nada é consultável sem a sua decisão de direitos e de revisão. Conteúdo com dado pessoal ou segredo fica restrito.</p></div></div>
+<div class="kpis" id="nv-acv-kpis"></div>
+<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Entrar com uma fonte</div><h2 class="panel-title">Enviar, colar ou importar</h2></div></div>
+<div class="nv-form"><label class="nv-campo largo"><span>arquivo (md, txt, html ou pdf, até 25 MB)</span><input id="nv-acv-arquivo" type="file" accept=".md,.txt,.html,.htm,.pdf"></label></div>
+<div class="nv-acoes"><button type="button" class="btn" id="nv-acv-enviar">Enviar arquivo</button><button type="button" class="btn secondary" id="nv-acv-importar">Importar pasta de entrada</button><button type="button" class="btn secondary" id="nv-acv-processar">Processar pendentes</button></div>
+<div class="nv-form nv-mt"><label class="nv-campo largo"><span>ou cole um endereço https</span><input id="nv-acv-url" type="text" placeholder="https://…"></label></div>
+<div class="nv-acoes"><button type="button" class="btn secondary" id="nv-acv-baixar">Baixar endereço</button></div>
+<p class="nv-nota" id="nv-acv-nota" role="status">A quarentena roda sozinha. Cada decisão abaixo é sua.</p></article>
+<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fontes no acervo</div><h2 class="panel-title" id="nv-acv-titulo">Lista</h2></div></div>
+<div class="nv-tabela-wrap"><table class="nv-tabela"><thead><tr><th>fonte</th><th>origem</th><th>estado</th><th>sinais</th><th>decisão</th></tr></thead><tbody id="nv-acv-lista"></tbody></table></div>
+<div class="nv-vazio" id="nv-acv-vazio">Nenhuma fonte ainda.</div></article></section>
 <section class="page nv-page" id="page-nv-avaliacao" data-title="Avaliação"><div class="section-heading"><div><div class="eyebrow">Nova versão · F2, medir antes de integrar</div><h1>Avaliação</h1><p>A Alexandria melhora as respostas sem aumentar erro crítico nem custo? Cada rodada compara o caminho atual (busca por texto) com a versão nova, nas mesmas tarefas e na mesma rota. Trinta tarefas em seis grupos; doze ficam reservadas, fora do repositório.</p></div></div>
 <div class="kpis" id="nv-ava-kpis"></div>
 <div class="nv-cols"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Antes de medir o reservado</div><h2 class="panel-title">O que falta</h2></div></div><ol class="nv-passos" id="nv-ava-passos"></ol></article>

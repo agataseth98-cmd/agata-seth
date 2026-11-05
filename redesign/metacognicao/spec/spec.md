@@ -27,6 +27,15 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Orig
 - [ ] a guarda marca autoridade forjada, instrução, segredo e frase mandada
 - [ ] a guarda bloqueia só o eco e troca por recusa sem o segredo
 - [ ] a curadoria anota só fonte sem autoridade e o posterior bloqueia o eco
+- [ ] a verificação mecânica acha citação inventada e número sem fonte
+- [ ] o revisor de suporte é proporcional ao risco
+- [ ] o revisor vê só o par afirmação e trecho, e divergência vira inconclusivo
+
+## Lote 5 (05/11/2026)
+
+- `revisao_suporte.py`: verificação mecânica das citações (sempre) e revisor de outra família, proporcional ao risco (Regra 8). Quem gerou a resposta não é juiz único.
+- `posterior.classificar(..., orcamento=)`: orçamento do turno esgotado vira `parcial`.
+- `guarda.py`: aplicada também ao gateway, atrás de `SETH_GUARDA_BLOQUEIA`.
 
 ## Desenho e alternativas
 
@@ -50,3 +59,4 @@ O verbo de efeito é detectado por raiz ("aplic", "envi", "remov"...) e terá fa
 - `posterior.py`
 - `guarda.py`
 - `tests/`
+- `revisao_suporte.py`

@@ -88,7 +88,8 @@ def varrer(raiz: Path) -> list[dict]:
 def popular(con: sqlite3.Connection, raiz: Path) -> int:
     lista = varrer(Path(raiz))
     for s in lista:
-        cur = con.execute("INSERT OR IGNORE INTO skills VALUES (?,?,?,?,?,?,?,?)",
+        cur = con.execute("INSERT OR IGNORE INTO skills (skill_id, nome, origem, caminho, descricao, sha256, estado,"
+                          " quarentena) VALUES (?,?,?,?,?,?,?,?)",
                           (s["skill_id"], s["nome"], s["origem"], s["caminho"], s["descricao"], s["sha256"],
                            s["estado"], s["quarentena"]))
         if cur.rowcount == 0:
@@ -99,6 +100,10 @@ def popular(con: sqlite3.Connection, raiz: Path) -> int:
 
 
 def selecionar(consulta: str, n: int = 3, con: sqlite3.Connection | None = None) -> dict:
+    # lote 5 (C5): skill revogada pelo ciclo nunca é sugerida (o histórico continua no ciclo)
+    sys.path.insert(0, str(AQUI))
+    import ciclo_skills  # noqa: E402
+    proibidas = ciclo_skills.revogadas()
     sys.path.insert(0, str(AQUI))
     import acervo  # noqa: E402
     proprio = con is None
@@ -128,7 +133,7 @@ def selecionar(consulta: str, n: int = 3, con: sqlite3.Connection | None = None)
     for c in candidatos:
         c["estado"] = "selecionada"   # sugestão: ninguém leu nem aplicou
         c["aplicada"] = False
-    return {"schema_version": 1, "candidatos": candidatos[:n],
+    return {"schema_version": 1, "candidatos": [c for c in candidatos if c["nome"] not in proibidas][:n],
             "nota": "seleção consultiva: o executor ainda precisa ler o SKILL.md inteiro; nada foi executado"}
 
 
@@ -138,3 +143,25 @@ if __name__ == "__main__":
         sys.exit(0)
     print(__doc__)
     sys.exit(2)
+
+
+def bloco_skills(consulta: str, *, n: int = 3, teto: int = 500) -> str | None:
+    """(lote 5, A2) Sugestão de skills para a hidratação: nome e descrição curta. Nada é carregado.
+    Descrição com instrução embutida é omitida (guarda.nota). Revogadas nunca entram (selecionar já filtra)."""
+    try:
+        cands = selecionar(consulta, n=n)["candidatos"]
+    except FileNotFoundError:
+        return None
+    if not cands:
+        return None
+    sys.path.insert(0, str(AQUI.parent / "metacognicao"))
+    import guarda  # noqa: E402
+    linhas = ["SKILLS-SUGERIDAS (sugestão: nada foi carregado; leia o SKILL.md inteiro antes de aplicar):"]
+    for c in cands:
+        desc = " ".join((c.get("descricao") or "").split())[:90]
+        if guarda.nota(desc):
+            continue
+        linhas.append(f"- {c['nome']}: {desc}")
+    if len(linhas) == 1:
+        return None
+    return "\n".join(linhas)[:teto]

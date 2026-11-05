@@ -20,6 +20,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import tempfile
 
 BWRAP = shutil.which("bwrap") or "/usr/bin/bwrap"
 
@@ -47,6 +48,33 @@ def _base_args(net: bool, cwd: str | None) -> list[str]:
     return a
 
 
+MAX_SAIDA = 2_000_000          # bytes por fluxo (stdout/stderr); acima disso, corta (lote 5: bomba de saída)
+MEM_MB_PADRAO = 512            # teto de memória virtual do processo filho
+
+
+def _decodifica(b) -> str:
+    if b is None:
+        return ""
+    if isinstance(b, str):
+        return b[:MAX_SAIDA]
+    return b[:MAX_SAIDA].decode("utf-8", errors="replace")   # bytes inválidos viram �, nunca levantam
+
+
+def _limites(cpu_s: int, mem_mb: int):
+    """preexec do filho: CPU, memória e tamanho de escrita limitados (o kernel corta a saída no teto)."""
+    def aplicar():
+        import resource
+        resource.setrlimit(resource.RLIMIT_CPU, (cpu_s, cpu_s))
+        resource.setrlimit(resource.RLIMIT_AS, (mem_mb * 1024 * 1024, mem_mb * 1024 * 1024))
+        resource.setrlimit(resource.RLIMIT_FSIZE, (MAX_SAIDA, MAX_SAIDA))
+    return aplicar
+
+
+def _ler_limitado(f) -> str:
+    f.seek(0)
+    return f.read(MAX_SAIDA).decode("utf-8", errors="replace")
+
+
 def run_sandboxed(
     argv: list[str],
     *,
@@ -56,6 +84,7 @@ def run_sandboxed(
     cwd: str | None = None,
     stdin: str | None = None,
     timeout: int = 120,
+    mem_mb: int = MEM_MB_PADRAO,
 ) -> dict:
     args = _base_args(net, cwd)
     for p in (ro or []):
@@ -65,13 +94,19 @@ def run_sandboxed(
         p = os.path.abspath(p)
         args += ["--bind", p, p]
     args += ["--"] + list(argv)
-    try:
-        r = subprocess.run(args, input=stdin, capture_output=True, text=True, timeout=timeout)
-        return {"exit_code": r.returncode, "stdout": r.stdout, "stderr": r.stderr, "sandboxed": True}
-    except subprocess.TimeoutExpired as e:
-        return {"exit_code": 124, "stdout": e.stdout or "", "stderr": (e.stderr or "") + f"\n[timeout {timeout}s]", "sandboxed": True}
-    except OSError as e:
-        return {"exit_code": 127, "stdout": "", "stderr": f"[bwrap indisponivel: {e}]", "sandboxed": True}
+    entrada = stdin.encode("utf-8") if isinstance(stdin, str) else None
+    # saída vai para arquivos temporários: o pai nunca guarda a saída inteira na memória
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        try:
+            r = subprocess.run(args, input=entrada, stdout=out, stderr=err, timeout=timeout,
+                               preexec_fn=_limites(max(1, int(timeout)), mem_mb))
+            return {"exit_code": r.returncode, "stdout": _ler_limitado(out), "stderr": _ler_limitado(err),
+                    "sandboxed": True}
+        except subprocess.TimeoutExpired:
+            return {"exit_code": 124, "stdout": _ler_limitado(out),
+                    "stderr": _ler_limitado(err) + f"\n[timeout {timeout}s]", "sandboxed": True}
+        except OSError as e:
+            return {"exit_code": 127, "stdout": "", "stderr": f"[bwrap indisponivel: {e}]", "sandboxed": True}
 
 
 def disponivel() -> bool:

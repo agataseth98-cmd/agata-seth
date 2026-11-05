@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "comentario": "Papéis da nova versão (lote 5, D1): papel -> nível, capacidades exigidas (provas de testar_rotas), categorias de orçamento permitidas e independência. Não cria serviço por papel; a execução é tarefas.executar com o mesmo orçamento.",
+  "papeis": {
+    "classificador": {"nivel": "leve", "tipo": "llm", "capacidades": ["formato"], "categorias": ["local", "gratuito"], "independente_de": null},
+    "recuperador": {"nivel": "intermediario", "tipo": "codigo", "capacidades": [], "categorias": ["local"], "independente_de": null},
+    "sintetizador": {"nivel": "forte", "tipo": "llm", "capacidades": ["conversa"], "categorias": ["local", "gratuito", "assinatura", "pago"], "independente_de": null},
+    "revisor": {"nivel": "revisor", "tipo": "llm", "capacidades": ["conversa", "formato"], "categorias": ["local", "gratuito", "assinatura", "pago"], "independente_de": "sintetizador"},
+    "suporte": {"nivel": "revisor", "tipo": "llm", "capacidades": ["conversa"], "categorias": ["local", "gratuito", "assinatura", "pago"], "independente_de": "sintetizador"}
+  }
+}

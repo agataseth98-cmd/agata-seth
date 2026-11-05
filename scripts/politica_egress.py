@@ -89,7 +89,7 @@ def destino_permitido(url: str) -> tuple[bool, str]:
 
 
 def buscar_seguro(
-    url: str, destino: str, ua: str = "Mozilla/5.0", timeout_s: int = 20
+    url: str, destino: str, ua: str = "Mozilla/5.0", timeout_s: int = 20, max_bytes: int | None = None
 ) -> tuple[bool, int, str, str]:
     """Busca `url` salvando o corpo em `destino`, checando a política de
     egress a CADA salto de redirecionamento -- não só na URL inicial.
@@ -123,7 +123,7 @@ def buscar_seguro(
                 "curl", "-sS", "-A", ua, "--max-time", str(timeout_s),
                 "--noproxy", "*", "--resolve", f"{host}:{port}:{ip_curl}",
                 "-D", "-", "-o", destino, "-w", "%{http_code}", atual,
-            ],
+            ] + (["--max-filesize", str(max_bytes)] if max_bytes else []),   # lote 5: teto de corpo (curl recusa acima)
             capture_output=True, text=True,
         )
         if r.returncode != 0:

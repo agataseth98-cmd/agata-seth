@@ -73,7 +73,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
         self.assertIn('<link rel="stylesheet" href="nova_versao.css">', html)
         for sec in re.findall(r'<section class="page nv-page".*?</section>', html, re.S):
             self.assertNotIn("style=", sec)
-        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 7)
+        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 8)
         js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
         self.assertNotIn(".style.", js)
         self.assertNotIn('"style"', js)
@@ -92,7 +92,7 @@ class NovaVersaoPainelTests(unittest.TestCase):
         # reservado sem conjunto/revisão: recusa volta na hora, sem abrir rodada
         base = Path(os.environ["AGATA_NV_DIR"]) / "avaliacao" / "teste-reservado"
         base.mkdir(parents=True)
-        t = {"task_id": "ope-teste", "grupo": "operacao", "split": "teste", "pedido": "p", "criterios": [{"tipo": "abstem"}]}
+        t = {"task_id": "ope-teste", "grupo": "operacao", "split": "teste", "pedido": "p", "autor": "teste", "criterios": [{"tipo": "abstem"}]}
         (base / "conjunto.jsonl").write_text(_j.dumps(t) + "\n", encoding="utf-8")
         r = self.m.executar("avaliar", {"split": "teste", "rotas": ["x"], "condicoes": ["alexandria"], "repeticoes": 1})
         self.assertIn("revisão", r["resultado"]["recusado"])
