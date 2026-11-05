@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b3c84d55bad90529185495b0f18bd0e1b9f50517
-  Escrito em: 05/11/2026 17:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fb2d20364961370ae2c6aa51f205205e4b24ae69
+  Escrito em: 05/11/2026 18:23 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b3c84d55bad90529185495b0f18bd0e1b9f50517/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b3c84d55bad90529185495b0f18bd0e1b9f50517/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b3c84d55bad90529185495b0f18bd0e1b9f50517/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b3c84d55bad90529185495b0f18bd0e1b9f50517/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b3c84d55bad90529185495b0f18bd0e1b9f50517/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb2d20364961370ae2c6aa51f205205e4b24ae69/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb2d20364961370ae2c6aa51f205205e4b24ae69/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb2d20364961370ae2c6aa51f205205e4b24ae69/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb2d20364961370ae2c6aa51f205205e4b24ae69/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fb2d20364961370ae2c6aa51f205205e4b24ae69/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
+- **Pedido do Humano (05/11/2026):** incluir o NVIDIA já, com assinatura.
+- **Medição:** `nvidia/google/gemma-4-31b-it` respondeu 200. `gpt-oss-20b` e `nemotron-3-super` deram 404 (sem acesso). `qwen3.5-122b` e `mistral-small-4` deram 410.
+- **Limite:** a cota da conta NVIDIA não foi medida.
+
 (952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova versão, lote 7, complemento): origem anônima, usada só com dados redigidos e um modelo de contingência nomeado.** Proposta `crouton-condicoes-20261105`.
 - **Decisão do Humano (05/11/2026):** uso autorizado com dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e modelo de contingência sempre nomeado.
 - **Mecanismo:** `config/gratuitos_omniroute.json` (`ativo: true`, com a nota das condições) e o teste correspondente.

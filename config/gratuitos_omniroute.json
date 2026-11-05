@@ -66,6 +66,11 @@
       "id": "openrouter/stealth/crouton-alpha",
       "ativo": true,
       "nota": "Origem anônima (stealth). Uso autorizado pelo Humano em 05/11/2026 SOMENTE com: dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e um modelo nomeado como plano de contingência."
+    },
+    {
+      "id": "nvidia/google/gemma-4-31b-it",
+      "ativo": true,
+      "nota": "NVIDIA NIM (gratuito, conexão nvidia no OmniRoute). Testado em 05/11/2026: respondeu 200. Outros modelos NVIDIA testados deram 404 (sem acesso na conta) ou 410 (descontinuados)."
     }
   ]
 }

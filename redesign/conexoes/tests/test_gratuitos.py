@@ -11,8 +11,9 @@ import testar_rotas  # noqa: E402
 def test_lista_versionada_tem_so_ativos_e_crouton_fora():
     ids = testar_rotas.gratuitos_configurados()
     assert "zai/glm-4.7-flash" in ids
-    assert "openrouter/stealth/crouton-alpha" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
-    assert all(i.startswith(("openrouter/", "zai/")) for i in ids)
+    assert "openrouter/stealth/crouton-alpha" in ids
+    assert "nvidia/google/gemma-4-31b-it" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
+    assert all(i.startswith(("openrouter/", "zai/", "nvidia/")) for i in ids)
 
 
 def test_cota_esgotada_vira_estado_proprio(monkeypatch):
