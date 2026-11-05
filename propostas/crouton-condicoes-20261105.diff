@@ -1,0 +1,28 @@
+diff --git a/config/gratuitos_omniroute.json b/config/gratuitos_omniroute.json
+index 1fc8f7b4..c7a6c074 100644
+--- a/config/gratuitos_omniroute.json
++++ b/config/gratuitos_omniroute.json
+@@ -64,8 +64,8 @@
+     },
+     {
+       "id": "openrouter/stealth/crouton-alpha",
+-      "ativo": false,
+-      "nota": "Origem anônima (stealth). OpenRouter: prompts podem ser retidos pelo provedor, não usados para treino. Fora até o Humano decidir."
++      "ativo": true,
++      "nota": "Origem anônima (stealth). Uso autorizado pelo Humano em 05/11/2026 SOMENTE com: dados redigidos (sem informação pessoal, senha ou código fonte proprietário) e um modelo nomeado como plano de contingência."
+     }
+   ]
+ }
+diff --git a/redesign/conexoes/tests/test_gratuitos.py b/redesign/conexoes/tests/test_gratuitos.py
+index e85cac68..cfae774d 100644
+--- a/redesign/conexoes/tests/test_gratuitos.py
++++ b/redesign/conexoes/tests/test_gratuitos.py
+@@ -11,7 +11,7 @@ import testar_rotas  # noqa: E402
+ def test_lista_versionada_tem_so_ativos_e_crouton_fora():
+     ids = testar_rotas.gratuitos_configurados()
+     assert "zai/glm-4.7-flash" in ids
+-    assert not any("crouton" in i for i in ids)  # origem anônima: fora até decisão do Humano
++    assert "openrouter/stealth/crouton-alpha" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
+     assert all(i.startswith(("openrouter/", "zai/")) for i in ids)
+ 
+ 
