@@ -1,0 +1,82 @@
+diff --git a/redesign/avaliacao/avaliar.py b/redesign/avaliacao/avaliar.py
+index 827b8664..730c0f74 100644
+--- a/redesign/avaliacao/avaliar.py
++++ b/redesign/avaliacao/avaliar.py
+@@ -109,13 +109,8 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
+         consultar = acervo.consultar
+     pac = consultar(consulta, n=6, semantica="sempre" if condicao == "alexandria_semantica" else "nunca")
+     fontes = []
+-    if condicao == "alexandria_externa":   # lote 5 (C3): evidência externa efêmera, só com busca injetada
+-        import externa  # noqa: E402
+-        if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
+-            import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
+-            buscar_externa = fornecedores.wikipedia_pesquisar
+-        ext = externa.pesquisar(consulta, buscar=buscar_externa)
+-        fontes += externa.para_contexto(ext)
++    if condicao == "alexandria_externa":   # tarefas sem documentos: acervo do repo + evidência externa
++        fontes += _externa_fontes(t, buscar_externa)
+     for i, r in enumerate(pac["resultados"][:6], 1):
+         fid = str(r["entrada"]) if r.get("entrada") is not None else f"f{i}"
+         fontes.append({"id": fid, "texto": r.get("trecho") or "(entrada relacionada; trecho não incluído)",
+@@ -125,9 +120,23 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
+     return fontes, pac.get("context_id")
+ 
+ 
++def _externa_fontes(t: dict, buscar_externa=None) -> list[dict]:
++    """Evidência externa efêmera (lote 5, C3). Sem fornecedor configurado, devolve nada (padrão)."""
++    import externa  # noqa: E402
++    if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
++        import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
++        buscar_externa = fornecedores.wikipedia_pesquisar
++    return externa.para_contexto(externa.pesquisar(t.get("consulta") or t["pedido"], buscar=buscar_externa))
++
++
+ def fontes(t: dict, condicao: str, **kw) -> tuple[list[dict] | None, str | None]:
+-    if t.get("documentos") and condicao != "alexandria_externa":
+-        return _fontes_documentos(t, condicao), None
++    # (lote 8) a condição externa mantém as fontes da própria tarefa e acrescenta a evidência externa.
++    # Antes ela caía no acervo do repo e perdia as fontes da tarefa: a "piora" medida era isso.
++    if t.get("documentos"):
++        base = _fontes_documentos(t, condicao) or []
++        if condicao == "alexandria_externa":
++            base = base + _externa_fontes(t, kw.get("buscar_externa"))
++        return base, None
+     return _fontes_repo(t, condicao, **kw)
+ 
+ 
+diff --git a/redesign/avaliacao/tests/test_fontes_externa.py b/redesign/avaliacao/tests/test_fontes_externa.py
+new file mode 100644
+index 00000000..b5dddaab
+--- /dev/null
++++ b/redesign/avaliacao/tests/test_fontes_externa.py
+@@ -0,0 +1,30 @@
++"""Condição alexandria_externa mantém as fontes da própria tarefa (lote 8)."""
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(AQUI))
++import avaliar  # noqa: E402
++import externa  # noqa: E402
++
++TAREFA = {"task_id": "rec-teste", "grupo": "recuperacao", "pedido": "Qual a capacidade?",
++          "documentos": [{"id": "d1", "texto": "O reservatório tem 840 litros.", "autoridade": "canon",
++                          "data": "2025-04-12", "estado": "revisado"}],
++          "criterios": [{"tipo": "todos", "valor": ["840"]}]}
++
++
++def test_externa_sem_fornecedor_mantem_fonte_da_tarefa(monkeypatch):
++    monkeypatch.delenv("AGATA_EXTERNA_FORNECEDOR", raising=False)
++    fontes, _ = avaliar.fontes(TAREFA, "alexandria_externa")
++    ids = [f["id"] for f in fontes]
++    assert "d1" in ids                      # a fonte da tarefa não some
++    assert not any(str(i).startswith("x") for i in ids)  # sem fornecedor: nenhuma evidência externa
++
++
++def test_externa_acrescenta_evidencia_externa(monkeypatch):
++    monkeypatch.delenv("AGATA_EXTERNA_FORNECEDOR", raising=False)
++    monkeypatch.setattr(externa, "pesquisar", lambda p, buscar=None: {
++        "resultados": [{"trecho": "trecho externo", "url": "https://exemplo.test/x"}]})
++    fontes, _ = avaliar.fontes(TAREFA, "alexandria_externa")
++    ids = [f["id"] for f in fontes]
++    assert "d1" in ids and "x1" in ids

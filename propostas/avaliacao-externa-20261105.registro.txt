@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
+- **Causa medida:** nas tarefas com fontes, a condição externa caía no acervo do repositório e perdia a fonte da tarefa (`d1`).
+- **Mecanismo:** `redesign/avaliacao/avaliar.py` mantém as fontes da tarefa e acrescenta a evidência externa.
+- **Medição:** 32 testes de avaliação verdes, incluindo 2 novos.
+- **Pendente:** rerodar as condições `busca_texto` e `alexandria_externa` nos 10 modelos, depois da aplicação.
