@@ -1,0 +1,30 @@
+diff --git a/redesign/avaliacao/avaliar.py b/redesign/avaliacao/avaliar.py
+index 46a01279..827b8664 100644
+--- a/redesign/avaliacao/avaliar.py
++++ b/redesign/avaliacao/avaliar.py
+@@ -300,7 +300,9 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
+             res.update(conjunto.avaliar_resposta(t, res.get("texto") or ""))
+         return res
+ 
+-    tf = tarefas.criar("avaliacao", itens, max_chamadas=o["max_chamadas"], prazo_s=max(o["timeout_s"] * 10, 900))
++    # prazo pelo tamanho da rodada (lote 7): ~6 s por chamada local em série; antes, 900 s cortavam 95% dos itens
++    tf = tarefas.criar("avaliacao", itens, max_chamadas=o["max_chamadas"],
++                       prazo_s=max(o["timeout_s"] * 10, 900, 30 * len(itens)))
+     tf = tarefas.executar(tf, executor, paralelo=paralelo)
+     linhas_ = []
+     for item in itens:
+@@ -334,7 +336,13 @@ def rodar(split: str, rotas_escolhidas: list[str], condicoes=CONDICOES, repetico
+     resumo["duracao_s"] = round(time.monotonic() - inicio, 2)
+     resumo["tokens_usados"] = gasto["tokens"]
+     resumo["obsoleto"] = tf["obsoleto"]
+-    return registro.fechar(run, resumo, estado="cancelada" if tf["estado"] == "cancelada" else "concluida")
++    # rodada que bateu no prazo não é "concluída": fica "incompleta" e o resumo não vira veredito
++    prazo_bateu = any(r.get("falha_etapa") == "prazo" for r in tf["resultados"].values())
++    if tf["estado"] == "cancelada":
++        estado = "cancelada"
++    else:
++        estado = "incompleta" if prazo_bateu else "concluida"
++    return registro.fechar(run, resumo, estado=estado)
+ 
+ 
+ # --- métricas e veredito ------------------------------------------------------------------------------
