@@ -1,0 +1,4 @@
+({N}) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
+- **Mecanismo:** `redesign/router/sombra_nova_versao.py` ganha o bloco `suporte_turno_anterior`, só registro. Não altera a resposta, não bloqueia, não chama modelo.
+- **Medição:** selftest 6 de 6 (inclui o caso de número sem fonte e de texto que não vai ao registro).
+- **Limites:** confere números, não afirmações; citações `(N)` ficam de fora; revisor de outra família segue sem ligação ao gateway.
