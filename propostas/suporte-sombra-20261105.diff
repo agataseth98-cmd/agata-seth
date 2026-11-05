@@ -1,0 +1,56 @@
+diff --git a/redesign/router/sombra_nova_versao.py b/redesign/router/sombra_nova_versao.py
+index 8207cec0..d78872bf 100644
+--- a/redesign/router/sombra_nova_versao.py
++++ b/redesign/router/sombra_nova_versao.py
+@@ -95,6 +95,27 @@ def observar(payload: dict, rota: str, varrer_pessoal=None) -> dict:
+                                               "fontes_ferramenta": len(fontes)}
+     except Exception as e:  # noqa: BLE001
+         linha["erros"].append(f"guarda: {e.__class__.__name__}")
++    try:
++        # (lote 6) revisão de suporte MECÂNICA da resposta ANTERIOR: os números que ela afirma aparecem no que as
++        # ferramentas e o sistema trouxeram? Só contagens e até 5 números -- nunca o texto. Sem revisor de outra família.
++        import re as _re  # noqa: E402
++        msgs = payload.get("messages") or []
++        idx = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "assistant"), default=None)
++        if idx is None:
++            pass
++        else:
++            ant = previo._texto(msgs[idx].get("content"))
++            base = " ".join(previo._texto(m.get("content")) for m in msgs[:idx]
++                            if isinstance(m, dict) and m.get("role") in ("tool", "system"))
++            ferramentas = sum(1 for m in msgs[:idx] if isinstance(m, dict) and m.get("role") == "tool")
++            if ferramentas == 0:
++                linha["suporte_turno_anterior"] = {"estado": "sem_fontes"}
++            else:
++                nums = sorted({n for n in _re.findall(r"(?<![\w.])\d{2,}(?:[.,]\d+)?(?![\w])", ant) if n not in base})
++                linha["suporte_turno_anterior"] = {"estado": "revisar" if nums else "ok", "fontes_ferramenta": ferramentas,
++                                                   "numeros_sem_suporte": len(nums), "amostra": nums[:5]}
++    except Exception as e:  # noqa: BLE001
++        linha["erros"].append(f"suporte: {e.__class__.__name__}")
+     try:
+         import skills  # noqa: E402
+         linha["skills"] = [c["skill_id"] for c in skills.selecionar(ultima, n=3)["candidatos"]]
+@@ -125,6 +146,15 @@ def registrar(payload: dict, rota: str) -> None:
+     threading.Thread(target=_rodar, daemon=True).start()
+ 
+ 
++def _caso_suporte() -> bool:
++    msgs = [{"role": "user", "content": "qual o preço?"},
++            {"role": "tool", "content": "Tabela: preço 47 reais; prazo 9 dias"},
++            {"role": "assistant", "content": "Custa 47 reais e leva 365 dias, segundo a segredo-xyz."}]
++    linha = observar({"messages": msgs}, "seth-livre", lambda x: [])
++    s = linha.get("suporte_turno_anterior", {})
++    return s.get("estado") == "revisar" and s.get("amostra") == ["365"] and "segredo-xyz" not in json.dumps(linha)
++
++
+ def _selftest() -> int:
+     import tempfile
+     with tempfile.TemporaryDirectory() as t:
+@@ -141,6 +171,7 @@ def _selftest() -> int:
+              and linha["previo"]["atualidade"] == "volatil"),
+             ("sem índice não quebra", linha.get("alexandria", {}).get("estado") == "sem índice"),
+             ("desligado por padrão", os.environ.get("SETH_SOMBRA_NOVA_VERSAO") == "1" or not ligado()),
++            ("suporte: número sem fonte aparece, texto não", _caso_suporte()),
+         ]
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
