@@ -11,7 +11,7 @@ import testar_rotas  # noqa: E402
 def test_lista_versionada_tem_so_ativos_e_crouton_fora():
     ids = testar_rotas.gratuitos_configurados()
     assert "zai/glm-4.7-flash" in ids
-    assert not any("crouton" in i for i in ids)  # origem anônima: fora até decisão do Humano
+    assert "openrouter/stealth/crouton-alpha" in ids  # origem anônima: liberado só com dados redigidos e plano de contingência
     assert all(i.startswith(("openrouter/", "zai/")) for i in ids)
 
 

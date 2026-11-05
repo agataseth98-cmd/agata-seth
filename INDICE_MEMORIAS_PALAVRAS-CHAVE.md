@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova versão, lote 7, complemento): origem anônima, usada só com dados redigidos e um modelo de contingência nomeado.** Proposta `crouton-condicoes-20261105`.
+  palavras-chave: stealth, crouton, alpha, liberado, sob, condições, nova, versão, lote, complemento, origem, anônima, usada, dados, redigidos, modelo, contingência, nomeado, proposta, condicoes
 (951) DIÁRIO — 05/11/2026 · **Rodada que bate no prazo vira "incompleta", não "concluída" (avaliação, lote 7): a rodada do reservado teste2 com 3.482 itens tinha teto de 900 s, rodou 190 e saiu "concluída".** Proposta `avaliacao-prazo-20261105`.
   palavras-chave: rodada, bate, prazo, vira, incompleta, concluída, avaliação, lote, reservado, teste, itens, tinha, teto, rodou, saiu, proposta, avaliacao
 (950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: executor, api, entrou, produção, após, merge, humano, dacc, painel, operacional, service, reiniciado, ativo, get, rede, relay, council, catalog, responderam, http, fila, vazia, poll, observado, reaberto, brave, mostrou, formulário, fluxo, aprovação, catálogo, contém, provedores, cinco, apis, estão, mapeadas, execução, prompt, enviado, confirmei, chromium, carregou, nova, versão, extensão, política, navegador, bloqueou, chrome, extensions, falta, recarregar, manualmente, relaycouncil, perímetro, reinício, skip, parcial, falha
 (922) DIÁRIO — 28/10/2026 · **Assinatura P-8 validada e proposta aplicada em worktree própria.** O marcador assinado corresponde ao SHA-256 do diff e passou `ssh-keygen -Y verify` com `agata-humano`/`agata-aprovacao-p8`. Aplicação em `aplica/painel-conselho-api-20261028`; selftest do painel, 43 testes, selftest do Conselho Remoto, `py_compile`, `node --check`, manifesto e `git diff --check` passaram. Nenhuma chamada real a provedor; serviço de produção não foi alterado. PR de aplicação ainda será aberto para revisão/merge humano.
   palavras-chave: assinatura, validada, proposta, aplicada, worktree, própria, marcador, assinado, corresponde, sha, diff, passou, ssh, keygen, verify, agata, humano, aprovacao, aplicação, aplica, painel, api, selftest, testes, remoto, compile, node, check, manifesto, git, passaram, chamada, real, provedor, serviço, produção, alterado, será, aberto, revisão, merge
-(921) DIÁRIO — 28/10/2026 · **Proposta P-8 preparada para substituir o executor DOM do Conselho por APIs oficiais.** A proposta preserva a fila e a aprovação humana, limita os destinos aos cinco modelos mapeados no ROSTER do OmniRoute e remove da extensão permissões e scripts de páginas de provedores. Nenhuma chamada real a provedor foi feita; a mudança aguarda assinatura e aplicação.
-  palavras-chave: proposta, preparada, substituir, executor, dom, apis, oficiais, preserva, fila, aprovação, humana, limita, destinos, cinco, modelos, mapeados, roster, omniroute, remove, extensão, permissões, scripts, páginas, provedores, chamada, real, provedor, feita, mudança, aguarda, assinatura, aplicação
+(921) DIÁRIO — 28/10/2026 · **Proposta P-8 preparada para substituir o executor …
+  palavras-chave: proposta, preparada, substituir, executor
 (920) DIÁRIO — 28/10/2026 · **O serviço oficial do Conselho tem permissão de esc …
   palavras-chave: serviço, oficial, tem, permissão, esc
 (919) DIÁRIO — 28/10/2026 · **Chromium do projeto volta a fazer poll no painel o …
