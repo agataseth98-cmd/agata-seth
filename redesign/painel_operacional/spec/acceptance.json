@@ -107,5 +107,23 @@
       "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_chave_gravada_nao_volta_na_resposta_nem_no_estado"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "as páginas da nova versão não têm estilo inline porque a CSP o bloqueia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_paginas_sem_estilo_inline_porque_a_csp_bloqueia"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a avaliação pelo painel respeita revisão, política e não expõe o gabarito no estado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_nova_versao_painel.py::NovaVersaoPainelTests::test_avaliacao_pelo_painel_respeita_os_portoes"
+    ],
+    "cwd": null
   }
 ]

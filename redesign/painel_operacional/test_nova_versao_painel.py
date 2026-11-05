@@ -66,6 +66,43 @@ class NovaVersaoPainelTests(unittest.TestCase):
         js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
         self.assertNotIn("innerHTML", js)
 
+    def test_paginas_sem_estilo_inline_porque_a_csp_bloqueia(self):
+        # style-src 'self': atributo style é ignorado pelo navegador; foi a causa da tela crua dos lotes 1 e 2
+        import re
+        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+        self.assertIn('<link rel="stylesheet" href="nova_versao.css">', html)
+        for sec in re.findall(r'<section class="page nv-page".*?</section>', html, re.S):
+            self.assertNotIn("style=", sec)
+        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 6)
+        js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
+        self.assertNotIn(".style.", js)
+        self.assertNotIn('"style"', js)
+        import server
+        self.assertIn("/nova_versao.css", server._ASSETS)
+        self.assertIn("style-src 'self'", (HERE / "server.py").read_text(encoding="utf-8"))
+
+    def test_avaliacao_pelo_painel_respeita_os_portoes(self):
+        import json as _j
+        with self.assertRaises(ValueError):
+            self.m.executar("salvar_politica", {"margem_minima": 5, "teto_latencia_ms": 1000, "teto_reais": 0})
+        with self.assertRaises(ValueError):
+            self.m.executar("ver_execucao", {"run_id": "../../etc/passwd"})
+        with self.assertRaises(ValueError):
+            self.m.executar("avaliar", {"split": "dev", "rotas": "tudo"})
+        # reservado sem conjunto/revisão: recusa volta na hora, sem abrir rodada
+        base = Path(os.environ["AGATA_NV_DIR"]) / "avaliacao" / "teste-reservado"
+        base.mkdir(parents=True)
+        t = {"task_id": "ope-teste", "grupo": "operacao", "split": "teste", "pedido": "p", "criterios": [{"tipo": "abstem"}]}
+        (base / "conjunto.jsonl").write_text(_j.dumps(t) + "\n", encoding="utf-8")
+        r = self.m.executar("avaliar", {"split": "teste", "rotas": ["x"], "condicoes": ["alexandria"], "repeticoes": 1})
+        self.assertIn("revisão", r["resultado"]["recusado"])
+        e = self.m.estado()["avaliacao"]
+        self.assertEqual(e["reservado"]["tarefas"], 1)
+        self.assertIsNone(e["reservado"]["revisado_por"])
+        self.assertNotIn("criterios", _j.dumps(e))   # o estado nunca traz o gabarito
+        self.m.executar("revisar_reservado", {})
+        self.assertTrue(self.m.estado()["avaliacao"]["reservado"]["revisado_por"])
+
 
 if __name__ == "__main__":
     unittest.main()

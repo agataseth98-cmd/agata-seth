@@ -106,35 +106,41 @@ def rotas(categorias: set[str], get=None) -> list[dict]:
     return out
 
 
-def _executor(timeout_s: int, post=None):
+def chamar_rota(r: dict, prompt: str, timeout_s: int, *, max_tokens: int = 60, post=None) -> dict:
+    """Uma chamada a uma rota de `rotas()`, dentro do orçamento. Devolve ok, texto, usage, latencia_ms,
+    falha_etapa e erro. Reaproveitada pela avaliação (redesign/avaliacao/avaliar.py)."""
     post = post or _post
+    t0 = time.monotonic()
+    if r["tipo"] == "conexao":
+        res = adaptadores.chamar(r["provedor"], r["modo"], prompt, max_tokens=max_tokens)
+    else:
+        ok, motivo = orcamento.permite(r["categoria"])
+        if not ok:
+            return {"ok": False, "falha_etapa": "orcamento", "erro": motivo}
+        try:
+            if r["tipo"] == "ollama":
+                d = post(f"{OLLAMA}/api/chat", {"model": r["modelo"], "stream": False, "think": False,
+                                                 "messages": [{"role": "user", "content": prompt}],
+                                                 "options": {"temperature": 0, "num_predict": max_tokens}}, timeout_s)
+                res = {"ok": True, "texto": (d.get("message") or {}).get("content", ""),
+                       "usage": {"input_tokens": d.get("prompt_eval_count"), "output_tokens": d.get("eval_count")}}
+            else:
+                d = post(f"{OMNI}/v1/chat/completions", {"model": r["modelo"], "max_tokens": max_tokens, "temperature": 0,
+                                                         "messages": [{"role": "user", "content": prompt}]}, timeout_s)
+                u = d.get("usage") or {}
+                res = {"ok": True, "texto": ((d.get("choices") or [{}])[0].get("message") or {}).get("content", ""),
+                       "usage": {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}}
+        except Exception as e:  # noqa: BLE001
+            res = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
+    if res.get("latencia_ms") is None:
+        res["latencia_ms"] = round((time.monotonic() - t0) * 1000)
+    return res
 
+
+def _executor(timeout_s: int, post=None):
     def f(item):
         prompt, _ = PROVAS[item["capacidade"]]
-        r = item["rota_info"]
-        t0 = time.monotonic()
-        if r["tipo"] == "conexao":
-            res = adaptadores.chamar(r["provedor"], r["modo"], prompt, max_tokens=60)
-        else:
-            ok, motivo = orcamento.permite(r["categoria"])
-            if not ok:
-                return {"ok": False, "falha_etapa": "orcamento", "erro": motivo}
-            try:
-                if r["tipo"] == "ollama":
-                    d = post(f"{OLLAMA}/api/chat", {"model": r["modelo"], "stream": False, "think": False,
-                                                     "messages": [{"role": "user", "content": prompt}],
-                                                     "options": {"temperature": 0, "num_predict": 60}}, timeout_s)
-                    res = {"ok": True, "texto": (d.get("message") or {}).get("content", ""),
-                           "usage": {"input_tokens": d.get("prompt_eval_count"), "output_tokens": d.get("eval_count")}}
-                else:
-                    d = post(f"{OMNI}/v1/chat/completions", {"model": r["modelo"], "max_tokens": 60, "temperature": 0,
-                                                             "messages": [{"role": "user", "content": prompt}]}, timeout_s)
-                    u = d.get("usage") or {}
-                    res = {"ok": True, "texto": ((d.get("choices") or [{}])[0].get("message") or {}).get("content", ""),
-                           "usage": {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}}
-            except Exception as e:  # noqa: BLE001
-                res = {"ok": False, "falha_etapa": "transporte", "erro": f"{e.__class__.__name__}: {str(e)[:160]}"}
-            res["latencia_ms"] = round((time.monotonic() - t0) * 1000)
+        res = chamar_rota(item["rota_info"], prompt, timeout_s, post=post)
         res["passou"] = bool(res.get("ok")) and PROVAS[item["capacidade"]][1](res.get("texto"))
         res.pop("texto", None)   # a resposta não é guardada: só o veredito mecânico
         return res

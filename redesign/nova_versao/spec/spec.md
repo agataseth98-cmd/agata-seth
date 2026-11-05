@@ -25,7 +25,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 | C6 | Corpo operacional | `estado_para_eco.sh`, `perimetro.sh`, `coletar_evidencias.py` da auditoria, `config/portas-*.txt` | `redesign/corpo/` (1) |
 | C7 | Redundância e conexões | combos OmniRoute, Conselho em Rede (`relay_catalog.py`), `sanitizar.py`, `teste_portugues.py` | `redesign/conexoes/` (2): Claude e ChatGPT como exemplos nos três caminhos, cofre de chaves, teste por capacidade |
 | C8 | Coordenação e papéis | `grafo/durabilidade.py` (WAL), `evidence_ledger`, `idempotency_key` do Conselho, semáforos das sombras | `redesign/nova_versao/tarefas.py` (2) |
-| C9 | Avaliação | `medir_recuperacao.py`, `teste_portugues.py`, `seth_golden.py`, `seth_autodev.py`, `medir_contexto_efetivo.py` | registro por execução comum (3) |
+| C9 | Avaliação | `medir_recuperacao.py`, `teste_portugues.py`, `seth_golden.py`, `seth_autodev.py`, `medir_contexto_efetivo.py` | registro por execução comum (3): `redesign/avaliacao/` |
 
 **Mapa de memória (C2), camada → mecanismo existente:** autoridade = canon; memória de trabalho = hidratação (`seth_gateway.py`, `_hidratacao`); episódica = MEMÓRIAS e `memoria/` (quente, morna, fria); semântica derivada = vault e índices; operacional entre modelos = `cache_conselho.py`; procedural = skills e scripts; corporal = `redesign/corpo/`; acervo com proveniência = Alexandria. Nenhuma camada nova é criada para substituir outra.
 
