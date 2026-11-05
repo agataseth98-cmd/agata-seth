@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
+  palavras-chave: projeto, sentidos, primeira, peça, ouvido, local, agata, proposta, nova, versão, lote, item, decisão, humano, temos, planos, ter, conversa, voz, eles, podem, adiantar, chamado, faça
 (942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
   palavras-chave: alexandria, curadoria, pacote, evidência, aviso, entrada, corrigida, achados, avaliação, verificador, abstenção, corrigido, proposta, ordem, humano, aproveite, conserte, erros, encontrados
 (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) e painel da Nova versão refeito.** Proposta `nova-versao-avaliacao-20261104`, depois do "pode prosseguir" do Humano em 04/11, que conferiu o lote 2 e o achou "desreipetosamente tosca mas é um bom projeto".
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: interface, aplicada, branch, após, validar, assinatura, proposta, verificar, relay, council, panel, rebase, confirmou, hash, humana, git, apply, check, server, selftest, passou, testes, painel, passaram, aplicação, altera, quatro, arquivos, arquiva, par, assinado, serviço, reiniciado, nem, página, real, medida, aguarda, merge, humano
 (913) DIÁRIO — 28/10/2026 · **Proposta P-8 da interface do Conselho refeita sobre o main 8519794.** O patch da página Conselho de Modelos em Rede foi regenerado e `git apply --check` passou na base atual. A proposta registra catálogo local de 17 provedores e registro manual via endpoint local; não chama provedores nem automatiza o navegador. Testes visuais e de painel da versão anterior não foram repetidos após o rebase. O PR anterior #684 permanece aberto e conflitante; esta proposta não o modifica. Aguarda publicação da proposta e assinatura humana própria.
   palavras-chave: proposta, interface, refeita, main, patch, página, modelos, rede, regenerado, git, apply, check, passou, base, atual, registra, catálogo, local, provedores, registro, manual, endpoint, chama, nem, automatiza, navegador, testes, visuais, painel, versão, anterior, foram, repetidos, após, rebase, permanece, aberto, conflitante, modifica, aguarda, publicação, assinatura, humana, própria
-(912) DIÁRIO — 28/10/2026 · **Log de auditoria encadeado por hash.** Aplica `auditoria-encadeada-20261028`, assinado pelo Humano. Cada registro do log de auditoria de turno passa a levar o SHA-256 do registro anterior; alterar ou apagar uma linha quebra a cadeia, e `auditoria_turno.py --verificar-cadeia` mostra a quebra. Limite declarado: a cadeia não prova que nenhum turno deixou de ser gravado.
-  palavras-chave: log, auditoria, encadeado, hash, aplica, encadeada, assinado, humano, registro, turno, passa, levar, sha, anterior, alterar, apagar, linha, quebra, cadeia, verificar, mostra, limite, declarado, prova, deixou, gravado
+(912) DIÁRIO — 28/10/2026 · **Log de auditoria encadeado por hash.** Aplica `aud …
+  palavras-chave: log, auditoria, encadeado, hash, aplica, aud
 (911) DIÁRIO — 28/10/2026 · **A dupla agora se chama Equipe e aceita qualquer me …
   palavras-chave: dupla, agora, chama, equipe, aceita
 (910) DIÁRIO — 28/10/2026 · **Discord usa a venv do navegador.** Aplica `discord …

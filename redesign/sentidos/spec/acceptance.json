@@ -1,0 +1,38 @@
+[
+  {
+    "criterion": "o lfm3 recebe a instrução no sistema e o áudio no campo images",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_lfm3_recebe_instrucao_no_sistema_e_audio_em_images"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a reserva só entra se o Whisper já estiver no ar e nenhum serviço é ligado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_reserva_so_se_o_whisper_ja_estiver_no_ar_e_nunca_liga_servico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o WER ignora acento, pontuação e caixa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_wer_sem_acento_pontuacao_e_caixa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a medição grava o registro comum com referência e WER e não toca no alto-falante",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_sentidos.py::OuvidoTests::test_medicao_grava_registro_comum_com_referencia_e_wer"
+    ],
+    "cwd": null
+  }
+]

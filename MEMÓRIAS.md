@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1b9b0d883ccefb5d27e41e1cd03890159b00ba25
-  Escrito em: 05/11/2026 09:38 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 233feee29493347701cf1643ae8648b496c69cc4
+  Escrito em: 05/11/2026 09:47 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1b9b0d883ccefb5d27e41e1cd03890159b00ba25/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1b9b0d883ccefb5d27e41e1cd03890159b00ba25/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1b9b0d883ccefb5d27e41e1cd03890159b00ba25/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1b9b0d883ccefb5d27e41e1cd03890159b00ba25/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1b9b0d883ccefb5d27e41e1cd03890159b00ba25/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/233feee29493347701cf1643ae8648b496c69cc4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/233feee29493347701cf1643ae8648b496c69cc4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/233feee29493347701cf1643ae8648b496c69cc4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/233feee29493347701cf1643ae8648b496c69cc4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/233feee29493347701cf1643ae8648b496c69cc4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
+- **Ouvido:** `redesign/sentidos/ouvido.py` transcreve fala com o `lfm3-audio:2b` (Liquid AI) pelo Ollama local. A reserva é o Whisper da iGPU, usado só se já estiver no ar; o ouvido nunca liga serviço e nunca gera fala.
+- **Medição:** `medir_ouvido.py` mede 20 frases da voz do sistema, limpas e com ruído leve, e grava no registro comum da avaliação. A página Sentidos no painel mostra o resultado e roda a medição.
+- **Resultado** (05/11, voz sintética): lfm3-audio com 4 a 5% de erro por palavra e 0,15 s por frase; Whisper base com 14% e 0,7 s.
+- **Voz:** a voz do sistema continua o piper `agata-last`, sem mudança.
+- **Achado:** a instrução de transcrever precisa ir como mensagem de sistema; na do usuário, o modelo entra em laço.
+
 (942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
 - **Curadoria:** `redesign/alexandria/curadoria.py` ordena as fontes por autoridade, deixa as vigentes antes das superadas e a mais recente antes da antiga, e anota em texto cópia, correção, fonte sem autoridade e medição anterior.
 - **Entrada corrigida:** o `acervo.consultar` marca `corrigida_por` na entrada citada primeiro no cabeçalho de uma CORREÇÃO (39 no acervo).

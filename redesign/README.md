@@ -47,6 +47,7 @@ regime normal:
 | `conexoes/` | conexões de modelos (navegador, programa, API), cofre de chaves só de escrita, teste de redundância por capacidade; guia em `conexoes/README.md` | painel · `testar_rotas.py` |
 | `corpo/` | fotografia datada da Máquina, só leitura, e saúde em cinco estados | `fotografar.py` · painel |
 | `avaliacao/` | avaliação da nova versão (F2): registro comum por execução, 30 tarefas (reservado fora do repo), condições pareadas, métricas por dimensão e veredito | `avaliar.py` · `recuperacao.py` · painel |
+| `sentidos/` | projeto 5 sentidos: ouvido local (fala → texto) com `lfm3-audio` e Whisper de reserva, e a medição sintética do ouvido | `ouvido.py` · `medir_ouvido.py` · painel |
 
 ## Docs de planejamento — arquivados
 
