@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8d097152fc257337f278877e141377e2d84a5029
-  Escrito em: 06/11/2026 10:55 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1666ac5da1b764e3f6e18551102067e2fd5854df
+  Escrito em: 06/11/2026 11:19 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-acervo-egress-20261106` substitui a v1, que não deve ser assinada.** Proposta `m2b-acervo-egress-20261106`.
+- **Causa medida:** revisão de cinco pareceres (três subagentes locais, Conselho Remoto com Gemini e Ministral, Seth) achou falhas reais na v1: docstring do teste de userinfo dizia "sem rede", mas um caso chegava ao DNS; estado `parcial` sem fontes mostrava "Nenhuma fonte ainda."; KPIs em zero no erro; nome da exceção aparecia ao operador; spec sem tabela de estados.
+- **Mecanismo:** tabela de estados com precedência (erro > parcial > vazio > ok) na própria proposta; KPIs ocultos em erro; texto fixo; teste com DNS simulado; casos de estado ok, vazio, parcial, erro e regressão de `listar()`.
+- **Não procedeu (verificado):** teste gravando no acervo real (o `setUp` isola `AGATA_NV_DIR`); token em userinfo não coberto (é coberto).
+- **Medição:** cópia limpa do `origin/main` (1666ac5d) com o patch aplica; suíte da Alexandria passa; painel: 84 testes, 1 falha pré-existente.
+- **Pendente:** assinatura da v2 pelo Humano, depois do merge.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: aplicação em cópia limpa do main, suítes da Alexandria e do painel, revisão por cinco pareceres · Autorização: Humano — "pode prosseguir da melhor forma para o sistema."
+
 (958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
 - **Causa medida (leitura de código):** `_estado_acervo` devolvia lista vazia em caso de erro (`redesign/painel_operacional/nova_versao_painel.py`); `cadastro.listar` ignorava JSON ilegível sem aviso (`redesign/alexandria/cadastro.py`); `politica_egress._resolver_destino` aceitava userinfo na URL (`scripts/politica_egress.py`).
 - **Mecanismo:** `cadastro.listar_com_falhas()` conta os ilegíveis; `acervo_listar` devolve `estado` (ok, vazio, parcial, erro) e `ilegiveis`; o painel mostra o erro e a contagem; URL com usuário ou senha é recusada antes de qualquer DNS.
