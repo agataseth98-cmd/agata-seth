@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
-  Escrito em: 06/11/2026 13:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+  Escrito em: 06/11/2026 13:53 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
+- **Revisão:** a skill foi revisada por agente independente (13 achados, todos aplicados). O CI local (`scripts/ci_sdd_local.sh`) passou por completo na worktree do lote.
+- **Limites:** os agentes novos não foram reconhecidos na sessão que os criou (valem em sessão nova); página de frentes e chat não foram testados em navegador; OpenCode instalado e verificado por SHA-256, sem modelo configurado.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check` em cópia limpa do origin/main, CI local, lint de skills, revisão por agente · Autorização: Humano — "aproveite a oportunidade para criar agentes especializados do sistema agata para tarefas de programação"
+
 (964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
 - **Verificação:** `p8_verificar` deu PODE APLICAR na árvore viva e na worktree de aplicação (assinatura ED25519 de `agata-humano`, sha256 `4035ed1aeafe`). Depois, `git apply --check -R` do diff assinado passou na árvore aplicada.
 - **Medição:** painel com 106 testes, uma falha pré-existente (`test_sdd_painel`, que também ocorre sem o lote); MVP, gates, rotas, falha segura e avaliação: OK; Rust `egress`: 19 testes de paridade OK.
