@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-acervo-egress-20261106` substitui a v1, que não deve ser assinada.** Proposta `m2b-acervo-egress-20261106`.
+  palavras-chave: correção, proposta, acervo, egress, substitui, deve, assinada
 (958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
   palavras-chave: acervo, erro, visível, registros, ilegíveis, contados, userinfo, recusado, egress, proposta, auditoria, próprio, agata
 (957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o Agata: cada serviço avisa seu estado no desktop, nos atalhos Agata e Parar Agata.** Proposta `notificacoes-agata-20261106`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: confirmação, única, entrou, painel, oficial, após, merge, operacional, service, reiniciou, bind, rede, app, api, relay, council, state, responderam, http, aba, brave, recarregada, mostrou, nove, abas, detectadas, fila, vazia, servido, corresponde, arquivo, main, window, confirm, botões, aprovação, preservados, prompt, novo, enviado, perímetro, skip, parcial, falha
 (930) DIÁRIO — 29/10/2026 · **A proposta `conselho-rede-confirmacao-unica-20261029` foi assinada e aplicada em worktree própria.** O P-8 confirmou assinatura/hash e `PODE APLICAR`; o painel remove os diálogos nativos duplicados e mantém a aprovação explícita na fila. Selftest do painel, 39 testes, sintaxe JavaScript, ausência de `window.confirm()` e botões de aprovar/rejeitar passaram. O painel oficial não foi alterado; PR de aplicação aguarda merge humano.
   palavras-chave: proposta, rede, confirmacao, unica, assinada, aplicada, worktree, própria, confirmou, assinatura, hash, pode, aplicar, painel, remove, diálogos, nativos, duplicados, mantém, aprovação, explícita, fila, selftest, testes, sintaxe, javascript, ausência, window, confirm, botões, aprovar, rejeitar, passaram, oficial, alterado, aplicação, aguarda, merge, humano
-(929) DIÁRIO — 29/10/2026 · **Proposta P-8 para uma confirmação explícita no Conselho em Rede, sem diálogo duplicado do navegador.** O diff remove `window.confirm()` ao decidir na fila, preparar rodadas e solicitar ferramenta; os controles explícitos e a aprovação individual por envio permanecem. A bateria mostrou resposta de oito provedores; o Humano confirmou visualmente a resposta Claude, embora o registro do relay tenha marcado timeout. A proposta foi rebaseada sobre o `main` atual após o merge do PR #707.
-  palavras-chave: proposta, confirmação, explícita, rede, diálogo, duplicado, navegador, diff, remove, window, confirm, decidir, fila, preparar, rodadas, solicitar, ferramenta, controles, explícitos, aprovação, individual, envio, permanecem, bateria, mostrou, resposta, oito, provedores, humano, confirmou, visualmente, claude, embora, registro, relay, tenha, marcado, timeout, rebaseada, main, atual, após, merge
+(929) DIÁRIO — 29/10/2026 · **Proposta P-8 para uma confirmação explícita no Con …
+  palavras-chave: proposta, confirmação, explícita, con
 (928) CORREÇÃO — 29/10/2026 · **Correção da entrada (927): o PR #705 foi mergead …
   palavras-chave: correção, entrada, mergead
 (927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium …

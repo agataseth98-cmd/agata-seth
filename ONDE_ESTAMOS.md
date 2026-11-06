@@ -8,7 +8,13 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Hoje, 06/11
+## Hoje, 06/11 (atualização)
+
+**Acervo e egress, v2:** a proposta `m2b-acervo-egress-20261106` substitui a v1 (`m2-acervo-egress-20261106`). Não assine a v1. A v2 corrige os achados da revisão: tela sem contradição, KPIs ocultos em erro, teste sem rede. Os testes passam numa cópia limpa do main.
+
+**Esperando você:** assinar `m2b-acervo-egress-20261106` depois do merge. Decidir D1–D13 (conciliação v2 no Experimento 2, seção 8).
+
+## Hoje, 06/11 (início do dia)
 
 **Acervo e egress (proposta pronta, falta sua assinatura):** o Acervo deixa de mostrar erro como lista vazia; arquivo que não se lê vira contagem visível; URL com usuário ou senha deixa de sair. Os testes passam numa cópia limpa do main. Uma falha do painel (projeto externo do SDD) já existia antes desta mudança.
 
