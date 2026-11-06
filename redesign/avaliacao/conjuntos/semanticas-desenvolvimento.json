@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "aviso": "Exemplos sintéticos de desenvolvimento. Não são conjunto reservado nem medem sozinhos a confiabilidade do sistema.",
+  "itens": [
+    {
+      "id": "T1.1",
+      "tarefa": "T1",
+      "fenomeno": "paráfrase",
+      "entrada": "Que peça a Delta substituiu e qual sinal levou à intervenção?",
+      "fontes": {
+        "D1": "Na conferência de março, a equipe Delta trocou o filtro depois que a pressão caiu 18%.",
+        "D2": "Na conferência de abril, a equipe Sigma trocou o motor depois que a pressão caiu 18%."
+      },
+      "gabarito": "filtro; queda de pressão de 18%; fonte D1",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T1.2",
+      "tarefa": "T1",
+      "fenomeno": "entidade correta sob sobreposição lexical",
+      "entrada": "Na ocorrência da Sigma, qual componente mudou?",
+      "fontes": {
+        "D1": "Na conferência de março, a equipe Delta trocou o filtro depois que a pressão caiu 18%.",
+        "D2": "Na conferência de abril, a equipe Sigma trocou o motor depois que a pressão caiu 18%."
+      },
+      "gabarito": "motor; fonte D2",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T2.1",
+      "tarefa": "T2",
+      "fenomeno": "implicação",
+      "entrada": "Premissa: Todos os lotes recebidos foram pesados. Hipótese: Nenhum lote recebido deixou de ser pesado.",
+      "fontes": null,
+      "gabarito": "implica",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T2.2",
+      "tarefa": "T2",
+      "fenomeno": "contradição",
+      "entrada": "Premissa: Apenas parte das mensagens foi arquivada. Hipótese: Todas as mensagens foram arquivadas.",
+      "fontes": null,
+      "gabarito": "contradiz",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T2.3",
+      "tarefa": "T2",
+      "fenomeno": "indeterminado",
+      "entrada": "Premissa: O sensor registrou 8h15 no início da jornada. Hipótese: A máquina foi iniciada às 8h15.",
+      "fontes": null,
+      "gabarito": "indeterminado; a leitura do sensor não estabelece por si só quando a máquina iniciou",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T3.1",
+      "tarefa": "T3",
+      "fenomeno": "ambíguo",
+      "entrada": "Texto: Rui enviou a pasta para Caio depois que ele terminou o relatório. Pergunta: Quem terminou o relatório?",
+      "fontes": null,
+      "gabarito": "não há referente único; ele pode apontar para Rui ou Caio",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T3.2",
+      "tarefa": "T3",
+      "fenomeno": "referente explícito",
+      "entrada": "Texto: Rui enviou a pasta para Caio, que terminou o relatório. Pergunta: Quem terminou o relatório?",
+      "fontes": null,
+      "gabarito": "Caio",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T4.1",
+      "tarefa": "T4",
+      "fenomeno": "quantificador",
+      "entrada": "Texto: Nem todos os testes passaram. Hipótese: Ao menos um teste não passou.",
+      "fontes": null,
+      "gabarito": "implica",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T4.2",
+      "tarefa": "T4",
+      "fenomeno": "negação encaixada",
+      "entrada": "Texto: Não é verdade que Ana não participou. Hipótese: Ana participou.",
+      "fontes": null,
+      "gabarito": "implica, na leitura literal do enunciado",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T4.3",
+      "tarefa": "T4",
+      "fenomeno": "condicional",
+      "entrada": "Premissa: Se o arquivo foi assinado, então foi revisado. O arquivo foi revisado. Hipótese: O arquivo foi assinado.",
+      "fontes": null,
+      "gabarito": "indeterminado; afirmar o consequente não estabelece o antecedente",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T5.1",
+      "tarefa": "T5",
+      "fenomeno": "preserva",
+      "entrada": "Original: O comitê aprovou a expansão por seis meses, condicionada à revisão trimestral. Resumo: A expansão foi aprovada por seis meses, com revisão trimestral como condição.",
+      "fontes": null,
+      "gabarito": "preserva as duas proposições principais",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T5.2",
+      "tarefa": "T5",
+      "fenomeno": "altera",
+      "entrada": "Original: O comitê aprovou a expansão por seis meses, condicionada à revisão trimestral. Resumo: O comitê aprovou a expansão por um ano, sem revisões.",
+      "fontes": null,
+      "gabarito": "altera duração e condição; reprovar",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T6.1",
+      "tarefa": "T6",
+      "fenomeno": "combinar denominadores",
+      "entrada": "D1: Na amostra de 20 respostas, 12 continham pelo menos uma fonte pertinente. D2: Entre essas 12 respostas, as citações de 9 foram consideradas corretas. Pergunta: Quantas respostas da amostra inicial tinham fonte pertinente e citação considerada correta?",
+      "fontes": null,
+      "gabarito": "9 respostas; D2 delimita o subconjunto de 12 respostas de D1",
+      "split": "desenvolvimento",
+      "reservado": false
+    },
+    {
+      "id": "T6.2",
+      "tarefa": "T6",
+      "fenomeno": "limite da evidência",
+      "entrada": "D3: Na amostra seguinte, ainda não havia revisão das citações. Pergunta: As citações da amostra seguinte foram corretas?",
+      "fontes": null,
+      "gabarito": "não determinado pelas fontes; D3 diz que ainda não tinham sido revisadas",
+      "split": "desenvolvimento",
+      "reservado": false
+    }
+  ],
+  "nota_contagem": "O documento de origem diz doze exemplos; o texto tem quatorze subitens (T1.1 a T6.2). Vale o texto."
+}

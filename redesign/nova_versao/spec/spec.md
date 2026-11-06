@@ -96,3 +96,5 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve 
 - `papeis.py`
 - `redundancia.py`
 - `orcamento_turno.py`
+- `conselho.py`
+

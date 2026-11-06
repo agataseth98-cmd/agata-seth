@@ -67,3 +67,5 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
 - `servidor_ouvido.py`
 - `tests/`
 - `visao.py`
+- `falha_segura.py`
+

@@ -1,0 +1,422 @@
+{
+  "title": "Registro de execução Experimento 2 v2 — proposto",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "experiment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "split": {
+      "enum": [
+        "development",
+        "calibration",
+        "reserved_test"
+      ]
+    },
+    "condition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prompt_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "corpus_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_calls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_cost_micros": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cost_limit_status": {
+          "enum": [
+            "defined",
+            "not_applicable",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "max_calls",
+        "max_tokens",
+        "timeout_seconds",
+        "max_cost_micros",
+        "currency",
+        "cost_limit_status"
+      ]
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cost_micros": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "measurement_status": {
+          "enum": [
+            "measured",
+            "estimated",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "cost_micros",
+        "measurement_status"
+      ]
+    },
+    "latency_ms": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "output_file": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rubric_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scores": {
+      "type": "object"
+    },
+    "reviewer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "failure_stage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "critical_failure": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "acceptance_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "running",
+        "failed",
+        "inconclusive",
+        "verified",
+        "not_run",
+        "invalidated",
+        "blocked"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "baseline_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "harness_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "policy_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "skills_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "permission_manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_rights_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_classification_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consent_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "preregistered_plan_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "baseline_commit",
+        "harness_version",
+        "policy_version",
+        "skills_version",
+        "permission_manifest_ref",
+        "source_manifest_ref",
+        "data_rights_ref",
+        "data_classification_ref",
+        "consent_ref",
+        "preregistered_plan_ref"
+      ],
+      "additionalProperties": false
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requested_model": {
+            "type": "string",
+            "minLength": 1
+          },
+          "actual_model": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "actual_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provider_route": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tool_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "action_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "authorization_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "effect_status": {
+            "enum": [
+              "not_started",
+              "not_applied",
+              "applied",
+              "partial",
+              "unknown"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "failure_origin": {
+            "enum": [
+              "none",
+              "model",
+              "tool",
+              "provider",
+              "transport",
+              "evaluator",
+              "policy",
+              "unknown"
+            ]
+          },
+          "usage": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "requested_model",
+          "actual_model",
+          "actual_version",
+          "provider_route",
+          "tool_refs",
+          "action_id",
+          "authorization_ref",
+          "effect_status",
+          "evidence_refs",
+          "failure_origin",
+          "usage"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "run_id",
+    "task_id",
+    "split",
+    "condition",
+    "model_id",
+    "model_version",
+    "prompt_version",
+    "corpus_version",
+    "parameters",
+    "budget",
+    "usage",
+    "latency_ms",
+    "tools",
+    "output_file",
+    "output_sha256",
+    "rubric_version",
+    "scores",
+    "reviewer",
+    "failure_stage",
+    "critical_failure",
+    "notes",
+    "acceptance_ids",
+    "status",
+    "provenance",
+    "attempts"
+  ]
+}
