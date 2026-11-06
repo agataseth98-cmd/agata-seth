@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 06/11 (proposta m2c)
+
+**Esperando você:** assinar `m2c-acervo-parcial-20261106`. É só um teste novo para o estado `parcial` do Acervo, achado pelo ciclo SDD da M2b. O código não muda.
+
 ## Hoje, 06/11 (aplicação)
 
 **Acervo (M2b):** assinada pelo Humano e aplicada em PR próprio. O Acervo mostra estados explícitos e o egress recusa URL com usuário ou senha. Falta conferir a tela no navegador.

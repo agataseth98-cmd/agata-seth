@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2bf10fe9a414b913d5f390adb43291cf8f704444
-  Escrito em: 06/11/2026 11:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a9f0acb0d4a939077fcd2d7442ab399e355b2114
+  Escrito em: 06/11/2026 11:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
+- **Causa medida:** o ciclo SDD da M2b (critério "registro ilegível diz parcial e conta") falhou: o teste não estava na árvore aplicada, embora o código esteja (`nova_versao_painel.py`). A v2 foi escrita sobre o `origin/main`, que não tinha a v1, e o teste da v1 não entrou.
+- **Mecanismo:** só um teste novo; nenhuma mudança de código.
+- **Medição:** passa no main; teste de mutação (regra `parcial` trocada por `ok`) faz o teste falhar; aplicação em cópia limpa do main passa.
+- **Pendente:** assinatura do Humano; depois, aplicação em PR próprio.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: ciclo SDD (critério 7/7 esperado após a aplicação), mutação e aplicação em cópia limpa · Autorização: Humano — "pode continuar até precisar de uma assinatura minha"
+
 (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
 - **Causa:** na aplicação, adicionei ao índice só os arquivos novos e o diff movido; os arquivos modificados (`cadastro.py`, `nova_versao.js`, `nova_versao_painel.py`, `test_nova_versao_painel.py`, `politica_egress.py`) ficaram sem `git add`. O CI do PR #913 falhou (`fiscal-p8` e `sdd`), e o PR não foi juntado.
 - **Verificação da correção:** `git apply --check -R` do diff assinado na árvore completa passou, o que prova que a árvore é exatamente o estado assinado. O controle P-16, rodado pelo hook, executou a suíte de regressão de `politica_egress` (61 casos, 0 falhas).
