@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxico, semântica e externa ficam disponíveis, e o modo auto escolhe caso a caso, registrando o motivo de cada etapa.** Proposta `alexandria-hierarquia-20261106`.
+- **Pedido do Humano (06/11/2026):** todas as formas de pesquisa disponíveis, escolhidas caso a caso.
+- **Mecanismo:** `redesign/alexandria/pesquisa.py`; spec e critérios atualizados.
+- **Medição:** 83 testes verdes; âncora da Alexandria OK.
+- **Pendente:** interface no painel e medição da escolha automática.

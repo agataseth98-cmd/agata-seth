@@ -1,0 +1,220 @@
+diff --git a/redesign/alexandria/pesquisa.py b/redesign/alexandria/pesquisa.py
+new file mode 100644
+index 00000000..20c7afda
+--- /dev/null
++++ b/redesign/alexandria/pesquisa.py
+@@ -0,0 +1,95 @@
++"""Hierarquia de buscas da Alexandria: cada forma de pesquisa disponível, escolhida caso a caso.
++
++Formas: `lexico` (texto no acervo, com relações), `semantica` (sentido, ferramenta secundária, (327)) e
++`externa` (evidência efêmera, C3). Modos:
++- `auto`: começa pelo léxico; se a suficiência (C2) não bastar, acrescenta a semântica; se ainda faltar e a
++  pesquisa externa estiver configurada, acrescenta a externa. Cada etapa registra o motivo.
++- `lexico`, `semantica`, `externa`: só a forma pedida, sem passos extras.
++- `todos`: todas as formas disponíveis, para comparar.
++
++A externa nunca entra no índice nem vira resultado do acervo: volta como `externa` do pacote, rotulada.
++Quem decide a ordem é `etapas_para` (pura, testável). A execução só chama `consultar` e `externa.pesquisar`.
++"""
++from __future__ import annotations
++
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++for _p in (AQUI, AQUI.parent / "nova_versao", AQUI.parent / "metacognicao"):
++    if str(_p) not in sys.path:
++        sys.path.insert(0, str(_p))
++
++MODOS = ("auto", "lexico", "semantica", "externa", "todos")
++
++
++def etapas_para(modo: str, *, suficiente: bool | None = None, externa_disponivel: bool = False) -> list[str]:
++    """Ordem das etapas. `suficiente` é o resultado da etapa léxica (None = ainda não medido)."""
++    if modo not in MODOS:
++        raise ValueError(f"modo fora da lista: {modo}")
++    if modo == "lexico":
++        return ["lexico"]
++    if modo == "semantica":
++        return ["semantica"]
++    if modo == "externa":
++        return ["externa"] if externa_disponivel else []
++    if modo == "todos":
++        return ["lexico", "semantica"] + (["externa"] if externa_disponivel else [])
++    # auto
++    etapas = ["lexico"]
++    if suficiente is True:
++        return etapas
++    etapas.append("semantica")
++    if suficiente is False and externa_disponivel:
++        etapas.append("externa")
++    return etapas
++
++
++def pesquisar(consulta: str, *, modo: str = "auto", acesso: str = "public", n: int = 8,
++              consultar=None, buscar_externa=None, externa_disponivel: bool | None = None) -> dict:
++    """Executa a hierarquia escolhida e devolve o pacote com as etapas registradas."""
++    if modo not in MODOS:
++        raise ValueError(f"modo fora da lista: {modo}")
++    import acervo  # noqa: E402
++    import externa  # noqa: E402
++    consultar = consultar or acervo.consultar
++    if externa_disponivel is None:
++        externa_disponivel = buscar_externa is not None
++    registro, pacote, ext = [], None, None
++
++    def etapa_lexica_ou(semantica: str):
++        return consultar(consulta, acesso=acesso, n=n, semantica=semantica)
++
++    if modo in ("lexico", "semantica", "todos"):
++        semantica = "sempre" if modo in ("semantica", "todos") else "nunca"
++        pacote = etapa_lexica_ou(semantica)
++        registro.append({"etapa": "lexico" if modo == "lexico" else "lexico+semantica",
++                         "motivo": "modo pedido", "resultados": len(pacote["resultados"])})
++    if modo == "auto":
++        pacote = etapa_lexica_ou("nunca")
++        suf = pacote["suficiencia"]
++        registro.append({"etapa": "lexico", "motivo": "primeira etapa", "suficiente": suf["suficiente"],
++                         "cobertura": suf["cobertura"]})
++        if not suf["suficiente"]:
++            pacote = etapa_lexica_ou("auto")
++            registro.append({"etapa": "semantica", "motivo": suf["motivo"],
++                             "resultados": len(pacote["resultados"])})
++            suf = pacote["suficiencia"]
++    if (modo == "externa") or (modo == "todos" and externa_disponivel) or \
++       (modo == "auto" and externa_disponivel and pacote and not pacote["suficiencia"]["suficiente"]):
++        if pacote is None:
++            pacote = etapa_lexica_ou("nunca")
++        motivo = "modo pedido" if modo in ("externa", "todos") else pacote["suficiencia"]["motivo"]
++        if externa_disponivel:
++            ext = externa.pesquisar(consulta, buscar=buscar_externa)
++            registro.append({"etapa": "externa", "motivo": motivo, "estado": ext.get("estado"),
++                             "resultados": len(ext.get("resultados") or [])})
++        else:
++            registro.append({"etapa": "externa", "motivo": motivo, "estado": "indisponível"})
++    if pacote is None:
++        pacote = etapa_lexica_ou("nunca")
++    pacote["hierarquia"] = {"modo": modo, "etapas": registro,
++                            "previstas": etapas_para(modo, suficiente=pacote["suficiencia"]["suficiente"],
++                                                     externa_disponivel=externa_disponivel)}
++    pacote["externa"] = externa.para_contexto(ext) if ext else []
++    return pacote
+diff --git a/redesign/alexandria/spec/acceptance.json b/redesign/alexandria/spec/acceptance.json
+index fdf0db84..bb2b75aa 100644
+--- a/redesign/alexandria/spec/acceptance.json
++++ b/redesign/alexandria/spec/acceptance.json
+@@ -232,5 +232,50 @@
+       "redesign/alexandria/tests/test_externa.py::ExternaTests::test_fornecedor_que_cai_vira_estado_falhou_e_nao_quebra"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "modo auto para no léxico quando a suficiência basta",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_pesquisa.py::test_auto_para_no_lexico_quando_basta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "modo auto acrescenta semântica e externa só quando faltar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_pesquisa.py::test_auto_acrescenta_semantica_e_externa_quando_falta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "modos explícitos fazem só o pedido",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_pesquisa.py::test_modos_explicitos_so_fazem_o_pedido"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "modo desconhecido é recusado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_pesquisa.py::test_modo_desconhecido_levanta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "execução auto consulta o léxico primeiro e registra as etapas",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/alexandria/tests/test_pesquisa.py::test_executa_auto_com_consulta_falsa"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/alexandria/spec/spec.md b/redesign/alexandria/spec/spec.md
+index 685fbc41..73e08edf 100644
+--- a/redesign/alexandria/spec/spec.md
++++ b/redesign/alexandria/spec/spec.md
+@@ -106,3 +106,8 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
+ - `ciclo_skills.py`
+ - `fornecedores.py`
+ - `extrair_pdf.py`
++- `pesquisa.py`
++
++## Lote 9 (06/11/2026): hierarquia de buscas
++
++Cada forma de pesquisa (léxica, semântica, externa) fica disponível e é escolhida caso a caso pelo modo: `auto` começa pelo léxico e só acrescenta semântica e externa quando a suficiência (C2) não basta; os modos explícitos fazem só o pedido; `todos` roda tudo para comparar. Cada etapa registra o motivo. A externa segue como evidência efêmera e nunca entra no índice.
+diff --git a/redesign/alexandria/tests/test_pesquisa.py b/redesign/alexandria/tests/test_pesquisa.py
+new file mode 100644
+index 00000000..a94c44ac
+--- /dev/null
++++ b/redesign/alexandria/tests/test_pesquisa.py
+@@ -0,0 +1,45 @@
++"""Hierarquia de buscas da Alexandria: planejador puro e execução com busca falsa (lote 9)."""
++import sys
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(AQUI))
++import pesquisa  # noqa: E402
++
++
++def test_auto_para_no_lexico_quando_basta():
++    assert pesquisa.etapas_para("auto", suficiente=True, externa_disponivel=True) == ["lexico"]
++
++
++def test_auto_acrescenta_semantica_e_externa_quando_falta():
++    assert pesquisa.etapas_para("auto", suficiente=False, externa_disponivel=True) == ["lexico", "semantica", "externa"]
++    assert pesquisa.etapas_para("auto", suficiente=False, externa_disponivel=False) == ["lexico", "semantica"]
++
++
++def test_modos_explicitos_so_fazem_o_pedido():
++    assert pesquisa.etapas_para("lexico") == ["lexico"]
++    assert pesquisa.etapas_para("semantica") == ["semantica"]
++    assert pesquisa.etapas_para("externa", externa_disponivel=False) == []
++    assert pesquisa.etapas_para("todos", externa_disponivel=True) == ["lexico", "semantica", "externa"]
++
++
++def test_modo_desconhecido_levanta():
++    try:
++        pesquisa.etapas_para("adivinhar")
++    except ValueError:
++        return
++    raise AssertionError("deveria levantar ValueError")
++
++
++def test_executa_auto_com_consulta_falsa(monkeypatch):
++    chamadas = []
++
++    def consulta_falsa(consulta, *, acesso, n, semantica):
++        chamadas.append(semantica)
++        suf = {"suficiente": semantica != "nunca", "cobertura": 0.2, "motivo": "teste", "precisa_externa": False}
++        return {"resultados": [], "suficiencia": suf}
++
++    pac = pesquisa.pesquisar("pergunta", modo="auto", consultar=consulta_falsa, externa_disponivel=False)
++    assert chamadas == ["nunca", "auto"]          # léxico primeiro; semântica só porque faltou
++    assert [e["etapa"] for e in pac["hierarquia"]["etapas"]] == ["lexico", "semantica"]
++    assert pac["externa"] == []
