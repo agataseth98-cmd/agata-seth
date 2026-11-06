@@ -51,7 +51,7 @@ def _estado_acervo() -> dict:
     try:
         return _acervo("acervo_listar", {})
     except Exception as e:  # noqa: BLE001 — o acervo não derruba o painel
-        return {"itens": [], "erro": f"{e.__class__.__name__}"}
+        return {"itens": [], "estado": "erro", "ilegiveis": 0, "erro": f"{e.__class__.__name__}"}
 
 
 def _estado_sentidos() -> dict:
@@ -254,7 +254,9 @@ def _acervo(acao: str, dados: dict) -> dict:
     import aquisicao  # noqa: E402
     import cadastro  # noqa: E402
     if acao == "acervo_listar":
-        return {"itens": [_resumo_cadastro(c) for c in cadastro.listar()],
+        cadastros, ilegiveis = cadastro.listar_com_falhas()
+        estado = "parcial" if ilegiveis else ("vazio" if not cadastros else "ok")
+        return {"itens": [_resumo_cadastro(c) for c in cadastros], "estado": estado, "ilegiveis": ilegiveis,
                 "estados": list(cadastro.ESTADOS), "direitos": list(cadastro.DIREITOS)}
     if acao == "acervo_importar":
         return {"pasta": aquisicao.importar_pasta(), "processados": [

@@ -61,6 +61,8 @@ def _resolver_destino(url: str) -> tuple[str | None, int | None, list[str], str]
         return None, None, [], f"URL malformada: {e}"
     if partes.scheme not in _ESQUEMAS_PERMITIDOS:
         return None, None, [], f"esquema '{partes.scheme}' fora de {_ESQUEMAS_PERMITIDOS}"
+    if "@" in partes.netloc:  # userinfo (usuário/senha) não sai: vazaria credencial no destino
+        return None, None, [], "URL com credenciais (userinfo) recusada"
     host = partes.hostname
     if not host:
         return None, None, [], "sem host na URL"
