@@ -1,0 +1,1692 @@
+{
+  "quando": "2026-11-04T13:55:30.187918-03:00",
+  "escopo": "metadados de leitura; sem chaves, sem POST, sem teste de geração",
+  "arquivos_antes": {
+    "agata-llm-fundamentos-revisada.md": {
+      "sha256": "835c17b84d1a5407946289d2152115fe1849b0ea371ab8741ecc6fa64cfab7fa",
+      "bytes": 7017
+    },
+    "briefing-auditoria-modelo-fronteira.md": {
+      "sha256": "75c6bb7af56a08870684db4bec868de750ee8f1a6a6bdf40b053ac7201573dbf",
+      "bytes": 2028
+    },
+    "conclusoes.md": {
+      "sha256": "2a23e811b63e7d2d6906aa58bf908b865d30e26c784aba966d7849f0cd17585c",
+      "bytes": 53817
+    },
+    "contrato-do-agata-rascunho.md": {
+      "sha256": "cee4ded7503560d6419f4d6b49b67fb8b1a595c5350829b599bf6bcd2fb185aa",
+      "bytes": 8473
+    },
+    "inventario-servicos-agata-2026-11-04.md": {
+      "sha256": "783a4428377c7d9f34837ac084608874212e319bda1ef9550bce241a09a4b211",
+      "bytes": 4574
+    },
+    "matriz-redundancia-agata-2026-11-04.md": {
+      "sha256": "a72e361f7f593b361f521bb8a1086194a20db39c6b1c58af0c1ec0728e52f946",
+      "bytes": 8606
+    },
+    "proposta-implementacao-buracos-experimento.md": {
+      "sha256": "dfd3476a14fa61811eb534b49ce3271487d50279f885044305ad2ce51db9b609",
+      "bytes": 12346
+    },
+    "proposta-tecnica-alexandria-editorial.md": {
+      "sha256": "cb84704a21255e04ca758d8f2961bb27c127ad4df8feb5d3043214623e8c2d37",
+      "bytes": 16438
+    },
+    "proposta-tecnica-metacognicao-llm.md": {
+      "sha256": "d855b49b826b072043b5ea50dbe4b199539a621132205994a1e0c208f824e590",
+      "bytes": 10680
+    },
+    "skill-experimento-gpt/SKILL.md": {
+      "sha256": "2105d57c86ea29f9ec8b16620e7f5a894ab43797c1bd33e2473e47afeb8eede3",
+      "bytes": 7033
+    },
+    "transcricao-etapa-1.txt": {
+      "sha256": "fe9db093e974294331967c7218cf3c0eee76fc3475482bba58a0dfc34034e7f6",
+      "bytes": 35393
+    }
+  },
+  "head": {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit_code": 0,
+    "stdout": "ef5a08e24c4a1d18de42152d0c5d4315c6d8433b\n",
+    "stderr": ""
+  },
+  "status_git": {
+    "argv": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit_code": 0,
+    "stdout": "?? .claude/skills/design-taste-frontend\n?? skills-lock.json\n",
+    "stderr": ""
+  },
+  "canon_hashes": {
+    "argv": [
+      "sha256sum",
+      "REGRAS.md",
+      "PROTOCOLOS.md",
+      "FALHAS.md",
+      "PROJETO.md",
+      "MEMÓRIAS.md",
+      "AGENTS.md"
+    ],
+    "exit_code": 0,
+    "stdout": "250e52101216443dd51172e9a26f51d3bd54658d592fa874c7d6afa309a1c0ed  REGRAS.md\n7e05b091edc8831c102cefd4b7584da71c4a7f61d69216c4beb5df321f2fe6eb  PROTOCOLOS.md\n528060f31968d6666eed07c9514e0a65a385587875af7bf4496f38bd23cbf30d  FALHAS.md\n01527f343f980554fd6d7c05098e6eb92ddc9963847a5c13015ad5440568704b  PROJETO.md\n71e94f2bf2dcd4f166faec2736060a8ee9b1395d8881c9db4828abf9424c50e1  MEMÓRIAS.md\n4465eab698ac38bd6ad4d1547209382e8a4f66e1a678480e2f243ab0e5c87b20  AGENTS.md\n",
+    "stderr": ""
+  },
+  "portas": {
+    "argv": [
+      "ss",
+      "-ltn"
+    ],
+    "exit_code": 0,
+    "stdout": "State  Recv-Q Send-Q                          Local Address:Port  Peer Address:Port\nLISTEN 0      4096                                127.0.0.1:11434      0.0.0.0:*\nLISTEN 0      4096                                127.0.0.1:39041      0.0.0.0:*\nLISTEN 0      512                                 127.0.0.1:36069      0.0.0.0:*\nLISTEN 0      128                                 127.0.0.1:35841      0.0.0.0:*\nLISTEN 0      10                                  127.0.0.1:36155      0.0.0.0:*\nLISTEN 0      32                                  127.0.0.1:53         0.0.0.0:*\nLISTEN 0      4096                                127.0.0.1:631        0.0.0.0:*\nLISTEN 0      4096                               127.0.0.54:53         0.0.0.0:*\nLISTEN 0      4096                            127.0.0.53%lo:53         0.0.0.0:*\nLISTEN 0      4096                 100.89.222.23%tailscale0:41339      0.0.0.0:*\nLISTEN 0      5                                   127.0.0.1:20140      0.0.0.0:*\nLISTEN 0      511                                 127.0.0.1:20132      0.0.0.0:*\nLISTEN 0      511                                 127.0.0.1:20128      0.0.0.0:*\nLISTEN 0      511                                 127.0.0.1:20131      0.0.0.0:*\nLISTEN 0      5                                   127.0.0.1:20127      0.0.0.0:*\nLISTEN 0      4096                 100.89.222.23%tailscale0:443        0.0.0.0:*\nLISTEN 0      32                                      [::1]:53            [::]:*\nLISTEN 0      4096                                    [::1]:631           [::]:*\nLISTEN 0      4096   [fd7a:115c:a1e0::c201:debd]%tailscale0:443           [::]:*\nLISTEN 0      4096   [fd7a:115c:a1e0::c201:debd]%tailscale0:38021         [::]:*\nLISTEN 0      50                                          *:1716             *:*\n",
+    "stderr": ""
+  },
+  "servicos": {
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "omniroute.service",
+      "omniroute-sanitizer.service",
+      "seth-gateway.service",
+      "seth-escriba.service",
+      "seth-verificador.service",
+      "openvino-embeddings.service",
+      "laya-roteador.service",
+      "painel-operacional.service",
+      "-p",
+      "Id",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState"
+    ],
+    "exit_code": 0,
+    "stdout": "Id=omniroute.service\nActiveState=active\nSubState=running\n\nId=omniroute-sanitizer.service\nActiveState=active\nSubState=running\n\nId=seth-gateway.service\nActiveState=inactive\nSubState=dead\n\nId=seth-escriba.service\nActiveState=active\nSubState=running\n\nId=seth-verificador.service\nActiveState=inactive\nSubState=dead\n\nId=openvino-embeddings.service\nActiveState=inactive\nSubState=dead\n\nId=laya-roteador.service\nActiveState=inactive\nSubState=dead\n\nId=painel-operacional.service\nActiveState=inactive\nSubState=dead\n",
+    "stderr": ""
+  },
+  "ollama": {
+    "url": "http://127.0.0.1:11434/api/tags",
+    "status": 200,
+    "dados": [
+      {
+        "name": "lumi-4b:latest",
+        "digest": "60d6d243326bc39f1830ca1d05369a2903e53ffe52d84480c38daa034031a852",
+        "size": 2837073519,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "nemotron_h",
+          "families": [
+            "nemotron_h"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 1048576,
+          "embedding_length": 3136
+        }
+      },
+      {
+        "name": "qwen3-30b-a3b-64k:latest",
+        "digest": "c761024a838a01770fd951b87e2fe3dfe82199d84e3eab182b47347ad4c71fb8",
+        "size": 18556686928,
+        "details": {
+          "parent_model": "qwen3-30b-a3b-32k:latest",
+          "format": "gguf",
+          "family": "qwen3moe",
+          "families": [
+            "qwen3moe"
+          ],
+          "parameter_size": "30.5B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2048
+        }
+      },
+      {
+        "name": "qwen3:4b",
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "size": 2497293931,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2560
+        }
+      },
+      {
+        "name": "rlm-qwen3-8b-teste:latest",
+        "digest": "386e0edaf30065ba3eadad0a99ab83d042fa83b5a2c7150ad8f8fafe00345afd",
+        "size": 5027781658,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "8.2B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 40960,
+          "embedding_length": 4096
+        }
+      },
+      {
+        "name": "qwen3.5-9b-64k:latest",
+        "digest": "e5e6a1fc58486e958deeb798db25866d9115bbf745875dd164e9d82ad7e75b9f",
+        "size": 6594474814,
+        "details": {
+          "parent_model": "qwen3.5:9b",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "9.7B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 4096
+        }
+      },
+      {
+        "name": "qwen3.5:9b",
+        "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+        "size": 6594474711,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "9.7B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 4096
+        }
+      },
+      {
+        "name": "nomic-embed-text:latest",
+        "digest": "0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f",
+        "size": 274302450,
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "nomic-bert",
+          "families": [
+            "nomic-bert"
+          ],
+          "parameter_size": "137M",
+          "quantization_level": "F16",
+          "context_length": 2048,
+          "embedding_length": 768
+        }
+      }
+    ]
+  },
+  "catalogo_remoto": {
+    "url": "http://127.0.0.1:20128/api/models",
+    "status": 200,
+    "dados": [
+      {
+        "fullModel": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        "provider": "groq",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "groq/llama-3.3-70b-versatile",
+        "provider": "groq",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "groq/openai/gpt-oss-120b",
+        "provider": "groq",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "groq/openai/gpt-oss-20b",
+        "provider": "groq",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "groq/qwen/qwen3-32b",
+        "provider": "groq",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "mistral/mistral-large-latest",
+        "provider": "mistral",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "mistral/mistral-medium-3-5",
+        "provider": "mistral",
+        "available": false,
+        "supportsVision": true
+      },
+      {
+        "fullModel": "mistral/mistral-small-latest",
+        "provider": "mistral",
+        "available": false,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "mistral/devstral-latest",
+        "provider": "mistral",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "mistral/codestral-latest",
+        "provider": "mistral",
+        "available": false,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "openrouter/auto",
+        "provider": "openrouter",
+        "available": true,
+        "supportsVision": false
+      },
+      {
+        "fullModel": "gemini/gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "available": true,
+        "supportsVision": true
+      },
+      {
+        "fullModel": "gemini/gemini-3-flash-preview",
+        "provider": "gemini",
+        "available": true,
+        "supportsVision": true
+      },
+      {
+        "fullModel": "gemini/gemini-2.5-flash",
+        "provider": "gemini",
+        "available": true,
+        "supportsVision": true
+      },
+      {
+        "fullModel": "gemini/gemini-2.5-flash-lite",
+        "provider": "gemini",
+        "available": true,
+        "supportsVision": true
+      }
+    ]
+  },
+  "rotas_expostas": {
+    "url": "http://127.0.0.1:20128/v1/models",
+    "status": 200,
+    "dados": [
+      {
+        "id": "auto/best-coding",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-reasoning",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-fast",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-vision",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-chat",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-coding-fast",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/coding",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/fast",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/chat",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/cheap",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/offline",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/smart",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/claude-opus",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/claude-sonnet",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-free",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/best-chaos",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/chaos",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/coding:fast",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/coding:cheap",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/coding:free",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/coding:reliable",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/reasoning",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/vision",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/multimodal",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/glm",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/minimax",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/mimo",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/zai",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/gemma",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/llama",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto/gemini",
+        "owned_by": "combo"
+      },
+      {
+        "id": "conselho",
+        "owned_by": "combo"
+      },
+      {
+        "id": "cheap",
+        "owned_by": "combo"
+      },
+      {
+        "id": "auto",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-livre",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-rapido",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-pesado",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-codigo",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-rapido-longo",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-livre-longo",
+        "owned_by": "combo"
+      },
+      {
+        "id": "seth-pesado-longo",
+        "owned_by": "combo"
+      },
+      {
+        "id": "oc/big-pickle",
+        "owned_by": "opencode"
+      },
+      {
+        "id": "oc/deepseek-v4-flash-free",
+        "owned_by": "opencode"
+      },
+      {
+        "id": "ddgw/gpt-5.4-mini",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "ddgw/gpt-5.4-nano",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "ddgw/claude-haiku-4-5",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "ddgw/mistral-small-2603",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "ddgw/tinfoil/gpt-oss-120b",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "ddgw/tinfoil/gemma4-31b",
+        "owned_by": "duckduckgo-web"
+      },
+      {
+        "id": "felo/felo-chat",
+        "owned_by": "felo-web"
+      },
+      {
+        "id": "felo/felo-search",
+        "owned_by": "felo-web"
+      },
+      {
+        "id": "felo/felo-scholar",
+        "owned_by": "felo-web"
+      },
+      {
+        "id": "felo/felo-social",
+        "owned_by": "felo-web"
+      },
+      {
+        "id": "felo/felo-document",
+        "owned_by": "felo-web"
+      },
+      {
+        "id": "veoaifree-web/veo",
+        "owned_by": "veoaifree-web"
+      },
+      {
+        "id": "veoaifree-web/seedance",
+        "owned_by": "veoaifree-web"
+      },
+      {
+        "id": "veo-free/veo",
+        "owned_by": "veoaifree-web"
+      },
+      {
+        "id": "veo-free/seedance",
+        "owned_by": "veoaifree-web"
+      },
+      {
+        "id": "unc/adamo1139/Hermes-3-Llama-3.1-8B-FP8-Dynamic",
+        "owned_by": "uncloseai"
+      },
+      {
+        "id": "unc/qwen3.6:27b",
+        "owned_by": "uncloseai"
+      },
+      {
+        "id": "unc/gemma4:31b",
+        "owned_by": "uncloseai"
+      },
+      {
+        "id": "aihorde/2DN",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/526Mix-Animated",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/A-Zovya RPG Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AAM XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AbsoluteReality",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Abyss OrangeMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AbyssOrangeMix-AfterDark",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ACertainThing",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AIO Pixel Art",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AlbedoBase XL (SDXL)",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AlbedoBase XL 3.1",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Amanatsu (Illustrious)",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AMPonyXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Analog Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Analog Madness",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anima-Turbo-v1.1",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Animagine XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anime Pencil Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anygen",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/AnyLoRA",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anything Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anything Diffusion Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anything v3",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Anything v5",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/App Icon Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Art Of Mtg",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Aurora",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Babes",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/BB95 Furry Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/BB95 Furry Mix v14",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/BigASP",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Blank Canvas XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/BlenderMix Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Bubble Hentai Illustrious",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/BweshMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/CamelliaMix 2.5D",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Cetus-Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Cheese Daddys Landscape Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Cheyenne",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Comic-Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Counterfeit",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/CyberRealistic Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/CyriousMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Dan Mumford Style",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DaSiWa Illustrious | Anime",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Deliberate",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Deliberate 3.0",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Deliberate Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Double Exposure Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Dreamlike Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DreamLikeSamKuvshinov",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Dreamshaper",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DreamShaper Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DreamShaper XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DucHaiten",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DucHaiten Classic Anime",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/DucHaiten GameArt (Unreal) Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Dungeons and Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Dungeons n Waifus",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Edge Of Realism",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Eimis Anime Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Elysium Anime",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Epic Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Epic Diffusion Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Ether Real Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Experience",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ExpMix Line",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/FaeTastic",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Fantasy Card Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Flat-2D Animerge",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Flux.1-Schnell fp8 (Compact)",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Fustercluck",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Galena Redux",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Ghibli Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/GhostMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Grapefruit Hentai",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/GTA5 Artwork Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/HASDX",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Hassaku XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Healy's Anime Blend",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Hentai Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Hidden Canvas",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/HolyMix ILXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/HRL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ICBINP - I Can't Believe It's Not Photography",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ICBINP XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/iCoMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/iCoMix Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Illuminati Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Inkpunk Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Jim Eidomode",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Juggernaut XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/KaynegIllustriousXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Krea2-Turbo_fp8",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Lawlas's yiff mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Liberty",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Lyriel",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/majicMIX realistic",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/MeinaMix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/MeinaXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/MHXL - Aventis Horizon",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Midjourney PaintArt",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Mistoon Anime",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ModernArt Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/MoonMix Fantasy",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Moss-Image-Base",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/MOSS-Image-SFT",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Movie Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/NatViS",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Neurogen",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/NeverEnding Dream",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/NEW ERA",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/noob_v_pencil XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/noobEvo",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Nova Anime XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Nova Flat XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Nova Furry Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Nova Furry XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/NTR MIX IL-Noob XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/One obsession",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Pastel Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Perfect World",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/PerfectDeliberate",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Photon",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Pixel Illustrious",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Poison",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Pony Diffusion XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Pony Realism",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/PPP",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Prefect illustrious XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Prefect Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Pretty 2.5D",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Project Unreal Engine 5",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Quiet Goodnight XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Raehoshi illust XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Raemu XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Raena XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Rag Illustrious Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Real Dos Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/RealBiter",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Realism Engine",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Realistic Vision",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Realistic Vision Inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Reliberate",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Rev Animated",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Ri-Mix",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/RPG",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Sci-Fi Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/SD-Silicon",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/SDXL 1.0",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Something",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/stable_diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/stable_diffusion_2.1",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/stable_diffusion_inpainting",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Sudachi XL (Illustrious)",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/SwamPonyXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ToonYou",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/TUNIX Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Uhmami",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Ultraspice",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Unholy Desire Mix - Sinister Aesthetic (Illustrious)",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Unstable Diffusers XL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Unstable Ink Dream",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/URPM",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Vector Art",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/WAI-ANI-NSFW-PONYXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/WAI-CUTE Pony",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/WAI-NSFW-illustrious-SDXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/WAI-SHUFFLE-NOOB",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/waifu_diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Western Animation Diffusion",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/White Pony Diffusion 4",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Woop-Woop Photo",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Yiffy",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Z-Image-Turbo",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/ZavyChromaXL",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "aihorde/Zeipher Female Model",
+        "owned_by": "aihorde"
+      },
+      {
+        "id": "openrouter/auto",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/recursive/flint-v1.0:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/xingchen-agi/xing4.0-29b-a4b:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/dots-studio/dots-3-note-preview:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/liquid/lfm-2.5-2.6b:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/nemotron-3.5-lightning:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/thinkingmachines/inkling-small:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/thinkingmachines/inkling:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/cohere/north-mini-code:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/nemotron-3.5-content-safety:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemma-4-26b-a4b-it:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemma-4-31b-it:free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/lyria-3-pro-preview",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/lyria-3-clip-preview",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/free",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/text-embedding-3-small",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/text-embedding-3-large",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/qwen/qwen3-embedding-8b",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/qwen/qwen3-embedding-4b",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/baai/bge-m3",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/mistralai/mistral-embed-2312",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemini-embedding-001",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemini-embedding-2",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemini-embedding-2-preview",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/gpt-5.4-image-2",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/gpt-5-image-mini",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemini-3.1-flash-image-preview",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/gemini-3-pro-image-preview",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/black-forest-labs/flux.2-max",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/black-forest-labs/flux.2-pro",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/black-forest-labs/flux.2-flex",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/cohere/rerank-4-pro",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/cohere/rerank-4-fast",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/cohere/rerank-v3.5",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/deepgram/nova-3",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/microsoft/mai-transcribe-1.5",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/nvidia/parakeet-tdt-0.6b-v3",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/mistralai/voxtral-mini-transcribe",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/qwen/qwen3-asr-flash-2026-02-10",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/google/chirp-3",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/gpt-4o-mini-transcribe",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/whisper-large-v3",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/whisper-large-v3-turbo",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/whisper-1",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "openrouter/openai/gpt-4o-transcribe",
+        "owned_by": "openrouter"
+      },
+      {
+        "id": "gemini/gemini-3.1-flash-lite",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-3-flash-preview",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-2.5-flash",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-2.5-flash-lite",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-embedding-2",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-embedding-2-preview",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "gemini/gemini-embedding-001",
+        "owned_by": "gemini"
+      },
+      {
+        "id": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/llama-3.3-70b-versatile",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/openai/gpt-oss-120b",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/openai/gpt-oss-20b",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/qwen/qwen3-32b",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/whisper-large-v3",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/whisper-large-v3-turbo",
+        "owned_by": "groq"
+      },
+      {
+        "id": "groq/distil-whisper-large-v3-en",
+        "owned_by": "groq"
+      },
+      {
+        "id": "mistral/mistral-large-latest",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/devstral-latest",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/codestral-latest",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/mistral-small-latest",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/mistral-medium-3-5",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/mistral-embed",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "mistral/mistral-moderation-latest",
+        "owned_by": "mistral"
+      },
+      {
+        "id": "ollama-local/embeddinggemma",
+        "owned_by": "ollama-local"
+      },
+      {
+        "id": "ollama-local/nomic-embed-text",
+        "owned_by": "ollama-local"
+      },
+      {
+        "id": "ollama-local/bge-m3",
+        "owned_by": "ollama-local"
+      }
+    ]
+  },
+  "combos": {
+    "url": "http://127.0.0.1:20128/api/combos",
+    "status": 200,
+    "dados": [
+      {
+        "name": "conselho",
+        "strategy": "priority",
+        "models": [
+          "zai/glm-4.7-flash",
+          "gemini/gemini-2.5-flash"
+        ]
+      },
+      {
+        "name": "cheap",
+        "strategy": "priority",
+        "models": [
+          "ollama-local/llama3.2:3b",
+          "zai/glm-4.7-flash",
+          "cerebras/gpt-oss-120b",
+          "groq/openai/gpt-oss-120b"
+        ]
+      },
+      {
+        "name": "auto",
+        "strategy": "priority",
+        "models": [
+          "zai/glm-4.7-flash",
+          "gemini/gemini-2.5-flash",
+          "cerebras/gpt-oss-120b",
+          "groq/openai/gpt-oss-120b",
+          "ollama-local/qwen3.5:9b"
+        ]
+      },
+      {
+        "name": "seth-livre",
+        "strategy": "priority",
+        "models": [
+          "mistral/ministral-14b-latest",
+          "gemini/gemini-2.5-flash",
+          "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "zai/glm-4.7-flash",
+          "gemini/gemini-3-flash-preview",
+          "ollama-local/qwen3.5-9b-64k:latest"
+        ]
+      },
+      {
+        "name": "seth-rapido",
+        "strategy": "priority",
+        "models": [
+          "mistral/ministral-14b-latest",
+          "gemini/gemini-3.5-flash-lite",
+          "gemini/gemini-3.1-flash-lite",
+          "ollama-local/qwen3.5-9b-64k:latest"
+        ]
+      },
+      {
+        "name": "seth-pesado",
+        "strategy": "priority",
+        "models": [
+          "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "gemini/gemini-2.5-flash",
+          "ollama-local/qwen3.5-9b-64k:latest"
+        ]
+      },
+      {
+        "name": "seth-codigo",
+        "strategy": "priority",
+        "models": [
+          "mistral/codestral-latest",
+          "gemini/gemini-3-flash-preview",
+          "openrouter/cohere/north-mini-code:free",
+          "zai/glm-4.7-flash",
+          "ollama-local/qwen3.5-9b-64k:latest"
+        ]
+      },
+      {
+        "name": "seth-rapido-longo",
+        "strategy": "priority",
+        "models": [
+          "mistral/ministral-14b-latest",
+          "gemini/gemini-3.5-flash-lite",
+          "gemini/gemini-3.1-flash-lite"
+        ]
+      },
+      {
+        "name": "seth-livre-longo",
+        "strategy": "priority",
+        "models": [
+          "mistral/ministral-14b-latest",
+          "gemini/gemini-2.5-flash",
+          "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "gemini/gemini-3-flash-preview"
+        ]
+      },
+      {
+        "name": "seth-pesado-longo",
+        "strategy": "priority",
+        "models": [
+          "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "gemini/gemini-2.5-flash"
+        ]
+      }
+    ]
+  }
+}
