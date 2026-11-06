@@ -1,0 +1,4 @@
+({N}) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o Agata: cada serviço avisa seu estado no desktop, nos atalhos Agata e Parar Agata.** Proposta `notificacoes-agata-20261106`.
+- **Pedido do Humano (06/11/2026):** "deve ter notificação em todos".
+- **Mecanismo:** `redesign/systemd/seth` e `redesign/systemd/seth-parar` ganham o aviso por unidade.
+- **Medição:** sintaxe OK; função testada com três unidades reais.
