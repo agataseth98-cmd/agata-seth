@@ -1,0 +1,153 @@
+diff --git a/redesign/alexandria/cadastro.py b/redesign/alexandria/cadastro.py
+index f9cf0ceb..262d7d8f 100644
+--- a/redesign/alexandria/cadastro.py
++++ b/redesign/alexandria/cadastro.py
+@@ -82,14 +82,19 @@ def ler(sha: str) -> dict | None:
+     return json.loads(arq.read_text(encoding="utf-8")) if arq.exists() else None
+ 
+ 
+-def listar() -> list[dict]:
+-    out = []
++def listar_com_falhas() -> tuple[list[dict], int]:
++    """Cadastros legíveis e quantos arquivos não puderam ser lidos (ilegíveis ficam de fora, contados)."""
++    out, falhas = [], 0
+     for arq in sorted(pasta().glob("ext:*.json")):
+         try:
+             out.append(json.loads(arq.read_text(encoding="utf-8")))
+         except (OSError, ValueError):
+-            continue
+-    return out
++            falhas += 1
++    return out, falhas
++
++
++def listar() -> list[dict]:
++    return listar_com_falhas()[0]
+ 
+ 
+ def criar(sha256: str, extensao: str, rotulo: str, *, origem_uri: str | None = None, tamanho: int = 0,
+diff --git a/redesign/alexandria/tests/test_egress_userinfo.py b/redesign/alexandria/tests/test_egress_userinfo.py
+new file mode 100644
+index 00000000..92c72cbd
+--- /dev/null
++++ b/redesign/alexandria/tests/test_egress_userinfo.py
+@@ -0,0 +1,27 @@
++import sys
++import unittest
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent.parent.parent / "scripts"))
++import politica_egress  # noqa: E402
++
++
++class UserinfoTests(unittest.TestCase):
++    """A checagem de userinfo roda antes de qualquer DNS: estes testes não usam rede."""
++
++    def test_url_com_usuario_e_senha_e_recusada(self):
++        _h, _p, _ips, motivo = politica_egress._resolver_destino("https://user:senha@exemplo.invalid/p")
++        self.assertIn("userinfo", motivo)
++
++    def test_url_so_com_usuario_tambem_e_recusada(self):
++        _h, _p, _ips, motivo = politica_egress._resolver_destino("https://token@exemplo.invalid/")
++        self.assertIn("userinfo", motivo)
++
++    def test_url_sem_userinfo_nao_cai_nessa_regra(self):
++        _h, _p, _ips, motivo = politica_egress._resolver_destino("https://exemplo.invalid/p")
++        self.assertNotIn("userinfo", motivo)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/nova_versao.js b/redesign/painel_operacional/nova_versao.js
+index 265875c3..229456b6 100644
+--- a/redesign/painel_operacional/nova_versao.js
++++ b/redesign/painel_operacional/nova_versao.js
+@@ -483,9 +483,12 @@
+     por("nv-acv-kpis", kpi("Fontes", itens.length, "teal"), kpi("Revisadas", itens.filter((c) => c.editorial_status === "revisado").length, "teal"),
+       kpi("Em quarentena", itens.filter((c) => ["recebido", "quarentena"].includes(c.editorial_status)).length, "gold"),
+       kpi("Restritas ou rejeitadas", itens.filter((c) => ["restrito", "rejeitado"].includes(c.editorial_status)).length, "rose"));
+-    byId("nv-acv-titulo").textContent = itens.length + " fontes · só as revisadas com direitos aparecem na busca";
++    const erro = a.estado === "erro";
++    const parcial = a.estado === "parcial" ? " · " + a.ilegiveis + " registro(s) ilegível(is) ficaram de fora" : "";
++    byId("nv-acv-titulo").textContent = erro ? "Acervo indisponível agora" : itens.length + " fontes · só as revisadas com direitos aparecem na busca" + parcial;
++    byId("nv-acv-vazio").textContent = erro ? "Não foi possível ler o acervo (" + (a.erro || "erro") + "). Nada foi alterado; tente de novo." : "Nenhuma fonte ainda.";
+     por("nv-acv-lista", itens.map(linhaAcervo));
+-    mostrar("nv-acv-vazio", itens.length === 0);
++    mostrar("nv-acv-vazio", erro || itens.length === 0);
+   }
+   async function enviarArquivo() {
+     const campo = byId("nv-acv-arquivo"); const arq = campo.files && campo.files[0];
+diff --git a/redesign/painel_operacional/nova_versao_painel.py b/redesign/painel_operacional/nova_versao_painel.py
+index 185bd0ec..2ad6dfef 100644
+--- a/redesign/painel_operacional/nova_versao_painel.py
++++ b/redesign/painel_operacional/nova_versao_painel.py
+@@ -51,7 +51,7 @@ def _estado_acervo() -> dict:
+     try:
+         return _acervo("acervo_listar", {})
+     except Exception as e:  # noqa: BLE001 — o acervo não derruba o painel
+-        return {"itens": [], "erro": f"{e.__class__.__name__}"}
++        return {"itens": [], "estado": "erro", "ilegiveis": 0, "erro": f"{e.__class__.__name__}"}
+ 
+ 
+ def _estado_sentidos() -> dict:
+@@ -254,7 +254,9 @@ def _acervo(acao: str, dados: dict) -> dict:
+     import aquisicao  # noqa: E402
+     import cadastro  # noqa: E402
+     if acao == "acervo_listar":
+-        return {"itens": [_resumo_cadastro(c) for c in cadastro.listar()],
++        cadastros, ilegiveis = cadastro.listar_com_falhas()
++        estado = "parcial" if ilegiveis else ("vazio" if not cadastros else "ok")
++        return {"itens": [_resumo_cadastro(c) for c in cadastros], "estado": estado, "ilegiveis": ilegiveis,
+                 "estados": list(cadastro.ESTADOS), "direitos": list(cadastro.DIREITOS)}
+     if acao == "acervo_importar":
+         return {"pasta": aquisicao.importar_pasta(), "processados": [
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+index 6b40221c..c6cb412c 100644
+--- a/redesign/painel_operacional/test_nova_versao_painel.py
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -41,6 +41,31 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         self.assertEqual(ev[-1]["antes"]["provedores"]["gratuito"], False)
+         self.assertEqual(ev[-1]["depois"]["provedores"]["gratuito"], True)
+ 
++    def test_acervo_com_registro_ilegivel_diz_parcial_e_conta(self):
++        import cadastro  # noqa: E402
++        cadastro.criar("a" * 64, "md", "ok.md")
++        ruim = cadastro.pasta() / "ext:ruim.json"
++        ruim.write_text("{ isto não é json", encoding="utf-8")
++        try:
++            a = self.m._acervo("acervo_listar", {})
++        finally:
++            ruim.unlink()
++        self.assertEqual(a["estado"], "parcial")
++        self.assertEqual(a["ilegiveis"], 1)
++        self.assertEqual(len(a["itens"]), 1)
++
++    def test_acervo_com_erro_diz_erro_e_nao_vazio(self):
++        original = self.m._acervo
++        def quebra(acao, dados):
++            raise RuntimeError("disco fora")
++        self.m._acervo = quebra
++        try:
++            a = self.m._estado_acervo()
++        finally:
++            self.m._acervo = original
++        self.assertEqual(a["estado"], "erro")
++        self.assertEqual(a["itens"], [])
++
+     def test_estado_sem_dados_diz_nao_medido(self):
+         e = self.m.estado()
+         self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")
+diff --git a/scripts/politica_egress.py b/scripts/politica_egress.py
+index 8b5c0656..5088c854 100644
+--- a/scripts/politica_egress.py
++++ b/scripts/politica_egress.py
+@@ -61,6 +61,8 @@ def _resolver_destino(url: str) -> tuple[str | None, int | None, list[str], str]
+         return None, None, [], f"URL malformada: {e}"
+     if partes.scheme not in _ESQUEMAS_PERMITIDOS:
+         return None, None, [], f"esquema '{partes.scheme}' fora de {_ESQUEMAS_PERMITIDOS}"
++    if "@" in partes.netloc:  # userinfo (usuário/senha) não sai: vazaria credencial no destino
++        return None, None, [], "URL com credenciais (userinfo) recusada"
+     host = partes.hostname
+     if not host:
+         return None, None, [], "sem host na URL"

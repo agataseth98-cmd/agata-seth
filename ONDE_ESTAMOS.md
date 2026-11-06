@@ -8,6 +8,14 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 06/11
+
+**Acervo e egress (proposta pronta, falta sua assinatura):** o Acervo deixa de mostrar erro como lista vazia; arquivo que não se lê vira contagem visível; URL com usuário ou senha deixa de sair. Os testes passam numa cópia limpa do main. Uma falha do painel (projeto externo do SDD) já existia antes desta mudança.
+
+**Experimento 2:** a conciliação das sete palavras está em `Área de trabalho/Experimento 2/conciliacao-sete-palavras.md`. Esperando você confirmar ou corrigir.
+
+**Esperando você:** assinar `m2-acervo-egress-20261106` depois que o PR chegar ao main. Decidir a allowlist por destinatário e o conflito de saída externa de dados pessoais.
+
 ## Hoje, 03/11
 
 **SDD (spec-driven):** o ciclo está no ar e passa na CI: `anchor`, `cycle` e `proposal` em `redesign/sdd_flow/`, com os componentes `sdd_flow`, `project_kit`, `review_mesh`, `evidence_ledger` e `painel_operacional` ancorados (spec com critérios ligados a testes). Cada implementação agora é uma proposta e uma assinatura.
