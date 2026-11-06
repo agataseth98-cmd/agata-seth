@@ -109,13 +109,8 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
         consultar = acervo.consultar
     pac = consultar(consulta, n=6, semantica="sempre" if condicao == "alexandria_semantica" else "nunca")
     fontes = []
-    if condicao == "alexandria_externa":   # lote 5 (C3): evidência externa efêmera, só com busca injetada
-        import externa  # noqa: E402
-        if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
-            import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
-            buscar_externa = fornecedores.wikipedia_pesquisar
-        ext = externa.pesquisar(consulta, buscar=buscar_externa)
-        fontes += externa.para_contexto(ext)
+    if condicao == "alexandria_externa":   # tarefas sem documentos: acervo do repo + evidência externa
+        fontes += _externa_fontes(t, buscar_externa)
     for i, r in enumerate(pac["resultados"][:6], 1):
         fid = str(r["entrada"]) if r.get("entrada") is not None else f"f{i}"
         fontes.append({"id": fid, "texto": r.get("trecho") or "(entrada relacionada; trecho não incluído)",
@@ -125,9 +120,23 @@ def _fontes_repo(t: dict, condicao: str, *, buscar=None, consultar=None, buscar_
     return fontes, pac.get("context_id")
 
 
+def _externa_fontes(t: dict, buscar_externa=None) -> list[dict]:
+    """Evidência externa efêmera (lote 5, C3). Sem fornecedor configurado, devolve nada (padrão)."""
+    import externa  # noqa: E402
+    if buscar_externa is None and os.environ.get("AGATA_EXTERNA_FORNECEDOR") == "wikipedia":
+        import fornecedores  # noqa: E402  (só quando o ambiente pede: avaliação com rede, nunca nos testes)
+        buscar_externa = fornecedores.wikipedia_pesquisar
+    return externa.para_contexto(externa.pesquisar(t.get("consulta") or t["pedido"], buscar=buscar_externa))
+
+
 def fontes(t: dict, condicao: str, **kw) -> tuple[list[dict] | None, str | None]:
-    if t.get("documentos") and condicao != "alexandria_externa":
-        return _fontes_documentos(t, condicao), None
+    # (lote 8) a condição externa mantém as fontes da própria tarefa e acrescenta a evidência externa.
+    # Antes ela caía no acervo do repo e perdia as fontes da tarefa: a "piora" medida era isso.
+    if t.get("documentos"):
+        base = _fontes_documentos(t, condicao) or []
+        if condicao == "alexandria_externa":
+            base = base + _externa_fontes(t, kw.get("buscar_externa"))
+        return base, None
     return _fontes_repo(t, condicao, **kw)
 
 

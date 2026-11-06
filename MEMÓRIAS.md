@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 068e918398fb07de6ca667d53c121f80add1858a
-  Escrito em: 05/11/2026 20:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3e0724c755a3454109a09be86e55bae1b9297eca
+  Escrito em: 06/11/2026 08:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/068e918398fb07de6ca667d53c121f80add1858a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/068e918398fb07de6ca667d53c121f80add1858a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/068e918398fb07de6ca667d53c121f80add1858a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/068e918398fb07de6ca667d53c121f80add1858a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/068e918398fb07de6ca667d53c121f80add1858a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e0724c755a3454109a09be86e55bae1b9297eca/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e0724c755a3454109a09be86e55bae1b9297eca/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e0724c755a3454109a09be86e55bae1b9297eca/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e0724c755a3454109a09be86e55bae1b9297eca/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3e0724c755a3454109a09be86e55bae1b9297eca/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
+- **Causa medida:** nas tarefas com fontes, a condição externa caía no acervo do repositório e perdia a fonte da tarefa (`d1`).
+- **Mecanismo:** `redesign/avaliacao/avaliar.py` mantém as fontes da tarefa e acrescenta a evidência externa.
+- **Medição:** 32 testes de avaliação verdes, incluindo 2 novos.
+- **Pendente:** rerodar as condições `busca_texto` e `alexandria_externa` nos 10 modelos, depois da aplicação.
+
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
 - **Causa medida:** a ponte e o serviço respondem. O upload em chunked dava 411 dentro do contêiner do LibreChat.
 - **Medição:** selftest do ouvido 2/2; 11 testes de sentidos verdes.
