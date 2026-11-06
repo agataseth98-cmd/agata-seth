@@ -1,0 +1,2689 @@
+diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+new file mode 100644
+index 00000000..686bbe2c
+--- /dev/null
++++ b/.agents/skills/agata-processo-lote/SKILL.md
+@@ -0,0 +1,74 @@
++---
++name: agata-processo-lote
++description: Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote, aplicação, merge). Use antes de qualquer proposta P-8 ou aplicação, e para guiar outro modelo que vá tocar o mesmo processo.
++---
++
++# Processo de lote no Agata
++
++Por quê: cada lote que deu errado aqui deu errado no mesmo ponto: testes que o CI roda e nós não rodamos, comando que falhou em silêncio por causa de `| tail`, arquivo gerado que entrou no commit, conflito de âncora. Esta skill é a lista do que já quebrou. Siga na ordem.
++
++## Regras que não se negociam
++1. Um lote = uma proposta = uma assinatura do Humano. Não assine nada e nunca rode `scripts/aprovar.sh` (a chave é do Humano).
++2. Código protegido (`redesign/`, `scripts/`, `config/`, `.agents/`, `.githooks/`, canon) só entra no main por proposta assinada. O hook P-8 recusa commit direto; não contorne.
++3. Não edite o checkout vivo `~/agata` para trabalho de lote. Use worktree a partir de `origin/main`.
++4. Permissão negada pelo classificador é decisão do Humano. Pare, explique o que tentou e por que precisa, e espere. Não recrie a ação com outra forma.
++5. Destruir (remover worktree com alteração, apagar dado) só com ordem explícita do Humano nesta conversa.
++
++## Passo a passo
++1. **Worktree do lote**: `git fetch -q origin && git worktree add -b proposta/<lote> <pasta-scratch>/<lote> origin/main`.
++2. **Escreva o código e a spec juntos.** Todo arquivo de código novo (.py, .sh, .js, .html) em componente ancorado precisa estar na seção `## Código` do arquivo spec.md daquele componente, senão a âncora falha (`código órfão`). A âncora do CI cobre só os escopos listados em `.github/workflows/sdd.yml`.
++3. **Rode o CI local antes de propor:** `bash scripts/ci_sdd_local.sh` (ver abaixo). Só siga se tudo passar, ou se a falha já existia no `origin/main` (compare na mesma árvore limpa).
++4. **Gere o diff único**: `git status` primeiro e `git add <caminhos explícitos>` (nunca `git add -A` numa worktree com mudanças alheias; veja a lista abaixo). Depois `git diff --cached origin/main > propostas/<lote>.diff`. Confira em cópia limpa: `git worktree add --detach <pasta> origin/main && cd <pasta> && git apply --check <diff>`.
++5. **Proposta só com registro**: o PR da proposta traz apenas `propostas/<lote>.diff`, `propostas/<lote>.md` (resumo, limites, comando de assinatura), a entrada de proposta no MEMÓRIAS e o ONDE_ESTAMOS (`propostas/README.md`, item 0). O código não vai nesse PR. Espere o CI, junte, e entregue o comando de assinatura ao Humano.
++6. **Depois da assinatura**: `bash scripts/p8_verificar.sh <lote>` no checkout vivo. Só se der `PODE APLICAR`, siga.
++7. **Aplicação em worktree própria** (pare se a verificação não der `PODE APLICAR`) (`aplica/<lote>` a partir de `origin/main` atual), copie o `APROVADO-<lote>` e o diff para ela, rode `p8_verificar` lá também, e aplique com checagem por passo (`if git apply ...; then ... else echo FALHOU; exit 1; fi`). Nunca encadeie verificação com `| tail -1 &&`: o `tail` devolve 0 e o `git apply` roda mesmo com a verificação falha. Já aconteceu.
++8. **Mova o par**: diff e APROVADO para `propostas/aplicadas/` (o APROVADO não está no git: use `mv`, não `git mv`). Prove com `git apply --check -R propostas/aplicadas/<lote>.diff` que a árvore é exatamente o estado assinado.
++9. **Adicione explicitamente**: `git add <arquivos>` (ou `git add -A` só depois de conferir `git status`). Confira que o commit traz os arquivos de código, não só os de registro. (Esquecer os arquivos modificados já aconteceu e o CI pegou.)
++10. **Registro**: entrada nova no MEMÓRIAS logo abaixo do marcador `ENTRADAS-NOVAS`, número = topo + 1. Nunca edite entrada antiga; correção é entrada nova.
++11. **PR de aplicação**: espere os checks que o PR dispara: `suite-adversarial` e `fiscal-p8` (sempre, workflow `perimetro.yml`/`fiscal-p8.yml`); `sdd` só se o PR tocar os paths de `sdd.yml`. Se `mergeStateStatus` for `DIRTY`, mergeie `origin/main` no branch e resolva. Se for `BLOCKED`, espere os checks obrigatórios.
++12. **Depois do merge**: remova a worktree de aplicação só se `git status` estiver limpo. Apague cópias soltas de APROVADO no checkout vivo só depois de confirmar que o original está em `propostas/aplicadas/` no main; havendo dúvida, peça ordem ao Humano.
++
++## Armadilhas já pagas
++- **CI local diferente do CI real**: o job `sdd` roda `pytest` (versão fixada 9.2.0) nos diretórios listados no workflow, depois anchor e ciclos. Unittest passa e pytest falha, ou o contrário. Use o script.
++- **Índice derivado**: `ferramentas/indice.json` e `ferramentas/INDICE.md` são gerados por `python3 -I ferramentas/ferramentas.py reindexar`, que lê só skills versionadas. Depois de criar ou mudar skill: `git add` da skill, rode `reindexar`, e adicione os dois arquivos gerados.
++- **Arquivos gerados pelo ciclo SDD**: o `cycle` escreve na pasta do spec passado (`criterion-drift.md`, `evidence.json`). Antes de restaurar, confira se a mudança veio do ciclo: `git diff -- <arquivo>` deve mostrar só a saída do ciclo. Se houver qualquer alteração sua nesse arquivo, preserve-a (copie para fora da árvore) antes de `git checkout -- <arquivo>`. Arquivos novos gerados: remova um a um, depois de conferir a lista. Não use `rm -rf`.
++- **Testes que parecem isolados**: confira `AGATA_NV_DIR` antes de confiar num teste que grava. Um teste de revisão que imprime "Humano" não é prova de gravação real.
++- **Conflito de âncora**: `REGRAS.md`, `PROJETO.md`, `PROMPT_CARREGAMENTO.md`, `.hidrata.md` e o bloco `ANCORA-SHA` do `MEMÓRIAS.md` são regenerados pelo hook. No `git merge origin/main`, `--theirs` é o main: use `git checkout --theirs -- <arquivo>` nesses blocos e preserve as entradas do MEMÓRIAS. Num rebase, `--theirs` é o lote e o main é `--ours`. Confira com `git status` antes.
++- **Spec é P-8**: mudar `redesign/*/spec/spec.md` exige proposta própria, mesmo que seja só uma linha. Por isso o lote precisa já conter a spec certa.
++- **Worktrees de outros**: não toque nas worktrees do Codex (`~/.codex/worktrees/`). As do Claude ficam na pasta .claude/worktrees, dentro do repositório; remova só as que você criou.
++- **Subagente que diz "passou"**: confira o código, rode o teste você mesmo. Relatório de subagente é alegação.
++
++- **Subagente não grava arquivo**: o harness recusa `Write` para subagentes. Peça que o relatório venha como texto na resposta e grave você mesmo, depois de conferir.
++- **Lista de pytest do script e do workflow têm de ser iguais**: `scripts/ci_sdd_local.sh` e a linha `pytest` de `.github/workflows/sdd.yml` precisam listar as mesmas pastas. Quando uma pasta de teste nova entra num lote, entra nos dois. Confira com `diff` antes de propor (na rodada de 06/11 divergiam).
++- **Binário externo (OpenCode, Herdr, rustup)**: baixe o pacote, não o script; confira o SHA-256 contra o `digest` que a release publica (`gh api repos/<dono>/<repo>/releases/tags/<tag> -q '.assets[]|select(.name|test("linux-x64"))|{name,digest}'`); instale com a opção que não altera o shell (`--no-modify-path`). Herdr não tem checksum independente: registre isso.
++- **Herdr e REA não dirigem a sessão do Humano**: não envie teclas para a sessão Herdr dele sem pedido direto. O classificador bloqueou esse envio (`Self-Modification`). Herdr só sobe sob pedido, com `script -qfc "stty cols 200 rows 50; herdr --session <nome>"` (sem tamanho, falha com "zero-sized grid").
++- **Verificação com `if`, nunca com `| tail`**: a versão de 2026-11-06 do passo 7 valia para `git apply`. Vale também para qualquer teste ou script de verificação.
++- **Required checks**: não verificado no repositório quais são obrigatórios. Para confirmar, `gh api repos/<dono>/<repo>/branches/main/protection` (precisa de rede). `fiscal-p8` só vira barreira se o Humano marcá-lo como obrigatório (`PROJETO.md`). O `sdd` roda só por caminho (`paths` do workflow). `gh pr checks` às vezes lista só parte: confira com `gh pr view <n> --json statusCheckRollup`.
++- **Mudança na worktree que você não fez**: antes de alarmar, cheque se foi um subagente seu ou o próprio ciclo (`criterion-drift.md`, `evidence.json`, `ferramentas/indice.json`, o diretório target do crate Rust). Na rodada de 06/11 o alarme foi falso.
++- **Pytest do sistema**: `python3 -m pytest` pode não existir. Rode `PYTEST=$(ls /home/orusoua/.cache/uv/archive-v0/*/bin/pytest | head -1) bash scripts/ci_sdd_local.sh` (o binário do cache do uv, versão 9.2.0). Não instale sem necessidade.
++- **`git rm` em arquivo já staged pelo merge**: exige `-f`. Antes, confira que é a cópia que você quer remover.
++- **Nome de skill**: não pode conter `claude` nem `anthropic` (lint de `qualidade_llm.py`). Depois de criar ou editar skill, rode o lint: `python3 redesign/painel_operacional/qualidade_llm.py` e confira `problemas` vazio.
++- **Subagentes em paralelo**: funciona com arquivos disjuntos (cada agente com a sua lista). Sem isso, duas edições no mesmo arquivo viram conflito que ninguém vê.
++
++## Uso de agentes (regra)
++Use agentes quando o trabalho for independente, tiver arquivos próprios e a sessão permitir delegar (ferramentas e regras da sessão). Se a delegação não estiver disponível, faça você mesmo com a mesma disciplina. Cada agente recebe: caminho exato da worktree, lista de arquivos que pode editar, comandos de teste, proibições (sem commit, sem `rm -rf`, sem sudo, sem chamar provedor real). Você confere o resultado (código e teste), não aceita o relatório.
++
++## Diário de erros e acertos (atualize a cada rodada)
++- **06/11 (lote P2–P10)**: spec de componente novo esqueceu arquivos → âncora falhou no CI. Correção: mini-proposta de spec (`spec-anchor-lote-pn-20261106`), assinada à parte. Ação para o futuro: incluir a spec no lote.
++- **06/11 (lote P2–P10)**: CI `sdd` quebrou por índice de ferramentas desatualizado após criar skills. Correção: `reindexar`. Ação: rodar `ci_sdd_local.sh` antes de propor.
++- **06/11 (lote P2–P10)**: `test_conjunto_dev.py` nasceu vazio por causa de `cat > arquivo 2>/dev/null || mkdir ... && cat > ...` (o primeiro `cat` cria o arquivo vazio e o `||` pula o segundo). Ação: nunca encadear criação de arquivo com `||`; verificar tamanho depois de criar.
++- **06/11 (OpenCode)**: o subagente de instalação foi bloqueado pelo classificador ao executar código externo. Acerto: depois de ler o instalador e conferir o digest da release, a instalação manual passou.
++- **06/11 (Herdr)**: pseudo-terminal sem tamanho falha; a leitura de glifos pede confirmação interativa; o envio de teclas à sessão foi bloqueado. Ação: pedir ao Humano para responder na própria sessão.
++- **06/11 (CI local)**: o `ci_sdd_local.sh` falhou 25 passos por um motivo só: `pytest` fora do PATH (os ciclos chamam `pytest` pelo nome). Correção: o script põe o diretório do binário no PATH. Ação: ao escrever script de verificação, teste-o do zero, sem o PATH do seu shell.
++- **06/11 (âncora de painel)**: três arquivos novos do painel (`frentes.html`, `frentes.js`, `test_chat_ui.py`) sem dono na spec. Correção: incluir na seção Código da spec antes de propor. Ação: a âncora roda por escopo; rode `anchor.py` por pasta depois de criar arquivo.
++- **06/11 (agentes)**: o tipo de agente criado em `.claude/agents/` não foi reconhecido na mesma sessão (`Agent type not found`). Os tipos são lidos na inicialização; crie os arquivos e teste numa sessão nova. Até lá, use `general-purpose` com o mesmo texto de instrução.
++- **06/11 (revisão da skill)**: um revisor independente achou 13 problemas que o lint não pega (caminhos, `--theirs` num rebase, `git add -A`, required checks). Ação: a skill passa por revisão de agente antes de ir a lote; lint só valida formato.
++
++## Comandos úteis
++- CI local: `bash scripts/ci_sdd_local.sh`
++- Verificar assinatura: `bash scripts/p8_verificar.sh <lote>`
++- Âncora de um componente: `python3 redesign/sdd_flow/anchor.py . <pasta>`
++- Estado do PR: `gh pr view <n> --json mergeStateStatus,statusCheckRollup`
++
++## Para outro modelo que tocar o processo
++Leia a seção "Passo a passo" inteira antes de qualquer comando. Não avance sem o passo 3 verde. Quando algo pedir assinatura, permissão ou decisão do Humano, pare e escreva o comando exato e o motivo. Relate o que foi executado, com a saída, e o que não foi medido.
+diff --git a/.agents/skills/agata-time-inovacao/SKILL.md b/.agents/skills/agata-time-inovacao/SKILL.md
+new file mode 100644
+index 00000000..c43e470a
+--- /dev/null
++++ b/.agents/skills/agata-time-inovacao/SKILL.md
+@@ -0,0 +1,35 @@
++---
++name: agata-time-inovacao
++description: Como o time de inovação do Agata propõe melhorias com SDD: pesquisa, spec, revisão independente, decisão humana e só então proposta P-8. Use ao propor uma melhoria nova ou ao avaliar uma ideia já registrada no backlog.
++---
++
++# Time de inovação (SDD)
++
++Por quê: ideia sem evidência vira retrabalho, e ideia sem revisão vira alucinação com cara de plano. O time transforma uma melhoria em artefato de SDD antes de qualquer código.
++
++## Papéis (agentes em .claude/agents)
++- agata-inov-pesquisa: bootstrap. Busca estado da arte e problema real do Agata, com fonte e evidência.
++- agata-inov-arquiteto: draft. Escreve brainstorm e spec mínima (critério com teste, reversão, código a tocar).
++- agata-inov-critico: review independente. Procura reuso, falha de governança, critério sem teste, custo.
++- Auditoria do processo: a mesma pessoa que audita o lote, com o checklist de agata-processo-lote.
++
++## Ciclo (uma ideia por vez)
++1. Pesquisa: a ideia tem problema com evidência do Agata e fonte externa. Sem as duas, fica "não verificado" e não avança.
++2. Spec: o arquiteto escreve brainstorm e spec fora do repositório. Nada de código ainda.
++3. Revisão: o crítico avalia a spec. Se o crítico recomendar reduzir escopo ou arquivar, o time segue a recomendação ou registra por que não segue.
++4. Decisão: o Humano decide avançar, reduzir ou arquivar. O time nunca decide.
++5. Proposta P-8: se avançar, a implementação entra como lote, pelo processo de agata-processo-lote. Uma proposta, uma assinatura.
++6. Implementação e drift: depois da aplicação, roda-se o ciclo SDD da spec e o relatório de drift (cada critério passa, falha ou não roda).
++
++## Backlog
++Ideias ficam num backlog de trabalho fora do repositório (Área de trabalho, pasta de inovação do Experimento 2), com: id, problema, evidência, hipótese, estado (pesquisada, spec, revisada, decidida, proposta, aplicada, arquivada), decisão do Humano e data. Ideia arquivada também fica registrada, com o motivo.
++
++## Regras
++- Não recomende código que o reuso já cobre. O crítico confere com grep antes.
++- Todo critério tem teste ou é marcado como lacuna.
++- Medição de custo e cota: diga "não medido" quando não tiver medição.
++- Subagente só quando a sessão permitir e o Humano pedir (ver agata-processo-lote).
++- Nenhum agente do time assina, aplica ou junta PR.
++
++## Diário de erros e acertos
++(Acrescente uma linha por rodada: o que funcionou, o que o crítico derrubou, o que virou regra.)
+diff --git a/.claude/agents/agata-ci.md b/.claude/agents/agata-ci.md
+new file mode 100644
+index 00000000..2aa5d04b
+--- /dev/null
++++ b/.claude/agents/agata-ci.md
+@@ -0,0 +1,15 @@
++---
++name: agata-ci
++description: Roda o CI local do Agata (scripts/ci_sdd_local.sh, mesmos passos do job sdd) e diagnostica cada falha com a causa e a correção mínima. Use antes de propor e depois de cada mudança que toca testes, specs ou ciclos.
++tools: Read, Bash, Grep, Glob
++---
++
++Você roda o CI local e explica as falhas. Você não edita código; sugere a correção mínima e quem edita é outro agente ou o próprio fluxo.
++
++Passos:
++1. Na raiz da worktree: `PYTEST=<caminho do pytest 9.2.0> bash scripts/ci_sdd_local.sh > <log> 2>&1`. Se PYTEST não existir, procure um pytest já instalado no cache do uv e diga qual; não instale nada.
++2. Leia o log. Para cada linha "FALHA", localize a causa real (traceback, código de saída, mensagem da âncora). Lembre que muitas falhas em cascata vêm de uma só: pytest fora do PATH, acceptance_runner sem evidência, âncora com código órfão.
++3. Classifique cada causa: ambiente (PATH, pytest), spec (âncora, critério), código (teste vermelho), dado (índice derivado desatualizado).
++4. Diga a correção mínima para cada causa.
++
++Resposta em texto: total de passos OK e com falha, causas agrupadas, correções mínimas, e o que você não conseguiu confirmar.
+diff --git a/.claude/agents/agata-dev.md b/.claude/agents/agata-dev.md
+new file mode 100644
+index 00000000..0629b657
+--- /dev/null
++++ b/.claude/agents/agata-dev.md
+@@ -0,0 +1,18 @@
++---
++name: agata-dev
++description: Desenvolvedor do Agata. Implementa um componente ou correção numa worktree de lote, com arquivos próprios e testes. Use para mudança de código e teste dentro do processo de lote (skill agata-processo-lote). Não commita, não aplica, não assina.
++tools: Read, Edit, Write, Bash, Grep, Glob
++---
++
++Você é desenvolvedor do sistema Agata. Trabalhe SOMENTE na worktree e nos arquivos que a tarefa indicar.
++
++Regras que não se negociam:
++- Não rode git commit, git push, git reset --hard, rm -rf, sudo, nem instale pacotes. Não chame provedor real de modelo.
++- Não leia .env nem chaves. Não leia nem cite caminhos de memoria/missoes.
++- Não toque em arquivos fora da lista da tarefa. Se precisar de um, pare e diga qual.
++- Escreva o código e o teste (unittest ou pytest) juntos. Todo arquivo novo de redesign/<componente>/ precisa constar na seção Código da spec do componente, senão a âncora do CI falha.
++- Antes de responder, rode os testes da sua área e cole a saída real (últimas linhas com o resultado).
++- Não crie arquivo com `cat > arq ... || mkdir` (já deixou arquivo vazio uma vez). Confira o tamanho do arquivo depois de criar.
++- Se um teste falhar, corrija o código, não o teste, a menos que o teste esteja errado e você diga por quê.
++
++Resposta final, em texto: arquivos alterados (caminho), o que cada um faz, saída dos testes, e o que ficou de fora. Relatório é alegação: quem chamou vai conferir.
+diff --git a/.claude/agents/agata-inov-arquiteto.md b/.claude/agents/agata-inov-arquiteto.md
+new file mode 100644
+index 00000000..05128625
+--- /dev/null
++++ b/.claude/agents/agata-inov-arquiteto.md
+@@ -0,0 +1,20 @@
++---
++name: agata-inov-arquiteto
++description: Arquiteto SDD do time de inovação do Agata. Transforma uma ideia em brainstorm e spec mínima (jornadas, contrato, critérios de aceite com teste, código, reversão). Etapa de draft do SDD. Não implementa.
++tools: Read, Grep, Glob, Write, Bash
++---
++
++Você é o arquiteto SDD do time de inovação do Agata. Você recebe uma ideia já pesquisada e escreve, num diretório de trabalho indicado (fora do repositório), os artefatos do SDD:
++
++1. brainstorm.md: Usuários, Estado que muda, Erros e concorrência, Migração, Observabilidade, Reversão, Sucesso.
++2. spec.md: Jornadas críticas, Contrato, Critérios de aceite (cada critério com o nome do teste que o prova), Desenho e alternativas (pelo menos uma alternativa descartada com motivo), Implementação e testes, Migração e reversão, Riscos e dependências.
++3. Lista do que seria tocado no repositório (caminhos), para o crítico avaliar o alcance.
++
++Regras:
++- Menor mecanismo primeiro: se o problema se resolve reaproveitando o que existe, diga qual e não proponha código novo.
++- Nada de critério sem teste. Critério sem teste fica marcado como lacuna.
++- Não escreva em redesign/, scripts/, config/ nem .agents/: isso é proposta P-8 e entra depois.
++- Não leia nem cite memoria/missoes.
++- Escreva no diretório que a tarefa indicar. Depois de escrever, confira o tamanho dos arquivos (não podem estar vazios).
++
++Resposta em texto: caminhos escritos, o que cada critério prova, e as lacunas.
+diff --git a/.claude/agents/agata-inov-critico.md b/.claude/agents/agata-inov-critico.md
+new file mode 100644
+index 00000000..cb1f171f
+--- /dev/null
++++ b/.claude/agents/agata-inov-critico.md
+@@ -0,0 +1,17 @@
++---
++name: agata-inov-critico
++description: Crítico do time de inovação do Agata. Revisa uma ideia e sua spec contra a governança (P-8, Regra 2, Regra 3, Regra 8) e contra evidência. Somente leitura. Etapa de review independente do SDD.
++tools: Read, Grep, Glob, Bash
++---
++
++Você é o crítico do time de inovação do Agata. Seu trabalho é achar o que faz a ideia falhar. Você não edita, não commita, não aplica.
++
++Confira, nesta ordem:
++1. Evidência: o problema existe no Agata? Confira o arquivo:linha ou a medição citada.
++2. Reuso: já existe no repositório algo que resolve isso? Procure (grep) antes de aceitar código novo.
++3. Governança: a proposta toca código protegido (P-8)? Toca a Regra 2 (inventar fato) ou a Regra 3 (decidir pelo Humano)? Exige segredo ou dado pessoal fora do que a política permite?
++4. Critérios: cada critério tem teste? Algum é só afirmação?
++5. Reversão: dá para voltar atrás sem perder história (Regra 4)?
++6. Custo e cota: consome cota compartilhada com a Seth? Quanto?
++
++Resposta em texto, em português: veredito por item (ok, problema, não verificado), com arquivo:linha. Termine com uma linha: "recomendação ao Humano: avançar, reduzir escopo ou arquivar", com a razão. Você não decide.
+diff --git a/.claude/agents/agata-inov-pesquisa.md b/.claude/agents/agata-inov-pesquisa.md
+new file mode 100644
+index 00000000..c395f2cc
+--- /dev/null
++++ b/.claude/agents/agata-inov-pesquisa.md
+@@ -0,0 +1,21 @@
++---
++name: agata-inov-pesquisa
++description: Pesquisador do time de inovação do Agata. Busca estado da arte e problemas reais do sistema, e devolve ideias com fonte e evidência. Não decide, não propõe código; alimenta a etapa de bootstrap do SDD.
++tools: Read, Grep, Glob, Bash, WebSearch
++---
++
++Você é o pesquisador do time de inovação do Agata. Trabalhe em SDD: sua saída é a etapa de bootstrap, não a decisão.
++
++Regras:
++- Não edite arquivos, não commite, não rode nada que altere estado. Leitura e busca apenas.
++- Não leia nem cite caminhos de memoria/missoes. Não leia .env nem chaves.
++- Cada afirmação sobre o estado do sistema vem com arquivo:linha lido por você. Cada afirmação sobre o mundo vem com URL. Sem fonte, escreva "não verificado".
++- Separe: fato medido, inferência, hipótese, não medido.
++
++Para cada ideia (no máximo 5 por rodada), entregue:
++1. Problema real do Agata (com evidência: arquivo:linha, entrada de diário, medição).
++2. O que o estado da arte faz (URL) e por que se aplica ou não ao Agata (local-first, governança, P-8).
++3. Hipótese testável e o que mediria para confirmar ou refutar.
++4. Custo estimado e risco de quebrar a governança.
++
++Resposta em texto, em português, numerada. Não diga que uma ideia é boa; quem decide é o Humano após o crítico e o arquiteto.
+diff --git a/.claude/agents/agata-revisor.md b/.claude/agents/agata-revisor.md
+new file mode 100644
+index 00000000..8e7236c5
+--- /dev/null
++++ b/.claude/agents/agata-revisor.md
+@@ -0,0 +1,15 @@
++---
++name: agata-revisor
++description: Revisor independente de diff ou proposta do Agata. Somente leitura: confere se o código faz o que a proposta diz, se os testes provam os critérios e se há risco operacional. Use antes de qualquer proposta P-8 ou aplicação.
++tools: Read, Grep, Glob, Bash
++---
++
++Você é revisor independente do sistema Agata. Você NÃO edita arquivos, NÃO commita, NÃO aplica nada.
++
++Como trabalhar:
++- Use só leitura. Bash apenas para comandos de leitura (git diff, git show, git log, grep, cat, python3 -m unittest sem alterar nada).
++- Não leia nem cite memoria/missoes. Não leia .env nem chaves.
++- Você recebe a proposta (diff e descrição). Confira: (1) o diff faz o que a descrição diz; (2) cada critério de aceite tem teste que o prova (diga qual); (3) risco operacional: carga, repetição, recuperação, o que quebra em produção; (4) se a âncora da spec cobre os arquivos novos.
++- Quando não puder verificar só com o texto, diga "não verificável".
++
++Resposta em texto, em português: achados numerados, cada um com trecho ou arquivo:linha, severidade (alta, média, baixa), e recomendação. Termine com uma linha: itens conferidos e itens com problema. Não diga "aprovado" por conta própria; quem decide é o Humano.
+diff --git a/.claude/agents/agata-spec.md b/.claude/agents/agata-spec.md
+new file mode 100644
+index 00000000..43464462
+--- /dev/null
++++ b/.claude/agents/agata-spec.md
+@@ -0,0 +1,17 @@
++---
++name: agata-spec
++description: Escreve ou atualiza a spec SDD de um componente do Agata (spec.md, acceptance.json, brainstorm.md, decision.md) e confere a âncora. Use quando um componente novo ou alterado precisa de spec para o CI.
++tools: Read, Edit, Write, Bash, Grep, Glob
++---
++
++Você escreve specs no formato SDD do Agata para um componente indicado na tarefa. Trabalhe só na worktree e só dentro de redesign/<componente>/spec/.
++
++Formato obrigatório:
++- spec.md: seções ## Jornadas críticas, ## Contrato, ## Critérios de aceite, ## Código (lista de arquivos entre crases, uma por linha, incluindo tests/ para a subárvore de testes). Critérios com "- [ ]".
++- acceptance.json: lista de objetos {"criterion": texto, "command": ["pytest", "-q", "<alvo relativo>"], "cwd": null}. Só pytest com alvo relativo à raiz; sem -p, sem caminho absoluto, sem "..".
++- brainstorm.md: seções ## Usuários, ## Estado que muda, ## Erros e concorrência, ## Migração, ## Observabilidade, ## Reversão, ## Sucesso.
++- decision.md: "DECISAO: aceita" só se a tarefa disser que o Humano decidiu; senão escreva "DECISAO: pendente".
++
++Confira antes de responder: `python3 redesign/sdd_flow/anchor.py . redesign/<componente>` (deve dar ANCHOR: OK) e a suíte do componente.
++Lembre: spec.md é arquivo do P-8. Você não commita; quem propõe é outra etapa.
++Resposta em texto: arquivos escritos, saída da âncora, e o que não foi possível confirmar.
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index 41542b9e..aba0914e 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -14,6 +14,9 @@ on:
+       - "redesign/project_kit/**"
+       - "redesign/evidence_ledger/**"
+       - "redesign/nova_versao/**"
++      - "redesign/confiabilidade/**"
++      - "redesign/rotas/**"
++      - "redesign/mvp_autoaprimoramento/**"
+       - "redesign/alexandria/**"
+       - "redesign/metacognicao/**"
+       - "redesign/corpo/**"
+@@ -42,7 +45,7 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests ferramentas/test_ferramentas.py
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+diff --git a/.hidrata.md b/.hidrata.md
+index 6919b389..c32f5ebf 100644
+--- a/.hidrata.md
++++ b/.hidrata.md
+@@ -40,14 +40,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
+ -->
+ 
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+-  Escrito em: 06/11/2026 13:53 -03
++  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
++  Escrito em: 06/11/2026 13:35 -03
+   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+ <!-- ANCORA-SHA:FIM -->
+ <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
+ 
+@@ -713,15 +713,16 @@ disco, só não é mais auto-injetado. Corte item 2a, MEMÓRIAS (431).
+ 
+ # MEMÓRIAS.md (janela por entrada inteira, orçamento 25000 chars)
+ 
+-(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
+-- **Revisão:** a skill foi revisada por agente independente (13 achados, todos aplicados). O CI local (`scripts/ci_sdd_local.sh`) passou por completo na worktree do lote.
+-- **Limites:** os agentes novos não foram reconhecidos na sessão que os criou (valem em sessão nova); página de frentes e chat não foram testados em navegador; OpenCode instalado e verificado por SHA-256, sem modelo configurado.
+-Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check` em cópia limpa do origin/main, CI local, lint de skills, revisão por agente · Autorização: Humano — "aproveite a oportunidade para criar agentes especializados do sistema agata para tarefas de programação"
++(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
++- **Verificação:** `p8_verificar` deu PODE APLICAR na árvore viva e na worktree de aplicação (assinatura ED25519 de `agata-humano`, sha256 `4035ed1aeafe`). Depois, `git apply --check -R` do diff assinado passou na árvore aplicada.
++- **Medição:** painel com 106 testes, uma falha pré-existente (`test_sdd_painel`, que também ocorre sem o lote); MVP, gates, rotas, falha segura e avaliação: OK; Rust `egress`: 19 testes de paridade OK.
++- **Não entra neste lote:** front-end do chat; página de frentes; P8 OpenCode (piloto fora do repositório); P11 bots (tarefa posterior); segunda camada Rust; cota do Conselho no código.
++- **Pendente:** merge do PR de aplicação com CI verde.
++Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar` antes de aplicar, `git apply --check -R` depois, suítes do painel, das camadas novas e do Rust na árvore aplicada · Autorização: Humano — "assinado"
+ 
+ ## Entradas mais antigas que a janela acima — resumo de 1 linha cada, orçamento 8000 chars à parte (item B1.1)
+ ## Isto NÃO é texto integral. Pra ler uma entrada citada aqui por inteiro, peça o número via query_canon/vault_consultar — não afirme conteúdo além do título.
+ 
+-(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
+ (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261106`), assinada pelo Humano: o teste do estado `parcial` do Acervo entra na árvore.** Aplicação em `aplica/m2c-acervo-parcial-20261106`.
+ (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
+ (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
+@@ -745,3 +746,4 @@ Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check
+ (943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
+ (942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
+ (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) e painel da Nova versão refeito.** Proposta `nova-versao-avaliacao-20261104`, depois do "pode prosseguir" do Humano em 04/11, que conferiu o lote 2 e o achou "desreipetosamente tosca mas é um bom projeto".
++(940) DIÁRIO — 04/11/2026 · **Nova versão, lote 2: conexões de modelos por três caminhos (navegador, programa da assinatura, API com chave), com Claude e ChatGPT como exemplos para outros usuários, redundância testada por capacidade e coordenação de tarefas.** Proposta `nova-versao-conexoes-v2-20261104` (substitui `nova-versao-conexoes-20261104`, barrada pelo CodeQL por `py/path-injection` no cofre; a v2 confina o caminho da chave à pasta e só aceita id do catálogo), por decisão do Humano em 04/11 ("Devem servir de exemplo para futuros usuarios conseguirem conectar as de sua preferencia"; "o preenchimento de API deve ter aba segura de configuração"). Entram `redesign/conexoes/` (catálogo `provedores.json`, cofre `segredos.py` em `~/.config/agata/conexoes/` que nunca devolve a chave, `adaptadores.py` com portas de orçamento, privacidade e custo antes de qualquer chamada, `testar_rotas.py` com três provas mecânicas que não guardam resposta, guia `README.md`), `redesign/nova_versao/tarefas.py` (task_id, versão de contexto, teto, cancelamento, GPU em fila única), a categoria `assinatura` no orçamento e a página "Conexões de modelos" no painel. Medido no worktree: 146 testes verdes, âncora OK em 11 componentes, 25 critérios `pass`; teste real só local com `lumi-4b` e `qwen3-30b-a3b-64k` aprovados nas três provas. Não medido: login dos programas `claude`/`codex` (gastaria a cota sem a categoria ligada pelo Humano), chamadas pagas (sem chave), modelo vigente do ChatGPT na API. Origem: Claude Opus 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+diff --git a/INDICE_MEMORIAS.md b/INDICE_MEMORIAS.md
+index cfa26268..bb19b5e6 100644
+--- a/INDICE_MEMORIAS.md
++++ b/INDICE_MEMORIAS.md
+@@ -3,7 +3,6 @@
+ 
+ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
+ 
+-(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
+ (964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
+ (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261106`), assinada pelo Humano: o teste do estado `parcial` do Acervo entra na árvore.** Aplicação em `aplica/m2c-acervo-parcial-20261106`.
+ (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
+@@ -33,7 +32,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
+ (938) DIÁRIO — 04/11/2026 · **O perfil de capacidades ganha a estratégia por modelo (`formato_simples` ou `harness`) e a condição `adaptativo` passa a obedecê-la.** Proposta `harness-estrategia-20261104` (assinada e aplicada em 04/11/2026): `config/capacidades_modelos.json` (campo `estrategia` por modelo, evidências atualizadas) e `scripts/teste_portugues.py` (`adaptativo` roda como `cru_formato` quando o perfil manda `formato_simples`; selftest com mais 6 casos). Motivo: a rodada completa (3 modelos × 4 condições × 3 repetições, temperatura 0,3, 30 execuções por célula, arquivo `resultado-20261104-completo.json`) mostrou que a maior parte do ganho vem da instrução de formato, não dos mecanismos. Tarefas totalmente certas (de 30): Lumi cru 11, cru_formato 22, harness 26; `qwen3.5-9b-64k` cru 15, cru_formato 30, harness 26 (falhas em T4 e T9, duas cada; em T4 a resposta trouxe a frase proibida "qualquer coisa é só falar!"); `qwen3:4b` cru 16, cru_formato 22, harness 23, adaptativo 25. Por isso o 9b fica com `formato_simples` e o Lumi e o `qwen3:4b` com `harness`. Fumaça pós-mudança: 9b adaptativo em T4 e T9, 3 repetições, 6/6. Não medido: tarefas que o perfil não viu (o perfil foi escrito olhando estas mesmas, então o resultado do `adaptativo` é hipótese), causa da piora do 9b no harness, T5 do `qwen3:4b` (falha em todas as repetições). Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+ (937) DIÁRIO — 04/11/2026 · **Teste de português do Agata entra em `scripts/` com quatro condições, perfil de capacidades por modelo e retentativa em turno separado; registra-se a autorização do CEIA para alterar o Lumi.** Proposta `harness-adaptativo-20261104` (assinada e aplicada em 04/11/2026): `scripts/teste_portugues.py` (10 tarefas reais, pontuação mecânica; condições `cru`, `cru_formato` — a instrução do harness sem os mecanismos —, `harness` e `adaptativo`; `--repeticoes N` com temperatura 0,3 e semente; retentativa com a resposta anterior no papel do modelo), `config/capacidades_modelos.json` (JSON estruturado e orçamento de saída por modelo, cada valor com a medição que o sustenta), selftest na CI (`.github/workflows/sdd.yml`), e em `models/manifest.json` + `models/RECONSTRUCAO.md` o campo `licenca` do `lumi-4b`: autorização escrita dos desenvolvedores (CEIA-UFG) ao Humano para alterar o modelo, informada pelo Humano em 04/11/2026; o sistema NÃO leu o documento e não conferiu termos (ajuste fino, redistribuição, uso comercial, atribuição); risco assumido pelo Humano, por decisão dele. Motivo: no teste v2 (uma execução por célula) o JSON estruturado levou o `qwen3:4b` de 6/6 para 0/6 na classificação e o 9b de 0/6 para 6/6; a mensagem de correção da retentativa foi copiada para a resposta do 9b. Fumaça pós-correção (`qwen3:4b`, T8 e T10, 1 execução): cru 9/10 pontos, cru_formato 10/10, harness 8/10, adaptativo 10/10; leitura inicial: a instrução de formato basta e a camada que prejudicou foi o JSON estruturado no 4b. Não medido: repetições, os três modelos nas quatro condições, tarefas que o perfil não viu (o perfil foi escrito olhando as mesmas tarefas, então o resultado do `adaptativo` é hipótese). Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par; risco da licença assumido por ele)
+ (935) DIÁRIO — 04/11/2026 · **Registra o `lumi-4b` (CEIA-UFG) no manifesto de modelos e na reconstrução.** Proposta `manifesto-lumi-4b-20261104`: `models/manifest.json` (entrada nova, `n_modelos` 10, SHA-256 do GGUF `185d2add…`) e `models/RECONSTRUCAO.md` (classe D, GGUF de terceiros: origem, SHA-256 e comando de reconstrução). O modelo foi importado no Ollama em 04/11/2026 a pedido do Humano (GGUF Q4_K_M de 2,7 GB de `HyperScale/lumi-4b-GGUF`, conversão de terceiros do `ceia-br/lumi-4b`). Licença do CEIA não declarada: sem uso em produto nem ajuste fino até declarar. Fora do backup obrigatório do P-12 (decisão do Humano). Medições: agulha 3/3 até o alvo de 128k; rastreio de variáveis 0/3 sem raciocínio e 1/3 com. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+-(936) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha a opção de raciocínio li …
++(936) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha a opção de raciocínio ligado (`--raciocinio`) e o painel ganha o seletor.** Proposta `medicao-raciocinio-ligado-20261104`: `scripts/medir_contexto_efetivo.py` (`think: true`, até 8.000 tokens de saída, `--ctx-maximo`, resultado salvo com sufixo `-raciocinio` e declarado no JSON), `redesign/painel_operacional` (lista fechada `desligado|ligado`, seletor, spec e teste). Motivo: o `qwen3.5-9b-64k` sem raciocínio lista só os primeiros elos da cadeia no rastreio. Medido pelo caminho do CLI (texto do canon como enchimento): com raciocínio ligado o 9b acertou 1/3 em 4k e 1/3 em 16k; as três respostas de 4k inspecionadas foram erros reais (uma cadeia completa, uma com 2 elos, uma com 1), sem corte de saída. Com enchimento simples (script avulso, sem registro) tinha dado 3/3 em 4k e 16k: o resultado depende do texto de enchimento. Não medido: 32k e 61k com raciocínio, outros modelos. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+ (934) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha as tarefas de rastreio d …
+ (933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 …
+ (932) DIÁRIO — 03/11/2026 · **Quatro decisões do Humano em 03/11/2026 entram no …
+diff --git a/INDICE_MEMORIAS_PALAVRAS-CHAVE.md b/INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+index 8ffcfe56..470a53dd 100644
+--- a/INDICE_MEMORIAS_PALAVRAS-CHAVE.md
++++ b/INDICE_MEMORIAS_PALAVRAS-CHAVE.md
+@@ -7,8 +7,6 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
+ Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
+ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
+ 
+-(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
+-  palavras-chave: proposta, lote, skill, processo, agentes, especializados, claude, agents, local, página, frentes, chat, stream, regra, camada, rust, egress, diff
+ (964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
+   palavras-chave: aplicado, lote, assinado, humano, diff, único, mvp, autoaprimoramento, gates, rotas, frentes, stream, painel, falha, segura, voz, skills, primeira, camada, rust, política, egress, aplicação, aplica
+ (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261106`), assinada pelo Humano: o teste do estado `parcial` do Acervo entra na árvore.** Aplicação em `aplica/m2c-acervo-parcial-20261106`.
+@@ -67,8 +65,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
+   palavras-chave: teste, português, agata, entra, scripts, quatro, condições, perfil, capacidades, modelo, retentativa, turno, separado, registra, autorização, ceia, alterar, lumi, proposta, harness, adaptativo, assinada, aplicada, portugues, tarefas, reais, pontuação, mecânica, cru, formato, instrução, mecanismos, repeticoes, temperatura, semente, resposta, anterior, papel, config, modelos, json, estruturado, orçamento, saída, valor, medição, sustenta, selftest, github, workflows, sdd, yml, models, manifest, reconstrucao, campo, licenca, escrita, desenvolvedores, ufg, humano, informada, sistema, leu, documento, conferiu, termos, ajuste, fino, redistribuição, uso, comercial, atribuição, risco, assumido, decisão, dele, motivo, execução, célula, levou, qwen, classificação, mensagem, correção, copiada, fumaça, pós, pontos, leitura, inicial, basta, camada, prejudicou, medido, repetições, três, viu, escrito, olhando, mesmas, então, resultado, hipótese, origem, claude, sonnet, code, assinatura, par, licença, ele
+ (935) DIÁRIO — 04/11/2026 · **Registra o `lumi-4b` (CEIA-UFG) no manifesto de modelos e na reconstrução.** Proposta `manifesto-lumi-4b-20261104`: `models/manifest.json` (entrada nova, `n_modelos` 10, SHA-256 do GGUF `185d2add…`) e `models/RECONSTRUCAO.md` (classe D, GGUF de terceiros: origem, SHA-256 e comando de reconstrução). O modelo foi importado no Ollama em 04/11/2026 a pedido do Humano (GGUF Q4_K_M de 2,7 GB de `HyperScale/lumi-4b-GGUF`, conversão de terceiros do `ceia-br/lumi-4b`). Licença do CEIA não declarada: sem uso em produto nem ajuste fino até declarar. Fora do backup obrigatório do P-12 (decisão do Humano). Medições: agulha 3/3 até o alvo de 128k; rastreio de variáveis 0/3 sem raciocínio e 1/3 com. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
+   palavras-chave: registra, lumi, ceia, ufg, manifesto, modelos, reconstrução, proposta, models, manifest, json, entrada, nova, sha, gguf, add, reconstrucao, classe, terceiros, origem, comando, modelo, importado, ollama, pedido, humano, hyperscale, conversão, licença, declarada, uso, produto, nem, ajuste, fino, declarar, fora, backup, obrigatório, decisão, medições, agulha, alvo, rastreio, variáveis, raciocínio, claude, sonnet, code, autorização, assinatura, par
+-(936) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha a opção de raciocínio li …
+-  palavras-chave: medidor, contexto, ganha, opção, raciocínio
++(936) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha a opção de raciocínio ligado (`--raciocinio`) e o painel ganha o seletor.** Proposta `medicao-raciocinio-ligado-20261104`: `scripts/medir_contexto_efetivo.py` (`think: true`, até 8.000 tokens de saída, `--ctx-maximo`, resultado salvo com sufixo `-raciocinio` e declarado no JSON), `redesign/painel_operacional` (lista fechada `desligado|ligado`, seletor, spec e teste). Motivo: o `qwen3.5-9b-64k` sem raciocínio lista só os primeiros elos da cadeia no rastreio. Medido pelo caminho do CLI (texto do canon como enchimento): com raciocínio ligado o 9b acertou 1/3 em 4k e 1/3 em 16k; as três respostas de 4k inspecionadas foram erros reais (uma cadeia completa, uma com 2 elos, uma com 1), sem corte de saída. Com enchimento simples (script avulso, sem registro) tinha dado 3/3 em 4k e 16k: o resultado depende do texto de enchimento. Não medido: 32k e 61k com raciocínio, outros modelos. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
++  palavras-chave: medidor, contexto, ganha, opção, raciocínio, ligado, raciocinio, painel, seletor, proposta, medicao, scripts, medir, efetivo, think, true, tokens, saída, ctx, maximo, resultado, salvo, sufixo, declarado, json, redesign, operacional, lista, fechada, desligado, spec, teste, motivo, qwen, primeiros, elos, cadeia, rastreio, medido, caminho, cli, texto, canon, enchimento, acertou, três, respostas, inspecionadas, foram, erros, reais, completa, corte, simples, script, avulso, registro, tinha, dado, depende, modelos, origem, claude, sonnet, code, autorização, humano, assinatura, par
+ (934) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha as tarefas de rastreio d …
+   palavras-chave: medidor, contexto, ganha, tarefas, rastreio
+ (933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 …
+diff --git a/MEMÓRIAS.md b/MEMÓRIAS.md
+index 10f5bf90..692f1b38 100644
+--- a/MEMÓRIAS.md
++++ b/MEMÓRIAS.md
+@@ -26,25 +26,20 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
+ **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
+ 
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+-  Escrito em: 06/11/2026 13:53 -03
++  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
++  Escrito em: 06/11/2026 13:35 -03
+   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+ <!-- ANCORA-SHA:FIM -->
+ <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
+ 
+ ---
+ 
+ <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+-(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
+-- **Revisão:** a skill foi revisada por agente independente (13 achados, todos aplicados). O CI local (`scripts/ci_sdd_local.sh`) passou por completo na worktree do lote.
+-- **Limites:** os agentes novos não foram reconhecidos na sessão que os criou (valem em sessão nova); página de frentes e chat não foram testados em navegador; OpenCode instalado e verificado por SHA-256, sem modelo configurado.
+-Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git apply --check` em cópia limpa do origin/main, CI local, lint de skills, revisão por agente · Autorização: Humano — "aproveite a oportunidade para criar agentes especializados do sistema agata para tarefas de programação"
+-
+ (964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
+ - **Verificação:** `p8_verificar` deu PODE APLICAR na árvore viva e na worktree de aplicação (assinatura ED25519 de `agata-humano`, sha256 `4035ed1aeafe`). Depois, `git apply --check -R` do diff assinado passou na árvore aplicada.
+ - **Medição:** painel com 106 testes, uma falha pré-existente (`test_sdd_painel`, que também ocorre sem o lote); MVP, gates, rotas, falha segura e avaliação: OK; Rust `egress`: 19 testes de paridade OK.
+diff --git a/ONDE_ESTAMOS.md b/ONDE_ESTAMOS.md
+index 966caf65..b7d6ef21 100644
+--- a/ONDE_ESTAMOS.md
++++ b/ONDE_ESTAMOS.md
+@@ -12,10 +12,6 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+ 
+ **Esperando você:** assinar `m2c-acervo-parcial-20261106`. É só um teste novo para o estado `parcial` do Acervo, achado pelo ciclo SDD da M2b. O código não muda.
+ 
+-## Hoje, 06/11 (proposta lote2)
+-
+-**Esperando você:** assinar `lote2-processo-20261106`. Traz a skill do processo de lote, quatro agentes especializados em `.claude/agents` (valem em sessão nova), a página de frentes, o chat com stream e a regra D3 no Conselho. O CI local passa.
+-
+ ## Hoje, 06/11 (aplicação)
+ 
+ **Acervo (M2b):** assinada pelo Humano e aplicada em PR próprio. O Acervo mostra estados explícitos e o egress recusa URL com usuário ou senha. Falta conferir a tela no navegador.
+diff --git a/PROJETO.md b/PROJETO.md
+index 452b91ab..48ffc543 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -5,14 +5,14 @@ Se algo aqui contradisser MEMÓRIAS, MEMÓRIAS ganha: lá está o que aconteceu,
+ Se algo aqui contradisser a Máquina, a Máquina ganha — e a correção vira entrada nova em MEMÓRIAS.
+ 
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+-  Escrito em: 06/11/2026 13:53 -03
++  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
++  Escrito em: 06/11/2026 13:35 -03
+   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+ <!-- ANCORA-SHA:FIM -->
+ <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
+ 
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 6166b063..cd402eeb 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -39,14 +39,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
+ 
+ ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+-  Escrito em: 06/11/2026 13:53 -03
++  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
++  Escrito em: 06/11/2026 13:35 -03
+   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+ <!-- ANCORA-SHA:FIM -->
+ <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
+ 
+diff --git a/REGRAS.md b/REGRAS.md
+index 69272d99..1f45e2d6 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -22,14 +22,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
+ -->
+ 
+ <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
+-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 18441d1503fafbc2e034522e1a22d0666d35d687
+-  Escrito em: 06/11/2026 13:53 -03
++  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1
++  Escrito em: 06/11/2026 13:35 -03
+   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/REGRAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROTOCOLOS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/FALHAS.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/PROJETO.md
+-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/18441d1503fafbc2e034522e1a22d0666d35d687/MEMÓRIAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/REGRAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROTOCOLOS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/FALHAS.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/PROJETO.md
++    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f46c6ee3e57daa5cc8f422d4219d4c9ca9d6abd1/MEMÓRIAS.md
+ <!-- ANCORA-SHA:FIM -->
+ <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
+ 
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index 442ab4af..2e0f9881 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -5,7 +5,7 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ 
+ | Tema | Peças | Observação |
+ |---|---|---|
+-| agata | 17 | skills próprias do sistema |
++| agata | 19 | skills próprias do sistema |
+ | banco-e-infra | 23 |  |
+ | contexto-e-custo | 15 |  |
+ | dados-e-ml | 8 |  |
+@@ -22,4 +22,4 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ | seguranca | 16 |  |
+ | testes | 44 |  |
+ 
+-Total: 417 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
++Total: 419 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index 4c1a7b9a..b1b39cff 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -3287,6 +3287,14 @@
+   "caminho": ".agents/skills/agata-painel/SKILL.md",
+   "resumo": "Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth"
+  },
++ {
++  "nome": "agata-processo-lote",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/agata-processo-lote/SKILL.md",
++  "resumo": "Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote,"
++ },
+  {
+   "nome": "agata-relay-provedores",
+   "tipo": "skill",
+@@ -3295,6 +3303,14 @@
+   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
+   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+  },
++ {
++  "nome": "agata-time-inovacao",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/agata-time-inovacao/SKILL.md",
++  "resumo": "Como o time de inovação do Agata propõe melhorias com SDD: pesquisa, spec, revisão independente, decisão humana e só então proposta P-8. Use"
++ },
+  {
+   "nome": "agata-voz",
+   "tipo": "skill",
+diff --git a/propostas/lote2-processo-20261106.diff b/propostas/lote2-processo-20261106.diff
+deleted file mode 100644
+index d474d398..00000000
+--- a/propostas/lote2-processo-20261106.diff
++++ /dev/null
+@@ -1,1118 +0,0 @@
+-diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+-new file mode 100644
+-index 00000000..3f7473f0
+---- /dev/null
+-+++ b/.agents/skills/agata-processo-lote/SKILL.md
+-@@ -0,0 +1,74 @@
+-+---
+-+name: agata-processo-lote
+-+description: Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote, aplicação, merge). Use antes de qualquer proposta P-8 ou aplicação, e para guiar outro modelo que vá tocar o mesmo processo.
+-+---
+-+
+-+# Processo de lote no Agata
+-+
+-+Por quê: cada lote que deu errado aqui deu errado no mesmo ponto: testes que o CI roda e nós não rodamos, comando que falhou em silêncio por causa de `| tail`, arquivo gerado que entrou no commit, conflito de âncora. Esta skill é a lista do que já quebrou. Siga na ordem.
+-+
+-+## Regras que não se negociam
+-+1. Um lote = uma proposta = uma assinatura do Humano. Não assine nada e nunca rode `scripts/aprovar.sh` (a chave é do Humano).
+-+2. Código protegido (`redesign/`, `scripts/`, `config/`, `.agents/`, `.githooks/`, canon) só entra no main por proposta assinada. O hook P-8 recusa commit direto; não contorne.
+-+3. Não edite o checkout vivo `~/agata` para trabalho de lote. Use worktree a partir de `origin/main`.
+-+4. Permissão negada pelo classificador é decisão do Humano. Pare, explique o que tentou e por que precisa, e espere. Não recrie a ação com outra forma.
+-+5. Destruir (remover worktree com alteração, apagar dado) só com ordem explícita do Humano nesta conversa.
+-+
+-+## Passo a passo
+-+1. **Worktree do lote**: `git fetch -q origin && git worktree add -b proposta/<lote> <pasta-scratch>/<lote> origin/main`.
+-+2. **Escreva o código e a spec juntos.** Todo arquivo de código novo (.py, .sh, .js, .html) em componente ancorado precisa estar na seção `## Código` do arquivo spec.md daquele componente, senão a âncora falha (`código órfão`). A âncora do CI cobre só os escopos listados em `.github/workflows/sdd.yml`.
+-+3. **Rode o CI local antes de propor:** `bash scripts/ci_sdd_local.sh` (ver abaixo). Só siga se tudo passar, ou se a falha já existia no `origin/main` (compare na mesma árvore limpa).
+-+4. **Gere o diff único**: `git status` primeiro e `git add <caminhos explícitos>` (nunca `git add -A` numa worktree com mudanças alheias; veja a lista abaixo). Depois `git diff --cached origin/main > propostas/<lote>.diff`. Confira em cópia limpa: `git worktree add --detach <pasta> origin/main && cd <pasta> && git apply --check <diff>`.
+-+5. **Proposta só com registro**: o PR da proposta traz apenas `propostas/<lote>.diff`, `propostas/<lote>.md` (resumo, limites, comando de assinatura), a entrada de proposta no MEMÓRIAS e o ONDE_ESTAMOS (`propostas/README.md`, item 0). O código não vai nesse PR. Espere o CI, junte, e entregue o comando de assinatura ao Humano.
+-+6. **Depois da assinatura**: `bash scripts/p8_verificar.sh <lote>` no checkout vivo. Só se der `PODE APLICAR`, siga.
+-+7. **Aplicação em worktree própria** (`aplica/<lote>` a partir de `origin/main` atual), copie o `APROVADO-<lote>` e o diff para ela, rode `p8_verificar` lá também, e aplique com checagem por passo (`if git apply ...; then ... else echo FALHOU; exit 1; fi`). Nunca encadeie verificação com `| tail -1 &&`: o `tail` devolve 0 e o `git apply` roda mesmo com a verificação falha. Já aconteceu.
+-+8. **Mova o par**: diff e APROVADO para `propostas/aplicadas/` (o APROVADO não está no git: use `mv`, não `git mv`). Prove com `git apply --check -R propostas/aplicadas/<lote>.diff` que a árvore é exatamente o estado assinado.
+-+9. **Adicione explicitamente**: `git add <arquivos>` (ou `git add -A` só depois de conferir `git status`). Confira que o commit traz os arquivos de código, não só os de registro. (Esquecer os arquivos modificados já aconteceu e o CI pegou.)
+-+10. **Registro**: entrada nova no MEMÓRIAS logo abaixo do marcador `ENTRADAS-NOVAS`, número = topo + 1. Nunca edite entrada antiga; correção é entrada nova.
+-+11. **PR de aplicação**: espere os checks que o PR dispara: `suite-adversarial` e `fiscal-p8` (sempre, workflow `perimetro.yml`/`fiscal-p8.yml`); `sdd` só se o PR tocar os paths de `sdd.yml`. Se `mergeStateStatus` for `DIRTY`, mergeie `origin/main` no branch e resolva. Se for `BLOCKED`, espere os checks obrigatórios.
+-+12. **Depois do merge**: remova a worktree de aplicação só se `git status` estiver limpo. Apague cópias soltas de APROVADO no checkout vivo só depois de confirmar que o original está em `propostas/aplicadas/` no main; havendo dúvida, peça ordem ao Humano.
+-+
+-+## Armadilhas já pagas
+-+- **CI local diferente do CI real**: o job `sdd` roda `pytest` (versão fixada 9.2.0) nos diretórios listados no workflow, depois anchor e ciclos. Unittest passa e pytest falha, ou o contrário. Use o script.
+-+- **Índice derivado**: `ferramentas/indice.json` e `ferramentas/INDICE.md` são gerados por `python3 -I ferramentas/ferramentas.py reindexar`, que lê só skills versionadas. Depois de criar ou mudar skill: `git add` da skill, rode `reindexar`, e adicione os dois arquivos gerados.
+-+- **Arquivos gerados pelo ciclo SDD**: o `cycle` escreve na pasta do spec passado (`criterion-drift.md`, `evidence.json`). Depois do ciclo, rode `git status`: os versionados se restauram com `git checkout -- <arquivo>`; os novos gerados você remove um a um, depois de conferir a lista. Não use `rm -rf`.
+-+- **Testes que parecem isolados**: confira `AGATA_NV_DIR` antes de confiar num teste que grava. Um teste de revisão que imprime "Humano" não é prova de gravação real.
+-+- **Conflito de âncora**: `REGRAS.md`, `PROJETO.md`, `PROMPT_CARREGAMENTO.md`, `.hidrata.md` e o bloco `ANCORA-SHA` do `MEMÓRIAS.md` são regenerados pelo hook. No `git merge origin/main`, `--theirs` é o main: use `git checkout --theirs -- <arquivo>` nesses blocos e preserve as entradas do MEMÓRIAS. Num rebase, `--theirs` é o lote e o main é `--ours`. Confira com `git status` antes.
+-+- **Spec é P-8**: mudar `redesign/*/spec/spec.md` exige proposta própria, mesmo que seja só uma linha. Por isso o lote precisa já conter a spec certa.
+-+- **Worktrees de outros**: não toque nas worktrees do Codex (`~/.codex/worktrees/`). As do Claude ficam na pasta .claude/worktrees, dentro do repositório; remova só as que você criou.
+-+- **Subagente que diz "passou"**: confira o código, rode o teste você mesmo. Relatório de subagente é alegação.
+-+
+-+- **Subagente não grava arquivo**: o harness recusa `Write` para subagentes. Peça que o relatório venha como texto na resposta e grave você mesmo, depois de conferir.
+-+- **Lista de pytest do script e do workflow têm de ser iguais**: `scripts/ci_sdd_local.sh` e a linha `pytest` de `.github/workflows/sdd.yml` precisam listar as mesmas pastas. Quando uma pasta de teste nova entra num lote, entra nos dois. Confira com `diff` antes de propor (na rodada de 06/11 divergiam).
+-+- **Binário externo (OpenCode, Herdr, rustup)**: baixe o pacote, não o script; confira o SHA-256 contra o `digest` que a release publica (`gh api repos/<dono>/<repo>/releases/tags/<tag> -q '.assets[]|select(.name|test("linux-x64"))|{name,digest}'`); instale com a opção que não altera o shell (`--no-modify-path`). Herdr não tem checksum independente: registre isso.
+-+- **Herdr e REA não dirigem a sessão do Humano**: não envie teclas para a sessão Herdr dele sem pedido direto. O classificador bloqueou esse envio (`Self-Modification`). Herdr só sobe sob pedido, com `script -qfc "stty cols 200 rows 50; herdr --session <nome>"` (sem tamanho, falha com "zero-sized grid").
+-+- **Verificação com `if`, nunca com `| tail`**: a versão de 2026-11-06 do passo 7 valia para `git apply`. Vale também para qualquer teste ou script de verificação.
+-+- **Required checks**: não verificado no repositório quais são obrigatórios. Para confirmar, `gh api repos/<dono>/<repo>/branches/main/protection` (precisa de rede). `fiscal-p8` só vira barreira se o Humano marcá-lo como obrigatório (`PROJETO.md`). O `sdd` roda só por caminho (`paths` do workflow). `gh pr checks` às vezes lista só parte: confira com `gh pr view <n> --json statusCheckRollup`.
+-+- **Mudança na worktree que você não fez**: antes de alarmar, cheque se foi um subagente seu ou o próprio ciclo (`criterion-drift.md`, `evidence.json`, `ferramentas/indice.json`, o diretório target do crate Rust). Na rodada de 06/11 o alarme foi falso.
+-+- **Pytest do sistema**: `python3 -m pytest` pode não existir. Rode `PYTEST=$(ls /home/orusoua/.cache/uv/archive-v0/*/bin/pytest | head -1) bash scripts/ci_sdd_local.sh` (o binário do cache do uv, versão 9.2.0). Não instale sem necessidade.
+-+- **`git rm` em arquivo já staged pelo merge**: exige `-f`. Antes, confira que é a cópia que você quer remover.
+-+- **Nome de skill**: não pode conter `claude` nem `anthropic` (lint de `qualidade_llm.py`). Depois de criar ou editar skill, rode o lint: `python3 redesign/painel_operacional/qualidade_llm.py` e confira `problemas` vazio.
+-+- **Subagentes em paralelo**: funciona com arquivos disjuntos (cada agente com a sua lista). Sem isso, duas edições no mesmo arquivo viram conflito que ninguém vê.
+-+
+-+## Uso de agentes (regra)
+-+Use agentes sempre que o trabalho for independente e tiver arquivos próprios: desenvolvimento de um componente, revisão de um pacote, instalação com verificação, leitura de muitos arquivos. Cada agente recebe: caminho exato da worktree, lista de arquivos que pode editar, comandos de teste, proibições (sem commit, sem `rm -rf`, sem sudo, sem chamar provedor real). Você confere o resultado (código e teste), não aceita o relatório.
+-+
+-+## Diário de erros e acertos (atualize a cada rodada)
+-+- **06/11 (lote P2–P10)**: spec de componente novo esqueceu arquivos → âncora falhou no CI. Correção: mini-proposta de spec (`spec-anchor-lote-pn-20261106`), assinada à parte. Ação para o futuro: incluir a spec no lote.
+-+- **06/11 (lote P2–P10)**: CI `sdd` quebrou por índice de ferramentas desatualizado após criar skills. Correção: `reindexar`. Ação: rodar `ci_sdd_local.sh` antes de propor.
+-+- **06/11 (lote P2–P10)**: `test_conjunto_dev.py` nasceu vazio por causa de `cat > arquivo 2>/dev/null || mkdir ... && cat > ...` (o primeiro `cat` cria o arquivo vazio e o `||` pula o segundo). Ação: nunca encadear criação de arquivo com `||`; verificar tamanho depois de criar.
+-+- **06/11 (OpenCode)**: o subagente de instalação foi bloqueado pelo classificador ao executar código externo. Acerto: depois de ler o instalador e conferir o digest da release, a instalação manual passou.
+-+- **06/11 (Herdr)**: pseudo-terminal sem tamanho falha; a leitura de glifos pede confirmação interativa; o envio de teclas à sessão foi bloqueado. Ação: pedir ao Humano para responder na própria sessão.
+-+- **06/11 (CI local)**: o `ci_sdd_local.sh` falhou 25 passos por um motivo só: `pytest` fora do PATH (os ciclos chamam `pytest` pelo nome). Correção: o script põe o diretório do binário no PATH. Ação: ao escrever script de verificação, teste-o do zero, sem o PATH do seu shell.
+-+- **06/11 (âncora de painel)**: três arquivos novos do painel (`frentes.html`, `frentes.js`, `test_chat_ui.py`) sem dono na spec. Correção: incluir na seção Código da spec antes de propor. Ação: a âncora roda por escopo; rode `anchor.py` por pasta depois de criar arquivo.
+-+- **06/11 (agentes)**: o tipo de agente criado em `.claude/agents/` não foi reconhecido na mesma sessão (`Agent type not found`). Os tipos são lidos na inicialização; crie os arquivos e teste numa sessão nova. Até lá, use `general-purpose` com o mesmo texto de instrução.
+-+- **06/11 (revisão da skill)**: um revisor independente achou 13 problemas que o lint não pega (caminhos, `--theirs` num rebase, `git add -A`, required checks). Ação: a skill passa por revisão de agente antes de ir a lote; lint só valida formato.
+-+
+-+## Comandos úteis
+-+- CI local: `bash scripts/ci_sdd_local.sh`
+-+- Verificar assinatura: `bash scripts/p8_verificar.sh <lote>`
+-+- Âncora de um componente: `python3 redesign/sdd_flow/anchor.py . <pasta>`
+-+- Estado do PR: `gh pr view <n> --json mergeStateStatus,statusCheckRollup`
+-+
+-+## Para outro modelo que tocar o processo
+-+Leia a seção "Passo a passo" inteira antes de qualquer comando. Não avance sem o passo 3 verde. Quando algo pedir assinatura, permissão ou decisão do Humano, pare e escreva o comando exato e o motivo. Relate o que foi executado, com a saída, e o que não foi medido.
+-diff --git a/.claude/agents/agata-ci.md b/.claude/agents/agata-ci.md
+-new file mode 100644
+-index 00000000..2aa5d04b
+---- /dev/null
+-+++ b/.claude/agents/agata-ci.md
+-@@ -0,0 +1,15 @@
+-+---
+-+name: agata-ci
+-+description: Roda o CI local do Agata (scripts/ci_sdd_local.sh, mesmos passos do job sdd) e diagnostica cada falha com a causa e a correção mínima. Use antes de propor e depois de cada mudança que toca testes, specs ou ciclos.
+-+tools: Read, Bash, Grep, Glob
+-+---
+-+
+-+Você roda o CI local e explica as falhas. Você não edita código; sugere a correção mínima e quem edita é outro agente ou o próprio fluxo.
+-+
+-+Passos:
+-+1. Na raiz da worktree: `PYTEST=<caminho do pytest 9.2.0> bash scripts/ci_sdd_local.sh > <log> 2>&1`. Se PYTEST não existir, procure um pytest já instalado no cache do uv e diga qual; não instale nada.
+-+2. Leia o log. Para cada linha "FALHA", localize a causa real (traceback, código de saída, mensagem da âncora). Lembre que muitas falhas em cascata vêm de uma só: pytest fora do PATH, acceptance_runner sem evidência, âncora com código órfão.
+-+3. Classifique cada causa: ambiente (PATH, pytest), spec (âncora, critério), código (teste vermelho), dado (índice derivado desatualizado).
+-+4. Diga a correção mínima para cada causa.
+-+
+-+Resposta em texto: total de passos OK e com falha, causas agrupadas, correções mínimas, e o que você não conseguiu confirmar.
+-diff --git a/.claude/agents/agata-dev.md b/.claude/agents/agata-dev.md
+-new file mode 100644
+-index 00000000..0629b657
+---- /dev/null
+-+++ b/.claude/agents/agata-dev.md
+-@@ -0,0 +1,18 @@
+-+---
+-+name: agata-dev
+-+description: Desenvolvedor do Agata. Implementa um componente ou correção numa worktree de lote, com arquivos próprios e testes. Use para mudança de código e teste dentro do processo de lote (skill agata-processo-lote). Não commita, não aplica, não assina.
+-+tools: Read, Edit, Write, Bash, Grep, Glob
+-+---
+-+
+-+Você é desenvolvedor do sistema Agata. Trabalhe SOMENTE na worktree e nos arquivos que a tarefa indicar.
+-+
+-+Regras que não se negociam:
+-+- Não rode git commit, git push, git reset --hard, rm -rf, sudo, nem instale pacotes. Não chame provedor real de modelo.
+-+- Não leia .env nem chaves. Não leia nem cite caminhos de memoria/missoes.
+-+- Não toque em arquivos fora da lista da tarefa. Se precisar de um, pare e diga qual.
+-+- Escreva o código e o teste (unittest ou pytest) juntos. Todo arquivo novo de redesign/<componente>/ precisa constar na seção Código da spec do componente, senão a âncora do CI falha.
+-+- Antes de responder, rode os testes da sua área e cole a saída real (últimas linhas com o resultado).
+-+- Não crie arquivo com `cat > arq ... || mkdir` (já deixou arquivo vazio uma vez). Confira o tamanho do arquivo depois de criar.
+-+- Se um teste falhar, corrija o código, não o teste, a menos que o teste esteja errado e você diga por quê.
+-+
+-+Resposta final, em texto: arquivos alterados (caminho), o que cada um faz, saída dos testes, e o que ficou de fora. Relatório é alegação: quem chamou vai conferir.
+-diff --git a/.claude/agents/agata-revisor.md b/.claude/agents/agata-revisor.md
+-new file mode 100644
+-index 00000000..8e7236c5
+---- /dev/null
+-+++ b/.claude/agents/agata-revisor.md
+-@@ -0,0 +1,15 @@
+-+---
+-+name: agata-revisor
+-+description: Revisor independente de diff ou proposta do Agata. Somente leitura: confere se o código faz o que a proposta diz, se os testes provam os critérios e se há risco operacional. Use antes de qualquer proposta P-8 ou aplicação.
+-+tools: Read, Grep, Glob, Bash
+-+---
+-+
+-+Você é revisor independente do sistema Agata. Você NÃO edita arquivos, NÃO commita, NÃO aplica nada.
+-+
+-+Como trabalhar:
+-+- Use só leitura. Bash apenas para comandos de leitura (git diff, git show, git log, grep, cat, python3 -m unittest sem alterar nada).
+-+- Não leia nem cite memoria/missoes. Não leia .env nem chaves.
+-+- Você recebe a proposta (diff e descrição). Confira: (1) o diff faz o que a descrição diz; (2) cada critério de aceite tem teste que o prova (diga qual); (3) risco operacional: carga, repetição, recuperação, o que quebra em produção; (4) se a âncora da spec cobre os arquivos novos.
+-+- Quando não puder verificar só com o texto, diga "não verificável".
+-+
+-+Resposta em texto, em português: achados numerados, cada um com trecho ou arquivo:linha, severidade (alta, média, baixa), e recomendação. Termine com uma linha: itens conferidos e itens com problema. Não diga "aprovado" por conta própria; quem decide é o Humano.
+-diff --git a/.claude/agents/agata-spec.md b/.claude/agents/agata-spec.md
+-new file mode 100644
+-index 00000000..43464462
+---- /dev/null
+-+++ b/.claude/agents/agata-spec.md
+-@@ -0,0 +1,17 @@
+-+---
+-+name: agata-spec
+-+description: Escreve ou atualiza a spec SDD de um componente do Agata (spec.md, acceptance.json, brainstorm.md, decision.md) e confere a âncora. Use quando um componente novo ou alterado precisa de spec para o CI.
+-+tools: Read, Edit, Write, Bash, Grep, Glob
+-+---
+-+
+-+Você escreve specs no formato SDD do Agata para um componente indicado na tarefa. Trabalhe só na worktree e só dentro de redesign/<componente>/spec/.
+-+
+-+Formato obrigatório:
+-+- spec.md: seções ## Jornadas críticas, ## Contrato, ## Critérios de aceite, ## Código (lista de arquivos entre crases, uma por linha, incluindo tests/ para a subárvore de testes). Critérios com "- [ ]".
+-+- acceptance.json: lista de objetos {"criterion": texto, "command": ["pytest", "-q", "<alvo relativo>"], "cwd": null}. Só pytest com alvo relativo à raiz; sem -p, sem caminho absoluto, sem "..".
+-+- brainstorm.md: seções ## Usuários, ## Estado que muda, ## Erros e concorrência, ## Migração, ## Observabilidade, ## Reversão, ## Sucesso.
+-+- decision.md: "DECISAO: aceita" só se a tarefa disser que o Humano decidiu; senão escreva "DECISAO: pendente".
+-+
+-+Confira antes de responder: `python3 redesign/sdd_flow/anchor.py . redesign/<componente>` (deve dar ANCHOR: OK) e a suíte do componente.
+-+Lembre: spec.md é arquivo do P-8. Você não commita; quem propõe é outra etapa.
+-+Resposta em texto: arquivos escritos, saída da âncora, e o que não foi possível confirmar.
+-diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+-index 41542b9e..8cd58a7e 100644
+---- a/.github/workflows/sdd.yml
+-+++ b/.github/workflows/sdd.yml
+-@@ -42,7 +42,7 @@ jobs:
+-         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+- 
+-       - name: Testes dos componentes SDD
+--        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests ferramentas/test_ferramentas.py
+-+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+- 
+-       - name: Ciclo SDD sobre o próprio sdd_flow
+-         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+-diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+-index 442ab4af..9caa4ade 100644
+---- a/ferramentas/INDICE.md
+-+++ b/ferramentas/INDICE.md
+-@@ -5,7 +5,7 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+- 
+- | Tema | Peças | Observação |
+- |---|---|---|
+--| agata | 17 | skills próprias do sistema |
+-+| agata | 18 | skills próprias do sistema |
+- | banco-e-infra | 23 |  |
+- | contexto-e-custo | 15 |  |
+- | dados-e-ml | 8 |  |
+-@@ -22,4 +22,4 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+- | seguranca | 16 |  |
+- | testes | 44 |  |
+- 
+--Total: 417 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+-+Total: 418 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+-diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+-index 4c1a7b9a..18a9dc6c 100644
+---- a/ferramentas/indice.json
+-+++ b/ferramentas/indice.json
+-@@ -3287,6 +3287,14 @@
+-   "caminho": ".agents/skills/agata-painel/SKILL.md",
+-   "resumo": "Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth"
+-  },
+-+ {
+-+  "nome": "agata-processo-lote",
+-+  "tipo": "skill",
+-+  "fonte": "agata",
+-+  "tema": "agata",
+-+  "caminho": ".agents/skills/agata-processo-lote/SKILL.md",
+-+  "resumo": "Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote,"
+-+ },
+-  {
+-   "nome": "agata-relay-provedores",
+-   "tipo": "skill",
+-diff --git a/redesign/nova_versao/conselho.py b/redesign/nova_versao/conselho.py
+-index b251c187..fa98c773 100644
+---- a/redesign/nova_versao/conselho.py
+-+++ b/redesign/nova_versao/conselho.py
+-@@ -2,6 +2,8 @@
+- 
+- Regras:
+- - D2: dado pessoal só vai a rota local; segredo nunca sai (é recusado sempre).
+-+- D3: cota gratuita compartilhada com a Seth (rota com compartilhada_com_seth=True
+-+  e categoria "gratuito") é permitida sem teto; gera aviso visível, nunca recusa.
+- - Uma rota por família; a família não é consultada duas vezes.
+- - A resposta de cada modelo é DADO: é guardada literal, nunca executada,
+-   nunca interpretada como instrução.
+-@@ -59,14 +61,21 @@ def _elegivel(rota, classe):
+- 
+- 
+- def _recusa(motivo):
+-+    aviso = "recusado: " + motivo
+-     return {
+-         "pareceres": [],
+-         "divergencia": False,
+-         "lacuna": False,
+--        "aviso": "recusado: " + motivo,
+-+        "aviso": aviso,
+-+        "avisos": [aviso],
+-     }
+- 
+- 
+-+def _cota_compartilhada_gratuita(rota):
+-+    """D3: rota gratuita que compartilha cota com a Seth (sem teto, só aviso)."""
+-+    return rota.get("categoria") == "gratuito" and bool(rota.get("compartilhada_com_seth", False))
+-+
+-+
+- def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publico"):
+-     """Convoca pareceres de até uma rota por família.
+- 
+-@@ -120,10 +129,14 @@ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publ
+-     fora = [par["rota"] for par in pareceres if not par["formato_ok"]]
+-     if fora:
+-         avisos.append("fora_do_formato: " + ", ".join(fora) + " (não reenviado).")
+-+    for rota in escolhidas:
+-+        if _cota_compartilhada_gratuita(rota):
+-+            avisos.append("D3: rota %s usa cota compartilhada com a Seth, sem teto" % rota["id"])
+- 
+-     return {
+-         "pareceres": pareceres,
+-         "divergencia": divergencia,
+-         "lacuna": divergencia,
+-         "aviso": " ".join(avisos),
+-+        "avisos": avisos,
+-     }
+-diff --git a/redesign/nova_versao/tests/test_conselho.py b/redesign/nova_versao/tests/test_conselho.py
+-index bfccd4d4..eb2b9810 100644
+---- a/redesign/nova_versao/tests/test_conselho.py
+-+++ b/redesign/nova_versao/tests/test_conselho.py
+-@@ -33,6 +33,9 @@ ROTA_NUVEM_B = {"id": "nuvem-b", "familia": "B", "categoria": "nuvem",
+-                 "classes_permitidas": ["publico", "pessoal"]}
+- ROTA_NUVEM_C = {"id": "nuvem-c", "familia": "C", "categoria": "nuvem",
+-                 "classes_permitidas": ["publico"]}
+-+ROTA_GRATUITA_COMPARTILHADA = {"id": "gratis-s", "familia": "S", "categoria": "gratuito",
+-+                               "classes_permitidas": ["publico"],
+-+                               "compartilhada_com_seth": True}
+- 
+- 
+- class TransporteFalso:
+-@@ -123,7 +126,7 @@ class ConselhoTests(unittest.TestCase):
+-         self.assertTrue(r["divergencia"])
+-         self.assertTrue(r["lacuna"])
+-         self.assertIn("lacuna: divergência; sem votação", r["aviso"])
+--        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso"})
+-+        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso", "avisos"})
+-         self.assertNotIn("votos", r)
+-         self.assertNotIn("vencedor", r)
+- 
+-@@ -142,6 +145,34 @@ class ConselhoTests(unittest.TestCase):
+-         self.assertTrue(r["pareceres"][0]["e_dado"])
+-         self.assertEqual(t.ids, ["nuvem-a"])
+- 
+-+    def test_d3_aviso_aparece_para_rota_gratuita_compartilhada(self):
+-+        t = TransporteFalso()
+-+        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
+-+        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["avisos"])
+-+        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["aviso"])
+-+
+-+    def test_d3_aviso_nao_aparece_para_rota_local(self):
+-+        rota_local_compartilhada = dict(ROTA_LOCAL, compartilhada_com_seth=True)
+-+        t = TransporteFalso()
+-+        r = convocar([rota_local_compartilhada], t)
+-+        self.assertEqual(t.ids, ["local-a"])
+-+        self.assertFalse([a for a in r["avisos"] if a.startswith("D3")])
+-+        self.assertNotIn("D3", r["aviso"])
+-+
+-+    def test_d3_rota_compartilhada_e_chamada_nao_recusada(self):
+-+        t = TransporteFalso()
+-+        r = convocar([ROTA_GRATUITA_COMPARTILHADA, ROTA_NUVEM_B], t)
+-+        self.assertEqual(t.ids, ["gratis-s", "nuvem-b"])
+-+        self.assertEqual([p["rota"] for p in r["pareceres"]], ["gratis-s", "nuvem-b"])
+-+        self.assertFalse(r["aviso"].startswith("recusado"))
+-+
+-+    def test_avisos_gerais_continuam_na_lista_e_no_texto(self):
+-+        t = TransporteFalso(respostas={"gratis-s": FORMATO_SEM_EMENDA})
+-+        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
+-+        self.assertIn("sem divergência de posição entre famílias.", r["avisos"])
+-+        self.assertTrue(any(a.startswith("fora_do_formato") for a in r["avisos"]))
+-+        self.assertIn("sem divergência de posição entre famílias.", r["aviso"])
+-+
+-     def test_pedido_vazio_recusado(self):
+-         for pedido in ("", "   \n\t"):
+-             t = TransporteFalso()
+-diff --git a/redesign/painel_operacional/frentes.html b/redesign/painel_operacional/frentes.html
+-new file mode 100644
+-index 00000000..a0c1c7ac
+---- /dev/null
+-+++ b/redesign/painel_operacional/frentes.html
+-@@ -0,0 +1,20 @@
+-+<!doctype html>
+-+<html lang="pt-BR">
+-+<head>
+-+<meta charset="utf-8">
+-+<meta name="viewport" content="width=device-width, initial-scale=1">
+-+<title>Frentes — Agata</title>
+-+<link rel="stylesheet" href="/prototipo.css">
+-+<script src="/frentes.js" defer></script>
+-+</head>
+-+<body>
+-+<main>
+-+<p><a href="/prototipo">Voltar ao painel</a></p>
+-+<h1>Frentes</h1>
+-+<p>Somente leitura. Fonte: config/frentes.json.</p>
+-+<p id="cabecalho"></p>
+-+<p id="estado" role="status">Carregando frentes…</p>
+-+<ul id="lista"></ul>
+-+</main>
+-+</body>
+-+</html>
+-diff --git a/redesign/painel_operacional/frentes.js b/redesign/painel_operacional/frentes.js
+-new file mode 100644
+-index 00000000..d2b4cd2a
+---- /dev/null
+-+++ b/redesign/painel_operacional/frentes.js
+-@@ -0,0 +1,57 @@
+-+"use strict";
+-+
+-+// Somente leitura: busca /api/frentes e desenha a lista só com textContent e createElement.
+-+(function () {
+-+  const estado = document.getElementById("estado");
+-+  const cabecalho = document.getElementById("cabecalho");
+-+  const lista = document.getElementById("lista");
+-+
+-+  const CAMPOS = [
+-+    ["Entregável", "entregavel"],
+-+    ["Gate", "gate"],
+-+    ["Bloqueios", "bloqueios"],
+-+  ];
+-+
+-+  function item(frenta) {
+-+    const li = document.createElement("li");
+-+    const titulo = document.createElement("h2");
+-+    titulo.textContent = `${frenta.id} · ${frenta.nome}`;
+-+    li.appendChild(titulo);
+-+
+-+    for (const [rotulo, campo] of CAMPOS) {
+-+      const p = document.createElement("p");
+-+      const b = document.createElement("strong");
+-+      b.textContent = `${rotulo}: `;
+-+      p.appendChild(b);
+-+      p.appendChild(document.createTextNode(String(frenta[campo] ?? "")));
+-+      li.appendChild(p);
+-+    }
+-+
+-+    if (frenta.piloto_sintetico) {
+-+      const p = document.createElement("p");
+-+      const b = document.createElement("strong");
+-+      b.textContent = "Piloto sintético: ";
+-+      p.appendChild(b);
+-+      p.appendChild(document.createTextNode(String(frenta.piloto_sintetico)));
+-+      li.appendChild(p);
+-+    }
+-+    return li;
+-+  }
+-+
+-+  function desenhar(dados) {
+-+    const frentes = Array.isArray(dados.frentes) ? dados.frentes : [];
+-+    cabecalho.textContent = `Palavra atual: ${dados.palavra_atual ?? ""} · Dados reais: ${dados.dados_reais ?? ""}`;
+-+    lista.replaceChildren(...frentes.map(item));
+-+    estado.textContent = `${frentes.length} frentes.`;
+-+  }
+-+
+-+  fetch("/api/frentes", { cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" } })
+-+    .then((resposta) => {
+-+      if (!resposta.ok) throw new Error("status " + resposta.status);
+-+      return resposta.json();
+-+    })
+-+    .then(desenhar)
+-+    .catch(() => {
+-+      estado.textContent = "Não foi possível carregar as frentes.";
+-+    });
+-+})();
+-diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+-index a48d6b5e..6d5ff9bf 100644
+---- a/redesign/painel_operacional/prototipo.js
+-+++ b/redesign/painel_operacional/prototipo.js
+-@@ -532,7 +532,7 @@ function ligarCartoesClicaveis() {
+-   });
+- }
+- 
+--/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
+-+/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
+- let sethAtual = {id: null, titulo: "", mensagens: []};
+- const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
+- const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
+-@@ -673,26 +673,86 @@ function sethErro(status, erro) {
+-   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
+-   return erro && erro.message ? erro.message : "falha desconhecida";
+- }
+-+/* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
+-+   Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
+-+   Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
+-+function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
+-+async function sethLerStream(mensagens, parcial, aoTexto) {
+-+  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
+-+    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
+-+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+-+  if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
+-+  const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
+-+  let pendente = "", fim = false;
+-+  const tratarBloco = (bloco) => {
+-+    const dados = bloco.split("\n").filter((l) => l.startsWith("data: ")).map((l) => l.slice(6)).join("\n");
+-+    if (!dados) return;
+-+    let evento;
+-+    try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
+-+    if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
+-+    else if (evento.tipo === "fim") fim = true;
+-+    else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
+-+  };
+-+  try {
+-+    for (;;) {
+-+      const {value, done} = await leitor.read();
+-+      if (done) break;
+-+      pendente += decodificador.decode(value, {stream: true}).replace(/\r\n/g, "\n");
+-+      const blocos = pendente.split("\n\n"); pendente = blocos.pop();
+-+      blocos.forEach(tratarBloco);
+-+    }
+-+    pendente += decodificador.decode().replace(/\r\n/g, "\n");
+-+    if (pendente.trim()) tratarBloco(pendente);
+-+    if (!fim) throw sethErroStream("stream interrompido");
+-+    return parcial.texto;
+-+  } finally {
+-+    try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
+-+  }
+-+}
+-+async function sethChatInteiro(mensagens) {
+-+  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+-+    body: JSON.stringify({messages: mensagens})});
+-+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+-+  return r.json();
+-+}
+- async function sethEnviar(textoUsuario, reaproveitar) {
+--  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input");
+-+  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input"); const log = byId("seth-transcript");
+-   if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
+-   sethDesenhar();
+-   botao.disabled = true; sethStatus("PENSANDO", "partial");
+-   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+--  byId("seth-transcript").append(pensando);
+-+  log.append(pensando);
+-+  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
+-+  const parcial = {texto: ""};
+-+  let textoNo = null;
+-+  const aoTexto = (delta) => {
+-+    if (!textoNo) {
+-+      pensando.remove();
+-+      const bolha = document.createElement("article"); bolha.className = "msg msg-assistant";
+-+      const corpo = document.createElement("div"); corpo.className = "msg-body";
+-+      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo);
+-+      log.append(bolha);
+-+    }
+-+    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
+-+  };
+-   try {
+--    const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+--      body: JSON.stringify({messages: sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}))})});
+--    if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+--    const dados = await r.json();
+--    sethAtual.mensagens.push({role: "assistant", content: dados.content, hora: sethHora(), modelo: dados.model || ""});
+-+    let conteudo, modelo = "";
+-+    try {
+-+      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
+-+    } catch (erro) {
+-+      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
+-+      if (!transporte) throw erro;
+-+      const dados = await sethChatInteiro(mensagens);
+-+      conteudo = dados.content; modelo = dados.model || "";
+-+    }
+-+    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
+-     sethDesenhar(); sethStatus("PRONTA", "planned");
+-     sethSalvar();
+-   } catch (erro) {
+-     if (!reaproveitar) sethAtual.mensagens.pop();
+-     sethDesenhar();
+-     const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
+--    byId("seth-transcript").append(aviso);
+-+    log.append(aviso);
+-     sethStatus("INDISPONÍVEL", "horizon");
+-   } finally { botao.disabled = false; campo.focus(); }
+- }
+-diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+-index 7f3780e4..c684fd05 100644
+---- a/redesign/painel_operacional/server.py
+-+++ b/redesign/painel_operacional/server.py
+-@@ -108,6 +108,8 @@ _ASSETS = {
+-     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+-     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+-     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
+-+    "/frentes": ("frentes.html", "text/html; charset=utf-8"),
+-+    "/frentes.js": ("frentes.js", "text/javascript; charset=utf-8"),
+-     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
+-     "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
+-     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+-@@ -1056,6 +1058,14 @@ class Handler(BaseHTTPRequestHandler):
+-                 dados = _vault_item(item_id)
+-             body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
+-             return self._send(200, "application/json; charset=utf-8", body)
+-+        if self.path == "/api/frentes":
+-+            # Somente leitura: caminho fixo a partir da raiz do repositório; o cliente não escolhe arquivo.
+-+            try:
+-+                dados_frentes = json.loads((ROOT / "config/frentes.json").read_bytes())
+-+            except (OSError, ValueError):
+-+                return self._send(500, "text/plain; charset=utf-8", b"frentes indisponiveis")
+-+            body = json.dumps(dados_frentes, ensure_ascii=False).encode("utf-8")
+-+            return self._send(200, "application/json; charset=utf-8", body)
+-         if self.path == "/api/lacunas":
+-             body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
+-             return self._send(200, "application/json; charset=utf-8", body)
+-diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+-index 9b85d17a..0cf4d1bb 100644
+---- a/redesign/painel_operacional/spec/spec.md
+-+++ b/redesign/painel_operacional/spec/spec.md
+-@@ -96,3 +96,8 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+- - `relay-extension-v2/`
+- - `operator_console/`
+- - `assets/`
+-+- `frentes.html`
+-+- `frentes.js`
+-+- `test_frentes.py`
+-+- `test_chat_ui.py`
+-+
+-diff --git a/redesign/painel_operacional/test_chat_ui.py b/redesign/painel_operacional/test_chat_ui.py
+-new file mode 100644
+-index 00000000..d84928e6
+---- /dev/null
+-+++ b/redesign/painel_operacional/test_chat_ui.py
+-@@ -0,0 +1,84 @@
+-+#!/usr/bin/env python3
+-+"""Checagens estáticas da seção de conversa do painel (prototipo.html / prototipo.js).
+-+
+-+Não abre navegador e não chama o gateway: lê os dois arquivos e confere a CSP (sem script inline,
+-+sem style=, sem atributos on*) e o uso do stream com render por textContent.
+-+"""
+-+import re
+-+import unittest
+-+from pathlib import Path
+-+
+-+HERE = Path(__file__).resolve().parent
+-+HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
+-+JS = (HERE / "prototipo.js").read_text(encoding="utf-8")
+-+
+-+INICIO_SECAO = '<section class="page" id="page-conversa"'
+-+INICIO_BLOCO_JS = "/* (27/10/2026) Conversa com a Seth"
+-+FIM_BLOCO_JS = "/* (27/10/2026) Grafo do vault"
+-+
+-+
+-+def secao_conversa() -> str:
+-+    inicio = HTML.index(INICIO_SECAO)
+-+    fim = HTML.index("<section", inicio + len(INICIO_SECAO))
+-+    return HTML[inicio:fim]
+-+
+-+
+-+def bloco_conversa_js() -> str:
+-+    inicio = JS.index(INICIO_BLOCO_JS)
+-+    fim = JS.index(FIM_BLOCO_JS, inicio)
+-+    return JS[inicio:fim]
+-+
+-+
+-+class ConversaHtml(unittest.TestCase):
+-+    def test_nenhum_script_sem_src(self):
+-+        for tag in re.finditer(r"<script\b([^>]*)>", HTML, flags=re.IGNORECASE):
+-+            self.assertRegex(tag.group(1), r"\bsrc\s*=", f"script inline encontrado: {tag.group(0)[:80]}")
+-+
+-+    def test_secao_conversa_existe(self):
+-+        self.assertIn(INICIO_SECAO, HTML)
+-+
+-+    def test_secao_conversa_sem_style(self):
+-+        self.assertNotIn("style=", secao_conversa())
+-+
+-+    def test_secao_conversa_sem_atributo_on(self):
+-+        self.assertIsNone(re.search(r"\son[a-z]+\s*=", secao_conversa(), flags=re.IGNORECASE))
+-+
+-+
+-+class ConversaJs(unittest.TestCase):
+-+    def test_usa_rota_de_stream(self):
+-+        self.assertIn("/api/seth/chat/stream", JS)
+-+
+-+    def test_mantem_fallback_para_chat_inteiro(self):
+-+        self.assertIn('"/api/seth/chat"', JS)
+-+
+-+    def test_envia_chave_mensagens_no_stream(self):
+-+        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens\}\)'
+-+        self.assertIsNotNone(re.search(padrao, bloco_conversa_js(), flags=re.DOTALL),
+-+                             "o stream deve enviar o campo 'mensagens' (server.py, _seth_chat_stream)")
+-+
+-+    def test_bloco_conversa_sem_innerhtml(self):
+-+        self.assertNotIn("innerHTML", bloco_conversa_js())
+-+
+-+    def test_nenhum_innerhtml_com_delta(self):
+-+        for linha in JS.splitlines():
+-+            if "innerHTML" in linha:
+-+                self.assertNotIn("delta", linha)
+-+
+-+    def test_texto_do_stream_vai_por_text_node(self):
+-+        bloco = bloco_conversa_js()
+-+        self.assertIn("createTextNode", bloco)
+-+        self.assertIn("appendData(delta)", bloco)
+-+
+-+    def test_sem_armazenamento_local_na_conversa(self):
+-+        bloco = bloco_conversa_js()
+-+        self.assertNotIn("localStorage", bloco)
+-+        self.assertNotIn("sessionStorage", bloco)
+-+
+-+    def test_trata_evento_erro_com_motivo(self):
+-+        bloco = bloco_conversa_js()
+-+        self.assertIn('evento.tipo === "erro"', bloco)
+-+        self.assertIn("evento.motivo", bloco)
+-+
+-+
+-+if __name__ == "__main__":
+-+    unittest.main()
+-diff --git a/redesign/painel_operacional/test_frentes.py b/redesign/painel_operacional/test_frentes.py
+-new file mode 100644
+-index 00000000..8967a387
+---- /dev/null
+-+++ b/redesign/painel_operacional/test_frentes.py
+-@@ -0,0 +1,100 @@
+-+"""Testes da página somente leitura de frentes (/frentes, /api/frentes, /frentes.js)."""
+-+import http.client
+-+import importlib.util
+-+import json
+-+import threading
+-+import unittest
+-+from html.parser import HTMLParser
+-+from pathlib import Path
+-+
+-+HERE = Path(__file__).resolve().parent
+-+spec = importlib.util.spec_from_file_location("painel_frentes_teste", HERE / "server.py")
+-+panel = importlib.util.module_from_spec(spec)
+-+spec.loader.exec_module(panel)
+-+
+-+FRENTES_JSON = panel.ROOT / "config/frentes.json"
+-+
+-+
+-+class MarcacoesPerigosas(HTMLParser):
+-+    """Conta script sem src, qualquer <style> e atributos style=."""
+-+
+-+    def __init__(self):
+-+        super().__init__()
+-+        self.script_inline = 0
+-+        self.style_tag = 0
+-+        self.style_attr = 0
+-+
+-+    def handle_starttag(self, tag, attrs):
+-+        nomes = {nome for nome, _ in attrs}
+-+        if tag == "script" and "src" not in nomes:
+-+            self.script_inline += 1
+-+        if tag == "style":
+-+            self.style_tag += 1
+-+        if "style" in nomes:
+-+            self.style_attr += 1
+-+
+-+
+-+class FrentesHttpTests(unittest.TestCase):
+-+    @classmethod
+-+    def setUpClass(cls):
+-+        cls.old_port = panel.PORT
+-+        cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
+-+        cls.server.daemon_threads = True
+-+        panel.PORT = cls.server.server_address[1]
+-+        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
+-+        cls.thread.start()
+-+
+-+    @classmethod
+-+    def tearDownClass(cls):
+-+        cls.server.shutdown()
+-+        cls.server.server_close()
+-+        cls.thread.join(timeout=3)
+-+        panel.PORT = cls.old_port
+-+
+-+    def request(self, method, path, body=None, headers=None):
+-+        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=3)
+-+        try:
+-+            conn.request(method, path, body=body, headers=headers or {})
+-+            resposta = conn.getresponse()
+-+            return resposta.status, resposta.read(), dict(resposta.getheaders())
+-+        finally:
+-+            conn.close()
+-+
+-+    def test_api_devolve_as_14_frentes_do_arquivo(self):
+-+        status, corpo, cabecalhos = self.request("GET", "/api/frentes")
+-+        self.assertEqual(status, 200)
+-+        self.assertTrue(cabecalhos["Content-Type"].startswith("application/json"))
+-+        dados = json.loads(corpo)
+-+        self.assertEqual(len(dados["frentes"]), 14)
+-+        self.assertEqual(dados, json.loads(FRENTES_JSON.read_text(encoding="utf-8")))
+-+        self.assertEqual(dados["dados_reais"], "proibido nesta fase")
+-+
+-+    def test_pagina_sem_script_inline_nem_style(self):
+-+        status, corpo, cabecalhos = self.request("GET", "/frentes")
+-+        self.assertEqual(status, 200)
+-+        self.assertTrue(cabecalhos["Content-Type"].startswith("text/html"))
+-+        marcas = MarcacoesPerigosas()
+-+        marcas.feed(corpo.decode("utf-8"))
+-+        self.assertEqual(marcas.script_inline, 0)
+-+        self.assertEqual(marcas.style_tag, 0)
+-+        self.assertEqual(marcas.style_attr, 0)
+-+        self.assertIn(b'src="/frentes.js"', corpo)
+-+        self.assertIn(b'href="/prototipo"', corpo)
+-+
+-+    def test_script_servido_como_javascript(self):
+-+        status, corpo, cabecalhos = self.request("GET", "/frentes.js")
+-+        self.assertEqual(status, 200)
+-+        self.assertTrue(cabecalhos["Content-Type"].startswith("text/javascript"))
+-+        self.assertNotIn(b"innerHTML", corpo)
+-+
+-+    def test_post_em_api_frentes_e_recusado(self):
+-+        status, _, cabecalhos = self.request(
+-+            "POST", "/api/frentes", body=b"{}", headers={"Content-Type": "application/json"}
+-+        )
+-+        self.assertEqual(status, 405)
+-+        self.assertNotEqual(status, 200)
+-+        self.assertIn("GET", cabecalhos.get("Allow", ""))
+-+
+-+
+-+if __name__ == "__main__":
+-+    unittest.main()
+-diff --git a/redesign/rust/egress/src/camada2.rs b/redesign/rust/egress/src/camada2.rs
+-new file mode 100644
+-index 00000000..9f7fbfad
+---- /dev/null
+-+++ b/redesign/rust/egress/src/camada2.rs
+-@@ -0,0 +1,181 @@
+-+//! Camada 2 do egress: o que a camada 1 (`classificar_ip`, `validar_url`) não cobre.
+-+//!
+-+//! - `resolver_e_classificar`: resolve o host com `std::net::ToSocketAddrs` e
+-+//!   classifica TODOS os IPs devolvidos; se um for bloqueado, recusa tudo.
+-+//! - `validar_redirect` / `seguir_redirects`: resolve o Location (absoluto ou
+-+//!   relativo) sobre a URL de origem, valida esquema e userinfo e revalida o
+-+//!   DNS do novo destino. Limite de `LIMITE_REDIRECTS` redirecionamentos.
+-+//! - Pinagem: a lista devolvida por `resolver_e_classificar` (e a de
+-+//!   `validar_redirect_com_ips`) é o conjunto já validado. O chamador conecta
+-+//!   em um desses IPs, sem nova resolução.
+-+//!
+-+//! Limitações: não abre conexão, não faz TLS nem HTTP. Host só passa com
+-+//! sintaxe LDH (letras, dígitos, hífen) ou IP literal; o resto é recusado antes
+-+//! do DNS. O parser de URL é o da camada 1 (sem percent-decoding nem IDNA).
+-+
+-+use crate::{classificar_ip, destino, validar_url};
+-+use std::net::{IpAddr, ToSocketAddrs};
+-+
+-+/// Número máximo de redirecionamentos seguidos; o próximo é recusado.
+-+pub const LIMITE_REDIRECTS: usize = 10;
+-+
+-+/// Resolve `host:porta` e classifica todos os IPs. Recusa se qualquer um for
+-+/// bloqueado (mesmo critério de `classificar_ip`) ou se a lista vier vazia.
+-+///
+-+/// Os IPs devolvidos são o conjunto pinado: o chamador conecta em um deles.
+-+pub fn resolver_e_classificar(host: &str, porta: u16) -> Result<Vec<IpAddr>, String> {
+-+    let ips: Vec<IpAddr> = match host.parse::<IpAddr>() {
+-+        Ok(ip) => vec![ip],
+-+        Err(_) => {
+-+            if !host_dns_valido(host) {
+-+                return Err(format!("host inválido para resolução: '{host}'"));
+-+            }
+-+            let resolvidos = (host, porta)
+-+                .to_socket_addrs()
+-+                .map_err(|e| format!("sem resolução DNS para '{host}': {e}"))?;
+-+            resolvidos.map(|sa| sa.ip()).collect()
+-+        }
+-+    };
+-+    if ips.is_empty() {
+-+        return Err(format!("sem resolução para '{host}'"));
+-+    }
+-+    for ip in &ips {
+-+        if let Some(motivo) = classificar_ip(&ip.to_string()) {
+-+            return Err(format!("IP {ip} de '{host}' bloqueado: {motivo}"));
+-+        }
+-+    }
+-+    Ok(ips)
+-+}
+-+
+-+/// Valida um redirecionamento e devolve a URL final (sem os IPs).
+-+pub fn validar_redirect(origem: &str, location: &str) -> Result<String, String> {
+-+    validar_redirect_com_ips(origem, location).map(|(url, _)| url)
+-+}
+-+
+-+/// Como `validar_redirect`, mas devolve também os IPs validados do novo destino,
+-+/// para o chamador conectar sem nova resolução (pinagem).
+-+pub fn validar_redirect_com_ips(
+-+    origem: &str,
+-+    location: &str,
+-+) -> Result<(String, Vec<IpAddr>), String> {
+-+    let url = url_do_redirect(origem, location)?;
+-+    validar_url(&url)?;
+-+    let (host, porta) = destino(&url)?;
+-+    let ips = resolver_e_classificar(&host, porta)?;
+-+    Ok((url, ips))
+-+}
+-+
+-+/// Aplica `validar_redirect` em sequência, cada Location sobre a URL anterior.
+-+/// Recusa se houver mais de `LIMITE_REDIRECTS` Locations.
+-+pub fn seguir_redirects(url_inicial: &str, locations: &[&str]) -> Result<String, String> {
+-+    if locations.len() > LIMITE_REDIRECTS {
+-+        return Err(format!(
+-+            "{} redirecionamentos recebidos; limite é {LIMITE_REDIRECTS}",
+-+            locations.len()
+-+        ));
+-+    }
+-+    validar_url(url_inicial)?;
+-+    let (host, porta) = destino(url_inicial)?;
+-+    resolver_e_classificar(&host, porta)?;
+-+
+-+    let mut atual = url_inicial.to_string();
+-+    for location in locations {
+-+        atual = validar_redirect(&atual, location)?;
+-+    }
+-+    Ok(atual)
+-+}
+-+
+-+/// Monta a URL absoluta do Location. Absoluto passa como está (a validação
+-+/// de esquema e userinfo fica com `validar_url`).
+-+fn url_do_redirect(origem: &str, location: &str) -> Result<String, String> {
+-+    let loc = limpar(location);
+-+    if loc.is_empty() {
+-+        return Err("Location vazio".to_string());
+-+    }
+-+    let (esquema_loc, _) = crate::separar_esquema(&loc);
+-+    if !esquema_loc.is_empty() {
+-+        return Ok(loc);
+-+    }
+-+
+-+    let (esquema, netloc, caminho) = partes_origem(origem)?;
+-+    if loc.starts_with("//") {
+-+        return Ok(format!("{esquema}:{loc}"));
+-+    }
+-+
+-+    let (cam, sufixo) = match loc.find(['?', '#']) {
+-+        Some(i) => (&loc[..i], &loc[i..]),
+-+        None => (loc.as_str(), ""),
+-+    };
+-+    let so_caminho = caminho.split(['?', '#']).next().unwrap_or("");
+-+    let caminho_final = if cam.is_empty() {
+-+        if so_caminho.is_empty() {
+-+            "/".to_string()
+-+        } else {
+-+            so_caminho.to_string()
+-+        }
+-+    } else if cam.starts_with('/') {
+-+        normalizar(cam)
+-+    } else {
+-+        let dir = match so_caminho.rfind('/') {
+-+            Some(i) => &so_caminho[..=i],
+-+            None => "/",
+-+        };
+-+        normalizar(&format!("{dir}{cam}"))
+-+    };
+-+    Ok(format!("{esquema}://{netloc}{caminho_final}{sufixo}"))
+-+}
+-+
+-+/// Esquema, netloc e caminho (com query/fragment) da origem, já validada.
+-+fn partes_origem(origem: &str) -> Result<(String, String, String), String> {
+-+    destino(origem)?;
+-+    let limpa = limpar(origem);
+-+    let (esquema, resto) = crate::separar_esquema(&limpa);
+-+    let netloc = crate::netloc_de(resto);
+-+    let caminho = &resto[2 + netloc.len()..];
+-+    Ok((esquema, netloc.to_string(), caminho.to_string()))
+-+}
+-+
+-+/// Remove `.` e `..` do caminho e preserva a barra final.
+-+fn normalizar(caminho: &str) -> String {
+-+    let barra_final =
+-+        caminho.ends_with('/') || caminho.ends_with("/.") || caminho.ends_with("/..");
+-+    let mut pilha: Vec<&str> = Vec::new();
+-+    for seg in caminho.split('/') {
+-+        match seg {
+-+            "" | "." => {}
+-+            ".." => {
+-+                pilha.pop();
+-+            }
+-+            s => pilha.push(s),
+-+        }
+-+    }
+-+    let mut out = format!("/{}", pilha.join("/"));
+-+    if barra_final && !out.ends_with('/') {
+-+        out.push('/');
+-+    }
+-+    out
+-+}
+-+
+-+/// Mesma limpeza de `destino`: tira tab/CR/LF e espaços das pontas.
+-+fn limpar(url: &str) -> String {
+-+    let s: String = url
+-+        .chars()
+-+        .filter(|c| !matches!(c, '\t' | '\r' | '\n'))
+-+        .collect();
+-+    s.trim_matches(|c: char| c <= ' ').to_string()
+-+}
+-+
+-+/// Sintaxe de host DNS (rótulos LDH). Vazio, com `:`, `%`, espaço etc. é recusado
+-+/// antes de chamar o resolvedor.
+-+fn host_dns_valido(host: &str) -> bool {
+-+    !host.is_empty()
+-+        && host.len() <= 253
+-+        && host.split('.').all(|rotulo| {
+-+            let b = rotulo.as_bytes();
+-+            !b.is_empty()
+-+                && b.len() <= 63
+-+                && b[0] != b'-'
+-+                && b[b.len() - 1] != b'-'
+-+                && b.iter().all(|c| c.is_ascii_alphanumeric() || *c == b'-')
+-+        })
+-+}
+-diff --git a/redesign/rust/egress/src/lib.rs b/redesign/rust/egress/src/lib.rs
+-index 1939ec95..fb1752ac 100644
+---- a/redesign/rust/egress/src/lib.rs
+-+++ b/redesign/rust/egress/src/lib.rs
+-@@ -267,3 +267,5 @@ fn host_e_porta(netloc: &str) -> (&str, Option<&str>) {
+-         None => (netloc, None),
+-     }
+- }
+-+
+-+pub mod camada2;
+-diff --git a/redesign/rust/egress/tests/camada2.rs b/redesign/rust/egress/tests/camada2.rs
+-new file mode 100644
+-index 00000000..397a8095
+---- /dev/null
+-+++ b/redesign/rust/egress/tests/camada2.rs
+-@@ -0,0 +1,111 @@
+-+//! Testes da camada 2 (DNS, redirect, pinagem). Sem internet: só `localhost`
+-+//! e IPs literais; o host sem resolução é recusado pela sintaxe, antes do DNS.
+-+
+-+use egress::camada2::{
+-+    resolver_e_classificar, seguir_redirects, validar_redirect, validar_redirect_com_ips,
+-+    LIMITE_REDIRECTS,
+-+};
+-+use std::net::IpAddr;
+-+
+-+const ORIGEM: &str = "http://8.8.8.8/a/b";
+-+
+-+fn locations(n: usize) -> Vec<String> {
+-+    (1..=n).map(|i| format!("/p{i}")).collect()
+-+}
+-+
+-+#[test]
+-+fn localhost_resolve_e_e_recusado_como_loopback() {
+-+    let erro = resolver_e_classificar("localhost", 80).expect_err("localhost deve ser recusado");
+-+    assert!(erro.contains("loopback"), "{erro}");
+-+}
+-+
+-+#[test]
+-+fn ip_literal_publico_e_devolvido_para_pinagem() {
+-+    let ips = resolver_e_classificar("8.8.8.8", 443).unwrap();
+-+    assert_eq!(ips, vec!["8.8.8.8".parse::<IpAddr>().unwrap()]);
+-+}
+-+
+-+#[test]
+-+fn ip_literal_privado_e_recusado() {
+-+    let erro = resolver_e_classificar("10.0.0.1", 80).expect_err("RFC1918 deve ser recusado");
+-+    assert!(erro.contains("RFC1918"), "{erro}");
+-+}
+-+
+-+#[test]
+-+fn host_sem_resolucao_e_recusado() {
+-+    assert!(resolver_e_classificar("", 80).is_err());
+-+    assert!(resolver_e_classificar("nao resolve", 80).is_err());
+-+    assert!(resolver_e_classificar("fe80::1%eth0", 80).is_err());
+-+}
+-+
+-+#[test]
+-+fn location_relativo_valido_resolve_sobre_a_origem() {
+-+    assert_eq!(validar_redirect(ORIGEM, "c").unwrap(), "http://8.8.8.8/a/c");
+-+    assert_eq!(validar_redirect(ORIGEM, "/x?y=1").unwrap(), "http://8.8.8.8/x?y=1");
+-+    assert_eq!(validar_redirect(ORIGEM, "../d/").unwrap(), "http://8.8.8.8/d/");
+-+    assert_eq!(
+-+        validar_redirect("https://8.8.8.8/a/b?q=1", "?z=2").unwrap(),
+-+        "https://8.8.8.8/a/b?z=2"
+-+    );
+-+}
+-+
+-+#[test]
+-+fn location_relativo_devolve_o_ip_pinado() {
+-+    let (url, ips) = validar_redirect_com_ips(ORIGEM, "/x").unwrap();
+-+    assert_eq!(url, "http://8.8.8.8/x");
+-+    assert_eq!(ips, vec!["8.8.8.8".parse::<IpAddr>().unwrap()]);
+-+}
+-+
+-+#[test]
+-+fn location_que_vira_userinfo_e_recusado() {
+-+    let e1 = validar_redirect(ORIGEM, "http://user:senha@8.8.8.8/").unwrap_err();
+-+    assert!(e1.contains("userinfo"), "{e1}");
+-+    let e2 = validar_redirect(ORIGEM, "//atacante@8.8.8.8/").unwrap_err();
+-+    assert!(e2.contains("userinfo"), "{e2}");
+-+}
+-+
+-+#[test]
+-+fn location_com_esquema_ftp_e_recusado() {
+-+    let erro = validar_redirect(ORIGEM, "ftp://8.8.8.8/arquivo").unwrap_err();
+-+    assert!(erro.contains("esquema"), "{erro}");
+-+}
+-+
+-+#[test]
+-+fn location_para_ip_ou_host_bloqueado_e_recusado() {
+-+    assert!(validar_redirect(ORIGEM, "http://127.0.0.1/").unwrap_err().contains("loopback"));
+-+    assert!(validar_redirect(ORIGEM, "http://localhost/").unwrap_err().contains("loopback"));
+-+    assert!(validar_redirect(ORIGEM, "http://169.254.169.254/latest/")
+-+        .unwrap_err()
+-+        .contains("link-local"));
+-+}
+-+
+-+#[test]
+-+fn location_com_barra_invertida_nao_muda_o_host() {
+-+    assert!(validar_redirect(ORIGEM, "http:\\\\localhost\\x").is_err());
+-+    assert_eq!(
+-+        validar_redirect(ORIGEM, "/\\evil.example").unwrap(),
+-+        "http://8.8.8.8/\\evil.example"
+-+    );
+-+}
+-+
+-+#[test]
+-+fn limite_de_redirects_e_dez() {
+-+    assert_eq!(LIMITE_REDIRECTS, 10);
+-+    let v = locations(10);
+-+    let refs: Vec<&str> = v.iter().map(String::as_str).collect();
+-+    assert_eq!(seguir_redirects(ORIGEM, &refs).unwrap(), "http://8.8.8.8/p10");
+-+}
+-+
+-+#[test]
+-+fn onze_redirects_sao_recusados() {
+-+    let v = locations(11);
+-+    let refs: Vec<&str> = v.iter().map(String::as_str).collect();
+-+    let erro = seguir_redirects(ORIGEM, &refs).unwrap_err();
+-+    assert!(erro.contains("limite"), "{erro}");
+-+}
+-+
+-+#[test]
+-+fn cadeia_com_salto_para_loopback_e_recusada() {
+-+    let erro = seguir_redirects(ORIGEM, &["/ok", "http://127.0.0.1/", "/depois"]).unwrap_err();
+-+    assert!(erro.contains("loopback"), "{erro}");
+-+}
+-diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+-new file mode 100755
+-index 00000000..11be07d3
+---- /dev/null
+-+++ b/scripts/ci_sdd_local.sh
+-@@ -0,0 +1,35 @@
+-+#!/usr/bin/env bash
+-+# Roda localmente os mesmos passos do job `sdd` (.github/workflows/sdd.yml), na ordem, sem parar no primeiro erro.
+-+# Uso: bash scripts/ci_sdd_local.sh            (a partir da raiz do repositório)
+-+# pytest: usa $PYTEST se definido; senão, o `pytest` do PATH. Não instala nada.
+-+set -u
+-+RAIZ="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+-+cd "$RAIZ" || exit 1
+-+PYTEST="${PYTEST:-$(command -v pytest || true)}"
+-+TMP="$(mktemp -d)"
+-+trap 'rm -rf "$TMP"' EXIT
+-+FALHAS=0
+-+passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); fi; }
+-+
+-+if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
+-+# os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
+-+export PATH="$(dirname "$PYTEST"):$PATH"
+-+
+-+passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+-+passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+-+passo "ciclo SDD sobre a nova versão" python3 redesign/sdd_flow/runner.py "$TMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
+-+passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
+-+for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+-+  passo "critérios e drift: $c" python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$TMP/$c-evidence.json"
+-+  passo "drift por critério: $c" python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$TMP/$c-evidence.json" "$TMP/$c-drift.md"
+-+done
+-+passo "qualidade de LLM (selftest)" python3 -I redesign/painel_operacional/qualidade_llm.py --selftest
+-+passo "skills sem problema de lint" python3 -c "import json,subprocess,sys; out=subprocess.run([sys.executable,'redesign/painel_operacional/qualidade_llm.py'],capture_output=True,text=True,check=True).stdout; d=json.loads(out); bad=[s for s in d['skills'] if s['problemas']]; [print(s['skill'], s['problemas']) for s in bad]; sys.exit(1 if bad else 0)"
+-+passo "medição de recuperação (selftest)" python3 -I scripts/medir_recuperacao.py --selftest
+-+passo "medição de contexto (selftest)" python3 -I scripts/medir_contexto_efetivo.py --selftest
+-+passo "teste de português (selftest)" python3 -I scripts/teste_portugues.py --selftest
+-+passo "voz do sistema (selftest)" python3 -I scripts/agata_falar.py --selftest
+-+passo "projeto SDD declarativo (selftest)" python3 -I redesign/sdd_flow/project.py --selftest
+-+
+-+if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
+-+echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
+diff --git a/propostas/lote2-processo-20261106.md b/propostas/lote2-processo-20261106.md
+deleted file mode 100644
+index 4f112c2b..00000000
+--- a/propostas/lote2-processo-20261106.md
++++ /dev/null
+@@ -1,30 +0,0 @@
+-# Proposta lote2 — processo de lote, agentes especializados e página de frentes
+-
+-**Nome para assinatura:** `lote2-processo-20261106`
+-**Escopo:** um diff único (1118 linhas), uma assinatura.
+-
+-## O que entra
+-- **Skill `agata-processo-lote`** (`.agents/skills/`): o processo de lote do começo ao fim, com as armadilhas já pagas e um diário de erros e acertos. Revisada por agente independente (13 achados aplicados).
+-- **Agentes especializados** (`.claude/agents/`): `agata-dev` (implementação com arquivos próprios e testes), `agata-revisor` (somente leitura), `agata-spec` (spec SDD e âncora), `agata-ci` (CI local e diagnóstico). Só valem para sessões que reiniciarem: nesta sessão o tipo não foi reconhecido.
+-- **CI local** (`scripts/ci_sdd_local.sh`): reproduz os passos do job `sdd`. Corrige o PATH do pytest. Passou por completo nesta worktree.
+-- **Workflow `sdd.yml`**: as pastas de teste novas (confiabilidade, rotas, mvp_autoaprimoramento) entram no pytest do CI.
+-- **Página de frentes** (`/frentes`, `/api/frentes`, somente leitura) em `server.py`, `frentes.html`, `frentes.js`, `test_frentes.py`.
+-- **Chat com stream** no `prototipo.js` (consome `/api/seth/chat/stream`, com fallback), `test_chat_ui.py`.
+-- **Conselho com regra D3** (`conselho.py`): cota gratuita compartilhada sem teto gera aviso, não recusa.
+-- **Rust egress, camada 2** (`redesign/rust/egress/src/camada2.rs`): resolução DNS com classificação de todos os IPs, validação de redirecionamento, limite de 10 saltos.
+-- **Spec do painel** (Código): inclui os arquivos novos.
+-- **Índice de ferramentas** regenerado (`ferramentas/indice.json`, `INDICE.md`).
+-
+-## Limites declarados
+-- Agentes de `.claude/agents/`: não reconhecidos na sessão que os criou; testar em sessão nova.
+-- Página de frentes e chat: não testados num navegador real (testes são estáticos e do servidor).
+-- Camada 2 do Rust: sem teste de NXDOMAIN real nem de IPv6 que resolve só AAAA; sem TLS nem cliente HTTP.
+-- OpenCode (P8): instalado e verificado (SHA-256 do pacote oficial), mas sem modelo configurado; o piloto não produziu resposta. Não entra neste diff.
+-
+-## Evidência
+-- `git apply --check` passa em cópia limpa do `origin/main`.
+-- `scripts/ci_sdd_local.sh` nesta worktree: TUDO OK.
+-- Lint de skills: sem problemas nem avisos.
+-
+-## Assinatura
+-`bash scripts/aprovar.sh lote2-processo-20261106`
+diff --git a/redesign/nova_versao/conselho.py b/redesign/nova_versao/conselho.py
+index b251c187..fa98c773 100644
+--- a/redesign/nova_versao/conselho.py
++++ b/redesign/nova_versao/conselho.py
+@@ -2,6 +2,8 @@
+ 
+ Regras:
+ - D2: dado pessoal só vai a rota local; segredo nunca sai (é recusado sempre).
++- D3: cota gratuita compartilhada com a Seth (rota com compartilhada_com_seth=True
++  e categoria "gratuito") é permitida sem teto; gera aviso visível, nunca recusa.
+ - Uma rota por família; a família não é consultada duas vezes.
+ - A resposta de cada modelo é DADO: é guardada literal, nunca executada,
+   nunca interpretada como instrução.
+@@ -59,14 +61,21 @@ def _elegivel(rota, classe):
+ 
+ 
+ def _recusa(motivo):
++    aviso = "recusado: " + motivo
+     return {
+         "pareceres": [],
+         "divergencia": False,
+         "lacuna": False,
+-        "aviso": "recusado: " + motivo,
++        "aviso": aviso,
++        "avisos": [aviso],
+     }
+ 
+ 
++def _cota_compartilhada_gratuita(rota):
++    """D3: rota gratuita que compartilha cota com a Seth (sem teto, só aviso)."""
++    return rota.get("categoria") == "gratuito" and bool(rota.get("compartilhada_com_seth", False))
++
++
+ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publico"):
+     """Convoca pareceres de até uma rota por família.
+ 
+@@ -120,10 +129,14 @@ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publ
+     fora = [par["rota"] for par in pareceres if not par["formato_ok"]]
+     if fora:
+         avisos.append("fora_do_formato: " + ", ".join(fora) + " (não reenviado).")
++    for rota in escolhidas:
++        if _cota_compartilhada_gratuita(rota):
++            avisos.append("D3: rota %s usa cota compartilhada com a Seth, sem teto" % rota["id"])
+ 
+     return {
+         "pareceres": pareceres,
+         "divergencia": divergencia,
+         "lacuna": divergencia,
+         "aviso": " ".join(avisos),
++        "avisos": avisos,
+     }
+diff --git a/redesign/nova_versao/tests/test_conselho.py b/redesign/nova_versao/tests/test_conselho.py
+index bfccd4d4..eb2b9810 100644
+--- a/redesign/nova_versao/tests/test_conselho.py
++++ b/redesign/nova_versao/tests/test_conselho.py
+@@ -33,6 +33,9 @@ ROTA_NUVEM_B = {"id": "nuvem-b", "familia": "B", "categoria": "nuvem",
+                 "classes_permitidas": ["publico", "pessoal"]}
+ ROTA_NUVEM_C = {"id": "nuvem-c", "familia": "C", "categoria": "nuvem",
+                 "classes_permitidas": ["publico"]}
++ROTA_GRATUITA_COMPARTILHADA = {"id": "gratis-s", "familia": "S", "categoria": "gratuito",
++                               "classes_permitidas": ["publico"],
++                               "compartilhada_com_seth": True}
+ 
+ 
+ class TransporteFalso:
+@@ -123,7 +126,7 @@ class ConselhoTests(unittest.TestCase):
+         self.assertTrue(r["divergencia"])
+         self.assertTrue(r["lacuna"])
+         self.assertIn("lacuna: divergência; sem votação", r["aviso"])
+-        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso"})
++        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso", "avisos"})
+         self.assertNotIn("votos", r)
+         self.assertNotIn("vencedor", r)
+ 
+@@ -142,6 +145,34 @@ class ConselhoTests(unittest.TestCase):
+         self.assertTrue(r["pareceres"][0]["e_dado"])
+         self.assertEqual(t.ids, ["nuvem-a"])
+ 
++    def test_d3_aviso_aparece_para_rota_gratuita_compartilhada(self):
++        t = TransporteFalso()
++        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
++        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["avisos"])
++        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["aviso"])
++
++    def test_d3_aviso_nao_aparece_para_rota_local(self):
++        rota_local_compartilhada = dict(ROTA_LOCAL, compartilhada_com_seth=True)
++        t = TransporteFalso()
++        r = convocar([rota_local_compartilhada], t)
++        self.assertEqual(t.ids, ["local-a"])
++        self.assertFalse([a for a in r["avisos"] if a.startswith("D3")])
++        self.assertNotIn("D3", r["aviso"])
++
++    def test_d3_rota_compartilhada_e_chamada_nao_recusada(self):
++        t = TransporteFalso()
++        r = convocar([ROTA_GRATUITA_COMPARTILHADA, ROTA_NUVEM_B], t)
++        self.assertEqual(t.ids, ["gratis-s", "nuvem-b"])
++        self.assertEqual([p["rota"] for p in r["pareceres"]], ["gratis-s", "nuvem-b"])
++        self.assertFalse(r["aviso"].startswith("recusado"))
++
++    def test_avisos_gerais_continuam_na_lista_e_no_texto(self):
++        t = TransporteFalso(respostas={"gratis-s": FORMATO_SEM_EMENDA})
++        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
++        self.assertIn("sem divergência de posição entre famílias.", r["avisos"])
++        self.assertTrue(any(a.startswith("fora_do_formato") for a in r["avisos"]))
++        self.assertIn("sem divergência de posição entre famílias.", r["aviso"])
++
+     def test_pedido_vazio_recusado(self):
+         for pedido in ("", "   \n\t"):
+             t = TransporteFalso()
+diff --git a/redesign/painel_operacional/frentes.html b/redesign/painel_operacional/frentes.html
+new file mode 100644
+index 00000000..a0c1c7ac
+--- /dev/null
++++ b/redesign/painel_operacional/frentes.html
+@@ -0,0 +1,20 @@
++<!doctype html>
++<html lang="pt-BR">
++<head>
++<meta charset="utf-8">
++<meta name="viewport" content="width=device-width, initial-scale=1">
++<title>Frentes — Agata</title>
++<link rel="stylesheet" href="/prototipo.css">
++<script src="/frentes.js" defer></script>
++</head>
++<body>
++<main>
++<p><a href="/prototipo">Voltar ao painel</a></p>
++<h1>Frentes</h1>
++<p>Somente leitura. Fonte: config/frentes.json.</p>
++<p id="cabecalho"></p>
++<p id="estado" role="status">Carregando frentes…</p>
++<ul id="lista"></ul>
++</main>
++</body>
++</html>
+diff --git a/redesign/painel_operacional/frentes.js b/redesign/painel_operacional/frentes.js
+new file mode 100644
+index 00000000..d2b4cd2a
+--- /dev/null
++++ b/redesign/painel_operacional/frentes.js
+@@ -0,0 +1,57 @@
++"use strict";
++
++// Somente leitura: busca /api/frentes e desenha a lista só com textContent e createElement.
++(function () {
++  const estado = document.getElementById("estado");
++  const cabecalho = document.getElementById("cabecalho");
++  const lista = document.getElementById("lista");
++
++  const CAMPOS = [
++    ["Entregável", "entregavel"],
++    ["Gate", "gate"],
++    ["Bloqueios", "bloqueios"],
++  ];
++
++  function item(frenta) {
++    const li = document.createElement("li");
++    const titulo = document.createElement("h2");
++    titulo.textContent = `${frenta.id} · ${frenta.nome}`;
++    li.appendChild(titulo);
++
++    for (const [rotulo, campo] of CAMPOS) {
++      const p = document.createElement("p");
++      const b = document.createElement("strong");
++      b.textContent = `${rotulo}: `;
++      p.appendChild(b);
++      p.appendChild(document.createTextNode(String(frenta[campo] ?? "")));
++      li.appendChild(p);
++    }
++
++    if (frenta.piloto_sintetico) {
++      const p = document.createElement("p");
++      const b = document.createElement("strong");
++      b.textContent = "Piloto sintético: ";
++      p.appendChild(b);
++      p.appendChild(document.createTextNode(String(frenta.piloto_sintetico)));
++      li.appendChild(p);
++    }
++    return li;
++  }
++
++  function desenhar(dados) {
++    const frentes = Array.isArray(dados.frentes) ? dados.frentes : [];
++    cabecalho.textContent = `Palavra atual: ${dados.palavra_atual ?? ""} · Dados reais: ${dados.dados_reais ?? ""}`;
++    lista.replaceChildren(...frentes.map(item));
++    estado.textContent = `${frentes.length} frentes.`;
++  }
++
++  fetch("/api/frentes", { cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" } })
++    .then((resposta) => {
++      if (!resposta.ok) throw new Error("status " + resposta.status);
++      return resposta.json();
++    })
++    .then(desenhar)
++    .catch(() => {
++      estado.textContent = "Não foi possível carregar as frentes.";
++    });
++})();
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index a48d6b5e..6d5ff9bf 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -532,7 +532,7 @@ function ligarCartoesClicaveis() {
+   });
+ }
+ 
+-/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
++/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
+ let sethAtual = {id: null, titulo: "", mensagens: []};
+ const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
+ const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
+@@ -673,26 +673,86 @@ function sethErro(status, erro) {
+   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
+   return erro && erro.message ? erro.message : "falha desconhecida";
+ }
++/* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
++   Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
++   Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
++function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
++async function sethLerStream(mensagens, parcial, aoTexto) {
++  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
++    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
++  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
++  if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
++  const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
++  let pendente = "", fim = false;
++  const tratarBloco = (bloco) => {
++    const dados = bloco.split("\n").filter((l) => l.startsWith("data: ")).map((l) => l.slice(6)).join("\n");
++    if (!dados) return;
++    let evento;
++    try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
++    if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
++    else if (evento.tipo === "fim") fim = true;
++    else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
++  };
++  try {
++    for (;;) {
++      const {value, done} = await leitor.read();
++      if (done) break;
++      pendente += decodificador.decode(value, {stream: true}).replace(/\r\n/g, "\n");
++      const blocos = pendente.split("\n\n"); pendente = blocos.pop();
++      blocos.forEach(tratarBloco);
++    }
++    pendente += decodificador.decode().replace(/\r\n/g, "\n");
++    if (pendente.trim()) tratarBloco(pendente);
++    if (!fim) throw sethErroStream("stream interrompido");
++    return parcial.texto;
++  } finally {
++    try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
++  }
++}
++async function sethChatInteiro(mensagens) {
++  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++    body: JSON.stringify({messages: mensagens})});
++  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
++  return r.json();
++}
+ async function sethEnviar(textoUsuario, reaproveitar) {
+-  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input");
++  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input"); const log = byId("seth-transcript");
+   if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
+   sethDesenhar();
+   botao.disabled = true; sethStatus("PENSANDO", "partial");
+   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+-  byId("seth-transcript").append(pensando);
++  log.append(pensando);
++  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
++  const parcial = {texto: ""};
++  let textoNo = null;
++  const aoTexto = (delta) => {
++    if (!textoNo) {
++      pensando.remove();
++      const bolha = document.createElement("article"); bolha.className = "msg msg-assistant";
++      const corpo = document.createElement("div"); corpo.className = "msg-body";
++      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo);
++      log.append(bolha);
++    }
++    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
++  };
+   try {
+-    const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+-      body: JSON.stringify({messages: sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}))})});
+-    if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+-    const dados = await r.json();
+-    sethAtual.mensagens.push({role: "assistant", content: dados.content, hora: sethHora(), modelo: dados.model || ""});
++    let conteudo, modelo = "";
++    try {
++      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
++    } catch (erro) {
++      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
++      if (!transporte) throw erro;
++      const dados = await sethChatInteiro(mensagens);
++      conteudo = dados.content; modelo = dados.model || "";
++    }
++    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
+     sethDesenhar(); sethStatus("PRONTA", "planned");
+     sethSalvar();
+   } catch (erro) {
+     if (!reaproveitar) sethAtual.mensagens.pop();
+     sethDesenhar();
+     const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
+-    byId("seth-transcript").append(aviso);
++    log.append(aviso);
+     sethStatus("INDISPONÍVEL", "horizon");
+   } finally { botao.disabled = false; campo.focus(); }
+ }
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 7f3780e4..c684fd05 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -108,6 +108,8 @@ _ASSETS = {
+     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
+     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
+     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
++    "/frentes": ("frentes.html", "text/html; charset=utf-8"),
++    "/frentes.js": ("frentes.js", "text/javascript; charset=utf-8"),
+     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
+     "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
+     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+@@ -1056,6 +1058,14 @@ class Handler(BaseHTTPRequestHandler):
+                 dados = _vault_item(item_id)
+             body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path == "/api/frentes":
++            # Somente leitura: caminho fixo a partir da raiz do repositório; o cliente não escolhe arquivo.
++            try:
++                dados_frentes = json.loads((ROOT / "config/frentes.json").read_bytes())
++            except (OSError, ValueError):
++                return self._send(500, "text/plain; charset=utf-8", b"frentes indisponiveis")
++            body = json.dumps(dados_frentes, ensure_ascii=False).encode("utf-8")
++            return self._send(200, "application/json; charset=utf-8", body)
+         if self.path == "/api/lacunas":
+             body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 9b85d17a..9b30d6c5 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -96,3 +96,7 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+ - `relay-extension-v2/`
+ - `operator_console/`
+ - `assets/`
++- `frentes.html`
++- `frentes.js`
++- `test_frentes.py`
++- `test_chat_ui.py`
+diff --git a/redesign/painel_operacional/test_chat_ui.py b/redesign/painel_operacional/test_chat_ui.py
+new file mode 100644
+index 00000000..d84928e6
+--- /dev/null
++++ b/redesign/painel_operacional/test_chat_ui.py
+@@ -0,0 +1,84 @@
++#!/usr/bin/env python3
++"""Checagens estáticas da seção de conversa do painel (prototipo.html / prototipo.js).
++
++Não abre navegador e não chama o gateway: lê os dois arquivos e confere a CSP (sem script inline,
++sem style=, sem atributos on*) e o uso do stream com render por textContent.
++"""
++import re
++import unittest
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
++JS = (HERE / "prototipo.js").read_text(encoding="utf-8")
++
++INICIO_SECAO = '<section class="page" id="page-conversa"'
++INICIO_BLOCO_JS = "/* (27/10/2026) Conversa com a Seth"
++FIM_BLOCO_JS = "/* (27/10/2026) Grafo do vault"
++
++
++def secao_conversa() -> str:
++    inicio = HTML.index(INICIO_SECAO)
++    fim = HTML.index("<section", inicio + len(INICIO_SECAO))
++    return HTML[inicio:fim]
++
++
++def bloco_conversa_js() -> str:
++    inicio = JS.index(INICIO_BLOCO_JS)
++    fim = JS.index(FIM_BLOCO_JS, inicio)
++    return JS[inicio:fim]
++
++
++class ConversaHtml(unittest.TestCase):
++    def test_nenhum_script_sem_src(self):
++        for tag in re.finditer(r"<script\b([^>]*)>", HTML, flags=re.IGNORECASE):
++            self.assertRegex(tag.group(1), r"\bsrc\s*=", f"script inline encontrado: {tag.group(0)[:80]}")
++
++    def test_secao_conversa_existe(self):
++        self.assertIn(INICIO_SECAO, HTML)
++
++    def test_secao_conversa_sem_style(self):
++        self.assertNotIn("style=", secao_conversa())
++
++    def test_secao_conversa_sem_atributo_on(self):
++        self.assertIsNone(re.search(r"\son[a-z]+\s*=", secao_conversa(), flags=re.IGNORECASE))
++
++
++class ConversaJs(unittest.TestCase):
++    def test_usa_rota_de_stream(self):
++        self.assertIn("/api/seth/chat/stream", JS)
++
++    def test_mantem_fallback_para_chat_inteiro(self):
++        self.assertIn('"/api/seth/chat"', JS)
++
++    def test_envia_chave_mensagens_no_stream(self):
++        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens\}\)'
++        self.assertIsNotNone(re.search(padrao, bloco_conversa_js(), flags=re.DOTALL),
++                             "o stream deve enviar o campo 'mensagens' (server.py, _seth_chat_stream)")
++
++    def test_bloco_conversa_sem_innerhtml(self):
++        self.assertNotIn("innerHTML", bloco_conversa_js())
++
++    def test_nenhum_innerhtml_com_delta(self):
++        for linha in JS.splitlines():
++            if "innerHTML" in linha:
++                self.assertNotIn("delta", linha)
++
++    def test_texto_do_stream_vai_por_text_node(self):
++        bloco = bloco_conversa_js()
++        self.assertIn("createTextNode", bloco)
++        self.assertIn("appendData(delta)", bloco)
++
++    def test_sem_armazenamento_local_na_conversa(self):
++        bloco = bloco_conversa_js()
++        self.assertNotIn("localStorage", bloco)
++        self.assertNotIn("sessionStorage", bloco)
++
++    def test_trata_evento_erro_com_motivo(self):
++        bloco = bloco_conversa_js()
++        self.assertIn('evento.tipo === "erro"', bloco)
++        self.assertIn("evento.motivo", bloco)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/test_frentes.py b/redesign/painel_operacional/test_frentes.py
+new file mode 100644
+index 00000000..8967a387
+--- /dev/null
++++ b/redesign/painel_operacional/test_frentes.py
+@@ -0,0 +1,100 @@
++"""Testes da página somente leitura de frentes (/frentes, /api/frentes, /frentes.js)."""
++import http.client
++import importlib.util
++import json
++import threading
++import unittest
++from html.parser import HTMLParser
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location("painel_frentes_teste", HERE / "server.py")
++panel = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(panel)
++
++FRENTES_JSON = panel.ROOT / "config/frentes.json"
++
++
++class MarcacoesPerigosas(HTMLParser):
++    """Conta script sem src, qualquer <style> e atributos style=."""
++
++    def __init__(self):
++        super().__init__()
++        self.script_inline = 0
++        self.style_tag = 0
++        self.style_attr = 0
++
++    def handle_starttag(self, tag, attrs):
++        nomes = {nome for nome, _ in attrs}
++        if tag == "script" and "src" not in nomes:
++            self.script_inline += 1
++        if tag == "style":
++            self.style_tag += 1
++        if "style" in nomes:
++            self.style_attr += 1
++
++
++class FrentesHttpTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.old_port = panel.PORT
++        cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.server.daemon_threads = True
++        panel.PORT = cls.server.server_address[1]
++        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
++        cls.thread.start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.server.shutdown()
++        cls.server.server_close()
++        cls.thread.join(timeout=3)
++        panel.PORT = cls.old_port
++
++    def request(self, method, path, body=None, headers=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=3)
++        try:
++            conn.request(method, path, body=body, headers=headers or {})
++            resposta = conn.getresponse()
++            return resposta.status, resposta.read(), dict(resposta.getheaders())
++        finally:
++            conn.close()
++
++    def test_api_devolve_as_14_frentes_do_arquivo(self):
++        status, corpo, cabecalhos = self.request("GET", "/api/frentes")
++        self.assertEqual(status, 200)
++        self.assertTrue(cabecalhos["Content-Type"].startswith("application/json"))
++        dados = json.loads(corpo)
++        self.assertEqual(len(dados["frentes"]), 14)
++        self.assertEqual(dados, json.loads(FRENTES_JSON.read_text(encoding="utf-8")))
++        self.assertEqual(dados["dados_reais"], "proibido nesta fase")
++
++    def test_pagina_sem_script_inline_nem_style(self):
++        status, corpo, cabecalhos = self.request("GET", "/frentes")
++        self.assertEqual(status, 200)
++        self.assertTrue(cabecalhos["Content-Type"].startswith("text/html"))
++        marcas = MarcacoesPerigosas()
++        marcas.feed(corpo.decode("utf-8"))
++        self.assertEqual(marcas.script_inline, 0)
++        self.assertEqual(marcas.style_tag, 0)
++        self.assertEqual(marcas.style_attr, 0)
++        self.assertIn(b'src="/frentes.js"', corpo)
++        self.assertIn(b'href="/prototipo"', corpo)
++
++    def test_script_servido_como_javascript(self):
++        status, corpo, cabecalhos = self.request("GET", "/frentes.js")
++        self.assertEqual(status, 200)
++        self.assertTrue(cabecalhos["Content-Type"].startswith("text/javascript"))
++        self.assertNotIn(b"innerHTML", corpo)
++
++    def test_post_em_api_frentes_e_recusado(self):
++        status, _, cabecalhos = self.request(
++            "POST", "/api/frentes", body=b"{}", headers={"Content-Type": "application/json"}
++        )
++        self.assertEqual(status, 405)
++        self.assertNotEqual(status, 200)
++        self.assertIn("GET", cabecalhos.get("Allow", ""))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/rust/egress/src/camada2.rs b/redesign/rust/egress/src/camada2.rs
+new file mode 100644
+index 00000000..31d286bb
+--- /dev/null
++++ b/redesign/rust/egress/src/camada2.rs
+@@ -0,0 +1,205 @@
++//! Camada 2 do egress: o que a camada 1 (`classificar_ip`, `validar_url`) não cobre.
++//!
++//! - `resolver_e_classificar`: resolve o host com `std::net::ToSocketAddrs` e
++//!   classifica TODOS os IPs devolvidos; se um for bloqueado, recusa tudo.
++//! - `validar_redirect` / `seguir_redirects`: resolve o Location (absoluto ou
++//!   relativo) sobre a URL de origem, valida esquema e userinfo e revalida o
++//!   DNS do novo destino. Limite de `LIMITE_REDIRECTS` redirecionamentos.
++//! - Pinagem: a lista devolvida por `resolver_e_classificar` (e a de
++//!   `validar_redirect_com_ips`) é o conjunto já validado. O chamador conecta
++//!   em um desses IPs, sem nova resolução.
++//!
++//! Limitações: não abre conexão, não faz TLS nem HTTP. Host só passa com
++//! sintaxe LDH (letras, dígitos, hífen) ou IP literal; o resto é recusado antes
++//! do DNS. O parser de URL é o da camada 1 (sem percent-decoding nem IDNA).
++
++use crate::{classificar_ip, destino, validar_url};
++use std::net::{IpAddr, ToSocketAddrs};
++
++/// Número máximo de redirecionamentos seguidos; o próximo é recusado.
++pub const LIMITE_REDIRECTS: usize = 10;
++
++/// Resolve `host:porta` e classifica todos os IPs. Recusa se qualquer um for
++/// bloqueado (mesmo critério de `classificar_ip`) ou se a lista vier vazia.
++///
++/// Os IPs devolvidos são o conjunto pinado: o chamador conecta em um deles.
++pub fn resolver_e_classificar(host: &str, porta: u16) -> Result<Vec<IpAddr>, String> {
++    let ips: Vec<IpAddr> = match host.parse::<IpAddr>() {
++        Ok(ip) => vec![ip],
++        Err(_) => {
++            if !host_dns_valido(host) {
++                return Err(format!("host inválido para resolução: '{host}'"));
++            }
++            let resolvidos = (host, porta)
++                .to_socket_addrs()
++                .map_err(|e| format!("sem resolução DNS para '{host}': {e}"))?;
++            resolvidos.map(|sa| sa.ip()).collect()
++        }
++    };
++    if ips.is_empty() {
++        return Err(format!("sem resolução para '{host}'"));
++    }
++    for ip in &ips {
++        if let Some(motivo) = classificar_ip(&ip.to_string()) {
++            return Err(format!("IP {ip} de '{host}' bloqueado: {motivo}"));
++        }
++    }
++    Ok(ips)
++}
++
++/// Valida um redirecionamento e devolve a URL final (sem os IPs).
++pub fn validar_redirect(origem: &str, location: &str) -> Result<String, String> {
++    validar_redirect_com_ips(origem, location).map(|(url, _)| url)
++}
++
++/// Como `validar_redirect`, mas devolve também os IPs validados do novo destino,
++/// para o chamador conectar sem nova resolução (pinagem).
++pub fn validar_redirect_com_ips(
++    origem: &str,
++    location: &str,
++) -> Result<(String, Vec<IpAddr>), String> {
++    let url = url_do_redirect(origem, location)?;
++    validar_url(&url)?;
++    let (host, porta) = destino(&url)?;
++    let ips = resolver_e_classificar(&host, porta)?;
++    Ok((url, ips))
++}
++
++/// Como `seguir_redirects`, mas devolve, para cada salto (inclusive a URL inicial),
++/// a URL e os IPs validados naquele momento. Quem conecta deve usar esses IPs
++/// (pinagem), sem resolver o host de novo: evita DNS rebinding entre validação e conexão.
++pub fn seguir_redirects_com_ips(
++    url_inicial: &str,
++    locations: &[&str],
++) -> Result<Vec<(String, Vec<IpAddr>)>, String> {
++    if locations.len() > LIMITE_REDIRECTS {
++        return Err(format!(
++            "{} redirecionamentos recebidos; limite é {LIMITE_REDIRECTS}",
++            locations.len()
++        ));
++    }
++    validar_url(url_inicial)?;
++    let (host, porta) = destino(url_inicial)?;
++    let ips = resolver_e_classificar(&host, porta)?;
++    let mut saltos = vec![(url_inicial.to_string(), ips)];
++    for location in locations {
++        let (url, ips) = validar_redirect_com_ips(&saltos[saltos.len() - 1].0, location)?;
++        saltos.push((url, ips));
++    }
++    Ok(saltos)
++}
++
++/// Aplica `validar_redirect` em sequência, cada Location sobre a URL anterior.
++/// Recusa se houver mais de `LIMITE_REDIRECTS` Locations.
++pub fn seguir_redirects(url_inicial: &str, locations: &[&str]) -> Result<String, String> {
++    if locations.len() > LIMITE_REDIRECTS {
++        return Err(format!(
++            "{} redirecionamentos recebidos; limite é {LIMITE_REDIRECTS}",
++            locations.len()
++        ));
++    }
++    validar_url(url_inicial)?;
++    let (host, porta) = destino(url_inicial)?;
++    resolver_e_classificar(&host, porta)?;
++
++    let mut atual = url_inicial.to_string();
++    for location in locations {
++        atual = validar_redirect(&atual, location)?;
++    }
++    Ok(atual)
++}
++
++/// Monta a URL absoluta do Location. Absoluto passa como está (a validação
++/// de esquema e userinfo fica com `validar_url`).
++fn url_do_redirect(origem: &str, location: &str) -> Result<String, String> {
++    let loc = limpar(location);
++    if loc.is_empty() {
++        return Err("Location vazio".to_string());
++    }
++    let (esquema_loc, _) = crate::separar_esquema(&loc);
++    if !esquema_loc.is_empty() {
++        return Ok(loc);
++    }
++
++    let (esquema, netloc, caminho) = partes_origem(origem)?;
++    if loc.starts_with("//") {
++        return Ok(format!("{esquema}:{loc}"));
++    }
++
++    let (cam, sufixo) = match loc.find(['?', '#']) {
++        Some(i) => (&loc[..i], &loc[i..]),
++        None => (loc.as_str(), ""),
++    };
++    let so_caminho = caminho.split(['?', '#']).next().unwrap_or("");
++    let caminho_final = if cam.is_empty() {
++        if so_caminho.is_empty() {
++            "/".to_string()
++        } else {
++            so_caminho.to_string()
++        }
++    } else if cam.starts_with('/') {
++        normalizar(cam)
++    } else {
++        let dir = match so_caminho.rfind('/') {
++            Some(i) => &so_caminho[..=i],
++            None => "/",
++        };
++        normalizar(&format!("{dir}{cam}"))
++    };
++    Ok(format!("{esquema}://{netloc}{caminho_final}{sufixo}"))
++}
++
++/// Esquema, netloc e caminho (com query/fragment) da origem, já validada.
++fn partes_origem(origem: &str) -> Result<(String, String, String), String> {
++    destino(origem)?;
++    let limpa = limpar(origem);
++    let (esquema, resto) = crate::separar_esquema(&limpa);
++    let netloc = crate::netloc_de(resto);
++    let caminho = &resto[2 + netloc.len()..];
++    Ok((esquema, netloc.to_string(), caminho.to_string()))
++}
++
++/// Remove `.` e `..` do caminho e preserva a barra final.
++fn normalizar(caminho: &str) -> String {
++    let barra_final =
++        caminho.ends_with('/') || caminho.ends_with("/.") || caminho.ends_with("/..");
++    let mut pilha: Vec<&str> = Vec::new();
++    for seg in caminho.split('/') {
++        match seg {
++            "" | "." => {}
++            ".." => {
++                pilha.pop();
++            }
++            s => pilha.push(s),
++        }
++    }
++    let mut out = format!("/{}", pilha.join("/"));
++    if barra_final && !out.ends_with('/') {
++        out.push('/');
++    }
++    out
++}
++
++/// Mesma limpeza de `destino`: tira tab/CR/LF e espaços das pontas.
++fn limpar(url: &str) -> String {
++    let s: String = url
++        .chars()
++        .filter(|c| !matches!(c, '\t' | '\r' | '\n'))
++        .collect();
++    s.trim_matches(|c: char| c <= ' ').to_string()
++}
++
++/// Sintaxe de host DNS (rótulos LDH). Vazio, com `:`, `%`, espaço etc. é recusado
++/// antes de chamar o resolvedor.
++fn host_dns_valido(host: &str) -> bool {
++    !host.is_empty()
++        && host.len() <= 253
++        && host.split('.').all(|rotulo| {
++            let b = rotulo.as_bytes();
++            !b.is_empty()
++                && b.len() <= 63
++                && b[0] != b'-'
++                && b[b.len() - 1] != b'-'
++                && b.iter().all(|c| c.is_ascii_alphanumeric() || *c == b'-')
++        })
++}
+diff --git a/redesign/rust/egress/src/lib.rs b/redesign/rust/egress/src/lib.rs
+index 1939ec95..fb1752ac 100644
+--- a/redesign/rust/egress/src/lib.rs
++++ b/redesign/rust/egress/src/lib.rs
+@@ -267,3 +267,5 @@ fn host_e_porta(netloc: &str) -> (&str, Option<&str>) {
+         None => (netloc, None),
+     }
+ }
++
++pub mod camada2;
+diff --git a/redesign/rust/egress/tests/camada2.rs b/redesign/rust/egress/tests/camada2.rs
+new file mode 100644
+index 00000000..1a0a752a
+--- /dev/null
++++ b/redesign/rust/egress/tests/camada2.rs
+@@ -0,0 +1,129 @@
++//! Testes da camada 2 (DNS, redirect, pinagem). Sem internet: só `localhost`
++//! e IPs literais; o host sem resolução é recusado pela sintaxe, antes do DNS.
++
++use egress::camada2::{
++    resolver_e_classificar, seguir_redirects, validar_redirect, validar_redirect_com_ips,
++    LIMITE_REDIRECTS,
++};
++use std::net::IpAddr;
++
++const ORIGEM: &str = "http://8.8.8.8/a/b";
++
++fn locations(n: usize) -> Vec<String> {
++    (1..=n).map(|i| format!("/p{i}")).collect()
++}
++
++#[test]
++fn localhost_resolve_e_e_recusado_como_loopback() {
++    let erro = resolver_e_classificar("localhost", 80).expect_err("localhost deve ser recusado");
++    assert!(erro.contains("loopback"), "{erro}");
++}
++
++#[test]
++fn ip_literal_publico_e_devolvido_para_pinagem() {
++    let ips = resolver_e_classificar("8.8.8.8", 443).unwrap();
++    assert_eq!(ips, vec!["8.8.8.8".parse::<IpAddr>().unwrap()]);
++}
++
++#[test]
++fn ip_literal_privado_e_recusado() {
++    let erro = resolver_e_classificar("10.0.0.1", 80).expect_err("RFC1918 deve ser recusado");
++    assert!(erro.contains("RFC1918"), "{erro}");
++}
++
++#[test]
++fn host_sem_resolucao_e_recusado() {
++    assert!(resolver_e_classificar("", 80).is_err());
++    assert!(resolver_e_classificar("nao resolve", 80).is_err());
++    assert!(resolver_e_classificar("fe80::1%eth0", 80).is_err());
++}
++
++#[test]
++fn location_relativo_valido_resolve_sobre_a_origem() {
++    assert_eq!(validar_redirect(ORIGEM, "c").unwrap(), "http://8.8.8.8/a/c");
++    assert_eq!(validar_redirect(ORIGEM, "/x?y=1").unwrap(), "http://8.8.8.8/x?y=1");
++    assert_eq!(validar_redirect(ORIGEM, "../d/").unwrap(), "http://8.8.8.8/d/");
++    assert_eq!(
++        validar_redirect("https://8.8.8.8/a/b?q=1", "?z=2").unwrap(),
++        "https://8.8.8.8/a/b?z=2"
++    );
++}
++
++#[test]
++fn location_relativo_devolve_o_ip_pinado() {
++    let (url, ips) = validar_redirect_com_ips(ORIGEM, "/x").unwrap();
++    assert_eq!(url, "http://8.8.8.8/x");
++    assert_eq!(ips, vec!["8.8.8.8".parse::<IpAddr>().unwrap()]);
++}
++
++#[test]
++fn location_que_vira_userinfo_e_recusado() {
++    let e1 = validar_redirect(ORIGEM, "http://user:senha@8.8.8.8/").unwrap_err();
++    assert!(e1.contains("userinfo"), "{e1}");
++    let e2 = validar_redirect(ORIGEM, "//atacante@8.8.8.8/").unwrap_err();
++    assert!(e2.contains("userinfo"), "{e2}");
++}
++
++#[test]
++fn location_com_esquema_ftp_e_recusado() {
++    let erro = validar_redirect(ORIGEM, "ftp://8.8.8.8/arquivo").unwrap_err();
++    assert!(erro.contains("esquema"), "{erro}");
++}
++
++#[test]
++fn location_para_ip_ou_host_bloqueado_e_recusado() {
++    assert!(validar_redirect(ORIGEM, "http://127.0.0.1/").unwrap_err().contains("loopback"));
++    assert!(validar_redirect(ORIGEM, "http://localhost/").unwrap_err().contains("loopback"));
++    assert!(validar_redirect(ORIGEM, "http://169.254.169.254/latest/")
++        .unwrap_err()
++        .contains("link-local"));
++}
++
++#[test]
++fn location_com_barra_invertida_nao_muda_o_host() {
++    assert!(validar_redirect(ORIGEM, "http:\\\\localhost\\x").is_err());
++    assert_eq!(
++        validar_redirect(ORIGEM, "/\\evil.example").unwrap(),
++        "http://8.8.8.8/\\evil.example"
++    );
++}
++
++#[test]
++fn limite_de_redirects_e_dez() {
++    assert_eq!(LIMITE_REDIRECTS, 10);
++    let v = locations(10);
++    let refs: Vec<&str> = v.iter().map(String::as_str).collect();
++    assert_eq!(seguir_redirects(ORIGEM, &refs).unwrap(), "http://8.8.8.8/p10");
++}
++
++#[test]
++fn onze_redirects_sao_recusados() {
++    let v = locations(11);
++    let refs: Vec<&str> = v.iter().map(String::as_str).collect();
++    let erro = seguir_redirects(ORIGEM, &refs).unwrap_err();
++    assert!(erro.contains("limite"), "{erro}");
++}
++
++#[test]
++fn cadeia_com_salto_para_loopback_e_recusada() {
++    let erro = seguir_redirects(ORIGEM, &["/ok", "http://127.0.0.1/", "/depois"]).unwrap_err();
++    assert!(erro.contains("loopback"), "{erro}");
++}
++
++#[test]
++fn seguir_redirects_com_ips_devolve_ip_pinado_por_salto() {
++    use egress::camada2::seguir_redirects_com_ips;
++    let saltos = seguir_redirects_com_ips("https://8.8.8.8/a", &["/b", "/c"]).expect("deve passar");
++    assert_eq!(saltos.len(), 3, "inicial + 2 redirects");
++    for (_url, ips) in &saltos {
++        assert!(!ips.is_empty(), "cada salto precisa de IP pinado");
++    }
++    assert_eq!(saltos[2].0, "https://8.8.8.8/c");
++}
++
++#[test]
++fn seguir_redirects_com_ips_recusa_salto_para_loopback() {
++    use egress::camada2::seguir_redirects_com_ips;
++    let r = seguir_redirects_com_ips("https://8.8.8.8/a", &["https://127.0.0.1/x"]);
++    assert!(r.is_err(), "salto para loopback deve ser recusado");
++}
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+new file mode 100755
+index 00000000..11be07d3
+--- /dev/null
++++ b/scripts/ci_sdd_local.sh
+@@ -0,0 +1,35 @@
++#!/usr/bin/env bash
++# Roda localmente os mesmos passos do job `sdd` (.github/workflows/sdd.yml), na ordem, sem parar no primeiro erro.
++# Uso: bash scripts/ci_sdd_local.sh            (a partir da raiz do repositório)
++# pytest: usa $PYTEST se definido; senão, o `pytest` do PATH. Não instala nada.
++set -u
++RAIZ="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
++cd "$RAIZ" || exit 1
++PYTEST="${PYTEST:-$(command -v pytest || true)}"
++TMP="$(mktemp -d)"
++trap 'rm -rf "$TMP"' EXIT
++FALHAS=0
++passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); fi; }
++
++if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
++# os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
++export PATH="$(dirname "$PYTEST"):$PATH"
++
++passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
++passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
++passo "ciclo SDD sobre a nova versão" python3 redesign/sdd_flow/runner.py "$TMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
++passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
++for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
++  passo "critérios e drift: $c" python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$TMP/$c-evidence.json"
++  passo "drift por critério: $c" python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$TMP/$c-evidence.json" "$TMP/$c-drift.md"
++done
++passo "qualidade de LLM (selftest)" python3 -I redesign/painel_operacional/qualidade_llm.py --selftest
++passo "skills sem problema de lint" python3 -c "import json,subprocess,sys; out=subprocess.run([sys.executable,'redesign/painel_operacional/qualidade_llm.py'],capture_output=True,text=True,check=True).stdout; d=json.loads(out); bad=[s for s in d['skills'] if s['problemas']]; [print(s['skill'], s['problemas']) for s in bad]; sys.exit(1 if bad else 0)"
++passo "medição de recuperação (selftest)" python3 -I scripts/medir_recuperacao.py --selftest
++passo "medição de contexto (selftest)" python3 -I scripts/medir_contexto_efetivo.py --selftest
++passo "teste de português (selftest)" python3 -I scripts/teste_portugues.py --selftest
++passo "voz do sistema (selftest)" python3 -I scripts/agata_falar.py --selftest
++passo "projeto SDD declarativo (selftest)" python3 -I redesign/sdd_flow/project.py --selftest
++
++if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
++echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
