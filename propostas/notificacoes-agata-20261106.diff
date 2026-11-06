@@ -1,0 +1,40 @@
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index 426dc4af..f1bbcd9a 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -74,4 +74,16 @@ if ! _chromium_aberto; then
+   # Dá tempo para a janela do painel aparecer e para a extensão do Conselho avisar o painel.
+   sleep 25
+ fi
++
++# Notificação por componente (Humano, 06/11/2026: "deve ter notificação em todos").
++_notifica_unidades() {
++  local _u _st
++  for _u in "$@"; do
++    _st=$(systemctl --user is-active "$_u" 2>/dev/null || true)
++    notify-send -a Seth "$_u" "${_st:-desconhecido}" 2>/dev/null || true
++  done
++}
++_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service
++_lc=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:3080/health 2>/dev/null || echo fora)
++notify-send -a Seth "LibreChat" "$_lc" 2>/dev/null || true
+ notify-send -a Seth "Seth" "pronta: painel do Agata aberto" 2>/dev/null || true
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 70997974..b5640064 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -32,4 +32,14 @@ fi
+ # espinha: no stop o agata-drain roda antes e drena o WAL -> nunca corta no meio
+ # de um commit. Derruba os servicos + o MoE :20129 (libera a VRAM).
+ systemctl --user stop agata.target 2>/dev/null || true
++
++# Notificação por componente (Humano, 06/11/2026: "deve ter notificação em todos").
++_notifica_unidades() {
++  local _u _st
++  for _u in "$@"; do
++    _st=$(systemctl --user is-active "$_u" 2>/dev/null || true)
++    notify-send -a Seth "$_u" "${_st:-desconhecido}" 2>/dev/null || true
++  done
++}
++_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service agata.target
+ notify-send -a Seth "Seth" "parada por completo" 2>/dev/null || true
