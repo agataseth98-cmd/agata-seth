@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b6ebb351ba1eeb73704f632f692b9a4d31160565
-  Escrito em: 06/11/2026 09:47 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8d097152fc257337f278877e141377e2d84a5029
+  Escrito em: 06/11/2026 10:55 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b6ebb351ba1eeb73704f632f692b9a4d31160565/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b6ebb351ba1eeb73704f632f692b9a4d31160565/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b6ebb351ba1eeb73704f632f692b9a4d31160565/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b6ebb351ba1eeb73704f632f692b9a4d31160565/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b6ebb351ba1eeb73704f632f692b9a4d31160565/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8d097152fc257337f278877e141377e2d84a5029/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
+- **Causa medida (leitura de código):** `_estado_acervo` devolvia lista vazia em caso de erro (`redesign/painel_operacional/nova_versao_painel.py`); `cadastro.listar` ignorava JSON ilegível sem aviso (`redesign/alexandria/cadastro.py`); `politica_egress._resolver_destino` aceitava userinfo na URL (`scripts/politica_egress.py`).
+- **Mecanismo:** `cadastro.listar_com_falhas()` conta os ilegíveis; `acervo_listar` devolve `estado` (ok, vazio, parcial, erro) e `ilegiveis`; o painel mostra o erro e a contagem; URL com usuário ou senha é recusada antes de qualquer DNS.
+- **Medição:** 3 testes novos de userinfo e 2 do Acervo passam. Numa cópia limpa do `origin/main` com o patch aplicado, a suíte da Alexandria passa. A suíte do painel tem 1 falha (`test_sdd_painel`, projeto externo), que também ocorre no `origin/main` sem o patch.
+- **Não feito:** allowlist por destinatário (a semântica é decisão do Humano); rótulo "SOMENTE LEITURA" (aparece em duas telas e ainda não se decidiu qual está errado).
+- **Pendente:** assinatura do P-8 e aplicação em PR separado.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: diff testado em cópia limpa do origin/main, testes unitários e selftest do painel · Autorização: Humano — "queremos que tudo que está na pasta seja implementado como minimo produto viável, ok"
+
 (957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o Agata: cada serviço avisa seu estado no desktop, nos atalhos Agata e Parar Agata.** Proposta `notificacoes-agata-20261106`.
 - **Pedido do Humano (06/11/2026):** "deve ter notificação em todos".
 - **Mecanismo:** `redesign/systemd/seth` e `redesign/systemd/seth-parar` ganham o aviso por unidade.
