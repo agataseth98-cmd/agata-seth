@@ -1,0 +1,34 @@
+diff --git a/redesign/nova_versao/spec/spec.md b/redesign/nova_versao/spec/spec.md
+index 0b0dcddd..339b4b3d 100644
+--- a/redesign/nova_versao/spec/spec.md
++++ b/redesign/nova_versao/spec/spec.md
+@@ -96,3 +96,5 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve
+ - `papeis.py`
+ - `redundancia.py`
+ - `orcamento_turno.py`
++- `conselho.py`
++
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 7d61ded4..9b85d17a 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -72,6 +72,9 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+ - `medicoes_painel.py`
+ - `nova_versao_painel.py`
+ - `nova_versao.js`
++- `chat_stream.py`
++- `test_chat_stream.py`
++- `test_chat_stream_rota.py`
+ - `nova_versao.css`
+ - `abrir.js`
+ - `app.js`
+diff --git a/redesign/sentidos/spec/spec.md b/redesign/sentidos/spec/spec.md
+index 00b30a83..3a361163 100644
+--- a/redesign/sentidos/spec/spec.md
++++ b/redesign/sentidos/spec/spec.md
+@@ -67,3 +67,5 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
+ - `servidor_ouvido.py`
+ - `tests/`
+ - `visao.py`
++- `falha_segura.py`
++

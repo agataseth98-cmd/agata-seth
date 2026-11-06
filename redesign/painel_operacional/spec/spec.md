@@ -72,6 +72,9 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
 - `medicoes_painel.py`
 - `nova_versao_painel.py`
 - `nova_versao.js`
+- `chat_stream.py`
+- `test_chat_stream.py`
+- `test_chat_stream_rota.py`
 - `nova_versao.css`
 - `abrir.js`
 - `app.js`
