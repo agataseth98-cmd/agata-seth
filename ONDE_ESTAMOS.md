@@ -12,6 +12,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **Esperando você:** assinar `m2c-acervo-parcial-20261106`. É só um teste novo para o estado `parcial` do Acervo, achado pelo ciclo SDD da M2b. O código não muda.
 
+## Hoje, 06/11 (proposta lote3)
+
+**Esperando você:** assinar `lote3-processo-20261106`. Substitui a lote2b, que foi assinada com um diff que traz registros e não aplica. A v3 é só código e aplica limpa. Traz a regra do D3 (aviso antes da chamada) e a camada 2 do Rust com IPs pinados.
+
 ## Hoje, 06/11 (proposta lote2b)
 
 **Esperando você:** assinar `lote2b-processo-20261106` (substitui a v1). Traz a correção de segurança do Rust egress, o filtro do CI, a skill de processo e o time de inovação. Duas perguntas: merge de PR de aplicação (AGENTS.md diz que fica com você) e a ordem do aviso D3.
