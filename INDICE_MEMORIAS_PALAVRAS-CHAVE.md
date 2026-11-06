@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxico, semântica e externa ficam disponíveis, e o modo auto escolhe caso a caso, registrando o motivo de cada etapa.** Proposta `alexandria-hierarquia-20261106`.
+  palavras-chave: hierarquia, buscas, alexandria, lote, léxico, semântica, externa, ficam, disponíveis, modo, auto, escolhe, caso, registrando, motivo, etapa, proposta
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
   palavras-chave: condição, busca, externa, avaliação, passa, usar, fontes, própria, tarefa, piora, era, erro, medição, efeito, modelo, lote, proposta, avaliacao
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, entrada, mergeado, painel, operacional, reiniciado, checkout, principal, avançou, acee, service, reiniciou, primeira, checagem, imediata, conectou, porta, após, cinco, segundos, serviço, estava, ativo, ouvindo, rede, prototipo, responderam, http, brave, exibiu, nove, adaptadores, experimentais, poll, recente, inventário, abas, provedores, veio, vazio, prompt, real, enviado, extensão, modelos, chromium, foram, verificados, automação, mostrou, teste, negativo, api, relay, council, tasks, identificador, cliente, deliberadamente, inválido, recebeu, esperado
 (927) DIÁRIO — 29/10/2026 · **A P-8 de integração do Conselho com abas Chromium foi assinada, verificada e aplicada em worktree própria.** Selftest, 39 testes do painel, 10 testes de contrato, sintaxe JavaScript, manifesto e validação da skill passaram. Nenhum serviço ou navegador foi alterado e nenhum prompt real foi enviado; PR de aplicação aguarda revisão e merge humano.
   palavras-chave: integração, abas, chromium, assinada, verificada, aplicada, worktree, própria, selftest, testes, painel, contrato, sintaxe, javascript, manifesto, validação, skill, passaram, serviço, navegador, alterado, prompt, real, enviado, aplicação, aguarda, revisão, merge, humano
-(926) CORREÇÃO — 29/10/2026 · **A revisão da P-8 de abas Chromium amplia a skill com o mapa e as descobertas operacionais já registrados localmente.** Os resultados de 27–28/10 permanecem históricos; a proposta mantém os nove adaptadores experimentais até confirmação formal na extensão oficial. Nenhum runtime ou provedor foi alterado/testado.
-  palavras-chave: revisão, abas, chromium, amplia, skill, mapa, descobertas, operacionais, registrados, localmente, resultados, permanecem, históricos, proposta, mantém, nove, adaptadores, experimentais, confirmação, formal, extensão, oficial, runtime, provedor, alterado, testado
+(926) CORREÇÃO — 29/10/2026 · **A revisão da P-8 de abas Chromium amplia a skill …
+  palavras-chave: revisão, abas, chromium, amplia, skill
 (925) DIÁRIO — 29/10/2026 · **P-8 preparada para levar o Conselho às abas Chromi …
   palavras-chave: preparada, levar, abas, chromi
 (924) DIÁRIO — 28/10/2026 · **P-8 do executor API entrou em produção após o merg …
