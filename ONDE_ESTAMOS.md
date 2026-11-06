@@ -8,6 +8,12 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 06/11 (aplicação REA)
+
+**Aplicado:** `rea-herdr-integracao-20261106`. O REA entra em leitura, com allowlist de 14 subcomandos e wrapper `scripts/rea_leitura.sh`. O Herdr fica como está. Assinado pelo Humano.
+
+**Pendente:** a linha da skill em `.agents/skills/INDICE.md` (caminho protegido, precisa de proposta própria).
+
 ## Hoje, 06/11 (aplicação lote4)
 
 **Aplicado:** `lote4-processo-20261106` (aviso D3 antes da chamada, multicast bloqueado, skill de processo, portões mecanizados). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Próximo: PR de aplicação e CI verde.
