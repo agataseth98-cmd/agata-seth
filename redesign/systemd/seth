@@ -74,4 +74,16 @@ if ! _chromium_aberto; then
   # Dá tempo para a janela do painel aparecer e para a extensão do Conselho avisar o painel.
   sleep 25
 fi
+
+# Notificação por componente (Humano, 06/11/2026: "deve ter notificação em todos").
+_notifica_unidades() {
+  local _u _st
+  for _u in "$@"; do
+    _st=$(systemctl --user is-active "$_u" 2>/dev/null || true)
+    notify-send -a Seth "$_u" "${_st:-desconhecido}" 2>/dev/null || true
+  done
+}
+_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service
+_lc=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:3080/health 2>/dev/null || echo fora)
+notify-send -a Seth "LibreChat" "$_lc" 2>/dev/null || true
 notify-send -a Seth "Seth" "pronta: painel do Agata aberto" 2>/dev/null || true
