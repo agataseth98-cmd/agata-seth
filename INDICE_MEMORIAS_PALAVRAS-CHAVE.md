@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261106`), assinada pelo Humano: o teste do estado `parcial` do Acervo entra na árvore.** Aplicação em `aplica/m2c-acervo-parcial-20261106`.
+  palavras-chave: aplicada, proposta, acervo, parcial, assinada, humano, teste, estado, entra, árvore, aplicação, aplica
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
   palavras-chave: proposta, teste, estado, parcial, acervo, achado, ciclo, sdd
 (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: medidor, contexto, ganha, opção, raciocínio, ligado, raciocinio, painel, seletor, proposta, medicao, scripts, medir, efetivo, think, true, tokens, saída, ctx, maximo, resultado, salvo, sufixo, declarado, json, redesign, operacional, lista, fechada, desligado, spec, teste, motivo, qwen, primeiros, elos, cadeia, rastreio, medido, caminho, cli, texto, canon, enchimento, acertou, três, respostas, inspecionadas, foram, erros, reais, completa, corte, simples, script, avulso, registro, tinha, dado, depende, modelos, origem, claude, sonnet, code, autorização, humano, assinatura, par
 (934) DIÁRIO — 04/11/2026 · **Medidor de contexto ganha as tarefas de rastreio de variáveis e agregação (RULER completo).** Proposta `medicao-ruler-completo-20261104`: `scripts/medir_contexto_efetivo.py` (tarefas `rastreio` e `agregacao`, espaço de saída por tarefa e só o texto depois de `</think>` vale), lista fechada e menu do painel, spec e teste. Medido em `qwen3:4b` (04/11): rastreio 3/3 em 2k, 8k, 16k e 32k e 1/3 em 4k (efetivo pela regra do medidor: 2.048); agregação 0/3 em 2k e 8k (repetição do modelo, um prompt cru inspecionado). A primeira rodada deu falsos zeros por saída cortada em 400 tokens; o medidor foi corrigido antes. Não medido: outros modelos, agregação acima de 8k. Origem: Claude Sonnet 5.5 (Claude Code) · Autorização: Humano (assinatura do par)
   palavras-chave: medidor, contexto, ganha, tarefas, rastreio, variáveis, agregação, ruler, completo, proposta, medicao, scripts, medir, efetivo, agregacao, espaço, saída, tarefa, texto, think, vale, lista, fechada, menu, painel, spec, teste, medido, qwen, regra, repetição, modelo, prompt, cru, inspecionado, primeira, rodada, deu, falsos, zeros, cortada, tokens, corrigido, modelos, acima, origem, claude, sonnet, code, autorização, humano, assinatura, par
-(933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 tópico(s) de 123 entrada(s) do cache do Conselho.** Texto em `extras/memoria-semanal/semana-2026-11-03.md`, assinado pelo Humano (V9 §37, M3; (849)). Origem: proposta do modelo ollama-local/qwen3.5-9b-64k:latest, conferida pela Máquina. A Máquina cortou 2 tópico(s) sem sustentação nas entradas citadas.
-  palavras-chave: memória, canônica, semana, tópico, entrada, cache, texto, extras, memoria, semanal, assinado, humano, origem, proposta, modelo, ollama, local, qwen, latest, conferida, máquina, cortou, sustentação, entradas, citadas
+(933) DIÁRIO — 03/11/2026 · **Memória Canônica da semana 28/10 a 03/11/2026: 12 …
+  palavras-chave: memória, canônica, semana
 (932) DIÁRIO — 03/11/2026 · **Quatro decisões do Humano em 03/11/2026 entram no …
   palavras-chave: quatro, decisões, humano, entram
 (931) DIÁRIO — 29/10/2026 · **A confirmação única entrou no painel oficial após …

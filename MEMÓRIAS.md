@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a9f0acb0d4a939077fcd2d7442ab399e355b2114
-  Escrito em: 06/11/2026 11:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0dc7066f3216a25986b7626c3fede7925d49b06e
+  Escrito em: 06/11/2026 11:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a9f0acb0d4a939077fcd2d7442ab399e355b2114/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dc7066f3216a25986b7626c3fede7925d49b06e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dc7066f3216a25986b7626c3fede7925d49b06e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dc7066f3216a25986b7626c3fede7925d49b06e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dc7066f3216a25986b7626c3fede7925d49b06e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0dc7066f3216a25986b7626c3fede7925d49b06e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261106`), assinada pelo Humano: o teste do estado `parcial` do Acervo entra na árvore.** Aplicação em `aplica/m2c-acervo-parcial-20261106`.
+- **Verificação:** `p8_verificar` deu PODE APLICAR em worktree de aplicação (assinatura ED25519 de `agata-humano`, sha256 `97e0cd9d56bc`); só depois o diff foi aplicado. `git apply --check -R` do diff assinado na árvore passou.
+- **Medição:** `test_nova_versao_painel.py` passa (inclui o teste novo).
+- **Pendente:** merge do PR de aplicação com CI verde.
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar` antes de aplicar, `git apply --check -R` depois, suíte do painel · Autorização: Humano — "assinado"
+
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
 - **Causa medida:** o ciclo SDD da M2b (critério "registro ilegível diz parcial e conta") falhou: o teste não estava na árvore aplicada, embora o código esteja (`nova_versao_painel.py`). A v2 foi escrita sobre o `origin/main`, que não tinha a v1, e o teste da v1 não entrou.
 - **Mecanismo:** só um teste novo; nenhuma mudança de código.
