@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): eb1c40a42ee7d889b9794f23fe89796cf74b0f13
-  Escrito em: 06/11/2026 17:46 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 40f79f744c29e18f6137139d34453e86002285e7
+  Escrito em: 06/11/2026 18:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb1c40a42ee7d889b9794f23fe89796cf74b0f13/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb1c40a42ee7d889b9794f23fe89796cf74b0f13/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb1c40a42ee7d889b9794f23fe89796cf74b0f13/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb1c40a42ee7d889b9794f23fe89796cf74b0f13/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/eb1c40a42ee7d889b9794f23fe89796cf74b0f13/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/40f79f744c29e18f6137139d34453e86002285e7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/40f79f744c29e18f6137139d34453e86002285e7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/40f79f744c29e18f6137139d34453e86002285e7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/40f79f744c29e18f6137139d34453e86002285e7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/40f79f744c29e18f6137139d34453e86002285e7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(970) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
+- Assinatura do Humano verificada com `p8_verificar` (PODE APLICAR, hash e505d47564d3); diff aplicado em worktree própria a partir de `origin/main`. O diff de `scripts/conselho_remoto.py` aplicado confere byte a byte com o assinado (`cmp`) e o `git apply -R --check` passa.
+- Modelo: Claude Haiku 5.5 (Claude Code, na Máquina). Vetor: `p8_verificar`, `git apply` e `cmp`.
+- Numeração: (970) assume que a (969), da agência (PR 930), entra no main antes. Se a ordem mudar, a numeração é ajustada na entrada seguinte, não nesta.
+
 (968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D3 em stderr antes da chamada, multicast bloqueado no egress, skill de processo corrigida, portões mecanizados.**
 - Substitui a lote3, que nunca foi assinada. Assinatura do Humano verificada com `p8_verificar` (PODE APLICAR); diff aplicado em worktree própria a partir de `origin/main`.
 - O `APROVADO` foi copiado para `propostas/aplicadas/`; o original, não rastreado no checkout principal, fica onde está.
