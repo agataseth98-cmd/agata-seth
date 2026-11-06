@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 06/11 (aplicação agência de pesquisa)
+
+**Aplicado:** `agencia-pesquisa-20261106`. Três pesquisadores de leitura em `.claude/agents/` (`agata-pesq-rea`, `agata-pesq-painel`, `agata-pesq-processo`). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Valem numa sessão nova. Registro em MEMÓRIAS (969).
+
 ## Hoje, 06/11 (aplicação lote4)
 
 **Aplicado:** `lote4-processo-20261106` (aviso D3 antes da chamada, multicast bloqueado, skill de processo, portões mecanizados). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Próximo: PR de aplicação e CI verde.
