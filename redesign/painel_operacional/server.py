@@ -35,6 +35,7 @@ import qualidade_llm  # noqa: E402
 import medicoes_painel  # noqa: E402
 import sdd_painel  # noqa: E402
 import nova_versao_painel  # noqa: E402
+import chat_stream  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
@@ -47,6 +48,9 @@ CACHE_SECONDS = 3
 WIKI_LIBERADA = True
 LIMITE_RESPOSTA_VERIFICADOR = 262144
 ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
+GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os testes trocam por servidor falso
+CHAT_STREAM_LIMITE_BYTES = 131_072
+CHAT_STREAM_TIMEOUT_S = 120
 WIKI_RESULT_MAX = 12000
 
 # Allowlist de unidades de usuário. A API não aceita nome de unidade do cliente.
@@ -134,6 +138,15 @@ def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
     if fetch_site and fetch_site not in {"same-origin", "none"}:
         return False
     return not origin or origin == ALLOWED_ORIGIN
+
+
+def _linhas_do_gateway(resposta):
+    """Linhas de texto do stream do gateway. Queda de conexão encerra o stream; quem chama emite 'stream interrompido'."""
+    try:
+        for linha in resposta:
+            yield linha.decode("utf-8", errors="replace")
+    except (OSError, http.client.HTTPException):
+        return
 
 
 def _relay_modules():
@@ -1016,6 +1029,11 @@ class Handler(BaseHTTPRequestHandler):
         if (self.path.startswith("/api/") and self.path.split("?", 1)[0] not in ROTAS_DA_EXTENSAO
                 and not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin"))):
             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        # Painel unificado (P9-A): as páginas antigas continuam no disco, mas a entrada agora é o protótipo.
+        if self.path == "/":
+            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo"),))
+        if self.path == "/conselho-rede":
+            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo#conselho"),))
         if self.path.startswith("/api/grafo"):
             return self._grafo()
         if self.path == "/api/seth/conversas":
@@ -1139,6 +1157,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._relay_evaluation()
         if self.path == "/api/seth/chat":
             return self._seth_chat()
+        if self.path == "/api/seth/chat/stream":
+            return self._seth_chat_stream()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
         if self.path == "/api/nova-versao/upload":
@@ -1394,6 +1414,54 @@ class Handler(BaseHTTPRequestHandler):
         }).encode("utf-8")
         return self._send(200 if receipt.get("duplicate") else 201, "application/json; charset=utf-8", body)
 
+
+    def _seth_chat_stream(self) -> None:
+        """Chat da Seth em streaming (SSE) pelo gateway local: só texto, sem ferramentas, sem escrita. Não grava conteúdo em log."""
+        if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
+            self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
+        ):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+            return self._send(415, "text/plain; charset=utf-8", b"JSON required")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
+            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        try:
+            corpo = json.loads(self.rfile.read(int(raw_length)))
+            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None)
+        except (ValueError, RecursionError):
+            # Mensagem genérica: a exceção de montar_pedido não ecoa conteúdo do usuário, e aqui nem ela sai.
+            return self._send(400, "text/plain; charset=utf-8", b"invalid request")
+        if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
+            return self._send(429, "text/plain; charset=utf-8", b"busy")
+        try:
+            try:
+                req = urllib.request.Request(GATEWAY_CHAT_URL, data=json.dumps(pedido).encode("utf-8"),
+                                             headers={"Content-Type": "application/json", "Accept": "text/event-stream"},
+                                             method="POST")
+                resposta = urllib.request.urlopen(req, timeout=CHAT_STREAM_TIMEOUT_S)
+            except OSError:
+                return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
+            with resposta:
+                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)))
+        finally:
+            _SEM_CONVERSA_EM_CURSO.release()
+
+    def _stream_sse(self, eventos) -> None:
+        """Repassa eventos como SSE. Sem Content-Length: a conexão fecha ao fim (HTTP/1.0)."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+        self.end_headers()
+        try:
+            for evento in eventos:
+                self.wfile.write(chat_stream.codificar_sse(evento))
+                self.wfile.flush()
+        except OSError:
+            return  # o navegador saiu no meio do stream
 
     def _seth_conversa(self, apagar: bool) -> None:
         """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia."""

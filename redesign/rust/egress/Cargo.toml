@@ -1,0 +1,8 @@
+[package]
+name = "egress"
+version = "0.1.0"
+edition = "2021"
+description = "Politica de egress/anti-SSRF: camada Rust espelho de scripts/politica_egress.py"
+publish = false
+
+[dependencies]

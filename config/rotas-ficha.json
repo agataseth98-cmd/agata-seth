@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "decisoes": {
+    "D2": "dado pessoal só em rota local nas rotas novas",
+    "D3": "cota gratuita compartilhada sem teto, com aviso"
+  },
+  "rotas": [
+    {
+      "id": "local-qwen",
+      "provedor": "ollama",
+      "modelo": "qwen3.5-9b-64k",
+      "categoria": "local",
+      "classes_permitidas": [
+        "publico",
+        "sintetico",
+        "pessoal"
+      ],
+      "treina_com_prompts": "nao_aplica",
+      "cota": "sem cota (hardware local)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-06",
+      "fonte": "PROJETO.md (fundo local da cadeia da Seth)"
+    },
+    {
+      "id": "gemini-flash",
+      "provedor": "gemini",
+      "modelo": "gemini-2.5-flash",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico",
+        "sintetico"
+      ],
+      "treina_com_prompts": "nao_conferido",
+      "cota": "~20 requisições por dia (PROVEDORES.md, linha 133)",
+      "compartilhada_com_seth": true,
+      "cota_medida": false,
+      "conferida_em": "2026-09-02",
+      "fonte": "redesign/router/PROVEDORES.md"
+    },
+    {
+      "id": "openrouter-free",
+      "provedor": "openrouter",
+      "modelo": "*:free (rotativo)",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico",
+        "sintetico"
+      ],
+      "treina_com_prompts": "nao_conferido",
+      "cota": "volátil; modelos :free rotacionam",
+      "compartilhada_com_seth": true,
+      "cota_medida": false,
+      "conferida_em": "2026-09-02",
+      "fonte": "redesign/router/PROVEDORES.md"
+    },
+    {
+      "id": "zai-glm",
+      "provedor": "zai",
+      "modelo": "glm-4.7-flash",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico",
+        "sintetico"
+      ],
+      "treina_com_prompts": "nao_conferido",
+      "cota": "não medida",
+      "compartilhada_com_seth": true,
+      "cota_medida": false,
+      "conferida_em": "2026-09-02",
+      "fonte": "redesign/router/PROVEDORES.md"
+    },
+    {
+      "id": "mistral-8b",
+      "provedor": "mistral",
+      "modelo": "ministral-8b-latest",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico",
+        "sintetico"
+      ],
+      "treina_com_prompts": "nao_conferido",
+      "cota": "mistral-small dá 429 nesta conta",
+      "compartilhada_com_seth": true,
+      "cota_medida": false,
+      "conferida_em": "2026-11-06",
+      "fonte": "medição do Conselho Remoto em 06/11/2026 (registro privado, não citado aqui)"
+    },
+    {
+      "id": "huggingface-llama",
+      "provedor": "huggingface",
+      "modelo": "Llama-3.3-70B-Instruct",
+      "categoria": "gratuito",
+      "classes_permitidas": [],
+      "treina_com_prompts": "nao_conferido",
+      "cota": "sem crédito (HTTP 402 desde 22/09)",
+      "compartilhada_com_seth": true,
+      "cota_medida": true,
+      "conferida_em": "2026-11-06",
+      "fonte": "medição do Conselho Remoto em 06/11/2026 (registro privado, não citado aqui)"
+    }
+  ]
+}

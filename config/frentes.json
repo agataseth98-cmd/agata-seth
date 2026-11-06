@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "fonte": "Experimento 2, Proposta técnica SDD/carteira.md (linhas 11-24)",
+  "palavra_atual": "Apresentação",
+  "dados_reais": "proibido nesta fase",
+  "frentes": [
+    {
+      "id": "F-01",
+      "nome": "Estúdio de processos para PMEs",
+      "entregavel": "Marketing/vendas/RH sintéticos: briefing, proposta e resposta administrativa",
+      "gate": "Estado final correto, retrabalho e custo; envio/publicação sempre sob aprovação",
+      "bloqueios": "dados da empresa, integrações e responsável de processo",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-02",
+      "nome": "Laboratório de avaliação e proveniência em português",
+      "entregavel": "Relatório reproduzível das seis famílias e confiabilidade",
+      "gate": "gabaritos independentes, splits separados, origem verificável",
+      "bloqueios": "direitos de corpus e governança de avaliação",
+      "piloto_sintetico": "reusa a avaliação do P3 (tarefas de desenvolvimento) em português"
+    },
+    {
+      "id": "F-03",
+      "nome": "Tutor móvel e apoio ao educador",
+      "entregavel": "Sessão de prática guiada com conteúdo licenciado",
+      "gate": "retenção/transferência sem ajuda, revisão docente e acessibilidade",
+      "bloqueios": "educadores, participantes e salvaguardas de menores",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-04",
+      "nome": "Navegador pessoal de serviços públicos",
+      "entregavel": "Checklist de serviço público com fontes datadas",
+      "gate": "requisitos corretos e abstenção sobre elegibilidade; sem submissão automática",
+      "bloqueios": "acesso público e atualização; nenhum login ou API presumido",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-05",
+      "nome": "Cursos, vagas e requalificação",
+      "entregavel": "Plano de busca e comparação de ofertas",
+      "gate": "vigência das ofertas, aderência e correção, sem promessa de emprego",
+      "bloqueios": "fontes autorizadas e preferências consentidas",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-06",
+      "nome": "Letramento digital e antifraude para idosos",
+      "entregavel": "Exercícios sintéticos de navegação e fraude",
+      "gate": "compreensão/transferência e ausência de ações financeiras",
+      "bloqueios": "co-design com usuários, acessibilidade e proteção de dados",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-07",
+      "nome": "Navegador de saúde e preparação para consulta",
+      "entregavel": "Resumo autorizado de dúvidas e documentos para consulta",
+      "gate": "fidelidade, privacidade, encaminhamento apropriado; sem diagnóstico/prescrição",
+      "bloqueios": "revisão especializada e consentimento; integração pública não presumida",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-08",
+      "nome": "Transparência para trabalhadores de plataformas",
+      "entregavel": "Dossiê de evidências fornecidas pelo titular",
+      "gate": "origem e cronologia corretas; distinguir fato e interpretação",
+      "bloqueios": "dados do titular, segurança e revisão jurídica antes de aconselhamento",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-09",
+      "nome": "Documentação a P&D e talentos",
+      "entregavel": "Dossiê de P&D: pergunta, materiais, plano e evidência; mapa de chamadas como complemento",
+      "gate": "fontes vigentes e checklist sem inventar elegibilidade",
+      "bloqueios": "editais reais, direitos e responsável técnico",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-10",
+      "nome": "Computação e sustentabilidade de IA",
+      "entregavel": "Comparação de custo/energia por tarefa correta",
+      "gate": "medição documentada ou desconhecido; nenhum ganho ambiental presumido",
+      "bloqueios": "instrumentação energética e fatores comparáveis",
+      "piloto_sintetico": "reusa a ficha de rotas (P7) para custo por tarefa correta"
+    },
+    {
+      "id": "F-11",
+      "nome": "Prontidão industrial e hardware/software",
+      "entregavel": "Diagnóstico documental não invasivo",
+      "gate": "lacunas rastreáveis e plano revisado pelo operador",
+      "bloqueios": "autorização industrial e acesso restrito",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-12",
+      "nome": "Fluxo agropecuário rural",
+      "entregavel": "Registro sintético de lote/eventos e cronologia; consulta documental como complemento",
+      "gate": "recuperação offline e proveniência; sem controle de máquinas",
+      "bloqueios": "conectividade e especialista local; dados autorizados",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-13",
+      "nome": "Documentação cibernética restrita",
+      "entregavel": "Exercício de mesa documental de recuperação de runbook, sem comandos ou acesso real",
+      "gate": "escopo autorizado, segredos excluídos e recomendações verificadas",
+      "bloqueios": "autorização específica; sem ações ofensivas ou varredura",
+      "piloto_sintetico": null
+    },
+    {
+      "id": "F-14",
+      "nome": "Observatório de governança digital",
+      "entregavel": "Boletim de fontes públicas e alterações",
+      "gate": "data, autoria, distinção proposta/norma/execução",
+      "bloqueios": "revalidação legal/institucional por fonte primária",
+      "piloto_sintetico": "boletim sobre fontes públicas, sem dado real"
+    }
+  ]
+}
