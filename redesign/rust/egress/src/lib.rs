@@ -190,6 +190,10 @@ fn v4_global(ip: Ipv4Addr) -> bool {
     if GLOBAIS_EXCECAO_V4.iter().any(|&(b, p)| em_rede_v4(ip, b, p)) {
         return true;
     }
+    // Multicast (224.0.0.0/4) não é destino unicast: bloqueado por decisão do Humano (06/11).
+    if em_rede_v4(ip, Ipv4Addr::new(224, 0, 0, 0), 4) {
+        return false;
+    }
     if em_rede_v4(ip, COMPARTILHADO_V4.0, COMPARTILHADO_V4.1) {
         return false;
     }
@@ -201,6 +205,10 @@ fn v4_privado(ip: Ipv4Addr) -> bool {
 }
 
 fn v6_global(ip: Ipv6Addr) -> bool {
+    // Multicast (ff00::/8) bloqueado por decisão do Humano (06/11).
+    if em_rede_v6(ip, Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0), 8) {
+        return false;
+    }
     !v6_privado(ip)
 }
 
@@ -267,3 +275,5 @@ fn host_e_porta(netloc: &str) -> (&str, Option<&str>) {
         None => (netloc, None),
     }
 }
+
+pub mod camada2;

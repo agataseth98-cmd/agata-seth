@@ -74,7 +74,7 @@ fn ipv4_extras_iguais_ao_python() {
         ("172.16.0.1", Some(MOTIVO_PRIVADO)),
         ("172.32.0.1", None),
         ("192.168.1.1", Some(MOTIVO_PRIVADO)),
-        ("224.0.0.1", None),
+        ("224.0.0.1", Some(MOTIVO_RESERVADO)), // multicast: divergência deliberada do is_global do Python (decisão 06/11)
         ("255.255.255.255", Some(MOTIVO_PRIVADO)),
         ("192.0.0.9", None),
         ("198.18.0.1", Some(MOTIVO_PRIVADO)),
@@ -90,8 +90,9 @@ fn ipv4_extras_iguais_ao_python() {
 
 #[test]
 fn ipv6_extras_iguais_ao_python() {
-    let casos: [(&str, Option<&str>); 16] = [
+    let casos: [(&str, Option<&str>); 17] = [
         ("::1", Some("loopback")),
+        ("ff02::1", Some(MOTIVO_RESERVADO)), // multicast IPv6 (decisão 06/11)
         ("fe80::1", Some(MOTIVO_LINK_LOCAL)),
         ("fc00::1", Some(MOTIVO_PRIVADO)),
         ("2001:db8::1", Some(MOTIVO_PRIVADO)),

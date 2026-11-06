@@ -8,6 +8,12 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 06/11 (aplicação lote4)
+
+**Aplicado:** `lote4-processo-20261106` (aviso D3 antes da chamada, multicast bloqueado, skill de processo, portões mecanizados). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Próximo: PR de aplicação e CI verde.
+
+**Para o Humano:** o time `agata-*` (em `.claude/agents/`) só fica ativo numa sessão nova. A spec da nova versão (PR 923) segue vermelha nos critérios de painel de chaves e reversão, sem teste.
+
 ## Hoje, 06/11 (proposta m2c)
 
 **Esperando você:** assinar `m2c-acervo-parcial-20261106`. É só um teste novo para o estado `parcial` do Acervo, achado pelo ciclo SDD da M2b. O código não muda.

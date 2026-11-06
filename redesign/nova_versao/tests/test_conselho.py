@@ -1,3 +1,5 @@
+import contextlib
+import io
 import sys
 import unittest
 from pathlib import Path
@@ -33,6 +35,9 @@ ROTA_NUVEM_B = {"id": "nuvem-b", "familia": "B", "categoria": "nuvem",
                 "classes_permitidas": ["publico", "pessoal"]}
 ROTA_NUVEM_C = {"id": "nuvem-c", "familia": "C", "categoria": "nuvem",
                 "classes_permitidas": ["publico"]}
+ROTA_GRATUITA_COMPARTILHADA = {"id": "gratis-s", "familia": "S", "categoria": "gratuito",
+                               "classes_permitidas": ["publico"],
+                               "compartilhada_com_seth": True}
 
 
 class TransporteFalso:
@@ -123,7 +128,7 @@ class ConselhoTests(unittest.TestCase):
         self.assertTrue(r["divergencia"])
         self.assertTrue(r["lacuna"])
         self.assertIn("lacuna: divergência; sem votação", r["aviso"])
-        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso"})
+        self.assertEqual(set(r.keys()), {"pareceres", "divergencia", "lacuna", "aviso", "avisos"})
         self.assertNotIn("votos", r)
         self.assertNotIn("vencedor", r)
 
@@ -142,6 +147,34 @@ class ConselhoTests(unittest.TestCase):
         self.assertTrue(r["pareceres"][0]["e_dado"])
         self.assertEqual(t.ids, ["nuvem-a"])
 
+    def test_d3_aviso_aparece_para_rota_gratuita_compartilhada(self):
+        t = TransporteFalso()
+        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
+        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["avisos"])
+        self.assertIn("D3: rota gratis-s usa cota compartilhada com a Seth, sem teto", r["aviso"])
+
+    def test_d3_aviso_nao_aparece_para_rota_local(self):
+        rota_local_compartilhada = dict(ROTA_LOCAL, compartilhada_com_seth=True)
+        t = TransporteFalso()
+        r = convocar([rota_local_compartilhada], t)
+        self.assertEqual(t.ids, ["local-a"])
+        self.assertFalse([a for a in r["avisos"] if a.startswith("D3")])
+        self.assertNotIn("D3", r["aviso"])
+
+    def test_d3_rota_compartilhada_e_chamada_nao_recusada(self):
+        t = TransporteFalso()
+        r = convocar([ROTA_GRATUITA_COMPARTILHADA, ROTA_NUVEM_B], t)
+        self.assertEqual(t.ids, ["gratis-s", "nuvem-b"])
+        self.assertEqual([p["rota"] for p in r["pareceres"]], ["gratis-s", "nuvem-b"])
+        self.assertFalse(r["aviso"].startswith("recusado"))
+
+    def test_avisos_gerais_continuam_na_lista_e_no_texto(self):
+        t = TransporteFalso(respostas={"gratis-s": FORMATO_SEM_EMENDA})
+        r = convocar([ROTA_GRATUITA_COMPARTILHADA], t)
+        self.assertIn("sem divergência de posição entre famílias.", r["avisos"])
+        self.assertTrue(any(a.startswith("fora_do_formato") for a in r["avisos"]))
+        self.assertIn("sem divergência de posição entre famílias.", r["aviso"])
+
     def test_pedido_vazio_recusado(self):
         for pedido in ("", "   \n\t"):
             t = TransporteFalso()
@@ -149,6 +182,22 @@ class ConselhoTests(unittest.TestCase):
             self.assertEqual(t.chamadas, [])
             self.assertEqual(r["pareceres"], [])
             self.assertIn("pedido vazio", r["aviso"])
+
+
+class AvisoD3AntesDaChamadaTests(unittest.TestCase):
+    def test_aviso_d3_sai_em_stderr_antes_da_primeira_chamada(self):
+        # Prova de ordem: o transporte falso registra se o aviso já estava no stderr quando foi chamado.
+        eventos = []
+        buf = io.StringIO()
+
+        def transporte(rota, pedido):
+            eventos.append(("chamada", rota["id"], "AVISO D3" in buf.getvalue()))
+            return "posicao: sim\nargumentos: a\nrisco: b\nrecomendacao: c"
+
+        with contextlib.redirect_stderr(buf):
+            convocar([ROTA_GRATUITA_COMPARTILHADA], transporte, classe="publico")
+        self.assertTrue(eventos and eventos[0][2], eventos)
+        self.assertEqual(buf.getvalue().count("AVISO D3 (antes da chamada)"), 1)
 
 
 if __name__ == "__main__":

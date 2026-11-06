@@ -96,3 +96,7 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
 - `relay-extension-v2/`
 - `operator_console/`
 - `assets/`
+- `frentes.html`
+- `frentes.js`
+- `test_frentes.py`
+- `test_chat_ui.py`

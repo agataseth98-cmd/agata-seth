@@ -532,7 +532,7 @@ function ligarCartoesClicaveis() {
   });
 }
 
-/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat). Só texto; histórico só na memória desta aba. */
+/* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
 let sethAtual = {id: null, titulo: "", mensagens: []};
 const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
 const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
@@ -673,26 +673,86 @@ function sethErro(status, erro) {
   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
   return erro && erro.message ? erro.message : "falha desconhecida";
 }
+/* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
+   Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
+   Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
+function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
+async function sethLerStream(mensagens, parcial, aoTexto) {
+  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
+    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+  if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
+  const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
+  let pendente = "", fim = false;
+  const tratarBloco = (bloco) => {
+    const dados = bloco.split("\n").filter((l) => l.startsWith("data: ")).map((l) => l.slice(6)).join("\n");
+    if (!dados) return;
+    let evento;
+    try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
+    if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
+    else if (evento.tipo === "fim") fim = true;
+    else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
+  };
+  try {
+    for (;;) {
+      const {value, done} = await leitor.read();
+      if (done) break;
+      pendente += decodificador.decode(value, {stream: true}).replace(/\r\n/g, "\n");
+      const blocos = pendente.split("\n\n"); pendente = blocos.pop();
+      blocos.forEach(tratarBloco);
+    }
+    pendente += decodificador.decode().replace(/\r\n/g, "\n");
+    if (pendente.trim()) tratarBloco(pendente);
+    if (!fim) throw sethErroStream("stream interrompido");
+    return parcial.texto;
+  } finally {
+    try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
+  }
+}
+async function sethChatInteiro(mensagens) {
+  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+    body: JSON.stringify({messages: mensagens})});
+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+  return r.json();
+}
 async function sethEnviar(textoUsuario, reaproveitar) {
-  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input");
+  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input"); const log = byId("seth-transcript");
   if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
   sethDesenhar();
   botao.disabled = true; sethStatus("PENSANDO", "partial");
   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
-  byId("seth-transcript").append(pensando);
+  log.append(pensando);
+  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
+  const parcial = {texto: ""};
+  let textoNo = null;
+  const aoTexto = (delta) => {
+    if (!textoNo) {
+      pensando.remove();
+      const bolha = document.createElement("article"); bolha.className = "msg msg-assistant";
+      const corpo = document.createElement("div"); corpo.className = "msg-body";
+      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo);
+      log.append(bolha);
+    }
+    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
+  };
   try {
-    const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
-      body: JSON.stringify({messages: sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}))})});
-    if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
-    const dados = await r.json();
-    sethAtual.mensagens.push({role: "assistant", content: dados.content, hora: sethHora(), modelo: dados.model || ""});
+    let conteudo, modelo = "";
+    try {
+      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
+    } catch (erro) {
+      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
+      if (!transporte) throw erro;
+      const dados = await sethChatInteiro(mensagens);
+      conteudo = dados.content; modelo = dados.model || "";
+    }
+    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
     sethDesenhar(); sethStatus("PRONTA", "planned");
     sethSalvar();
   } catch (erro) {
     if (!reaproveitar) sethAtual.mensagens.pop();
     sethDesenhar();
     const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
-    byId("seth-transcript").append(aviso);
+    log.append(aviso);
     sethStatus("INDISPONÍVEL", "horizon");
   } finally { botao.disabled = false; campo.focus(); }
 }

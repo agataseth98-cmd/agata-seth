@@ -14,6 +14,9 @@ on:
       - "redesign/project_kit/**"
       - "redesign/evidence_ledger/**"
       - "redesign/nova_versao/**"
+      - "redesign/confiabilidade/**"
+      - "redesign/rotas/**"
+      - "redesign/mvp_autoaprimoramento/**"
       - "redesign/alexandria/**"
       - "redesign/metacognicao/**"
       - "redesign/corpo/**"
@@ -42,7 +45,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
 
       - name: Testes dos componentes SDD
-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests ferramentas/test_ferramentas.py
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
 
       - name: Ciclo SDD sobre o próprio sdd_flow
         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
