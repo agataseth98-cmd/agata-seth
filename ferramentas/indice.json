@@ -3318,5 +3318,21 @@
   "tema": "agata",
   "caminho": ".agents/skills/elephant-goldfish-sdd/SKILL.md",
   "resumo": "Orientar o Humano e os modelos a aplicar SDD 2.0 em funcionalidades grandes ou arriscadas: contexto profundo para desenhar, revisão independ"
+ },
+ {
+  "nome": "experimento-agata",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/experimento-agata/SKILL.md",
+  "resumo": "Planejar, executar, analisar e registrar experimentos semânticos e avaliações de confiabilidade interna do Agata no Experimento 2. Use para "
+ },
+ {
+  "nome": "morse",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/morse/SKILL.md",
+  "resumo": "Conduzir conversas de voz e debates entre Humano, Codex e Seth com escuta paciente, tolerância a ruído, turnos claros e distinção entre fala"
  }
 ]
