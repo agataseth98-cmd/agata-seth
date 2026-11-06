@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
+  palavras-chave: condição, busca, externa, avaliação, passa, usar, fontes, própria, tarefa, piora, era, erro, medição, efeito, modelo, lote, proposta, avaliacao
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
   palavras-chave: voz, librechat, transcreve, novo, conversa, sentidos, ouvido, aceita, corpo, chunked, envia, content, length, idioma, stt, passa, código, válido, proposta
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: integração, abas, chromium, assinada, verificada, aplicada, worktree, própria, selftest, testes, painel, contrato, sintaxe, javascript, manifesto, validação, skill, passaram, serviço, navegador, alterado, prompt, real, enviado, aplicação, aguarda, revisão, merge, humano
 (926) CORREÇÃO — 29/10/2026 · **A revisão da P-8 de abas Chromium amplia a skill com o mapa e as descobertas operacionais já registrados localmente.** Os resultados de 27–28/10 permanecem históricos; a proposta mantém os nove adaptadores experimentais até confirmação formal na extensão oficial. Nenhum runtime ou provedor foi alterado/testado.
   palavras-chave: revisão, abas, chromium, amplia, skill, mapa, descobertas, operacionais, registrados, localmente, resultados, permanecem, históricos, proposta, mantém, nove, adaptadores, experimentais, confirmação, formal, extensão, oficial, runtime, provedor, alterado, testado
-(925) DIÁRIO — 29/10/2026 · **P-8 preparada para levar o Conselho às abas Chromium já abertas, com nove adaptadores experimentais e aprovação humana por prompt.** A proposta substitui o executor por API, preserva as abas persistentes do launcher e não cria abas ausentes; runtime e provedores reais não foram alterados ou testados. Inclui a skill `agata-relay-provedores`.
-  palavras-chave: preparada, levar, abas, chromium, abertas, nove, adaptadores, experimentais, aprovação, humana, prompt, proposta, substitui, executor, api, preserva, persistentes, launcher, cria, ausentes, runtime, provedores, reais, foram, alterados, testados, inclui, skill, agata, relay
+(925) DIÁRIO — 29/10/2026 · **P-8 preparada para levar o Conselho às abas Chromi …
+  palavras-chave: preparada, levar, abas, chromi
 (924) DIÁRIO — 28/10/2026 · **P-8 do executor API entrou em produção após o merg …
   palavras-chave: executor, api, entrou, produção, após, merg
 (922) DIÁRIO — 28/10/2026 · **Assinatura P-8 validada e proposta aplicada em wor …
