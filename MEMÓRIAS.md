@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ffe27d06fef1d1db3108c66f4fb283d05f1b3b85
-  Escrito em: 06/11/2026 09:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d9712dc0bfabfa46d3168df0a37add374d9ee45d
+  Escrito em: 06/11/2026 09:26 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffe27d06fef1d1db3108c66f4fb283d05f1b3b85/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffe27d06fef1d1db3108c66f4fb283d05f1b3b85/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffe27d06fef1d1db3108c66f4fb283d05f1b3b85/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffe27d06fef1d1db3108c66f4fb283d05f1b3b85/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ffe27d06fef1d1db3108c66f4fb283d05f1b3b85/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9712dc0bfabfa46d3168df0a37add374d9ee45d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9712dc0bfabfa46d3168df0a37add374d9ee45d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9712dc0bfabfa46d3168df0a37add374d9ee45d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9712dc0bfabfa46d3168df0a37add374d9ee45d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9712dc0bfabfa46d3168df0a37add374d9ee45d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxico, semântica e externa ficam disponíveis, e o modo auto escolhe caso a caso, registrando o motivo de cada etapa.** Proposta `alexandria-hierarquia-20261106`.
+- **Pedido do Humano (06/11/2026):** todas as formas de pesquisa disponíveis, escolhidas caso a caso.
+- **Mecanismo:** `redesign/alexandria/pesquisa.py`; spec e critérios atualizados.
+- **Medição:** 83 testes verdes; âncora da Alexandria OK.
+- **Pendente:** interface no painel e medição da escolha automática.
+
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
 - **Causa medida:** nas tarefas com fontes, a condição externa caía no acervo do repositório e perdia a fonte da tarefa (`d1`).
 - **Mecanismo:** `redesign/avaliacao/avaliar.py` mantém as fontes da tarefa e acrescenta a evidência externa.

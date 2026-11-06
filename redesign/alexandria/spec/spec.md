@@ -106,3 +106,8 @@ Medido em 04/11 no HEAD `6666813d`: 733 objetos, 7287 trechos, 349 skills; "susp
 - `ciclo_skills.py`
 - `fornecedores.py`
 - `extrair_pdf.py`
+- `pesquisa.py`
+
+## Lote 9 (06/11/2026): hierarquia de buscas
+
+Cada forma de pesquisa (léxica, semântica, externa) fica disponível e é escolhida caso a caso pelo modo: `auto` começa pelo léxico e só acrescenta semântica e externa quando a suficiência (C2) não basta; os modos explícitos fazem só o pedido; `todos` roda tudo para comparar. Cada etapa registra o motivo. A externa segue como evidência efêmera e nunca entra no índice.
