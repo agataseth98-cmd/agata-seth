@@ -82,14 +82,19 @@ def ler(sha: str) -> dict | None:
     return json.loads(arq.read_text(encoding="utf-8")) if arq.exists() else None
 
 
-def listar() -> list[dict]:
-    out = []
+def listar_com_falhas() -> tuple[list[dict], int]:
+    """Cadastros legíveis e quantos arquivos não puderam ser lidos (ilegíveis ficam de fora, contados)."""
+    out, falhas = [], 0
     for arq in sorted(pasta().glob("ext:*.json")):
         try:
             out.append(json.loads(arq.read_text(encoding="utf-8")))
         except (OSError, ValueError):
-            continue
-    return out
+            falhas += 1
+    return out, falhas
+
+
+def listar() -> list[dict]:
+    return listar_com_falhas()[0]
 
 
 def criar(sha256: str, extensao: str, rotulo: str, *, origem_uri: str | None = None, tamanho: int = 0,

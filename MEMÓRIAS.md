@@ -26,20 +26,32 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1666ac5da1b764e3f6e18551102067e2fd5854df
-  Escrito em: 06/11/2026 11:19 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2bf10fe9a414b913d5f390adb43291cf8f704444
+  Escrito em: 06/11/2026 11:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1666ac5da1b764e3f6e18551102067e2fd5854df/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2bf10fe9a414b913d5f390adb43291cf8f704444/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
+- **Causa:** na aplicação, adicionei ao índice só os arquivos novos e o diff movido; os arquivos modificados (`cadastro.py`, `nova_versao.js`, `nova_versao_painel.py`, `test_nova_versao_painel.py`, `politica_egress.py`) ficaram sem `git add`. O CI do PR #913 falhou (`fiscal-p8` e `sdd`), e o PR não foi juntado.
+- **Verificação da correção:** `git apply --check -R` do diff assinado na árvore completa passou, o que prova que a árvore é exatamente o estado assinado. O controle P-16, rodado pelo hook, executou a suíte de regressão de `politica_egress` (61 casos, 0 falhas).
+- **Medição que valia:** a entrada (960) citava a suíte do painel e os testes do Acervo; essas medições foram feitas sobre a árvore de trabalho, e não sobre o commit de 1e607529. A medição sobre o commit corrigido vem do ciclo SDD (ver próxima entrada).
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `git show --stat` do commit, `git apply --check -R` do diff assinado, P-16 no hook · Autorização: Humano — "assinado" (já registrado em 960)
+
+(960) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2b (`m2b-acervo-egress-20261106`), assinada pelo Humano: o Acervo mostra estados explícitos, registros ilegíveis são contados e URL com usuário ou senha é recusada antes do DNS.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
+- **Verificação:** `p8_verificar` no checkout vivo deu PODE APLICAR (assinatura ED25519 de `agata-humano`, sha256 `5af93a80d256`, `git apply --check` limpo). Na worktree de aplicação, a cadeia de comandos aplicou o diff antes de o script rodar, por erro de encadeamento (`| tail -1 &&`); o `mv` da assinatura falhou e foi refeito. Conferido à mão depois: sha256 do diff aplicado igual, assinatura válida contra a raiz de confiança do HEAD, linha `diff-sha256` do arquivo de assinatura igual.
+- **Medição:** painel com 84 testes, 1 falha pré-existente (`test_sdd_painel`, projeto externo); suíte da Alexandria passa; teste de egress passa; `node --check` do JS passa.
+- **Pendente:** merge do PR de aplicação (com CI verde); conferir o Acervo no painel no navegador (renderização não coberta por teste automático).
+Modelo: Claude Haiku 5.5 (Claude Code, na Máquina) · vetor: `p8_verificar` no checkout vivo, verificação manual de sha256 e assinatura, suítes do painel e da Alexandria na árvore aplicada · Autorização: Humano — "assinado"
+
 (959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-acervo-egress-20261106` substitui a v1, que não deve ser assinada.** Proposta `m2b-acervo-egress-20261106`.
 - **Causa medida:** revisão de cinco pareceres (três subagentes locais, Conselho Remoto com Gemini e Ministral, Seth) achou falhas reais na v1: docstring do teste de userinfo dizia "sem rede", mas um caso chegava ao DNS; estado `parcial` sem fontes mostrava "Nenhuma fonte ainda."; KPIs em zero no erro; nome da exceção aparecia ao operador; spec sem tabela de estados.
 - **Mecanismo:** tabela de estados com precedência (erro > parcial > vazio > ok) na própria proposta; KPIs ocultos em erro; texto fixo; teste com DNS simulado; casos de estado ok, vazio, parcial, erro e regressão de `listar()`.

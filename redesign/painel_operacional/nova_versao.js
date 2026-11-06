@@ -480,12 +480,21 @@
   function acervo() {
     const a = (estado && estado.acervo) || {itens: []};
     const itens = a.itens || [];
-    por("nv-acv-kpis", kpi("Fontes", itens.length, "teal"), kpi("Revisadas", itens.filter((c) => c.editorial_status === "revisado").length, "teal"),
+    const erro = a.estado === "erro";
+    const ilegiveis = a.ilegiveis || 0;
+    por("nv-acv-kpis", ...(erro ? [] : [kpi("Fontes", itens.length, "teal"), kpi("Revisadas", itens.filter((c) => c.editorial_status === "revisado").length, "teal"),
       kpi("Em quarentena", itens.filter((c) => ["recebido", "quarentena"].includes(c.editorial_status)).length, "gold"),
-      kpi("Restritas ou rejeitadas", itens.filter((c) => ["restrito", "rejeitado"].includes(c.editorial_status)).length, "rose"));
-    byId("nv-acv-titulo").textContent = itens.length + " fontes · só as revisadas com direitos aparecem na busca";
+      kpi("Restritas ou rejeitadas", itens.filter((c) => ["restrito", "rejeitado"].includes(c.editorial_status)).length, "rose")]));
+    mostrar("nv-acv-kpis", !erro);
+    const aviso = ilegiveis ? " · " + ilegiveis + " registro(s) ilegível(is) ficaram de fora" : "";
+    byId("nv-acv-titulo").textContent = erro ? "Acervo indisponível agora"
+      : itens.length + " fontes · só as revisadas com direitos aparecem na busca" + aviso;
+    const vazio = byId("nv-acv-vazio");
+    if (erro) vazio.textContent = "Não foi possível ler o acervo. Nada foi alterado; tente de novo.";
+    else if (ilegiveis && !itens.length) vazio.textContent = "Nenhuma fonte legível" + aviso + ".";
+    else vazio.textContent = "Nenhuma fonte ainda.";
     por("nv-acv-lista", itens.map(linhaAcervo));
-    mostrar("nv-acv-vazio", itens.length === 0);
+    mostrar("nv-acv-vazio", erro || itens.length === 0);
   }
   async function enviarArquivo() {
     const campo = byId("nv-acv-arquivo"); const arq = campo.files && campo.files[0];

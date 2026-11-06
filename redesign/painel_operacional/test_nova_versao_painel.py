@@ -41,6 +41,36 @@ class NovaVersaoPainelTests(unittest.TestCase):
         self.assertEqual(ev[-1]["antes"]["provedores"]["gratuito"], False)
         self.assertEqual(ev[-1]["depois"]["provedores"]["gratuito"], True)
 
+    def test_acervo_ok_e_vazio(self):
+        import cadastro  # noqa: E402
+        self.assertEqual(self.m._acervo("acervo_listar", {})["estado"], "vazio")
+        cadastro.criar("b" * 64, "md", "ok.md")
+        a = self.m._acervo("acervo_listar", {})
+        self.assertEqual((a["estado"], a["ilegiveis"], len(a["itens"])), ("ok", 0, 1))
+
+    def test_listar_continua_devolvendo_so_os_legiveis(self):
+        import cadastro  # noqa: E402
+        cadastro.criar("c" * 64, "md", "legivel.md")
+        ruim = cadastro.pasta() / "ext:ruim.json"
+        ruim.write_text("{ quebrado", encoding="utf-8")
+        try:
+            self.assertEqual(len(cadastro.listar()), 1)
+            self.assertEqual(cadastro.listar_com_falhas()[1], 1)
+        finally:
+            ruim.unlink()
+
+    def test_acervo_com_erro_devolve_estado_erro_sem_itens(self):
+        original = self.m._acervo
+        def quebra(acao, dados):
+            raise RuntimeError("disco fora")
+        self.m._acervo = quebra
+        try:
+            a = self.m._estado_acervo()
+        finally:
+            self.m._acervo = original
+        self.assertEqual(a["estado"], "erro")
+        self.assertEqual(a["itens"], [])
+
     def test_estado_sem_dados_diz_nao_medido(self):
         e = self.m.estado()
         self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")
