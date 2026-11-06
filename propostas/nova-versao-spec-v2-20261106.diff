@@ -1,5 +1,5 @@
 diff --git a/redesign/nova_versao/spec/spec.md b/redesign/nova_versao/spec/spec.md
-index 339b4b3d..e921ef31 100644
+index 339b4b3d..d4ea5b97 100644
 --- a/redesign/nova_versao/spec/spec.md
 +++ b/redesign/nova_versao/spec/spec.md
 @@ -23,7 +23,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
@@ -78,7 +78,7 @@ index 339b4b3d..e921ef31 100644
  
  ## Riscos e dependências
  
-@@ -87,14 +109,14 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve
+@@ -87,14 +109,15 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve
  
  ## Código
  
@@ -95,9 +95,11 @@ index 339b4b3d..e921ef31 100644
 -- `redundancia.py`
 -- `orcamento_turno.py`
 -- `conselho.py`
+-
 +- `caminhos.py` (lote 5)
 +- `papeis.py` (lote 5)
 +- `redundancia.py` (lote 5)
-+- `painel de chaves` (lote 2, junto ao painel)
-+- Lote 6: `metacognicao/`, `corpo/`, `alexandria/skills.py`, `conselho.py`
- 
++- `conselho.py` (existente; critério no lote 6)
++- `orcamento_turno.py` (existente; sai no lote 5, em favor do escopo turno de `orcamento.py`)
++- Painel de chaves (lote 2, junto ao painel; sem crase até existir)
++- Lote 6, sem crase até existir: metacognição, corpo, skills da Alexandria

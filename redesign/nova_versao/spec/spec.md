@@ -117,6 +117,7 @@ O pré-voo é regex: erra (falso positivo de "efeito", por exemplo) e só serve 
 - `caminhos.py` (lote 5)
 - `papeis.py` (lote 5)
 - `redundancia.py` (lote 5)
-- `painel de chaves` (lote 2, junto ao painel)
-- Lote 6: `metacognicao/`, `corpo/`, `alexandria/skills.py`, `conselho.py`
-
+- `conselho.py` (existente; critério no lote 6)
+- `orcamento_turno.py` (existente; sai no lote 5, em favor do escopo turno de `orcamento.py`)
+- Painel de chaves (lote 2, junto ao painel; sem crase até existir)
+- Lote 6, sem crase até existir: metacognição, corpo, skills da Alexandria
