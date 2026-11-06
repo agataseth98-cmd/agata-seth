@@ -1,0 +1,5 @@
+({N}) DIÁRIO — 06/11/2026 · **Orçamento do turno em sombra (nova versão, lote 9): a Máquina conta rodadas de ferramenta e respostas por turno e registra se o orçamento teria estourado, sem alterar a resposta.** Proposta `sombra-orcamento-20261106`.
+- **Pedido do Humano (06/11/2026):** seguir com a metacognição durante o turno, em sombra.
+- **Mecanismo:** `redesign/router/sombra_nova_versao.py`, bloco `orcamento_turno`, só registro.
+- **Medição:** selftest do módulo passa, com caso de esgotamento; 32 testes verdes.
+- **Limite:** o prazo do turno não é medido.

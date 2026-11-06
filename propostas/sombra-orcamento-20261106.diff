@@ -1,0 +1,50 @@
+diff --git a/redesign/router/sombra_nova_versao.py b/redesign/router/sombra_nova_versao.py
+index d78872bf..a52752d8 100644
+--- a/redesign/router/sombra_nova_versao.py
++++ b/redesign/router/sombra_nova_versao.py
+@@ -95,6 +95,22 @@ def observar(payload: dict, rota: str, varrer_pessoal=None) -> dict:
+                                               "fontes_ferramenta": len(fontes)}
+     except Exception as e:  # noqa: BLE001
+         linha["erros"].append(f"guarda: {e.__class__.__name__}")
++    try:
++        # (lote 9) orçamento do turno em SOMBRA: o turno atual teria estourado rodadas ou chamadas? Só registra.
++        import orcamento_turno  # noqa: E402
++        import orcamento as _orc  # noqa: E402
++        msgs = payload.get("messages") or []
++        ult_user = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"), default=-1)
++        depois = msgs[ult_user + 1:] if ult_user >= 0 else msgs
++        rodadas = sum(1 for m in depois if isinstance(m, dict) and m.get("role") == "tool")
++        chamadas = sum(1 for m in depois if isinstance(m, dict) and m.get("role") == "assistant")
++        o = _orc.ler()
++        e = orcamento_turno.estado(rodadas=rodadas, chamadas=chamadas, inicio_monotonic=time.monotonic(),
++                                   max_chamadas=int(o["max_chamadas"]), prazo_s=float(o["timeout_s"]))
++        linha["orcamento_turno"] = {"rodadas": rodadas, "chamadas": chamadas, "esgotado": e["esgotado"],
++                                    "motivos": e["motivos"], "prazo": "não medido nesta sombra"}
++    except Exception as e:  # noqa: BLE001
++        linha["erros"].append(f"orcamento_turno: {e.__class__.__name__}")
+     try:
+         # (lote 6) revisão de suporte MECÂNICA da resposta ANTERIOR: os números que ela afirma aparecem no que as
+         # ferramentas e o sistema trouxeram? Só contagens e até 5 números -- nunca o texto. Sem revisor de outra família.
+@@ -155,6 +171,14 @@ def _caso_suporte() -> bool:
+     return s.get("estado") == "revisar" and s.get("amostra") == ["365"] and "segredo-xyz" not in json.dumps(linha)
+ 
+ 
++def _caso_orcamento() -> bool:
++    msgs = [{"role": "user", "content": "pesquise"}] + [
++        m for i in range(6) for m in ({"role": "assistant", "content": "x"}, {"role": "tool", "content": "r"})]
++    linha = observar({"messages": msgs}, "seth-livre", lambda x: [])
++    ot = linha.get("orcamento_turno", {})
++    return ot.get("rodadas") == 6 and ot.get("esgotado") is True
++
++
+ def _selftest() -> int:
+     import tempfile
+     with tempfile.TemporaryDirectory() as t:
+@@ -172,6 +196,7 @@ def _selftest() -> int:
+             ("sem índice não quebra", linha.get("alexandria", {}).get("estado") == "sem índice"),
+             ("desligado por padrão", os.environ.get("SETH_SOMBRA_NOVA_VERSAO") == "1" or not ligado()),
+             ("suporte: número sem fonte aparece, texto não", _caso_suporte()),
++            ("orçamento do turno: seis rodadas de ferramenta esgotam", _caso_orcamento()),
+         ]
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
