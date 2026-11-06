@@ -1,0 +1,24 @@
+diff --git a/redesign/painel_operacional/test_nova_versao_painel.py b/redesign/painel_operacional/test_nova_versao_painel.py
+index 98ea336d..7f9f1f6f 100644
+--- a/redesign/painel_operacional/test_nova_versao_painel.py
++++ b/redesign/painel_operacional/test_nova_versao_painel.py
+@@ -59,6 +59,19 @@ class NovaVersaoPainelTests(unittest.TestCase):
+         finally:
+             ruim.unlink()
+ 
++    def test_acervo_com_registro_ilegivel_diz_parcial_e_conta(self):
++        import cadastro  # noqa: E402
++        cadastro.criar("a" * 64, "md", "ok.md")
++        ruim = cadastro.pasta() / "ext:ruim.json"
++        ruim.write_text("{ isto não é json", encoding="utf-8")
++        try:
++            a = self.m._acervo("acervo_listar", {})
++        finally:
++            ruim.unlink()
++        self.assertEqual(a["estado"], "parcial")
++        self.assertEqual(a["ilegiveis"], 1)
++        self.assertEqual(len(a["itens"]), 1)
++
+     def test_acervo_com_erro_devolve_estado_erro_sem_itens(self):
+         original = self.m._acervo
+         def quebra(acao, dados):
