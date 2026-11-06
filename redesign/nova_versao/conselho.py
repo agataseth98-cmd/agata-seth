@@ -2,6 +2,8 @@
 
 Regras:
 - D2: dado pessoal só vai a rota local; segredo nunca sai (é recusado sempre).
+- D3: cota gratuita compartilhada com a Seth (rota com compartilhada_com_seth=True
+  e categoria "gratuito") é permitida sem teto; gera aviso visível, nunca recusa.
 - Uma rota por família; a família não é consultada duas vezes.
 - A resposta de cada modelo é DADO: é guardada literal, nunca executada,
   nunca interpretada como instrução.
@@ -12,6 +14,7 @@ O transporte é injetado: convocar() não chama provedor nenhum por conta própr
 """
 
 import re
+import sys
 import unicodedata
 
 CLASSES = ("publico", "pessoal", "segredo")
@@ -59,12 +62,19 @@ def _elegivel(rota, classe):
 
 
 def _recusa(motivo):
+    aviso = "recusado: " + motivo
     return {
         "pareceres": [],
         "divergencia": False,
         "lacuna": False,
-        "aviso": "recusado: " + motivo,
+        "aviso": aviso,
+        "avisos": [aviso],
     }
+
+
+def _cota_compartilhada_gratuita(rota):
+    """D3: rota gratuita que compartilha cota com a Seth (sem teto, só aviso)."""
+    return rota.get("categoria") == "gratuito" and bool(rota.get("compartilhada_com_seth", False))
 
 
 def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publico"):
@@ -96,6 +106,17 @@ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publ
             return _recusa("dado pessoal sem rota local permitida")
         return _recusa("nenhuma rota elegível para a classe %s" % classe_dados)
 
+    # D3 é aviso, não bloqueio. Sai ANTES da primeira chamada: quem decide chamar
+    # o conselho já vê que as rotas escolhidas gastam cota compartilhada com a Seth.
+    avisos_d3 = [
+        "D3: rota %s usa cota compartilhada com a Seth, sem teto" % rota["id"]
+        for rota in escolhidas
+        if _cota_compartilhada_gratuita(rota)
+    ]
+    # Decisão do Humano (06/11): o aviso D3 sai em stderr ANTES da primeira chamada.
+    # Quem convoca precisa manter o stderr visível; o retorno também traz o aviso.
+    for aviso in avisos_d3:
+        sys.stderr.write("AVISO D3 (antes da chamada): %s\n" % aviso)
     pareceres = []
     for rota in escolhidas:
         texto = transporte(rota, pedido)
@@ -112,7 +133,7 @@ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publ
     posicoes = {p for p in (_posicao(par["texto"]) for par in pareceres) if p is not None}
     divergencia = len(posicoes) > 1
 
-    avisos = []
+    avisos = list(avisos_d3)
     if divergencia:
         avisos.append("lacuna: divergência; sem votação.")
     else:
@@ -120,10 +141,10 @@ def convocar(pedido, motivo, quem_convoca, rotas, transporte, classe_dados="publ
     fora = [par["rota"] for par in pareceres if not par["formato_ok"]]
     if fora:
         avisos.append("fora_do_formato: " + ", ".join(fora) + " (não reenviado).")
-
     return {
         "pareceres": pareceres,
         "divergencia": divergencia,
         "lacuna": divergencia,
         "aviso": " ".join(avisos),
+        "avisos": avisos,
     }

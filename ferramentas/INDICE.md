@@ -5,7 +5,7 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por 
 
 | Tema | Peças | Observação |
 |---|---|---|
-| agata | 17 | skills próprias do sistema |
+| agata | 19 | skills próprias do sistema |
 | banco-e-infra | 23 |  |
 | contexto-e-custo | 15 |  |
 | dados-e-ml | 8 |  |
@@ -22,4 +22,4 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por 
 | seguranca | 16 |  |
 | testes | 44 |  |
 
-Total: 417 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+Total: 419 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.

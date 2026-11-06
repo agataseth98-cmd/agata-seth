@@ -3288,12 +3288,28 @@
   "resumo": "Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth"
  },
  {
+  "nome": "agata-processo-lote",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-processo-lote/SKILL.md",
+  "resumo": "Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote,"
+ },
+ {
   "nome": "agata-relay-provedores",
   "tipo": "skill",
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-relay-provedores/SKILL.md",
   "resumo": "Descobrir, auditar e testar adaptadores de chats web do Conselho em Rede no Chromium, incluindo login manual, foco, DOM, envio, resposta, po"
+ },
+ {
+  "nome": "agata-time-inovacao",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-time-inovacao/SKILL.md",
+  "resumo": "Como o time de inovação do Agata propõe melhorias com SDD: pesquisa, spec, revisão independente, decisão humana e só então proposta P-8. Use"
  },
  {
   "nome": "agata-voz",

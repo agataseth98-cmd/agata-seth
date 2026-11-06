@@ -108,6 +108,8 @@ _ASSETS = {
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
+    "/frentes": ("frentes.html", "text/html; charset=utf-8"),
+    "/frentes.js": ("frentes.js", "text/javascript; charset=utf-8"),
     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
     "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
     "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
@@ -1055,6 +1057,14 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(400, "text/plain; charset=utf-8", b"item fora da lista")
                 dados = _vault_item(item_id)
             body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
+        if self.path == "/api/frentes":
+            # Somente leitura: caminho fixo a partir da raiz do repositório; o cliente não escolhe arquivo.
+            try:
+                dados_frentes = json.loads((ROOT / "config/frentes.json").read_bytes())
+            except (OSError, ValueError):
+                return self._send(500, "text/plain; charset=utf-8", b"frentes indisponiveis")
+            body = json.dumps(dados_frentes, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/lacunas":
             body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
