@@ -1,0 +1,489 @@
+{
+  "quando": "2026-11-04T14:11:28.617871-03:00",
+  "escopo": "integridade e estrutura; sem garantia semântica",
+  "arquivos_revisados_sha256": {
+    "LEIA-ME.md": "ae99b60166089fcf14ac4055f158b6758275598b8e2e09b234004f9e9979b372",
+    "agata-llm-fundamentos-revisada.md": "6b2e9ce4bf4b40563279b4812e2a3cc4c24fa8ec14be15e6c3e107561fb0bd2b",
+    "auditoria-2026-11-04/coletar_evidencias.py": "fbc7ec6155d7caaedd3b22a46e05777aaa1281178c11c5b5bfe799e5ab44a2fe",
+    "auditoria-2026-11-04/evidencias-iniciais.json": "a34c46f06b64e0e8b2f06c7e50e1a3db62b4eccd5efb8b8f97c3c79fc59afc3f",
+    "auditoria-2026-11-04/fontes.md": "9fff6f7778571119486f29a3aa91f415098db02cbffc7f87a2f711b4757b25d0",
+    "auditoria-2026-11-04/originais.tar.gz": "57851fc1b319af51cf8e93f23f5cd2a5fa5d873b01a7960bad4a65d780b53c06",
+    "auditoria-2026-11-04/relatorio.md": "39f2d6dd0a21b61576e467265fd676d053883d7ae0409b6c562ed4f98417940f",
+    "auditoria-2026-11-04/verificar_pasta.py": "206c62cf27b3fb8636f4d684a2e7c9b28b39a89f7da66d9211edf023f8af1c6d",
+    "briefing-auditoria-modelo-fronteira.md": "09da711200fc622ed29f2276a1aa832391aff5f683e56010be3f72ac3bd80842",
+    "briefing-executor-nova-versao.md": "ad83810b39cef485c3fdad7d2aad8cffb8b105a230eaee000a86a146758e9a4c",
+    "conclusoes.md": "3bdd065a44f78dbf2477b62ab3076495689f94d76a37307c892f0996e6c13f3c",
+    "contrato-do-agata-rascunho.md": "55552b089d6d3de2bfa59f6912b4762929f594edb81592de0297b21b0aa42b45",
+    "inventario-servicos-agata-2026-11-04.md": "f0d10bf962d12fe43fd51edd59b5765fefc6254a702b1014ef8da879e4ab0f36",
+    "matriz-redundancia-agata-2026-11-04.md": "90469db5aa24a88a8d417ec7093cc20ed3c3b90c78fecad1983e5e0e6df8da0d",
+    "proposta-implementacao-buracos-experimento.md": "a3bcc1575f34190a2485d7527b95bff5929fabfbd9570688b95acff19900eca6",
+    "proposta-tecnica-alexandria-editorial.md": "794775f8b586acc0b18ddf58a375654eaf3b25c48d5a14e3d6fed907df7c5df5",
+    "proposta-tecnica-metacognicao-llm.md": "2cc1c3089d3bd55b2134b0f3ad7dc42e05ba6e6859a1582ae1885ecb76b46488",
+    "skill-experimento-gpt/SKILL.md": "eb52cb556d4113ef7b0a2a3bddf4de80e0f53df73cae1bfd1e3093b5d12bab2a",
+    "transcricao-etapa-1.txt": "fe9db093e974294331967c7218cf3c0eee76fc3475482bba58a0dfc34034e7f6"
+  },
+  "aprovados": 92,
+  "total": 92,
+  "checks": [
+    {
+      "item": "copia:agata-llm-fundamentos-revisada.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:briefing-auditoria-modelo-fronteira.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:conclusoes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "historico_preservado",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:inventario-servicos-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:matriz-redundancia-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:proposta-tecnica-metacognicao-llm.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:skill-experimento-gpt/SKILL.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "copia:transcricao-etapa-1.txt",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "transcricao_preservada",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:LEIA-ME.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:conclusoes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:proposta-tecnica-metacognicao-llm.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:agata-llm-fundamentos-revisada.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:inventario-servicos-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:matriz-redundancia-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:skill-experimento-gpt/SKILL.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:briefing-auditoria-modelo-fronteira.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:briefing-executor-nova-versao.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:auditoria-2026-11-04/fontes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:transcricao-etapa-1.txt",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:briefing-executor-nova-versao.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:auditoria-2026-11-04/originais.tar.gz",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:auditoria-2026-11-04/evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:LEIA-ME.md:auditoria-2026-11-04/verificar_pasta.py",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:agata-llm-fundamentos-revisada.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:agata-llm-fundamentos-revisada.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:agata-llm-fundamentos-revisada.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:auditoria-2026-11-04/fontes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:auditoria-2026-11-04/relatorio.md:originais.tar.gz",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:auditoria-2026-11-04/relatorio.md:evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:auditoria-2026-11-04/relatorio.md:verificar_pasta.py",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:auditoria-2026-11-04/relatorio.md:verificacao.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:briefing-auditoria-modelo-fronteira.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:conclusoes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:LEIA-ME.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:auditoria-2026-11-04/evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-auditoria-modelo-fronteira.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:briefing-executor-nova-versao.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-executor-nova-versao.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-executor-nova-versao.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-executor-nova-versao.md:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-executor-nova-versao.md:auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:briefing-executor-nova-versao.md:LEIA-ME.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:contrato-do-agata-rascunho.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:contrato-do-agata-rascunho.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:contrato-do-agata-rascunho.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:inventario-servicos-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:inventario-servicos-agata-2026-11-04.md:auditoria-2026-11-04/evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:inventario-servicos-agata-2026-11-04.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:inventario-servicos-agata-2026-11-04.md:matriz-redundancia-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:matriz-redundancia-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:matriz-redundancia-agata-2026-11-04.md:inventario-servicos-agata-2026-11-04.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:matriz-redundancia-agata-2026-11-04.md:auditoria-2026-11-04/evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:matriz-redundancia-agata-2026-11-04.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-implementacao-buracos-experimento.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-implementacao-buracos-experimento.md:contrato-do-agata-rascunho.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-tecnica-alexandria-editorial.md:auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-tecnica-alexandria-editorial.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-tecnica-alexandria-editorial.md:auditoria-2026-11-04/fontes.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:proposta-tecnica-metacognicao-llm.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-tecnica-metacognicao-llm.md:proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:proposta-tecnica-metacognicao-llm.md:proposta-implementacao-buracos-experimento.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "numeracao:skill-experimento-gpt/SKILL.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:skill-experimento-gpt/SKILL.md:../LEIA-ME.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:skill-experimento-gpt/SKILL.md:../proposta-tecnica-alexandria-editorial.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "link:skill-experimento-gpt/SKILL.md:../auditoria-2026-11-04/relatorio.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "ids_memoria_unicos",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "json:evidencias-iniciais.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "json:verificacao.json",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:REGRAS.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:PROTOCOLOS.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:FALHAS.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:PROJETO.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:MEMÓRIAS.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "canon_sem_alteracao:AGENTS.md",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "status_git_preservado",
+      "ok": true,
+      "detalhe": null
+    },
+    {
+      "item": "head_preservado",
+      "ok": true,
+      "detalhe": null
+    }
+  ]
+}
