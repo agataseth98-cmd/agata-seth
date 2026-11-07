@@ -1,0 +1,29 @@
+# Propostas superadas (arquivadas)
+
+Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classificação D13 (`~/agata-documentacao/classificacao-p8/classificacao.md`, base origin/main 83334fde). Nada foi apagado. Nenhuma tem `APROVADO-`. Ficam aqui para registro; não são candidatas a aplicação.
+
+| nome | substituta |
+|---|---|
+| agata-operator-console-fase0-20261030 | agata-painel-operator-console-20261030 (PR #775) (confiança média) |
+| agata-painel-console-csp-20261031 | a própria, já aplicada (PR #779) |
+| agata-painel-console-csp-frame-20261031 | a própria, já aplicada (PR #781) |
+| agata-painel-console-index-20261031 | a própria, já aplicada (PR #783) |
+| agata-painel-console-route-20261031 | a própria, já aplicada (PR #777) |
+| agata-painel-operator-console-20261030 | a própria, já aplicada (PR #775) |
+| conselho-em-rede-paridade-20261028 | conselho-em-rede-parser-estrito-20261028 (PR #696) (confiança média) |
+| conselho-em-rede-seguro-20261028 | conselho-em-rede-parser-estrito-20261028 (PR #696) (confiança média) |
+| conselho-estudo-f2-20261029 | conselho-f1-f2-rebase-20261029 (PR #724) (confiança média) |
+| conselho-hidratacao-f1-20261029 | conselho-f1-f2-rebase-20261029 (confiança média) |
+| design-taste-frontend-20261031 | design-taste-frontend-v2-20261031 (PR #788) (confiança média) |
+| lote2-processo-20261106 | lote4-processo-20261106 (PR #925) (confiança média) |
+| lote3-processo-20261106 | lote4-processo-20261106 |
+| nova-versao-conexoes-20261104 | nova-versao-conexoes-v2-20261104 (PR #872) (confiança média) |
+| relay-council-contrato-20261028 | relay-council-integracao-20261028 (PR #674; confiança média) |
+| relay-council-panel-ui-20261028 | relay-council-panel-ui-rebase3-20261028 (PR #690) (confiança média) |
+| retrato-original-20261026 | retrato-original-r2-20261026 |
+| seth-painel-raiz-20261029 | seth-painel-raiz-rebase-20261029 (PR #726) (confiança média) |
+| seth-sob-demanda-20261029 | sistema-sob-demanda-20261029 (PR #715) (confiança média) |
+
+Notas:
+- "a própria, já aplicada": a proposta arquivada é cópia idêntica (cmp) da que está em `propostas/aplicadas/`.
+- "(confiança média)": marcação conforme a seção "Limites" do relatório de classificação.
