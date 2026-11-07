@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 07/11 (proposta de voz)
+
+**Em proposta:** `agata-voz-piper-chamada-20261107` documenta como usar Piper local depois de silenciar manualmente o áudio do app, mantendo o texto visível e narrando só a resposta final. O CI local repetiu seis falhas preexistentes iguais com e sem o diff; os checks obrigatórios do PR ainda precisam passar. A aplicação e a assinatura continuam pendentes.
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).

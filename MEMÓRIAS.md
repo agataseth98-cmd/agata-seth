@@ -40,6 +40,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(973) DIÁRIO — 07/11/2026 · **Proposta `agata-voz-piper-chamada-20261107`: orientar o uso de Piper local com `pt_BR-agata-last` em chamadas com áudio nativo, com o app silenciado manualmente, texto breve visível e apenas a resposta final narrada.**
+- A proposta separa a voz nativa do app da saída Piper; não promete trocar a voz, controlar o silêncio, injetar áudio na chamada nem expor raciocínio interno.
+- `git apply --check` passou na base `83334fde`. O CI local teve as mesmas seis falhas com e sem o diff; ambas as cópias passaram os dois ciclos SDD. Falhas preexistentes detalhadas no registro da proposta; checks obrigatórios do PR ainda pendentes.
+- Pendente: merge do PR de proposta com checks verdes e assinatura do Humano; nenhuma aplicação foi feita.
+Modelo: GPT-6 (Codex Desktop) · vetor: diff em base limpa; CI local em cópia sem e com o diff; revisão independente · Autorização: Humano — "Crie um agente e deixe ele responsável por esse procedimento de fundo aguardando provavelmente a minha assinatura"
+
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
 - Aplicado em worktree própria a partir de `origin/main`: `git apply` do diff assinado (`redesign/painel_operacional/prototipo.css`, `prototipo.html`, `spec/spec.md` e `test_csp_prototipo.py`). `git apply --check -R` passa; `cmp` entre `git diff origin/main -- redesign/painel_operacional` e o diff assinado é idêntico.
 - Diff movido para `propostas/aplicadas/`; o `APROVADO-csp-prototipo-20261106` copiado (o original permanece na raiz).
