@@ -26,20 +26,24 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c337fae84118e34ec6e8abb3749c1040a685e0b0
-  Escrito em: 06/11/2026 21:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ec1ea88f32c7efb5b6e6b45464795bd76749f68a
+  Escrito em: 07/11/2026 00:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c337fae84118e34ec6e8abb3749c1040a685e0b0/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c337fae84118e34ec6e8abb3749c1040a685e0b0/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c337fae84118e34ec6e8abb3749c1040a685e0b0/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c337fae84118e34ec6e8abb3749c1040a685e0b0/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c337fae84118e34ec6e8abb3749c1040a685e0b0/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec1ea88f32c7efb5b6e6b45464795bd76749f68a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec1ea88f32c7efb5b6e6b45464795bd76749f68a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec1ea88f32c7efb5b6e6b45464795bd76749f68a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec1ea88f32c7efb5b6e6b45464795bd76749f68a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ec1ea88f32c7efb5b6e6b45464795bd76749f68a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(972) DIÁRIO — 07/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
+- Assinatura do Humano verificada com `p8_verificar` (PODE APLICAR); diff aplicado em worktree própria a partir de `origin/main`. O `git diff origin/main -- .agents` confere byte a byte com o assinado (`cmp`) e o `git apply -R --check` passa.
+- Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar PODE APLICAR; cmp idêntico · Autorização: Humano — assinatura
+
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
 - Assinatura do Humano verificada com `p8_verificar` (PODE APLICAR, hash e505d47564d3); diff aplicado em worktree própria a partir de `origin/main`. O diff de `scripts/conselho_remoto.py` aplicado confere byte a byte com o assinado (`cmp`) e o `git apply -R --check` passa.
 - Modelo: Claude Haiku 5.5 (Claude Code, na Máquina). Vetor: `p8_verificar`, `git apply` e `cmp`.

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(972) DIÁRIO — 07/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
+  palavras-chave: equipe, aplicada, agata, skill, regras, delegação
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
   palavras-chave: teto, removido, pedido, remoto, tem, tamanho
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-20261106): três pesquisadores de leitura em `.claude/agents/`.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: conversa, natural, voz, librechat, tudo, local, ouvido, sentidos, transcreve, piper, agata, last, fala, proposta, pedida, humano, vamos, deixar, disponivel, enquanto, testarei, experimento, implementado
 (943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
   palavras-chave: projeto, sentidos, primeira, peça, ouvido, local, agata, proposta, nova, versão, lote, item, decisão, humano, temos, planos, ter, conversa, voz, eles, podem, adiantar, chamado, faça
-(942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
-  palavras-chave: alexandria, curadoria, pacote, evidência, aviso, entrada, corrigida, achados, avaliação, verificador, abstenção, corrigido, proposta, ordem, humano, aproveite, conserte, erros, encontrados
+(942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e avi …
+  palavras-chave: alexandria, curadoria, pacote, evidência, avi
 (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) …
   palavras-chave: nova, versão, lote, avaliação
 (940) DIÁRIO — 04/11/2026 · **Nova versão, lote 2: conexões de modelos por três …
