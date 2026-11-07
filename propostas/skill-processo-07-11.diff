@@ -1,0 +1,18 @@
+diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+index 4b271433..cc9d1ee5 100644
+--- a/.agents/skills/agata-processo-lote/SKILL.md
++++ b/.agents/skills/agata-processo-lote/SKILL.md
+@@ -106,3 +106,13 @@ Use agentes quando o trabalho for independente, tiver arquivos próprios e a ses
+ 
+ ## Para outro modelo que tocar o processo
+ Leia a seção "Passo a passo" inteira antes de qualquer comando. Não avance sem o passo 3 verde. Quando algo pedir assinatura, permissão ou decisão do Humano, pare e escreva o comando exato e o motivo. Relate o que foi executado, com a saída, e o que não foi medido.
++
++## Lições de 07/11
++Cada regra traz a fonte. "Cache" = `python3 redesign/router/cache_conselho.py ler`. Onde a fonte não cobre a regra, está escrito.
++
++1. **Sincronize o PR com o main antes de juntar.** Cada junção que mexe em canon deixa os outros PRs em conflito: a junção do PR 929 (17:49, 06/11) levou os PRs 927 e 928 de CLEAN para DIRTY. Depois, 933 (integração) fez o mesmo com 934-937. Fonte: cache, entrada 380 (medição da vigia) e PR 933 (cache, 383). Ação: `git fetch`, `gh pr view <n> --json mergeStateStatus`; se DIRTY ou BEHIND, atualize o branch com `origin/main` antes de juntar.
++2. **Ordem de junção de um lote coerente: integração primeiro, depois as propostas de código.** A integração (ex.: PR 933, que reúne 927, 930, 931, 932 e 928) entra antes; as propostas de código que ela cobre só depois, cada uma sincronizada com o main (regra 1). Fonte: cache, entrada 379 (ordem de junção 927, 930, 931, 932, 928 enviada ao agata-ci, negada pelo classificador) e entrada 383 (PR 933 verde, aguardando junção do Humano). A ordem exata entre integração e propostas é regra do Humano de 07/11, não medida em outro caso.
++3. **Assine só depois que o diff estiver no main.** `scripts/p8_verificar.sh` exige o `.diff` no `origin/main`; assinar antes faz a verificação falhar. Fonte: ordem do Humano de 07/11 (não há entrada do cache sobre isso). Ação: junte o PR de proposta, confirme com `git ls-tree origin/main -- propostas/<lote>.diff`, só então entregue `bash scripts/aprovar.sh <lote>` ao Humano.
++4. **Nunca `--amend` em commit de proposta.** O pré-commit grava o SHA do commit anterior; se o SHA foi descartado pelo amend, a âncora deixa de bater e o fiscal-p8 quebra. Fonte: ordem do Humano de 07/11 (não há entrada do cache sobre isso). Ação: corrija com um commit novo.
++5. **Ao juntar, confira `mergeStateStatus` e os checks do head.** BLOCKED ou DIRTY não é verde. Só junte com o run do commit atual verde nos obrigatórios (`suite-adversarial`, `fiscal-p8`, `CodeQL`). Fonte: entrada 379 (junção negada pelo classificador sem revisão) e a seção "CI é por commit" desta skill. Ação: `gh pr view <n> --json mergeStateStatus,statusCheckRollup` e `gh run list --branch <b> --json headSha`.
++6. **O orquestrador não executa mecânica; delega a um agente com permissão de commit.** Fonte: entrada 381 (subagente do tipo general-purpose não conseguiu gravar arquivo e devolveu o texto na resposta) e entrada 385 (agente de dev restaurou e apagou arquivos gerados sem ordem). Ação: a delegação vai a agente com permissão de commit para a mecânica; o orquestrador confere o resultado (código, checks, diff), não aceita o relatório. Junção só com ordem do Humano (Regra 5 e a seção "Uso de agentes").
