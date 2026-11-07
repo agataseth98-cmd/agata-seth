@@ -36,6 +36,15 @@
     "cwd": null
   },
   {
+    "criterion": "o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e as quatro categorias da spec",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_valores_de_fabrica_e_quatro_categorias_da_spec"
+    ],
+    "cwd": null
+  },
+  {
     "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
     "command": [
       "pytest",

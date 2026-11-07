@@ -1,0 +1,50 @@
+diff --git a/redesign/nova_versao/spec/acceptance.json b/redesign/nova_versao/spec/acceptance.json
+index 0101e253..66e8817a 100644
+--- a/redesign/nova_versao/spec/acceptance.json
++++ b/redesign/nova_versao/spec/acceptance.json
+@@ -35,6 +35,15 @@
+     ],
+     "cwd": null
+   },
++  {
++    "criterion": "o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e as quatro categorias da spec",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_valores_de_fabrica_e_quatro_categorias_da_spec"
++    ],
++    "cwd": null
++  },
+   {
+     "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
+     "command": [
+diff --git a/redesign/nova_versao/spec/spec.md b/redesign/nova_versao/spec/spec.md
+index 339b4b3d..69d1ab10 100644
+--- a/redesign/nova_versao/spec/spec.md
++++ b/redesign/nova_versao/spec/spec.md
+@@ -53,6 +53,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
+ - [ ] escritas concorrentes no ledger preservam a cadeia
+ - [ ] a transição recusa salto fora da tabela e Remoção sem autorização
+ - [ ] o orçamento padrão é só local e pago sem teto não gasta
++- [ ] o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e as quatro categorias da spec
+ - [ ] a GPU local tem fila única e o teto de chamadas da tarefa vale
+ - [ ] cancelar impede novos itens e contexto mudado manda o resultado para revisão
+ - [ ] nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado
+diff --git a/redesign/nova_versao/tests/test_nova_versao.py b/redesign/nova_versao/tests/test_nova_versao.py
+index 859817fe..90c6be3a 100644
+--- a/redesign/nova_versao/tests/test_nova_versao.py
++++ b/redesign/nova_versao/tests/test_nova_versao.py
+@@ -58,6 +58,13 @@ class OrcamentoTests(Base):
+         self.assertTrue(orcamento.permite("local")[0])
+         self.assertFalse(orcamento.permite("local", chamadas_ja=10**6)[0])
+ 
++    def test_valores_de_fabrica_e_quatro_categorias_da_spec(self):
++        o = orcamento.ler()
++        self.assertEqual(orcamento.PROVEDORES, ("local", "gratuito", "assinatura", "pago"))
++        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
++        self.assertEqual((o["max_chamadas"], o["max_tokens"], o["timeout_s"], o["teto_reais"]), (200, 2_000_000, 120, 0.0))
++        self.assertEqual([orcamento.permite(p)[0] for p in orcamento.PROVEDORES], [True, False, False, False])
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
