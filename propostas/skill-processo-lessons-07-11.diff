@@ -1,0 +1,43 @@
+diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+index 4b271433..158c961e 100644
+--- a/.agents/skills/agata-processo-lote/SKILL.md
++++ b/.agents/skills/agata-processo-lote/SKILL.md
+@@ -106,3 +106,38 @@ Use agentes quando o trabalho for independente, tiver arquivos próprios e a ses
+ 
+ ## Para outro modelo que tocar o processo
+ Leia a seção "Passo a passo" inteira antes de qualquer comando. Não avance sem o passo 3 verde. Quando algo pedir assinatura, permissão ou decisão do Humano, pare e escreva o comando exato e o motivo. Relate o que foi executado, com a saída, e o que não foi medido.
++
++## Lições medidas em 07/11/2026
++Cada lição tem a regra em uma frase e a fonte em uma linha. Quando a fonte é relato da rodada que não foi conferido, a linha diz "relato, não conferido". Medido e lido aparecem rotulados.
++
++- **a. Medir antes de afirmar.** Ler código não é medição: risco só lido se escreve "lido", e só vira "confirmado" depois de teste ou comando.
++  Fonte: regra da rodada de 07/11, sem caso específico informado.
++- **b. Risco medido se resolve na mesma rodada, por proposta.** Defeito de código já medido se corrige numa proposta, sem pedir permissão antes; a assinatura continua sendo do Humano.
++  Fonte: regra da rodada de 07/11, sem caso específico informado.
++- **c. Teste com cópia dos dados.** Migração, importação e teste de escrita rodam sobre cópia, com manifesto de hashes antes de importar; nunca sobre o armazenamento real.
++  Fonte: a migração das conversas do LibreChat usou uma cópia e um manifesto de hashes antes de importar (relato, não conferido).
++- **d. Em teste de navegador e de HTTP, só GET.** Antes de rodar, confira a origem: um POST dispara ação real.
++  Fonte: um POST para /api/abrir, disparado por teste com origem errada, colocou conselheiros na fila; um clique na seção Conselho também disparou POST (relato, não conferido).
++- **e. Nunca rm.** Não use rm (nem -f, nem -r), nem em arquivo temporário, nem em pasta criada na mesma tarefa; para tirar algo do caminho, use mv. Remoção só com ordem do Humano, por nome.
++  Fonte: três agentes rodaram rm -rf ou rm -f em scratch, e um comando foi negado pelo classificador (relato, não conferido).
++  Conhecido (grep em 07/11): `scripts/ci_sdd_local.sh` (trap com rm -rf) e `.githooks/pre-commit` (rm -f do log em /tmp) usam rm em arquivo temporário; esta lição não os altera.
++- **f. Trabalho durável não fica em /tmp.** Use `/home/orusoua/agata/.claude/worktrees/` ou `~/agata-documentacao`; /tmp é memória e some num reinício sujo.
++  Fonte: 22 worktrees perdidas em 07/11, com causa apontada como journal, fsck e tmpfs (relato). Medido: `findmnt -T /tmp` mostra tmpfs, e `git worktree list` mostra 20 entradas prunable (não 22). Journal e fsck não medidos.
++- **g. Canon não se commita antes da assinatura.** Gere o diff, confira com `git apply --check` numa cópia limpa de origin/main e reverta a edição na worktree antes do commit; o pre-commit recusa commit quando edição pendente de canon seria varrida pela âncora.
++  Fonte: a proposta de correção do PROJETO.md precisou ser revertida antes do commit (relato, não conferido). Lido em `.githooks/pre-commit`: o hook faz `git add` da âncora em REGRAS.md, PROJETO.md e MEMÓRIAS.md e recusa o commit se o staged ganhou conteúdo fora da âncora.
++- **h. O pre-commit regrava âncoras e hidratação.** Todo commit regrava o bloco ANCORA-SHA de PROMPT_CARREGAMENTO.md e, quando o canon entra no commit, de REGRAS.md, PROJETO.md e MEMÓRIAS.md, além de `.hidrata.md` e INDICE_MEMORIAS.md. Isso é esperado: o corpo do PR declara quais arquivos o hook alterou.
++  Fonte: PRs #934, #941, #942 e #943 (relato, não conferido). O trecho que faz isso está lido em `.githooks/pre-commit`; o efeito real aparece no commit de cada proposta.
++- **i. Decisão do Humano fora do repo vira proposta ou registro.** Uma decisão que existe só em mensagem não é tratada como decidida: antes, vira proposta P-8 ou entrada de registro.
++  Fonte: a desativação do Ollama no boot e a substituição do LibreChat existiam só em mensagem (relato, não conferido). Medido: grep em MEMÓRIAS.md por Ollama com boot ou desativ, e por LibreChat com substitu ou troca, não achou nada; isso prova só "não encontrado nesta busca".
++- **j. Antes de remover serviço ou dado, verifique a cópia.** Faça inventário sem conteúdo, cópia de segurança com hash, importação idempotente e contagem igual nos dois lados; só então remova, com ordem explícita do Humano.
++  Fonte: a migração das conversas do LibreChat seguiu essa ordem (relato, não conferido).
++- **k. Limiar de corte pela quebra medida.** Escolha o limiar pela quebra observada na distribuição, não por chute, e anote a distribuição junto.
++  Fonte: limiar de 20 mensagens, com quebra entre 18 e 22 (relato, não conferido).
++- **l. Número com rótulo.** Todo número sai marcado como medido, inferido ou não medido; número sem rótulo é defeito.
++  Fonte: regra da rodada de 07/11, sem caso específico informado.
++- **m. Perguntas numeradas.** Perguntas ao Humano vão numeradas, na ordem em que aparecem na mensagem.
++  Fonte: preferência explícita do Humano (relato, não conferido).
++- **n. Sem sudo pelo modelo.** O modelo não usa sudo; comando de sistema que exige sudo vai ao Humano como comando pronto, com caminho absoluto, para colar no terminal dele, sem o prefixo `!`.
++  Fonte: o `!` do chat não mostrou o prompt de senha (registro de 23/10); `sudo -n` falha e a senha não é do modelo (registro de 17/10).
++- **o. Estado real antes de afirmar.** Antes de dizer que um serviço, container, branch ou PR está em certo estado, consulte com systemctl, docker inspect, git ls-remote ou gh pr view e cite a saída.
++  Fonte: divergências entre o relatório de um agente e o estado medido (relato, não conferido).
