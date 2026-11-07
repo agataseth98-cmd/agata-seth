@@ -17,6 +17,7 @@
 - `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`, `gravar_chave`, `remover_chave`, `ajustar_conexao`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste` e, no lote 3, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `rotas_disponiveis`, `avaliar`, `medir_recuperacao`, `cancelar_avaliacao`, `ver_execucao` e, no lote 4, `medir_ouvido`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`). A chave de API digitada em Conexões vai para o cofre de `redesign/conexoes/segredos.py` e nenhuma resposta do painel a devolve; o campo é `password` e é limpo ao enviar. As páginas da nova versão usam só classes de `nova_versao.css` (a CSP tem `style-src 'self'`, que ignora atributo `style`); a Avaliação recusa o reservado sem revisão do Humano e sem política fixada, e o estado nunca traz o gabarito.
 - A navegação lateral agrupa as 24 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
 - A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
+- Conversas da Seth: `GET /api/seth/conversa?id=` devolve a conversa com o `id` do arquivo; `POST /api/seth/conversa` com `id` existente atualiza esse arquivo e sem `id` cria um novo com identificador novo. Abrir e salvar uma conversa não cria duplicata.
 - Proposta, assinatura, PR e merge não são executados pelo painel.
 
 ## Critérios de aceite
@@ -37,6 +38,7 @@
 - [ ] a avaliação pelo painel respeita revisão, política e não expõe o gabarito no estado
 - [ ] o upload de fonte aceita só md e recusa o resto, sem deixar temporário
 - [ ] o corpo de POST vai até 64 KB e recusa acima
+- [ ] a conversa reaberta e salva mantém o identificador e não duplica
 
 ## Lote 5 (05/11/2026)
 

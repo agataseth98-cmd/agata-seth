@@ -511,5 +511,43 @@ class HttpTests(unittest.TestCase):
             finally:
                 panel.armazem.CONVERSAS_DIR = antes
 
+    def test_conversa_reaberta_e_salva_mantem_o_identificador(self):
+        headers = {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"}
+        with tempfile.TemporaryDirectory() as tmp:
+            antes = panel.armazem.CONVERSAS_DIR
+            panel.armazem.CONVERSAS_DIR = Path(tmp)
+            try:
+                # conversa criada pelo painel: o salvamento sem id gera um id novo
+                criada = panel._conversa_gravar({"id": None, "titulo": "Nova", "mensagens": [{"role": "user", "content": "oi"}]})
+                # conversa com identificador no nome do arquivo e sem id dentro dele (como a importação grava)
+                (Path(tmp) / "a1b2c3d4e5f6.json").write_text(json.dumps({"titulo": "Importada", "mensagens": [{"role": "user", "content": "x"}]}), encoding="utf-8")
+                for conversa_id in (criada["id"], "a1b2c3d4e5f6"):
+                    status, corpo, _ = self.request("GET", "/api/seth/conversa?id=" + conversa_id, None, headers)
+                    self.assertEqual(status, 200)
+                    aberta = json.loads(corpo)
+                    self.assertEqual(aberta["id"], conversa_id)
+                    salvo = panel._conversa_gravar({"id": aberta["id"], "titulo": aberta["titulo"],
+                                                    "mensagens": aberta["mensagens"] + [{"role": "assistant", "content": "ok"}]})
+                    self.assertEqual(salvo["id"], conversa_id)
+                self.assertEqual(sorted(p.name for p in Path(tmp).glob("*.json")), sorted([criada["id"] + ".json", "a1b2c3d4e5f6.json"]))
+            finally:
+                panel.armazem.CONVERSAS_DIR = antes
+
+    def test_salvar_com_id_atualiza_e_sem_id_cria_um_novo(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            antes = panel.armazem.CONVERSAS_DIR
+            panel.armazem.CONVERSAS_DIR = Path(tmp)
+            try:
+                primeiro = panel._conversa_gravar({"titulo": "Teste", "mensagens": [{"role": "user", "content": "a"}]})
+                atualizado = panel._conversa_gravar({"id": primeiro["id"], "titulo": "Teste 2",
+                                                     "mensagens": [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}]})
+                self.assertEqual(atualizado["id"], primeiro["id"])
+                self.assertEqual(len(list(Path(tmp).glob("*.json"))), 1)
+                novo = panel._conversa_gravar({"id": None, "titulo": "Outra", "mensagens": [{"role": "user", "content": "c"}]})
+                self.assertNotEqual(novo["id"], primeiro["id"])
+                self.assertEqual(len(list(Path(tmp).glob("*.json"))), 2)
+            finally:
+                panel.armazem.CONVERSAS_DIR = antes
+
 if __name__ == "__main__":
     unittest.main()

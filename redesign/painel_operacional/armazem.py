@@ -96,6 +96,20 @@ def _conversas_listar() -> dict:
     return {"schema_version": 1, "state": "ok", "items": itens}
 
 
+def _conversa_ler(conversa_id: str) -> dict | None:
+    """Conversa pelo identificador do arquivo: o id devolvido é sempre o nome do arquivo, com ou sem id dentro dele."""
+    arq = _conversa_caminho(conversa_id)
+    if arq is None or not arq.is_file():
+        return None
+    try:
+        dados = json.loads(arq.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(dados, dict):
+        return None
+    return {**dados, "id": conversa_id}
+
+
 def _conversa_validar(dados: dict) -> dict | None:
     if not isinstance(dados, dict):
         return None

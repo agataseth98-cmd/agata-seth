@@ -1,0 +1,140 @@
+diff --git a/redesign/painel_operacional/armazem.py b/redesign/painel_operacional/armazem.py
+index 057f0e68..9b2e9031 100644
+--- a/redesign/painel_operacional/armazem.py
++++ b/redesign/painel_operacional/armazem.py
+@@ -96,6 +96,20 @@ def _conversas_listar() -> dict:
+     return {"schema_version": 1, "state": "ok", "items": itens}
+ 
+ 
++def _conversa_ler(conversa_id: str) -> dict | None:
++    """Conversa pelo identificador do arquivo: o id devolvido é sempre o nome do arquivo, com ou sem id dentro dele."""
++    arq = _conversa_caminho(conversa_id)
++    if arq is None or not arq.is_file():
++        return None
++    try:
++        dados = json.loads(arq.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++    if not isinstance(dados, dict):
++        return None
++    return {**dados, "id": conversa_id}
++
++
+ def _conversa_validar(dados: dict) -> dict | None:
+     if not isinstance(dados, dict):
+         return None
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index c684fd05..a28363d6 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -39,7 +39,7 @@ import chat_stream  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
+-    _conversas_listar, _vault_caminho, _vault_item)
++    _conversa_ler, _conversas_listar, _vault_caminho, _vault_item)
+ BIND = "127.0.0.1"
+ PORT = 20146
+ VERIFIER_URL = "http://127.0.0.1:20141/verificar"
+@@ -1041,10 +1041,10 @@ class Handler(BaseHTTPRequestHandler):
+         if self.path == "/api/seth/conversas":
+             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
+         if self.path.startswith("/api/seth/conversa?"):
+-            arq = _conversa_caminho((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
+-            if arq is None or not arq.is_file():
++            dados = _conversa_ler((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
++            if dados is None:
+                 return self._send(404, "text/plain; charset=utf-8", b"conversa indisponivel")
+-            return self._send(200, "application/json; charset=utf-8", arq.read_bytes())
++            return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+         if self.path.startswith("/api/vault/item"):
+             q = parse_qs(urlparse(self.path).query)
+             if q.get("caminho"):
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 0733fde8..13a03e01 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -143,5 +143,15 @@
+       "redesign/painel_operacional/test_painel.py::HttpTests::test_json_post_aceita_ate_64k_e_recusa_acima"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a conversa reaberta e salva mantém o identificador e não duplica",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_conversa_reaberta_e_salva_mantem_o_identificador",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_salvar_com_id_atualiza_e_sem_id_cria_um_novo"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index ccbf3f62..143ffb74 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -17,6 +17,7 @@
+ - `GET /api/nova-versao/estado` e `POST /api/nova-versao/executar` mostram e operam a nova versão (Experimento GPT, lote 1): ações de lista fechada (`iniciar`, `indexar`, `consultar`, `skills`, `classificar`, `fotografar`, `salvar_orcamento`, `gravar_chave`, `remover_chave`, `ajustar_conexao`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste` e, no lote 3, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `rotas_disponiveis`, `avaliar`, `medir_recuperacao`, `cancelar_avaliacao`, `ver_execucao` e, no lote 4, `medir_ouvido`), uma por vez; a consulta tem até 300 caracteres e só vira pacote de evidência; o orçamento só aceita os campos e limites de `redesign/nova_versao/orcamento.py` e cada mudança vira evento no ledger; dados fora do repositório (`AGATA_NV_DIR`). A chave de API digitada em Conexões vai para o cofre de `redesign/conexoes/segredos.py` e nenhuma resposta do painel a devolve; o campo é `password` e é limpo ao enviar. As páginas da nova versão usam só classes de `nova_versao.css` (a CSP tem `style-src 'self'`, que ignora atributo `style`); a Avaliação recusa o reservado sem revisão do Humano e sem política fixada, e o estado nunca traz o gabarito.
+ - A navegação lateral agrupa as 24 páginas em Panorama, Conselho e quatro submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão); o submenu da página aberta fica expandido.
+ - A aba SDD também lista os projetos externos registrados em `config/sdd/*.json` e roda o ciclo deles (`POST /api/sdd/executar` com `acao: projeto`); só nome de descritor existente, e o manifesto do projeto só pode ter `pytest` com alvos relativos.
++- Conversas da Seth: `GET /api/seth/conversa?id=` devolve a conversa com o `id` do arquivo; `POST /api/seth/conversa` com `id` existente atualiza esse arquivo e sem `id` cria um novo com identificador novo. Abrir e salvar uma conversa não cria duplicata.
+ - Proposta, assinatura, PR e merge não são executados pelo painel.
+ 
+ ## Critérios de aceite
+@@ -37,6 +38,7 @@
+ - [ ] a avaliação pelo painel respeita revisão, política e não expõe o gabarito no estado
+ - [ ] o upload de fonte aceita só md e recusa o resto, sem deixar temporário
+ - [ ] o corpo de POST vai até 64 KB e recusa acima
++- [ ] a conversa reaberta e salva mantém o identificador e não duplica
+ 
+ ## Lote 5 (05/11/2026)
+ 
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index d293eb09..c10466a5 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -511,5 +511,43 @@ class HttpTests(unittest.TestCase):
+             finally:
+                 panel.armazem.CONVERSAS_DIR = antes
+ 
++    def test_conversa_reaberta_e_salva_mantem_o_identificador(self):
++        headers = {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"}
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                # conversa criada pelo painel: o salvamento sem id gera um id novo
++                criada = panel._conversa_gravar({"id": None, "titulo": "Nova", "mensagens": [{"role": "user", "content": "oi"}]})
++                # conversa com identificador no nome do arquivo e sem id dentro dele (como a importação grava)
++                (Path(tmp) / "a1b2c3d4e5f6.json").write_text(json.dumps({"titulo": "Importada", "mensagens": [{"role": "user", "content": "x"}]}), encoding="utf-8")
++                for conversa_id in (criada["id"], "a1b2c3d4e5f6"):
++                    status, corpo, _ = self.request("GET", "/api/seth/conversa?id=" + conversa_id, None, headers)
++                    self.assertEqual(status, 200)
++                    aberta = json.loads(corpo)
++                    self.assertEqual(aberta["id"], conversa_id)
++                    salvo = panel._conversa_gravar({"id": aberta["id"], "titulo": aberta["titulo"],
++                                                    "mensagens": aberta["mensagens"] + [{"role": "assistant", "content": "ok"}]})
++                    self.assertEqual(salvo["id"], conversa_id)
++                self.assertEqual(sorted(p.name for p in Path(tmp).glob("*.json")), sorted([criada["id"] + ".json", "a1b2c3d4e5f6.json"]))
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
++    def test_salvar_com_id_atualiza_e_sem_id_cria_um_novo(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                primeiro = panel._conversa_gravar({"titulo": "Teste", "mensagens": [{"role": "user", "content": "a"}]})
++                atualizado = panel._conversa_gravar({"id": primeiro["id"], "titulo": "Teste 2",
++                                                     "mensagens": [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}]})
++                self.assertEqual(atualizado["id"], primeiro["id"])
++                self.assertEqual(len(list(Path(tmp).glob("*.json"))), 1)
++                novo = panel._conversa_gravar({"id": None, "titulo": "Outra", "mensagens": [{"role": "user", "content": "c"}]})
++                self.assertNotEqual(novo["id"], primeiro["id"])
++                self.assertEqual(len(list(Path(tmp).glob("*.json"))), 2)
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
+ if __name__ == "__main__":
+     unittest.main()
