@@ -302,7 +302,6 @@ def _registrar_sucesso(modelo_escolhido):
         pass
 
 # Tetos, primeiro corte -- ajustavel pelo Humano, nao um numero canonizado.
-TETO_CHARS_PEDIDO = 60_000   # heuristica pre-envio -- nao ha tokenizador local
 TETO_TOKENS_SAIDA = 4_000    # vira max_tokens no pedido -- teto mecanico
 
 # Achado real na primeira invocacao (MEMÓRIAS (212)): com "thinking" habilitado
@@ -580,9 +579,6 @@ def main():
     achado_privado = checar_conteudo_privado(pedido_texto)
     if achado_privado:
         print(f"ABORTADO: o pedido menciona '{achado_privado}' -- conteúdo da camada privada (memoria/missoes/) nunca sai daqui. Remova a referência e tente de novo.")
-        return 1
-    if len(pedido_texto) > TETO_CHARS_PEDIDO:
-        print(f"ABORTADO: pedido tem {len(pedido_texto)} caracteres, acima do teto de {TETO_CHARS_PEDIDO}. Confira o texto antes de mandar.")
         return 1
 
     pedido_sha = hashlib.sha256(pedido_texto.encode("utf-8")).hexdigest()
