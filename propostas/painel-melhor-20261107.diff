@@ -1,0 +1,156 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 756d5f2d..7d8c87fe 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -254,9 +254,7 @@ body{font-family:var(--sans);font-size:16px;line-height:1.65}
+ @media(max-width:800px){.wiki-demo-tools{grid-template-columns:1fr}.wiki-demo-result{grid-template-columns:minmax(0,1fr)}.wiki-demo-result p,.wiki-demo-result a{grid-column:1;grid-row:auto}.wiki-demo-result a{justify-self:start;margin-top:4px}}
+ @media(max-width:1060px) and (min-width:691px){.sidebar{padding-left:13px;padding-right:13px;gap:13px}.brand{gap:8px;padding-bottom:11px}.brand-mark{width:34px;height:34px}.nav button{min-height:39px;padding:7px 8px;gap:8px}.human-note{padding:10px}.side-bottom{margin-top:auto}}
+ @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+-/* Família tipográfica observada no shell do artefato Claude; pesos variáveis e itálico. */
+-@font-face{font-family:"Anthropic Sans";src:url("https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/cc27851ad-DDVos-BJ.woff2") format("woff2");font-weight:300 800;font-style:normal;font-display:swap}
+-@font-face{font-family:"Anthropic Sans";src:url("https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/c9d3a3a49-CJtkx3-S.woff2") format("woff2");font-weight:300 800;font-style:italic;font-display:swap}
++/* Família tipográfica: só fontes locais (a CSP default-src 'none' bloqueia fonte externa; nada sai da Máquina). */
+ :root{--sans:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;--serif:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;--mono:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif}
+ body{font-family:"Anthropic Sans","Fira Sans","Noto Sans",sans-serif;font-synthesis:none}
+ /* Contrato visual para leituras independentes de serviço, Git e agenda. */
+diff --git a/redesign/painel_operacional/sdd_painel.py b/redesign/painel_operacional/sdd_painel.py
+index a7908956..4bd4ddc6 100644
+--- a/redesign/painel_operacional/sdd_painel.py
++++ b/redesign/painel_operacional/sdd_painel.py
+@@ -114,9 +114,14 @@ def estado(raiz: Path = ROOT) -> dict:
+     return {"schema_version": 1, "acoes": list(ACOES), "items": itens, "externos": ext}
+ 
+ 
+-def _rodar(args: list[str], cwd: Path, limite: int = TIMEOUT_S) -> tuple[int, str]:
++def _pytest() -> str | None:
++    """Binário do pytest: AGATA_PYTEST (ex.: o do cache uv) ou o `pytest` do PATH. Não instala nada."""
++    return os.environ.get("AGATA_PYTEST") or shutil.which("pytest")
++
++
++def _rodar(args: list[str], cwd: Path, limite: int = TIMEOUT_S, env: dict | None = None) -> tuple[int, str]:
+     try:
+-        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=limite)
++        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=limite, env=env)
+         return r.returncode, (r.stdout + r.stderr)[-600:]
+     except subprocess.TimeoutExpired:
+         return 124, f"tempo esgotado ({limite} s)"
+@@ -134,7 +139,13 @@ def _executar_externo(nome, raiz: Path) -> dict:
+     d = escolhido["descritor"]
+     CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
+     estado_arq = CACHE / f"projeto-{d['nome']}.state.json"
+-    rc, saida = _rodar([sys.executable, str(raiz / "redesign" / "sdd_flow" / "runner.py"), str(estado_arq), "project", str(escolhido["arquivo"])], raiz, min(d["limite_s"] * 10 + 120, 4000))
++    pytest = _pytest()
++    if pytest is None:
++        passos = [{"passo": "ciclo do projeto", "ok": False, "detalhe": "pytest não encontrado no PATH do painel nem em AGATA_PYTEST: não medido"}]
++        return {"acao": "projeto", "componente": d["nome"], "ok": False, "passos": passos, "criterios": [], "ultimo": _ultimo_externo(d)}
++    # o runner chama "pytest" pelo nome: o diretório do binário entra no PATH, como em scripts/ci_sdd_local.sh
++    ambiente = {**os.environ, "PATH": str(Path(pytest).parent) + os.pathsep + os.environ.get("PATH", "")}
++    rc, saida = _rodar([sys.executable, str(raiz / "redesign" / "sdd_flow" / "runner.py"), str(estado_arq), "project", str(escolhido["arquivo"])], raiz, min(d["limite_s"] * 10 + 120, 4000), ambiente)
+     passos = [{"passo": "ciclo do projeto", "ok": rc == 0, "detalhe": saida.strip().replace("\n", " | ")[-300:] or ("ok" if rc == 0 else f"saída {rc}")}]
+     ultimo = _ultimo_externo(d)
+     return {"acao": "projeto", "componente": d["nome"], "ok": rc == 0, "passos": passos, "criterios": [], "ultimo": ultimo}
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index c684fd05..f2d24006 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -112,7 +112,6 @@ _ASSETS = {
+     "/frentes.js": ("frentes.js", "text/javascript; charset=utf-8"),
+     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
+     "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
+-    "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
+     "/operator_console/style.css": ("operator_console/style.css", "text/css; charset=utf-8"),
+@@ -1034,6 +1033,9 @@ class Handler(BaseHTTPRequestHandler):
+         # Painel unificado (P9-A): as páginas antigas continuam no disco, mas a entrada agora é o protótipo.
+         if self.path == "/":
+             return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo"),))
++        if self.path == "/operator_console":
++            # sem a barra final, style.css e app.js relativos caem na raiz (CSS 404 e o app.js do painel antigo)
++            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/operator_console/"),))
+         if self.path == "/conselho-rede":
+             return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo#conselho"),))
+         if self.path.startswith("/api/grafo"):
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index d293eb09..83c1f10d 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -227,10 +227,19 @@ class HttpTests(unittest.TestCase):
+         big = {**base, "Content-Length": str(26 * 1024 * 1024)}     # 26 MiB > 25 MiB: 413 pelo cabeçalho
+         self.assertEqual(self.request("POST", "/api/nova-versao/upload", b"x", big)[0], 413)
+ 
++    def test_css_servido_nao_carrega_recurso_externo_bloqueado_pela_csp(self):
++        import re
++        for rota in [r for r, (_, tipo) in panel._ASSETS.items() if tipo.startswith("text/css")]:
++            corpo = self.request("GET", rota)[1].decode("utf-8")
++            self.assertEqual(re.findall(r"url\(\s*[\"']?(?:https?:)?//", corpo), [], rota)
++
+     def test_html_e_status_sao_servidos_e_origem_cruzada_recusada(self):
+         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
+         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
++        # sem a barra, os caminhos relativos do console caíam na raiz: redireciona para a forma com barra
++        code, _, redir = self.request("GET", "/operator_console")
++        self.assertEqual((code, redir["Location"]), (302, "/operator_console/"))
+         self.assertEqual(self.request("GET", "/operator_console/index.html")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
+         self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
+diff --git a/redesign/painel_operacional/test_sdd_painel.py b/redesign/painel_operacional/test_sdd_painel.py
+index 59bedc13..fadcffbd 100644
+--- a/redesign/painel_operacional/test_sdd_painel.py
++++ b/redesign/painel_operacional/test_sdd_painel.py
+@@ -117,6 +117,14 @@ def projeto_externo(tmp_path):
+     return raiz
+ 
+ 
++def pytest_disponivel() -> str | None:
++    """pytest para o ciclo de projeto: PYTEST/AGATA_PYTEST, o do PATH ou o do cache uv (como scripts/ci_sdd_local.sh)."""
++    import glob
++    import shutil
++    achados = sorted(glob.glob(str(Path.home() / ".cache/uv/archive-v0/*/bin/pytest")))
++    return os.environ.get("PYTEST") or os.environ.get("AGATA_PYTEST") or shutil.which("pytest") or (achados[0] if achados else None)
++
++
+ class ProjetosExternosTests(unittest.TestCase):
+     def test_estado_lista_descritores_validos_e_invalidos_de_config_sdd(self):
+         with tempfile.TemporaryDirectory() as t:
+@@ -132,7 +140,11 @@ class ProjetosExternosTests(unittest.TestCase):
+             (base / "redesign").symlink_to(sdd.ROOT / "redesign")
+             (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida"), "ambiente": {"PYTHONPATH": "."}}), encoding="utf-8")
+             antes = sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file())
+-            r = sdd.executar("projeto", "ext", base)
++            pytest = pytest_disponivel()
++            if pytest is None:
++                self.skipTest("pytest não encontrado (PATH, PYTEST, AGATA_PYTEST nem cache uv): não medido")
++            with mock.patch.dict(os.environ, {"AGATA_PYTEST": pytest}):
++                r = sdd.executar("projeto", "ext", base)
+             self.assertTrue(r["ok"], r["passos"]); self.assertTrue(r["ultimo"]["ok"])
+             self.assertEqual(sorted(p.relative_to(raiz).as_posix() for p in raiz.rglob("*") if p.is_file()), antes)
+             for nome in ("outro", "../ext", 7, None):
+@@ -140,5 +152,26 @@ class ProjetosExternosTests(unittest.TestCase):
+                     sdd.executar("projeto", nome, base)
+ 
+ 
++    def test_projeto_sem_pytest_diz_nao_medido_e_nao_roda_o_ciclo(self):
++        with tempfile.TemporaryDirectory() as t:
++            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
++            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida")}), encoding="utf-8")
++            with mock.patch.dict(os.environ, {"AGATA_PYTEST": ""}), mock.patch.object(sdd.shutil, "which", return_value=None), \
++                    mock.patch.object(sdd, "_rodar") as rodar:
++                r = sdd.executar("projeto", "ext", base)
++            rodar.assert_not_called()
++            self.assertFalse(r["ok"]); self.assertIn("não medido", r["passos"][0]["detalhe"])
++
++    def test_projeto_poe_o_diretorio_do_pytest_no_path_do_ciclo(self):
++        with tempfile.TemporaryDirectory() as t:
++            base = Path(t); (base / "config" / "sdd").mkdir(parents=True); raiz = projeto_externo(base)
++            (base / "config" / "sdd" / "ext.json").write_text(json.dumps({"nome": "ext", "raiz": str(raiz), "saida": str(base / "saida")}), encoding="utf-8")
++            with mock.patch.dict(os.environ, {"AGATA_PYTEST": "/opt/uv/bin/pytest"}), \
++                    mock.patch.object(sdd, "_rodar", return_value=(0, "ok")) as rodar:
++                sdd.executar("projeto", "ext", base)
++            env = rodar.call_args.args[3]
++            self.assertTrue(env["PATH"].startswith("/opt/uv/bin" + os.pathsep))
++
++
+ if __name__ == "__main__":
+     unittest.main()
