@@ -53,6 +53,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 - [ ] escritas concorrentes no ledger preservam a cadeia
 - [ ] a transição recusa salto fora da tabela e Remoção sem autorização
 - [ ] o orçamento padrão é só local e pago sem teto não gasta
+- [ ] o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e as quatro categorias da spec
 - [ ] a GPU local tem fila única e o teto de chamadas da tarefa vale
 - [ ] cancelar impede novos itens e contexto mudado manda o resultado para revisão
 - [ ] nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado
