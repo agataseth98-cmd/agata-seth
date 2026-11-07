@@ -100,3 +100,4 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
 - `frentes.js`
 - `test_frentes.py`
 - `test_chat_ui.py`
+- `test_csp_prototipo.py`

@@ -555,3 +555,14 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .sidebar-collapsed .nav-group-toggle .nav-caret{display:none}
 .sidebar-collapsed .nav-sub{display:grid;margin-left:0;padding-left:0;border-left:0}
 @media(max-width:690px){.nav-group{display:flex;gap:5px}.nav-group-toggle{display:none}.nav-sub,.nav-sub[hidden]{display:flex;gap:5px;margin:0;padding:0;border:0}.nav-sub button{font-size:12px;padding:8px 9px}}
+
+/* Estilos antes inline (style=): a CSP style-src 'self' bloqueia o atributo, então ficam aqui. Mesmos valores. */
+.grafo-modos{display:flex;gap:8px;flex-wrap:wrap}
+.grafo-form{display:flex;gap:8px;margin:10px 0}
+.grafo-entrada{width:7em}
+.grafo-svg{width:100%;max-height:60vh}
+.lista-coluna{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+.linha-medicoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.medir-nota{margin:8px 0 0}
+.lista-componentes{display:flex;flex-direction:column;gap:10px}
+.vault-canvas{margin:8px 0;padding-left:18px}

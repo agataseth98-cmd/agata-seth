@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-20261106): três pesquisadores de leitura em `.claude/agents/`.**
 (969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-20261106): skill agata-engenharia-reversa e wrapper scripts/rea_leitura.sh, allowlist de 14 subcomandos. Herdr mantido.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (945) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forjada (nova versão, lote 4 item 2): a resposta que repete segredo ou frase mandada por fonte suspeita ou privada vira recusa.** Proposta `metacognicao-guarda-20261105`.
 (944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
 (943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
-(942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e aviso de entrada corrigida, achados pela avaliação; verificador de abstenção corrigido.** Proposta `alexandria-curadoria-20261105`, por ordem do Humano em 05/11 ("já aproveite e conserte os erros encontrados em alexandria").
+(942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e avi …
 (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) …
 (940) DIÁRIO — 04/11/2026 · **Nova versão, lote 2: conexões de modelos por três …
 (939) DIÁRIO — 04/11/2026 · **Nova versão do Agata (Experimento GPT), lote 1: a …
