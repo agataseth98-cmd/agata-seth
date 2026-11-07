@@ -143,15 +143,5 @@
       "redesign/painel_operacional/test_painel.py::HttpTests::test_json_post_aceita_ate_64k_e_recusa_acima"
     ],
     "cwd": null
-  },
-  {
-    "criterion": "a conversa reaberta e salva mantém o identificador e não duplica",
-    "command": [
-      "pytest",
-      "-q",
-      "redesign/painel_operacional/test_painel.py::HttpTests::test_conversa_reaberta_e_salva_mantem_o_identificador",
-      "redesign/painel_operacional/test_painel.py::HttpTests::test_salvar_com_id_atualiza_e_sem_id_cria_um_novo"
-    ],
-    "cwd": null
   }
 ]

@@ -39,7 +39,7 @@ import chat_stream  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
-    _conversa_ler, _conversas_listar, _vault_caminho, _vault_item)
+    _conversas_listar, _vault_caminho, _vault_item)
 BIND = "127.0.0.1"
 PORT = 20146
 VERIFIER_URL = "http://127.0.0.1:20141/verificar"
@@ -1041,10 +1041,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/seth/conversas":
             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
         if self.path.startswith("/api/seth/conversa?"):
-            dados = _conversa_ler((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
-            if dados is None:
+            arq = _conversa_caminho((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
+            if arq is None or not arq.is_file():
                 return self._send(404, "text/plain; charset=utf-8", b"conversa indisponivel")
-            return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+            return self._send(200, "application/json; charset=utf-8", arq.read_bytes())
         if self.path.startswith("/api/vault/item"):
             q = parse_qs(urlparse(self.path).query)
             if q.get("caminho"):
