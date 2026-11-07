@@ -3240,6 +3240,14 @@
   "resumo": "Disciplina obrigatória de qualquer modelo no sistema Agata — cabeçalho em toda resposta com hora medida, modo conciso, aviso antes de ação e"
  },
  {
+  "nome": "agata-engenharia-reversa",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-engenharia-reversa/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "agata-ferramentas",
   "tipo": "skill",
   "fonte": "agata",

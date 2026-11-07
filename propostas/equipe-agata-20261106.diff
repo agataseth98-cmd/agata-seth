@@ -1,0 +1,215 @@
+diff --git a/.agents/skills/agata-equipe/SKILL.md b/.agents/skills/agata-equipe/SKILL.md
+new file mode 100644
+index 00000000..bd90bd86
+--- /dev/null
++++ b/.agents/skills/agata-equipe/SKILL.md
+@@ -0,0 +1,93 @@
++---
++name: agata-equipe
++description: Papéis da equipe de agentes do Agata (spec, dev, revisor, ci, time de inovação e auditor), com o que cada um pode e não pode fazer, quem revisa quem, como passar trabalho entre papéis sem a conversa e o que só o Humano decide (assinatura, junção de aplicação, arquivar, apagar). Use antes de abrir lote com mais de um agente ou ao passar trabalho entre papéis.
++---
++
++# Equipe de agentes no Agata
++
++Por quê: os erros de 06/11 estão no diário de `agata-processo-lote` (diff assinado com registro, relatório de subagente dado como prova, passo mecânico feito à mão). Esta skill fixa quem faz o quê. O passo a passo do lote é `agata-processo-lote`.
++
++Princípio de papel:
++- O papel é uma função, não um modelo.
++- A garantia vem do script e da checagem, não da fala do agente.
++- O Humano decide o que é decisão do Humano.
++
++Os nomes são os de `.claude/agents/`. Um papel sem arquivo ali é descrito, não instalado: não diga que ele rodou.
++
++## Papéis
++
++| Papel | Função | Pode | Não pode | Quem revisa |
++|---|---|---|---|---|
++| coordenador (sessão que abre o lote) | Abre o lote e reparte a tarefa. Decide só o próximo passo do próprio lote | Montar pacote, rodar comandos de leitura, abrir PR de proposta, decidir a junção de proposta (padrão 692), com a saída de checks por `headSha` colada pelo `agata-ci` | Executar sozinho passo mecânico; assinar; aprovar; juntar aplicação; aceitar relatório sem saída colada; as proibições de git abaixo | Revisor diferente do que implementou; o Humano |
++| `agata-spec` | Escreve a spec SDD (`spec.md`, `acceptance.json`, `brainstorm.md`, `decision.md`) e confere a âncora | Editar só `redesign/<componente>/spec/` na worktree; rodar `anchor.py` | Commitar; pôr `DECISAO: aceita` sem decisão do Humano; spec entra só por proposta própria (P-8); as proibições de git abaixo | `agata-revisor` (não o autor) |
++| `agata-dev` | Implementa código e teste numa worktree de lote | Editar só os arquivos da tarefa (inclui o registro do passo 10, se a tarefa listar); rodar testes e colar a saída | Commit, push, sudo, instalar pacote, ler `.env`, citar `memoria/missoes`, chamar provedor real; as proibições de git abaixo | `agata-revisor` (não o próprio dev) |
++| `agata-revisor` | Revisão independente de diff ou proposta | Ler diff, spec, log; rodar só comandos de leitura | Editar, commitar, aplicar; dizer "aprovado" (quem decide é o Humano); as proibições de git da lista única | O Humano, com o veredito |
++| `agata-ci` | Responsável único pela conferência de passo mecânico: CI local, diagnóstico de falha, mecânica de aplicação, commit, push e PR quando o coordenador ordena | Rodar `ci_sdd_local.sh`, `git status`, `git apply` em worktree de aplicação, commit com caminhos explícitos, abrir PR, conferir a saída de todo passo mecânico; testar a âncora no worktree da proposta (passo 2); conferir o `headSha` dos checks (passo 5); executar a junção de proposta, com ordem do coordenador e headSha verde; rodar `reindexar` (passo mecânico) | Editar código e o registro (`MEMÓRIAS.md`, `ONDE_ESTAMOS.md`); assinar; juntar aplicação; as proibições de git abaixo | O Humano, pela saída colada |
++| `agata-inov-pesquisa` | Estado da arte e problemas reais do Agata, com fonte | Ler, buscar, pesquisar na web | Editar, commitar, decidir a ideia | `agata-inov-critico` |
++| `agata-inov-arquiteto` | Transforma ideia em brainstorm e spec mínima, num diretório fora do repositório | Escrever no diretório que a tarefa indicar | Escrever em `redesign/`, `scripts/`, `config/` ou `.agents/` (isso é P-8); implementar; citar `memoria/missoes` | `agata-inov-critico` |
++| `agata-inov-critico` | Crítica de ideia e spec contra governança e evidência | Ler, buscar, rodar leitura | Editar, commitar, aplicar; decidir (entrega só a recomendação ao Humano) | O Humano |
++| `agata-auditor` (função contínua) | Audita o processo e a conduta do coordenador; cobra com evidência | Ler logs, diffs, PRs e saídas; reportar ao Humano | Gravar, aprovar, juntar, assinar, dar ordem de destruição; as proibições de git da lista única | O Humano. Sem arquivo de definição no `origin/main` (06/11, `git ls-tree`) |
++
++Quem coordena um lote não é o revisor dele. Quem implementa não revisa o que implementou.
++
++## Barreiras
++- A barreira é a permissão da sessão e o classificador, não o frontmatter. A linha `tools:` de cada arquivo em `.claude/agents/` declara o que o papel usa; não impede nada por si só.
++- O registro (`MEMÓRIAS.md`, `ONDE_ESTAMOS.md`) é gravado pelo `agata-dev`, nomeado, e conferido pelo `agata-ci`. O coordenador não grava o registro, mesmo que a sessão lhe dê Edit ou Write: passo mecânico não é dele. Quem só tem Bash, como o `agata-ci`, também não grava.
++
++## Proibições de git (lista única)
++Vale para todo papel com Bash: coordenador, `agata-spec`, `agata-dev`, `agata-ci`, `agata-revisor`, `agata-inov-pesquisa`, `agata-inov-arquiteto`, `agata-inov-critico` e `agata-auditor` (quando tiver arquivo). Sem exceção, salvo a linha marcada.
++- `git reset --hard`
++- `rm -rf`
++- `git checkout --`
++- `git add -A` (use caminhos explícitos)
++- `--force` (inclusive em `git worktree remove` e em push)
++- `--amend` em commit de proposta (refaça sobre a base atual, `origin/main`)
++- `git clean`
++- `git rm -f` (linha marcada: só com ordem do Humano nesta conversa, arquivo por arquivo; armadilha de `agata-processo-lote`)
++
++Restaurar arquivo gerado ou apagar qualquer coisa é decisão do Humano (item 5 de `agata-processo-lote`).
++
++## Pacote de passagem (sem a conversa)
++
++Trabalho passa de um papel para outro por arquivo de texto num diretório de trabalho da tarefa (fora do repositório, ou no scratchpad). Conteúdo mínimo:
++1. Caminho absoluto da worktree e nome da branch.
++2. Objetivo em até três linhas.
++3. Arquivos que o papel pode editar. Em revisão, escreva "somente leitura".
++4. Comandos a rodar e o que a saída deve mostrar.
++5. Critérios de aceite, cada um com o nome do teste que o prova.
++6. Proibições do papel: a lista de git acima e as da tabela.
++7. Formato da resposta: texto, com `arquivo:linha` e a saída real colada.
++
++Não entra no pacote: a conversa do coordenador, opiniões não registradas, segredos, caminhos de `memoria/missoes`, e o raciocínio de quem implementou. O revisor recebe o diff, a descrição e os critérios. Para revisão SDD oficial, `redesign/review_mesh/mesh.py prepare <spec> <pasta>` gera o pacote e `consolidate` junta os pareceres.
++
++## Retorno e conferência
++- Relatório é alegação. Quem recebe confere o código e roda o teste ou o comando por conta própria. "Passou" sem saída colada não conta.
++- Conferência de passo mecânico: sempre `agata-ci`. O coordenador decide só o próximo passo do próprio lote.
++- Trabalho em paralelo só com arquivos disjuntos. Cada agente recebe a sua lista; duas edições no mesmo arquivo viram conflito que ninguém vê.
++- Relatório sem caminhos de arquivo não é conferível: devolva.
++- Criação de arquivo encadeada com `||` pode sair vazia (caso `test_conjunto_dev.py`, diário de `agata-processo-lote`, 06/11): confira tamanho e conteúdo depois.
++
++## Crescimento da equipe (por demanda)
++
++A equipe cresce quando o trabalho exige mais do que os papéis atuais cobrem.
++- Gatilho: (a) uma frente de trabalho não tem dono capaz de executá-la; (b) um papel está sobrecarregado, isto é, mais de um lote simultâneo, ou passo mecânico feito pelo coordenador. O gatilho precisa de evidência medida.
++- Medição em log antes de propor: o log, o comando que gerou a contagem e a data. Contagem informada por alguém não é prova. Sem a medição, não há proposta.
++- Quem propõe: `agata-auditor`, quando existir. Enquanto não existir (06/11, sem arquivo no `origin/main`), quem propõe é o coordenador, com a medição; o Humano decide. Nenhum agente cria papel por conta própria.
++- A proposta diz: nome, função, o que pode e o que não pode fazer, quem revisa, quem confere a saída, e a evidência medida que motivou.
++- Papel novo entra como arquivo em `.claude/agents/`, por proposta assinada. Sem arquivo, o papel não existe. Tipo novo só é reconhecido em sessão nova.
++- Nenhum caso nesta proposta. O candidato com mais peso (passos mecânicos feitos pelo coordenador) ainda não tem medição em log; entra em proposta própria depois de medido.
++
++## O que só o Humano decide
++- Assinatura: `scripts/aprovar.sh <lote>` roda só o Humano. O agente entrega o comando exato e o motivo, e para.
++- Junção de aplicação: o PR de aplicação é juntado pelo Humano. A junção de proposta segue o padrão 692: o coordenador decide, com a saída de checks por `headSha` colada pelo `agata-ci`.
++- Arquivar: ideia, lote, worktree ou `APROVADO-*`. Nenhum agente arquiva por conta própria.
++- Apagar ou restaurar: worktree com alteração, arquivo gerado, cópia de `APROVADO-*`, dado. Só com ordem explícita do Humano nesta conversa (item 5 de `agata-processo-lote`), arquivo por arquivo.
++- Versionar `APROVADO-*` no git: só com ordem do Humano.
++- Criar papel novo ou mudar esta skill: o Humano decide, e entra como proposta, não como edição direta no main.
++
++## Quando parar e pedir
++- Permissão negada pelo classificador: pare, explique o que tentou e espere (item 4 de `agata-processo-lote`). Não recrie a ação por outro caminho.
++- Check obrigatório vermelho, ausente no `headSha` atual, ou conflito `DIRTY`.
++- Ordem destrutiva sem ordem registrada nesta conversa.
++- Agente que não é reconhecido na sessão (`Agent type not found`): tipos são lidos na inicialização. Usar o papel com a mesma instrução só se o Humano aceitar, e dizer que foi assim (diário de `agata-processo-lote`).
++- Pedido de passo mecânico para o coordenador executar sozinho: devolva ao papel certo (tabela "Quem faz cada passo mecânico" em `agata-processo-lote`).
+diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+index 4b271433..1443ccc7 100644
+--- a/.agents/skills/agata-processo-lote/SKILL.md
++++ b/.agents/skills/agata-processo-lote/SKILL.md
+@@ -19,6 +19,49 @@ Escopo: o repositório Agata, checkout vivo `/home/orusoua/agata`. Caminhos de w
+ 4. Permissão negada pelo classificador é decisão do Humano. Pare, explique o que tentou e por que precisa, e espere. Não recrie a ação com outra forma (nem instalação manual, nem outro caminho).
+ 5. Destruir ou restaurar só com ordem explícita do Humano nesta conversa: remover worktree com alteração, apagar dado, remover ou restaurar arquivo gerado, apagar cópia de APROVADO. Sem ordem, pedir.
+ 
++## Equipe e papéis (06/11)
++Cada papel tem o nome do agente em `.claude/agents/`. A tabela completa (o que cada um pode e não pode, quem revisa) e o que só o Humano decide estão em `agata-equipe`.
++- `agata-spec`: spec SDD e critérios de aceite.
++- `agata-dev`: implementa numa worktree de lote, com arquivos próprios e testes.
++- `agata-revisor`: revisão independente, só leitura. Não revisa o que ele mesmo implementou.
++- `agata-ci`: CI local, testes, mecânica de aplicação e PR.
++- `agata-inov-pesquisa`, `agata-inov-arquiteto`, `agata-inov-critico`: time de inovação (bootstrap, spec mínima, crítica).
++- `agata-auditor`: função contínua. Audita o processo e a conduta do coordenador, cobra com evidência e reporta ao Humano. Não grava nem aprova. Em 06/11 não existe `agata-auditor.md` em `.claude/agents/` no `origin/main` (`git ls-tree`). Sem o arquivo, a pauta abaixo não tem executor: diga isso ao Humano, não finja que o auditor passou.
++
++**Coordenação descentralizada.**
++- Nenhum agente, nem o coordenador, executa sozinho passo mecânico de aplicação, commit, reindex ou montagem de diff. Passo mecânico vai para `agata-ci` ou `agata-dev`. A conferência da saída (log, `git status --short`, `grep '^diff --git'`) é do `agata-ci`; o coordenador decide só o próximo passo do próprio lote. Saída não colada não conta.
++- A coordenação rotaciona entre lotes: quem coordena um lote não é o revisor dele.
++
++**Regras de segurança (aprendidas em 06/11).**
++- Proibições de git (`reset --hard`, `rm -rf`, `git checkout --`, `git add -A`, `--force`, `--amend` em proposta, `git clean`): lista única em `agata-equipe`, para todo papel com Bash. Exceção marcada lá: `git rm -f`, com ordem do Humano.
++- Remover worktree: `git -C <worktree> status --porcelain` tem de sair vazio antes; sem `--force`; só com ordem do Humano (item 5 de `agata-processo-lote`).
++- Restaurar arquivo gerado: só com ordem do Humano, arquivo por arquivo (item 5 de `agata-processo-lote`).
++- Em proposta, refazer o lote sobre a base atual (`origin/main`), sem reescrever o commit já publicado.
++- `APROVADO-*` só entra no git por aplicação, com ordem do Humano.
++- Check obrigatório vale por head do PR: `suite-adversarial`, `fiscal-p8` e `CodeQL` precisam estar verdes no `headSha` atual (`gh run list --branch <b> --json headSha`). Conflito `DIRTY` é bloqueio: não junta.
++
++**Pauta do auditor (antes de cada lote).**
++1. Premissa: a base da proposta está aplicada no main ou só como proposta? (armadilha "Premissa de proposta").
++2. Worktree: caminho, e `git status --porcelain` de cada uma que será removida.
++3. Diff: `grep '^diff --git'` só com código; nenhum registro, nenhum `APROVADO-*`.
++4. CI local: log com `CI LOCAL: TUDO OK` e a versão do pytest na própria saída.
++5. Passos mecânicos: quem executou, com a saída colada.
++6. Checks obrigatórios por `headSha`; `mergeStateStatus` sem `DIRTY`.
++7. Ordens do Humano: quais ações de assinatura, destruição ou versionamento de `APROVADO-*` estão pendentes, e quais têm ordem registrada nesta conversa.
++
++**Veredito do auditor (no fim do lote).** Uma linha por item da pauta: `conforme`, `desvio` (com arquivo, log ou comando) ou `não medido`. Fecha com "lote conforme" ou "lote com N desvios", e manda os desvios ao Humano. O auditor não grava, não aprova, não junta.
++
++**Quem faz cada passo mecânico.**
++- Passos 1 e 3 (worktree, CI local): `agata-dev` cria a worktree; `agata-ci` roda o CI local.
++- Passo 2 (teste da âncora no worktree da proposta): `agata-ci` roda `anchor.py` e cola a saída.
++- Passo 4 (diff e conferência em cópia limpa): `agata-ci`.
++- Passo 5 (PR de proposta): `agata-ci` abre o PR e confere o `headSha` dos checks, colando a saída; o coordenador decide a junção (padrão 692); `agata-ci` executa a junção e o `git pull`, com ordem do coordenador e `headSha` verde.
++- Passos 6 e 7 (verificação de assinatura, aplicação em worktree própria): `agata-ci`, com checagem por passo.
++- Passos 8 e 9 (mover o par, `git add`): `agata-ci`. Passo 10 (registro em `MEMÓRIAS.md` e `ONDE_ESTAMOS.md`): `agata-dev` grava, nomeado; `agata-ci` confere `git status --short` depois. O coordenador não grava o registro.
++- Passo 11 (PR de aplicação): `agata-ci` abre; a junção é do Humano.
++- Passo 12 (remover worktrees): `agata-ci`, só com `git status` vazio e ordem do Humano.
++- Reindex (armadilha "Índice derivado"): `agata-ci` roda `reindexar` e cola a saída.
++
+ ## Passo a passo
+ 1. **Worktree do lote.** Todas as worktrees deste processo ficam num único lugar: `/home/orusoua/agata/.claude/worktrees/`. A pasta é excluída pelo `.git/info/exclude` local (verificado com `git check-ignore`). Comando: `git fetch -q origin && git worktree add -b proposta/<lote> /home/orusoua/agata/.claude/worktrees/<lote> origin/main`. Worktrees antigas fora dessa pasta não são removidas por este processo.
+ 2. **Código e spec juntos.** Todo arquivo de código novo (.py, .sh, .js, .html) em componente ancorado precisa estar na seção `## Código` do `spec.md` daquele componente, senão a âncora falha (`código órfão`). Teste a âncora no worktree da proposta (armadilha "Âncora SDD").
+@@ -29,18 +72,18 @@ Escopo: o repositório Agata, checkout vivo `/home/orusoua/agata`. Caminhos de w
+    - `git diff --cached origin/main > propostas/<lote>.diff`.
+    - Obrigatório: `grep '^diff --git' propostas/<lote>.diff` e conferir que só há caminhos de código. Se aparecer `MEMÓRIAS.md`, `ONDE_ESTAMOS.md`, `INDICE_MEMORIAS*.md`, `.hidrata.md`, `PROMPT_CARREGAMENTO.md`, qualquer coisa em `propostas/`, ou linha dentro de bloco `ANCORA-SHA`, pare e refaça o diff. Registro entra no PR de proposta, nunca no diff assinado (caso de 06/11).
+    - Conferir em cópia limpa: `git worktree add --detach /home/orusoua/agata/.claude/worktrees/check-<lote> origin/main`. Depois, dentro de um `if`: `git -C /home/orusoua/agata/.claude/worktrees/check-<lote> apply --check /home/orusoua/agata/.claude/worktrees/<lote>/propostas/<lote>.diff`.
+-5. **PR de proposta: só diff e registro.** O PR traz `propostas/<lote>.diff`, `propostas/<lote>.md` (resumo, limites, comando de assinatura), a entrada de proposta em `MEMÓRIAS.md` e a atualização de `ONDE_ESTAMOS.md` (página de estado para o Humano, não para modelos; ver `propostas/README.md`, item 0). O código não vai como arquivo no PR: só entra dentro do `.diff`. Antes de propor, confira a premissa (armadilha "Premissa de proposta"). Espere o CI do commit (seção "CI é por commit"). Com todos os checks obrigatórios verdes, junte e rode `git pull`. Vermelho ou ausente: não junte, avise o Humano. Depois entregue o comando de assinatura, `bash scripts/aprovar.sh <lote>`, que o Humano roda.
++5. **PR de proposta: só diff e registro.** O PR traz `propostas/<lote>.diff`, `propostas/<lote>.md` (resumo, limites, comando de assinatura), a entrada de proposta em `MEMÓRIAS.md` e a atualização de `ONDE_ESTAMOS.md` (página de estado para o Humano, não para modelos; ver `propostas/README.md`, item 0). O código não vai como arquivo no PR: só entra dentro do `.diff`. Antes de propor, confira a premissa (armadilha "Premissa de proposta"). Espere o CI do commit (seção "CI é por commit"). O `agata-ci` confere o `headSha` dos checks obrigatórios e cola a saída. O coordenador decide a junção; o `agata-ci` executa a junção e o `git pull`, com ordem do coordenador e `headSha` verde. Vermelho ou ausente: não junte, avise o Humano. Depois entregue o comando de assinatura, `bash scripts/aprovar.sh <lote>`, que o Humano roda.
+ 6. **Depois da assinatura:** `bash scripts/p8_verificar.sh <lote>` no checkout vivo, onde está o `APROVADO-<lote>`. O script usa a raiz de confiança do HEAD (`git show HEAD:propostas/.allowed_signers`); confirme antes que `git rev-parse HEAD` é `origin/main`. Só se der `PODE APLICAR`, siga.
+ 7. **Aplicação em worktree própria:** `/home/orusoua/agata/.claude/worktrees/aplica-<lote>`, a partir do `origin/main` atual. O diff já vem do `origin/main` (entrou pelo PR do passo 5). Copie só o `propostas/APROVADO-<lote>` para ela. Rode `p8_verificar.sh <lote>` lá também e aplique com checagem por passo:
+    ```
+    if git apply propostas/<lote>.diff; then echo OK; else echo FALHOU; exit 1; fi
+    ```
+    Nunca encadeie verificação com `| tail -1 &&`: o `tail` devolve 0 e o `git apply` roda mesmo com a verificação falha. Já aconteceu. Vale também para qualquer teste ou script de verificação.
+-8. **Mova o par** para `propostas/aplicadas/`. O diff vai com `git mv`, porque já está versionado pelo PR do passo 5. O `APROVADO-<lote>` vai com `mv`, porque é arquivo local, fora do commit de código. Depois prove com `git apply --check -R propostas/aplicadas/<lote>.diff`. Essa prova só mostra que os hunks do diff estão presentes na árvore. Não prova que a árvore é exatamente o estado assinado.
++8. **Mova o par** para `propostas/aplicadas/` (este passo só roda com aplicação ordenada pelo Humano; mover o par arquiva o lote, e nenhum agente arquiva por conta própria). O diff vai com `git mv`, porque já está versionado pelo PR do passo 5. O `APROVADO-<lote>` vai com `mv`, porque é arquivo local, fora do commit de código. Depois prove com `git apply --check -R propostas/aplicadas/<lote>.diff`. Essa prova só mostra que os hunks do diff estão presentes na árvore. Não prova que a árvore é exatamente o estado assinado.
+ 9. **Adicione explicitamente:** `git add <caminhos explícitos>` com os caminhos de código do diff. Confira com `git diff --cached --name-only` que aparecem todos os caminhos do `grep '^diff --git'` (já aconteceu de esquecer arquivo modificado, e o CI pegou). O `APROVADO-<lote>` não entra no commit de código. Histórico: 562 arquivos `APROVADO-*` estão versionados em `propostas/aplicadas/` no `origin/main` (contagem de 06/11). Em qual commit entram não foi verificado; pergunte ao Humano antes de versionar um.
+ 10. **Registro:** entrada nova no `MEMÓRIAS.md` logo abaixo do marcador `ENTRADAS-NOVAS:AQUI`, número = topo + 1, no formato das entradas de topo. Nunca edite entrada antiga; correção é entrada nova. Atualize `ONDE_ESTAMOS.md` se o estado mudou. Antes do commit, rode `git status --short` e `git diff origin/main --stat`. A lista tem de ser só: caminhos do diff, `propostas/aplicadas/<lote>.diff`, `MEMÓRIAS.md` e `ONDE_ESTAMOS.md` (se mudou). Quando o commit mexe no canon, o pre-commit regenera `ANCORA-SHA`, `.hidrata.md` e `INDICE_MEMORIAS*.md`: eles entram pelo hook, não à mão. Qualquer outro caminho: pare.
+-11. **PR de aplicação:** abra contra `main` e confira os checks (seção "CI é por commit"). Se `mergeStateStatus` for `BEHIND` ou `DIRTY`, o branch precisa estar atualizado com main (a proteção tem `strict: true`): faça `git merge origin/main` no branch. Depois de qualquer merge de main, repita `bash scripts/p8_verificar.sh <lote>` e `git apply --check -R propostas/aplicadas/<lote>.diff` na worktree, e espere o run do novo headSha. Conflito em arquivo assinado (`propostas/<lote>.diff`, `APROVADO-*`, `propostas/aplicadas/*`): pare e peça ao Humano; não resolva à mão. Conflito de âncora: armadilha "Conflito de âncora". `BLOCKED`: espere os checks obrigatórios.
+-12. **Depois do merge:** remova as worktrees deste lote (`aplica-<lote>` e `check-<lote>`) só com `git status` limpo, usando `git worktree remove <caminho>` sem `--force`. Cópias de `APROVADO-<lote>` no checkout vivo não são apagadas pelo processo. Remover só com ordem explícita do Humano nesta conversa (Regra 5); sem ordem, pedir.
++11. **PR de aplicação:** abra contra `main` e confira os checks (seção "CI é por commit"). Junção: decisão do Humano (`agata-equipe`); agente não junta aplicação. Se `mergeStateStatus` for `BEHIND` ou `DIRTY`, o branch precisa estar atualizado com main (a proteção tem `strict: true`): faça `git merge origin/main` no branch. Depois de qualquer merge de main, repita `bash scripts/p8_verificar.sh <lote>` e `git apply --check -R propostas/aplicadas/<lote>.diff` na worktree, e espere o run do novo headSha. Conflito em arquivo assinado (`propostas/<lote>.diff`, `APROVADO-*`, `propostas/aplicadas/*`): pare e peça ao Humano; não resolva à mão. Conflito de âncora: armadilha "Conflito de âncora". `BLOCKED`: espere os checks obrigatórios.
++12. **Depois do merge:** não remova sem ordem as worktrees deste lote (`aplica-<lote>` e `check-<lote>`). Com ordem, só com `git status` limpo, usando `git worktree remove <caminho>` sem `--force`. Cópias de `APROVADO-<lote>` no checkout vivo não são apagadas pelo processo. Remover só com ordem explícita do Humano nesta conversa (item 5 de `agata-processo-lote`); sem ordem, pedir.
+ 
+ ## CI é por commit
+ - Obrigatórios no `main`, verificado em 06/11 com `gh api repos/agataseth98-cmd/agata-seth/branches/main/protection`: `suite-adversarial`, `fiscal-p8` e `CodeQL`, com `strict: true`. Reconfira antes de juntar, porque a proteção pode mudar.
+@@ -56,7 +99,7 @@ Escopo: o repositório Agata, checkout vivo `/home/orusoua/agata`. Caminhos de w
+ - **CI local diferente do CI real:** o job `sdd` roda `pytest` (9.2.0, fixado em `sdd.yml`) nos diretórios listados no workflow, depois anchor e ciclos. Unittest passa e pytest falha, ou o contrário. Use o script.
+ - **pytest:** se `pytest` não estiver no PATH, use o binário do cache do uv: `PYTEST=$(ls /home/orusoua/.cache/uv/archive-v0/*/bin/pytest | head -1)`. Antes de usar, rode `"$PYTEST" --version`. Tem de mostrar `pytest 9.2.0` (em 06/11 foi esse o resultado). Se a saída estiver vazia, pare. Se a versão for outra, pare e avise. Depois: `PYTEST="$PYTEST" bash scripts/ci_sdd_local.sh`. Não instale sem ordem.
+ - **Índice derivado:** `ferramentas/indice.json` e `ferramentas/INDICE.md` são gerados por `python3 -I ferramentas/ferramentas.py reindexar`, que lê só skills versionadas. Depois de criar ou mudar skill: `git add` da skill, rode `reindexar` e adicione os dois arquivos gerados.
+-- **Arquivos gerados pelo ciclo SDD:** o `cycle` escreve na pasta do spec passado (`criterion-drift.md`, `evidence.json`). Antes de qualquer restauração, confira `git diff -- <arquivo>`: deve mostrar só a saída do ciclo. Se houver alteração sua, copie-a para fora da árvore e peça ordem. Remover ou restaurar arquivo gerado exige ordem do Humano (Regra 5), arquivo por arquivo, depois de conferir a lista. Nunca `rm -rf`.
++- **Arquivos gerados pelo ciclo SDD:** o `cycle` escreve na pasta do spec passado (`criterion-drift.md`, `evidence.json`). Antes de qualquer restauração, confira `git diff -- <arquivo>`: deve mostrar só a saída do ciclo. Se houver alteração sua, copie-a para fora da árvore e peça ordem. Remover ou restaurar arquivo gerado exige ordem do Humano (item 5 de `agata-processo-lote`), arquivo por arquivo, depois de conferir a lista. Nunca `rm -rf`.
+ - **Testes que parecem isolados:** confira `AGATA_NV_DIR` antes de confiar num teste que grava. Um teste de revisão que imprime "Humano" não é prova de gravação real.
+ - **Conflito de âncora:** os blocos `ANCORA-SHA` (em `REGRAS.md`, `PROJETO.md`, `MEMÓRIAS.md` e `PROMPT_CARREGAMENTO.md`) são de máquina, gerados pelo `.githooks/pre-commit` com `scripts/atualizar_ancora_prompt.py`. `.hidrata.md` e `INDICE_MEMORIAS*.md` são regenerados pelo mesmo hook (`.githooks/gerar-hidratacao.sh`). Não use `git checkout --theirs`: ele troca o arquivo inteiro e apaga as entradas do lote. No conflito:
+   1. separe o bloco `ANCORA-SHA` (de `<!-- ANCORA-SHA:INICIO` até `<!-- ANCORA-SHA:FIM -->`) e deixe-o com a versão do `origin/main`; não edite à mão;
+@@ -75,14 +118,16 @@ Escopo: o repositório Agata, checkout vivo `/home/orusoua/agata`. Caminhos de w
+ - **Premissa de proposta:** antes de propor "v4 sobre v3", confira (após `git fetch`) que a base está aplicada, não só proposta. Proposta no main aparece como `.diff` em `propostas/`; aplicação aparece como código no main e como par em `propostas/aplicadas/`. Se a base não estiver aplicada, não proponha v4 sobre ela: inclua a base no lote ou espere a aplicação. Em 06/11, a v3 (`lote3-processo-20261106`) estava no main só como proposta (`.diff` e `.md`, sem APROVADO em `propostas/`). O aviso D3 do Conselho também estava só numa proposta não aplicada.
+ - **CI é por commit:** cada commit tem o seu run (ver "CI é por commit"). Em 06/11 o run do commit corrigido não disparou; não junte sem o run dele.
+ - **Time de agentes:** antes de dizer que há "time" ou "mesh", confira `git ls-tree -r origin/main -- .claude/agents` (vale o main, não o lote). Em 06/11 essa consulta, sobre o `origin/main` local, saiu vazia: os agentes `agata-*` não estavam no main; diga que são agentes avulsos. Revisão SDD oficial: `redesign/review_mesh/mesh.py prepare <spec> <pasta>` gera o pacote; depois um revisor por `packet.md` (sem a conversa); depois `consolidate <reviews> <saida>`. Revisão ad-hoc não conta.
++  - Aviso: a instrução desta armadilha está desatualizada; ver correção em entrada nova do diário (06/11, "correção da armadilha 'Time de agentes'").
+ - **Âncora SDD:** o `anchor.py` lê só crases dentro da seção `## Código` da spec. Item planejado que ainda não existe não leva crase. Teste no worktree da proposta: `python3 redesign/sdd_flow/anchor.py "$PWD" redesign/<componente>`. A âncora pontual não equivale ao CI (ver passo 3).
+ - **Mudança na worktree que você não fez:** antes de alarmar, cheque se foi um subagente seu ou o próprio ciclo (`criterion-drift.md`, `evidence.json`, `ferramentas/indice.json`, o diretório target do crate Rust). Na rodada de 06/11 o alarme foi falso.
+ - **Pytest do sistema:** `python3 -m pytest` pode não existir. Use o binário da armadilha "pytest".
+-- **`git rm` em arquivo já staged pelo merge:** exige `-f`. Antes, confira que é a cópia que você quer remover, e peça ordem (Regra 5).
++- **`git rm` em arquivo já staged pelo merge:** exige `-f`. Antes, confira que é a cópia que você quer remover, e peça ordem (item 5 de `agata-processo-lote`).
+ - **Subagentes em paralelo:** funciona com arquivos disjuntos (cada agente com a sua lista). Sem isso, duas edições no mesmo arquivo viram conflito que ninguém vê.
+ 
+ ## Uso de agentes (regra)
+-Use agentes quando o trabalho for independente, tiver arquivos próprios e a sessão permitir delegar (ferramentas e regras da sessão). Se a delegação não estiver disponível, faça você mesmo com a mesma disciplina. Cada agente recebe: caminho exato da worktree, lista de arquivos que pode editar, comandos de teste, proibições (sem commit, sem `rm -rf`, sem sudo, sem chamar provedor real). Você confere o resultado (código e teste), não aceita o relatório.
++Use agentes quando o trabalho for independente, tiver arquivos próprios e a sessão permitir delegar (ferramentas e regras da sessão). Se a delegação não estiver disponível, faça você mesmo com a mesma disciplina. Cada agente recebe: caminho exato da worktree, lista de arquivos que pode editar, comandos de teste, proibições (sem commit, salvo o papel de CI com ordem do coordenador; sem `rm -rf`, sem sudo, sem chamar provedor real; e a lista de git de `agata-equipe`). Você confere o resultado (código e teste), não aceita o relatório.
++Passo mecânico (aplicação, commit, reindex, montagem de diff) não é do coordenador: vai para `agata-ci` ou `agata-dev`, com o pacote descrito em `agata-equipe`. A conferência é do `agata-ci`; o coordenador decide só o próximo passo do próprio lote.
+ 
+ ## Diário de erros e acertos (atualize a cada rodada)
+ - **06/11 (lote P2–P10):** spec de componente novo esqueceu arquivos → âncora falhou no CI. Correção: mini-proposta de spec (`spec-anchor-lote-pn-20261106`), assinada à parte. Ação para o futuro: incluir a spec no lote.
+@@ -96,6 +141,10 @@ Use agentes quando o trabalho for independente, tiver arquivos próprios e a ses
+ - **06/11 (agentes):** o tipo de agente criado em `.claude/agents/` não foi reconhecido na mesma sessão (`Agent type not found`). Os tipos são lidos na inicialização; crie os arquivos e teste numa sessão nova. Até lá, use `general-purpose` com o mesmo texto de instrução.
+ - **06/11 (spec v2 e time):** o time `agata-*` não estava no `main` e eu falei como se estivesse. Revisões foram avulsas até o Humano cobrar. Correção: mesh oficial, e dizer o estado real antes de descrever o time. Também: a âncora falhou por crase em item que não existia, e o CI não disparou no commit novo. Acerto: conferir a âncora no worktree e o `headSha` do run.
+ - **06/11 (revisão da skill):** um revisor independente achou 13 problemas que o lint não pega (caminhos, `--theirs` num rebase, `git add -A`, required checks). Ação: a skill passa por revisão de agente antes de ir a lote; lint só valida formato. Na revisão seguinte, 24 itens (processo de apagar, instalação manual, falha pré-existente, CI por commit, worktrees, REA).
++- **06/11 (correção da armadilha "Time de agentes"):** a instrução "diga que são agentes avulsos" ficou falsa. `git ls-tree -r origin/main -- .claude/agents` lista sete arquivos: `agata-ci`, `agata-dev`, `agata-inov-arquiteto`, `agata-inov-critico`, `agata-inov-pesquisa`, `agata-revisor` e `agata-spec`. `agata-auditor` não está. A linha antiga não foi editada; esta entrada é a correção. Ação: o Humano decide se o auditor entra como arquivo próprio; até lá, o papel é descrito e não instalado.
++- **06/11 (skill de equipe):** papéis, pacote de passagem e pauta do auditor entraram nesta skill e em `agata-equipe`. Nenhum desses trechos foi aplicado nem testado em lote real; é proposta P-8 não assinada.
++- **06/11 (substituição de instrução a agente):** a linha "Até lá, use `general-purpose` com o mesmo texto de instrução" foi substituída pela regra de `agata-equipe`: o papel com a mesma instrução só se o Humano aceitar, e dizer que foi assim. A linha antiga não foi editada.
++- **06/11 (contagem de APROVADO):** a linha de histórico do passo 9 diz 562 (contagem de 06/11, sem comando registrado). Medição nesta worktree com `git ls-tree -r origin/main --name-only -- propostas/aplicadas | grep -c '/APROVADO-'`: 563. A linha antiga não foi editada; esta entrada é a correção.
+ 
+ ## Comandos úteis
+ - CI local: `bash scripts/ci_sdd_local.sh`
