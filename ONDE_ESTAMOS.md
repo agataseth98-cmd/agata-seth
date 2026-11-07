@@ -16,6 +16,42 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 **Aplicado:** `agencia-pesquisa-20261106`. Três pesquisadores de leitura em `.claude/agents/` (`agata-pesq-rea`, `agata-pesq-painel`, `agata-pesq-processo`). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Valem numa sessão nova. Registro em MEMÓRIAS (970).
 
+## Estado em 06/11/2026 17:40 (correção por entrada nova)
+
+Esta entrada corrige o que as entradas de 03 a 06/11 dizem sobre pendências. Não edita nada acima. Atualizado em 06/11/2026 17:40 (UTC-3). Base: `origin/main` eb1c40a4.
+
+Resumo: cinco propostas já estão aplicadas; quatro estão superadas e não devem ser assinadas; o PR 927 (aplicação do rea-herdr) está pronto para você juntar.
+
+**Medido**
+
+Aplicadas (APROVADO em `propostas/aplicadas/`):
+- `APROVADO-m2c-acervo-parcial-20261106`
+- `APROVADO-m2b-acervo-egress-20261106`
+- `APROVADO-agata-robustez-codeql-medicoes-v2-20261103` (a v1 saiu do main em `af37554c`)
+- `APROVADO-cabecalho-modelo-real-20261020`
+- lote4: aplicada pelo PR 925 (mesclado às 16:20)
+
+Superadas (não assinar, não aplicar):
+- `lote2-processo-20261106` → substituída por `lote2b-processo-20261106` (o header do arquivo manda não assinar a v1).
+- `lote2b-processo-20261106` → substituída por `lote3-processo-20261106` (header da lote3). `git apply --check` contra o main de hoje falha: o diff cria arquivos que já existem (ex.: `.claude/agents/agata-ci.md`).
+- `lote3-processo-20261106` → substituída por `lote4-processo-20261106` (aplicada). Entrada 356 do cache do Conselho: "Não assinar a lote3".
+- `m2-acervo-egress-20261106` v1 → substituída por `m2b-acervo-egress-20261106`. A v1 entrou no main em `29b3231b` e saiu em `1412a897`; hoje não está no main nem no checkout vivo.
+
+Sem aplicação:
+- `APROVADO-lote2b-processo-20261106` existe só na raiz do checkout vivo (não rastreado, 06/11 14:18). É um APROVADO sem aplicação.
+
+PRs:
+- PR 925 (aplicação lote4): mesclado às 16:20 (UTC-3).
+- PR 926 (proposta rea-herdr-integracao-20261106): mesclado às 17:20 (UTC-3).
+- PR 927 (aplicação rea-herdr-integracao-20261106, head `3768443`): OPEN, sem conflito (CLEAN). Checks verdes: CodeQL (actions, javascript-typescript, python, rust) e CodeQL; fiscal-p8; suite-adversarial; sdd.
+- PR 923 (spec da nova versão, head `7f68458`): OPEN, em conflito com o main (DIRTY). Nesse head não há check `suite-adversarial` nem `sdd`; os checks que existem estão verdes. A frase anterior, "segue vermelha nos critérios de painel de chaves e reversão", não corresponde a esse estado medido e fica substituída por esta entrada.
+
+**Decisão do Humano pendente**
+- Juntar o PR 927. Pela AGENTS.md, o PR de aplicação fica com você.
+- Arquivar as propostas superadas (lote2, lote2b, lote3, m2 v1) e o `APROVADO-lote2b-processo-20261106` da raiz. A decisão final de arquivar é sua.
+- Destino do PR 923: está em conflito e sem suite-adversarial nem sdd no head.
+- Não conferido nesta rodada: os outros itens de "Esperando você" das entradas de 03 a 06/11 (branches, D1–D13, P-9/P-16/P-17/P-24, allowlist do Acervo, conciliação do Experimento 2, conferência da tela do Acervo no navegador).
+
 ## Hoje, 06/11 (aplicação REA)
 
 **Aplicado:** `rea-herdr-integracao-20261106`. O REA entra em leitura, com allowlist de 14 subcomandos e wrapper `scripts/rea_leitura.sh`. O Herdr fica como está. Assinado pelo Humano.
