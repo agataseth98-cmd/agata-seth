@@ -3248,6 +3248,14 @@
   "resumo": "-"
  },
  {
+  "nome": "agata-equipe",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-equipe/SKILL.md",
+  "resumo": "Papéis da equipe de agentes do Agata (spec, dev, revisor, ci, time de inovação e auditor), com o que cada um pode e não pode fazer, quem rev"
+ },
+ {
   "nome": "agata-ferramentas",
   "tipo": "skill",
   "fonte": "agata",
