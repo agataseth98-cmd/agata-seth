@@ -1,0 +1,262 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 756d5f2d..942e677c 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -555,3 +555,14 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .sidebar-collapsed .nav-group-toggle .nav-caret{display:none}
+ .sidebar-collapsed .nav-sub{display:grid;margin-left:0;padding-left:0;border-left:0}
+ @media(max-width:690px){.nav-group{display:flex;gap:5px}.nav-group-toggle{display:none}.nav-sub,.nav-sub[hidden]{display:flex;gap:5px;margin:0;padding:0;border:0}.nav-sub button{font-size:12px;padding:8px 9px}}
++
++/* Estilos antes inline (style=): a CSP style-src 'self' bloqueia o atributo, então ficam aqui. Mesmos valores. */
++.grafo-modos{display:flex;gap:8px;flex-wrap:wrap}
++.grafo-form{display:flex;gap:8px;margin:10px 0}
++.grafo-entrada{width:7em}
++.grafo-svg{width:100%;max-height:60vh}
++.lista-coluna{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
++.linha-medicoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
++.medir-nota{margin:8px 0 0}
++.lista-componentes{display:flex;flex-direction:column;gap:10px}
++.vault-canvas{margin:8px 0;padding-left:18px}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index d2f407b4..2384d4d1 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -80,23 +80,23 @@
+ <form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+ <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article></section>
+ <section class="page" id="page-grafo" data-title="Grafo do vault"><div class="section-heading"><div><div class="eyebrow">Vault derivado · só leitura</div><h1>Grafo do vault</h1><p>Escolha um nó para trocar o centro. Relações, Regiões e Brain Atlas mudam a forma de ver a memória.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button><button class="btn secondary" type="button" id="grafo-modo-atlas" aria-pressed="false">Brain Atlas</button></div></div>
+-<form id="grafo-form" style="display:flex;gap:8px;margin:10px 0"><label for="grafo-entrada" class="sr-only">Número da entrada</label><input id="grafo-entrada" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="0850" style="width:7em"><button class="btn" type="submit">Abrir nota</button></form>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Visualizador</div><h2 class="panel-title" id="grafo-titulo">Entrada 0850</h2></div><div class="grafo-modos"><button class="btn secondary" type="button" id="grafo-modo-relacoes" aria-pressed="true">Relações</button><button class="btn secondary" type="button" id="grafo-modo-regioes" aria-pressed="false">Regiões</button><button class="btn secondary" type="button" id="grafo-modo-atlas" aria-pressed="false">Brain Atlas</button></div></div>
++<form id="grafo-form" class="grafo-form"><label for="grafo-entrada" class="sr-only">Número da entrada</label><input id="grafo-entrada" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="0850" class="grafo-entrada"><button class="btn" type="submit">Abrir nota</button></form>
+ <p class="subnote" id="grafo-fonte" role="status" aria-live="polite">Lendo o vault…</p>
+-<svg id="grafo-svg" viewBox="0 0 480 360" role="img" aria-label="Grafo de relações do vault" style="width:100%;max-height:60vh"></svg>
++<svg id="grafo-svg" viewBox="0 0 480 360" role="img" aria-label="Grafo de relações do vault" class="grafo-svg"></svg>
+ </article></section>
+ <section class="page" id="page-lacunas" data-title="Lacunas"><div class="section-heading"><div><div class="eyebrow">Disciplina · o que falta</div><h1>Lacunas</h1><p>Lista o que falta: cada item visível sem leitura medida agora, com o motivo.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Mapa</div><h2 class="panel-title" id="lacunas-total">Calculando…</h2></div></div><ul id="lacunas-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Mapa</div><h2 class="panel-title" id="lacunas-total">Calculando…</h2></div></div><ul id="lacunas-lista" class="lista-coluna"></ul></article>
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Canon</div><h2 class="panel-title">Declarado e não confirmado</h2></div></div><div id="lacunas-canon"></div></article></section>
+ <section class="page" id="page-qualidade" data-title="Qualidade de LLM"><div class="section-heading"><div><div class="eyebrow">Falhas de LLM · leitura do momento</div><h1>Qualidade de LLM</h1><p>Indicadores medidos agora no repositório. O que ainda não tem medição aparece como não medido, nunca como número estimado. Mapa completo e fontes: skill agata-llm-fundamentos.</p></div></div>
+ <div class="kpis" id="qualidade-kpis"></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Medições</div><h2 class="panel-title">Medir agora</h2></div></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><button type="button" class="text-link" id="medir-recuperacao">Medir recuperação da busca</button><button type="button" class="text-link" id="medir-semantica">Medir busca por sentido</button><select id="medir-modelo" aria-label="Modelo local para medir o contexto"></select><select id="medir-tarefa" aria-label="Tarefa da medição de contexto"><option value="agulha">1 fato (agulha)</option><option value="varias">8 fatos parecidos</option><option value="rastreio">rastreio de variáveis</option><option value="agregacao">agregação de palavras</option></select><select id="medir-raciocinio" aria-label="Raciocínio do modelo na medição de contexto"><option value="desligado">raciocínio desligado</option><option value="ligado">raciocínio ligado</option></select><button type="button" class="text-link" id="medir-contexto">Medir contexto efetivo</button></div><p class="note" id="medir-nota" style="margin:8px 0 0">Recuperação lê só o vault (segundos). Contexto usa a GPU e leva minutos; confirme com dois cliques.</p></article>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Evidência</div><h2 class="panel-title" id="qualidade-titulo">Calculando…</h2></div></div><ul id="qualidade-lista" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Medições</div><h2 class="panel-title">Medir agora</h2></div></div><div class="linha-medicoes"><button type="button" class="text-link" id="medir-recuperacao">Medir recuperação da busca</button><button type="button" class="text-link" id="medir-semantica">Medir busca por sentido</button><select id="medir-modelo" aria-label="Modelo local para medir o contexto"></select><select id="medir-tarefa" aria-label="Tarefa da medição de contexto"><option value="agulha">1 fato (agulha)</option><option value="varias">8 fatos parecidos</option><option value="rastreio">rastreio de variáveis</option><option value="agregacao">agregação de palavras</option></select><select id="medir-raciocinio" aria-label="Raciocínio do modelo na medição de contexto"><option value="desligado">raciocínio desligado</option><option value="ligado">raciocínio ligado</option></select><button type="button" class="text-link" id="medir-contexto">Medir contexto efetivo</button></div><p class="note medir-nota" id="medir-nota">Recuperação lê só o vault (segundos). Contexto usa a GPU e leva minutos; confirme com dois cliques.</p></article>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Evidência</div><h2 class="panel-title" id="qualidade-titulo">Calculando…</h2></div></div><ul id="qualidade-lista" class="lista-coluna"></ul></article></section>
+ <section class="page" id="page-sdd" data-title="SDD"><div class="section-heading"><div><div class="eyebrow">Spec-driven · componentes ancorados</div><h1>SDD</h1><p>Cada componente tem uma spec que lista o código que possui e critérios de aceite ligados a testes. Aqui você confere a âncora e roda os critérios. Proposta, assinatura e PR continuam fora do painel, pelo Humano.</p></div></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Componentes</div><h2 class="panel-title" id="sdd-titulo">Calculando…</h2></div></div><div id="sdd-lista" style="display:flex;flex-direction:column;gap:10px"></div></article></section>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Componentes</div><h2 class="panel-title" id="sdd-titulo">Calculando…</h2></div></div><div id="sdd-lista" class="lista-componentes"></div></article></section>
+ <section class="page" id="page-visao" data-title="Visão do sistema"><div class="section-heading"><div><div class="eyebrow">Tudo junto · leitura do momento</div><h1>Visão do sistema</h1><p>Os números vêm das mesmas leituras das outras abas. O que falta aparece como lacuna, com link para a aba que resolve.</p></div></div>
+ <div class="kpis" id="visao-kpis"></div>
+-<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Melhorias a propor</div><h2 class="panel-title">O que falta ou está pendente</h2></div></div><ul id="visao-melhorias" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px"></ul></article></section>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Melhorias a propor</div><h2 class="panel-title">O que falta ou está pendente</h2></div></div><ul id="visao-melhorias" class="lista-coluna"></ul></article></section>
+ <section class="page" id="page-capacidades" data-title="O que posso fazer">
+     <p class="subnote">Catálogo documental: os rótulos não são leitura ao vivo. Para o estado medido, veja Estado operacional e Integrações.</p>
+     <div class="section-heading"><div><div class="eyebrow">Mapa de capacidades</div><h1>O que posso fazer</h1><p>Escolha uma capacidade para ver a evidência dela. Cartão sem leitura é documento, não medição.</p></div></div>
+@@ -314,7 +314,7 @@
+ <div id="nv-out"></div><div class="nv-vazio" id="nv-out-vazio">Nenhuma rodada ainda.</div></article></section>
+ </main>
+ </div>
+-<dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" style="margin:8px 0;padding-left:18px"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
++<dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Vault · leitura do momento</div><h2 id="vault-title">Vault</h2></div><button class="close close-vault" aria-label="Fechar">×</button></div><div class="dialog-source" id="vault-fonte"></div><ul id="vault-canvas" class="vault-canvas"></ul><pre id="vault-texto" class="dialog-texto"></pre><div class="dialog-actions"><button class="btn secondary close-vault" type="button">Fechar</button></div></div></dialog>
+ <dialog id="evidence-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><div class="dialog-top"><div><div class="eyebrow">Fonte e limite</div><h2 id="dialog-title">Evidência</h2></div><button class="close" aria-label="Fechar">×</button></div><p class="dialog-body" id="dialog-body"></p><div class="dialog-source" id="dialog-source"></div><div class="dialog-actions"><button class="btn secondary close-dialog">Fechar</button></div></div></dialog>
+ <script src="prototipo.js"></script>
+ <script src="abrir.js"></script>
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 9b30d6c5..ccbf3f62 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -100,3 +100,4 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+ - `frentes.js`
+ - `test_frentes.py`
+ - `test_chat_ui.py`
++- `test_csp_prototipo.py`
+diff --git a/redesign/painel_operacional/test_csp_prototipo.py b/redesign/painel_operacional/test_csp_prototipo.py
+new file mode 100644
+index 00000000..2e844f58
+--- /dev/null
++++ b/redesign/painel_operacional/test_csp_prototipo.py
+@@ -0,0 +1,183 @@
++import re
++import unittest
++from html.parser import HTMLParser
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++HTML = HERE / "prototipo.html"
++CSS = HERE / "prototipo.css"
++
++# style-src 'self' no servidor: o navegador descarta style="..." e <style>. Estilo fica em prototipo.css.
++ATRIBUTO_STYLE = re.compile(r"(?<![\w-])style\s*=", re.IGNORECASE)
++TAG_STYLE = re.compile(r"<style\b", re.IGNORECASE)
++CLASSES_NOVAS = (
++    "grafo-modos", "grafo-form", "grafo-entrada", "grafo-svg", "lista-coluna",
++    "linha-medicoes", "medir-nota", "lista-componentes", "vault-canvas",
++)
++IDS_PRESERVADOS = (
++    "grafo-form", "grafo-entrada", "grafo-svg", "lacunas-lista", "qualidade-lista",
++    "sdd-lista", "visao-melhorias", "medir-nota", "vault-canvas",
++)
++
++# Mapeamento copiado do diff de correção: o elemento com este id deve ter esta classe e esta tag.
++ELEMENTOS_COM_CLASSE = (
++    ("grafo-form", "grafo-form", "form"),
++    ("grafo-entrada", "grafo-entrada", "input"),
++    ("grafo-svg", "grafo-svg", "svg"),
++    ("lacunas-lista", "lista-coluna", "ul"),
++    ("qualidade-lista", "lista-coluna", "ul"),
++    ("visao-melhorias", "lista-coluna", "ul"),
++    ("sdd-lista", "lista-componentes", "div"),
++    ("medir-nota", "medir-nota", "p"),
++    ("vault-canvas", "vault-canvas", "ul"),
++)
++# Dois dos 11 elementos não têm id no diff: o alvo é o pai do filho com este id.
++PAI_DO_ID = (
++    ("grafo-modo-relacoes", "grafo-modos", "div"),
++    ("medir-recuperacao", "linha-medicoes", "div"),
++)
++
++# Valores dos style= originais (linhas '-' do diff de correção). O CSS tem que declarar exatamente isto.
++VALORES_ESPERADOS = {
++    "grafo-modos": {"display": "flex", "gap": "8px", "flex-wrap": "wrap"},
++    "grafo-form": {"display": "flex", "gap": "8px", "margin": "10px 0"},
++    "grafo-entrada": {"width": "7em"},
++    "grafo-svg": {"width": "100%", "max-height": "60vh"},
++    "lista-coluna": {"margin": "0", "padding-left": "18px", "display": "flex",
++                     "flex-direction": "column", "gap": "8px"},
++    "linha-medicoes": {"display": "flex", "flex-wrap": "wrap", "gap": "10px", "align-items": "center"},
++    "medir-nota": {"margin": "8px 0 0"},
++    "lista-componentes": {"display": "flex", "flex-direction": "column", "gap": "10px"},
++    "vault-canvas": {"margin": "8px 0", "padding-left": "18px"},
++}
++
++VAZIOS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
++COMENTARIO_CSS = re.compile(r"/\*.*?\*/", re.S)
++REGRA_CSS = re.compile(r"([^{}]+)\{([^{}]*)\}")
++
++
++class Arvore(HTMLParser):
++    """Guarda cada elemento (tag, atributos, índice do pai), na ordem do documento."""
++
++    def __init__(self):
++        super().__init__(convert_charrefs=True)
++        self.elementos = []
++        self._abertos = []
++
++    def handle_starttag(self, tag, attrs):
++        pai = self._abertos[-1] if self._abertos else None
++        self.elementos.append({"tag": tag, "attrs": dict(attrs), "pai": pai})
++        if tag not in VAZIOS:
++            self._abertos.append(len(self.elementos) - 1)
++
++    def handle_endtag(self, tag):
++        for pos in range(len(self._abertos) - 1, -1, -1):
++            if self.elementos[self._abertos[pos]]["tag"] == tag:
++                del self._abertos[pos:]
++                return
++
++
++def arvore_de(texto):
++    arvore = Arvore()
++    arvore.feed(texto)
++    arvore.close()
++    return arvore
++
++
++def por_id(arvore, id_):
++    return [e for e in arvore.elementos if e["attrs"].get("id") == id_]
++
++
++def classes_de(elemento):
++    return elemento["attrs"].get("class", "").split()
++
++
++def declaracoes_da_classe(css, classe):
++    """Parser simples: junta as declarações de cada regra cujo seletor inclui '.classe' (a última vence)."""
++    css = COMENTARIO_CSS.sub("", css)
++    decl = {}
++    for m in REGRA_CSS.finditer(css):
++        seletores = [s.strip() for s in m.group(1).split(",")]
++        if "." + classe not in seletores:
++            continue
++        for item in m.group(2).split(";"):
++            prop, sep, val = item.partition(":")
++            if sep:
++                decl[prop.strip().lower()] = " ".join(val.split())
++    return decl
++
++
++def linhas_de(texto, padrao):
++    return [texto.count("\n", 0, m.start()) + 1 for m in padrao.finditer(texto)]
++
++
++class CspPrototipoTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.html = HTML.read_text(encoding="utf-8")
++        cls.css = CSS.read_text(encoding="utf-8")
++
++    def test_html_sem_atributo_style(self):
++        self.assertEqual([], linhas_de(self.html, ATRIBUTO_STYLE), "atributo style= nas linhas indicadas")
++
++    def test_html_sem_tag_style(self):
++        self.assertEqual([], linhas_de(self.html, TAG_STYLE), "<style> nas linhas indicadas")
++
++    def test_classes_novas_existem_no_css(self):
++        for nome in CLASSES_NOVAS:
++            with self.subTest(classe=nome):
++                self.assertRegex(self.css, r"\." + re.escape(nome) + r"(?![\w-])")
++
++    def test_mapeamento_cobre_as_classes_novas(self):
++        usadas = {c for _, c, _ in ELEMENTOS_COM_CLASSE} | {c for _, c, _ in PAI_DO_ID}
++        self.assertEqual(set(CLASSES_NOVAS), usadas)
++        self.assertEqual(11, len(ELEMENTOS_COM_CLASSE) + len(PAI_DO_ID))
++
++    def test_elemento_tem_a_classe_do_seu_id(self):
++        arvore = arvore_de(self.html)
++        for id_, classe, tag in ELEMENTOS_COM_CLASSE:
++            with self.subTest(id=id_, classe=classe):
++                achados = por_id(arvore, id_)
++                self.assertEqual(1, len(achados), f"id={id_!r} deveria aparecer 1 vez, achou {len(achados)}")
++                el = achados[0]
++                self.assertEqual(tag, el["tag"], f"id={id_!r}: tag {el['tag']!r}, esperado {tag!r}")
++                self.assertIn(classe, classes_de(el),
++                              f"id={id_!r} sem class={classe!r}; classes achadas: {classes_de(el)}")
++
++    def test_pai_do_id_tem_a_classe(self):
++        arvore = arvore_de(self.html)
++        for id_filho, classe, tag in PAI_DO_ID:
++            with self.subTest(filho=id_filho, classe=classe):
++                achados = por_id(arvore, id_filho)
++                self.assertEqual(1, len(achados), f"id={id_filho!r} deveria aparecer 1 vez, achou {len(achados)}")
++                indice_pai = achados[0]["pai"]
++                self.assertIsNotNone(indice_pai, f"id={id_filho!r} sem elemento pai")
++                pai = arvore.elementos[indice_pai]
++                self.assertEqual(tag, pai["tag"], f"pai de id={id_filho!r}: tag {pai['tag']!r}, esperado {tag!r}")
++                self.assertIn(classe, classes_de(pai),
++                              f"pai de id={id_filho!r} sem class={classe!r}; classes achadas: {classes_de(pai)}")
++
++    def test_valores_cobrem_as_classes_novas(self):
++        self.assertEqual(set(CLASSES_NOVAS), set(VALORES_ESPERADOS))
++
++    def test_valores_das_classes_novas_no_css(self):
++        for classe, esperado in VALORES_ESPERADOS.items():
++            decl = declaracoes_da_classe(self.css, classe)
++            with self.subTest(classe=classe):
++                if not decl:
++                    self.fail(f"nenhuma regra '.{classe} {{...}}' no CSS; esperado {esperado}")
++                for prop, val in esperado.items():
++                    with self.subTest(prop=prop):
++                        if prop not in decl:
++                            self.fail(f".{classe} não declara '{prop}' no CSS (esperado {val!r})")
++                        self.assertEqual(val, decl[prop],
++                                         f".{classe} {prop}: esperado {val!r}, achado {decl[prop]!r}")
++
++    def test_ids_preservados(self):
++        for id_ in IDS_PRESERVADOS:
++            with self.subTest(id=id_):
++                self.assertIn(f'id="{id_}"', self.html)
++
++
++if __name__ == "__main__":
++    unittest.main()
