@@ -1,0 +1,1166 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+index 85d4b653..0150702b 100644
+--- a/.agents/skills/INDICE.md
++++ b/.agents/skills/INDICE.md
+@@ -7,7 +7,7 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada
+ | Skill | Use quando | Dono de fato |
+ |---|---|---|
+ | `agata-carregar` | abrir uma sessão ou quando o bloco de estado não aparecer | Claude |
+-| `agata-fluxo` | qualquer trabalho que mude o sistema, para qualquer modelo | Codex (doutrina) |
++| `agata-fluxo` | guia universal (Ma'at): qualquer trabalho que mude o sistema, para qualquer modelo | agata-spec (dono); revisor agata-revisor (D4, 07/11/2026) |
+ | `agata-fluxo-equipe` | trabalhar em Equipe, qualquer membro do Conselho (partida, fila, propriedade) | Claude |
+ | `agata-conselho-memoria` | cache do Conselho, canal MSG, auditoria antes de afirmar | Claude |
+ | `agata-aplicar-proposta` | criar, verificar e aplicar uma proposta P-8 | Claude |
+@@ -20,6 +20,11 @@ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Seth ou outro). Cada
+ | `agata-voz` | ler em voz alta, falar, narrar, voz do sistema; todo modelo que fala usa a voz do Agata | Claude |
+ | `experimento-agata` | conduzir uma rodada do Experimento 2: critérios antes da observação, splits separados, registro append-only | Claude |
+ | `morse` | conversas de voz e debates com escuta paciente, turnos claros e distinção entre fala, chamada técnica e ação comprovada | Claude |
++| `agata-processo-lote` | propor e aplicar um lote: worktree, CI local, uma assinatura, aplicação e merge | não medido |
++| `agata-time-inovacao` | melhoria nova com SDD: pesquisa, spec, revisão independente, decisão humana e só então proposta P-8 | não medido |
++| `agata-disciplina` | disciplina de qualquer modelo: cabeçalho com hora medida, modo conciso, consulta antes de mexer em trabalho alheio | não medido |
++| `agata-engenharia-reversa` | análise estática, por leitura, de app web ou bundle JavaScript/Electron que o Agata usa | não medido |
++| `elephant-goldfish-sdd` (sem prefixo agata-) | SDD 2.0 em funcionalidade grande ou arriscada: desenho, revisão independente, drift | não medido |
+ 
+ ## Skills de terceiros (cópias fixas, não editar aqui)
+ - `defuddle`, `json-canvas`, `obsidian-bases`, `obsidian-cli`, `obsidian-markdown`: presentes em `.agents/skills` e em `.claude/skills` só como cópias locais fora do git (`.git/info/exclude`): um clone limpo e a CI não as têm. São cópias do mesmo conteúdo; a fonte de atualização é externa.
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index 1deedcce..74b2d1df 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -3,68 +3,93 @@ name: agata-fluxo
+ description: Fluxo único de trabalho no sistema Agata para qualquer LLM (Claude, Codex, Seth ou outro) que atue numa tarefa. Usar ao começar uma sessão, ao dividir trabalho com outro modelo, antes de propor ou aplicar mudança, e ao registrar resultado.
+ ---
+ 
+-# Fluxo Agata (universal)
++# Fluxo Agata (universal): Ma'at
+ 
+-Vale para qualquer modelo da Confederação. Use o cabeçalho exato de `PROTOCOLOS.md`: `agata-seth · <modelo> · t=<n> (<origem da contagem>) · <data e hora local + selo>`. O modelo específico só entra se estiver verificado; caso contrário, diga isso no campo.
++Ma'at é o guia universal do núcleo de desenvolvimento: ordem e verdade para qualquer modelo. Nomes por decisão do Humano (07/11/2026): Ptah é o núcleo de construção (artífice; faz a mudança em worktree); Thoth é o canal da equipe, para escrita e registro (hoje agata-fluxo-equipe e scripts/equipe/equipe.py).
++
++Vale para qualquer modelo da Confederação. Use o cabeçalho de `PROTOCOLOS.md`: `agata-seth · <modelo> · t=<n> (<origem da contagem>) · <data e hora local + selo>`. Modelo específico só se verificado; senão, diga isso no campo.
+ 
+ ## Escolha a skill necessária
+ - Sessão nova ou sem bloco de estado: `agata-carregar`.
+ - Proposta ou aplicação protegida por P-8: `agata-aplicar-proposta`.
++- Lote de proposta, do worktree à aplicação: `agata-processo-lote` (roteiro completo).
++- Melhoria nova com SDD (pesquisa, spec, revisão, decisão humana): `agata-time-inovacao`.
+ - Trabalho com Claude/Codex em pistas separadas: `agata-fluxo-equipe`.
+ - Mudança em serviço, container, rede, energia ou boot: `agata-mudanca-segura`.
+ - Leitura ou contato com a Seth, quando solicitado: `agata-conversar-com-seth`.
+ 
+-Use as skills necessárias ao tipo de tarefa. Se ela envolver, por exemplo, runtime e arquivos P-8, use as duas skills correspondentes. Este fluxo define as regras comuns; cada skill especializada define só seu procedimento próprio.
+-
+-Quando a tarefa pedir auditoria ou melhoria das skills Agata, inventarie as skills compartilhadas em `.agents/skills/`, procure duplicações e conflitos e proponha alterações que modelos locais menores consigam seguir: gatilho, pré-requisitos, passos curtos, condições de parada e resultado esperado. Preserve skills com responsabilidades distintas; consolide só procedimentos realmente duplicados. Faça revisão cruzada com `agata-fluxo-equipe` e entregue um `.diff` P-8. Não altere a skill instalada nem a publique antes da assinatura e integração; depois de integrada e sincronizada, ela fica disponível aos membros que carregam as skills deste repositório.
++Use as skills do tipo de tarefa; cada skill define só o seu procedimento, e este fluxo define as regras comuns.
++
++Auditoria ou melhoria de skills: proponha em `.diff` P-8, com revisão cruzada de `agata-fluxo-equipe`. Não publique antes da assinatura.
++
++## Regras de lote (resumo; completo em `.agents/skills/agata-processo-lote/SKILL.md`)
++- Um lote, uma proposta, uma assinatura. Só o Humano assina (`scripts/aprovar.sh`). (regra 1 do lote)
++- Trabalho em worktree em `.claude/worktrees/<nome>`, a partir de origin/main; não no checkout vivo, não em /tmp. (lição f)
++- Antes de propor: `bash scripts/ci_sdd_local.sh`, só com "CI LOCAL: TUDO OK". (passo 3 do lote)
++- PR de proposta traz só o `.diff` e o registro; código só dentro do `.diff`, conferido com `grep '^diff --git'`. (passos 4 e 5 do lote)
++- Não use rm, nem -f nem -r; para tirar algo do caminho, use mv. Remover só com ordem do Humano, por nome. (lição e)
++- Não restaure nem descarte alteração sem ordem explícita do Humano, por nome. (regra 5 do lote)
++- Delegue operação a agentes quando a sessão permitir; sem isso, faça com a mesma disciplina. Confira o resultado, não o relatório. (uso de agentes)
++- Memória comum: `python3 redesign/router/cache_conselho.py ler --n 20` ao começar; anote ao fechar trabalho relevante (seção 7). (AGENTS.md)
++- Decisão do Humano que só existe em conversa vira registro ou proposta antes de código; no cache é `decisao` provisória. (lição i)
++- Perguntas ao Humano numeradas, na ordem da mensagem, cada número com rótulo: medido, inferido ou não medido. (lições l e m)
++- Antes de entregar afirmação verificável: `python3 redesign/router/auditoria_turno.py --verificar < arquivo`. (AGENTS.md)
++
++## Lições citadas acima (ids)
++- **e.** Nunca rm (nem -f, -r); usar mv; remover só com ordem do Humano, por nome. Fonte: agentes rodaram rm em scratch (relato).
++- **f.** Trabalho durável não fica em /tmp (tmpfs; `findmnt -T /tmp`, medido). Worktrees perdidas em 07/11 (relato).
++- **i.** Decisão do Humano só em mensagem não é decidida; vira registro ou proposta. Fonte: decisões de 07/11 (relato).
++- **l.** Número sai com rótulo: medido, inferido ou não medido.
++- **m.** Perguntas numeradas, na ordem da mensagem. Fonte: preferência do Humano (relato).
++
++## Nomes e papéis (decisão do Humano, 07/11/2026)
++- Ma'at: este guia. Ptah: núcleo de construção. Thoth: canal da equipe.
++- Dono deste guia: agata-spec (escreve e mantém a especificação do processo). Revisor: agata-revisor (somente leitura, independente de quem escreveu). Quem escreve não revisa.
+ 
+ ## 0. Antes de qualquer ação
+-1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`,
+-   `python3 scripts/equipe/equipe.py status`. Sem medição, escrever "não medido".
+-2. **Canal**: `python3 scripts/equipe/equipe.py presente --agente <eu>`; ler o canal com
+-   `python3 scripts/equipe/equipe.py ler --agente <eu>`. Responder com `dizer --assunto ... --texto "$(cat arq)"`.
++1. **Medir o estado**, nunca supor: `git fetch -q && git status -sb`, `gh pr list --state open`, `python3 scripts/equipe/equipe.py status`. Sem medição, escrever "não medido".
++2. **Canal**: `python3 scripts/equipe/equipe.py presente --agente <eu>`; ler com `python3 scripts/equipe/equipe.py ler --agente <eu>`.
+ 3. **Não tocar** no checkout compartilhado. Trabalhar em worktree própria a partir de `origin/main`.
+ 
+ ## 1. Divisão de trabalho entre modelos
+-- Quem propõe redige a mudança em `propostas/<nome>.diff`; quem audita **executa** os comandos citados
+-  e reporta a saída literal. Quem audita não aprova.
++- Quem propõe redige em `propostas/<nome>.diff`; quem audita executa os comandos citados e reporta a saída literal, sem aprovar.
+ - Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `equipe.py`).
+-- Trabalho caro em tokens (suíte completa, varreduras longas) vai para o modelo com mais folga; o relato
+-  volta pelo canal, sem colar relatório inteiro.
++- Trabalho caro em tokens vai ao modelo com mais folga; o relato volta pelo canal, sem colar relatório inteiro.
+ 
+ ## 2. Mudança protegida
+-Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8. Em trabalho conjunto, some a revisão cruzada de `agata-fluxo-equipe`.
++Use `agata-aplicar-proposta` para criar, testar e aplicar uma proposta P-8 (em trabalho conjunto, some a revisão cruzada de `agata-fluxo-equipe`).
+ 
+-Regras que sempre valem: proposta em worktree própria baseada em `origin/main`; `.diff` verificável e testado; proposta e aplicação são etapas separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Não avance com teste ou assinatura ausente.
++Sempre: worktree a partir de `origin/main`; `.diff` verificável e testado; proposta e aplicação separadas; só o Humano assina; nenhum modelo roda `aprovar.sh`, usa `sudo` ou abre segredo. Sem teste ou assinatura, não avance.
+ 
+ ## 3. Registro
+-- Resultado vai para `MEMÓRIAS.md` **só por PR**, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`.
+-- Nunca editar entrada antiga (P-5). Correção é entrada nova.
++- Resultado vai para `MEMÓRIAS.md` **só por PR**, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`. Nunca editar entrada antiga (P-5); correção é entrada nova.
+ - Conversa com modelo não é fonte: só entra o que tiver PR, commit ou medição (M7, entrada 791).
+ 
+ ## 4. Afirmar com prova
+ - "endereçado", "fechado", "confirmado" só com PR, commit, caminho ou saída de comando no mesmo parágrafo.
+-- Sem percentual de confiança: usar "medido" ou "não medido".
+-- Componente removido só se citado com a entrada de remoção.
+-- Afirmação agregada ("todos", "5 de 7") exige tabela por item.
++- Sem percentual de confiança: "medido" ou "não medido". Afirmação agregada exige tabela por item.
+ 
+ ## 5. Quando parar
+-- O Humano decide quando parar. Um modelo que não se julga apto (erro de medição recorrente, afirmação sem
+-  prova, perda de contexto) diz isso e pede substituição (entrada 789).
++- O Humano decide quando parar. Um modelo que não se julga apto (erro de medição recorrente, afirmação sem prova, perda de contexto) diz isso e pede substituição (entrada 789).
+ 
+ ## 6. Seth
+-- A Seth carrega esta skill pela hidratação quando a tarefa envolve mudança no sistema. Ela não assina,
+-  não aplica e não envia nada para fora.
++- Pelo código medido, a Seth não recebe esta skill: a sugestão de skills é desligada por padrão (`SETH_SKILLS_SUGERE=1` liga) e traz só nome e descrição (seth_gateway.py, `_injeta`, [lido]). Se ela lê o arquivo por alguma ferramenta: não medido (lacuna L5).
++- Pela decisão D2, o bloco de estado traz a linha `PROCESSO:` com o caminho deste fluxo; `SETH_PROCESSO_HIDRATA=0` a desliga. Ler a skill é ação dela.
++- Ela não assina, não aplica e não envia nada para fora.
+ 
+-## Relacionadas
+-- `agata-carregar` (abrir sessão), `agata-mudanca-segura` (mudança na Máquina),
+-  `agata-aplicar-proposta` (aplicação P-8), `agata-fluxo-equipe` (detalhe do canal e da vigia).
++## 7. Memória do Conselho e MEMÓRIAS.md (decisão D7, 07/11/2026)
++- Cache do Conselho, registro não canônico:
++  `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato "<texto>"`
++  `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo pendencia "<texto>"`
++  Segredo é recusado (saída 2). Autor: o modelo real, medido.
++- MEMÓRIAS.md entra só de duas formas: (a) pelo timer do cache, que destila fatos e pendências já verificados (medido hoje: `scripts/memoria_semanal.py`, na janela de `config/janela-tarefas.txt`); (b) em momento extremamente importante, e só com assinatura do Humano.
++- Os critérios de destilação vêm da medição do sistema, não de opinião.
+ 
+-## 8. Comandos padrão (para o Humano colar; todo modelo entrega neste formato)
+-Atualizar a checkout principal sem perder nada. Guarda qualquer arquivo rastreado modificado antes de devolvê-lo ao repositório:
++## 8. Comandos padrão (para o Humano colar)
++Atualiza o checkout principal. Copia para backup o que estiver modificado e não restaura nada: restaurar só com ordem do Humano, por nome.
+ 
+ ```bash
+-bash -c 'R=$HOME/agata; B=$HOME/.agata-backup-staging/alteracoes-$(date +%Y%m%d-%H%M); M=$(git -C "$R" diff --name-only); if [ -n "$M" ]; then mkdir -p "$B" && for f in $M; do mkdir -p "$B/$(dirname "$f")" && cp "$R/$f" "$B/$f"; done && echo "Alterações guardadas em: $B"; git -C "$R" checkout -- $M; fi && git -C "$R" pull --ff-only && echo "Pronto: main atualizado"'
++bash -c 'R=$HOME/agata; B=$HOME/.agata-backup-staging/alteracoes-$(date +%Y%m%d-%H%M); M=$(git -C "$R" diff --name-only); if [ -n "$M" ]; then mkdir -p "$B" && for f in $M; do mkdir -p "$B/$(dirname "$f")" && cp "$R/$f" "$B/$f"; done && echo "Alterações guardadas em: $B"; fi && git -C "$R" pull --ff-only && echo "Pronto: main atualizado"'
+ ```
+ 
+ Assinar uma proposta (o Humano cola no próprio terminal, uma vez por proposta):
+@@ -73,4 +98,4 @@ Assinar uma proposta (o Humano cola no próprio terminal, uma vez por proposta):
+ bash scripts/aprovar.sh <nome-da-proposta>
+ ```
+ 
+-Regra: `<nome-da-proposta>` é o nome do arquivo `.diff` em `propostas/`, sem a extensão. Antes de assinar, confirme que o arquivo existe (`ls propostas/<nome>.diff`); se não existir, atualize a checkout com o comando acima.
++`<nome-da-proposta>` é o nome do arquivo `.diff` em `propostas/`, sem a extensão. Antes de assinar, confirme com `ls propostas/<nome>.diff`; se não existir, atualize a checkout com o comando acima.
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index aba0914e..0727ff41 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -23,6 +23,9 @@ on:
+       - "redesign/conexoes/**"
+       - "redesign/avaliacao/**"
+       - "redesign/sentidos/**"
++      - "redesign/nucleo-desenvolvimento/**"
++      - "redesign/router/seth_gateway.py"
++      - "AGENTS.md"
+       - "redesign/router/sombra_nova_versao.py"
+       - "ferramentas/**"
+       - "scripts/busca_texto.py"
+@@ -45,7 +48,7 @@ jobs:
+         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
+ 
+       - name: Testes dos componentes SDD
+-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
++        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
+ 
+       - name: Ciclo SDD sobre o próprio sdd_flow
+         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+@@ -55,7 +58,8 @@ jobs:
+ 
+       - name: Âncora e critérios dos componentes existentes
+         run: |
+-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
++          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos redesign/nucleo-desenvolvimento
++          python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec
+           for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
+             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
+diff --git a/AGENTS.md b/AGENTS.md
+index affe4330..0cdc9d75 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -20,3 +20,4 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Voz do sistema, sem negociação** (decisão do Humano, 03/11/2026: "alteração fundamenteal para o protocolo de inserção humana continuo"; skill `agata-voz`): quando um modelo FALA (ler em voz alta, modo de voz, chamada), a voz é a do sistema, o `pt_BR-agata-last` do piper-tts local, pelo `scripts/agata_falar.py`. Nenhum modelo usa outra voz nem serviço externo de voz, e texto do Agata não sai da Máquina para virar áudio. Quem não tem como emitir áudio mimetiza essa voz por escrito (voz comum, (685)/(686)), entrega o texto falável e diz que NÃO falou. Se a voz do sistema não responde ou carregou outro modelo, o correto é dizer que não falou. Falar sai da tela: só quando o Humano pede ou o modo de voz está ativo.
+ - **Memória comum do Conselho e checagem de fatos** ((849), V9 §37; decisão do Humano, 26/10/2026: todo modelo aberto em `~/agata` usa as mesmas regras e as mesmas ferramentas). Quem passa pelo `seth_gateway` (Seth, Goose) já recebe as duas. Quem não passa (Claude Code, Codex, Gemini e outros na CLI): ao começar, leia `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, anote `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"` (não canônico; segredo é recusado, dado pessoal vira marca). Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada) e corrija o que ela apontar.
+ - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
++- **Fluxo e regras de lote** (Ma'at, 07/11/2026): antes de propor ou aplicar mudança, leia `.agents/skills/agata-fluxo/SKILL.md`.
+diff --git a/redesign/nucleo-desenvolvimento/spec/acceptance.json b/redesign/nucleo-desenvolvimento/spec/acceptance.json
+new file mode 100644
+index 00000000..4a2b844b
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/spec/acceptance.json
+@@ -0,0 +1,110 @@
++[
++  {
++    "criterion": "C1: AGENTS.md aponta para o fluxo universal e o caminho existe",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_agents_aponta_para_o_fluxo_universal"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C2: o índice de skills tem uma linha para cada pasta de .agents/skills com SKILL.md",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_indice_lista_toda_pasta_de_skill"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C6: os caminhos relativos citados no fluxo, no AGENTS.md e no índice existem",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_caminhos_citados_existem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C3: o resumo de regras de lote do fluxo tem os 11 pontos",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_resume_as_regras_de_lote"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C4: nenhum bloco de comando do fluxo remove ou restaura sem ordem",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_sem_restauracao_ou_remocao_sem_ordem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C5: o fluxo não afirma que a Seth carrega a skill sem medição",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_nao_afirma_o_que_a_seth_nao_mostrou"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C8: as skills de processo passam no lint de skill, sem problema",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_skills_de_processo_passam_no_lint"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C9: cada id de lição citado no resumo existe na skill de processo (depende do PR #944 aplicado)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_ids_do_resumo_existem_na_skill"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C7: nas linhas acrescentadas, nenhum valor de segredo e nenhum caminho de memória restrita",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py::test_linhas_novas_sem_segredo_nem_memoria_restrita"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C10: o comando de cache documentado no fluxo grava um fato e uma pendência, e o ler mostra os dois",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py::test_cache_fato_e_pendencia_pelo_comando_documentado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C11a (condicional a D2): o ponteiro de estado aparece em faixa interna e não aparece na faixa pública",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_so_nas_faixas_internas"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "C11b (condicional a D2): o ponteiro é desligado por SETH_PROCESSO_HIDRATA=0 e não muda o MARCADOR",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_desligavel_por_ambiente"
++    ],
++    "cwd": null
++  }
++]
+diff --git a/redesign/nucleo-desenvolvimento/spec/brainstorm.md b/redesign/nucleo-desenvolvimento/spec/brainstorm.md
+new file mode 100644
+index 00000000..5c0ed386
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/spec/brainstorm.md
+@@ -0,0 +1,103 @@
++# Brainstorm: transição do modo de trabalho para o núcleo de desenvolvimento
++
++Status: rascunho do arquiteto SDD. Decisão: pendente (ver decision.md). Data: 07/11/2026. Base medida: origin/main 83334fde.
++Rótulos: [medido] = comando ou busca com saída citada; [lido] = arquivo lido, sem execução; [inferido]; [não medido].
++
++## Pedido
++
++Decisão do Humano, 07/11/2026, como chegou ao arquiteto: "prepare a transição deste modelo de trabalho para fazer parte do núcleo de desenvolvimento do Agata, universalista e disponível a todos os membros do Conselho".
++[medido] Essa decisão não está no canon de origin/main: busca por "universalista" em MEMÓRIAS.md, PROJETO.md, REGRAS.md, ONDE_ESTAMOS.md e propostas/ achou só a linha 363 de MEMÓRIAS.md, que é outra decisão (renomear "dupla" para "Equipe", também "universalista"); "núcleo de desenvolvimento" não apareceu em nenhum arquivo do repositório fora de memória restrita (busca com git grep). Prova só "não encontrado nesta busca". Pela lição i do lote, a decisão vira registro ou proposta antes de virar código.
++
++## Problema medido
++
++1. O processo de lote mora em skills e agentes que não chegam a todos os modelos.
++   - [medido] `.agents/skills/INDICE.md` não tem linha para 5 de 20 pastas com SKILL.md: agata-disciplina, agata-engenharia-reversa, agata-processo-lote, agata-time-inovacao e elephant-goldfish-sdd. As duas skills de processo, agata-processo-lote e agata-time-inovacao, ficam de fora.
++   - [lido] Os agentes em `.claude/agents/` usam o formato do Claude Code (campos name, description e tools). [não medido] Se Codex, Gemini ou Goose leem esse formato.
++2. AGENTS.md, que o time pede que todo modelo leia, não aponta para o fluxo universal nem para o índice de skills.
++   - [medido] Não há menção a agata-fluxo nem a INDICE em AGENTS.md. Há a regra de cache e o verificador (linha 21), a economia de tokens (linha 22) e a ordem de carregar PROMPT_CARREGAMENTO.md (linha 5).
++   - [medido] AGENTS.md não tem "worktree" nem "CI local". [não medido] Quais CLIs carregam AGENTS.md por padrão.
++3. `agata-fluxo` é o fluxo declarado para qualquer LLM ("Vale para qualquer modelo da Confederação", SKILL.md, e linha 10 do INDICE), mas não tem as regras que faltam.
++   - [medido] Zero ocorrências de cache_conselho, "lote", "delega", "numer" (perguntas numeradas), "rm" e "mv" no arquivo.
++4. A Seth, pelo gateway, recebe a doutrina fixa, o estado e o resumo do cache, mas não o processo de lote.
++   - [lido] `_DOUTRINA_FIXA` tem 10734 bytes (seth_gateway.py, linha 103, medido com ast). Não há "worktree", "lote" nem "skill" nela (a constante vai da linha 103 à 253).
++   - [lido] Skills só aparecem como sugestão, e só com SETH_SKILLS_SUGERE=1 (seth_gateway.py, linha 1174; redesign/alexandria/skills.py, linha 159: "nada foi carregado"). O padrão é desligado.
++5. As lições medidas de 07/11 estão só na proposta do PR #944 (propostas/skill-processo-lessons-07-11.md, branch proposta/skill-processo-lessons-07-11). [medido] Não estão em origin/main.
++6. Duas partes de `agata-fluxo` contradizem o próprio time.
++   - §8 manda copiar as alterações para backup e depois rodar `git checkout --` nelas. Isso restaura sem ordem explícita, contra a regra de remoção e restauração do lote. [lido]
++   - §6 diz "A Seth carrega esta skill pela hidratação". [lido] O código de injeção lido não confirma isso. [não medido] Se a Seth tem alguma ferramenta de leitura de skill.
++7. Já existe um mecanismo universal de coordenação: agata-fluxo-equipe, para "qualquer membro do Conselho" (SKILL.md, linha 3, na descrição, e linha 12), e scripts/equipe/equipe.py (812 linhas, 47169 bytes) [medido]. A matriz de propriedade e a vigia já estão lá.
++
++## Alternativas
++
++A. Texto inteiro do processo em AGENTS.md.
++B. Skill-guia nova, com ponteiro em AGENTS.md e entrega das regras pelo cache do Conselho.
++C. Módulo de código com função de guia (por exemplo, guia.py que imprime o guia) que cada modelo chama.
++D. Reaproveitar o que existe: agata-fluxo vira o guia curto, as duas skills de processo entram no seu roteiro e no índice, AGENTS.md ganha um ponteiro para agata-fluxo, e o gateway recebe um ponteiro de uma linha só se o Humano decidir.
++
++Avaliação:
++- A. Descartada. AGENTS.md já tem 7193 bytes [medido]. O texto do processo de lote tem 22305 bytes [medido]. A regra de economia de tokens (AGENTS.md, linha 22) veda carregar isso em toda sessão. O gateway não lê AGENTS.md: "AGENTS" não aparece em seth_gateway.py [medido]. Só alcançaria os CLIs que leem AGENTS.md.
++- B. Descartada como mecanismo novo. Criaria um terceiro fluxo ao lado de agata-fluxo, que já é o universal. O cache é um registro append-only, e o gateway injeta só as 3 últimas entradas, de até 160 caracteres (cache_conselho.py, `resumo_hidratacao`) [lido]. Não serve de canal de doutrina. Fica o uso que AGENTS.md já prevê: o cache guarda fato e pendência.
++- C. Descartada agora. É código novo com testes e P-8 para entregar um texto que a leitura de um arquivo já entrega. Não resolve a lacuna de conteúdo (problema 3) e não chega ao gateway sem mais código. Fica de reserva se a regra precisar de estado calculado, como o quadro da Equipe.
++- D. Escolhida. É o menor mecanismo que resolve. Não cria serviço, nem módulo de produto, nem fluxo novo: muda texto e índice, e ganha testes de regressão. Corrige os problemas 1, 2, 3, 5 e 6. O problema 4 depende de uma decisão do Humano (gateway). O problema 7 vira o ponto de entrada do mesmo fluxo.
++
++Ponteiro para o gateway, se for aprovado: pelo canal de estado de `_injeta` (seth_gateway.py, linhas 1132 e 1160), e não pela doutrina. [lido] `MARCADOR` é o hash de `_DOUTRINA_FIXA` (linha 255), e o próprio código avisa que mudar a doutrina faz conversas em andamento serem reidratadas (comentário logo acima da linha 103). [inferido, não testado] Uma linha no bloco de estado não muda o hash.
++
++## Escolha
++
++D. O resultado é um guia curto (agata-fluxo, com um resumo de regras de lote) mais um roteiro completo (agata-processo-lote), uma entrada no índice para cada skill de processo, um ponteiro no AGENTS.md e testes que travam esses pontos. Nenhum modelo recebe regra diferente: a regra é a mesma para todos.
++
++## Usuários
++
++- Humano: decide, assina e lê a devolutiva em poucas linhas.
++- Orquestrador (hoje, Claude Code): coordena e delega operação a agentes. Não faz a operação.
++- Operários: agentes com arquivos próprios. Subagente sem permissão de escrita devolve texto, e quem coordena grava e confere (armadilha do lote, 06/11).
++- Membros da Equipe (Codex, Gemini, Goose, Seth e quem entrar): entram por agata-fluxo-equipe e por equipe.py [medido]. [não medido] Quais leem AGENTS.md.
++- Conselho Remoto: usa o CLI do cache (docstring de cache_conselho.py) [lido].
++- Faixa pública (seth-public): fica de fora por desenho. O gateway tira o sistema e o histórico oculto antes de enviar (`_preparar_payload_publico`, seth_gateway.py, linhas 567 a 580, e 1294 a 1295) [lido].
++
++## Estado que muda
++
++- Texto: uma linha em AGENTS.md; uma seção nova em agata-fluxo/SKILL.md, e a correção de §6 e §8; cinco linhas em .agents/skills/INDICE.md.
++- Gerado: ferramentas/indice.json e ferramentas/INDICE.md, só se a descrição de alguma skill mudar (armadilha "Índice derivado" do lote).
++- Testes e CI: pasta nova de testes; a mesma lista de pytest em scripts/ci_sdd_local.sh e em .github/workflows/sdd.yml [medido: as duas listas hoje são iguais e precisam continuar iguais].
++- Gateway, só se D2 for aprovada: uma função de ponteiro e uma linha em `_injeta`.
++- Não muda: formato e dados do cache; scripts/equipe/equipe.py; REGRAS.md; PROJETO.md; agata-processo-lote, exceto a aplicação do PR #944, que é outro lote.
++- Registro: .diff e .md em propostas/ (PR de proposta), e entrada de decisão em MEMÓRIAS.md (lição i).
++
++## Erros e concorrência
++
++- Duas mudanças no mesmo arquivo (agata-fluxo/SKILL.md ou INDICE.md) em propostas diferentes: aplicar uma de cada vez, em sequência. Não há mudança concorrente no mesmo arquivo hoje [medido: só o PR #944 toca agata-processo-lote].
++- Ponteiro para arquivo que não existe: pegado pelos testes C1 e C6 no CI.
++- Resumo que cita uma lição inexistente: pego pelo teste C9 (ids). Conteúdo errado dentro de uma lição existente não é pego por teste: lacuna L2, revisão cruzada.
++- Modelo que não lê AGENTS.md nem o índice: não recebe o ponteiro. [não medido] Quantos.
++- Cache: escrita com trava (fcntl.flock, cache_conselho.py, linha 118), fsync e cadeia de hash. Segredo é recusado com saída 2. Dado pessoal vira marca.
++- Gateway (D2): a linha de estado não muda MARCADOR. [não medido] Se o cliente descarta mensagens de sistema, a linha volta a cada turno: custo de contexto.
++- Remoção ou restauração destrutiva: fica fora do fluxo, pelo teste C4.
++
++## Migração
++
++- Não há migração de dados.
++- Conversas em andamento: não são afetadas se o ponteiro do gateway for pelo canal de estado (D2). Se fosse pela doutrina, seriam reidratadas (linhas 100 a 103 de seth_gateway.py).
++- Lições de 07/11: o resumo do fluxo só pode citar as lições (ids a a o) depois que skill-processo-lessons-07-11 estiver assinada e aplicada. Antes disso, o teste C9 fica vermelho. Ou se junta a proposta, ou se espera.
++- Decisão de 07/11: entrada de registro em MEMÓRIAS.md por PR, com número na junção.
++
++## Observabilidade
++
++- CI: os testes rodam no run do commit (regra "CI é por commit" do lote).
++- Gateway (D2): hoje não há sinal de que o ponteiro foi injetado. [inferido] Pode seguir o padrão dos registradores que já existem em seth_gateway.py (linhas 1696 a 1760), mas isso é código novo e não está decidido.
++- Adoção, isto é, quem leu o ponteiro: [não medido]. A proposta não cria telemetria de leitura (lacuna L1).
++- Verificador: `python3 redesign/router/auditoria_turno.py --verificar < arquivo` já aponta caminho inexistente em texto de modelo (auditoria_turno.py, linha 1531) [lido].
++
++## Reversão
++
++- Ponteiro em AGENTS.md: nova proposta que remove a linha. Correção é entrada nova; não se reescreve histórico (Regra 4).
++- Gateway (D2): `SETH_PROCESSO_HIDRATA=0` desliga sem código, no mesmo padrão de SETH_CACHE_CONSELHO_HIDRATA (seth_gateway.py, linha 1160). Aplicar a variável exige reiniciar o serviço: ordem do Humano.
++- Seção nova em agata-fluxo: revertida por proposta. O comando destrutivo de §8 não volta: a remoção do bloco é parte do desenho.
++- Testes e CI: saem da lista na mesma proposta.
++- Arquivos: nenhum é apagado. Se for preciso tirar algo do caminho, usa-se mv para uma pasta de arquivo, com ordem do Humano.
++
++## Sucesso
++
++- Medido agora: testes C1 a C11 verdes no CI do commit; índice com 20 de 20 pastas de skill.
++- Medido na próxima rodada de lote: cada proposta passa pelo resumo do fluxo, sem violação de rm, de restauração sem ordem, de assinatura feita por modelo. [não medido] Hoje não há contagem.
++- Não é sucesso: "todo modelo recebeu o guia" sem medição de leitura (lacuna L1).
+diff --git a/redesign/nucleo-desenvolvimento/spec/decision.md b/redesign/nucleo-desenvolvimento/spec/decision.md
+new file mode 100644
+index 00000000..8e528fe6
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/spec/decision.md
+@@ -0,0 +1,42 @@
++# Decisão
++
++DECISAO: aceita
++
++Data: 07/11/2026. Decidido pelo Humano, em conversa de 07/11/2026. O time de inovação não decide (regra do time, agata-time-inovacao). A linha "DECISAO: aceita" foi escrita por um agente de implementação, por instrução do orquestrador, com as decisões do Humano; a versão anterior desta regra dizia que modelo não escreve a marca de aceite. O portão real continua a assinatura P-8 do Humano: nenhum modelo roda scripts/aprovar.sh.
++
++Registro da proposta: propostas/nucleo-desenvolvimento-07-11.md (PR de proposta, sem assinatura).
++
++## Decisões do Humano (07/11/2026)
++
++D1. Todos os modelos do Conselho recebem o ponteiro do AGENTS.md e do índice. Aceita (07/11/2026, decidido pelo Humano).
++
++D2. O ponteiro vai ao gateway, pelo canal de estado de `_injeta`, nas faixas internas (Seth, Goose e o que passa pelo gateway). A saída é SETH_PROCESSO_HIDRATA=0. Aceita (07/11/2026, decidido pelo Humano). Efeito: C11a e C11b ficam no acceptance.json.
++
++D3. Orçamento de contexto, equilibrando custo e desempenho. Aceita (07/11/2026, decidido pelo Humano): ponteiro no AGENTS.md de até 200 bytes; guia agata-fluxo de até 8 KB; linha do gateway de até 200 caracteres.
++
++D4. Dono e revisor do guia agata-fluxo, por critério de função. Aceita (07/11/2026, decidido pelo Humano).
++- Dono: agata-spec (escreve e mantém a especificação do processo).
++- Revisor: agata-revisor (somente leitura, independente de quem escreveu).
++- Justificativa: quem escreve a regra não a revisa. O dono tem a função de especificar; o revisor só lê e não grava, o que separa a escrita da conferência.
++
++D5. Uma proposta só: spec, código, testes e CI, com uma assinatura. Aceita (07/11/2026, decidido pelo Humano).
++
++D6. A faixa pública fica de fora. Aceita (07/11/2026, decidido pelo Humano). O gateway já tira o sistema e o histórico oculto nessa faixa (`_preparar_payload_publico`, que não chama `_injeta`).
++
++D7. Memórias do sistema (MEMÓRIAS.md) entram só de duas formas. Aceita (07/11/2026, decidido pelo Humano):
++(a) pelo timer do cache, que destila fatos e pendências já verificados; (b) em momentos extremamente importantes, e só com assinatura do Humano.
++Os critérios de destilação vêm da medição do sistema, não de opinião. Esta regra está escrita no guia agata-fluxo, seção "Memória do Conselho e MEMÓRIAS.md".
++
++D8. A proposta NÃO depende da PR #944. O texto dos 11 pontos de regras de lote fica dentro do próprio guia agata-fluxo, e o teste de ids (C9) confere os ids dentro desse mesmo arquivo. Aceita (07/11/2026, decidido pelo Humano). Efeito: C9 passa sem esperar a #944; a aplicação da #944 continua outro lote.
++
++D9. Pasta redesign/nucleo-desenvolvimento (P-8). Aceita (07/11/2026, decidido pelo Humano).
++
++D10. Nomes, com termos da mitologia egípcia, com respeito. Aceita (07/11/2026, decidido pelo Humano):
++- Ma'at: guia universal (ordem e verdade). É o agata-fluxo.
++- Ptah: núcleo de construção (artífice).
++- Thoth: canal da equipe, para escrita e registro. Hoje é o que a skill agata-fluxo-equipe e scripts/equipe/equipe.py fazem; esta proposta não renomeia código.
++
++## Medido nesta proposta (não é decisão)
++
++- Lacunas L1 a L6 da spec continuam abertas. A aceitação das decisões não as fecha.
++- A entrada de registro em MEMÓRIAS.md (lição i) não entra no diff desta proposta. Fica como pendência do PR de proposta.
+diff --git a/redesign/nucleo-desenvolvimento/spec/spec.md b/redesign/nucleo-desenvolvimento/spec/spec.md
+new file mode 100644
+index 00000000..b75f0fe2
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/spec/spec.md
+@@ -0,0 +1,168 @@
++# Spec: núcleo de desenvolvimento universal (transição do modo de trabalho)
++
++Status: spec da proposta nucleo-desenvolvimento-07-11. Decisão: aceita (decision.md, D1 a D10, decididas pelo Humano em 07/11/2026). Base: origin/main 83334fde, medida em 07/11/2026. Nomes (D10): Ma'at é o guia universal (agata-fluxo); Ptah é o núcleo de construção; Thoth é o canal da equipe, para escrita e registro.
++Brainstorm com as alternativas e as medições: brainstorm.md, na mesma pasta.
++Rótulos: [medido], [lido], [inferido], [não medido].
++
++## Escopo
++
++Entra:
++- O fluxo universal que já existe, agata-fluxo, passa a ser o guia curto: ganha uma seção de regras de lote (resumo) e perde os dois trechos que contradizem o time (§6 e §8).
++- Índice de skills com uma linha para cada pasta de skill com SKILL.md.
++- AGENTS.md com um ponteiro de uma linha para agata-fluxo.
++- Por decisão D2 (aceita): uma linha de ponteiro no bloco de estado da Seth, nas faixas internas (faixa pública fica de fora, D6).
++- Testes que travam esses pontos, sem navegador e sem provedor real.
++
++Não entra:
++- Mudança em REGRAS.md, PROJETO.md ou PROTOCOLOS.md.
++- Código de produto novo, serviço novo ou módulo novo de guia.
++- Mudança em scripts/equipe/equipe.py, no formato do cache ou nos dados do cache.
++- Mudança em .claude/agents/ (formato do Claude Code).
++- A aplicação do PR #944 (lições de 07/11), que é outro lote.
++- Qualquer pedido de carregamento de skill pela Seth: não medido, fica como lacuna L5.
++
++Universal e específico de modelo:
++- Universal: regras, papéis, fluxo de proposta, lições, uso do cache e do verificador. A regra é a mesma para todos os modelos.
++- Específico de modelo: nada na regra. A diferença de capacidade, como subagentes do Claude Code ou ferramentas da Seth, é da sessão. A regra já prevê o caso: sem delegação, o modelo faz a operação com a mesma disciplina (agata-processo-lote, seção "Uso de agentes").
++
++## Jornadas críticas
++
++- J1. Modelo novo abre sessão no Agata (Codex, Gemini, Goose, Claude Code ou outro). Lê AGENTS.md, segue o ponteiro para agata-fluxo, mede o estado (§0), lê o cache com `ler --n 20` e só então age.
++- J2. Seth, pelo gateway, numa faixa interna, pede mudança no sistema. Recebe a doutrina fixa, o estado e, se D2 for aprovada, a linha de PROCESSO com o caminho do fluxo. Ler a skill é ação dela; não medido se ela lê (L5).
++- J3. Orquestrador delega operação. O agente recebe o caminho da worktree e a lista de arquivos que pode editar. O orquestrador confere código e teste, não o relatório.
++- J4. Proposta P-8. Worktree a partir de origin/main, CI local com "CI LOCAL: TUDO OK", .diff conferido com grep, PR só com .diff e registro, Humano assina. A aplicação continua no agata-processo-lote.
++- J5. Decisão do Humano dita em conversa. Vira registro antes de virar código: entrada de cache `decisao` provisória, e entrada em MEMÓRIAS por PR.
++- J6. Faixa pública. Nada do processo sai para fora. Negativo: o teste C11a cobre.
++
++## Contrato
++
++O que um modelo do Conselho recebe ao começar:
++- C-a. AGENTS.md, com uma linha de ponteiro para `.agents/skills/agata-fluxo/SKILL.md`. Limite: até 200 bytes acrescentados.
++- C-b. agata-fluxo/SKILL.md, com a seção "Regras de lote (resumo)", de até 12 linhas, cada uma com a fonte entre parênteses (lição do PR #944 ou passo do lote), e um link para `.agents/skills/agata-processo-lote/SKILL.md`, que é a skill completa.
++- C-c. .agents/skills/INDICE.md, com uma linha para cada skill de processo, inclusive agata-processo-lote e agata-time-inovacao.
++- C-d. Só se D2: uma linha "PROCESSO:" no bloco de estado da Seth, em faixas internas, com o caminho do fluxo. Limite proposto: 200 caracteres.
++
++Texto da seção de resumo, aceito nesta proposta (o texto que vale está em .agents/skills/agata-fluxo/SKILL.md; o rascunho abaixo ficou como registro do que se decidiu):
++
++    ## Regras de lote (resumo; completo em agata-processo-lote)
++    - Um lote, uma proposta, uma assinatura. Só o Humano assina com scripts/aprovar.sh. (regra 1 do lote)
++    - Trabalho em worktree a partir de origin/main, em /home/orusoua/agata/.claude/worktrees/. Não no checkout vivo, não em /tmp. (lição f)
++    - Antes de propor: bash scripts/ci_sdd_local.sh, com "CI LOCAL: TUDO OK". (passo 3 do lote)
++    - PR de proposta traz só o .diff e o registro. Código entra só dentro do .diff, conferido com grep '^diff --git'. (passo 4 e 5 do lote)
++    - Não use rm, nem -f nem -r. Para tirar algo do caminho, use mv. Remover só com ordem do Humano, por nome. (lição e)
++    - Não restaure nem descarte alteração sem ordem explícita do Humano. (regra 5 do lote)
++    - Delegue operação a agentes quando a sessão permitir; sem isso, faça a operação com a mesma disciplina. Confira o resultado; não aceite o relatório. (uso de agentes)
++    - Memória comum: ao começar, `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, `anotar --autor "<modelo real>" --tipo fato|pendencia|nota "<texto>"`. (memória comum, AGENTS.md)
++    - Decisão do Humano que só existe em conversa vira proposta ou registro antes de virar código. No cache ela é `decisao` provisória, e o cache não é canon. (lição i)
++    - Perguntas ao Humano vão numeradas, na ordem da mensagem. Número sai com rótulo: medido, inferido ou não medido. (lições l e m)
++    - Antes de entregar afirmação verificável: `python3 redesign/router/auditoria_turno.py --verificar < arquivo`.
++
++Como o modelo registra no cache (contrato de escrita):
++- Fato: `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato "<texto>"`.
++- Pendência: o mesmo comando com `--tipo pendencia`.
++- Decisão do Humano dita em conversa: `--tipo decisao`, provisória. Registro definitivo só em MEMÓRIAS.md, por PR.
++- Recusa: segredo na nota é recusado, com saída 2 (cache_conselho.py, CLI). Não se repete o valor do segredo na nota.
++- Autor: o modelo real, medido, não de cabeça.
++- Entrada e saída são de texto curto. Não se cola relatório inteiro no cache.
++
++Saída de cada resposta (voz comum do AGENTS.md): resultado primeiro, depois evidência ou "não medido", depois o próximo passo.
++
++## Critérios de aceite
++
++Cada critério tem um teste. Os testes estão em redesign/nucleo-desenvolvimento/tests/ (lista em "Código"). O estado de cada critério na proposta está no registro propostas/nucleo-desenvolvimento-07-11.md. Os nomes estão em acceptance.json.
++
++- [ ] C1. AGENTS.md aponta para o fluxo universal, e o caminho existe. Teste: `redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_agents_aponta_para_o_fluxo_universal`. Hoje: falha, porque AGENTS.md não cita agata-fluxo [medido].
++- [ ] C2. Há uma linha no índice para cada pasta de .agents/skills com SKILL.md. Teste: `redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_indice_lista_toda_pasta_de_skill`. Hoje: falha, com 5 pastas faltando [medido].
++- [ ] C3. O resumo de regras de lote do fluxo tem os 11 pontos (assinatura, worktree, CI local, PR de proposta, mv no lugar de rm, restauração, delegação, cache, decisão fora de arquivo, perguntas numeradas, verificador). Teste: `redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_resume_as_regras_de_lote`. Hoje: falha, porque o fluxo não tem essas regras [medido]. O teste prova presença de cada ponto, não que o modelo o cumpre (lacuna L6).
++- [ ] C4. Nenhum bloco de comando do fluxo remove ou restaura sem ordem: sem rm, sem `checkout --`, sem `reset --hard`, sem `clean -f`. Teste: `redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_sem_restauracao_ou_remocao_sem_ordem`. Hoje: falha, pelo §8 [lido].
++- [ ] C5. O §6 do fluxo não afirma que a Seth carrega a skill sem medição. Teste: `redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_nao_afirma_o_que_a_seth_nao_mostrou`. Hoje: falha, pela frase "A Seth carrega esta skill pela hidratação" [lido].
++- [ ] C6. Os caminhos relativos citados no fluxo, na linha do AGENTS.md e no índice existem. Caminhos absolutos e com placeholder (`<nome>`) ficam fora. Teste: `redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_caminhos_citados_existem`. Hoje: a medir na implementação (não medido).
++- [ ] C7. Nas linhas acrescentadas por este lote, nenhum valor de segredo (pela régua de redesign/router/sanitizar.py, função varrer) e nenhum caminho de memória restrita. A lista de caminhos fica no código do teste, não neste documento. Teste: `redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py::test_linhas_novas_sem_segredo_nem_memoria_restrita`. Hoje: não se aplica ainda (nada foi acrescentado).
++- [ ] C8. As skills de processo (agata-fluxo, agata-processo-lote e agata-time-inovacao) passam no lint de skill, sem problema. Teste: `redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_skills_de_processo_passam_no_lint`. Hoje: o formato de saída de redesign/painel_operacional/qualidade_llm.py não foi medido (não medido).
++- [ ] C9. Cada id de lição citado no resumo existe como item na skill de processo (ids a a o). Teste: `redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_ids_do_resumo_existem_na_skill`. Hoje: depende da aplicação do PR #944 [medido: os ids existem só na proposta].
++- [ ] C10. O comando de cache documentado no fluxo grava um fato e uma pendência, e o `ler` mostra os dois. Usa uma pasta temporária, apontada por AGATA_CACHE_CONSELHO. Teste: `redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py::test_cache_fato_e_pendencia_pelo_comando_documentado`. Hoje: falha, porque o fluxo não tem o comando [medido].
++- [ ] C11a. (Condicional a D2.) O ponteiro de estado aparece para uma conversa de faixa interna e não aparece para a faixa pública. Teste: `redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_so_nas_faixas_internas`. O teste isola `_estado` (seth_gateway.py, linha 292 roda um subprocess). Hoje: não existe.
++- [ ] C11b. (Condicional a D2.) O ponteiro é desligado por SETH_PROCESSO_HIDRATA=0, e o MARCADOR não muda com a linha acrescentada. Teste: `redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_desligavel_por_ambiente`. Hoje: não existe.
++
++Lacunas, sem teste automatizado:
++- L1. Adoção: quem leu o ponteiro. [não medido] Não há telemetria de leitura.
++- L2. Qualidade do texto do resumo (se a regra está certa, não só se está escrita). Fica para a revisão de agente (redesign/review_mesh/mesh.py) e para o Humano.
++- L3. Quais CLIs carregam AGENTS.md por padrão. [não medido]
++- L4. Índice derivado (ferramentas/indice.json) sem divergência. Não há função de leitura que compare sem gravar. [não medido]
++- L5. Se a Seth lê skill por alguma ferramenta. [não medido]; o código de injeção lido não carrega skill.
++- L6. Que um modelo cumpre a regra. Não é testável por teste; mede-se por auditoria de rodadas de lote.
++
++## Desenho e alternativas
++
++Escolhida: D (reaproveitar). agata-fluxo já é o fluxo declarado para qualquer LLM e já está no índice. Mudam texto e índice, e os testes são a única parte nova.
++
++Alternativas descartadas (motivo resumido; detalhe no brainstorm.md):
++- A. Texto inteiro em AGENTS.md. Descartada: 7193 bytes já carregados por toda sessão, mais 22305 bytes do processo de lote; o gateway não lê AGENTS.md [medido].
++- B. Skill-guia nova com cache como canal. Descartada: um terceiro fluxo ao lado do universal; o cache é registro de fato e pendência, com janela de 20 entradas, e o gateway injeta 3 entradas de até 160 caracteres [lido].
++- C. Módulo de código com função de guia. Descartada: código novo, com P-8 e testes, para entregar um texto que a leitura de arquivo já entrega; não resolve a lacuna de conteúdo.
++
++Desenho do ponteiro no gateway (só se D2): uma função que devolve a linha "PROCESSO:" e uma chamada dela em `_injeta`, depois do bloco de cache do Conselho (seth_gateway.py, linha 1160), com a mesma forma que os outros blocos de estado. A linha é desligada por SETH_PROCESSO_HIDRATA=0. Não entra em `_DOUTRINA_FIXA`, para não mudar MARCADOR (linha 255).
++
++## Implementação e testes
++
++Não há código nesta etapa. Ordem proposta, para quando as decisões estiverem tomadas:
++
++1. Decisões D1 a D10 (decision.md) tomadas pelo Humano.
++2. Dispensado por D8 (aceita): a proposta não espera a PR #944. O teste C9 confere os ids dentro do próprio guia.
++3. Worktree: `git fetch -q origin && git worktree add -b proposta/nucleo-desenvolvimento-07-11 /home/orusoua/agata/.claude/worktrees/nucleo-desenvolvimento-07-11 origin/main`.
++4. Escrever os testes primeiro (C1 a C11), vendo-os vermelhos. Depois o texto, até ficarem verdes.
++5. Copiar esta pasta para `redesign/nucleo-desenvolvimento/spec/` na worktree, e depois o caminho do spec entra no Código, com crase só para arquivos que já existem.
++6. Lista de testes igual em scripts/ci_sdd_local.sh e em .github/workflows/sdd.yml (armadilha da lista de pytest).
++7. CI local com "CI LOCAL: TUDO OK". Gates: `python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec` e `python3 redesign/sdd_flow/anchor.py . redesign/nucleo-desenvolvimento`.
++8. Revisão de agente pelo caminho oficial (`redesign/review_mesh/mesh.py prepare` e `consolidate`). Revisão avulsa não conta (armadilha do lote).
++9. Um único .diff, com spec, código, testes, CI e o texto do fluxo, conferido com `grep '^diff --git'`. Registro (.md e entrada de MEMÓRIAS) no PR de proposta, sem assinatura.
++
++Arquivos tocados nesta proposta (o diff tem só estes caminhos; o registro está em propostas/nucleo-desenvolvimento-07-11.md):
++- `AGENTS.md`: uma linha de ponteiro. Protegido (P-8).
++- `.agents/skills/agata-fluxo/SKILL.md`: seção de resumo, §6 e §8. Protegido (P-8, `.agents/*` em scripts/perimetro/p08_quarentena.sh, linha 134).
++- `.agents/skills/INDICE.md`: cinco linhas. Protegido (P-8).
++- `ferramentas/indice.json` e `ferramentas/INDICE.md`: gerados por `reindexar`, só se alguma descrição de skill mudar.
++- `redesign/nucleo-desenvolvimento/spec/` (quatro arquivos). Protegido (redesign/*).
++- `redesign/nucleo-desenvolvimento/tests/` (testes C1 a C11). Protegido (redesign/*).
++- `scripts/ci_sdd_local.sh`: uma pasta de teste na lista. Protegido (scripts/*).
++- `.github/workflows/sdd.yml`: a mesma pasta na linha de pytest. Fora da lista P-8 [não verificado].
++- `redesign/router/seth_gateway.py`: só se D2 for aprovada. Protegido (redesign/*).
++- `propostas/nucleo-desenvolvimento-07-11.diff` e `.md`: registro da proposta.
++- `MEMÓRIAS.md`: entrada de registro da decisão de 07/11 (lição i). Registro, sem quarentena.
++
++Não tocados: redesign/router/cache_conselho.py, redesign/router/auditoria_turno.py, redesign/router/sanitizar.py, scripts/equipe/equipe.py, .claude/agents/*, .agents/skills/agata-processo-lote/SKILL.md (exceto pelo PR #944, que é outro lote), .agents/skills/agata-time-inovacao/SKILL.md, PROMPT_CARREGAMENTO.md, REGRAS.md, PROJETO.md.
++
++## Migração e reversão
++
++Migração:
++- Sem migração de dados. O cache, o estado e as conversas em andamento não mudam.
++- Conversas em andamento da Seth: não são reidratadas se o ponteiro for pelo canal de estado (D2). Pela doutrina, seriam (MARCADOR muda com o hash de `_DOUTRINA_FIXA`, linha 255).
++- As lições de 07/11 entram no resumo sem depender da PR #944 (D8, aceita): o guia agata-fluxo traz os ids que cita (e, f, i, l, m), e o teste C9 confere os ids dentro desse mesmo arquivo. A aplicação da #944 continua outro lote.
++- A decisão de 07/11 vira entrada de MEMÓRIAS por PR (lição i). O número da entrada só se fixa na junção.
++
++Reversão:
++- Ponteiro em AGENTS.md: proposta nova que remove a linha. Sem reescrever histórico (Regra 4).
++- Ponteiro no gateway (D2): `SETH_PROCESSO_HIDRATA=0` desliga sem código. Aplicar a variável pede reinício do serviço: ordem do Humano.
++- Seção nova e correções no fluxo: revertidas por proposta. O bloco destrutivo de §8 não volta.
++- Testes e lista de CI: saem na mesma proposta.
++- Nenhum arquivo é apagado. Se for preciso tirar algo do caminho, usa-se mv para uma pasta de arquivo, com ordem do Humano, por nome.
++
++## Riscos e dependências
++
++- R1. Governança: AGENTS.md, .agents/* e redesign/* são P-8. O Humano assina. Nenhum modelo aplica.
++- R2. Dependência: PR #944 (lições). Resolvida por D8 (aceita): a proposta não depende da #944; os ids citados existem dentro do próprio guia.
++- R3. Dono do arquivo: .agents/skills/INDICE.md dá agata-fluxo como de doutrina do Codex. A mudança precisa de revisão cruzada (agata-fluxo §0) e de decisão do Humano (D4).
++- R4. Duas listas de pytest (scripts/ci_sdd_local.sh e sdd.yml) precisam ser iguais. Já houve divergência (lote de 06/11).
++- R5. Contexto: o resumo entra no fluxo, que é carregado sob demanda. O ponteiro do AGENTS.md entra em toda sessão. Por isso o limite de 200 bytes (D3).
++- R6. Gateway (D2): mudar `_DOUTRINA_FIXA` reidrata conversas em andamento (comentário acima da linha 103). Por isso o canal de estado, e não a doutrina.
++- R7. Faixa pública: o processo não pode sair para provedor externo. O gateway já tira o sistema nessa faixa (linhas 567 a 580 e 1294 a 1295). O teste C11a trava isso.
++- R8. Nomes (D10, aceita): Ma'at (guia universal, ordem e verdade), Ptah (núcleo de construção, artífice) e Thoth (canal da equipe, escrita e registro). Thoth é o nome do canal que hoje é agata-fluxo-equipe e scripts/equipe/equipe.py; esta proposta não renomeia código. A linha "universalista" de MEMÓRIAS.md, linha 363, é a origem do pedido; não é a fonte dos nomes.
++- R9. Cota: a proposta não consome cota de provedor. Consumo de cota da Seth: não medido, porque o ponteiro é texto.
++- R10. Gate de spec: decision.md está em "DECISAO: aceita" (D1 a D10, 07/11/2026, decididas pelo Humano). `spec_gate.py check` passa; a regra do gate está em redesign/sdd_flow/spec_gate.py, linhas 27 e 28.
++
++## Código
++
++Dono de código deste componente (caminhos relativos a redesign/nucleo-desenvolvimento/, lidos pela âncora):
++- `tests/`: a pasta inteira. Dona dos testes C1 a C11 e dos testes de decisões (test_entrada_universal.py, test_fluxo_regras.py, test_texto_seguro.py, test_cache_documentado.py, test_ponteiro_gateway.py, test_decisoes.py). Os nomes de arquivo estão sem crase de propósito: a âncora (redesign/sdd_flow/anchor.py) trata cada crase como arquivo que precisa existir na pasta do componente.
++
++Fora da pasta do componente, nesta proposta, sem crase (a âncora não os confere): redesign/router/seth_gateway.py (ponteiro PROCESSO, D2), scripts/ci_sdd_local.sh e .github/workflows/sdd.yml (lista de testes, âncora e gate), AGENTS.md e .agents/skills/ (texto do guia e do índice).
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py b/redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py
+new file mode 100644
+index 00000000..7f83b904
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py
+@@ -0,0 +1,43 @@
++"""C10: o comando de cache documentado no guia grava um fato e uma pendência, e o `ler` mostra os dois.
++
++O teste extrai o comando do próprio guia (não copia), troca o autor e o texto, e roda numa pasta temporária,
++apontada por AGATA_CACHE_CONSELHO. Não toca o cache real do usuário.
++"""
++import os
++import re
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[3]
++FLUXO = RAIZ / ".agents/skills/agata-fluxo/SKILL.md"
++MODELO = re.compile(r'python3 (redesign/router/cache_conselho\.py) anotar --autor "<modelo real>" --tipo (fato|pendencia) "<texto>"')
++
++
++class CacheDocumentadoTests(unittest.TestCase):
++    def test_cache_fato_e_pendencia_pelo_comando_documentado(self):
++        texto = FLUXO.read_text(encoding="utf-8")
++        comandos = {m.group(2): m.group(1) for m in MODELO.finditer(texto)}
++        self.assertEqual(set(comandos), {"fato", "pendencia"},
++                         "o guia precisa documentar o comando de anotar com --tipo fato e --tipo pendencia")
++        with tempfile.TemporaryDirectory() as pasta:
++            env = dict(os.environ)
++            env["AGATA_CACHE_CONSELHO"] = str(Path(pasta) / "cache.jsonl")
++            env["AGATA_P20_LISTA"] = str(Path(pasta) / "sem-lista.txt")  # lista privada não é lida aqui
++            notas = {"fato": "teste c10 fato", "pendencia": "teste c10 pendencia"}
++            for tipo, nota in notas.items():
++                r = subprocess.run([sys.executable, comandos[tipo], "anotar", "--autor", "teste-c10",
++                                    "--tipo", tipo, nota], cwd=RAIZ, env=env, capture_output=True, text=True)
++                self.assertEqual(r.returncode, 0, f"anotar --tipo {tipo} falhou: {r.stderr.strip()}")
++            r = subprocess.run([sys.executable, "redesign/router/cache_conselho.py", "ler", "--n", "20"],
++                               cwd=RAIZ, env=env, capture_output=True, text=True)
++            self.assertEqual(r.returncode, 0, f"ler falhou: {r.stderr.strip()}")
++            for tipo, nota in notas.items():
++                self.assertIn(nota, r.stdout, f"o ler não mostrou a entrada de {tipo}")
++                self.assertIn(f"teste-c10 · {tipo}", r.stdout, f"o ler não mostrou o tipo {tipo}")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_decisoes.py b/redesign/nucleo-desenvolvimento/tests/test_decisoes.py
+new file mode 100644
+index 00000000..003fa030
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_decisoes.py
+@@ -0,0 +1,57 @@
++"""Decisões do Humano de 07/11/2026 que a proposta registra (D3, D4, D7, D10) e o estado da decisão.
++
++Não é critério da spec (C1 a C11); são as decisões escritas no guia e na spec, para que a proposta não as perca.
++"""
++import re
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[3]
++AGENTS = RAIZ / "AGENTS.md"
++FLUXO = RAIZ / ".agents/skills/agata-fluxo/SKILL.md"
++COMPONENTE = RAIZ / "redesign/nucleo-desenvolvimento"
++DECISION = COMPONENTE / "spec/decision.md"
++SPEC = COMPONENTE / "spec/spec.md"
++PONTEIRO = "agata-fluxo/SKILL.md"
++
++
++class DecisoesTests(unittest.TestCase):
++    def test_decision_aceita(self):
++        # gate de spec: "DECISAO: aceita" (redesign/sdd_flow/spec_gate.py)
++        self.assertIn("DECISAO: aceita", DECISION.read_text(encoding="utf-8"))
++
++    def test_d3_ponteiro_do_agents_ate_200_bytes(self):
++        linha = [l for l in AGENTS.read_text(encoding="utf-8").splitlines() if PONTEIRO in l]
++        self.assertEqual(len(linha), 1, "AGENTS.md precisa de exatamente uma linha de ponteiro")
++        self.assertLessEqual(len(linha[0].encode("utf-8")), 200,
++                             f"ponteiro do AGENTS.md com {len(linha[0].encode('utf-8'))} bytes")
++
++    def test_d3_guia_ate_8_kib(self):
++        tamanho = len(FLUXO.read_bytes())
++        self.assertLessEqual(tamanho, 8 * 1024, f"agata-fluxo com {tamanho} bytes (limite 8 KiB)")
++
++    def test_d4_dono_e_revisor_do_guia(self):
++        texto = FLUXO.read_text(encoding="utf-8")
++        self.assertRegex(texto, r"Dono deste guia: agata-spec")
++        self.assertRegex(texto, r"Revisor: agata-revisor")
++        self.assertIn("Dono e revisor", DECISION.read_text(encoding="utf-8"))
++        self.assertTrue((RAIZ / ".claude/agents/agata-spec.md").is_file(), "agente agata-spec não existe")
++        self.assertTrue((RAIZ / ".claude/agents/agata-revisor.md").is_file(), "agente agata-revisor não existe")
++
++    def test_d7_regra_de_memorias_no_guia_e_no_registro(self):
++        texto = FLUXO.read_text(encoding="utf-8")
++        for trecho in ("timer do cache", "assinatura do Humano", "medição do sistema"):
++            self.assertIn(trecho, texto, f"D7: falta '{trecho}' no guia")
++        self.assertIn("D7", DECISION.read_text(encoding="utf-8"))
++        self.assertIn("timer do cache", DECISION.read_text(encoding="utf-8"))
++
++    def test_d10_nomes_no_guia_e_na_spec(self):
++        for arq in (FLUXO, SPEC):
++            texto = arq.read_text(encoding="utf-8")
++            for nome in ("Ma'at", "Ptah", "Thoth"):
++                self.assertIn(nome, texto, f"D10: falta o nome {nome} em {arq.name}")
++        self.assertTrue(re.search(r"Thoth.*escrita e registro|escrita e registro.*Thoth", SPEC.read_text(encoding="utf-8"), re.S))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py b/redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py
+new file mode 100644
+index 00000000..f856d684
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py
+@@ -0,0 +1,75 @@
++"""C1, C2 e C6: a entrada universal aponta para o guia, o índice lista as skills e os caminhos citados existem.
++
++Roda em checkout limpo (CI): não lê arquivo fora do repositório e não depende de arquivo local não versionado.
++"""
++import re
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[3]
++AGENTS = RAIZ / "AGENTS.md"
++FLUXO = RAIZ / ".agents/skills/agata-fluxo/SKILL.md"
++INDICE = RAIZ / ".agents/skills/INDICE.md"
++PONTEIRO = ".agents/skills/agata-fluxo/SKILL.md"
++
++
++def pastas_com_skill():
++    """Nomes das pastas de .agents/skills que têm SKILL.md. Lê o disco, sem git: vale também num export.
++    As cópias de terceiros que não estão no git aparecem na seção "Skills de terceiros" do índice."""
++    return sorted(p.parent.name for p in (RAIZ / ".agents/skills").glob("*/SKILL.md"))
++
++
++def secao_terceiros(texto):
++    m = re.search(r"^## Skills de terceiros.*$", texto, re.M)
++    if not m:
++        return ""
++    resto = texto[m.end():]
++    prox = re.search(r"^## ", resto, re.M)
++    return resto[: prox.start()] if prox else resto
++
++
++def caminhos_citados(texto):
++    """Mesma régua de qualquer skill: token entre crases, sem espaço, com barra, com extensão ou barra final.
++    Caminho absoluto, URL, placeholder (<nome>, *, {}, $, ~, :) e '..' ficam fora."""
++    texto = re.sub(r"```.*?```", "", texto, flags=re.S)
++    achados = re.findall(r"`([^`\s]+)`", texto)
++    return sorted({c for c in achados
++                   if "/" in c and not re.search(r"[<>*{}$:~]|^https?|^\.\.|^/", c)
++                   and re.search(r"\.\w+$|/$", c)})
++
++
++class EntradaUniversalTests(unittest.TestCase):
++    def test_agents_aponta_para_o_fluxo_universal(self):
++        # C1: AGENTS.md cita o guia e o caminho existe.
++        linhas = [l for l in AGENTS.read_text(encoding="utf-8").splitlines() if PONTEIRO in l]
++        self.assertTrue(linhas, f"AGENTS.md não cita {PONTEIRO}")
++        self.assertTrue((RAIZ / PONTEIRO).is_file(), f"o caminho {PONTEIRO} não existe")
++
++    def test_indice_lista_toda_pasta_de_skill(self):
++        # C2: uma linha de tabela para cada pasta com SKILL.md (cópias de terceiros ficam na seção própria).
++        pastas = pastas_com_skill()
++        self.assertGreater(len(pastas), 0, "nenhuma pasta com SKILL.md em .agents/skills")
++        texto = INDICE.read_text(encoding="utf-8")
++        faltam = [p for p in pastas
++                  if not re.search(rf"^\| `{re.escape(p)}`", texto, re.M)
++                  and f"`{p}`" not in secao_terceiros(texto)]
++        self.assertFalse(faltam, f"INDICE.md sem linha para: {faltam}")
++
++    def test_caminhos_citados_existem(self):
++        # C6: caminhos relativos do guia, da linha do AGENTS.md e do índice existem.
++        linha_agents = [l for l in AGENTS.read_text(encoding="utf-8").splitlines() if PONTEIRO in l]
++        fontes = [
++            ("guia", FLUXO.read_text(encoding="utf-8")),
++            ("AGENTS.md (linha do ponteiro)", "\n".join(linha_agents)),
++            ("INDICE.md", INDICE.read_text(encoding="utf-8")),
++        ]
++        faltam = []
++        for nome, texto in fontes:
++            for c in caminhos_citados(texto):
++                if not (RAIZ / c).exists():
++                    faltam.append(f"{nome}: {c}")
++        self.assertFalse(faltam, "caminhos citados que não existem: " + "; ".join(faltam))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py b/redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py
+new file mode 100644
+index 00000000..09a2efa5
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py
+@@ -0,0 +1,102 @@
++"""C3, C4, C5, C8 e C9: o conteúdo do guia agata-fluxo (Ma'at).
++
++C3 prova presença de cada um dos 11 pontos, não que o modelo os cumpre (lacuna L6).
++C9 confere os ids de lição citados contra os ids definidos no próprio guia (decisão D8).
++"""
++import json
++import re
++import subprocess
++import sys
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[3]
++FLUXO = RAIZ / ".agents/skills/agata-fluxo/SKILL.md"
++SKILLS_DE_PROCESSO = ("agata-fluxo", "agata-processo-lote", "agata-time-inovacao")
++
++PONTOS_DE_LOTE = {
++    "assinatura": r"assina",
++    "worktree": r"worktree",
++    "CI local": r"ci_sdd_local|CI LOCAL",
++    "PR de proposta": r"PR de proposta",
++    "mv no lugar de rm": r"\bmv\b",
++    "rm proibido": r"\brm\b",
++    "restauração": r"restaur",
++    "delegação": r"delega|delegu",
++    "cache": r"cache_conselho\.py ler",
++    "decisão fora de arquivo": r"decis.*(registro|proposta)",
++    "perguntas numeradas": r"numer",
++    "verificador": r"auditoria_turno\.py --verificar",
++}
++
++
++def secao(texto, inicio):
++    """Texto de uma seção de nível 2, do título que começa com `inicio` até o próximo '## '."""
++    m = re.search(rf"^## {re.escape(inicio)}.*$", texto, re.M)
++    if not m:
++        return None
++    resto = texto[m.end():]
++    prox = re.search(r"^## ", resto, re.M)
++    return resto[: prox.start()] if prox else resto
++
++
++def blocos_de_codigo(texto):
++    return re.findall(r"```[a-z]*\n(.*?)```", texto, re.S)
++
++
++class FluxoRegrasTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.texto = FLUXO.read_text(encoding="utf-8")
++
++    def test_fluxo_resume_as_regras_de_lote(self):
++        # C3: o resumo tem 11 pontos e cada ponto aparece.
++        resumo = secao(self.texto, "Regras de lote (resumo")
++        self.assertIsNotNone(resumo, "o guia não tem a seção 'Regras de lote (resumo'")
++        pontos = [l for l in resumo.splitlines() if l.startswith("- ")]
++        self.assertEqual(len(pontos), 11, f"o resumo deveria ter 11 pontos, tem {len(pontos)}")
++        faltam = [nome for nome, rx in PONTOS_DE_LOTE.items() if not re.search(rx, resumo, re.I)]
++        self.assertFalse(faltam, f"pontos de lote ausentes no resumo: {faltam}")
++
++    def test_fluxo_sem_restauracao_ou_remocao_sem_ordem(self):
++        # C4: nenhum bloco de comando remove ou restaura sem ordem.
++        blocos = blocos_de_codigo(self.texto)
++        self.assertGreaterEqual(len(blocos), 2, "o guia deveria ter os blocos de comando da seção 8")
++        proibidos = [r"\brm\b", r"checkout\s+--", r"reset\s+--hard", r"clean\s+-\w*f"]
++        achados = [(rx, b.strip().splitlines()[0]) for b in blocos for rx in proibidos if re.search(rx, b)]
++        self.assertFalse(achados, f"bloco de comando com remoção ou restauração sem ordem: {achados}")
++
++    def test_fluxo_nao_afirma_o_que_a_seth_nao_mostrou(self):
++        # C5: a seção 6 não afirma que a Seth carrega a skill; diz o que foi medido e o que não foi.
++        sec6 = secao(self.texto, "6. Seth")
++        self.assertIsNotNone(sec6, "o guia não tem a seção '6. Seth'")
++        self.assertFalse(re.search(r"carrega\s+(esta|a)\s+skill|pela hidrata", sec6),
++                         "a seção 6 ainda afirma que a Seth carrega a skill pela hidratação")
++        self.assertIn("não medido", sec6, "a seção 6 precisa marcar o que não foi medido")
++        self.assertIn("SETH_SKILLS_SUGERE", sec6, "a seção 6 deve citar o que o código mostra (sugestão desligada)")
++
++    def test_skills_de_processo_passam_no_lint(self):
++        # C8: o lint de skill (qualidade_llm.py) não aponta problema nas skills de processo.
++        saida = subprocess.run([sys.executable, "-I", "redesign/painel_operacional/qualidade_llm.py"],
++                               cwd=RAIZ, capture_output=True, text=True)
++        self.assertEqual(saida.returncode, 0, f"lint falhou: {saida.stderr.strip()[-300:]}")
++        skills = {s["skill"]: s for s in json.loads(saida.stdout)["skills"]}
++        for nome in SKILLS_DE_PROCESSO:
++            self.assertIn(nome, skills, f"o lint não viu a skill {nome}")
++            self.assertEqual(skills[nome]["problemas"], [], f"{nome} tem problema no lint")
++
++    def test_ids_do_resumo_existem_na_skill(self):
++        # C9: cada id de lição citado no resumo está definido no próprio guia (D8, aceita).
++        resumo = secao(self.texto, "Regras de lote (resumo")
++        self.assertIsNotNone(resumo, "o guia não tem a seção 'Regras de lote (resumo'")
++        citados = set()
++        for m in re.finditer(r"lições? ([a-z])(?: e ([a-z]))?\b", resumo):
++            citados.update(g for g in m.groups() if g)
++        self.assertTrue(citados, "o resumo não cita nenhuma lição")
++        definidos = set(re.findall(r"^- \*\*([a-z])\.\*\*", secao(self.texto, "Lições citadas") or "", re.M))
++        faltam = sorted(citados - definidos)
++        self.assertFalse(faltam, f"ids citados no resumo sem item na skill: {faltam}")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py b/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py
+new file mode 100644
+index 00000000..250846b4
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py
+@@ -0,0 +1,82 @@
++"""C11a e C11b (condicionais à decisão D2, aceita): o ponteiro PROCESSO no gateway.
++
++C11a: o ponteiro aparece numa conversa de faixa interna e não aparece na faixa pública.
++C11b: SETH_PROCESSO_HIDRATA=0 desliga o ponteiro, e o MARCADOR da doutrina não muda.
++
++Isola o estado (`_estado`, que roda um subprocess) e o cache do Conselho (que lê o cache real).
++"""
++import importlib
++import json
++import os
++import sys
++import unittest
++from pathlib import Path
++from unittest import mock
++
++RAIZ = Path(__file__).resolve().parents[3]
++sys.path.insert(0, str(RAIZ / "redesign" / "router"))
++
++# MARCADOR medido em origin/main 83334fde: <!-- SETH:HIDRATADO:97773826 --> (hash de _DOUTRINA_FIXA, 10734 bytes)
++MARCADOR_BASE = "<!-- SETH:HIDRATADO:97773826 -->"
++PREFIXO = "PROCESSO:"
++PAYLOAD = {"model": "seth-teste", "messages": [{"role": "user", "content": "oi"}]}
++
++
++class PonteiroGatewayTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        try:
++            cls.g = importlib.import_module("seth_gateway")
++            cls.cc = importlib.import_module("cache_conselho")
++        except Exception as e:  # noqa: BLE001
++            raise AssertionError(f"seth_gateway não importa: {e!r}")
++
++    def injetar(self, env_extra=None, remover=()):
++        """Chama _injeta com estado fixo e sem cache real; devolve o texto da mensagem de sistema."""
++        g = self.g
++        env = {k: v for k, v in os.environ.items() if k not in remover}
++        if env_extra:
++            env.update(env_extra)
++        with mock.patch.dict(os.environ, env, clear=True), \
++                mock.patch.object(g, "_estado", return_value="HEAD: teste (medido no teste)"), \
++                mock.patch.object(g, "MODO", "compacto"), \
++                mock.patch.object(g.auditoria_turno, "linha_estado", return_value=""), \
++                mock.patch.object(self.cc, "resumo_hidratacao", return_value=""):
++            out = g._injeta(json.loads(json.dumps(PAYLOAD)))
++        return out["messages"][0]["content"]
++
++    def test_ponteiro_so_nas_faixas_internas(self):
++        # C11a: faixa interna recebe o ponteiro (via _injeta).
++        self.assertTrue(hasattr(self.g, "_LINHA_PROCESSO"),
++                        "seth_gateway não tem _LINHA_PROCESSO: o ponteiro PROCESSO ainda não foi implementado")
++        interna = self.injetar(remover=("SETH_PROCESSO_HIDRATA",))
++        self.assertIn(PREFIXO, interna, "a faixa interna não recebeu a linha PROCESSO:")
++        self.assertIn(self.g._LINHA_PROCESSO, interna)
++        # faixa pública: o caminho dela é _preparar_payload_publico, que não chama _injeta
++        publica = self.g._preparar_payload_publico(json.loads(json.dumps(PAYLOAD)))
++        texto_publico = json.dumps(publica, ensure_ascii=False)
++        self.assertNotIn(PREFIXO, texto_publico, "a faixa pública recebeu a linha PROCESSO:")
++        self.assertNotIn(self.g._LINHA_PROCESSO, texto_publico)
++        self.assertNotIn(PREFIXO, self.g._DOUTRINA_PUBLICA, "a doutrina pública não pode carregar o ponteiro")
++
++    def test_ponteiro_desligavel_por_ambiente(self):
++        # C11b: SETH_PROCESSO_HIDRATA=0 tira a linha; o MARCADOR da doutrina não muda com a linha acrescentada.
++        self.assertTrue(hasattr(self.g, "_LINHA_PROCESSO"),
++                        "seth_gateway não tem _LINHA_PROCESSO: o ponteiro PROCESSO ainda não foi implementado")
++        ligada = self.injetar(remover=("SETH_PROCESSO_HIDRATA",))
++        self.assertIn(PREFIXO, ligada, "sem a variável, o ponteiro deveria aparecer; senão o teste de desligar não prova nada")
++        desligada = self.injetar(env_extra={"SETH_PROCESSO_HIDRATA": "0"})
++        self.assertNotIn(PREFIXO, desligada, "SETH_PROCESSO_HIDRATA=0 não desligou o ponteiro")
++        self.assertIn("HEAD: teste", desligada, "desligar o ponteiro não pode tirar o estado")
++        self.assertEqual(self.g.MARCADOR, MARCADOR_BASE,
++                         "o MARCADOR mudou: a linha PROCESSO não pode entrar em _DOUTRINA_FIXA")
++        self.assertNotIn(PREFIXO, self.g._DOUTRINA_FIXA, "o ponteiro entrou na doutrina fixa")
++
++    def test_linha_do_gateway_ate_200_caracteres(self):
++        # D3 (aceita): a linha do gateway tem até 200 caracteres.
++        self.assertLessEqual(len(self.g._LINHA_PROCESSO), 200,
++                             f"linha PROCESSO com {len(self.g._LINHA_PROCESSO)} caracteres")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py b/redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py
+new file mode 100644
+index 00000000..bcf24f7e
+--- /dev/null
++++ b/redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py
+@@ -0,0 +1,70 @@
++"""C7: nas linhas acrescentadas por este lote, nenhum valor de segredo e nenhum caminho de memória restrita.
++
++Régua de segredo: redesign/router/sanitizar.py, função varrer. O escopo são as linhas que este lote acrescenta
++(regiões abaixo), não o arquivo inteiro: o resto de AGENTS.md já tinha texto antes deste lote.
++
++Caminho de memória restrita: a lista NÃO é escrita neste repositório (regra do sistema: não se cita esse tipo de
++caminho). Ela vem da variável AGATA_CAMINHOS_RESTRITOS, separada por vírgula, configurada por quem roda o teste.
++Sem a variável, a parte de caminho restrito fica como pendência (skip com motivo), e a parte de segredo continua.
++"""
++import os
++import re
++import sys
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[3]
++sys.path.insert(0, str(RAIZ / "redesign" / "router"))
++
++
++def caminhos_restritos():
++    return [c.strip() for c in os.environ.get("AGATA_CAMINHOS_RESTRITOS", "").split(",") if c.strip()]
++
++
++def regioes_acrescentadas():
++    """Trechos que este lote acrescenta, lidos dos arquivos. Falha clara se a região sumir."""
++    agents = (RAIZ / "AGENTS.md").read_text(encoding="utf-8").splitlines()
++    indice = (RAIZ / ".agents/skills/INDICE.md").read_text(encoding="utf-8").splitlines()
++    gw = (RAIZ / "redesign/router/seth_gateway.py").read_text(encoding="utf-8")
++    fluxo = (RAIZ / ".agents/skills/agata-fluxo/SKILL.md").read_text(encoding="utf-8")
++    ponteiro = [l for l in agents if "agata-fluxo/SKILL.md" in l]
++    linhas_indice = [l for l in indice if re.search(
++        r"agata-fluxo`|agata-processo-lote|agata-time-inovacao|agata-disciplina|agata-engenharia-reversa|elephant-goldfish-sdd", l)]
++    m_gw = re.search(r"# \(07/11/2026, núcleo de desenvolvimento, D2\) ponteiro de uma linha.*?(?=\ndef _hidratacao)",
++                     gw, re.S)
++    m_inj = re.search(r"# \(07/11/2026, núcleo de desenvolvimento, D2\) ponteiro PROCESSO.*?\+ _proc\n", gw, re.S)
++    faltam = [n for n, ok in (("ponteiro do AGENTS.md", ponteiro), ("linhas do índice", linhas_indice),
++                              ("bloco do gateway", m_gw), ("injeção do gateway", m_inj)) if not ok]
++    if faltam:
++        raise AssertionError(f"região acrescentada não encontrada: {faltam}")
++    return {
++        "AGENTS.md (ponteiro)": "\n".join(ponteiro),
++        "INDICE.md (linhas novas e do agata-fluxo)": "\n".join(linhas_indice),
++        "guia agata-fluxo (inteiro)": fluxo,
++        "seth_gateway.py (ponteiro)": m_gw.group(0) + "\n" + m_inj.group(0),
++    }
++
++
++class TextoSeguroTests(unittest.TestCase):
++    def test_linhas_novas_sem_segredo_nem_memoria_restrita(self):
++        from sanitizar import varrer  # régua oficial de segredo (P-1)
++
++        regioes = regioes_acrescentadas()
++        achados = {}
++        for nome, texto in regioes.items():
++            seg = varrer(texto)
++            if seg:
++                achados[nome] = [(a["padrao_rotulo"], a["trecho_redigido"]) for a in seg]
++        self.assertFalse(achados, f"linhas acrescentadas com valor de segredo: {achados}")
++
++        restritos = caminhos_restritos()
++        if not restritos:
++            self.skipTest("pendência: caminhos restritos não configurados (AGATA_CAMINHOS_RESTRITOS); "
++                          "a parte de segredo passou")
++        for nome, texto in regioes.items():
++            citados = [c for c in restritos if c in texto]
++            self.assertFalse(citados, f"{nome} cita caminho restrito: {citados}")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 56f98b5b..c5371ae8 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -346,6 +346,19 @@ def _linha_propostas(pasta: Path | None = None) -> str:
+             + " · o que está em propostas/aplicadas/ NÃO está pendente")
+ 
+ 
++# (07/11/2026, núcleo de desenvolvimento, D2) ponteiro de uma linha para o guia universal (Ma'at), no canal de
++# estado de _injeta, só nas faixas internas (a faixa pública não passa por _injeta). Fica FORA de _DOUTRINA_FIXA,
++# para não mudar MARCADOR. SETH_PROCESSO_HIDRATA=0 desliga.
++_LINHA_PROCESSO = ("PROCESSO: regras de lote e fluxo em .agents/skills/agata-fluxo/SKILL.md (Ma'at); "
++                   "leia antes de propor ou aplicar mudança.")
++
++
++def _linha_processo() -> str:
++    if os.environ.get("SETH_PROCESSO_HIDRATA") == "0":
++        return ""
++    return _LINHA_PROCESSO
++
++
+ def _hidratacao(extra: str = "") -> str:
+     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
+     `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
+@@ -1159,6 +1172,10 @@ def _injeta(payload: dict) -> dict:
+         _cc = ""
+     if _cc and os.environ.get("SETH_CACHE_CONSELHO_HIDRATA") != "0":
+         auditoria = (auditoria + "\n" if auditoria else "") + _cc
++    # (07/11/2026, núcleo de desenvolvimento, D2) ponteiro PROCESSO: para o guia universal; não entra na doutrina.
++    _proc = _linha_processo()
++    if _proc:
++        auditoria = (auditoria + "\n" if auditoria else "") + _proc
+     # (05/11/2026, nova versão lote 4 item 3) evidência da Alexandria para a pergunta da vez, com as notas da
+     # curadoria; DESLIGADA por padrão (SETH_ALEXANDRIA_HIDRATA=1 liga). Só no 1º passo da resposta (não em
+     # continuação de ferramenta); sem índice ou com erro, segue sem o bloco.
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index 11be07d3..e272363d 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -15,10 +15,11 @@ if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/cam
+ # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
+ export PATH="$(dirname "$PYTEST"):$PATH"
+ 
+-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
++passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
+ passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+ passo "ciclo SDD sobre a nova versão" python3 redesign/sdd_flow/runner.py "$TMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
+-passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
++passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos redesign/nucleo-desenvolvimento
++passo "gate de spec (núcleo de desenvolvimento)" python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec
+ for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+   passo "critérios e drift: $c" python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$TMP/$c-evidence.json"
+   passo "drift por critério: $c" python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$TMP/$c-evidence.json" "$TMP/$c-drift.md"
