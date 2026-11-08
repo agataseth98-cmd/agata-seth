@@ -1,57 +1,5 @@
-diff --git a/config/rotas/regras.json b/config/rotas/regras.json
-new file mode 100644
-index 00000000..6bcb881a
---- /dev/null
-+++ b/config/rotas/regras.json
-@@ -0,0 +1,46 @@
-+{
-+  "versao": 1,
-+  "descricao": "Regras da rota automática do gateway (seth-auto), em ordem: a primeira que casa decide. Entradas, operadores e filas só do conjunto de redesign/router/rota_regras.py; regra fora dele é recusada na carga, e o gateway mantém a última versão válida.",
-+  "regras": [
-+    {
-+      "id": "pesado_tamanho",
-+      "condicao": [["chars_ultimo_usuario", ">", 6000]],
-+      "fila": "seth-pesado",
-+      "alternativas": ["seth-livre"],
-+      "motivo": "último texto do usuário acima de 6000 caracteres vai à fila pesada, mesmo com escolha do Laya",
-+      "fonte": "redesign/router/seth_gateway.py: _LIMIAR_PESADO_CHARS e _rota_com_travas (trava T1)"
-+    },
-+    {
-+      "id": "laya_escolha",
-+      "condicao": [["escolha_laya", "in", ["rapido", "livre", "pesado", "codigo"]]],
-+      "fila": "escolha_laya",
-+      "alternativas": ["seth-livre"],
-+      "motivo": "o Laya escolheu a fila com confiança de pelo menos 0,6",
-+      "fonte": "redesign/router/seth_gateway.py: _rota_laya, _LIMIAR_ROTA e _TIMEOUT_LAYA (entrada L1)"
-+    },
-+    {
-+      "id": "codigo_cerca",
-+      "condicao": [["cerca_codigo", "==", true], ["escolha_laya", "==", null]],
-+      "fila": "seth-codigo",
-+      "alternativas": ["seth-pesado", "seth-livre"],
-+      "motivo": "último texto do usuário com cerca de código e sem escolha do Laya",
-+      "fonte": "redesign/router/seth_gateway.py: _classificar_rota (cerca de código); spec do chat, regra R1"
-+    },
-+    {
-+      "id": "rapido_trivial",
-+      "condicao": [["chars_total", "<", 400], ["n_usuario", "<=", 2], ["ferramenta", "==", false]],
-+      "fila": "seth-rapido",
-+      "alternativas": ["seth-livre"],
-+      "motivo": "pedido curto, com até dois textos do usuário e sem ferramenta",
-+      "fonte": "redesign/router/seth_gateway.py: _LIMIAR_TRIVIAL_CHARS e _classificar_rota; spec do chat, regra R2"
-+    },
-+    {
-+      "id": "padrao",
-+      "condicao": [],
-+      "fila": "seth-livre",
-+      "alternativas": ["seth-pesado", "seth-rapido"],
-+      "motivo": "nenhuma regra acima casou",
-+      "fonte": "redesign/router/seth_gateway.py: _ROTA_BASE; spec do chat, regra R3"
-+    }
-+  ]
-+}
 diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
-index cc0f9826..479ff195 100644
+index cc0f9826..31547813 100644
 --- a/redesign/painel_operacional/README.md
 +++ b/redesign/painel_operacional/README.md
 @@ -10,7 +10,15 @@ Na raiz do repositório:
@@ -71,15 +19,16 @@ index cc0f9826..479ff195 100644
  
  ## Conselho em Rede
  
-@@ -27,6 +35,7 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
+@@ -27,6 +35,8 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
  - `/api/status` consulta unidades, Git, timers, tarefas, propostas locais e o catálogo de capacidades, com origem, horário e validade para as leituras.
  - `/api/details` consulta sob demanda integrações e contagem de notas do vault derivado. Unidade ativa não prova funcionamento completo da integração.
  - `/api/wiki/search` usa o verificador local, limita consulta e retorno e não guarda histórico.
++- A leitura `/api/seth/conversa?id=` valida o arquivo e devolve `schema_version` e `id` esperados pelo cliente; mensagens importadas de até 65536 caracteres podem ser reabertas e salvas.
 +- `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
  - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
  
  ## Verificar em cópia isolada
-@@ -34,6 +43,8 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
+@@ -34,6 +44,8 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
  ```sh
  python3 redesign/painel_operacional/server.py --selftest
  python3 -m unittest discover -s redesign/painel_operacional -p 'test_*.py'
@@ -89,7 +38,7 @@ index cc0f9826..479ff195 100644
  ```
  
 diff --git a/redesign/painel_operacional/abrir.js b/redesign/painel_operacional/abrir.js
-index eda2d368..b9dfc3f3 100644
+index eda2d368..250dc3b8 100644
 --- a/redesign/painel_operacional/abrir.js
 +++ b/redesign/painel_operacional/abrir.js
 @@ -1,3 +1,5 @@
@@ -103,7 +52,7 @@ index eda2d368..b9dfc3f3 100644
    }
  }
 -document.querySelectorAll('[data-page="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
-+document.querySelectorAll('[data-secao="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
++document.querySelectorAll('button[data-secao="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
 +})();
 diff --git a/redesign/painel_operacional/app.js b/redesign/painel_operacional/app.js
 deleted file mode 100644
@@ -426,79 +375,32 @@ index 9c194bf3..00000000
 -document.addEventListener("visibilitychange", syncPollingWithVisibility);
 -syncPollingWithVisibility();
 diff --git a/redesign/painel_operacional/armazem.py b/redesign/painel_operacional/armazem.py
-index 057f0e68..60f58848 100644
+index 057f0e68..d3e0769b 100644
 --- a/redesign/painel_operacional/armazem.py
 +++ b/redesign/painel_operacional/armazem.py
-@@ -71,7 +71,13 @@ def _vault_caminho(caminho: str) -> dict | None:
- 
+@@ -72,6 +72,7 @@ def _vault_caminho(caminho: str) -> dict | None:
  CONVERSAS_DIR = Path.home() / ".cache/agata/painel-conversas"
  CONVERSA_ID = re.compile(r"[0-9a-f]{12}")
--CONVERSA_LIMITE_BYTES = 262144
-+CONVERSA_LIMITE_BYTES = 262144  # corpo de um POST de conversa (a conversa inteira vai em cada gravação)
-+# (07/11/2026) limite explícito por mensagem: 8000 recusava mensagens das conversas importadas do LibreChat
-+# (a maior medida tinha 18973 caracteres). O corpo continua limitado por CONVERSA_LIMITE_BYTES.
+ CONVERSA_LIMITE_BYTES = 262144
 +CONVERSA_MENSAGEM_LIMITE = 65536
-+CONVERSA_MENSAGENS_LIMITE = 200
-+CAMPOS_TEXTO_ASSISTENTE = ("rota", "regra", "modelo", "hora")
-+CAMPO_TEXTO_LIMITE = 64
  
  
  def _conversa_caminho(conversa_id: str) -> Path | None:
-@@ -96,20 +102,43 @@ def _conversas_listar() -> dict:
-     return {"schema_version": 1, "state": "ok", "items": itens}
- 
- 
-+def _campos_do_assistente(m: dict) -> dict | None:
-+    """Campos opcionais da resposta do assistente (07/11/2026): rota (fila), regra, modelo e hora,
-+    texto de até 64 caracteres, e `interrompida` (verdadeiro ou falso). Ausentes: nada. Fora da forma: None."""
-+    extra = {}
-+    for campo in CAMPOS_TEXTO_ASSISTENTE:
-+        if campo in m:
-+            valor = m[campo]
-+            if not isinstance(valor, str) or len(valor) > CAMPO_TEXTO_LIMITE:
-+                return None
-+            extra[campo] = valor
-+    if "interrompida" in m:
-+        if not isinstance(m["interrompida"], bool):
-+            return None
-+        extra["interrompida"] = m["interrompida"]
-+    return extra
-+
-+
- def _conversa_validar(dados: dict) -> dict | None:
-     if not isinstance(dados, dict):
-         return None
-     titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
-     mensagens = dados.get("mensagens")
--    if not isinstance(mensagens, list) or len(mensagens) > 200:
-+    if not isinstance(mensagens, list) or len(mensagens) > CONVERSA_MENSAGENS_LIMITE:
-         return None
-     limpas = []
+@@ -107,7 +108,7 @@ def _conversa_validar(dados: dict) -> dict | None:
      for m in mensagens:
          if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
              return None
 -        if len(m["content"]) > 8000:
 +        if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
              return None
--        limpas.append({"role": m["role"], "content": m["content"]})
-+        limpa = {"role": m["role"], "content": m["content"]}
-+        if m["role"] == "assistant":
-+            extra = _campos_do_assistente(m)
-+            if extra is None:
-+                return None
-+            limpa.update(extra)
-+        limpas.append(limpa)
+         limpas.append({"role": m["role"], "content": m["content"]})
      return {"titulo": titulo, "mensagens": limpas}
- 
- 
-@@ -128,6 +157,23 @@ def _conversa_gravar(dados: dict) -> dict | None:
+@@ -128,6 +129,21 @@ def _conversa_gravar(dados: dict) -> dict | None:
      return {"id": conversa_id, **limpo}
  
  
 +def _conversa_ler(conversa_id: str) -> dict | None:
-+    """Conversa salva no formato que o painel lê: schema_version, id, titulo e mensagens.
-+    O arquivo fica como está; a leitura valida e completa. Arquivo importado (do LibreChat) entra igual.
-+    (07/11/2026) Antes, a rota devolvia o arquivo cru, sem schema_version, e abrir conversa dava INDISPONÍVEL."""
++    """Lê e valida uma conversa no contrato que o cliente exige: versão, id e conteúdo."""
 +    arq = _conversa_caminho(conversa_id)
 +    if arq is None or not arq.is_file():
 +        return None
@@ -515,81 +417,6 @@ index 057f0e68..60f58848 100644
  def _conversa_apagar(conversa_id: str) -> bool:
      arq = _conversa_caminho(conversa_id)
      if arq is None or not arq.is_file():
-diff --git a/redesign/painel_operacional/chat_stream.py b/redesign/painel_operacional/chat_stream.py
-index d92225dc..31a10798 100644
---- a/redesign/painel_operacional/chat_stream.py
-+++ b/redesign/painel_operacional/chat_stream.py
-@@ -2,16 +2,36 @@
- 
- Transporte injetado: este módulo não abre conexão nem chama o gateway.
- Não registra texto de usuário em log.
-+
-+Rota (07/11/2026, D2): o painel manda só a intenção `automatico`; ela vira o gatilho `seth-auto`
-+do gateway, que escolhe a fila por regra. Não há seletor manual de fila (D6g).
-+O evento `meta` leva fila, modificador, regra e modelo, lidos dos cabeçalhos da resposta do gateway;
-+o que não vier ou não passar na forma esperada sai como "não medido".
- """
- 
- import json
--from typing import Iterable, Iterator
-+import re
-+from typing import Iterable, Iterator, Mapping
- 
- PAPEIS_VALIDOS = {"system", "user", "assistant"}
- MAX_MENSAGENS = 20
- MAX_CARACTERES_MENSAGEM = 4000
- PREFIXO_DADOS = "data:"
- SENTINELA_FIM = "[DONE]"
-+ROTA_AUTOMATICA = "automatico"
-+GATILHO_AUTOMATICO = "seth-auto"
-+NAO_MEDIDO = "não medido"
-+FILA_RE = re.compile(r"seth-(livre|rapido|pesado|codigo)(-longo)?")
-+REGRA_RE = re.compile(r"[a-z][a-z0-9_]{0,40}")
-+MODELO_RE = re.compile(r"[^\x00-\x1f\x7f]{1,64}")
-+
-+
-+def resolver_rota(valor) -> str | None:
-+    """Gatilho do gateway para a rota pedida, ou None (resposta 400 antes do gateway).
-+    Campo ausente equivale a `automatico`. Qualquer outro valor é recusado."""
-+    if valor is None or valor == ROTA_AUTOMATICA:
-+        return GATILHO_AUTOMATICO
-+    return None
- 
- 
- def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
-@@ -57,12 +77,31 @@ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
-     yield {"tipo": "erro", "motivo": "stream interrompido"}
- 
- 
-+def meta_do_gateway(cabecalhos: Mapping[str, str]) -> dict:
-+    """Evento `meta` a partir dos cabeçalhos da resposta do gateway (nomes em minúsculas).
-+
-+    X-Seth-Rota: fila, com `-longo` quando houver. X-Seth-Regra: id da regra que decidiu.
-+    X-Modelo-Real: modelo que a Máquina mediu. Valor ausente ou fora da forma: "não medido".
-+    """
-+    rota = cabecalhos.get("x-seth-rota") or ""
-+    casa = FILA_RE.fullmatch(rota)
-+    fila = f"seth-{casa.group(1)}" if casa else NAO_MEDIDO
-+    modificador = (casa.group(2) or "") if casa else NAO_MEDIDO
-+    regra = cabecalhos.get("x-seth-regra") or ""
-+    modelo = cabecalhos.get("x-modelo-real") or ""
-+    return {"tipo": "meta",
-+            "fila": fila,
-+            "modificador": modificador,
-+            "regra": regra if REGRA_RE.fullmatch(regra) else NAO_MEDIDO,
-+            "modelo": modelo if MODELO_RE.fullmatch(modelo) else NAO_MEDIDO}
-+
-+
- def codificar_sse(evento: dict) -> bytes:
-     """Serializa um evento como bloco SSE: 'data: <json>' seguido de linha em branco."""
-     return ("data: " + json.dumps(evento, ensure_ascii=False) + "\n\n").encode("utf-8")
- 
- 
--def montar_pedido(mensagens: list[dict], modelo: str = "seth-livre") -> dict:
-+def montar_pedido(mensagens: list[dict], modelo: str = GATILHO_AUTOMATICO) -> dict:
-     """Monta o corpo do pedido de chat em streaming. Recusa entrada inválida com ValueError.
- 
-     As mensagens da exceção não ecoam o conteúdo do usuário.
 diff --git a/redesign/painel_operacional/conselho-rede/app.js b/redesign/painel_operacional/conselho-rede/app.js
 index 59d2a722..ed93b4ec 100644
 --- a/redesign/painel_operacional/conselho-rede/app.js
@@ -1448,7 +1275,7 @@ index ac5502e9..00000000
 @@ -1 +0,0 @@
 -:root{--ink:#e9f0ed;--muted:#91a29d;--bg:#0a1110;--card:#111c19;--line:#29403a;--lime:#d9f36a;--orange:#ff9b58}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#203b31 0,transparent 35%),var(--bg);color:var(--ink);font:15px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}.shell{max-width:1180px;margin:auto;padding:48px 28px 80px}header{display:flex;justify-content:space-between;gap:30px;align-items:end}h1{font-size:clamp(42px,7vw,86px);letter-spacing:-.07em;line-height:.9;margin:10px 0 18px}.eyebrow,small,.stamp span,.source span{font:500 11px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;letter-spacing:.14em;color:var(--lime)}.lede{color:var(--muted);max-width:460px}.load{border:1px solid var(--lime);color:var(--lime);padding:13px 16px;cursor:pointer;font:500 12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;white-space:nowrap}.load input{display:none}.hero{margin:60px 0 28px;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:24px}.status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--orange);margin-right:9px}.hero p{color:var(--muted);max-width:650px;line-height:1.6}.stamp{text-align:right}.stamp strong{display:block;font:500 22px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;margin-top:10px}.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:26px}.tabs button{background:none;color:var(--muted);border:0;padding:13px 16px;cursor:pointer;font:500 12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace}.tabs button.active{color:var(--ink);border-bottom:2px solid var(--lime)}.panel{display:none}.panel.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cards article{background:var(--card);border:1px solid var(--line);padding:22px;min-height:120px}.cards strong{display:block;font-size:30px;margin:16px 0 7px}.cards span{color:var(--muted);font-size:12px}.source{margin-top:14px;padding:16px;border-left:2px solid var(--lime);background:#0e1815}.source code,pre{font:13px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;color:var(--muted);display:block;margin-top:9px;white-space:pre-wrap}.list{display:grid;gap:8px}.list p,.list article{padding:15px;background:var(--card);border:1px solid var(--line)}.empty{color:var(--muted)}h2{letter-spacing:-.04em;font-size:28px}pre{background:var(--card);border:1px solid var(--line);padding:20px;min-height:180px}@media(max-width:700px){header,.hero{display:block}.load{display:inline-block;margin-top:20px}.stamp{text-align:left;margin-top:25px}.cards{grid-template-columns:1fr}}
 diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
-index 942e677c..6c83cbb5 100644
+index 942e677c..8d2029cf 100644
 --- a/redesign/painel_operacional/prototipo.css
 +++ b/redesign/painel_operacional/prototipo.css
 @@ -1,378 +1,1192 @@
@@ -3060,7 +2887,7 @@ index 942e677c..6c83cbb5 100644
  @media (max-width: 760px) {
  .conselho-page body { padding: 12px; }
  .conselho-page header { align-items: flex-start; flex-direction: column; gap: 6px; }
-@@ -535,34 +1400,354 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+@@ -535,34 +1400,348 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
  }
  
  
@@ -3428,14 +3255,8 @@ index 942e677c..6c83cbb5 100644
 +.memoria-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
 +.oc-cabecalho{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:0 0 18px}
 +.oc-cabecalho .oc-lede{margin:6px 0 0}
-+/* (07/11/2026, chat lote 1) parar resposta, janela de 20 mensagens, aviso de envio e linha de fila, regra e modelo */
-+.seth-form [hidden]{display:none !important}
-+.seth-janela,.seth-aviso{margin:0 0 8px;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--cor-d8e5f4);border:1px solid var(--line)}
-+.seth-aviso{border-color:var(--teal)}
-+.msg-meta{margin:6px 0 0;font-size:11px;color:var(--cor-a8b8ce)}
-+.msg-nota{margin:4px 0 0;font-size:11px;font-style:italic;color:var(--cor-a8b8ce)}
 diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
-index 2384d4d1..83366154 100644
+index 2384d4d1..ab7e1ce1 100644
 --- a/redesign/painel_operacional/prototipo.html
 +++ b/redesign/painel_operacional/prototipo.html
 @@ -4,50 +4,15 @@
@@ -3526,7 +3347,7 @@ index 2384d4d1..83366154 100644
 -  </section>
 -
 -  <section class="page" id="page-operator-console" data-title="Operator Console"><div class="section-heading"><div><div class="eyebrow">Evidence surface · leitura local</div><h1>Operator Console</h1><p>Inspecione um pacote Project Kit sem criar uma nova fonte de verdade.</p></div></div><article class="panel operator-console-frame"><iframe title="Operator Console" src="operator_console/index.html"></iframe></article></section>
--
+ 
 -  <section class="page" id="page-conversa" data-title="Conversa com a Seth"><div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
 -<article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
 -<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
@@ -3550,7 +3371,6 @@ index 2384d4d1..83366154 100644
 -<section class="page" id="page-sdd" data-title="SDD"><div class="section-heading"><div><div class="eyebrow">Spec-driven · componentes ancorados</div><h1>SDD</h1><p>Cada componente tem uma spec que lista o código que possui e critérios de aceite ligados a testes. Aqui você confere a âncora e roda os critérios. Proposta, assinatura e PR continuam fora do painel, pelo Humano.</p></div></div>
 -<article class="panel"><div class="panel-head"><div><div class="panel-kicker">Componentes</div><h2 class="panel-title" id="sdd-titulo">Calculando…</h2></div></div><div id="sdd-lista" class="lista-componentes"></div></article></section>
 -<section class="page" id="page-visao" data-title="Visão do sistema"><div class="section-heading"><div><div class="eyebrow">Tudo junto · leitura do momento</div><h1>Visão do sistema</h1><p>Os números vêm das mesmas leituras das outras abas. O que falta aparece como lacuna, com link para a aba que resolve.</p></div></div>
-+  
 +</div>
 +<div class="sub" id="sub-visao" data-sub="visao" data-secao="panorama" hidden>
 +<div class="section-heading"><div><div class="eyebrow">Tudo junto · leitura do momento</div><h1>Visão do sistema</h1><p>Os números vêm das mesmas leituras das outras abas. O que falta aparece como lacuna, com link para a aba que resolve.</p></div></div>
@@ -3569,9 +3389,6 @@ index 2384d4d1..83366154 100644
      </div><div class="no-results" id="no-results">Nenhuma capacidade deste mapa corresponde à busca.</div>
      <div class="footer-note"><span>ESTADOS: ATIVO · PARCIAL · PLANEJADO · HORIZONTE</span><span>Um placeholder não representa uma função pronta.</span></div>
 -  </section>
-+  
-+</div>
-+<div class="sub" id="sub-plano" data-sub="plano" data-secao="panorama" hidden>
  
 -  <section class="page" id="page-integracoes" data-title="Integrações">
 -    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Systemd · consulta sob demanda</div><h2 class="panel-title">Estado das unidades de integração</h2></div><span class="chip horizon" id="integration-state">SEM LEITURA</span></div><div class="service-list" id="integration-list"><p>Aguardando consulta.</p></div><p class="subnote" id="integration-source">Unidade ativa não comprova funcionamento da integração.</p></article><p class="subnote">Os cartões abaixo descrevem o sistema e têm referências históricas. O estado vivo das unidades está acima.</p>
@@ -3594,13 +3411,15 @@ index 2384d4d1..83366154 100644
 -    <div class="grid mt14"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fronteiras que acompanham cada integração</div><h2 class="panel-title">O que atravessa — e o que fica</h2></div><span class="chip">GOVERNANÇA</span></div><div class="action-list"><div class="action-row"><div class="action-icon">1</div><div><div class="action-title">Canon e esfera pessoal</div><div class="action-desc">Canon permanece fonte local. <code>memoria/missoes/segunda-camada/</code> é pessoal e não vai para nuvem.</div></div></div><div class="action-row"><div class="action-icon blue">2</div><div><div class="action-title">Leitura e escrita são caminhos diferentes</div><div class="action-desc">Consulta é read-only; escrita passa por ferramenta aprovada e, no canon, pelo par P-8 assinado.</div></div></div><div class="action-row"><div class="action-icon violet">3</div><div><div class="action-title">Acesso remoto</div><div class="action-desc">Acesso remoto documentado usa Tailscale; o painel e novos serviços não devem ganhar bind público por conveniência.</div></div></div></div></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Três refinamentos</div><h2 class="panel-title">Como o mapa foi depurado</h2></div></div><div class="action-list"><div class="action-row"><div class="action-icon">I</div><div><div class="action-title">Inventário</div><div class="action-desc">Conexões e fluxos descritos no PROJETO, MEMÓRIAS e vault.</div></div></div><div class="action-row"><div class="action-icon blue">II</div><div><div class="action-title">Checagem de limites</div><div class="action-desc">Separação entre ferramenta existente, acesso por agente, estado runtime e decisões já recusadas.</div></div></div><div class="action-row"><div class="action-icon violet">III</div><div><div class="action-title">Síntese operacional</div><div class="action-desc">Estados claros, WebSocket marcado como interface a validar e futuras frentes fora do backlog ativo.</div></div></div></div></article></div>
 -    <div class="footer-note"><span>FONTES: PROJETO.md · PROJETO_REFERENCIA.md · MEMÓRIAS</span><span>Snapshot documental; integrações não foram testadas ao vivo nesta passada.</span></div>
 -  </section>
- 
--  <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
++</div>
++<div class="sub" id="sub-plano" data-sub="plano" data-secao="panorama" hidden>
++
++
 +    <div class="section-heading"><div><div class="eyebrow">Decisão humana · dados locais</div><h1>Plano de trabalho</h1><p>Veja cada proposta e confira se a assinatura do Humano existe.</p></div></div>
 +    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">propostas/ · leitura local</div><h2 class="panel-title">Propostas para examinar</h2></div><span class="chip horizon" id="proposal-state">SEM LEITURA</span></div><div class="action-list" id="proposal-list"><p>Sem leitura.</p></div><p class="subnote" id="proposal-source">Verifique assinatura e aplicabilidade em cada proposta. A verificação não aplica a mudança.</p></article>
 +    <article class="panel mt14"><h2 class="panel-title">Estado e próximos passos</h2><p>Consulte o registro atual para distinguir trabalho em curso, próxima decisão e horizonte.</p><div class="memory-links"><button type="button" data-vault="estado">Estado do sistema</button><button type="button" data-vault="inicio">Início do vault</button></div></article>
 +
-+  
++
 +</div>
 +<div class="sub" id="sub-frentes" data-sub="frentes" data-secao="panorama" hidden>
 +<div class="section-heading"><div><div class="eyebrow">config/frentes.json · somente leitura</div><h1>Frentes</h1><p>Lista das frentes da Agata. Não há ação de controle aqui; a fonte é o arquivo de configuração.</p></div></div>
@@ -3620,9 +3439,9 @@ index 2384d4d1..83366154 100644
 +<div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
 +<article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
 +<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
-+<div class="seth-main"><p id="seth-janela" class="seth-janela" role="status" hidden></p><p id="seth-aviso" class="seth-aviso" role="alert" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
++<div class="seth-main"><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
 +<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
-+<form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button><button class="btn secondary" type="button" id="seth-parar" hidden>Parar resposta</button></form>
++<form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
 +<p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article>
 +</div>
 +</section>
@@ -3636,7 +3455,8 @@ index 2384d4d1..83366154 100644
 +
 +<nav class="abas" aria-label="Subpainéis de Conselho"><button type="button" data-sub="conselho" aria-controls="sub-conselho" aria-selected="true">Operação</button><button type="button" data-sub="conselho-memoria" aria-controls="sub-conselho-memoria" aria-selected="false">Memória compartilhada</button></nav>
 +<div class="sub" id="sub-conselho" data-sub="conselho" data-secao="conselho">
-+
+ 
+-  <section class="page" id="page-conselho" data-title="Conselho de Modelos em Rede">
    <div class="conselho-page"><div class="modelos-links" aria-label="Modelos do Conselho"><div class="abrir-titulo">Modelos</div><button class="btn" type="button" data-alvo="deepseek">DeepSeek</button><button class="btn" type="button" data-alvo="gemini">Gemini</button><button class="btn" type="button" data-alvo="zai">Z.ai</button><button class="btn" type="button" data-alvo="chatgpt">ChatGPT</button><button class="btn" type="button" data-alvo="claude">Claude</button><button class="btn" type="button" data-alvo="grok">Grok</button><button class="btn" type="button" data-alvo="qwen">Qwen</button><button class="btn" type="button" data-alvo="mistral">Mistral</button><button class="btn" type="button" data-alvo="kimi">Kimi</button></div><p class="status" id="status" role="status">carregando…</p>
      <section id="turno">
        <h2>Novo turno</h2>
@@ -3681,9 +3501,6 @@ index 2384d4d1..83366154 100644
 +    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Configuração local</div><h2 class="panel-title">Tarefas da janela</h2></div></div><div class="service-list" id="live-tasks"><p>Sem leitura.</p></div><p class="subnote">Cadência configurada não comprova sucesso de execução.</p></article>
  
 -  </section>
-+  
-+</div>
-+<div class="sub" id="sub-integracoes" data-sub="integracoes" data-secao="sistema" hidden>
  
 -  <section class="page" id="page-documentacao" data-title="Documentação viva">
 -    <div class="section-heading"><div><div class="eyebrow">Documentação conectada ao sistema</div><h1>Conhecer, navegar, acompanhar</h1><p>Escolha uma fonte: estado, início do vault, linha do tempo ou mapas de conteúdo.</p></div></div>
@@ -3698,6 +3515,18 @@ index 2384d4d1..83366154 100644
 -      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Começar pelo presente</div><h2 class="panel-title">Estado e mudanças</h2></div><span class="chip planned">OBSIDIAN</span></div><p class="route-foot">Comece pelo estado resumido, siga para o ponto de entrada do vault e veja na linha do tempo como o sistema mudou.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="estado">Estado do sistema <span>estado.md</span></button><button type="button" class="doc-file" data-vault="inicio">Início do vault <span>INICIO.md</span></button><button type="button" class="doc-file" data-vault="timeline">Linha do tempo <span>timeline.md</span></button></div></article>
 -      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Percorrer por assunto</div><h2 class="panel-title">Memórias e documentos</h2></div><span class="chip active">NAVEGÁVEL</span></div><p class="route-foot">Os mapas agrupam decisões e fontes relacionadas. Busca e vínculos entre notas continuam no Obsidian.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="moc-projeto">Projeto e arquitetura <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-memoria">Memórias <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-documentos">Documentos-fonte <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-scripts">Scripts e ferramentas <span>MOC</span></button></div></article>
 -      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Ver as relações</div><h2 class="panel-title">Mapas navegáveis</h2></div><span class="chip active">VAULT</span></div><p class="route-foot">O Canvas e o Brain Atlas mostram relações entre componentes. A Base mostra as entradas em tabela.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="mapa">Mapa do sistema <span>Canvas</span></button><button type="button" class="doc-file" data-open-page="grafo">Brain Atlas <span>nota</span></button><button type="button" class="doc-file" data-vault="memorias">Base de memórias <span>Base</span></button></div></article>
+-    </div>
+-    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Como a documentação viva deverá atualizar</div><h2 class="panel-title">Da mudança confirmada à navegação</h2></div><span class="chip planned">BACKEND PENDENTE</span></div><div class="doc-flow"><div class="doc-step"><small>01 · FONTE</small><b>Canon e repositório</b><p>Arquivos, commits e estado da máquina fornecem a evidência. A conversa sozinha não altera a memória.</p></div><div class="doc-step"><small>02 · GERAÇÃO</small><b>Derivados do vault</b><p>Após uma mudança integrada, regenerar índices, mapas e links a partir das fontes autorizadas.</p></div><div class="doc-step"><small>03 · ÍNDICE</small><b>Obsidian navegável</b><p>Atualizar notas, MOCs e relações; manter caminho de volta até o arquivo de origem.</p></div><div class="doc-step"><small>04 · PAINEL</small><b>Estado e frescor</b><p>Mostrar último commit lido, horário, fontes desatualizadas e lacunas sem inventar estado.</p></div></div><p class="subnote">Cada dado mostra fonte, hora da leitura e commit. Se a leitura falhar, o último valor fica marcado como desatualizado.</p></article>
+-    <div class="footer-note"><span>PROTÓTIPO DE LEITURA · SEM ESCRITA NO CANON</span><span>As notas do Obsidian são derivadas; os arquivos-fonte prevalecem.</span></div>
+-  </section>
+-
+-  <section class="page" id="page-manutencao" data-title="Manutenção">
++</div>
++<div class="sub" id="sub-integracoes" data-sub="integracoes" data-secao="sistema" hidden>
+ 
+-    <div class="section-heading"><div><div class="eyebrow">Cuidar sem perder o contexto</div><h1>Manutenção da Agata</h1><p>Configuração e estado em um lugar; o painel não executa tarefas.</p></div></div>
+-    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Timers</div><h2 class="panel-title">Próximos e últimos disparos</h2></div></div><div class="service-list" id="maintenance-timers"><p>Sem leitura.</p></div><p class="subnote">O último disparo é do timer; o resultado da tarefa não é inferido.</p></article>
+-    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
 +    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Systemd · consulta sob demanda</div><h2 class="panel-title">Estado das unidades de integração</h2></div><span class="chip horizon" id="integration-state">SEM LEITURA</span></div><div class="service-list" id="integration-list"><p>Aguardando consulta.</p></div><p class="subnote" id="integration-source">Unidade ativa não comprova funcionamento da integração.</p></article><p class="subnote">Os cartões abaixo descrevem o sistema e têm referências históricas. O estado vivo das unidades está acima.</p>
 +    <div class="section-heading"><div><div class="eyebrow">Mapa de conexões · refinado em três passadas</div><h1>Integrações da Agata</h1><p>Mostra o que conecta hoje, o que está parcial e o que só entra quando o Humano abrir a frente. Não é medição de agora.</p></div></div>
 +    <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3.8 7.2v5.4c0 4.1 3.5 7.3 8.2 8.4 4.7-1.1 8.2-4.3 8.2-8.4V7.2L12 3Z"/><path d="m8.5 12.2 2.2 2.2 4.8-5"/></svg><span><strong>Princípio do mapa:</strong> conectar o que já existe antes de adicionar ferramentas. Canon e decisões continuam locais; nenhuma integração ganha permissão de escrita por aparecer aqui.</span><span class="right">LEITURA · SEM AÇÕES</span></div>
@@ -3714,21 +3543,11 @@ index 2384d4d1..83366154 100644
 +      <article class="cap-card" data-state="planned" data-search="home assistant whatsapp mcp automação mensagens"><div class="cap-top"><h3>Home Assistant e WhatsApp</h3><span class="chip planned">SOB DEMANDA</span></div><p>Integrações previstas como servidores MCP separados, quando a frente abrir. Não são conexão instalada.</p><div class="cap-meta"><small>INTEGRAÇÃO FUTURA</small><button class="evidence" data-title="Integrações sob demanda" data-body="O PROJETO nomeia Home Assistant e WhatsApp como futuras integrações sob demanda por MCP. Não há evidência lida nesta passada de implementação ativa." data-source="PROJETO.md · Interface">FONTE</button></div></article>
 +      <article class="cap-card" data-state="planned" data-search="google drive notebooklm nuvem esfera documentos upload autorizado"><div class="cap-top"><h3>NotebookLM e fontes externas</h3><span class="chip planned">ESFERA SEPARADA</span></div><p>Apoia pesquisa sobre fontes brutas, numa esfera própria. Nunca recebe o canon. Uploads exigem autorização humana.</p><div class="cap-meta"><small>PESQUISA · NUVEM</small><button class="evidence" data-title="Esfera de pesquisa externa" data-body="PROJETO.md define NotebookLM e afins como processamento de fonte bruta, relato/projeção. Canon não é enviado e resultados externos não viram cérebro do sistema." data-source="PROJETO.md · Memória em duas camadas">FONTE</button></div></article>
 +      <article class="cap-card" data-state="horizon" data-search="windows réplica failover continuidade"><div class="cap-top"><h3>Réplica Windows e failover</h3><span class="chip horizon">HORIZONTE</span></div><p>Continuidade entre máquinas segue no horizonte. Não é conexão pronta nem backlog ativo desta rodada.</p><div class="cap-meta"><small>CONTINUIDADE · FUTURO</small><button class="evidence" data-title="Continuidade entre máquinas" data-body="PROJETO descreve planos e limites para réplica/failover; os canônicos restringem trabalho corrente à fase atual e à seguinte. Este item fica como horizonte, sem compromisso de execução." data-source="PROJETO.md · roadmap e REGRAS.md · contenção de escopo">FONTE</button></div></article>
-     </div>
--    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Como a documentação viva deverá atualizar</div><h2 class="panel-title">Da mudança confirmada à navegação</h2></div><span class="chip planned">BACKEND PENDENTE</span></div><div class="doc-flow"><div class="doc-step"><small>01 · FONTE</small><b>Canon e repositório</b><p>Arquivos, commits e estado da máquina fornecem a evidência. A conversa sozinha não altera a memória.</p></div><div class="doc-step"><small>02 · GERAÇÃO</small><b>Derivados do vault</b><p>Após uma mudança integrada, regenerar índices, mapas e links a partir das fontes autorizadas.</p></div><div class="doc-step"><small>03 · ÍNDICE</small><b>Obsidian navegável</b><p>Atualizar notas, MOCs e relações; manter caminho de volta até o arquivo de origem.</p></div><div class="doc-step"><small>04 · PAINEL</small><b>Estado e frescor</b><p>Mostrar último commit lido, horário, fontes desatualizadas e lacunas sem inventar estado.</p></div></div><p class="subnote">Cada dado mostra fonte, hora da leitura e commit. Se a leitura falhar, o último valor fica marcado como desatualizado.</p></article>
--    <div class="footer-note"><span>PROTÓTIPO DE LEITURA · SEM ESCRITA NO CANON</span><span>As notas do Obsidian são derivadas; os arquivos-fonte prevalecem.</span></div>
--  </section>
--
--  <section class="page" id="page-manutencao" data-title="Manutenção">
--
--    <div class="section-heading"><div><div class="eyebrow">Cuidar sem perder o contexto</div><h1>Manutenção da Agata</h1><p>Configuração e estado em um lugar; o painel não executa tarefas.</p></div></div>
--    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Timers</div><h2 class="panel-title">Próximos e últimos disparos</h2></div></div><div class="service-list" id="maintenance-timers"><p>Sem leitura.</p></div><p class="subnote">O último disparo é do timer; o resultado da tarefa não é inferido.</p></article>
--    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
--
--  </section>
++    </div>
 +    <div class="grid mt14"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fronteiras que acompanham cada integração</div><h2 class="panel-title">O que atravessa — e o que fica</h2></div><span class="chip">GOVERNANÇA</span></div><div class="action-list"><div class="action-row"><div class="action-icon">1</div><div><div class="action-title">Canon e esfera pessoal</div><div class="action-desc">Canon permanece fonte local. <code>memoria/missoes/segunda-camada/</code> é pessoal e não vai para nuvem.</div></div></div><div class="action-row"><div class="action-icon blue">2</div><div><div class="action-title">Leitura e escrita são caminhos diferentes</div><div class="action-desc">Consulta é read-only; escrita passa por ferramenta aprovada e, no canon, pelo par P-8 assinado.</div></div></div><div class="action-row"><div class="action-icon violet">3</div><div><div class="action-title">Acesso remoto</div><div class="action-desc">Acesso remoto documentado usa Tailscale; o painel e novos serviços não devem ganhar bind público por conveniência.</div></div></div></div></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Três refinamentos</div><h2 class="panel-title">Como o mapa foi depurado</h2></div></div><div class="action-list"><div class="action-row"><div class="action-icon">I</div><div><div class="action-title">Inventário</div><div class="action-desc">Conexões e fluxos descritos no PROJETO, MEMÓRIAS e vault.</div></div></div><div class="action-row"><div class="action-icon blue">II</div><div><div class="action-title">Checagem de limites</div><div class="action-desc">Separação entre ferramenta existente, acesso por agente, estado runtime e decisões já recusadas.</div></div></div><div class="action-row"><div class="action-icon violet">III</div><div><div class="action-title">Síntese operacional</div><div class="action-desc">Estados claros, WebSocket marcado como interface a validar e futuras frentes fora do backlog ativo.</div></div></div></div></article></div>
 +    <div class="footer-note"><span>FONTES: PROJETO.md · PROJETO_REFERENCIA.md · MEMÓRIAS</span><span>Snapshot documental; integrações não foram testadas ao vivo nesta passada.</span></div>
-+  
+ 
+-  </section>
 +</div>
 +<div class="sub" id="sub-modelos" data-sub="modelos" data-secao="sistema" hidden>
  
@@ -3738,18 +3557,20 @@ index 2384d4d1..83366154 100644
      <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fluxo documentado · estado de execução não medido</div><h2 class="panel-title">Decide, limita, compara</h2></div><span class="chip partial">DOCUMENTADO</span></div><div class="route"><span class="route-node laya">Laya local</span><span class="route-arrow">→</span><span class="route-node">fila</span><span class="route-arrow">→</span><span class="route-node model">cascata de modelos</span></div><div class="route"><span class="route-node">travas determinísticas</span><span class="route-arrow">→</span><span class="route-node">fallback seguro</span></div><div class="route"><span class="route-node">Jev em sombra</span><span class="route-arrow">→</span><span class="route-node">divergência registrada</span></div><p class="subnote">A Laya escolhe dentro das regras. Se falhar, responde o fallback determinístico. A sombra observa e não controla.</p></article><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Próxima frente</div><h2 class="panel-title">Ficha de capacidade do modelo</h2></div><span class="chip planned">PLANEJADO</span></div><div class="action-list"><div class="action-row"><div class="action-icon blue">A</div><div><div class="action-title">Capacidade publicada</div><div class="action-desc">Janela, saída máxima, ferramentas e limites declarados pelo provedor.</div></div></div><div class="action-row"><div class="action-icon">B</div><div><div class="action-title">Capacidade testada localmente</div><div class="action-desc">Tarefas, latência, qualidade, VRAM/RAM, data e ambiente do teste.</div></div></div><div class="action-row"><div class="action-icon violet">C</div><div><div class="action-title">Uso real e custo</div><div class="action-desc">Modelo escolhido, fallback, tempo, falha e quota, sem misturar benchmarks com tráfego.</div></div></div></div></article></div>
      <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Contrato de evidência</div><h2 class="panel-title">Cada recomendação precisa explicar sua base</h2></div></div><div class="service-list"><div class="service"><span>Fonte primária da Web</span><b>DATA + LINK</b></div><div class="service"><span>Ensaio local reproduzível</span><b>DATA + SETUP</b></div><div class="service"><span>Uso de produção</span><b>SEPARADO</b></div><div class="service"><span>Sem medida suficiente</span><b class="paused">NÃO MEDIDO</b></div></div></article>
 -  </section>
--
+ 
 -  <section class="page" id="page-plano" data-title="Plano de trabalho">
--
--    <div class="section-heading"><div><div class="eyebrow">Decisão humana · dados locais</div><h1>Plano de trabalho</h1><p>Veja cada proposta e confira se a assinatura do Humano existe.</p></div></div>
--    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">propostas/ · leitura local</div><h2 class="panel-title">Propostas para examinar</h2></div><span class="chip horizon" id="proposal-state">SEM LEITURA</span></div><div class="action-list" id="proposal-list"><p>Sem leitura.</p></div><p class="subnote" id="proposal-source">Verifique assinatura e aplicabilidade em cada proposta. A verificação não aplica a mudança.</p></article>
--    <article class="panel mt14"><h2 class="panel-title">Estado e próximos passos</h2><p>Consulte o registro atual para distinguir trabalho em curso, próxima decisão e horizonte.</p><div class="memory-links"><button type="button" data-vault="estado">Estado do sistema</button><button type="button" data-vault="inicio">Início do vault</button></div></article>
-+  
 +</div>
 +<div class="sub" id="sub-manutencao" data-sub="manutencao" data-secao="sistema" hidden>
  
+-    <div class="section-heading"><div><div class="eyebrow">Decisão humana · dados locais</div><h1>Plano de trabalho</h1><p>Veja cada proposta e confira se a assinatura do Humano existe.</p></div></div>
+-    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">propostas/ · leitura local</div><h2 class="panel-title">Propostas para examinar</h2></div><span class="chip horizon" id="proposal-state">SEM LEITURA</span></div><div class="action-list" id="proposal-list"><p>Sem leitura.</p></div><p class="subnote" id="proposal-source">Verifique assinatura e aplicabilidade em cada proposta. A verificação não aplica a mudança.</p></article>
+-    <article class="panel mt14"><h2 class="panel-title">Estado e próximos passos</h2><p>Consulte o registro atual para distinguir trabalho em curso, próxima decisão e horizonte.</p><div class="memory-links"><button type="button" data-vault="estado">Estado do sistema</button><button type="button" data-vault="inicio">Início do vault</button></div></article>
+ 
 -  </section>
 -  <section class="page" id="page-operacao" data-title="Estado operacional">
++    <div class="section-heading"><div><div class="eyebrow">Cuidar sem perder o contexto</div><h1>Manutenção da Agata</h1><p>Configuração e estado em um lugar; o painel não executa tarefas.</p></div></div>
++    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Timers</div><h2 class="panel-title">Próximos e últimos disparos</h2></div></div><div class="service-list" id="maintenance-timers"><p>Sem leitura.</p></div><p class="subnote">O último disparo é do timer; o resultado da tarefa não é inferido.</p></article>
++    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
  
 -    <div class="section-heading"><div><div class="eyebrow">Máquina · leitura por fonte</div><h1>Operação</h1><p>Confira unidades, repositório e timers. Cada leitura mostra fonte e hora.</p></div><button class="btn secondary" id="refresh-status" type="button">↻ Atualizar leitura</button></div>
 -    <div class="callout"><span id="collection-status" role="status" aria-live="polite">Aguardando a primeira leitura.</span><span class="right">SOMENTE LEITURA</span></div>
@@ -3757,9 +3578,6 @@ index 2384d4d1..83366154 100644
 -    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Git local · leitura independente</div><h2 class="panel-title">Estado do repositório</h2></div><span class="chip horizon" id="git-panel-state">SEM LEITURA</span></div><dl class="git-summary"><div><dt>Branch</dt><dd id="git-branch">—</dd></div><div><dt>HEAD</dt><dd id="git-head">—</dd></div><div><dt>Referência</dt><dd id="git-upstream">—</dd></div><div><dt>Árvore</dt><dd id="git-dirty">—</dd></div></dl><p class="subnote" id="git-age">Sem leitura.</p><p class="subnote">Alinhamento compara a referência local do último fetch; não consulta o remoto.</p></article></div>
 -    <article class="panel timer-panel"><div class="panel-head"><div><div class="panel-kicker">Systemd timers</div><h2 class="panel-title">Agenda observada</h2></div><span class="chip horizon" id="timer-panel-state">SEM LEITURA</span></div><p class="timer-intro">Disparo do timer e execução concluída são fatos diferentes.</p><div class="timer-grid" id="live-timers"><p>Sem leitura.</p></div><p class="subnote" id="timer-age">Fonte: systemd de usuário.</p></article>
 -    <article class="panel mt14"><div class="panel-head"><div><div class="panel-kicker">Configuração local</div><h2 class="panel-title">Tarefas da janela</h2></div></div><div class="service-list" id="live-tasks"><p>Sem leitura.</p></div><p class="subnote">Cadência configurada não comprova sucesso de execução.</p></article>
-+    <div class="section-heading"><div><div class="eyebrow">Cuidar sem perder o contexto</div><h1>Manutenção da Agata</h1><p>Configuração e estado em um lugar; o painel não executa tarefas.</p></div></div>
-+    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Timers</div><h2 class="panel-title">Próximos e últimos disparos</h2></div></div><div class="service-list" id="maintenance-timers"><p>Sem leitura.</p></div><p class="subnote">O último disparo é do timer; o resultado da tarefa não é inferido.</p></article>
-+    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
  
 -  </section>
 -<section class="page nv-page" id="page-nv-alexandria" data-title="Alexandria"><div class="section-heading"><div><div class="eyebrow">Nova versão · acervo com origem</div><h1>Alexandria</h1><p>O que o sistema sabe, com origem, commit e hash de cada trecho. A busca começa pelo texto; a busca por sentido é secundária e vem rotulada. Sem resultado quer dizer não encontrado nesta busca, nunca "não existe".</p></div></div>
@@ -3771,7 +3589,6 @@ index 2384d4d1..83366154 100644
 -<dl class="nv-dl" id="nv-alex-dl"></dl>
 -<div class="nv-acoes"><button type="button" class="btn" id="nv-indexar">Reindexar a partir do HEAD</button><button type="button" class="btn secondary" id="nv-iniciar">Criar pastas e indexar</button></div><p class="nv-nota" id="nv-alex-nota" role="status"></p></article></section>
 -<section class="page nv-page" id="page-nv-metacognicao" data-title="Metacognição"><div class="section-heading"><div><div class="eyebrow">Nova versão · antes e depois do turno</div><h1>Metacognição</h1><p>Antes de responder, o sistema classifica o pedido: tipo, atualidade, privacidade, risco e limite combinado. No gateway roda em sombra, só com SETH_SOMBRA_NOVA_VERSAO=1, e guarda o hash do pedido, nunca o texto.</p></div></div>
-+  
 +</div>
 +<div class="sub nv-page" id="sub-nv-corpo" data-sub="nv-corpo" data-secao="sistema" hidden>
 +<div class="section-heading"><div><div class="eyebrow">Nova versão · estado da Máquina</div><h1>Corpo operacional</h1><p>Fotografia datada, só leitura: serviços, portas, recursos e modelos. Saúde em cinco estados. Dado ausente aparece como não medido; serviço sob demanda parado não é falha.</p></div></div>
@@ -3859,7 +3676,7 @@ index 2384d4d1..83366154 100644
 +    <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Vault derivado</div><h2 class="panel-title">A memória como mapa</h2></div><span class="chip horizon" id="memory-state">SEM LEITURA</span></div><div class="memory-orbit"><div class="orbit orbit-150"><div class="orbit-center"><strong id="memory-total">—</strong>entradas</div></div><div class="layer-list"><div class="layer">Quente · decisões recentes</div><div class="layer">Morna · contexto consultável</div><div class="layer">Fria · história selada</div><div class="layer">Mapas · regras, scripts e propostas</div></div></div><div class="memory-links"><button type="button" data-vault="inicio">Começar no vault</button><button type="button" data-open-page="conhecimento" data-open-sub="grafo">Brain Atlas</button><button type="button" data-vault="mapa">Canvas 2D</button><button type="button" data-vault="memorias">Vistas da Base</button><button type="button" data-vault="timeline">Linha do tempo</button></div><p class="subnote" id="memory-source">Aguardando leitura do vault.</p></article>
 +    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fontes</div><h2 class="panel-title">Navegar e confirmar</h2></div></div><p>O vault é derivado. As notas levam a relações e fontes; confirme o texto exato no canon antes de citá-lo.</p><button class="text-link" type="button" data-open-page="conhecimento" data-open-sub="documentacao">Buscar na documentação</button></article></div>
 +
-+  
++
 +</div>
 +<div class="sub" id="sub-grafo" data-sub="grafo" data-secao="conhecimento" hidden>
 +<div class="section-heading"><div><div class="eyebrow">Vault derivado · só leitura</div><h1>Grafo do vault</h1><p>Escolha um nó para trocar o centro. Relações, Regiões e Brain Atlas mudam a forma de ver a memória.</p></div></div>
@@ -3873,7 +3690,7 @@ index 2384d4d1..83366154 100644
 +
 +    <div class="section-heading"><div><div class="eyebrow">Documentação conectada ao sistema</div><h1>Conhecer, navegar, acompanhar</h1><p>Escolha uma fonte: estado, início do vault, linha do tempo ou mapas de conteúdo.</p></div></div>
 +    <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span><strong>As fontes mostram seu estado e horário de observação.</strong> As ligações para o Obsidian usam notas existentes no vault. Confirme conteúdo derivado na fonte canônica.</span><span class="right">DERIVAÇÃO · A CONECTAR</span></div>
-+    
++
 +    <div class="doc-grid">
 +      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Começar pelo presente</div><h2 class="panel-title">Estado e mudanças</h2></div><span class="chip planned">OBSIDIAN</span></div><p class="route-foot">Comece pelo estado resumido, siga para o ponto de entrada do vault e veja na linha do tempo como o sistema mudou.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="estado">Estado do sistema <span>estado.md</span></button><button type="button" class="doc-file" data-vault="inicio">Início do vault <span>INICIO.md</span></button><button type="button" class="doc-file" data-vault="timeline">Linha do tempo <span>timeline.md</span></button></div></article>
 +      <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Percorrer por assunto</div><h2 class="panel-title">Memórias e documentos</h2></div><span class="chip active">NAVEGÁVEL</span></div><p class="route-foot">Os mapas agrupam decisões e fontes relacionadas. Busca e vínculos entre notas continuam no Obsidian.</p><div class="doc-file-list"><button type="button" class="doc-file" data-vault="moc-projeto">Projeto e arquitetura <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-memoria">Memórias <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-documentos">Documentos-fonte <span>MOC</span></button><button type="button" class="doc-file" data-vault="moc-scripts">Scripts e ferramentas <span>MOC</span></button></div></article>
@@ -3881,7 +3698,7 @@ index 2384d4d1..83366154 100644
 +    </div>
 +    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Como a documentação viva deverá atualizar</div><h2 class="panel-title">Da mudança confirmada à navegação</h2></div><span class="chip planned">BACKEND PENDENTE</span></div><div class="doc-flow"><div class="doc-step"><small>01 · FONTE</small><b>Canon e repositório</b><p>Arquivos, commits e estado da máquina fornecem a evidência. A conversa sozinha não altera a memória.</p></div><div class="doc-step"><small>02 · GERAÇÃO</small><b>Derivados do vault</b><p>Após uma mudança integrada, regenerar índices, mapas e links a partir das fontes autorizadas.</p></div><div class="doc-step"><small>03 · ÍNDICE</small><b>Obsidian navegável</b><p>Atualizar notas, MOCs e relações; manter caminho de volta até o arquivo de origem.</p></div><div class="doc-step"><small>04 · PAINEL</small><b>Estado e frescor</b><p>Mostrar último commit lido, horário, fontes desatualizadas e lacunas sem inventar estado.</p></div></div><p class="subnote">Cada dado mostra fonte, hora da leitura e commit. Se a leitura falhar, o último valor fica marcado como desatualizado.</p></article>
 +    <div class="footer-note"><span>PROTÓTIPO DE LEITURA · SEM ESCRITA NO CANON</span><span>As notas do Obsidian são derivadas; os arquivos-fonte prevalecem.</span></div>
-+  
++
 +</div>
 +<div class="sub nv-page" id="sub-nv-alexandria" data-sub="nv-alexandria" data-secao="conhecimento" hidden>
 +<div class="section-heading"><div><div class="eyebrow">Nova versão · acervo com origem</div><h1>Alexandria</h1><p>O que o sistema sabe, com origem, commit e hash de cada trecho. A busca começa pelo texto; a busca por sentido é secundária e vem rotulada. Sem resultado quer dizer não encontrado nesta busca, nunca "não existe".</p></div></div>
@@ -3999,7 +3816,7 @@ index 2384d4d1..83366154 100644
  </body>
  </html>
 diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
-index 6d5ff9bf..e97f0aff 100644
+index 6d5ff9bf..db5605b8 100644
 --- a/redesign/painel_operacional/prototipo.js
 +++ b/redesign/painel_operacional/prototipo.js
 @@ -1,8 +1,11 @@
@@ -4112,7 +3929,8 @@ index 6d5ff9bf..e97f0aff 100644
 +    const ativa = botao.dataset.sub === escolhido.dataset.sub;
 +    botao.setAttribute("aria-selected", String(ativa));
 +    botao.classList.toggle("ativa", ativa);
-+  });
+   });
+-  byId("crumb").textContent = "Agata / " + (page.dataset.title || "Panorama");
 +  const nome = escolhido.dataset.sub;
 +  if (CARREGAR_SUB[nome]) CARREGAR_SUB[nome]();
 +  else if (nome.startsWith("nv-") && typeof AgataPainel.carregarNovaVersao === "function") AgataPainel.carregarNovaVersao(nome);
@@ -4124,8 +3942,7 @@ index 6d5ff9bf..e97f0aff 100644
 +  navSecoes.forEach((botao) => {
 +    if (botao.dataset.secao === alvo.id) botao.setAttribute("aria-current", "page");
 +    else botao.removeAttribute("aria-current");
-   });
--  byId("crumb").textContent = "Agata / " + (page.dataset.title || "Panorama");
++  });
 +  byId("crumb").textContent = "Agata / " + (alvo.dataset.titulo || "Panorama");
    search.value = "";
 -  filterSearch("");
@@ -4225,12 +4042,12 @@ index 6d5ff9bf..e97f0aff 100644
 -  finally { byId("wiki-submit").disabled = false; }
 +  } catch (_) { set("wiki-status", "Busca indisponível. Nenhum resultado foi preservado."); marcarEstado("conhecimento", "erro", "Não medido: a busca na documentação falhou. Nenhum resultado foi preservado."); }
 +  finally { byId("nv-consultar").disabled = false; }
-+}
+ }
+-byId("wiki-form").addEventListener("submit", searchWiki);
 +function aplicarEscopo() {
 +  const escopo = byId("conhecimento-escopo").value;
 +  document.querySelectorAll(".busca-unica [data-escopo]").forEach((item) => { item.hidden = item.dataset.escopo !== escopo; });
- }
--byId("wiki-form").addEventListener("submit", searchWiki);
++}
 +byId("conhecimento-escopo").addEventListener("change", aplicarEscopo);
 +aplicarEscopo();
 +// Uma busca só: documentação fica aqui; Alexandria e fora do acervo passam pelo nova_versao.js.
@@ -4292,265 +4109,7 @@ index 6d5ff9bf..e97f0aff 100644
      if (cartao.dataset.ligado) return;
      cartao.dataset.ligado = "1";
      cartao.tabIndex = 0; cartao.setAttribute("role", "button");
-@@ -533,12 +593,33 @@ function ligarCartoesClicaveis() {
- }
- 
- /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
-+/* (07/11/2026, lote 1 do chat) rota automática (rota: "automatico"), evento meta (fila, regra, modelo), parar resposta,
-+   aviso quando a conversa passa de 20 mensagens, texto de volta ao campo em falha de envio. Sem script inline e sem style=. */
- let sethAtual = {id: null, titulo: "", mensagens: []};
-+let sethEnvio = null; // AbortController da resposta em curso
- const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
- const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
-+const SETH_JANELA = 20; // o gateway recebe no máximo 20 mensagens (chat_stream.MAX_MENSAGENS)
-+const SETH_NAO_MEDIDO = "não medido";
- function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
- function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
- function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
-+function sethAviso(texto) { const a = byId("seth-aviso"); a.textContent = texto || ""; a.hidden = !texto; }
-+function sethJanela() {
-+  const aviso = byId("seth-janela"); const n = sethAtual.mensagens.length;
-+  aviso.hidden = n <= SETH_JANELA;
-+  aviso.textContent = n > SETH_JANELA
-+    ? "A Seth recebe só as últimas " + SETH_JANELA + " mensagens desta conversa. Ela tem " + n + "; as anteriores ficam salvas, mas não entram no pedido."
-+    : "";
-+}
-+/* Campos da resposta (fila, regra, modelo) vindos do evento meta ou da resposta inteira. Sem medição: "não medido". */
-+function sethCampos(meta) {
-+  if (!meta || !meta.fila || meta.fila === SETH_NAO_MEDIDO) return {rota: SETH_NAO_MEDIDO, regra: SETH_NAO_MEDIDO, modelo: SETH_NAO_MEDIDO};
-+  return {rota: meta.fila + (meta.modificador || ""), regra: meta.regra || SETH_NAO_MEDIDO, modelo: meta.modelo || SETH_NAO_MEDIDO};
-+}
-+function sethLinhaCampos(m) {
-+  return "Fila " + (m.rota || SETH_NAO_MEDIDO) + " · regra " + (m.regra || SETH_NAO_MEDIDO) + " · modelo " + (m.modelo || SETH_NAO_MEDIDO);
-+}
- function sethInline(container, texto) {
-   const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
-   for (const p of partes) {
-@@ -577,6 +658,12 @@ function sethMensagem(m, indice) {
-   if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
-   msg.append(cab, corpo);
-   if (m.role === "assistant") {
-+    const linha = document.createElement("p"); linha.className = "msg-meta"; linha.textContent = sethLinhaCampos(m);
-+    msg.append(linha);
-+    if (m.interrompida) {
-+      const nota = document.createElement("p"); nota.className = "msg-nota"; nota.textContent = "Resposta interrompida. O texto recebido ficou salvo.";
-+      msg.append(nota);
-+    }
-     const acoes = document.createElement("div"); acoes.className = "msg-acoes";
-     const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
-     copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
-@@ -599,6 +686,7 @@ function sethDesenhar() {
-   sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
-   log.scrollTop = log.scrollHeight;
-   sethTitulo(sethAtual.titulo);
-+  sethJanela();
- }
- function sethExemplos() {
-   const box = byId("seth-exemplos"); if (!box) return;
-@@ -638,21 +726,33 @@ async function sethAbrir(id) {
-   try {
-     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
-     sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens};
-+    sethAviso("");
-     sethDesenhar(); sethListar();
-   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
- }
-+/* Gravação: a conversa inteira vai em cada POST. Falha de gravação aparece no aviso; o texto segue na aba. */
-+function sethMensagemParaSalvar(m) {
-+  if (m.role !== "assistant") return {role: m.role, content: m.content};
-+  const saida = {role: "assistant", content: m.content, rota: m.rota || SETH_NAO_MEDIDO, regra: m.regra || SETH_NAO_MEDIDO,
-+    modelo: m.modelo || SETH_NAO_MEDIDO, hora: m.hora || ""};
-+  if (m.interrompida) saida.interrompida = true;
-+  return saida;
-+}
- async function sethSalvar() {
-   if (!sethAtual.mensagens.length) return;
-   if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
-   try {
-     const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
--      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map((m) => ({role: m.role, content: m.content}))})});
--    if (r.ok) { const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar(); }
--  } catch (_) { /* a conversa continua na aba; o aviso fica no status */ }
-+      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map(sethMensagemParaSalvar)})});
-+    if (r.ok) {
-+      const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar();
-+      if (byId("seth-aviso").textContent.startsWith("Conversa não salva")) sethAviso("");
-+    } else sethAviso("Conversa não salva (HTTP " + r.status + "). O texto continua nesta aba; tente de novo com uma mensagem menor, se a conversa estiver grande.");
-+  } catch (_) { sethAviso("Conversa não salva: o servidor não respondeu. O texto continua nesta aba."); }
- }
- async function sethApagar(id) {
-   await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
--  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); }
-+  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethAviso(""); sethDesenhar(); }
-   sethListar();
- }
- function sethRenomear(c, linha) {
-@@ -669,17 +769,22 @@ function sethRenomear(c, linha) {
-   campo.addEventListener("blur", () => sethListar());
- }
- function sethErro(status, erro) {
--  if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
--  if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
-+  if (status === 400) return "o servidor recusou o pedido (mensagem longa demais ou formato inválido)";
-+  if (status === 403) return "origem recusada pelo painel";
-+  if (status === 413) return "pedido grande demais";
-+  if (status === 429) return "outra resposta está em curso; tente de novo em instantes";
-+  if (status === 502 || status === 503) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
-+  if (erro && erro.motivoStream) return "o stream da resposta falhou (" + erro.message + ")";
-+  if (erro && erro.name === "TypeError") return "sem conexão com o painel";
-   return erro && erro.message ? erro.message : "falha desconhecida";
- }
- /* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
--   Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
--   Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
-+   Primeiro vem o evento meta (fila, regra, modelo). Erro de transporte (sem stream, 404, 5xx, rede) antes do
-+   primeiro delta cai para /api/seth/chat inteiro. Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
- function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
--async function sethLerStream(mensagens, parcial, aoTexto) {
--  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
--    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
-+async function sethLerStream(mensagens, parcial, aoTexto, sinal) {
-+  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store", signal: sinal,
-+    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, rota: "automatico"})});
-   if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
-   if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
-   const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
-@@ -689,7 +794,8 @@ async function sethLerStream(mensagens, parcial, aoTexto) {
-     if (!dados) return;
-     let evento;
-     try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
--    if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
-+    if (evento.tipo === "meta") parcial.meta = evento;
-+    else if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
-     else if (evento.tipo === "fim") fim = true;
-     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
-   };
-@@ -706,24 +812,44 @@ async function sethLerStream(mensagens, parcial, aoTexto) {
-     if (!fim) throw sethErroStream("stream interrompido");
-     return parcial.texto;
-   } finally {
--    try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
-+    try { await leitor.cancel(); } catch (_) { /* stream já fechado ou cancelado pelo Humano */ }
-   }
- }
--async function sethChatInteiro(mensagens) {
--  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
--    body: JSON.stringify({messages: mensagens})});
-+async function sethChatInteiro(mensagens, sinal) {
-+  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, signal: sinal,
-+    body: JSON.stringify({messages: mensagens, rota: "automatico"})});
-   if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
-   return r.json();
- }
-+/* Mensagem da janela para o envio: o gateway recusa mais de 4000 caracteres por mensagem. Conversa importada pode ter
-+   mensagem maior na janela; o trecho passa cortado, com a marca, para o pedido não falhar inteiro. */
-+const SETH_LIMITE_ENVIO = 4000;
-+function sethParaEnvio(texto) {
-+  if (texto.length <= SETH_LIMITE_ENVIO) return texto;
-+  return texto.slice(0, SETH_LIMITE_ENVIO - 100) + "\n[… cortado para o envio: " + texto.length + " caracteres]";
-+}
-+function sethGuardarResposta(conteudo, meta, interrompida) {
-+  const campos = sethCampos(meta);
-+  const m = {role: "assistant", content: conteudo, hora: sethHora(), rota: campos.rota, regra: campos.regra, modelo: campos.modelo};
-+  if (interrompida) m.interrompida = true;
-+  sethAtual.mensagens.push(m);
-+  sethDesenhar();
-+  sethStatus(interrompida ? "INTERROMPIDA" : "PRONTA", interrompida ? "horizon" : "planned");
-+  sethSalvar();
-+}
-+/* Envio: uma resposta por vez. Parar fecha o stream e mantém o texto recebido, marcado como interrompido.
-+   Falha de envio sem texto recebido: a mensagem sai da conversa com aviso, e o texto volta ao campo. */
- async function sethEnviar(textoUsuario, reaproveitar) {
--  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input"); const log = byId("seth-transcript");
-+  const botao = byId("seth-send"); const parar = byId("seth-parar"); const campo = byId("seth-input"); const log = byId("seth-transcript");
-   if (!reaproveitar) sethAtual.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
-+  sethAviso("");
-   sethDesenhar();
--  botao.disabled = true; sethStatus("PENSANDO", "partial");
-+  const controle = new AbortController(); sethEnvio = controle;
-+  botao.disabled = true; parar.hidden = false; sethStatus("PENSANDO", "partial");
-   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
-   log.append(pensando);
--  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
--  const parcial = {texto: ""};
-+  const mensagens = sethAtual.mensagens.slice(-SETH_JANELA).map((m) => ({role: m.role, content: sethParaEnvio(m.content)}));
-+  const parcial = {texto: "", meta: null};
-   let textoNo = null;
-   const aoTexto = (delta) => {
-     if (!textoNo) {
-@@ -736,25 +862,46 @@ async function sethEnviar(textoUsuario, reaproveitar) {
-     textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
-   };
-   try {
--    let conteudo, modelo = "";
-     try {
--      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
-+      let conteudo, meta = null;
-+      try {
-+        conteudo = await sethLerStream(mensagens, parcial, aoTexto, controle.signal);
-+        meta = parcial.meta;
-+      } catch (erro) {
-+        if (controle.signal.aborted) throw erro;
-+        const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
-+        if (!transporte) throw erro;
-+        const dados = await sethChatInteiro(mensagens, controle.signal);
-+        conteudo = dados.content; meta = dados;
-+      }
-+      sethGuardarResposta(conteudo, meta, false);
-     } catch (erro) {
--      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
--      if (!transporte) throw erro;
--      const dados = await sethChatInteiro(mensagens);
--      conteudo = dados.content; modelo = dados.model || "";
-+      if (!controle.signal.aborted) throw erro;
-+      // Parada do Humano: o texto recebido fica salvo, marcado como interrompido
-+      if (parcial.texto) sethGuardarResposta(parcial.texto, parcial.meta, true);
-+      else { sethDesenhar(); sethAviso("Parada antes do primeiro texto. Escreva de novo para tentar outra vez."); sethStatus("INTERROMPIDA", "horizon"); }
-     }
--    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
--    sethDesenhar(); sethStatus("PRONTA", "planned");
--    sethSalvar();
-   } catch (erro) {
--    if (!reaproveitar) sethAtual.mensagens.pop();
--    sethDesenhar();
--    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
--    log.append(aviso);
--    sethStatus("INDISPONÍVEL", "horizon");
--  } finally { botao.disabled = false; campo.focus(); }
-+    if (parcial.texto) {
-+      // o envio chegou e a resposta parou no meio: o que chegou fica salvo, com o motivo
-+      sethGuardarResposta(parcial.texto, parcial.meta, true);
-+      sethAviso("Resposta incompleta: " + sethErro(erro.status, erro) + ".");
-+    } else {
-+      if (!reaproveitar) sethAtual.mensagens.pop();
-+      sethDesenhar();
-+      if (!reaproveitar) campo.value = textoUsuario + (campo.value ? "\n" + campo.value : "");
-+      sethAviso((reaproveitar ? "Não gerada de novo: " : "Não enviada: ") + sethErro(erro.status, erro) + "." + (reaproveitar ? "" : " O texto voltou ao campo."));
-+      sethStatus("INDISPONÍVEL", "horizon");
-+    }
-+  } finally {
-+    pensando.remove();
-+    botao.disabled = false; parar.hidden = true; sethEnvio = null; campo.focus();
-+  }
-+}
-+function sethParar() {
-+  if (!sethEnvio) return;
-+  sethStatus("PARANDO", "partial");
-+  sethEnvio.abort();
- }
- function sethRegerar() {
-   const ultimo = sethAtual.mensagens[sethAtual.mensagens.length - 1];
-@@ -770,7 +917,8 @@ function ligarConversaSeth() {
-   sethExemplos(); sethDesenhar(); sethListar();
-   const campo = byId("seth-input");
-   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
--  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
-+  byId("seth-parar").addEventListener("click", sethParar);
-+  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethAviso(""); sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
-   form.addEventListener("submit", (e) => {
-     e.preventDefault();
-     const texto = campo.value.trim();
-@@ -846,7 +994,7 @@ window.addEventListener("load", () => { ligarGrafo(); });
+@@ -846,7 +906,7 @@ window.addEventListener("load", () => { ligarGrafo(); });
  /* (27/10/2026) Mapa de lacunas: cada item do painel sem fonte medida agora vira LACUNA, com o motivo. Lido do próprio DOM. */
  function calcularLacunas() {
    const itens = [];
@@ -4559,7 +4118,7 @@ index 6d5ff9bf..e97f0aff 100644
      const titulo = cartao.querySelector("h3").textContent;
      const probe = cartao.dataset.probe;
      if (probe === "documento") itens.push({nome: titulo, motivo: "sem sonda: é documento, não leitura do sistema", onde: "O que posso fazer"});
-@@ -863,7 +1011,7 @@ function calcularLacunas() {
+@@ -863,7 +923,7 @@ function calcularLacunas() {
    return itens.length;
  }
  function marcarLacunasNosCartoes() {
@@ -4568,7 +4127,7 @@ index 6d5ff9bf..e97f0aff 100644
      chip.className = "chip horizon"; chip.textContent = "LACUNA · sem sonda";
    });
  }
-@@ -1080,3 +1228,117 @@ document.addEventListener("click", (e) => {
+@@ -1080,3 +1140,117 @@ document.addEventListener("click", (e) => {
  });
  document.querySelectorAll(".close-vault").forEach((b) => b.addEventListener("click", () => byId("vault-dialog").close()));
  byId("vault-dialog").addEventListener("click", (e) => { if (e.target === byId("vault-dialog")) byId("vault-dialog").close(); });
@@ -4687,18 +4246,10 @@ index 6d5ff9bf..e97f0aff 100644
 +aoMudarHash();
 +})();
 diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
-index c684fd05..4eb14beb 100644
+index c684fd05..50602099 100644
 --- a/redesign/painel_operacional/server.py
 +++ b/redesign/painel_operacional/server.py
-@@ -6,6 +6,7 @@ import argparse
- import hashlib
- import http.client
- import collections
-+import itertools
- import json
- import os
- import socket
-@@ -38,7 +39,7 @@ import nova_versao_painel  # noqa: E402
+@@ -38,7 +38,7 @@ import nova_versao_painel  # noqa: E402
  import chat_stream  # noqa: E402
  from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
  from armazem import (  # noqa: E402
@@ -4707,7 +4258,7 @@ index c684fd05..4eb14beb 100644
      _conversas_listar, _vault_caminho, _vault_item)
  BIND = "127.0.0.1"
  PORT = 20146
-@@ -52,6 +53,10 @@ GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os
+@@ -52,6 +52,10 @@ GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os
  CHAT_STREAM_LIMITE_BYTES = 131_072
  CHAT_STREAM_TIMEOUT_S = 120
  WIKI_RESULT_MAX = 12000
@@ -4718,7 +4269,7 @@ index c684fd05..4eb14beb 100644
  
  # Allowlist de unidades de usuário. A API não aceita nome de unidade do cliente.
  SERVICE_ALLOWLIST = (
-@@ -100,29 +105,25 @@ _DETAILS_CACHE: dict | None = None
+@@ -100,29 +104,25 @@ _DETAILS_CACHE: dict | None = None
  _DETAILS_CACHE_AT: float | None = None
  
  _ASSETS = {
@@ -4758,7 +4309,7 @@ index c684fd05..4eb14beb 100644
  _STATUS_CACHE: dict | None = None
  _STATUS_CACHE_AT: float | None = None
  RELAY_CLIENT_ID = "agata-relay-v2"
-@@ -164,6 +165,32 @@ def _relay_modules():
+@@ -164,6 +164,32 @@ def _relay_modules():
      return cache_conselho, relay_catalog, relay_council_contract, sanitizar
  
  
@@ -4791,7 +4342,7 @@ index c684fd05..4eb14beb 100644
  def _relay_rate_limited() -> bool:
      now = time.monotonic()
      with _RELAY_RATE_LOCK:
-@@ -1031,20 +1058,19 @@ class Handler(BaseHTTPRequestHandler):
+@@ -1031,20 +1057,19 @@ class Handler(BaseHTTPRequestHandler):
          if (self.path.startswith("/api/") and self.path.split("?", 1)[0] not in ROTAS_DA_EXTENSAO
                  and not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin"))):
              return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
@@ -4819,7 +4370,7 @@ index c684fd05..4eb14beb 100644
          if self.path.startswith("/api/vault/item"):
              q = parse_qs(urlparse(self.path).query)
              if q.get("caminho"):
-@@ -1096,6 +1122,8 @@ class Handler(BaseHTTPRequestHandler):
+@@ -1096,6 +1121,8 @@ class Handler(BaseHTTPRequestHandler):
                  pedidos = list(FOCOS_PENDENTES)
                  FOCOS_PENDENTES.clear()
              return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
@@ -4828,71 +4379,7 @@ index c684fd05..4eb14beb 100644
          if self.path == "/api/eventos":
              return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
          if self.path == "/api/relay-council/catalog":
-@@ -1438,7 +1466,10 @@ class Handler(BaseHTTPRequestHandler):
-             return self._send(413, "text/plain; charset=utf-8", b"request too large")
-         try:
-             corpo = json.loads(self.rfile.read(int(raw_length)))
--            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None)
-+            modelo = chat_stream.resolver_rota(corpo.get("rota") if isinstance(corpo, dict) else None)
-+            if modelo is None:
-+                return self._send(400, "text/plain; charset=utf-8", b"invalid route")
-+            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None, modelo)
-         except (ValueError, RecursionError):
-             # Mensagem genérica: a exceção de montar_pedido não ecoa conteúdo do usuário, e aqui nem ela sai.
-             return self._send(400, "text/plain; charset=utf-8", b"invalid request")
-@@ -1453,7 +1484,8 @@ class Handler(BaseHTTPRequestHandler):
-             except OSError:
-                 return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
-             with resposta:
--                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)))
-+                meta = chat_stream.meta_do_gateway({k.lower(): v for k, v in resposta.headers.items()})
-+                self._stream_sse(itertools.chain([meta], chat_stream.eventos_do_stream(_linhas_do_gateway(resposta))))
-         finally:
-             _SEM_CONVERSA_EM_CURSO.release()
- 
-@@ -1493,16 +1525,19 @@ class Handler(BaseHTTPRequestHandler):
-         return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
- 
-     def _seth_chat(self) -> None:
--        """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
-+        """Conversa com a Seth pelo gateway local (rota automática, seth-auto), só texto, sem ferramentas e sem escrita."""
-         if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
-             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
-         raw_length = self.headers.get("Content-Length", "")
--        if not raw_length.isdecimal() or int(raw_length) > 16384:
-+        if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
-             return self._send(413, "text/plain; charset=utf-8", b"request too large")
-         try:
-             corpo = json.loads(self.rfile.read(int(raw_length)))
-         except (json.JSONDecodeError, UnicodeDecodeError):
-             return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
-+        modelo = chat_stream.resolver_rota(corpo.get("rota") if isinstance(corpo, dict) else None)
-+        if modelo is None:
-+            return self._send(400, "text/plain; charset=utf-8", b"invalid route")
-         mensagens = corpo.get("messages") if isinstance(corpo, dict) else None
-         if not isinstance(mensagens, list) or not mensagens or len(mensagens) > 20:
-             return self._send(400, "text/plain; charset=utf-8", b"messages must be 1-20 items")
-@@ -1517,13 +1552,16 @@ class Handler(BaseHTTPRequestHandler):
-         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
-             return self._send(429, "text/plain; charset=utf-8", b"busy")
-         try:
--            pedido = {"model": "seth-livre", "stream": False, "messages": limpas, "max_tokens": 1024}
--            req = urllib.request.Request("http://127.0.0.1:20126/v1/chat/completions", data=json.dumps(pedido).encode("utf-8"),
-+            pedido = {"model": modelo, "stream": False, "messages": limpas, "max_tokens": 1024}
-+            req = urllib.request.Request(GATEWAY_CHAT_URL, data=json.dumps(pedido).encode("utf-8"),
-                                          headers={"Content-Type": "application/json"}, method="POST")
-             with urllib.request.urlopen(req, timeout=120) as resposta:
-                 dados = json.loads(resposta.read().decode("utf-8"))
-+                meta = chat_stream.meta_do_gateway({k.lower(): v for k, v in resposta.headers.items()})
-             texto = dados["choices"][0]["message"].get("content") or ""
--            body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
-+            body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model"),
-+                               **{k: meta[k] for k in ("fila", "modificador", "regra", "modelo")}},
-+                              ensure_ascii=False).encode("utf-8")
-             return self._send(200, "application/json; charset=utf-8", body)
-         except (OSError, KeyError, IndexError, ValueError):
-             return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
-@@ -1531,6 +1569,24 @@ class Handler(BaseHTTPRequestHandler):
+@@ -1531,6 +1558,24 @@ class Handler(BaseHTTPRequestHandler):
              _SEM_CONVERSA_EM_CURSO.release()
  
  
@@ -4918,10 +4405,10 @@ index c684fd05..4eb14beb 100644
          """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
          from urllib.parse import urlparse, parse_qs
 diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
-index 0733fde8..8de1d254 100644
+index 0733fde8..5bdd2a62 100644
 --- a/redesign/painel_operacional/spec/acceptance.json
 +++ b/redesign/painel_operacional/spec/acceptance.json
-@@ -1,4 +1,176 @@
+@@ -1,4 +1,187 @@
  [
 +  {
 +    "criterion": "as telas antigas redirecionam para a seção certa: `/`, `/index.html` e `/frentes` para `/prototipo#panorama`; `/operator_console` para `/prototipo#qualidade`; `/conselho-rede` e `/conselho-rede/` para `/prototipo#conselho`",
@@ -4933,11 +4420,22 @@ index 0733fde8..8de1d254 100644
 +    "cwd": null
 +  },
 +  {
-+    "criterion": "as rotas `/api/*` e os caminhos que o JS chama são os mesmos de antes",
++    "criterion": "todos os caminhos `/api/*` chamados pelo JS existem no servidor; a rota nova `/api/conselho/memoria` é somente leitura do cache e está documentada",
 +    "command": [
 +      "pytest",
 +      "-q",
-+      "redesign/painel_operacional/test_painel_unificado.py::RotasDaTelaUnicaTests::test_rotas_de_api_e_chamadas_do_js_nao_mudam"
++      "redesign/painel_operacional/test_painel_unificado.py::RotasDaTelaUnicaTests::test_rotas_de_api_e_chamadas_do_js_nao_mudam",
++      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_so_le_e_ignora_caminho_do_cliente"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a conversa salva é validada e devolvida com `schema_version` e `id`, e regrava com o mesmo id sem duplicar arquivo; conteúdo de mensagem até 65536 caracteres passa na validação, respeitado o teto total de 262144 bytes por requisição",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_get_conversa_salva_devolve_schema_e_id_e_recusa_ausente",
++      "redesign/painel_operacional/test_painel.py::HttpTests::test_conversa_importada_com_mensagem_de_18973_caracteres_e_lida"
 +    ],
 +    "cwd": null
 +  },
@@ -5098,7 +4596,7 @@ index 0733fde8..8de1d254 100644
    {
      "criterion": "a página não tem script inline por causa da CSP",
      "command": [
-@@ -54,11 +226,11 @@
+@@ -54,11 +237,11 @@
      "cwd": null
    },
    {
@@ -5112,7 +4610,7 @@ index 0733fde8..8de1d254 100644
      ],
      "cwd": null
    },
-@@ -81,15 +253,6 @@
+@@ -81,15 +264,6 @@
      ],
      "cwd": null
    },
@@ -5128,7 +4626,7 @@ index 0733fde8..8de1d254 100644
    {
      "criterion": "a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento",
      "command": [
-@@ -143,5 +306,252 @@
+@@ -143,5 +317,68 @@
        "redesign/painel_operacional/test_painel.py::HttpTests::test_json_post_aceita_ate_64k_e_recusa_acima"
      ],
      "cwd": null
@@ -5193,190 +4691,6 @@ index 0733fde8..8de1d254 100644
 +      "pytest",
 +      "-q",
 +      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_aba_memoria_fica_na_secao_conselho"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "o painel manda só a rota `automatico` (ausente vale o mesmo), o gateway recebe `seth-auto`, e outra rota responde 400 sem chegar ao gateway",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_rota_ausente_e_automatico_chegam_ao_gateway_como_seth_auto",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_outra_rota_responde_400_e_nao_chega_ao_gateway",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_pedido_inteiro_com_rota_diferente_responde_400",
-+      "redesign/painel_operacional/test_chat_stream.py::RotaTest::test_automatico_e_ausente_viram_o_gatilho_do_gateway",
-+      "redesign/painel_operacional/test_chat_stream.py::RotaTest::test_outro_valor_e_recusado_sem_seletor_manual",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_rota_automatica_e_o_unico_valor_enviado",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_secao_sem_seletor_manual_de_fila"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a resposta do stream traz o evento `meta` antes do primeiro texto, com fila, modificador, regra e modelo, ou `não medido`",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_meta_vem_antes_do_primeiro_texto_com_os_cabecalhos_do_gateway",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_pedido_inteiro_devolve_fila_regra_e_modelo",
-+      "redesign/painel_operacional/test_chat_stream.py::MetaDoGatewayTest::test_cabecalhos_completos_viram_fila_regra_e_modelo",
-+      "redesign/painel_operacional/test_chat_stream.py::MetaDoGatewayTest::test_sem_cabecalhos_tudo_nao_medido",
-+      "redesign/painel_operacional/test_chat_stream.py::MetaDoGatewayTest::test_gateway_antigo_mede_fila_mas_nao_regra",
-+      "redesign/painel_operacional/test_chat_stream.py::MetaDoGatewayTest::test_valor_fora_da_forma_nao_entra"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a mensagem do assistente gravada guarda rota, regra, modelo e hora; o arquivo antigo sem esses campos continua abrindo",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_armazem.py::CamposDaRespostaTest::test_resposta_do_assistente_guarda_rota_regra_modelo_hora_e_interrompida",
-+      "redesign/painel_operacional/test_chat_armazem.py::ArquivoAntigoTest::test_arquivo_sem_os_campos_novos_continua_abrindo_e_listando",
-+      "redesign/painel_operacional/test_chat_armazem.py::ArquivoAntigoTest::test_gravar_com_campos_de_resposta_e_reabrir"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "o limite de mensagem da conversa é explícito (65536 caracteres); a maior mensagem medida, de 18973 caracteres, passa, e o contrato de validação continua valendo",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_armazem.py::LimiteDeMensagemTest::test_mensagem_de_18973_caracteres_passa",
-+      "redesign/painel_operacional/test_chat_armazem.py::LimiteDeMensagemTest::test_limite_e_explicito_e_fica_no_teto",
-+      "redesign/painel_operacional/test_chat_armazem.py::LimiteDeMensagemTest::test_contrato_antigo_continua_valendo_fora_do_limite_de_mensagem",
-+      "redesign/painel_operacional/test_chat_armazem.py::CamposDaRespostaTest::test_campo_de_resposta_com_mais_de_64_caracteres_recusa_a_conversa"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a Conversa mostra fila, regra e modelo de cada resposta, ou `não medido`, por textContent",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_resposta_mostra_fila_regra_e_modelo_por_textcontent",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_evento_meta_grava_fila_regra_e_modelo"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "em falha de envio, o texto volta ao campo e a mensagem do usuário sai da conversa com aviso visível",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_falha_de_envio_devolve_o_texto_ao_campo",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_aviso_de_envio_e_status_de_gravacao"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a Conversa mostra um aviso visível quando a conversa passa de 20 mensagens, e o pedido leva só as 20 últimas",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_aviso_de_janela_de_20_mensagens"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a Conversa tem botão para parar a resposta: fecha o stream com AbortController e marca o texto recebido como interrompido",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_parar_resposta_fecha_o_stream_com_abort_controller",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_parar_resposta_tem_botao_escondido_na_secao",
-+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_texto_interrompido_fica_marcado"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a regra automática do gateway casa a primeira regra de T1, L1, R1, R2 e R3, e o `-longo` só sai de fila que tem fila longa",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_trava_de_tamanho_6001_vai_a_pesado_mesmo_com_laya",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_6000_nao_casa_a_trava",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_laya_escolhe_a_fila_quando_nao_ha_trava",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_sem_escolha_laya_cai_na_regra_seguinte",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_cerca_de_codigo_sem_escolha_vai_a_codigo",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_cerca_com_escolha_do_laya_segue_o_laya",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_rapido_trivial_fronteira_400",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_rapido_trivial_veta_com_tres_usuarios_ou_ferramenta",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_padrao_sem_regra_casa",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_longo_so_em_fila_com_fila_longa",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_seth_auto_escolhe_pela_regra_e_responde_com_meta",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_seth_auto_com_texto_longo_vai_a_pesado",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_seth_livre_pedido_as_claras_e_fila_fixa_sem_regra",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_seth_public_segue_a_mesma_regra_automatica"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "fila que falhou sai da disponibilidade por um prazo; a regra passa à alternativa, com `fallback` registrado, e sem fila disponível o gateway responde 503",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_fila_principal_fora_usa_alternativa_com_fallback",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_sem_fila_disponivel_devolve_none",
-+      "redesign/router/test_rota_regras.py::RegistroEDisponibilidadeTests::test_falha_de_fila_sai_da_disponibilidade_por_cooldown",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_falha_de_fila_leva_a_alternativa_com_fallback_registrado",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_sem_fila_disponivel_responde_503_sem_chamar_upstream"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "mesmas entradas dão a mesma fila em 100 execuções, e a ordem das chaves do pedido não muda a saída",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_mesmas_entradas_dao_mesma_saida_em_100_execucoes",
-+      "redesign/router/test_rota_regras.py::DecisaoPuraTests::test_ordem_das_chaves_nao_muda_a_saida"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "a carga do arquivo de regras recusa regra sem fonte, entrada e operador fora do conjunto, fila fora das quatro, chave de modelo e id repetido",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_regra_sem_fonte",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_entrada_fora_do_conjunto",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_operador_fora_do_conjunto",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_fila_fora_das_quatro_inclusive_public_e_externos",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_modelo_por_chave_extra",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_recusa_id_repetido",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_arquivo_real_carrega_na_ordem_certa",
-+      "redesign/router/test_rota_regras.py::CargaDoArquivoTests::test_arquivo_invalido_mantem_a_ultima_versao_valida"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "o registro da decisão grava regra, motivo, sha256 do arquivo e modelo medido, e nenhum texto do usuário",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/router/test_rota_regras.py::RegistroEDisponibilidadeTests::test_registro_grava_valores_e_nao_texto_do_usuario",
-+      "redesign/router/test_rota_regras.py::RegistroEDisponibilidadeTests::test_registro_sem_medicao_grava_nao_medido_e_sem_escolha",
-+      "redesign/router/test_rota_regras.py::GatewayHttpTests::test_seth_auto_escolhe_pela_regra_e_responde_com_meta"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "o modelo mostrado sai só da medição da Máquina (`X-Modelo-Real`); sem ela, `não medido`",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_stream.py::MetaDoGatewayTest::test_sem_cabecalhos_tudo_nao_medido",
-+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_meta_vem_antes_do_primeiro_texto_com_os_cabecalhos_do_gateway"
-+    ],
-+    "cwd": null
-+  },
-+  {
-+    "criterion": "abrir uma conversa salva devolve `schema_version` e `id` (a leitura de arquivo importado do LibreChat também), e recusa id fora do formato e arquivo inválido",
-+    "command": [
-+      "pytest",
-+      "-q",
-+      "redesign/painel_operacional/test_chat_armazem.py::ArquivoAntigoTest::test_leitura_devolve_schema_version_e_id_e_aceita_arquivo_importado",
-+      "redesign/painel_operacional/test_chat_armazem.py::ArquivoAntigoTest::test_leitura_recusa_id_fora_do_formato_arquivo_invalido_e_ausente"
 +    ],
 +    "cwd": null
    }
@@ -5460,7 +4774,7 @@ index 00000000..7d371e45
 +
 +Pedido do Humano em 07/11/2026: aba "Memória compartilhada" dentro da seção Conselho, para acompanhar as entradas do cache do Conselho (leitura de `redesign/router/cache_conselho.py`). O Humano é membro do Conselho e a aba é só de leitura: não grava, não anota e não aprova nada. Isso abre uma exceção à regra "nenhuma rota nova de API" (`GET /api/conselho/memoria`; os sete critérios novos estão no fim de `spec/acceptance.json`). Entra no mesmo lote e na mesma assinatura do painel unificado.
 diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
-index ccbf3f62..b8ba4b94 100644
+index ccbf3f62..7d90507a 100644
 --- a/redesign/painel_operacional/spec/spec.md
 +++ b/redesign/painel_operacional/spec/spec.md
 @@ -1,33 +1,228 @@
@@ -5533,7 +4847,7 @@ index ccbf3f62..b8ba4b94 100644
 +
 +### Rotas de API
 +
-+- Sem mudança. Os caminhos `/api/*` de `server.py`, com verbos, limites, origem e respostas, continuam iguais. O JS só chama caminhos que existem no servidor.
++- Os caminhos e verbos existentes permanecem; o JS só chama caminhos presentes no servidor. A resposta da leitura de conversa salva é normalizada com `schema_version` e `id`, exigidos pelo cliente. Mensagens importadas até 65536 caracteres são aceitas.
 +- Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
 +  - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
 +  - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
@@ -5570,7 +4884,6 @@ index ccbf3f62..b8ba4b94 100644
 +
 +- panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`; POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
 +- conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`.
-+- conversa, rota (lote 1 do chat, 07/11/2026): `rota` opcional no corpo de `/api/seth/chat/stream` e `/api/seth/chat`. Único valor aceito: `automatico`; ausente vale o mesmo; outro valor responde 400 antes do gateway. O painel manda `seth-auto` ao gateway. O stream abre com o evento `meta` (`fila`, `modificador`, `regra`, `modelo`), lido dos cabeçalhos `X-Seth-Rota`, `X-Seth-Regra` e `X-Modelo-Real`; o que faltar sai `não medido`. A mensagem do assistente guarda `rota`, `regra`, `modelo`, `hora` e `interrompida` (texto de até 64 caracteres; os quatro primeiros).
 +- conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
 +- sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
 +- conhecimento: GET `/api/grafo`, `/api/vault/item`, `/api/nova-versao/estado`; POST `/api/wiki/search`, `/api/nova-versao/executar` (`consultar`, `skills`, `indexar`, `iniciar`, `acervo_*`, `acervo_externa_*`), POST `/api/nova-versao/upload`.
@@ -5679,7 +4992,8 @@ index ccbf3f62..b8ba4b94 100644
  ## Critérios de aceite
  
 +- [ ] as telas antigas redirecionam para a seção certa: `/`, `/index.html` e `/frentes` para `/prototipo#panorama`; `/operator_console` para `/prototipo#qualidade`; `/conselho-rede` e `/conselho-rede/` para `/prototipo#conselho`
-+- [ ] as rotas `/api/*` e os caminhos que o JS chama são os mesmos de antes
++- [ ] todos os caminhos `/api/*` chamados pelo JS existem no servidor; a rota nova `/api/conselho/memoria` é somente leitura do cache e está documentada
++- [ ] a conversa salva é validada e devolvida com `schema_version` e `id`, e regrava com o mesmo id sem duplicar arquivo; conteúdo de mensagem até 65536 caracteres passa na validação, respeitado o teto total de 262144 bytes por requisição
 +- [ ] a CSP das respostas continua com `script-src 'self'` e `style-src 'self'`
 +- [ ] o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma
 +- [ ] cada tela antiga tem um subpainel `sub-<nome>` dentro da seção de destino do mapeamento
@@ -5707,7 +5021,7 @@ index ccbf3f62..b8ba4b94 100644
  - [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
  - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
  - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
-@@ -37,28 +232,84 @@
+@@ -37,28 +232,69 @@
  - [ ] a avaliação pelo painel respeita revisão, política e não expõe o gabarito no estado
  - [ ] o upload de fonte aceita só md e recusa o resto, sem deixar temporário
  - [ ] o corpo de POST vai até 64 KB e recusa acima
@@ -5725,21 +5039,6 @@ index ccbf3f62..b8ba4b94 100644
 +- [ ] o texto da memória do Conselho sai pelo mesmo filtro de dado pessoal e de segredo da gravação
 +- [ ] a rota da memória do Conselho recusa origem cruzada, como as outras leituras de API
 +- [ ] a aba Memória compartilhada fica dentro da seção Conselho, tem estados carregando, vazio e erro, e monta o texto do cache só com textContent
-+- [ ] o painel manda só a rota `automatico` (ausente vale o mesmo), o gateway recebe `seth-auto`, e outra rota responde 400 sem chegar ao gateway
-+- [ ] a resposta do stream traz o evento `meta` antes do primeiro texto, com fila, modificador, regra e modelo, ou `não medido`
-+- [ ] a mensagem do assistente gravada guarda rota, regra, modelo e hora; o arquivo antigo sem esses campos continua abrindo
-+- [ ] o limite de mensagem da conversa é explícito (65536 caracteres); a maior mensagem medida, de 18973 caracteres, passa, e o contrato de validação continua valendo
-+- [ ] a Conversa mostra fila, regra e modelo de cada resposta, ou `não medido`, por textContent
-+- [ ] em falha de envio, o texto volta ao campo e a mensagem do usuário sai da conversa com aviso visível
-+- [ ] a Conversa mostra um aviso visível quando a conversa passa de 20 mensagens, e o pedido leva só as 20 últimas
-+- [ ] a Conversa tem botão para parar a resposta: fecha o stream com AbortController e marca o texto recebido como interrompido
-+- [ ] a regra automática do gateway casa a primeira regra de T1, L1, R1, R2 e R3, e o `-longo` só sai de fila que tem fila longa
-+- [ ] fila que falhou sai da disponibilidade por um prazo; a regra passa à alternativa, com `fallback` registrado, e sem fila disponível o gateway responde 503
-+- [ ] mesmas entradas dão a mesma fila em 100 execuções, e a ordem das chaves do pedido não muda a saída
-+- [ ] a carga do arquivo de regras recusa regra sem fonte, entrada e operador fora do conjunto, fila fora das quatro, chave de modelo e id repetido
-+- [ ] o registro da decisão grava regra, motivo, sha256 do arquivo e modelo medido, e nenhum texto do usuário
-+- [ ] o modelo mostrado sai só da medição da Máquina (`X-Modelo-Real`); sem ela, `não medido`
-+- [ ] abrir uma conversa salva devolve `schema_version` e `id` (a leitura de arquivo importado do LibreChat também), e recusa id fora do formato e arquivo inválido
  
  ## Desenho e alternativas
  
@@ -5802,7 +5101,7 @@ index ccbf3f62..b8ba4b94 100644
  
  ## Código
  
-@@ -71,18 +322,12 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+@@ -71,18 +307,12 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
  - `sdd_painel.py`
  - `medicoes_painel.py`
  - `nova_versao_painel.py`
@@ -5822,14 +5121,13 @@ index ccbf3f62..b8ba4b94 100644
  - `README.md`
  - `test_painel.py`
  - `test_qualidade_llm.py`
-@@ -92,12 +337,14 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
+@@ -92,12 +322,13 @@ O `pytest` precisa estar no PATH do serviço para o painel medir critérios; sem
  - `test_nova_versao_painel.py`
  - `test_relay_catalog.py`
  - `test_conselho_rede.py`
 +- `test_csp_prototipo.py`
 +- `test_chat_stream.py`
 +- `test_chat_stream_rota.py`
-+- `test_chat_armazem.py`
 +- `test_painel_unificado.py`
 +- `test_chat_ui.py`
 +- `test_frentes.py`
@@ -6070,246 +5368,11 @@ index e68340d9..00000000
 -@media (prefers-reduced-motion: reduce) {
 -  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 -}
-diff --git a/redesign/painel_operacional/test_chat_armazem.py b/redesign/painel_operacional/test_chat_armazem.py
-new file mode 100644
-index 00000000..87d49a30
---- /dev/null
-+++ b/redesign/painel_operacional/test_chat_armazem.py
-@@ -0,0 +1,117 @@
-+#!/usr/bin/env python3
-+"""Armazém das conversas: limite explícito por mensagem e campos da resposta (fila, regra, modelo, hora).
-+
-+Usa um diretório temporário (armazem.CONVERSAS_DIR trocado): nunca toca ~/.cache/agata/painel-conversas.
-+"""
-+import json
-+import tempfile
-+import unittest
-+from pathlib import Path
-+from unittest import mock
-+
-+import armazem
-+
-+ID_ANTIGO = "0123456789ab"
-+
-+
-+def conversa(*mensagens, titulo="teste"):
-+    return {"titulo": titulo, "mensagens": list(mensagens)}
-+
-+
-+class LimiteDeMensagemTest(unittest.TestCase):
-+    def test_mensagem_de_18973_caracteres_passa(self):
-+        # a maior mensagem medida nas conversas importadas do LibreChat (07/11/2026)
-+        limpo = armazem._conversa_validar(conversa({"role": "user", "content": "x" * 18973}))
-+        self.assertIsNotNone(limpo)
-+        self.assertEqual(len(limpo["mensagens"][0]["content"]), 18973)
-+
-+    def test_limite_e_explicito_e_fica_no_teto(self):
-+        self.assertEqual(armazem.CONVERSA_MENSAGEM_LIMITE, 65536)
-+        self.assertIsNotNone(armazem._conversa_validar(conversa({"role": "user", "content": "x" * 65536})))
-+        self.assertIsNone(armazem._conversa_validar(conversa({"role": "user", "content": "x" * 65537})))
-+
-+    def test_contrato_antigo_continua_valendo_fora_do_limite_de_mensagem(self):
-+        mensagens_demais = [{"role": "user", "content": "oi"}] * 201
-+        self.assertIsNone(armazem._conversa_validar(conversa(*mensagens_demais)))
-+        self.assertIsNone(armazem._conversa_validar(conversa({"role": "tool", "content": "oi"})))
-+        self.assertIsNone(armazem._conversa_validar(conversa({"role": "user", "content": None})))
-+        self.assertIsNone(armazem._conversa_validar({"titulo": "x", "mensagens": "não é lista"}))
-+
-+
-+class CamposDaRespostaTest(unittest.TestCase):
-+    def test_resposta_do_assistente_guarda_rota_regra_modelo_hora_e_interrompida(self):
-+        msg = {"role": "assistant", "content": "resposta", "rota": "seth-livre-longo", "regra": "padrao",
-+               "modelo": "openai/gpt-oss-120b", "hora": "10:31", "interrompida": True}
-+        limpo = armazem._conversa_validar(conversa(msg))
-+        self.assertEqual(limpo["mensagens"][0], msg)
-+
-+    def test_campos_de_resposta_com_valor_nao_medido_passam(self):
-+        msg = {"role": "assistant", "content": "x", "rota": "não medido", "regra": "não medido", "modelo": "não medido"}
-+        self.assertEqual(armazem._conversa_validar(conversa(msg))["mensagens"][0], msg)
-+
-+    def test_campo_de_resposta_com_mais_de_64_caracteres_recusa_a_conversa(self):
-+        msg = {"role": "assistant", "content": "x", "modelo": "m" * 65}
-+        self.assertIsNone(armazem._conversa_validar(conversa(msg)))
-+
-+    def test_campo_de_resposta_fora_do_tipo_recusa_a_conversa(self):
-+        self.assertIsNone(armazem._conversa_validar(conversa({"role": "assistant", "content": "x", "regra": 3})))
-+        self.assertIsNone(armazem._conversa_validar(conversa({"role": "assistant", "content": "x", "interrompida": "sim"})))
-+
-+    def test_campos_de_resposta_nao_sobem_para_a_mensagem_do_usuario(self):
-+        msg = {"role": "user", "content": "pergunta", "rota": "seth-livre", "modelo": "x"}
-+        self.assertEqual(armazem._conversa_validar(conversa(msg))["mensagens"][0], {"role": "user", "content": "pergunta"})
-+
-+
-+class ArquivoAntigoTest(unittest.TestCase):
-+    def setUp(self):
-+        self.tmp = tempfile.TemporaryDirectory()
-+        self.patch = mock.patch.object(armazem, "CONVERSAS_DIR", Path(self.tmp.name))
-+        self.patch.start()
-+
-+    def tearDown(self):
-+        self.patch.stop()
-+        self.tmp.cleanup()
-+
-+    def test_arquivo_sem_os_campos_novos_continua_abrindo_e_listando(self):
-+        antigo = {"titulo": "do LibreChat", "mensagens": [{"role": "user", "content": "oi"},
-+                                                          {"role": "assistant", "content": "olá"}]}
-+        (Path(self.tmp.name) / (ID_ANTIGO + ".json")).write_text(json.dumps(antigo), encoding="utf-8")
-+        self.assertIsNotNone(armazem._conversa_caminho(ID_ANTIGO))
-+        listagem = armazem._conversas_listar()
-+        self.assertEqual([(i["id"], i["mensagens"]) for i in listagem["items"]], [(ID_ANTIGO, 2)])
-+        lido = json.loads((Path(self.tmp.name) / (ID_ANTIGO + ".json")).read_text(encoding="utf-8"))
-+        self.assertEqual(armazem._conversa_validar(lido)["mensagens"], antigo["mensagens"])
-+
-+    def test_leitura_devolve_schema_version_e_id_e_aceita_arquivo_importado(self):
-+        # formato dos 16 arquivos importados do LibreChat (só as chaves; conteúdo sintético)
-+        importado = {"data_original": "2026-11-07", "id": "fakeid", "importado_em": "2026-11-07", "origem": "librechat",
-+                     "origem_id": "x", "titulo": "[LibreChat] teste", "titulo_original": "teste",
-+                     "mensagens": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "olá"}]}
-+        (Path(self.tmp.name) / (ID_ANTIGO + ".json")).write_text(json.dumps(importado), encoding="utf-8")
-+        lido = armazem._conversa_ler(ID_ANTIGO)
-+        self.assertEqual(lido["schema_version"], 1)
-+        self.assertEqual(lido["id"], ID_ANTIGO)
-+        self.assertEqual(lido["titulo"], "[LibreChat] teste")
-+        self.assertEqual(lido["mensagens"], importado["mensagens"])
-+
-+    def test_leitura_recusa_id_fora_do_formato_arquivo_invalido_e_ausente(self):
-+        self.assertIsNone(armazem._conversa_ler("../../etc"))
-+        self.assertIsNone(armazem._conversa_ler("aaaaaaaaaaaa"))
-+        (Path(self.tmp.name) / (ID_ANTIGO + ".json")).write_text(
-+            json.dumps({"titulo": "x", "mensagens": [{"role": "tool", "content": "oi"}]}), encoding="utf-8")
-+        self.assertIsNone(armazem._conversa_ler(ID_ANTIGO))
-+
-+    def test_gravar_com_campos_de_resposta_e_reabrir(self):
-+        dados = conversa({"role": "user", "content": "e a fila?"},
-+                         {"role": "assistant", "content": "resposta longa " * 900, "rota": "seth-rapido",
-+                          "regra": "rapido_trivial", "modelo": "fake/medido", "hora": "11:02"},
-+                         titulo="com campos")
-+        salvo = armazem._conversa_gravar(dados)
-+        self.assertIsNotNone(salvo)
-+        reaberto = armazem._conversa_validar(json.loads((Path(self.tmp.name) / (salvo["id"] + ".json")).read_text(encoding="utf-8")))
-+        self.assertEqual(reaberto["mensagens"][1]["rota"], "seth-rapido")
-+        self.assertEqual(reaberto["mensagens"][1]["modelo"], "fake/medido")
-+
-+
-+if __name__ == "__main__":
-+    unittest.main()
-diff --git a/redesign/painel_operacional/test_chat_stream.py b/redesign/painel_operacional/test_chat_stream.py
-index a985b504..ab0a640b 100644
---- a/redesign/painel_operacional/test_chat_stream.py
-+++ b/redesign/painel_operacional/test_chat_stream.py
-@@ -6,7 +6,9 @@ from chat_stream import (
-     MAX_MENSAGENS,
-     codificar_sse,
-     eventos_do_stream,
-+    meta_do_gateway,
-     montar_pedido,
-+    resolver_rota,
- )
- 
- 
-@@ -88,13 +90,46 @@ class CodificarSseTest(unittest.TestCase):
-         self.assertTrue(dados.endswith(b"\n\n"))
- 
- 
-+class RotaTest(unittest.TestCase):
-+    def test_automatico_e_ausente_viram_o_gatilho_do_gateway(self):
-+        self.assertEqual(resolver_rota("automatico"), "seth-auto")
-+        self.assertEqual(resolver_rota(None), "seth-auto")
-+
-+    def test_outro_valor_e_recusado_sem_seletor_manual(self):
-+        for valor in ("seth-livre", "seth-rapido", "seth-pesado", "seth-codigo", "seth-public", "", "AUTOMATICO", 1, ["automatico"]):
-+            with self.subTest(valor=valor):
-+                self.assertIsNone(resolver_rota(valor))
-+
-+
-+class MetaDoGatewayTest(unittest.TestCase):
-+    def test_cabecalhos_completos_viram_fila_regra_e_modelo(self):
-+        meta = meta_do_gateway({"x-seth-rota": "seth-livre-longo", "x-seth-regra": "padrao",
-+                                "x-modelo-real": "openai/gpt-oss-120b"})
-+        self.assertEqual(meta, {"tipo": "meta", "fila": "seth-livre", "modificador": "-longo",
-+                                "regra": "padrao", "modelo": "openai/gpt-oss-120b"})
-+
-+    def test_sem_cabecalhos_tudo_nao_medido(self):
-+        self.assertEqual(meta_do_gateway({}), {"tipo": "meta", "fila": "não medido", "modificador": "não medido",
-+                                               "regra": "não medido", "modelo": "não medido"})
-+
-+    def test_gateway_antigo_mede_fila_mas_nao_regra(self):
-+        meta = meta_do_gateway({"x-seth-rota": "seth-rapido", "x-modelo-real": "fake/m"})
-+        self.assertEqual((meta["fila"], meta["modificador"], meta["regra"], meta["modelo"]),
-+                         ("seth-rapido", "", "não medido", "fake/m"))
-+
-+    def test_valor_fora_da_forma_nao_entra(self):
-+        meta = meta_do_gateway({"x-seth-rota": "seth-publico", "x-seth-regra": "<script>", "x-modelo-real": "a" * 65})
-+        self.assertEqual((meta["fila"], meta["modificador"], meta["regra"], meta["modelo"]),
-+                         ("não medido", "não medido", "não medido", "não medido"))
-+
-+
- class MontarPedidoTest(unittest.TestCase):
-     def test_monta_pedido_com_stream_true(self):
-         pedido = montar_pedido([{"role": "user", "content": "oi"}])
-         self.assertEqual(
-             pedido,
-             {
--                "model": "seth-livre",
-+                "model": "seth-auto",
-                 "messages": [{"role": "user", "content": "oi"}],
-                 "stream": True,
-             },
 diff --git a/redesign/painel_operacional/test_chat_stream_rota.py b/redesign/painel_operacional/test_chat_stream_rota.py
-index 54e7eef6..773cd991 100644
+index 54e7eef6..150f9906 100644
 --- a/redesign/painel_operacional/test_chat_stream_rota.py
 +++ b/redesign/painel_operacional/test_chat_stream_rota.py
-@@ -27,14 +27,30 @@ def _chunk(texto):
-     return "data: " + json.dumps({"choices": [{"delta": {"content": texto}}]}, ensure_ascii=False) + "\n\n"
- 
- 
-+META_NAO_MEDIDO = {"tipo": "meta", "fila": "não medido", "modificador": "não medido",
-+                   "regra": "não medido", "modelo": "não medido"}
-+
-+
- class GatewayFalsoHandler(BaseHTTPRequestHandler):
-+    """Gateway de mentira: devolve o roteiro em SSE (stream) ou um JSON (pedido inteiro).
-+    Os cabeçalhos X-Seth-* e X-Modelo-Real vêm de `server.cabecalhos`, como o gateway real manda."""
-+
-     def do_POST(self):
-         tamanho = int(self.headers.get("Content-Length", "0"))
--        self.server.recebidos.append(json.loads(self.rfile.read(tamanho).decode("utf-8")))
-+        pedido = json.loads(self.rfile.read(tamanho).decode("utf-8"))
-+        self.server.recebidos.append(pedido)
-+        if pedido.get("stream") is False:
-+            corpo = json.dumps({"model": "fake/modelo", "choices": [{"message": {"role": "assistant", "content": "resposta inteira"}}]}).encode("utf-8")
-+            tipo = "application/json"
-+        else:
-+            corpo = self.server.roteiro.encode("utf-8")
-+            tipo = "text/event-stream"
-         self.send_response(200)
--        self.send_header("Content-Type", "text/event-stream")
-+        self.send_header("Content-Type", tipo)
-+        for nome, valor in self.server.cabecalhos.items():
-+            self.send_header(nome, valor)
-         self.end_headers()
--        self.wfile.write(self.server.roteiro.encode("utf-8"))
-+        self.wfile.write(corpo)
- 
-     def log_message(self, _format, *args):
-         return
-@@ -68,6 +84,7 @@ class RotaChatStreamTests(unittest.TestCase):
-         cls.gateway.daemon_threads = True
-         cls.gateway.roteiro = ""
-         cls.gateway.recebidos = []
-+        cls.gateway.cabecalhos = {}
-         cls.gateway_thread = threading.Thread(target=cls.gateway.serve_forever, daemon=True)
-         cls.gateway_thread.start()
-         cls.gateway_url = f"http://127.0.0.1:{cls.gateway.server_address[1]}/v1/chat/completions"
-@@ -85,6 +102,7 @@ class RotaChatStreamTests(unittest.TestCase):
-     def setUp(self):
-         self.gateway.recebidos.clear()
-         self.gateway.roteiro = ""
-+        self.gateway.cabecalhos = {}
-         panel.GATEWAY_CHAT_URL = self.gateway_url
- 
-     def tearDown(self):
-@@ -117,7 +135,7 @@ class RotaChatStreamTests(unittest.TestCase):
+@@ -117,7 +117,7 @@ class RotaChatStreamTests(unittest.TestCase):
      def test_raiz_redireciona_para_prototipo(self):
          status, _, cabecalhos = self.request("GET", "/")
          self.assertEqual(status, 302)
@@ -6318,7 +5381,7 @@ index 54e7eef6..773cd991 100644
  
      def test_conselho_rede_redireciona_para_o_conselho_no_prototipo(self):
          status, _, cabecalhos = self.request("GET", "/conselho-rede")
-@@ -126,7 +144,9 @@ class RotaChatStreamTests(unittest.TestCase):
+@@ -126,7 +126,9 @@ class RotaChatStreamTests(unittest.TestCase):
  
      def test_rotas_existentes_seguem_respondendo(self):
          self.assertEqual(self.request("GET", "/prototipo")[0], 200)
@@ -6329,85 +5392,8 @@ index 54e7eef6..773cd991 100644
  
      # Stream
  
-@@ -137,14 +157,15 @@ class RotaChatStreamTests(unittest.TestCase):
-         self.assertTrue(cabecalhos["content-type"].startswith("text/event-stream"))
-         self.assertEqual(cabecalhos["cache-control"], "no-store")
-         self.assertEqual(_eventos(corpo), [
-+            META_NAO_MEDIDO,
-             {"tipo": "texto", "delta": "Olá"},
-             {"tipo": "texto", "delta": ", mundo"},
-             {"tipo": "fim"},
-         ])
--        self.assertEqual(corpo, codificar_sse({"tipo": "texto", "delta": "Olá"})
-+        self.assertEqual(corpo, codificar_sse(META_NAO_MEDIDO) + codificar_sse({"tipo": "texto", "delta": "Olá"})
-                          + codificar_sse({"tipo": "texto", "delta": ", mundo"}) + codificar_sse({"tipo": "fim"}))
-         self.assertEqual(self.gateway.recebidos, [
--            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}], "stream": True},
-+            {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}], "stream": True},
-         ])
- 
-     def test_stream_sem_done_termina_em_erro_sse(self):
-@@ -152,10 +173,58 @@ class RotaChatStreamTests(unittest.TestCase):
-         status, corpo, _ = self.post_stream(self.MENSAGENS)
-         self.assertEqual(status, 200)
-         self.assertEqual(_eventos(corpo), [
-+            META_NAO_MEDIDO,
-             {"tipo": "texto", "delta": "parcial"},
-             {"tipo": "erro", "motivo": "stream interrompido"},
-         ])
- 
-+    # Rota automática (07/11/2026, D2 e D6g): o painel manda só `automatico`
-+
-+    def test_rota_ausente_e_automatico_chegam_ao_gateway_como_seth_auto(self):
-+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
-+        self.post_stream(self.MENSAGENS)
-+        self.post_stream({**self.MENSAGENS, "rota": "automatico"})
-+        self.assertEqual([p["model"] for p in self.gateway.recebidos], ["seth-auto", "seth-auto"])
-+
-+    def test_outra_rota_responde_400_e_nao_chega_ao_gateway(self):
-+        for valor in ("seth-livre", "seth-pesado", "seth-public", "zai/glm-4.7", ""):
-+            with self.subTest(rota=valor):
-+                status, _, _ = self.post_stream({**self.MENSAGENS, "rota": valor})
-+                self.assertEqual(status, 400)
-+        self.assertEqual(self.gateway.recebidos, [])
-+
-+    def test_meta_vem_antes_do_primeiro_texto_com_os_cabecalhos_do_gateway(self):
-+        self.gateway.cabecalhos = {"X-Seth-Rota": "seth-rapido", "X-Seth-Regra": "rapido_trivial",
-+                                   "X-Modelo-Real": "fake/medido"}
-+        self.gateway.roteiro = _chunk("oi") + "\n" + "data: [DONE]\n\n"
-+        _, corpo, _ = self.post_stream(self.MENSAGENS)
-+        self.assertEqual(_eventos(corpo), [
-+            {"tipo": "meta", "fila": "seth-rapido", "modificador": "", "regra": "rapido_trivial", "modelo": "fake/medido"},
-+            {"tipo": "texto", "delta": "oi"},
-+            {"tipo": "fim"},
-+        ])
-+
-+    def test_pedido_inteiro_devolve_fila_regra_e_modelo(self):
-+        self.gateway.cabecalhos = {"X-Seth-Rota": "seth-livre-longo", "X-Seth-Regra": "padrao",
-+                                   "X-Modelo-Real": "fake/modelo"}
-+        status, corpo, _ = self.request("POST", "/api/seth/chat", body=json.dumps(
-+            {"messages": self.MENSAGENS["mensagens"], "rota": "automatico"}).encode("utf-8"),
-+            headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}",
-+                     "Sec-Fetch-Site": "same-origin"})
-+        self.assertEqual(status, 200)
-+        dados = json.loads(corpo)
-+        self.assertEqual((dados["content"], dados["fila"], dados["modificador"], dados["regra"], dados["modelo"]),
-+                         ("resposta inteira", "seth-livre", "-longo", "padrao", "fake/modelo"))
-+        self.assertEqual(self.gateway.recebidos[-1]["model"], "seth-auto")
-+
-+    def test_pedido_inteiro_com_rota_diferente_responde_400(self):
-+        status, _, _ = self.request("POST", "/api/seth/chat", body=json.dumps(
-+            {"messages": self.MENSAGENS["mensagens"], "rota": "seth-pesado"}).encode("utf-8"),
-+            headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}",
-+                     "Sec-Fetch-Site": "same-origin"})
-+        self.assertEqual(status, 400)
-+        self.assertEqual(self.gateway.recebidos, [])
-+
-     def test_gateway_fora_gera_erro_sse_e_servidor_segue_vivo(self):
-         panel.GATEWAY_CHAT_URL = f"http://127.0.0.1:{_porta_fechada()}/v1/chat/completions"
-         status, corpo, cabecalhos = self.post_stream(self.MENSAGENS)
 diff --git a/redesign/painel_operacional/test_chat_ui.py b/redesign/painel_operacional/test_chat_ui.py
-index d84928e6..fc3a8663 100644
+index d84928e6..57099f94 100644
 --- a/redesign/painel_operacional/test_chat_ui.py
 +++ b/redesign/painel_operacional/test_chat_ui.py
 @@ -12,14 +12,14 @@ HERE = Path(__file__).resolve().parent
@@ -6427,72 +5413,6 @@ index d84928e6..fc3a8663 100644
      return HTML[inicio:fim]
  
  
-@@ -52,9 +52,63 @@ class ConversaJs(unittest.TestCase):
-         self.assertIn('"/api/seth/chat"', JS)
- 
-     def test_envia_chave_mensagens_no_stream(self):
--        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens\}\)'
-+        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens, rota: "automatico"\}\)'
-         self.assertIsNotNone(re.search(padrao, bloco_conversa_js(), flags=re.DOTALL),
--                             "o stream deve enviar o campo 'mensagens' (server.py, _seth_chat_stream)")
-+                             "o stream deve enviar 'mensagens' e a rota 'automatico' (server.py, _seth_chat_stream)")
-+
-+    def test_rota_automatica_e_o_unico_valor_enviado(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn('rota: "automatico"', bloco)
-+        self.assertNotIn("seth-livre", bloco)
-+        self.assertNotIn("seth-rapido", bloco)
-+        self.assertNotIn("seth-pesado", bloco)
-+        self.assertNotIn("seth-codigo", bloco)
-+
-+    def test_secao_sem_seletor_manual_de_fila(self):
-+        self.assertIsNone(re.search(r"<select\b", secao_conversa(), flags=re.IGNORECASE))
-+
-+    def test_parar_resposta_fecha_o_stream_com_abort_controller(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn("new AbortController()", bloco)
-+        self.assertIn("signal: sinal", bloco)
-+        self.assertIn("sethEnvio.abort()", bloco)
-+        self.assertIn('byId("seth-parar").addEventListener("click", sethParar)', bloco)
-+
-+    def test_parar_resposta_tem_botao_escondido_na_secao(self):
-+        secao = secao_conversa()
-+        self.assertRegex(secao, r'<button\b[^>]*id="seth-parar"[^>]*\bhidden\b')
-+
-+    def test_texto_interrompido_fica_marcado(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn("interrompida", bloco)
-+        self.assertIn("Resposta interrompida", bloco)
-+
-+    def test_falha_de_envio_devolve_o_texto_ao_campo(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn("campo.value = textoUsuario", bloco)
-+        self.assertIn("O texto voltou ao campo.", bloco)
-+
-+    def test_evento_meta_grava_fila_regra_e_modelo(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn('evento.tipo === "meta"', bloco)
-+        self.assertIn("sethCampos(meta)", bloco)
-+        self.assertIn("SETH_NAO_MEDIDO", bloco)
-+
-+    def test_resposta_mostra_fila_regra_e_modelo_por_textcontent(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn("msg-meta", bloco)
-+        self.assertIn("sethLinhaCampos", bloco)
-+        self.assertIn('"Fila "', bloco)
-+
-+    def test_aviso_de_janela_de_20_mensagens(self):
-+        bloco = bloco_conversa_js()
-+        self.assertIn("const SETH_JANELA = 20", bloco)
-+        self.assertIn('byId("seth-janela")', bloco)
-+        self.assertRegex(secao_conversa(), r'<p\b[^>]*id="seth-janela"[^>]*\bhidden\b')
-+
-+    def test_aviso_de_envio_e_status_de_gravacao(self):
-+        self.assertRegex(secao_conversa(), r'<p\b[^>]*id="seth-aviso"[^>]*role="alert"')
-+        self.assertIn("Conversa não salva", bloco_conversa_js())
- 
-     def test_bloco_conversa_sem_innerhtml(self):
-         self.assertNotIn("innerHTML", bloco_conversa_js())
 diff --git a/redesign/painel_operacional/test_frentes.py b/redesign/painel_operacional/test_frentes.py
 index 8967a387..ab083611 100644
 --- a/redesign/painel_operacional/test_frentes.py
@@ -6687,7 +5607,7 @@ index 7f9f1f6f..8e78f5fa 100644
  
      def test_avaliacao_pelo_painel_respeita_os_portoes(self):
 diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
-index d293eb09..d3bb0028 100644
+index d293eb09..7c7da12b 100644
 --- a/redesign/painel_operacional/test_painel.py
 +++ b/redesign/painel_operacional/test_painel.py
 @@ -37,7 +37,7 @@ class PainelTests(unittest.TestCase):
@@ -6718,7 +5638,31 @@ index d293eb09..d3bb0028 100644
          _, _, panel_headers = self.request("GET", "/prototipo")
          self.assertIn("frame-ancestors 'none'", panel_headers["Content-Security-Policy"])
          with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
-@@ -300,7 +301,7 @@ class HttpTests(unittest.TestCase):
+@@ -247,6 +248,23 @@ class HttpTests(unittest.TestCase):
+         self.assertEqual(self.request("GET", "/prototipo", headers={"Host": "exemplo.invalid"})[0], 421)
+         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
+ 
++    def test_get_conversa_salva_devolve_schema_e_id_e_recusa_ausente(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "0123456789ab"
++            panel._conversa_gravar({"id": conversa_id, "titulo": "Importada", "mensagens": [{"role": "user", "content": "oi"}]})
++            status, body, _ = self.request("GET", f"/api/seth/conversa?id={conversa_id}")
++            self.assertEqual(status, 200)
++            dados = json.loads(body)
++            self.assertEqual((dados["schema_version"], dados["id"]), (1, conversa_id))
++            headers = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                       "Content-Type": "application/json"}
++            status_salvar, body_salvar, _ = self.request("POST", "/api/seth/conversa",
++                json.dumps(dados).encode("utf-8"), headers)
++            self.assertEqual(status_salvar, 200)
++            self.assertEqual(json.loads(body_salvar)["id"], conversa_id)
++            self.assertEqual(len(list(Path(tmp).glob("*.json"))), 1)
++            self.assertEqual(self.request("GET", "/api/seth/conversa?id=aaaaaaaaaaaa")[0], 404)
++
+ 
+     def test_leituras_de_api_recusam_origem_cruzada_mas_a_extensao_passa(self):
+         for rota in ("/api/seth/conversas", "/api/eventos", "/api/lacunas", "/api/relay-council/state"):
+@@ -300,7 +318,7 @@ class HttpTests(unittest.TestCase):
  
      def test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp(self):
          # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
@@ -6727,12 +5671,30 @@ index d293eb09..d3bb0028 100644
              html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
              inline = []
  
+@@ -511,5 +529,17 @@ class HttpTests(unittest.TestCase):
+             finally:
+                 panel.armazem.CONVERSAS_DIR = antes
+ 
++    def test_conversa_importada_com_mensagem_de_18973_caracteres_e_lida(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "0123456789ab"
++            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [{"role": "user", "content": "x" * 18973}]})
++            self.assertIsNotNone(salvo)
++            lida = panel._conversa_ler(conversa_id)
++            self.assertEqual(lida["schema_version"], 1)
++            self.assertEqual(lida["id"], conversa_id)
++            self.assertEqual(len(lida["mensagens"][0]["content"]), 18973)
++            self.assertIsNotNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65536}]}))
++            self.assertIsNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65537}]}))
++
+ if __name__ == "__main__":
+     unittest.main()
 diff --git a/redesign/painel_operacional/test_painel_unificado.py b/redesign/painel_operacional/test_painel_unificado.py
 new file mode 100644
-index 00000000..868e4ad2
+index 00000000..cafca891
 --- /dev/null
 +++ b/redesign/painel_operacional/test_painel_unificado.py
-@@ -0,0 +1,533 @@
+@@ -0,0 +1,538 @@
 +"""Testes do painel unificado (spec em redesign/painel_operacional/spec/spec.md, decidida em 07/11/2026).
 +
 +Cada método corresponde a um critério automático de spec/acceptance.json. Os de rota sobem o servidor
@@ -6957,6 +5919,11 @@ index 00000000..868e4ad2
 +        e = estrutura()
 +        self.assertEqual(e.secoes, SECOES)
 +        self.assertEqual(e.botoes_menu, SECOES)
++
++    def test_conselho_so_abre_modelos_ao_entrar_pelo_menu(self):
++        js = (HERE / "abrir.js").read_text(encoding="utf-8")
++        self.assertIn('button[data-secao="conselho"]', js)
++        self.assertNotIn("querySelectorAll('[data-secao=\"conselho\"]", js)
 +
 +    def test_cada_tela_antiga_tem_subpainel_na_secao_certa(self):
 +        e = estrutura()
@@ -7301,904 +6268,3 @@ index 59bedc13..11e0b0a4 100644
          js = (HERE / "prototipo.js").read_text(encoding="utf-8")
          self.assertIn("/api/sdd/estado", js); self.assertIn("/api/sdd/executar", js)
  
-diff --git a/redesign/router/rota_regras.py b/redesign/router/rota_regras.py
-new file mode 100644
-index 00000000..644803cc
---- /dev/null
-+++ b/redesign/router/rota_regras.py
-@@ -0,0 +1,222 @@
-+#!/usr/bin/env python3
-+"""Rota automática do gateway (`seth-auto`): regras em arquivo versionado, decisão pura e registro.
-+
-+Quem chama é `seth_gateway.py`. Este módulo não chama modelo: a escolha do Laya entra como a
-+entrada `escolha_laya`, medida antes. Regra que usa algo fora do conjunto aqui é recusada na carga.
-+
-+Ordem da decisão: a primeira regra de `config/rotas/regras.json` que casa escolhe a fila;
-+depois a disponibilidade (M2, com a lista `alternativas`) e o sufixo `-longo` (M1).
-+`decidir` é função pura: mesmas entradas, mesmas regras e mesma disponibilidade dão a mesma saída.
-+O registro grava só valores (números, booleanos, rótulos e o sha256 do arquivo), nunca texto do usuário.
-+"""
-+from __future__ import annotations
-+
-+import hashlib
-+import json
-+import os
-+import re
-+import threading
-+import time
-+from datetime import datetime
-+from pathlib import Path
-+
-+FILAS = ("seth-livre", "seth-rapido", "seth-pesado", "seth-codigo")
-+FILAS_COM_LONGO = ("seth-livre", "seth-rapido", "seth-pesado")  # seth-codigo não tem fila longa
-+ESCOLHAS_LAYA = ("rapido", "livre", "pesado", "codigo")
-+FILA_DA_ESCOLHA = "escolha_laya"  # L1: a fila é "seth-" + a escolha do Laya
-+SUFIXO_LONGO = "-longo"
-+ENTRADAS = {
-+    "chars_ultimo_usuario": "numero", "chars_total": "numero", "n_usuario": "numero",
-+    "janela_estimada": "numero", "cerca_codigo": "booleano", "ferramenta": "booleano",
-+    "continuacao": "booleano", "escolha_laya": "escolha",
-+}
-+OPERADORES = ("==", "<", ">", "<=", "in")
-+CHAVES_REGRA = ("id", "condicao", "fila", "alternativas", "motivo", "fonte")
-+CHAVES_ARQUIVO = ("versao", "descricao", "regras")
-+REGISTRO = Path(os.environ.get("AGATA_ROTAS_REGISTRO") or Path.home() / ".cache/agata/rotas/decisoes.jsonl")
-+COOLDOWN_S = float(os.environ.get("AGATA_ROTAS_COOLDOWN_S", "60"))
-+_ID = re.compile(r"[a-z][a-z0-9_]{0,40}")
-+
-+
-+class RegrasInvalidas(ValueError):
-+    """Arquivo de regras recusado. A mensagem diz o que falhou, sem ecoar nenhum texto de pedido."""
-+
-+
-+def _valor_valido(tipo: str, op: str, valor) -> bool:
-+    if tipo == "numero":
-+        return op in ("==", "<", ">", "<=") and isinstance(valor, (int, float)) and not isinstance(valor, bool)
-+    if tipo == "booleano":
-+        return op == "==" and isinstance(valor, bool)
-+    if op == "==":  # escolha do Laya ausente
-+        return valor is None
-+    return (op == "in" and isinstance(valor, list) and bool(valor)
-+            and all(isinstance(v, str) and v in ESCOLHAS_LAYA for v in valor) and len(set(valor)) == len(valor))
-+
-+
-+def validar(dados) -> list[dict]:
-+    """Confere a forma do arquivo e devolve as regras normalizadas. Levanta RegrasInvalidas."""
-+    if not isinstance(dados, dict) or set(dados) - set(CHAVES_ARQUIVO):
-+        raise RegrasInvalidas("arquivo de regras: raiz inválida ou chave fora do conjunto")
-+    lista = dados.get("regras")
-+    if not isinstance(lista, list) or not lista:
-+        raise RegrasInvalidas("arquivo de regras sem a lista 'regras'")
-+    regras, vistos = [], set()
-+    for i, r in enumerate(lista):
-+        if not isinstance(r, dict):
-+            raise RegrasInvalidas(f"regra {i} não é objeto")
-+        fora = set(r) - set(CHAVES_REGRA)
-+        if fora:
-+            raise RegrasInvalidas(f"regra {i}: chave fora do conjunto {sorted(fora)}")
-+        rid = r.get("id")
-+        if not isinstance(rid, str) or not _ID.fullmatch(rid):
-+            raise RegrasInvalidas(f"regra {i}: id inválido")
-+        if rid in vistos:
-+            raise RegrasInvalidas(f"id repetido: {rid}")
-+        vistos.add(rid)
-+        if not isinstance(r.get("fonte"), str) or not r["fonte"].strip():
-+            raise RegrasInvalidas(f"regra {rid} sem fonte")
-+        if not isinstance(r.get("motivo"), str) or not r["motivo"].strip():
-+            raise RegrasInvalidas(f"regra {rid} sem motivo")
-+        fila = r.get("fila")
-+        if fila != FILA_DA_ESCOLHA and fila not in FILAS:
-+            raise RegrasInvalidas(f"regra {rid}: fila fora das quatro (seth-livre, seth-rapido, seth-pesado, seth-codigo)")
-+        alternativas = r.get("alternativas", [])
-+        if not isinstance(alternativas, list) or any(a not in FILAS for a in alternativas):
-+            raise RegrasInvalidas(f"regra {rid}: alternativa fora das quatro filas")
-+        condicao = r.get("condicao")
-+        if not isinstance(condicao, list):
-+            raise RegrasInvalidas(f"regra {rid}: condicao não é lista")
-+        clausulas = []
-+        for c in condicao:
-+            if not isinstance(c, list) or len(c) != 3:
-+                raise RegrasInvalidas(f"regra {rid}: cláusula com forma inválida")
-+            entrada, op, valor = c
-+            if entrada not in ENTRADAS:
-+                raise RegrasInvalidas(f"regra {rid}: entrada fora do conjunto")
-+            if op not in OPERADORES:
-+                raise RegrasInvalidas(f"regra {rid}: operador fora do conjunto")
-+            if not _valor_valido(ENTRADAS[entrada], op, valor):
-+                raise RegrasInvalidas(f"regra {rid}: operador ou valor incompatível com a entrada {entrada}")
-+            clausulas.append((entrada, op, valor))
-+        if fila == FILA_DA_ESCOLHA and not any(e == "escolha_laya" and o == "in" for e, o, _ in clausulas):
-+            raise RegrasInvalidas(f"regra {rid}: fila pela escolha do Laya sem condição sobre escolha_laya")
-+        regras.append({"id": rid, "condicao": clausulas, "fila": fila, "alternativas": list(alternativas),
-+                       "motivo": r["motivo"], "fonte": r["fonte"]})
-+    return regras
-+
-+
-+def carregar(caminho: Path) -> tuple[list[dict], str]:
-+    """(regras, sha256 do arquivo). Arquivo que não é JSON ou não passa em `validar` levanta RegrasInvalidas."""
-+    bruto = Path(caminho).read_bytes()
-+    try:
-+        dados = json.loads(bruto.decode("utf-8"))
-+    except (UnicodeDecodeError, ValueError):
-+        raise RegrasInvalidas("arquivo de regras não é JSON válido") from None
-+    return validar(dados), hashlib.sha256(bruto).hexdigest()
-+
-+
-+class Regras:
-+    """Última versão válida do arquivo. Arquivo ausente ou inválido: segue com a última válida."""
-+
-+    def __init__(self, caminho: Path):
-+        self.caminho = Path(caminho)
-+        self.erro: str | None = None
-+        self._mtime = None
-+        self._valida: tuple[list[dict], str] | None = None
-+        self._trava = threading.Lock()
-+
-+    def atual(self) -> tuple[list[dict] | None, str | None]:
-+        """(regras, sha256) da última versão válida, ou (None, None) se nunca houve uma."""
-+        with self._trava:
-+            try:
-+                mtime = self.caminho.stat().st_mtime_ns
-+            except OSError:
-+                mtime = None
-+            if mtime != self._mtime:
-+                self._mtime = mtime
-+                if mtime is None:
-+                    self.erro = "arquivo ausente"
-+                else:
-+                    try:
-+                        self._valida = carregar(self.caminho)
-+                        self.erro = None
-+                    except (OSError, RegrasInvalidas) as e:
-+                        self.erro = str(e)
-+            return self._valida or (None, None)
-+
-+
-+def _casa(entradas: dict, clausula: tuple) -> bool:
-+    entrada, op, valor = clausula
-+    real = entradas.get(entrada)
-+    if op == "==":
-+        return real == valor
-+    if op == "in":
-+        return real in valor  # escolha ausente (None) nunca casa
-+    if real is None:
-+        return False
-+    if op == "<":
-+        return real < valor
-+    if op == ">":
-+        return real > valor
-+    if op == "<=":
-+        return real <= valor
-+    return False
-+
-+
-+def decidir(entradas: dict, regras: list[dict], disponivel: dict, janelas: dict | None = None) -> dict:
-+    """Função pura. `janelas`: fila -> limiar de tokens, só para as filas que têm `-longo` (M1).
-+    Devolve fila (None se nenhuma disponível), modificador, regra, motivo (valores que decidiram) e fallback."""
-+    casou = next((r for r in regras if all(_casa(entradas, c) for c in r["condicao"])), None)
-+    if casou is None:
-+        return {"fila": None, "modificador": "", "regra": "sem_regra_casou", "motivo": {}, "fallback": False}
-+    base = casou["fila"]
-+    if base == FILA_DA_ESCOLHA:
-+        base = "seth-" + str(entradas.get("escolha_laya"))
-+    candidatas = [base] + [f for f in casou["alternativas"] if f != base]
-+    fila = next((f for f in candidatas if disponivel.get(f)), None)
-+    motivo = {entrada: entradas.get(entrada) for entrada, _, _ in casou["condicao"]}
-+    if fila is None:
-+        return {"fila": None, "modificador": "", "regra": casou["id"], "motivo": motivo, "fallback": False}
-+    limiar = (janelas or {}).get(fila)
-+    # seth-codigo nunca recebe -longo (não tem fila longa): a regra vale aqui, não só no mapa de quem chama
-+    longo = (fila in FILAS_COM_LONGO and limiar is not None
-+             and (entradas.get("janela_estimada") or 0) > limiar)
-+    return {"fila": fila, "modificador": SUFIXO_LONGO if longo else "", "regra": casou["id"],
-+            "motivo": motivo, "fallback": fila != base}
-+
-+
-+_FALHAS: dict[str, float] = {}
-+_TRAVA_FALHAS = threading.Lock()
-+
-+
-+def marcar_falha(fila: str, agora: float | None = None) -> None:
-+    """O gateway marca a fila quando ela devolve 429 ou 5xx. Sai da disponibilidade por COOLDOWN_S."""
-+    with _TRAVA_FALHAS:
-+        _FALHAS[fila] = time.monotonic() if agora is None else agora
-+
-+
-+def disponibilidade(agora: float | None = None) -> dict:
-+    """Snapshot das quatro filas no instante do pedido: fora só quem falhou dentro do prazo."""
-+    t = time.monotonic() if agora is None else agora
-+    with _TRAVA_FALHAS:
-+        falhas = dict(_FALHAS)
-+    return {f: not (f in falhas and t - falhas[f] < COOLDOWN_S) for f in FILAS}
-+
-+
-+def registrar(decisao: dict, entradas: dict, disponivel: dict, arquivo_regras: str | None,
-+              modelo: str | None, servida: str | None = None, caminho: Path | None = None) -> dict:
-+    """Uma linha JSON por resposta em ~/.cache/agata/rotas/decisoes.jsonl (fora do repositório)."""
-+    linha = {"ts": datetime.now().astimezone().isoformat(timespec="seconds"), "intencao": "automatico",
-+             "fila": decisao["fila"], "modificador": decisao["modificador"], "regra": decisao["regra"],
-+             "motivo": decisao["motivo"], "fallback": decisao["fallback"],
-+             "disponivel": {f: bool(disponivel.get(f)) for f in FILAS},
-+             "arquivo_regras": arquivo_regras, "modelo": modelo or "não medido"}
-+    if servida is not None:
-+        linha["servida"] = servida
-+    if entradas.get("escolha_laya") is not None:
-+        linha["escolha_laya"] = entradas["escolha_laya"]
-+    destino = Path(caminho or REGISTRO)
-+    destino.parent.mkdir(parents=True, exist_ok=True)
-+    with destino.open("a", encoding="utf-8") as f:
-+        f.write(json.dumps(linha, ensure_ascii=False, sort_keys=True) + "\n")
-+    return linha
-diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
-index 56f98b5b..bb884bf5 100644
---- a/redesign/router/seth_gateway.py
-+++ b/redesign/router/seth_gateway.py
-@@ -532,6 +532,10 @@ def _e_chamada_utilitaria(payload: dict) -> bool:
- # nunca quebra. Rodar ANTES de _injeta: a hidratação (~3,8k chars) empurraria
- # tudo pra "não trivial".
- _ROTA_BASE = "seth-livre"
-+# (07/11/2026, D2) gatilho da rota automática: o painel manda só este nome; a regra única
-+# (rota_regras.py + config/rotas/regras.json) escolhe a fila. `seth-livre` pedido às claras
-+# agora é fila fixa, sem regra.
-+_GATILHO_AUTO = "seth-auto"
- _LIMIAR_TRIVIAL_CHARS = 400
- _LIMIAR_PESADO_CHARS = 6000
- _ALIAS_PUBLICO = "seth-public"
-@@ -551,13 +555,13 @@ def _politica_dados_externos(payload: dict, classification: str | None = None) -
-     """Fail closed before the proxy: cloud payloads need the user's public-only lane."""
-     model = str(payload.get("model") or "")
-     if model == _ALIAS_PUBLICO:
--        payload["model"] = _ROTA_BASE
-+        payload["model"] = _GATILHO_AUTO  # a rota pública usa a mesma regra automática de sempre
-         payload["agata_data_classification"] = "public"
-     classification = payload.pop("agata_data_classification", classification)
-     local = model.startswith(_ROTAS_LOCAIS)
-     # (22/10/2026, P-8 sanitizador-cascata) a cascata seth-livre segue ao proxy, que sanitiza
-     # (segredo, dados pessoais, nomes de projeto) antes de qualquer saída. Outros modelos externos continuam exigindo public.
--    if not local and classification != "public" and model != _ROTA_BASE:
-+    if not local and classification != "public" and model not in (_ROTA_BASE, _GATILHO_AUTO):
-         raise DadosExternosSemClassificacao(
-             "dados sem classificação pública não podem ser enviados a modelos externos"
-         )
-@@ -639,6 +643,7 @@ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteament
- import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
- import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
- import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
-+import rota_regras  # noqa: E402  (mesmo diretório; rota automática seth-auto, 07/11/2026, D2)
- 
- _PERFIS = {"mtime": None, "dados": {}}
- 
-@@ -708,17 +713,18 @@ def _ultimo_texto_usuario(msgs: list) -> str:
-     return ""
- 
- 
--def _rota_laya(payload: dict) -> tuple[str, dict]:
--    """(719) Rota ativa: o Laya ajustado escolhe (decisão do Humano, 15/10/2026: "prefiro
--    já agora o Laya"), com as travas exatas de sempre por cima. Laya fora do ar, lento
--    (> _TIMEOUT_LAYA) ou com confiança abaixo do limiar -> a regra por tamanho, como antes.
--    Devolve (rota, resposta crua do Laya -- {} se não houve) para a sombra do Jev comparar."""
-+def _escolha_laya(payload: dict) -> tuple[str | None, dict]:
-+    """(719) O Laya ajustado escolhe (decisão do Humano, 15/10/2026: "prefiro já agora o Laya").
-+    (07/11/2026, D6f) Desde a regra automática, a escolha é uma ENTRADA medida antes da regra
-+    (`escolha_laya`), e não decide a fila sozinha. Laya fora do ar, lento (> _TIMEOUT_LAYA) ou
-+    com confiança abaixo do limiar -> None. Devolve (escolha ou None, resposta crua do Laya --
-+    {} se não houve) para a sombra do Jev comparar."""
-     if _e_chamada_utilitaria(payload):
--        return _classificar_rota(payload), {}
-+        return None, {}
-     msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-     texto = _ultimo_texto_usuario(msgs)[-4000:]
-     if not texto:
--        return _classificar_rota(payload), {}
-+        return None, {}
-     total, n_user, cerca = _texto_e_sinais(msgs)
-     # continuação (passo depois de ferramenta) decide de novo -- mesmo texto, mesma rota, a
-     # fila não troca no meio (682) -- mas a avaliação conta só a 1ª decisão de cada resposta
-@@ -727,7 +733,56 @@ def _rota_laya(payload: dict) -> tuple[str, dict]:
-             "continuacao": auditoria_turno.e_continuacao(msgs)}
-     r = decisor.decidir("roteador-laya", texto, _PERGUNTA_ROTA, timeout=_TIMEOUT_LAYA, meta=meta,
-                         url=decisor.URL_LAYA, modelo=decisor.MODELO_LAYA)
--    return _rota_com_travas(decisor.escolha(r, "rota", _LIMIAR_ROTA), payload), (r or {}).get("rota") or {}
-+    return decisor.escolha(r, "rota", _LIMIAR_ROTA), (r or {}).get("rota") or {}
-+
-+
-+def _rota_laya(payload: dict) -> tuple[str, dict]:
-+    """Versão antiga do caminho: a escolha do Laya com as travas por cima. Saiu do caminho de
-+    decisão com a regra automática (D6f); fica definida para quem ainda a importa."""
-+    escolha, crua = _escolha_laya(payload)
-+    return _rota_com_travas(escolha, payload), crua
-+
-+
-+_REGRAS_ROTA = rota_regras.Regras(REPO / "config" / "rotas" / "regras.json")
-+# R3 com a lista de alternativas: usada só se o arquivo de regras nunca foi válido
-+_REGRA_PADRAO_SEM_ARQUIVO = {"id": "sem_regras_validas", "condicao": [], "fila": _ROTA_BASE,
-+                             "alternativas": ["seth-pesado", "seth-rapido"], "motivo": "",
-+                             "fonte": "redesign/router/seth_gateway.py: _ROTA_BASE"}
-+
-+
-+def _entradas_regra(payload: dict, escolha: str | None) -> dict:
-+    """Entradas da regra, medidas no pedido antes da hidratação e da injeção de canon.
-+    Continuação (passo depois de ferramenta) usa só o texto até o último pedido do usuário (682)."""
-+    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-+    continuacao = auditoria_turno.e_continuacao(msgs)
-+    if continuacao:
-+        ult = max((i for i, m in enumerate(msgs) if isinstance(m, dict) and m.get("role") == "user"),
-+                  default=len(msgs) - 1)
-+        msgs = msgs[:ult + 1]
-+    total, n_user, _ = _texto_e_sinais(msgs)
-+    ult_texto = _ultimo_texto_usuario(msgs)
-+    return {"chars_ultimo_usuario": len(ult_texto), "chars_total": total, "n_usuario": n_user,
-+            "janela_estimada": total // 3, "cerca_codigo": "```" in ult_texto,
-+            "ferramenta": bool(payload.get("tools")), "continuacao": continuacao, "escolha_laya": escolha}
-+
-+
-+def _janelas_longas() -> dict:
-+    """M1: limiar de tokens das filas de conversa que têm fila longa (`-longo`); seth-codigo não tem."""
-+    perfis = _perfis()
-+    return {f: capivara_perfis.limiar_tokens(perfis, f) for f in capivara_perfis.FILAS_CONVERSA
-+            if capivara_perfis.fila_longa(perfis, f)}
-+
-+
-+def _decidir_automatica(entradas: dict) -> tuple[dict, str | None]:
-+    """(decisão, sha256 do arquivo de regras). Sem nenhuma versão válida do arquivo: R3 com
-+    `regra: sem_regras_validas`. Erro de carga fica em stderr; a última versão válida segue."""
-+    regras, sha = _REGRAS_ROTA.atual()
-+    if regras is None:
-+        regras, sha = [_REGRA_PADRAO_SEM_ARQUIVO], None
-+    elif _REGRAS_ROTA.erro:
-+        print(f"regras de rota: {_REGRAS_ROTA.erro} · segue a última versão válida", file=sys.stderr, flush=True)
-+    decisao = rota_regras.decidir(entradas, regras, rota_regras.disponibilidade(), _janelas_longas())
-+    return decisao, sha
- 
- 
- def _sombra_rota(payload: dict, rota_ativa: str, laya: dict | None = None) -> None:
-@@ -1209,16 +1264,25 @@ class _Handler(BaseHTTPRequestHandler):
-     def log_message(self, fmt, *args):
-         pass
- 
-+    def _zerar_decisao(self):
-+        """Estado de rota por requisição: com keep-alive o mesmo handler atende vários pedidos."""
-+        self._rota = ""
-+        self._regra = ""
-+        self._reg_rota = None
-+
-     def do_GET(self):
-+        self._zerar_decisao()
-         self._passar(b"", "GET")
- 
-     def do_HEAD(self):
-+        self._zerar_decisao()
-         self._passar(b"", "HEAD")
- 
-     def do_POST(self):
-         # estado por REQUISIÇÃO: com keep-alive o mesmo handler atende vários
-         # pedidos, e uma rota velha vazaria pro header X-Seth-Rota do seguinte
--        self._rota = ""
-+        self._zerar_decisao()
-+        automatica = False
-         self._cab_ctx = None
-         self._verificar = False
-         self._msgs_pedido = []
-@@ -1252,17 +1316,26 @@ class _Handler(BaseHTTPRequestHandler):
-                     ) and not getattr(self.server, "_selftest_allow_context", False)
-                     if classificacao == "public":
-                         self._data_classification = "public"
--                    elif payload.get("model") == _ROTA_BASE:
-+                    elif payload.get("model") in (_ROTA_BASE, _GATILHO_AUTO):
-                         self._data_classification = "sanitizado-cascata"
-                 except DadosExternosSemClassificacao as e:
-                     return self._erro(403, str(e))
--                # roteador por complexidade: só o alvo "seth-livre" do Agent
--                if payload.get("model") == _ROTA_BASE:
--                    self._rota, laya = _rota_laya(payload)
-+                # (07/11/2026, D2) rota automática: o painel manda `seth-auto`; a regra única escolhe a fila
-+                if payload.get("model") == _GATILHO_AUTO:
-+                    automatica = True
-+                    escolha, laya = _escolha_laya(payload)
-+                    entradas = _entradas_regra(payload, escolha)
-+                    decisao, arquivo = _decidir_automatica(entradas)
-+                    self._rota = (decisao["fila"] or "") + decisao["modificador"]
-+                    self._regra = decisao["regra"]
-                     # 1 decisão por resposta: no modo Agent os passos depois de
-                     # ferramenta são a mesma resposta (664)
--                    if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
--                            payload.get("messages") or []):
-+                    registra = not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
-+                        payload.get("messages") or [])
-+                    disponivel = rota_regras.disponibilidade()
-+                    if registra:
-+                        self._reg_rota = {"entradas": entradas, "decisao": decisao, "arquivo": arquivo,
-+                                          "disponivel": disponivel}
-                         _sombra_rota(payload, self._rota, laya)
-                         # passos 3-4 do roteamento por capacidade: só registra a recomendação (sombra)
-                         if sombra_capacidade.ligado():
-@@ -1273,7 +1346,15 @@ class _Handler(BaseHTTPRequestHandler):
-                         # nova versão (Alexandria + metacognição): só registra o que faria (sombra)
-                         if sombra_nova_versao.ligado():
-                             sombra_nova_versao.registrar(payload, self._rota)
-+                    if decisao["fila"] is None:
-+                        if registra:
-+                            rota_regras.registrar(decisao, entradas, disponivel, arquivo, None)
-+                        return self._erro(503, "gateway indisponível: nenhuma fila da regra automática está disponível")
-                     payload["model"] = self._rota
-+                elif payload.get("model") == _ROTA_BASE:
-+                    # fila fixa (D2): `seth-livre` pedido às claras, sem regra
-+                    self._rota = _ROTA_BASE
-+                    self._regra = "fixa"
-                 # (697) sem tool_choice "required": o Nemotron (seth-pesado) passou a escrever a
-                 # chamada de ferramenta como TEXTO e a conversa travou (14/10, 15:26-15:28).
-                 msgs0 = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-@@ -1301,7 +1382,8 @@ class _Handler(BaseHTTPRequestHandler):
-                 # Ministral e Codestral caíam sempre e a fila pulava para o próximo.
-                 # Campo opcional do OpenAI, nada no caminho o usa: sai aqui.
-                 payload.pop("user", None)
--                longa = _fila_pela_janela(payload)
-+                # rota automática: o -longo já saiu da regra, antes da hidratação (M1); não se decide duas vezes
-+                longa = None if automatica else _fila_pela_janela(payload)
-                 if longa:
-                     print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
-                     payload["model"] = longa
-@@ -1387,6 +1469,9 @@ class _Handler(BaseHTTPRequestHandler):
-             self._log(f"upstream inacessível ({e})", t0)
-             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
-                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
-+        if self._rota.startswith("seth-") and (up.status == 429 or up.status >= 500):
-+            # (07/11/2026, M2) a fila que falhou sai da disponibilidade por um prazo curto
-+            rota_regras.marcar_falha(self._rota.replace(capivara_perfis.SUFIXO_LONGO, ""))
-         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
-         modelo_real = None
-         buf_pre = b""
-@@ -1483,12 +1568,20 @@ class _Handler(BaseHTTPRequestHandler):
-         if up.status == 200 and not sse and self._cab_injetado and _cabecalho_unico_ligado():
-             buf_pre, _nc = limpa_cabecalho.limpar_json(buf_pre, self._cab_injetado)
-             _registrar_cabecalho(self._rota, modelo_real, _nc)
-+        reg_rota = getattr(self, "_reg_rota", None)
-+        if reg_rota is not None:
-+            # (07/11/2026, D2) uma decisão por resposta, gravada com o modelo que a Máquina mediu
-+            rota_regras.registrar(reg_rota["decisao"], reg_rota["entradas"], reg_rota["disponivel"],
-+                                  reg_rota["arquivo"], modelo_real, servida=self._rota or None)
-+            self._reg_rota = None
-         self.send_response(up.status)
-         for k, v in up.headers.items():
-             if k.lower() not in _HOP_BY_HOP:
-                 self.send_header(k, v)
-         if self._rota:
-             self.send_header("X-Seth-Rota", self._rota)
-+        if self._rota and self._regra:
-+            self.send_header("X-Seth-Regra", self._regra)
-         if modelo_real:
-             self.send_header("X-Modelo-Real", modelo_real)
-             _lembrar_modelo_real(modelo_real)
-@@ -2062,7 +2155,7 @@ def _selftest() -> int:
-     _log_antes, decisor.LOG_DIR = decisor.LOG_DIR, Path(tempfile.mkdtemp())
-     t0 = _t.monotonic()
-     urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
-+        {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read()
-     dt = _t.monotonic() - t0
-     rota_sombra = json.loads(_Dummy.ultimo_corpo)["model"]
-@@ -2089,7 +2182,7 @@ def _selftest() -> int:
-             return {"rota": {"type": "choice", "choice": jev_diz, "confidence": 0.9}}
-         decisor.decidir = _falso
-         urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--            {"model": "seth-livre", "messages": [{"role": "user", "content": texto}]}).encode(),
-+            {"model": "seth-auto", "messages": [{"role": "user", "content": texto}]}).encode(),
-             headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read()
-         for _ in range(50):  # espera a thread de sombra soltar o semáforo
-             if _SOMBRA_LIVRE.acquire(blocking=False):
-@@ -2233,7 +2326,7 @@ def _selftest() -> int:
-     falhas += 0 if ok12 else 1
- 
-     # 13. keep-alive: a rota de um pedido não vaza pro X-Seth-Rota do seguinte.
--    # Mesma conexão HTTP/1.1, mesmo handler: 1º pedido seth-livre (classificado),
-+    # Mesma conexão HTTP/1.1, mesmo handler: 1º pedido seth-auto (classificado),
-     # 2º pedido seth-codigo (não classificado) -- este não pode sair com rota.
-     import http.client
-     c13 = http.client.HTTPConnection("127.0.0.1", gw_port, timeout=10)
-@@ -2256,7 +2349,7 @@ def _selftest() -> int:
-     _Dummy.penduradas, _Dummy.modelos_pedidos = 1, []
-     t19 = time.monotonic()
-     r19 = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "stream": True, "messages": [{"role": "user", "content": "oi"}]}).encode(),
-+        {"model": "seth-auto", "stream": True, "messages": [{"role": "user", "content": "oi"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=20).read())["choices"][0]["message"]["content"]
-     dt19 = time.monotonic() - t19
-     PRAZO_1O_CONTEUDO = prazo_orig
-@@ -2268,10 +2361,10 @@ def _selftest() -> int:
-     # 17. (705) cabeçalho da Máquina: 1ª resposta = prontidão; 2ª = linha de turno; só ferramenta = nada
-     _Dummy.modelo_resposta = "gemini-2.5-flash"
-     r17a = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode(),
-+        {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read())["choices"][0]["message"]["content"]
-     r17b = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-+        {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-                                              {"role": "user", "content": "e agora?"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read())["choices"][0]["message"]["content"]
-     l17 = r17a.splitlines()
-@@ -2302,14 +2395,14 @@ def _selftest() -> int:
-     log_cab = Path(__import__("tempfile").mkdtemp()) / "cab.jsonl"
-     os.environ["AGATA_CABECALHO_LOG"] = str(log_cab)
-     r17h = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-+        {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-                                              {"role": "user", "content": "e agora?"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read())["choices"][0]["message"]["content"]
-     ok17h = r17h.count("agata-seth ·") == 1 and r17h.count("Agata ·") == 0 and r17h.endswith("Sistemas operacionais.") and "sync: PASS" not in r17h
-     ok17i = log_cab.exists() and json.loads(log_cab.read_text(encoding="utf-8").splitlines()[0])["n"] >= 1
-     os.environ["SETH_CABECALHO_UNICO"] = "0"
-     r17j = json.loads(urllib.request.urlopen(urllib.request.Request(base, data=json.dumps(
--        {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-+        {"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x"},
-                                              {"role": "user", "content": "e agora?"}]}).encode(),
-         headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read())["choices"][0]["message"]["content"]
-     del os.environ["SETH_CABECALHO_UNICO"]
-@@ -2340,7 +2433,7 @@ def _selftest() -> int:
- 
-     # 14. (695) resposta vazia -> 1 nova tentativa, fila acima; o cliente recebe a 2ª
-     _Dummy.vazias, _Dummy.modelos_pedidos = 1, []
--    body = json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}).encode()
-+    body = json.dumps({"model": "seth-auto", "messages": [{"role": "user", "content": "oi"}]}).encode()
-     r14 = json.loads(urllib.request.urlopen(urllib.request.Request(
-         base, data=body, headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"}), timeout=10).read())
-     ok14 = (r14["choices"][0]["message"]["content"].endswith("ok")  # (705) agora com o cabeçalho da Máquina na frente
-@@ -2466,7 +2559,7 @@ def _selftest() -> int:
-     # (22/10/2026) cascata seth-livre passa sem classificação: o proxy sanitiza
-     _casc21 = _politica_dados_externos({"model": _ROTA_BASE, "messages": []})
-     _casc21_ok = _casc21["model"] == _ROTA_BASE
--    ok21 = (_pub21["model"] == _ROTA_BASE and "agata_data_classification" not in _pub21
-+    ok21 = (_pub21["model"] == _GATILHO_AUTO and "agata_data_classification" not in _pub21
-             and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21 and _casc21_ok)
-     print(f"{'PASS' if ok21 else 'FALHA'}  política de dados: nuvem sem classe/fora de public bloqueia; alias público e local seguem")
-     falhas += 0 if ok21 else 1
-diff --git a/redesign/router/test_rota_regras.py b/redesign/router/test_rota_regras.py
-new file mode 100644
-index 00000000..0cbb0299
---- /dev/null
-+++ b/redesign/router/test_rota_regras.py
-@@ -0,0 +1,343 @@
-+#!/usr/bin/env python3
-+"""Rota automática (seth-auto): regras T1, L1, R1 a R3, modificadores M1 e M2, carga, registro e HTTP.
-+
-+Não chama provedor nem modelo: o upstream é um servidor falso em 127.0.0.1, a escolha do Laya
-+é desligada (decisor.decidir devolve None) e o token interno não é lido do disco.
-+Rodar: python3 -m unittest test_rota_regras (dentro de redesign/router) ou pytest.
-+"""
-+import http.client
-+import json
-+import tempfile
-+import threading
-+import unittest
-+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-+from pathlib import Path
-+from unittest import mock
-+
-+import rota_regras as rr
-+import seth_gateway
-+
-+RAIZ = Path(__file__).resolve().parents[2]
-+REGRAS_REAIS = RAIZ / "config" / "rotas" / "regras.json"
-+TODAS = {f: True for f in rr.FILAS}
-+SEM_LONGO = {}
-+COM_LONGO_LIVRE = {"seth-livre": 1000}
-+
-+
-+def entradas(**mudancas):
-+    base = {"chars_ultimo_usuario": 10, "chars_total": 10, "n_usuario": 1, "janela_estimada": 3,
-+            "cerca_codigo": False, "ferramenta": False, "continuacao": False, "escolha_laya": None}
-+    base.update(mudancas)
-+    return base
-+
-+
-+def regras_reais():
-+    regras, _ = rr.carregar(REGRAS_REAIS)
-+    return regras
-+
-+
-+class DecisaoPuraTests(unittest.TestCase):
-+    def setUp(self):
-+        self.regras = regras_reais()
-+
-+    def decide(self, disponivel=TODAS, janelas=SEM_LONGO, **kw):
-+        return rr.decidir(entradas(**kw), self.regras, disponivel, janelas)
-+
-+    def test_trava_de_tamanho_6001_vai_a_pesado_mesmo_com_laya(self):
-+        d = self.decide(chars_ultimo_usuario=6001, chars_total=6001, escolha_laya="livre")
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-pesado", "pesado_tamanho"))
-+
-+    def test_6000_nao_casa_a_trava(self):
-+        d = self.decide(chars_ultimo_usuario=6000, chars_total=6000, escolha_laya="livre")
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-livre", "laya_escolha"))
-+
-+    def test_laya_escolhe_a_fila_quando_nao_ha_trava(self):
-+        d = self.decide(chars_ultimo_usuario=900, chars_total=900, escolha_laya="codigo")
-+        self.assertEqual((d["fila"], d["regra"], d["motivo"]), ("seth-codigo", "laya_escolha", {"escolha_laya": "codigo"}))
-+
-+    def test_sem_escolha_laya_cai_na_regra_seguinte(self):
-+        d = self.decide(chars_ultimo_usuario=900, chars_total=900, n_usuario=3, escolha_laya=None)
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-livre", "padrao"))
-+
-+    def test_cerca_de_codigo_sem_escolha_vai_a_codigo(self):
-+        d = self.decide(cerca_codigo=True, chars_total=900, n_usuario=3)
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-codigo", "codigo_cerca"))
-+
-+    def test_cerca_com_escolha_do_laya_segue_o_laya(self):
-+        d = self.decide(cerca_codigo=True, chars_total=900, escolha_laya="livre")
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-livre", "laya_escolha"))
-+
-+    def test_rapido_trivial_fronteira_400(self):
-+        self.assertEqual(self.decide(chars_total=399, n_usuario=2)["fila"], "seth-rapido")
-+        d = self.decide(chars_total=400, n_usuario=2)
-+        self.assertEqual((d["fila"], d["regra"]), ("seth-livre", "padrao"))
-+
-+    def test_rapido_trivial_veta_com_tres_usuarios_ou_ferramenta(self):
-+        self.assertEqual(self.decide(chars_total=50, n_usuario=3)["regra"], "padrao")
-+        self.assertEqual(self.decide(chars_total=50, ferramenta=True)["regra"], "padrao")
-+
-+    def test_padrao_sem_regra_casa(self):
-+        d = self.decide(chars_total=5000, n_usuario=5)
-+        self.assertEqual((d["fila"], d["regra"], d["motivo"], d["fallback"]), ("seth-livre", "padrao", {}, False))
-+
-+    def test_longo_so_em_fila_com_fila_longa(self):
-+        janelas = {"seth-livre": 1000}
-+        padrao = dict(chars_total=900, n_usuario=3)  # cai em seth-livre (regra padrao)
-+        self.assertEqual(self.decide(janelas=janelas, janela_estimada=1001, **padrao)["modificador"], "-longo")
-+        self.assertEqual(self.decide(janelas=janelas, janela_estimada=1000, **padrao)["modificador"], "")
-+        # seth-codigo nunca recebe -longo: não está no mapa de janelas
-+        d = self.decide(janelas={"seth-codigo": 10}, cerca_codigo=True, janela_estimada=10**6)
-+        self.assertEqual((d["fila"], d["modificador"]), ("seth-codigo", ""))
-+
-+    def test_fila_fora_que_nao_e_a_da_regra_nao_muda_a_decisao(self):
-+        d = self.decide(disponivel=dict(TODAS, **{"seth-livre": False}), chars_total=50, n_usuario=1)
-+        self.assertEqual((d["fila"], d["regra"], d["fallback"]), ("seth-rapido", "rapido_trivial", False))
-+
-+    def test_fila_principal_fora_usa_alternativa_com_fallback(self):
-+        d = self.decide(disponivel=dict(TODAS, **{"seth-rapido": False}), chars_total=50, n_usuario=1)
-+        self.assertEqual((d["fila"], d["regra"], d["fallback"]), ("seth-livre", "rapido_trivial", True))
-+
-+    def test_sem_fila_disponivel_devolve_none(self):
-+        d = self.decide(disponivel={f: False for f in rr.FILAS}, chars_total=50, n_usuario=1)
-+        self.assertIsNone(d["fila"])
-+
-+    def test_mesmas_entradas_dao_mesma_saida_em_100_execucoes(self):
-+        ent = entradas(chars_ultimo_usuario=7000, chars_total=7000, escolha_laya="livre", janela_estimada=2500)
-+        primeira = rr.decidir(ent, self.regras, TODAS, COM_LONGO_LIVRE)
-+        for _ in range(100):
-+            self.assertEqual(rr.decidir(ent, self.regras, TODAS, COM_LONGO_LIVRE), primeira)
-+
-+    def test_ordem_das_chaves_nao_muda_a_saida(self):
-+        ordem_a = entradas(chars_total=120, n_usuario=2)
-+        ordem_b = dict(reversed(list(ordem_a.items())))
-+        self.assertEqual(rr.decidir(ordem_a, self.regras, TODAS, SEM_LONGO),
-+                         rr.decidir(ordem_b, self.regras, TODAS, SEM_LONGO))
-+
-+
-+class CargaDoArquivoTests(unittest.TestCase):
-+    def valido(self, **mudancas):
-+        regra = {"id": "x_teste", "condicao": [["chars_total", "<", 10]], "fila": "seth-rapido",
-+                 "motivo": "teste", "fonte": "teste"}
-+        regra.update(mudancas)
-+        return {"regras": [regra]}
-+
-+    def test_arquivo_real_carrega_na_ordem_certa(self):
-+        regras, sha = rr.carregar(REGRAS_REAIS)
-+        self.assertEqual([r["id"] for r in regras],
-+                         ["pesado_tamanho", "laya_escolha", "codigo_cerca", "rapido_trivial", "padrao"])
-+        self.assertEqual(len(sha), 64)
-+
-+    def test_regra_valida_de_teste_passa(self):
-+        self.assertEqual(rr.validar(self.valido())[0]["id"], "x_teste")
-+
-+    def recusa(self, dados):
-+        with self.assertRaises(rr.RegrasInvalidas):
-+            rr.validar(dados)
-+
-+    def test_recusa_regra_sem_fonte(self):
-+        self.recusa(self.valido(fonte=""))
-+        dados = self.valido()
-+        del dados["regras"][0]["fonte"]
-+        self.recusa(dados)
-+
-+    def test_recusa_entrada_fora_do_conjunto(self):
-+        self.recusa(self.valido(condicao=[["texto_do_usuario", "==", "oi"]]))
-+
-+    def test_recusa_operador_fora_do_conjunto(self):
-+        self.recusa(self.valido(condicao=[["chars_total", "!=", 10]]))
-+
-+    def test_recusa_fila_fora_das_quatro_inclusive_public_e_externos(self):
-+        self.recusa(self.valido(fila="seth-public"))
-+        self.recusa(self.valido(fila="zai/glm-4.7"))
-+        self.recusa(self.valido(alternativas=["gemini/gemini-2.5-pro"]))
-+
-+    def test_recusa_modelo_por_chave_extra(self):
-+        self.recusa(self.valido(modelo="openai/gpt-5"))
-+
-+    def test_recusa_id_repetido(self):
-+        dados = {"regras": [self.valido()["regras"][0], self.valido()["regras"][0]]}
-+        self.recusa(dados)
-+
-+    def test_recusa_valor_incompativel_com_a_entrada(self):
-+        self.recusa(self.valido(condicao=[["cerca_codigo", "<", 3]]))
-+        self.recusa(self.valido(condicao=[["escolha_laya", "in", ["gratis-e-pago"]]]))
-+
-+    def test_recusa_fila_pela_escolha_sem_condicao_sobre_a_escolha(self):
-+        self.recusa(self.valido(fila="escolha_laya"))
-+
-+    def test_arquivo_invalido_mantem_a_ultima_versao_valida(self):
-+        with tempfile.TemporaryDirectory() as tmp:
-+            caminho = Path(tmp) / "regras.json"
-+            caminho.write_text(json.dumps(self.valido()), encoding="utf-8")
-+            guarda = rr.Regras(caminho)
-+            regras, _ = guarda.atual()
-+            self.assertEqual(regras[0]["id"], "x_teste")
-+            caminho.write_text("{não é json", encoding="utf-8")
-+            regras_depois, _ = guarda.atual()
-+            self.assertEqual(regras_depois[0]["id"], "x_teste")
-+            self.assertIn("JSON", guarda.erro)
-+
-+    def test_sem_nenhuma_versao_valida_devolve_nada(self):
-+        with tempfile.TemporaryDirectory() as tmp:
-+            self.assertEqual(rr.Regras(Path(tmp) / "ausente.json").atual(), (None, None))
-+
-+
-+class RegistroEDisponibilidadeTests(unittest.TestCase):
-+    def test_registro_grava_valores_e_nao_texto_do_usuario(self):
-+        texto = "FRASE-SECRETA-DO-USUARIO-123"
-+        ent = entradas(chars_total=len(texto), escolha_laya="livre")
-+        decisao = {"fila": "seth-livre", "modificador": "", "regra": "laya_escolha",
-+                   "motivo": {"escolha_laya": "livre"}, "fallback": False}
-+        with tempfile.TemporaryDirectory() as tmp:
-+            destino = Path(tmp) / "decisoes.jsonl"
-+            linha = rr.registrar(decisao, ent, TODAS, "abc123", "openai/gpt-oss-120b", servida="seth-livre", caminho=destino)
-+            bruto = destino.read_text(encoding="utf-8")
-+            self.assertEqual(bruto.count("\n"), 1)
-+            self.assertNotIn(texto, bruto)
-+            obtido = json.loads(bruto)
-+        self.assertEqual(obtido, linha)
-+        for campo in ("ts", "intencao", "fila", "modificador", "regra", "motivo", "fallback", "disponivel",
-+                      "arquivo_regras", "modelo", "escolha_laya"):
-+            self.assertIn(campo, obtido)
-+        self.assertEqual(obtido["intencao"], "automatico")
-+        self.assertEqual(obtido["modelo"], "openai/gpt-oss-120b")
-+
-+    def test_registro_sem_medicao_grava_nao_medido_e_sem_escolha(self):
-+        decisao = {"fila": "seth-rapido", "modificador": "", "regra": "rapido_trivial", "motivo": {}, "fallback": False}
-+        with tempfile.TemporaryDirectory() as tmp:
-+            linha = rr.registrar(decisao, entradas(), TODAS, None, None, caminho=Path(tmp) / "d.jsonl")
-+        self.assertEqual(linha["modelo"], "não medido")
-+        self.assertNotIn("escolha_laya", linha)
-+
-+    def test_falha_de_fila_sai_da_disponibilidade_por_cooldown(self):
-+        with mock.patch.object(rr, "COOLDOWN_S", 60.0), mock.patch.dict(rr._FALHAS, {}, clear=True):
-+            rr.marcar_falha("seth-rapido", agora=0)
-+            self.assertFalse(rr.disponibilidade(agora=10)["seth-rapido"])
-+            self.assertTrue(rr.disponibilidade(agora=61)["seth-rapido"])
-+            self.assertTrue(rr.disponibilidade(agora=10)["seth-livre"])
-+
-+
-+class _FakeUpstream(BaseHTTPRequestHandler):
-+    def do_POST(self):
-+        corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length", "0"))).decode("utf-8"))
-+        self.server.recebidos.append(corpo)
-+        status = self.server.status_por_modelo.get(corpo.get("model"), 200)
-+        resposta = json.dumps({"model": "fake/medido", "choices": [{"message": {"role": "assistant", "content": "ok"}}]}).encode()
-+        self.send_response(status)
-+        self.send_header("Content-Type", "application/json")
-+        self.send_header("Content-Length", str(len(resposta)))
-+        self.end_headers()
-+        self.wfile.write(resposta)
-+
-+    def log_message(self, *args):
-+        return
-+
-+
-+class GatewayHttpTests(unittest.TestCase):
-+    @classmethod
-+    def setUpClass(cls):
-+        cls.tmp = tempfile.TemporaryDirectory()
-+        cls.registro = Path(cls.tmp.name) / "decisoes.jsonl"
-+        cls.upstream = ThreadingHTTPServer(("127.0.0.1", 0), _FakeUpstream)
-+        cls.upstream.daemon_threads = True
-+        cls.upstream.recebidos, cls.upstream.status_por_modelo = [], {}
-+        threading.Thread(target=cls.upstream.serve_forever, daemon=True).start()
-+        cls.gateway = ThreadingHTTPServer(("127.0.0.1", 0), seth_gateway._Handler)
-+        cls.gateway.daemon_threads = True
-+        threading.Thread(target=cls.gateway.serve_forever, daemon=True).start()
-+        cls.patches = [
-+            mock.patch.object(seth_gateway, "UPSTREAM", f"http://127.0.0.1:{cls.upstream.server_address[1]}"),
-+            mock.patch.object(seth_gateway, "_token_interno", lambda: "teste"),
-+            mock.patch.object(seth_gateway, "_estado", lambda: ""),
-+            mock.patch.object(seth_gateway, "MODELO_REAL_PATH", Path(cls.tmp.name) / "modelo-real.txt"),
-+            mock.patch.object(rr, "REGISTRO", cls.registro),
-+            mock.patch.object(seth_gateway.decisor, "decidir", lambda *a, **k: None),
-+            mock.patch.object(seth_gateway, "_sombra_rota", lambda *a, **k: None),
-+        ]
-+        for p in cls.patches:
-+            p.start()
-+
-+    @classmethod
-+    def tearDownClass(cls):
-+        for p in cls.patches:
-+            p.stop()
-+        cls.gateway.shutdown()
-+        cls.gateway.server_close()
-+        cls.upstream.shutdown()
-+        cls.upstream.server_close()
-+        cls.tmp.cleanup()
-+
-+    def setUp(self):
-+        self.upstream.recebidos.clear()
-+        self.upstream.status_por_modelo.clear()
-+        rr._FALHAS.clear()
-+        if self.registro.exists():
-+            self.registro.unlink()
-+
-+    def pedir(self, modelo, texto="oi"):
-+        corpo = json.dumps({"model": modelo, "messages": [{"role": "user", "content": texto}]}).encode("utf-8")
-+        conn = http.client.HTTPConnection("127.0.0.1", self.gateway.server_address[1], timeout=10)
-+        try:
-+            conn.request("POST", "/v1/chat/completions", body=corpo, headers={"Content-Type": "application/json"})
-+            r = conn.getresponse()
-+            cabecalhos = {k.lower(): v for k, v in r.getheaders()}
-+            return r.status, cabecalhos, r.read()
-+        finally:
-+            conn.close()
-+
-+    def registros(self):
-+        if not self.registro.exists():
-+            return []
-+        return [json.loads(l) for l in self.registro.read_text(encoding="utf-8").splitlines()]
-+
-+    def test_seth_auto_escolhe_pela_regra_e_responde_com_meta(self):
-+        status, cab, _ = self.pedir("seth-auto")
-+        self.assertEqual(status, 200)
-+        self.assertEqual(self.upstream.recebidos[-1]["model"], "seth-rapido")
-+        self.assertEqual(cab["x-seth-rota"], "seth-rapido")
-+        self.assertEqual(cab["x-seth-regra"], "rapido_trivial")
-+        self.assertEqual(cab["x-modelo-real"], "fake/medido")
-+        registro = self.registros()
-+        self.assertEqual(len(registro), 1)
-+        self.assertEqual((registro[0]["regra"], registro[0]["modelo"], registro[0]["servida"]),
-+                         ("rapido_trivial", "fake/medido", "seth-rapido"))
-+
-+    def test_seth_auto_com_texto_longo_vai_a_pesado(self):
-+        self.pedir("seth-auto", texto="x" * 6001)
-+        self.assertEqual(self.upstream.recebidos[-1]["model"], "seth-pesado")
-+        self.assertEqual(self.registros()[0]["regra"], "pesado_tamanho")
-+
-+    def test_seth_livre_pedido_as_claras_e_fila_fixa_sem_regra(self):
-+        status, cab, _ = self.pedir("seth-livre")
-+        self.assertEqual(status, 200)
-+        self.assertEqual(self.upstream.recebidos[-1]["model"], "seth-livre")
-+        self.assertEqual((cab["x-seth-rota"], cab["x-seth-regra"]), ("seth-livre", "fixa"))
-+        self.assertEqual(self.registros(), [])
-+
-+    def test_seth_public_segue_a_mesma_regra_automatica(self):
-+        status, _, _ = self.pedir("seth-public")
-+        self.assertEqual(status, 200)
-+        self.assertEqual(self.upstream.recebidos[-1]["model"], "seth-rapido")
-+
-+    def test_falha_de_fila_leva_a_alternativa_com_fallback_registrado(self):
-+        self.upstream.status_por_modelo["seth-rapido"] = 503
-+        status, cab, _ = self.pedir("seth-auto")
-+        self.assertEqual(status, 503)
-+        self.upstream.status_por_modelo.clear()
-+        status, cab, _ = self.pedir("seth-auto")
-+        self.assertEqual(status, 200)
-+        self.assertEqual(self.upstream.recebidos[-1]["model"], "seth-livre")
-+        self.assertEqual(cab["x-seth-regra"], "rapido_trivial")
-+        ultimo = self.registros()[-1]
-+        self.assertEqual((ultimo["fila"], ultimo["fallback"]), ("seth-livre", True))
-+
-+    def test_sem_fila_disponivel_responde_503_sem_chamar_upstream(self):
-+        for fila in rr.FILAS:
-+            rr._FALHAS[fila] = seth_gateway.time.monotonic()
-+        status, _, _ = self.pedir("seth-auto")
-+        self.assertEqual(status, 503)
-+        self.assertEqual(self.upstream.recebidos, [])
-+
-+
-+if __name__ == "__main__":
-+    unittest.main()
