@@ -98,7 +98,7 @@ class SddPainelTests(unittest.TestCase):
 
     def test_pagina_sdd_existe_e_o_js_chama_so_as_rotas_do_sdd(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
-        self.assertIn('id="page-sdd"', html); self.assertIn('data-page="sdd"', html)
+        self.assertIn('id="sub-sdd"', html); self.assertIn('data-sub="sdd"', html)
         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
         self.assertIn("/api/sdd/estado", js); self.assertIn("/api/sdd/executar", js)
 

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
+  palavras-chave: aplicação, assinada, painel, unificado, validada, localmente, assinatura, aceita, diff, aplicado, worktree, própria, reverso, passou, local, terminou, tudo
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
   palavras-chave: csp, protótipo, painel, aplicado, prototipo, assinado, humano
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: guarda, contra, instrução, embutida, autoridade, forjada, nova, versão, lote, item, resposta, repete, segredo, frase, mandada, fonte, suspeita, privada, vira, recusa, proposta, metacognicao
 (944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: o ouvido do 5 sentidos transcreve e o piper agata-last fala.** Proposta `sentidos-conversa-librechat-20261105`, pedida pelo Humano em 05/11 ("vamos já deixar a conversa natural disponivel no librechat por enquanto, testarei depois de tudo do experimento implementado").
   palavras-chave: conversa, natural, voz, librechat, tudo, local, ouvido, sentidos, transcreve, piper, agata, last, fala, proposta, pedida, humano, vamos, deixar, disponivel, enquanto, testarei, experimento, implementado
-(943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local do Agata.** Proposta `sentidos-ouvido-20261105` (nova versão, lote 4 item 1), por decisão do Humano em 05/11 ("temos planos de ter conversa por voz, e eles podem adiantar um projeto chamado 5 sentidos"; "faça").
-  palavras-chave: projeto, sentidos, primeira, peça, ouvido, local, agata, proposta, nova, versão, lote, item, decisão, humano, temos, planos, ter, conversa, voz, eles, podem, adiantar, chamado, faça
+(943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local …
+  palavras-chave: projeto, sentidos, primeira, peça, ouvido, local
 (942) DIÁRIO — 05/11/2026 · **Alexandria: curadoria do pacote de evidência e avi …
   palavras-chave: alexandria, curadoria, pacote, evidência, avi
 (941) DIÁRIO — 04/11/2026 · **Nova versão, lote 3: avaliação da nova versão (F2) …
