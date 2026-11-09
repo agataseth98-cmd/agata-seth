@@ -605,9 +605,16 @@ const SETH_MAX_MENSAGENS = 20;
 const SETH_MAX_CARACTERES = 4000;
 const SETH_LIMITE_PEDIDO_BYTES = 131072;
 const SETH_LIMITE_CONVERSA_BYTES = 262144;
+const SETH_LIMITE_IMPORTACAO_BYTES = 263168;
+const SETH_BUSCA_MAX_CARACTERES = 120;
+// Organização (lote 3, 09/11/2026): estado da lista vindo de GET /api/seth/conversas; filtros e busca só na tela.
+let sethLista = {items: [], pastas: [], marcadores: [], total: 0, organizacao: "ok"};
+let sethFiltro = {pasta: "", marcador: ""};
+let sethBuscaSeq = 0;
+function sethNova(temporaria = false) { return {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo, temporaria}; }
 function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
 function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
-function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
+function sethTitulo(texto) { byId("seth-titulo").textContent = texto || (sethAtual.temporaria ? "Conversa temporária" : "Nova conversa"); }
 function sethMostrarModelo() {
   const select = byId("seth-modelo"); const desc = byId("seth-modelo-desc");
   if (select.value !== sethAtual.modelo) select.value = sethAtual.modelo;
@@ -661,6 +668,7 @@ function sethMarkdown(texto, destino) {
 function sethMensagem(m, indice) {
   const log = byId("seth-transcript");
   const msg = document.createElement("article"); msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant");
+  msg.dataset.indice = String(indice);
   const cab = document.createElement("div"); cab.className = "msg-head";
   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
   const hora = document.createElement("span"); hora.textContent = m.hora || "";
@@ -694,6 +702,8 @@ function sethDesenhar() {
   log.scrollTop = log.scrollHeight;
   sethTitulo(sethAtual.titulo);
   sethPintarAvisoSalvar();
+  sethPintarTemporaria();
+  sethPintarExportar();
 }
 function sethExemplos() {
   const box = byId("seth-exemplos"); if (!box) return;
@@ -704,37 +714,289 @@ function sethExemplos() {
     box.append(b);
   });
 }
+function sethOpcao(valor, rotulo) { const o = document.createElement("option"); o.value = valor; o.textContent = rotulo; return o; }
+function sethTexto(rotulo, aoClicar) { const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = rotulo; b.addEventListener("click", aoClicar); return b; }
+function sethSelo(texto, classe) { const s = document.createElement("span"); s.className = "seth-selo " + classe; s.textContent = texto; return s; }
+function sethVazio(texto) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = texto; return p; }
+function sethMostrarOrg(texto) { const aviso = byId("seth-org-aviso"); if (!aviso) return; aviso.textContent = texto || ""; aviso.hidden = !texto; }
+// Motivo de recusa do painel em português, sem o conteúdo da conversa (o servidor só devolve a regra).
+function sethErroOrg(status, motivo) {
+  if (status === 404) return "Conversa ou pasta não encontrada; a lista foi atualizada.";
+  if (status === 409) return "A organização das conversas está ilegível; nada foi alterado.";
+  if (status === 413) return "Pedido grande demais; nada foi alterado.";
+  if (status === 400) return "Não foi possível salvar: " + (motivo || "pedido recusado") + ".";
+  return "Não foi possível salvar: o painel respondeu com erro " + status + ".";
+}
+// Lista: fixadas no topo, arquivadas numa seção própria, filtros por pasta e marcador. Estado vem de GET /api/seth/conversas.
 async function sethListar() {
   const box = byId("seth-conversas"); if (!box) return;
   try {
     const dados = await fetchJson("/api/seth/conversas", {headers: {Accept: "application/json"}});
-    box.replaceChildren();
-    (dados.items || []).forEach((c) => {
-      const linha = document.createElement("div"); linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "");
-      const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
-      abrir.title = c.mensagens + " mensagens · " + c.atualizada;
-      abrir.addEventListener("click", () => sethAbrir(c.id));
-      const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
-      const renomear = document.createElement("button"); renomear.type = "button"; renomear.className = "text-link"; renomear.textContent = "Renomear";
-      renomear.addEventListener("click", () => sethRenomear(c, linha));
-      const apagar = document.createElement("button"); apagar.type = "button"; apagar.className = "text-link"; apagar.textContent = "Apagar";
-      apagar.addEventListener("click", () => {
-        if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
-        sethApagar(c.id);
-      });
-      acoes.append(renomear, apagar);
-      linha.append(abrir, acoes);
-      box.append(linha);
-    });
-    if (!(dados.items || []).length) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = "Nenhuma conversa salva."; box.append(p); }
+    sethLista = {items: dados.items || [], pastas: dados.pastas || [], marcadores: dados.marcadores || [], total: dados.total || 0, organizacao: dados.organizacao || "ok"};
+    sethPintarLista();
   } catch (erro) { box.textContent = "Lista indisponível (" + erro.message + ")."; }
 }
-async function sethAbrir(id) {
+function sethPassaFiltro(c) {
+  const semPasta = sethFiltro.pasta === "-";
+  if (semPasta ? c.pasta : (sethFiltro.pasta && c.pasta !== sethFiltro.pasta)) return false;
+  return !sethFiltro.marcador || (c.marcadores || []).includes(sethFiltro.marcador);
+}
+function sethPintarFiltros() {
+  const pasta = byId("seth-filtro-pasta"); const marcador = byId("seth-filtro-marcador");
+  if (sethFiltro.pasta && sethFiltro.pasta !== "-" && !sethLista.pastas.some((p) => p.id === sethFiltro.pasta)) sethFiltro.pasta = "";
+  if (sethFiltro.marcador && !sethLista.marcadores.includes(sethFiltro.marcador)) sethFiltro.marcador = "";
+  pasta.replaceChildren(sethOpcao("", "Todas as pastas"), sethOpcao("-", "Sem pasta"), ...sethLista.pastas.map((p) => sethOpcao(p.id, p.nome)));
+  pasta.value = sethFiltro.pasta;
+  marcador.replaceChildren(sethOpcao("", "Todos os marcadores"), ...sethLista.marcadores.map((m) => sethOpcao(m, "#" + m)));
+  marcador.value = sethFiltro.marcador;
+}
+function sethGrupo(texto) { const h = document.createElement("p"); h.className = "seth-grupo"; h.textContent = texto; return h; }
+function sethPreencher(box, itens, vazio) {
+  box.replaceChildren();
+  if (!itens.length) { box.append(sethVazio(vazio)); return; }
+  const fixadas = itens.filter((c) => c.fixada); const outras = itens.filter((c) => !c.fixada);
+  if (fixadas.length) { box.append(sethGrupo("Fixadas")); fixadas.forEach((c) => box.append(sethLinha(c))); }
+  if (outras.length) { if (fixadas.length) box.append(sethGrupo("Recentes")); outras.forEach((c) => box.append(sethLinha(c))); }
+}
+function sethPintarLista() {
+  if (!byId("seth-conversas")) return;
+  sethPintarFiltros();
+  sethPintarPastas();
+  const filtrando = Boolean(sethFiltro.pasta || sethFiltro.marcador);
+  const visiveis = sethLista.items.filter(sethPassaFiltro);
+  const lista = byId("seth-conversas");
+  sethPreencher(lista, visiveis.filter((c) => !c.arquivada), filtrando ? "Nenhuma conversa com este filtro." : "Nenhuma conversa salva.");
+  if (sethLista.total > sethLista.items.length) lista.append(sethVazio("Mostrando as " + sethLista.items.length + " conversas mais recentes de " + sethLista.total + "."));
+  const arquivadas = sethLista.items.filter((c) => c.arquivada);
+  byId("seth-arquivadas-total").textContent = String(arquivadas.length);
+  sethPreencher(byId("seth-arquivadas"), visiveis.filter((c) => c.arquivada), arquivadas.length ? "Nenhuma conversa arquivada com este filtro." : "Nenhuma conversa arquivada.");
+  if (sethLista.organizacao === "ilegivel") sethMostrarOrg("A organização das conversas (fixadas, arquivadas, marcadores e pastas) está ilegível. Nada será alterado até o arquivo ser conferido.");
+}
+function sethLinha(c) {
+  const linha = document.createElement("div");
+  linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "") + (c.fixada ? " fixada" : "");
+  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
+  abrir.title = c.mensagens + " mensagens · " + c.atualizada;
+  abrir.addEventListener("click", () => sethAbrir(c.id));
+  const meta = document.createElement("div"); meta.className = "seth-item-meta";
+  if (c.fixada) meta.append(sethSelo("Fixada", "seth-selo-fixada"));
+  if (c.arquivada) meta.append(sethSelo("Arquivada", "seth-selo-arquivada"));
+  const pasta = sethLista.pastas.find((p) => p.id === c.pasta);
+  if (pasta) meta.append(sethSelo("Pasta: " + pasta.nome, "seth-selo-pasta"));
+  (c.marcadores || []).forEach((m) => meta.append(sethSelo("#" + m, "seth-selo-marcador")));
+  const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
+  const renomear = sethTexto("Renomear", () => sethRenomear(c, linha));
+  const fixar = sethTexto(c.fixada ? "Desfixar" : "Fixar", () => sethOrganizar(c.id, {fixada: !c.fixada}));
+  const arquivar = sethTexto(c.arquivada ? "Desarquivar" : "Arquivar", () => sethOrganizar(c.id, {arquivada: !c.arquivada}));
+  const apagar = sethTexto("Apagar", () => {
+    if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
+    sethApagar(c.id);
+  });
+  acoes.append(renomear, fixar, arquivar, apagar);
+  const org = document.createElement("details"); org.className = "seth-item-org";
+  const resumo = document.createElement("summary"); resumo.textContent = "Pasta e marcadores";
+  org.append(resumo, sethCampoPasta(c), sethCampoMarcadores(c));
+  linha.append(abrir, meta, acoes, org);
+  return linha;
+}
+function sethCampoPasta(c) {
+  const rotulo = document.createElement("label"); rotulo.className = "seth-org-campo";
+  const select = document.createElement("select"); select.className = "seth-org-pasta";
+  select.append(sethOpcao("", "Sem pasta"), ...sethLista.pastas.map((p) => sethOpcao(p.id, p.nome)));
+  select.value = c.pasta || "";
+  select.addEventListener("change", () => sethOrganizar(c.id, {pasta: select.value || null}));
+  rotulo.append(document.createTextNode("Pasta "), select);
+  return rotulo;
+}
+function sethCampoMarcadores(c) {
+  const bloco = document.createElement("div"); bloco.className = "seth-org-campo";
+  const titulo = document.createElement("span"); titulo.textContent = "Marcadores";
+  const lista = document.createElement("div"); lista.className = "seth-marcadores";
+  (c.marcadores || []).forEach((m) => {
+    const tirar = sethTexto("tirar", () => sethOrganizar(c.id, {marcadores: (c.marcadores || []).filter((x) => x !== m)}));
+    tirar.setAttribute("aria-label", "Tirar o marcador " + m);
+    lista.append(sethSelo("#" + m, "seth-selo-marcador"), tirar);
+  });
+  const form = document.createElement("form"); form.className = "seth-marcador-form";
+  const campo = document.createElement("input"); campo.type = "text"; campo.maxLength = 24; campo.placeholder = "novo marcador";
+  campo.setAttribute("aria-label", "Novo marcador");
+  const adicionar = document.createElement("button"); adicionar.type = "submit"; adicionar.className = "text-link"; adicionar.textContent = "Adicionar";
+  form.append(campo, adicionar);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const novo = campo.value.trim();
+    if (!novo) { sethMostrarOrg("Digite o marcador antes de adicionar."); return; }
+    sethOrganizar(c.id, {marcadores: [...(c.marcadores || []), novo]});
+  });
+  bloco.append(titulo, lista, form);
+  return bloco;
+}
+async function sethOrganizar(id, campos) {
+  let ok = false;
+  try {
+    const r = await fetch("/api/seth/conversa/organizar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify({id, ...campos})});
+    if (!r.ok) sethMostrarOrg(sethErroOrg(r.status, await sethMotivo(r)));
+    else { ok = true; sethMostrarOrg(""); }
+  } catch (_) { sethMostrarOrg("Não foi possível salvar: sem resposta do painel."); }
+  await sethListar();
+  return ok;
+}
+// Pastas (projetos). Apagar pasta não apaga conversa: as conversas dela ficam sem pasta.
+function sethPintarPastas() {
+  const ul = byId("seth-pastas"); if (!ul) return;
+  ul.replaceChildren();
+  if (!sethLista.pastas.length) { const li = document.createElement("li"); li.append(sethVazio("Nenhuma pasta ainda. Crie uma para agrupar conversas.")); ul.append(li); return; }
+  sethLista.pastas.forEach((p) => ul.append(sethLinhaPasta(p)));
+}
+function sethLinhaPasta(p) {
+  const li = document.createElement("li"); li.className = "seth-pasta";
+  const nome = document.createElement("button"); nome.type = "button"; nome.className = "seth-item-abrir";
+  nome.textContent = p.nome + " (" + p.conversas + ")"; nome.title = "Mostrar só as conversas desta pasta";
+  nome.addEventListener("click", () => { sethFiltro = {pasta: p.id, marcador: sethFiltro.marcador}; sethPintarLista(); });
+  const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
+  const renomear = sethTexto("Renomear", () => sethRenomearPasta(p, li));
+  const apagar = sethTexto("Apagar", () => {
+    if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar pasta"; return; }
+    sethPastaMudar({acao: "apagar", id: p.id});
+  });
+  acoes.append(renomear, apagar);
+  li.append(nome, acoes);
+  return li;
+}
+function sethRenomearPasta(p, li) {
+  const campo = document.createElement("input"); campo.type = "text"; campo.value = p.nome; campo.maxLength = 60; campo.className = "seth-renomear";
+  campo.setAttribute("aria-label", "Novo nome da pasta");
+  li.replaceChildren(campo); campo.focus();
+  campo.addEventListener("keydown", (e) => { if (e.key === "Enter") sethPastaMudar({acao: "renomear", id: p.id, nome: campo.value}); if (e.key === "Escape") sethPintarLista(); });
+  campo.addEventListener("blur", () => sethPintarLista());
+}
+function sethAvisoPasta(acao, dados) {
+  if (acao === "criar") return "Pasta criada: " + dados.nome + ".";
+  if (acao === "renomear") return "Pasta renomeada: " + dados.nome + ".";
+  const n = dados.conversas_soltas || 0;
+  if (!n) return "Pasta apagada. Não havia conversas nela.";
+  if (n === 1) return "Pasta apagada. A conversa dela continua na lista, sem pasta.";
+  return "Pasta apagada. As " + n + " conversas dela continuam na lista, sem pasta.";
+}
+async function sethPastaMudar(corpo) {
+  let ok = false;
+  try {
+    const r = await fetch("/api/seth/pastas", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
+    if (!r.ok) sethMostrarOrg(sethErroOrg(r.status, await sethMotivo(r)));
+    else { ok = true; sethMostrarOrg(sethAvisoPasta(corpo.acao, await r.json())); }
+  } catch (_) { sethMostrarOrg("Não foi possível salvar a pasta: sem resposta do painel."); }
+  await sethListar();
+  return ok;
+}
+// Busca nas conversas salvas. Resposta antiga (de uma digitação anterior) não sobrescreve a atual.
+async function sethBuscar(texto) {
+  const termo = String(texto || "").trim();
+  if (!termo) { sethLimparBusca(); return; }
+  const seq = ++sethBuscaSeq;
+  const box = byId("seth-busca-resultados");
+  byId("seth-conversas").hidden = true; byId("seth-arquivadas-bloco").hidden = true;
+  box.hidden = false; box.replaceChildren(sethVazio("Buscando…"));
+  try {
+    const r = await fetch("/api/seth/conversas/busca?q=" + encodeURIComponent(termo), {headers: {Accept: "application/json"}, credentials: "same-origin", cache: "no-store"});
+    if (seq !== sethBuscaSeq) return;
+    if (!r.ok) { box.replaceChildren(sethVazio(sethErroBusca(r.status, await sethMotivo(r)))); return; }
+    const dados = await r.json();
+    if (seq === sethBuscaSeq) sethPintarBusca(dados);
+  } catch (_) { if (seq === sethBuscaSeq) box.replaceChildren(sethVazio("Busca indisponível: sem resposta do painel.")); }
+}
+function sethErroBusca(status, motivo) {
+  if (status === 400) return "Busca não feita: " + (motivo || "termo recusado") + ".";
+  return "Busca indisponível: o painel respondeu com erro " + status + ".";
+}
+function sethPintarBusca(dados) {
+  const box = byId("seth-busca-resultados");
+  const total = dados.total || 0; const lista = dados.resultados || [];
+  box.replaceChildren();
+  let resumo = "Nenhuma conversa salva tem este texto (a busca vê só as conversas salvas).";
+  if (total) resumo = total + (total === 1 ? " conversa salva tem este texto." : " conversas salvas têm este texto.") + (total > lista.length ? " Mostrando as " + lista.length + " primeiras." : "");
+  box.append(sethVazio(resumo));
+  lista.forEach((r) => box.append(sethResultado(r)));
+}
+function sethResultado(r) {
+  const item = document.createElement("div"); item.className = "seth-resultado";
+  const titulo = document.createElement("strong"); titulo.textContent = r.titulo;
+  const trecho = document.createElement("p"); trecho.className = "seth-trecho"; trecho.textContent = r.trecho;
+  const meta = document.createElement("p"); meta.className = "seth-resultado-meta";
+  meta.textContent = (r.ocorrencias === 1 ? "1 ocorrência" : r.ocorrencias + " ocorrências") + (r.arquivada ? " · arquivada" : "") + " · " + (r.mensagem === null ? "no título" : "na mensagem " + (r.mensagem + 1));
+  const abrir = sethTexto(r.mensagem === null ? "Abrir conversa" : "Abrir na mensagem " + (r.mensagem + 1), () => sethAbrir(r.id, r.mensagem));
+  item.append(titulo, trecho, meta, abrir);
+  return item;
+}
+function sethLimparBusca() {
+  sethBuscaSeq++;
+  const campo = byId("seth-busca"); if (campo) campo.value = "";
+  const box = byId("seth-busca-resultados"); box.replaceChildren(); box.hidden = true;
+  byId("seth-conversas").hidden = false; byId("seth-arquivadas-bloco").hidden = false;
+}
+async function sethAbrir(id, indice = null) {
   try {
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
-    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO};
+    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO, temporaria: false};
     sethDesenhar(); sethListar(); sethMostrarModelo();
+    if (indice !== null) sethDestacar(indice);
   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
+}
+// Leva à mensagem que a busca apontou: rola até ela e marca com a borda de destaque.
+function sethDestacar(indice) {
+  const alvo = byId("seth-transcript").querySelector('[data-indice="' + indice + '"]');
+  if (!alvo) return;
+  alvo.classList.add("destacada");
+  if (typeof alvo.scrollIntoView === "function") alvo.scrollIntoView({block: "center"});
+}
+// Conversa temporária: não é gravada, não entra na lista nem na busca, e não tem exportação. Some ao trocar de conversa.
+function sethPintarTemporaria() {
+  const botao = byId("seth-temporaria"); const aviso = byId("seth-temporaria-aviso");
+  if (!botao || !aviso) return;
+  const ligada = Boolean(sethAtual.temporaria);
+  botao.setAttribute("aria-pressed", ligada ? "true" : "false");
+  botao.textContent = "Conversa temporária: " + (ligada ? "ligada" : "desligada");
+  aviso.hidden = !ligada;
+}
+function sethAlternarTemporaria() {
+  const ligar = !sethAtual.temporaria;
+  sethAtual = sethNova(ligar);
+  sethDesenhar(); sethListar();
+  sethStatus(ligar ? "TEMPORÁRIA" : "PRONTA", ligar ? "partial" : "planned");
+  byId("seth-input").focus();
+}
+function sethPintarExportar() {
+  const texto = byId("seth-exportar-texto"); const json = byId("seth-export-json"); const md = byId("seth-export-md");
+  if (!texto || !json || !md) return;
+  const salva = Boolean(sethAtual.id) && !sethAtual.temporaria;
+  json.hidden = !salva; md.hidden = !salva;
+  if (salva) {
+    json.href = "/api/seth/conversa/exportar?id=" + encodeURIComponent(sethAtual.id) + "&formato=json";
+    md.href = "/api/seth/conversa/exportar?id=" + encodeURIComponent(sethAtual.id) + "&formato=md";
+  }
+  if (sethAtual.temporaria) texto.textContent = "Conversa temporária não é salva, por isso não há o que exportar.";
+  else texto.textContent = salva ? "Exporta a última gravação." : "Exporta depois de salvar (uma resposta basta).";
+}
+// Importa um JSON exportado. O servidor valida o formato e não duplica: se o id ou a origem já existe, não grava.
+async function sethImportar(arquivo) {
+  if (!arquivo) return;
+  if (arquivo.size > SETH_LIMITE_IMPORTACAO_BYTES) { sethMostrarOrg("Arquivo não importado: passa do limite de " + SETH_LIMITE_IMPORTACAO_BYTES + " bytes (257 KB)."); return; }
+  try {
+    const texto = await arquivo.text();
+    const r = await fetch("/api/seth/conversa/importar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: texto});
+    if (!r.ok) { sethMostrarOrg(sethErroImportacao(r.status, await sethMotivo(r))); }
+    else {
+      const dados = await r.json();
+      sethMostrarOrg(dados.estado === "importada" ? "Conversa importada: " + dados.titulo + "." : "Esta conversa já estava aqui (" + dados.titulo + "); nada foi duplicado.");
+    }
+  } catch (_) { sethMostrarOrg("Não foi possível importar: sem resposta do painel."); }
+  await sethListar();
+}
+function sethErroImportacao(status, motivo) {
+  if (status === 413) return "Arquivo não importado: passa do limite de " + SETH_LIMITE_IMPORTACAO_BYTES + " bytes (257 KB).";
+  if (status === 400) return "Arquivo não importado: " + (motivo || "arquivo recusado") + ".";
+  if (status === 409) return "Arquivo não importado: a organização das conversas está ilegível; nada foi alterado.";
+  return "Arquivo não importado: o painel respondeu com erro " + status + ".";
 }
 // Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
 function sethParaSalvar(m) {
@@ -743,7 +1005,7 @@ function sethParaSalvar(m) {
   return item;
 }
 async function sethSalvar() {
-  if (!sethAtual.mensagens.length) return;
+  if (sethAtual.temporaria || !sethAtual.mensagens.length) return; // conversa temporária nunca é gravada
   if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
   const corpo = JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, modelo: sethAtual.modelo, mensagens: sethAtual.mensagens.map(sethParaSalvar)});
   if (new TextEncoder().encode(corpo).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true); return; }
@@ -776,7 +1038,7 @@ function sethPintarAvisoSalvar() {
 }
 async function sethApagar(id) {
   await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
-  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); }
+  if (sethAtual.id === id) { sethAtual = sethNova(false); sethDesenhar(); }
   sethListar();
 }
 function sethRenomear(c, linha) {
@@ -933,13 +1195,31 @@ function ligarConversaSeth() {
   byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
   const campo = byId("seth-input");
   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+  byId("seth-nova").addEventListener("click", () => { sethAtual = sethNova(false); sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const texto = campo.value.trim();
     if (!texto || byId("seth-send").disabled) return;
     campo.value = "";
     sethEnviar(texto, false);
+  });
+  // Organização (lote 3, 09/11/2026): temporária, busca, filtros, pastas e importação.
+  byId("seth-temporaria").addEventListener("click", sethAlternarTemporaria);
+  const busca = byId("seth-busca");
+  busca.addEventListener("input", () => sethBuscar(busca.value));
+  busca.addEventListener("keydown", (e) => { if (e.key === "Escape") sethLimparBusca(); });
+  byId("seth-filtro-pasta").addEventListener("change", (e) => { sethFiltro.pasta = e.target.value; sethPintarLista(); });
+  byId("seth-filtro-marcador").addEventListener("change", (e) => { sethFiltro.marcador = e.target.value; sethPintarLista(); });
+  byId("seth-pasta-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nomeCampo = byId("seth-pasta-nome"); const nome = nomeCampo.value.trim();
+    if (!nome) { sethMostrarOrg("Digite o nome da pasta."); return; }
+    if (await sethPastaMudar({acao: "criar", nome})) nomeCampo.value = "";
+  });
+  byId("seth-importar-arquivo").addEventListener("change", async (e) => {
+    const arquivo = e.target.files && e.target.files[0];
+    e.target.value = "";
+    await sethImportar(arquivo);
   });
 }
 window.addEventListener("load", ligarConversaSeth);

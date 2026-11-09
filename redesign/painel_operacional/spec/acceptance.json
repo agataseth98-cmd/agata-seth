@@ -380,5 +380,177 @@
       "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_aba_memoria_fica_na_secao_conselho"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a busca de conversas (`GET /api/seth/conversas/busca?q=`) procura em títulos e mensagens das conversas salvas, sem serviço externo, e devolve trecho, número da mensagem e data; termo vazio ou acima de 120 caracteres responde 400 com motivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_pela_rota_devolve_trecho_e_posicao",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_recusa_termo_vazio_longo_e_origem_cruzada",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_acha_mensagem_sem_acento_nem_caixa_e_aponta_a_posicao",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_recusa_termo_vazio_e_longo",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_termo_sem_resultado_nao_e_erro"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a busca ignora caixa e acento (`acao` acha `AÇÃO`), o trecho mostra o contexto da ocorrência, e a busca devolve até 50 resultados",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_dobrar_mantem_o_tamanho_para_a_posicao_valer",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_trecho_tem_contexto_e_reticencias",
+      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_marca_arquivada_e_limita_a_50_resultados"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "fixar, arquivar e marcadores ficam em `organizacao.json` dentro da pasta de conversas e não reescrevem a conversa; conversa antiga, sem esse arquivo, abre com os valores padrão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_conversa_antiga_sem_organizacao_lista_e_abre_com_padrao",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_fixar_arquivar_marcar_e_pasta_nao_mexem_no_conteudo",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_salvar_a_conversa_depois_nao_apaga_a_organizacao",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_apagar_conversa_tira_a_entrada_da_organizacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a conversa fixada vem antes das outras; a arquivada sai da lista principal e aparece na seção Arquivadas, com Desarquivar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_fixada_fica_no_topo_com_grupo_e_selo",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_arquivadas_saem_da_lista_principal_e_ficam_na_secao",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_desarquivar_chama_organizar_com_arquivada_falsa",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_fixada_vai_para_o_topo_mesmo_mais_antiga"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "marcadores têm até 10 por conversa e até 24 caracteres (letras, números, espaço e hífen); pasta só aceita pasta existente; a recusa diz o motivo em português",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizar_recusa_fora_do_contrato_com_motivo",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_marcador_adicionado_e_tirado_manda_a_lista_inteira",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_organizar_recusado_mostra_motivo_em_portugues"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "pastas: criar, renomear e apagar; apagar pasta não apaga conversa, que fica sem pasta; limite de 50 pastas e nome de até 60 caracteres",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_criar_mover_renomear_e_apagar_pasta_sem_apagar_conversa",
+      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_pasta_recusa_nome_repetido_longo_e_acao_fora_da_lista",
+      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_limite_de_50_pastas",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_apagar_pasta_pede_confirmacao_e_avisa_que_conversas_ficam",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_pasta_criar_envia_post_e_limpa_o_campo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a lista filtra por pasta e por marcador, e move a conversa para outra pasta pelo seletor da própria conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_filtro_por_pasta_e_por_marcador",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_mover_para_pasta_e_sem_pasta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a exportação baixa a conversa salva em JSON ou Markdown por `GET /api/seth/conversa/exportar`, com `Content-Disposition: attachment` e nome de arquivo só com o id; formato ou id inválido recusam",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_exporta_json_e_markdown_com_nome_so_com_o_id",
+      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_exportacao_recusa_formato_e_id",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_exportar_pela_rota_baixa_com_nome_so_com_o_id",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_exportacao_aponta_para_a_rota_da_conversa_salva"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a importação (`POST /api/seth/conversa/importar`) valida formato, versão e conversa, recusa arquivo acima de 263168 bytes com 413 e não duplica: id ou origem_id já conhecido responde `ja_existe` sem gravar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_importa_em_outra_instalacao_e_nao_duplica_por_id_ou_origem",
+      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_importa_recusa_arquivo_que_nao_e_do_painel",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_importar_pela_rota_recusa_acima_do_limite_sem_ler_e_nao_duplica",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_envia_o_arquivo_e_avisa",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_ja_existente_nao_duplica_e_avisa",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_acima_do_limite_nem_e_enviado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a conversa temporária não é gravada, não aparece na lista e mostra na tela que não é salva; não tem exportação",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_mostra_o_estado_na_tela",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_nao_grava_a_resposta",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_desligada_volta_a_gravar",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_abrir_conversa_salva_tira_a_temporaria"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as rotas novas de conversa recusam origem cruzada, e a organização recusa pedido acima de 4096 bytes com 413",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_organizar_pela_rota_grava_e_recusa_origem_cruzada_e_pedido_grande",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_recusa_termo_vazio_longo_e_origem_cruzada",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_exportar_pela_rota_baixa_com_nome_so_com_o_id",
+      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_pastas_pela_rota_e_lista_com_contagem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "organização ilegível não é sobrescrita: a lista avisa na tela e a escrita responde 409 sem gravar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizacao_ilegivel_recusa_escrita_e_avisa_na_lista",
+      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizacao_malformada_e_lida_com_tolerancia",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_organizacao_ilegivel_avisa_e_mantem_a_lista"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a busca abre a conversa na mensagem indicada e destaca essa mensagem; sem busca, a lista volta; a lista mostra quantas faltam quando passa de 200",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_mostra_trecho_e_abre_na_mensagem_destacada",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_vazia_volta_para_a_lista_sem_chamar_o_servidor",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_sem_resultado_diz_que_so_ve_conversas_salvas",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_recusada_pelo_servidor_mostra_o_motivo",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_lista_mostra_quantas_faltam_quando_passa_de_200"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os controles novos da Conversa (busca, filtros, pastas, importação, exportação e temporária) têm id em `prototipo.html`, com limite de tamanho nos campos e as constantes da UI iguais às do servidor; a seção continua sem `style=` nem atributo `on*`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_ids_da_organizacao_existem_na_secao_conversa",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_campo_de_busca_e_nome_de_pasta_com_limite",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_exportacao_e_link_com_download_e_sem_script",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_aviso_de_temporaria_comeca_escondido_e_com_status",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_style",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_atributo_on",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_bloco_conversa_sem_innerhtml",
+      "redesign/painel_operacional/test_chat_ui.py::LimitesDaUi::test_constantes_da_ui_sao_as_do_servidor"
+    ],
+    "cwd": null
   }
 ]

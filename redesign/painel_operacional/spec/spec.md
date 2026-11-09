@@ -30,6 +30,7 @@
 - Nenhuma rota nova de API. As rotas `/api/*` ficam como estão. Exceção pedida pelo Humano em 07/11/2026: `GET /api/conselho/memoria`, só leitura, para a aba Memória compartilhada (ver Contrato).
 - Conhecimento tem uma busca única, que serve à Alexandria (escopo "dentro"), ao Acervo (escopo "fora", busca externa) e à Wiki, a documentação do `/index.html` (escopo "documentação"). Decidido pelo Humano em 07/11/2026.
 - Casca registrada, fora das sete seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
+- Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
 
 ## Fora desta versão
 
@@ -38,6 +39,7 @@
 - Remoção do LibreChat: o botão "LibreChat" continua em Sistema e a rota de abertura continua. Motivo: decisão separada.
 - Ajuste fino de design: sem nova paleta e sem novo layout. Os valores visuais atuais viram tokens sem mudar. Motivo: a verificação visual depende do navegador, e ele não foi medido.
 - Mudança em `/api/*`, em CSP, em propostas, assinatura, PR ou merge. Continuam fora do painel.
+- Link público de compartilhamento de conversa: fora deste lote. Pendência: precisa decisão de segurança do Humano (quem vê, por quanto tempo, como revoga).
 
 ## Contrato
 
@@ -56,6 +58,16 @@
 - Os caminhos e verbos existentes permanecem; o JS só chama caminhos presentes no servidor. A resposta da leitura de conversa salva é normalizada com `schema_version` e `id`, exigidos pelo cliente. Mensagens importadas até 65536 caracteres são aceitas.
 - Seletor de modelo da conversa (09/11/2026): `GET /api/seth/modelos` devolve `padrao` (`seth-livre`) e a lista fixa `modelos` (`id`, `rotulo`, `descricao`): `seth-livre` e `seth-public`. `/api/seth/chat/stream` e `/api/seth/chat` aceitam `modelo` opcional (ausente vale o padrão); fora da lista, 400 sem chamar o gateway. A conversa salva guarda `modelo` e o `modelo` de cada resposta da Seth; conversa antiga sem o campo abre como `seth-livre`. Fora da lista ficam `seth-zai`, `seth-gemini`, `seth-hf`, `seth-mistral` e `seth-auto`, porque o gateway recusa com 403 quem não é `seth-livre` nem `seth-public` sem classificação pública.
 - Modelo que respondeu (09/11/2026): o gateway manda o cabeçalho `X-Modelo-Real` com o nome real do modelo (não o alias). `/api/seth/chat/stream` e `/api/seth/chat` repassam esse cabeçalho ao navegador só quando o valor tem formato de nome (`chat_stream.modelo_real_valido`). A conversa salva guarda `modelo_real` em cada resposta da Seth quando o cabeçalho veio; gravação com `modelo_real` fora do formato descarta só esse campo. A UI mostra o modelo real em cada resposta; sem ele, mostra o escolhido com `(escolhido)`.
+- Conversa, lote 3 (09/11/2026). Tudo local, em `~/.cache/agata/painel-conversas`; nenhum serviço externo.
+  - `GET /api/seth/conversas` (já existia) devolve, em cada item, `fixada`, `arquivada`, `marcadores` e `pasta`; e no topo `pastas` (`id`, `nome`, `conversas`), `marcadores` (distintos), `total` (conversas salvas) e `organizacao` (`ok` ou `ilegivel`). Fixadas vêm primeiro. Mostra até 200 conversas, as mais recentes.
+  - `GET /api/seth/conversas/busca?q=` procura `q` (1 a 120 caracteres, sem diferenciar caixa nem acento) em títulos e mensagens das conversas salvas. Resposta 200: `termo`, `total` e `resultados` (até 50; cada um com `id`, `titulo`, `atualizada`, `arquivada`, `ocorrencias`, `campo` `titulo` ou `mensagem`, `mensagem` (posição na conversa, ou `null` se foi no título) e `trecho`, de até 120 caracteres com reticências). `q` vazio ou acima de 120 caracteres: 400 com motivo. Termo sem resultado: 200 com `total` 0.
+  - `POST /api/seth/conversa/organizar` com `{id, fixada?, arquivada?, marcadores?, pasta?}`: muda só a organização da conversa, nunca o conteúdo. `marcadores` é lista de até 10 textos de até 24 caracteres (letras, números, espaço e hífen), guardados em minúsculas e sem repetir. `pasta` é `null` ou o `id` de pasta existente. Corpo até 4096 bytes; acima, 413. Conversa inexistente: 404. Campo desconhecido ou valor fora do contrato: 400 com motivo.
+  - `POST /api/seth/pastas` com `{acao: criar|renomear|apagar, id?, nome?}`. Nome de 1 a 60 caracteres, sem repetir (sem diferenciar caixa), até 50 pastas. Apagar pasta não apaga conversa: as conversas dela ficam sem pasta. Ação desconhecida ou id inválido: 400; pasta inexistente: 404.
+  - `GET /api/seth/conversa/exportar?id=&formato=json|md`: download (`Content-Disposition: attachment`) com nome `agata-conversa-<id>.json` ou `.md`. JSON: `formato` (`agata-conversa`), `versao` (1), `id`, `origem_id`, `titulo`, `modelo`, `mensagens` e `exportada_em`. Formato fora da lista: 400; conversa inexistente: 404. A conversa temporária não é salva e não tem exportação.
+  - `POST /api/seth/conversa/importar` com o JSON exportado. Limite de 263168 bytes (262144 da conversa mais 1024 de cabeçalho); acima, 413. Valida `formato`, `versao`, identificador e conversa (as mesmas regras da gravação). Reconhece pelo `id` e pelo `origem_id` do arquivo: se o id já é de uma conversa daqui, ou se alguma conversa daqui guarda esse `origem_id`, responde `estado: ja_existe` e não grava nada; senão grava com id novo e guarda o `origem_id`. Resposta: `estado` (`importada` ou `ja_existe`), `id` e `titulo`.
+  - Origem cruzada nas rotas novas: 403, como nas outras leituras e escritas de `/api/seth/*`.
+  - `organizacao.json`, dentro da pasta de conversas, guarda `pastas` e uma entrada por conversa (`fixada`, `arquivada`, `marcadores`, `pasta`, `origem_id`). Sem o arquivo, toda conversa vale o padrão (sem fixada, sem arquivada, sem marcador, sem pasta). Entrada malformada é ignorada na leitura. Arquivo ilegível: a lista avisa (`organizacao: ilegivel`) e as escritas respondem 409 sem sobrescrever.
+  - Conversa temporária: existe só na tela. A UI não chama `POST /api/seth/conversa` enquanto ela está ligada.
 - Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
   - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
   - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
@@ -142,6 +154,14 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | /index.html | Serviços e Git do painel antigo | panorama | sub-panorama (já coberto; sem card duplicado) |
 | /index.html | Wiki da Agata: busca, pela busca única de Conhecimento (escopo "documentação") | conhecimento | busca única (`conhecimento-busca`, `conhecimento-consulta`, `conhecimento-escopo`, `wiki-mode`, `wiki-source`, `wiki-results`) |
 | prototipo · Conversa com a Seth | Lista de conversas; nova, abrir, renomear e apagar | conversa | sub-conversa (`seth-conversas`, `seth-nova`) |
+| prototipo · Conversa com a Seth (lote 3, 09/11/2026) | Busca nas conversas salvas (título e mensagens), com trecho e link para a mensagem | conversa | sub-conversa (`seth-busca`, `seth-busca-resultados`) |
+| prototipo · Conversa com a Seth (lote 3) | Fixar e desfixar; fixadas no topo da lista | conversa | sub-conversa (`seth-conversas`) |
+| prototipo · Conversa com a Seth (lote 3) | Arquivar e desarquivar; seção Arquivadas | conversa | sub-conversa (`seth-arquivadas-bloco`, `seth-arquivadas`) |
+| prototipo · Conversa com a Seth (lote 3) | Marcadores (tags livres) por conversa e filtro por marcador | conversa | sub-conversa (`seth-filtro-marcador`) |
+| prototipo · Conversa com a Seth (lote 3) | Pastas (projetos): criar, renomear, apagar (as conversas ficam), mover conversa e filtrar por pasta | conversa | sub-conversa (`seth-pasta-form`, `seth-pastas`, `seth-filtro-pasta`) |
+| prototipo · Conversa com a Seth (lote 3) | Exportar a conversa salva em JSON e Markdown (download pelo navegador) | conversa | sub-conversa (`seth-export-json`, `seth-export-md`) |
+| prototipo · Conversa com a Seth (lote 3) | Importar JSON exportado (valida; não duplica) | conversa | sub-conversa (`seth-importar-arquivo`) |
+| prototipo · Conversa com a Seth (lote 3) | Conversa temporária: não é salva, com aviso visível | conversa | sub-conversa (`seth-temporaria`, `seth-temporaria-aviso`) |
 | prototipo · Conversa com a Seth | Envio com stream e fallback para o chat inteiro; Enter envia | conversa | sub-conversa (`seth-form`, `seth-input`) |
 | prototipo · Conversa com a Seth | Copiar, regerar, exemplos e salvamento automático | conversa | sub-conversa |
 | prototipo · Conselho e /conselho-rede | Novo turno: aba, prompt e solicitação de aprovação de envio | conselho | sub-conselho (`promptForm`, `site`, `pergunta`, `btnEnviar`) |
@@ -242,6 +262,20 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] o texto da memória do Conselho sai pelo mesmo filtro de dado pessoal e de segredo da gravação
 - [ ] a rota da memória do Conselho recusa origem cruzada, como as outras leituras de API
 - [ ] a aba Memória compartilhada fica dentro da seção Conselho, tem estados carregando, vazio e erro, e monta o texto do cache só com textContent
+- [ ] a busca de conversas (`GET /api/seth/conversas/busca?q=`) procura em títulos e mensagens das conversas salvas, sem serviço externo, e devolve trecho, número da mensagem e data; termo vazio ou acima de 120 caracteres responde 400 com motivo
+- [ ] a busca ignora caixa e acento (`acao` acha `AÇÃO`), o trecho mostra o contexto da ocorrência, e a busca devolve até 50 resultados
+- [ ] fixar, arquivar e marcadores ficam em `organizacao.json` dentro da pasta de conversas e não reescrevem a conversa; conversa antiga, sem esse arquivo, abre com os valores padrão
+- [ ] a conversa fixada vem antes das outras; a arquivada sai da lista principal e aparece na seção Arquivadas, com Desarquivar
+- [ ] marcadores têm até 10 por conversa e até 24 caracteres (letras, números, espaço e hífen); pasta só aceita pasta existente; a recusa diz o motivo em português
+- [ ] pastas: criar, renomear e apagar; apagar pasta não apaga conversa, que fica sem pasta; limite de 50 pastas e nome de até 60 caracteres
+- [ ] a lista filtra por pasta e por marcador, e move a conversa para outra pasta pelo seletor da própria conversa
+- [ ] a exportação baixa a conversa salva em JSON ou Markdown por `GET /api/seth/conversa/exportar`, com `Content-Disposition: attachment` e nome de arquivo só com o id; formato ou id inválido recusam
+- [ ] a importação (`POST /api/seth/conversa/importar`) valida formato, versão e conversa, recusa arquivo acima de 263168 bytes com 413 e não duplica: id ou origem_id já conhecido responde `ja_existe` sem gravar
+- [ ] a conversa temporária não é gravada, não aparece na lista e mostra na tela que não é salva; não tem exportação
+- [ ] as rotas novas de conversa recusam origem cruzada, e a organização recusa pedido acima de 4096 bytes com 413
+- [ ] organização ilegível não é sobrescrita: a lista avisa na tela e a escrita responde 409 sem gravar
+- [ ] a busca abre a conversa na mensagem indicada e destaca essa mensagem; sem busca, a lista volta; a lista mostra quantas faltam quando passa de 200
+- [ ] os controles novos da Conversa (busca, filtros, pastas, importação, exportação e temporária) têm id em `prototipo.html`, com limite de tamanho nos campos e as constantes da UI iguais às do servidor; a seção continua sem `style=` nem atributo `on*`
 
 ## Desenho e alternativas
 
@@ -286,6 +320,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 - Links antigos continuam funcionando: redirect para a seção certa.
 - Reversão: `git revert` do commit de aplicação. Os arquivos retirados (HTML e CSS) voltam com o revert.
 - Ordem de reversão: se a aplicação tiver ido em mais de um passo, reverter do último para o primeiro.
+- Lote 3 (09/11/2026): `organizacao.json` nasce só quando alguém fixa, arquiva, marca ou põe em pasta uma conversa. Sem ele, as conversas valem o padrão. Reverter o código deixa o arquivo ignorado; apagá-lo desfaz a organização sem tocar nas conversas.
 
 ## Riscos e dependências
 
@@ -328,6 +363,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 - `test_chat_stream.py`
 - `test_chat_stream_rota.py`
 - `test_painel_unificado.py`
+- `test_conversas_lote3.py`
 - `test_chat_ui.py`
 - `test_frentes.py`
 - `conselho-rede/`

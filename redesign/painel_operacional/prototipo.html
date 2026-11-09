@@ -99,9 +99,19 @@
 <div class="sub" id="sub-conversa" data-sub="conversa" data-secao="conversa">
 <div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
 <article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
-<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
-<div class="seth-main"><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
-<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
+<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><button class="text-link" type="button" id="seth-temporaria" aria-pressed="false">Conversa temporária: desligada</button>
+<div class="seth-busca-bloco"><label for="seth-busca">Buscar nas conversas</label><input id="seth-busca" type="search" maxlength="120" autocomplete="off" placeholder="Título ou texto"></div>
+<div id="seth-busca-resultados" class="seth-busca-resultados" hidden></div>
+<div class="seth-filtros"><label for="seth-filtro-pasta">Pasta</label><select id="seth-filtro-pasta"><option value="">Todas as pastas</option><option value="-">Sem pasta</option></select><label for="seth-filtro-marcador">Marcador</label><select id="seth-filtro-marcador"><option value="">Todos os marcadores</option></select></div>
+<p id="seth-org-aviso" class="seth-aviso" role="status" hidden></p>
+<div id="seth-conversas" class="seth-conversas"></div>
+<details id="seth-arquivadas-bloco" class="seth-bloco"><summary>Arquivadas (<span id="seth-arquivadas-total">0</span>)</summary><div id="seth-arquivadas" class="seth-conversas"></div></details>
+<details id="seth-pastas-bloco" class="seth-bloco" open><summary>Pastas (projetos)</summary>
+<form id="seth-pasta-form" class="seth-pasta-form"><label for="seth-pasta-nome" class="sr-only">Nome da nova pasta</label><input id="seth-pasta-nome" type="text" maxlength="60" autocomplete="off" placeholder="Nome da pasta"><button class="text-link" type="submit" id="seth-pasta-criar">Criar pasta</button></form>
+<ul id="seth-pastas" class="seth-pastas"></ul></details>
+<div class="seth-importar"><label for="seth-importar-arquivo">Importar conversa (arquivo JSON exportado)</label><input id="seth-importar-arquivo" type="file" accept="application/json,.json"></div></aside>
+<div class="seth-main"><p id="seth-temporaria-aviso" class="seth-temporaria" role="status" hidden>Conversa temporária: não é salva. Não aparece na lista nem na busca, e some ao trocar de conversa ou recarregar a página.</p><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
+<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div><div class="seth-exportar"><span id="seth-exportar-texto"></span><a class="text-link" id="seth-export-json" href="#" download hidden>Exportar JSON</a><a class="text-link" id="seth-export-md" href="#" download hidden>Exportar Markdown</a></div></div>
 <div class="seth-modelo"><label for="seth-modelo">Modelo</label><select id="seth-modelo"><option value="seth-livre">Seth (padrão)</option></select><span id="seth-modelo-desc" class="seth-modelo-desc"></span></div>
 <form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
 <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article>

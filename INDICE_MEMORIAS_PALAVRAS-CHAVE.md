@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
+  palavras-chave: lote, chat, aplicado, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, conversa, temporária
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
   palavras-chave: spec, unificada, aplicada, nova, versao, união, prs
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: hierarquia, buscas, alexandria, lote, léxico, semântica, externa, ficam, disponíveis, modo, auto, escolhe, caso, registrando, motivo, etapa, proposta
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
   palavras-chave: condição, busca, externa, avaliação, passa, usar, fontes, própria, tarefa, piora, era, erro, medição, efeito, modelo, lote, proposta, avaliacao
-(954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
-  palavras-chave: voz, librechat, transcreve, novo, conversa, sentidos, ouvido, aceita, corpo, chunked, envia, content, length, idioma, stt, passa, código, válido, proposta
+(954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por …
+  palavras-chave: voz, librechat, transcreve, novo, conversa
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, l …
   palavras-chave: nvidia, gemma, lista, gratuitos, nova, versão
 (952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova …

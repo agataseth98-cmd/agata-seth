@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2dc73d4d4ba65512296d2a23a06e14839c6c318c
-  Escrito em: 09/11/2026 15:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4
+  Escrito em: 09/11/2026 15:59 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2dc73d4d4ba65512296d2a23a06e14839c6c318c/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2dc73d4d4ba65512296d2a23a06e14839c6c318c/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2dc73d4d4ba65512296d2a23a06e14839c6c318c/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2dc73d4d4ba65512296d2a23a06e14839c6c318c/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2dc73d4d4ba65512296d2a23a06e14839c6c318c/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3620fadc0f6f654732a8a9b1614ede2c2d8dcbc4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
+- Assinatura do Humano verificada com `scripts/p8_verificar.sh chat-lote3-09-11` na worktree: PODE APLICAR (sha256 do `.diff` `62da13cab053`; assinatura `agata-aprovacao-p8` de `agata-humano`; `git apply --check` limpo). O diff foi aplicado com `git apply` a partir de `origin/main` `3620fadc`, posterior à base `e7c9b451` da proposta; o `--check` passou sobre o main atual.
+- Arquivos alterados: só `redesign/painel_operacional/` (8 alterados e `test_conversas_lote3.py` novo, 9 arquivos). Nenhum código fora do painel. Par `.diff` e `APROVADO-chat-lote3-09-11` movido para `propostas/aplicadas/`.
+- Testes medidos nesta worktree: `cd redesign/painel_operacional && python3 -m unittest discover -s . -p "test_*.py"`: 273 testes, 1 falha, a pré-existente `test_sdd_painel.ProjetosExternosTests.test_executar_projeto_roda_o_ciclo_e_recusa_o_que_nao_esta_em_config_sdd`. `uv run --with pytest bash scripts/ci_sdd_local.sh`: `CI LOCAL: TUDO OK`, 33 passos OK. Os `evidence.json` e `criterion-drift.md` que o CI regrava ficaram fora do commit.
+- Não medido: comportamento das rotas novas no servidor em uso (os testes usam servidor e dados de teste). Nenhum serviço reiniciado.
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
 - Assinatura do Humano verificada com `scripts/p8_verificar.sh nova-versao-spec-v2-unificada-09-11` na worktree: PODE APLICAR (sha256 do `.diff` `e4fed3c98c8e`; assinatura `agata-aprovacao-p8` de `agata-humano`; `git apply --check` limpo). O diff foi aplicado com `git apply` a partir de `origin/main` `2dc73d4d`, posterior à base `089a0d76` da proposta; o `--check` passou sobre o main atual.
 - Arquivos alterados: `redesign/nova_versao/spec/spec.md`, `redesign/nova_versao/spec/acceptance.json` e `redesign/nova_versao/tests/test_nova_versao.py`. Nenhum código de produção. Par `.diff` e `APROVADO-nova-versao-spec-v2-unificada-09-11` movido para `propostas/aplicadas/`.

@@ -1173,6 +1173,47 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 
 @media (max-width:760px){.seth-layout{grid-template-columns:1fr}.seth-conversas{max-height:22vh}}
 
+/* Lote 3 (09/11/2026): busca, fixadas, arquivadas, pastas, marcadores, conversa temporária e importação. Cores só por token. */
+.seth-busca-bloco{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.seth-busca-bloco input,.seth-filtros select,.seth-pasta-form input,.seth-org-campo select,.seth-marcador-form input,.seth-importar input[type="file"]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:12px/1.4 var(--sans);min-width:0;max-width:100%}
+.seth-busca-bloco input:focus,.seth-filtros select:focus,.seth-pasta-form input:focus,.seth-org-campo select:focus,.seth-marcador-form input:focus{outline:2px solid var(--teal);outline-offset:1px}
+.seth-filtros{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;font-size:12px;color:var(--muted)}
+.seth-busca-resultados{display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow:auto}
+.seth-busca-resultados .seth-vazio{margin:0;font-size:12px}
+.seth-resultado{display:flex;flex-direction:column;gap:4px;padding:8px 9px;border-radius:10px;border:1px solid var(--line)}
+.seth-resultado strong{font-size:13px;overflow-wrap:anywhere}
+.seth-trecho{margin:0;font-size:12px;line-height:1.45;color:var(--ink);overflow-wrap:anywhere}
+.seth-resultado-meta{margin:0;font-size:11px;color:var(--muted)}
+.seth-grupo{margin:6px 0 0;font:10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.seth-item.fixada{border-left:3px solid var(--gold)}
+.seth-item-meta{display:flex;flex-wrap:wrap;gap:4px}
+.seth-selo{font:10px var(--mono);border-radius:99px;padding:2px 7px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.seth-selo-fixada{border-color:var(--gold);color:var(--gold)}
+.seth-selo-arquivada{color:var(--muted)}
+.seth-selo-pasta{border-color:var(--blue);color:var(--blue)}
+.seth-selo-marcador{border-color:var(--violet);color:var(--violet)}
+.seth-item-acoes{flex-wrap:wrap;row-gap:4px}
+.seth-item-org{font-size:12px;color:var(--muted)}
+.seth-item-org summary{cursor:pointer;color:var(--ink)}
+.seth-org-campo{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.seth-marcadores{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.seth-marcador-form{display:flex;gap:6px;align-items:center;margin-top:4px}
+.seth-marcador-form input{flex:1;min-width:0}
+.seth-bloco{border-top:1px solid var(--line);padding-top:8px}
+.seth-bloco summary{cursor:pointer;font-size:12px;color:var(--ink)}
+.seth-pastas{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.seth-pasta{display:flex;flex-direction:column;gap:4px}
+.seth-pasta-form{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.seth-pasta-form input{flex:1;min-width:120px}
+.seth-importar{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.seth-importar input[type="file"]{font-size:11px}
+.seth-temporaria{margin:0;padding:8px 10px;border-radius:10px;border:1px solid var(--rose);color:var(--rose);font-size:13px;line-height:1.45}
+.text-link[type="submit"]{padding:0;background:transparent;border:0;border-bottom:1px solid var(--cor-rgba-97-217-237-35);color:var(--teal);font:11px var(--mono);cursor:pointer}
+.text-link[type="submit"]:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+.seth-pasta > .seth-item-abrir{font-size:13px;line-height:1.4}
+.seth-exportar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.msg.destacada{outline:2px solid var(--teal);outline-offset:2px}
+
 
 
 .abrir-lista{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 4px;margin-top:0}

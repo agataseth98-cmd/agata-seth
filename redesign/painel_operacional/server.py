@@ -38,8 +38,9 @@ import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
-    CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar, _conversa_ler,
-    _conversas_listar, _vault_caminho, _vault_item)
+    CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
+    _conversa_exportar, _conversa_gravar, _conversa_importar, _conversa_ler, _conversa_organizar, _conversas_buscar,
+    _conversas_listar, _pasta_mudar, _vault_caminho, _vault_item)
 BIND = "127.0.0.1"
 PORT = 20146
 VERIFIER_URL = "http://127.0.0.1:20141/verificar"
@@ -51,6 +52,8 @@ ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
 GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os testes trocam por servidor falso
 CHAT_STREAM_LIMITE_BYTES = 131_072
 CHAT_STREAM_TIMEOUT_S = 120
+# Organização das conversas (lote 3, 09/11/2026): pedidos pequenos de fixar, pasta, marcador, pasta e nome.
+SETH_ORGANIZACAO_LIMITE_BYTES = 4096
 WIKI_RESULT_MAX = 12000
 # Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): leitura do cache, n de 1 a 200.
 MEMORIA_CONSELHO_PADRAO = 40
@@ -149,25 +152,6 @@ def _linhas_do_gateway(resposta):
             yield linha.decode("utf-8", errors="replace")
     except (OSError, http.client.HTTPException):
         return
-
-
-def _motivo_conversa_recusada(dados) -> str:
-    """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
-    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
-    if isinstance(mensagens, list) and len(mensagens) > 200:
-        return "mais de 200 mensagens"
-    if isinstance(mensagens, list) and any(
-            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > armazem.CONVERSA_MENSAGEM_LIMITE
-            for m in mensagens):
-        return f"uma mensagem passa de {armazem.CONVERSA_MENSAGEM_LIMITE} caracteres"
-    modelo = dados.get("modelo") if isinstance(dados, dict) else None
-    if (modelo is not None and not chat_stream.modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
-            isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
-            and not chat_stream.modelo_permitido(m.get("modelo")) for m in mensagens)):
-        return "modelo fora da lista"
-    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
-        return "identificador da conversa inválido"
-    return "formato da conversa inválido"
 
 
 def _relay_modules():
@@ -1086,6 +1070,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
         if self.path == "/api/seth/conversas":
             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
+        if self.path.startswith("/api/seth/conversas/busca?"):
+            return self._seth_busca()
+        if self.path.startswith("/api/seth/conversa/exportar?"):
+            return self._seth_exportar()
         if self.path.startswith("/api/seth/conversa?"):
             dados = _conversa_ler((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
             if dados is None:
@@ -1219,6 +1207,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_chat_stream()
         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
             return self._seth_conversa(self.path.endswith("/apagar"))
+        if self.path in ("/api/seth/conversa/organizar", "/api/seth/pastas", "/api/seth/conversa/importar"):
+            return self._seth_organizacao(self.path)
         if self.path == "/api/nova-versao/upload":
             return self._nova_versao_upload()
         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
@@ -1545,8 +1535,53 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
         salvo = _conversa_gravar(dados)
         if salvo is None:
-            return self._send(400, "text/plain; charset=utf-8", _motivo_conversa_recusada(dados).encode("utf-8"))
+            return self._send(400, "text/plain; charset=utf-8", armazem.motivo_conversa_recusada(dados).encode("utf-8"))
         return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
+
+    def _seth_busca(self) -> None:
+        """Busca por texto nas conversas salvas (títulos e mensagens), só leitura e local."""
+        termo = (parse_qs(urlparse(self.path).query).get("q") or [""])[0]
+        try:
+            dados = _conversas_buscar(termo)
+        except ErroConversa as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _seth_exportar(self) -> None:
+        """Download de uma conversa salva, em JSON ou Markdown. O nome do arquivo leva só o id."""
+        query = parse_qs(urlparse(self.path).query)
+        try:
+            corpo, nome, tipo = _conversa_exportar((query.get("id") or [""])[0], (query.get("formato") or [""])[0])
+        except ErroConversa as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, tipo, corpo, (("Content-Disposition", f'attachment; filename="{nome}"'),))
+
+    def _seth_organizacao(self, rota: str) -> None:
+        """Fixar, arquivar, marcadores, pastas e importação das conversas (lote 3). Só valida e grava o que o painel envia."""
+        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        importando = rota.endswith("/importar")
+        limite = IMPORTACAO_LIMITE_BYTES if importando else SETH_ORGANIZACAO_LIMITE_BYTES
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > limite:
+            aviso = f"arquivo acima de {limite} bytes" if importando else f"pedido acima de {limite} bytes"
+            return self._send(413, "text/plain; charset=utf-8", aviso.encode("utf-8"))
+        try:
+            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", "pedido com JSON inválido".encode("utf-8"))
+        try:
+            if importando:
+                resultado = _conversa_importar(dados)
+            elif not isinstance(dados, dict):
+                raise ErroConversa(400, "pedido precisa ser um objeto JSON")
+            elif rota == "/api/seth/pastas":
+                resultado = _pasta_mudar(dados.get("acao"), dados.get("id"), dados.get("nome"))
+            else:
+                resultado = _conversa_organizar(dados.get("id"), {k: v for k, v in dados.items() if k != "id"})
+        except ErroConversa as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(resultado, ensure_ascii=False).encode("utf-8"))
 
     def _seth_chat(self) -> None:
         """Conversa com a Seth pelo gateway local, só texto, sem ferramentas e sem escrita. Modelo: lista fixa (chat_stream).
