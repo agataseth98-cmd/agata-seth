@@ -1,0 +1,81 @@
+diff --git a/PROJETO.md b/PROJETO.md
+index 1747c48e..d1227e23 100644
+--- a/PROJETO.md
++++ b/PROJETO.md
+@@ -34,14 +34,14 @@ Assistente pessoal do Orusoua, local-first e grátis por padrão.
+ Agata = **espinha determinística (git + `scripts/` + `perimetro.sh`)** + governança canônica
+ (REGRAS / PROTOCOLOS / FALHAS / PROJETO / MEMÓRIAS) + Conselho Federado de modelos.
+ - **Executor do loop:** grafo LangGraph + OmniRoute (redesenho mergeado na Fase 8, 03/09/2026 — (310)/(311)). Os modelos são trabalhadores substituíveis; nenhuma ferramenta É o sistema.
+-- **Frentes:** LibreChat (conversa, aponta no `seth_gateway` `:20126`), Goose (agente/código) e voz (piper-tts). Ver "Interface".
+-- **Acesso remoto:** LibreChat por `tailscale serve --bg 3080` (só tailnet, nunca `funnel`), hostname do tailnet em `~/librechat/.env` (`DOMAIN_CLIENT`/`DOMAIN_SERVER`, `TRUST_PROXY=1`) (350). Aviso conhecido do `tailscale status`, não bloqueante: `systemd-resolved` e `NetworkManager` "wired together incorrectly" — MagicDNS pode falhar; hostname completo e IP funcionam.
++- **Frentes:** LibreChat (conversa, aponta no `seth_gateway` `:20126`; **em substituição** pelo chat do painel, sai do sistema depois da entrega medida — decisão do Humano, 07/11/2026), Goose (agente/código) e voz (piper-tts). Ver "Interface".
++- **Acesso remoto:** LibreChat (em substituição, ver "Frentes") por `tailscale serve --bg 3080` (só tailnet, nunca `funnel`), hostname do tailnet em `~/librechat/.env` (`DOMAIN_CLIENT`/`DOMAIN_SERVER`, `TRUST_PROXY=1`) (350). Aviso conhecido do `tailscale status`, não bloqueante: `systemd-resolved` e `NetworkManager` "wired together incorrectly" — MagicDNS pode falhar; hostname completo e IP funcionam.
+ 
+ Grafia canônica do nome: **Agata** — sem acento, sem "h". A história migrada usa grafias antigas; não se corrige história.
+ 
+ ## Máquinas
+ - **Predator** (master — CachyOS, fish, i7-13650HX, 40GB RAM, RTX 4060 8GB): grafo + OmniRoute, LibreChat, Ollama, git, Obsidian, web.
+-  - **Boot:** GRUB é o bootloader ativo (Limine saiu na recuperação de 17/09/2026); `mkinitcpio` com `lvm2` logo após `block` (raiz em LVM sobre 2 NVMe, Btrfs); kernel de reserva `linux-cachyos-lts` com preset e `initramfs` (435).
++  - **Boot:** GRUB é o bootloader ativo (Limine saiu na recuperação de 17/09/2026); `mkinitcpio` com `lvm2` logo após `block` (raiz em LVM sobre 2 NVMe, Btrfs); kernel de reserva `linux-cachyos-lts` com preset e `initramfs` (435). **Fora do boot:** `agata.target` (sob demanda desde 29/10/2026) e `ollama.service` (desde 07/11/2026, decisão do Humano; medido `disabled`). Os atalhos não ligam nem param o Ollama; `seth-parar` só descarrega os modelos.
+   - **Suspensão:** S3 (`deep`) por `/etc/systemd/sleep.conf.d/10-agata-deep.conf` (`MemorySleepMode=deep`), com driver NVIDIA 615 open (`NVreg_UseKernelSuspendNotifiers=1`). O GRUB ainda tem `mem_sleep_default=s2idle` e não tem `nowatchdog` (101), mas o arquivo do systemd vence na suspensão. Desfazer: `sudo rm /etc/systemd/sleep.conf.d/10-agata-deep.conf` (540).
+   - **Vigiar:** suspender e acordar em loop (124); se voltar, procedimento em `PROCEDIMENTO_LOGIN.md`. Ruído conhecido: o teclado USB externo (`1-10.3`) reconecta sozinho no resume. A contenção antiga `predator-suspend-inhibit.service` está desabilitada (540).
+   - **Discos:** SMART `PASSED` nas duas NVMe (24/09/2026); `Unsafe Shutdowns` altos são o padrão de desligamento não-limpo deste hardware (539). Causa raiz desse padrão: não fechada.
+@@ -65,22 +65,22 @@ Fonte viva da ordem dos modelos: o próprio OmniRoute (`/api/combos`) e `config/
+ ## Serviços (boot)
+ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind real — fonte da verdade, não esta seção. `:20131`/`:20132` são do próprio `omniroute`, só loopback: `embedWsProxy` (proxy WebSocket das UIs embutidas) e `liveServer` (WebSocket do painel, `/live-ws`) — lido no código do OmniRoute 3.8.50 em 13/10/2026, deixou de ser `lacuna` (420).
+ 
+-**`agata.target`** (`systemd --user`, habilitado no boot) puxa:
++**`agata.target`** (`systemd --user`, sob demanda desde 29/10/2026: não sobe no boot; o atalho `seth` liga, `Parar Seth` desliga) puxa:
+ - `omniroute` (`:20128`) e `omniroute-sanitizer` (`:20127` — os callers usam este; `sanitizar_payload()` em `redesign/router/sanitizar.py`, `--autoteste`, sanitiza segredo antes do egresso e bloqueia payload profundo ou largo demais (328)). `requestQueue.maxWaitMs = 45000` no banco do OmniRoute (362)/(363); clone novo herda o valor pelo drop-in `redesign/systemd/dropin-omniroute-resilience.conf` (`RATE_LIMIT_MAX_WAIT_MS`) (588).
+ - `openvino-whisper` (`:20130`, STT na iGPU) e `openvino-embeddings` (`:20134`, embeddings na iGPU); venv `igpu/.venv` com `torch==2.14.0+cpu`, sem libs CUDA.
+ - `obsidian-ro-proxy` (`:27125`, só leitura, `ro_proxy.py`) e `obsidian-app.service` (Flatpak `md.obsidian.Obsidian`, `After=graphical-session.target`) — o app é o **backend real** do proxy: com ele fechado, o proxy devolve **403** ("upstream inacessível"), que parece permissão negada e não é.
+ - `agata-drain` (oneshot: drena o WAL do grafo no stop, nunca corta um commit).
+ - `ollaya` (`:11435`, contêiner CPU pinado por digest) — decisor local; ver "Decisor local".
+ 
+-**Gateway e voz no boot; demais frentes pelo atalho `seth` / `Parar Seth`:**
++**Gateway e voz sobem com o `agata.target` (sob demanda, não no boot); demais frentes pelo atalho `seth` / `Parar Seth`:**
+ - `seth-gateway` (`:20126`, habilitado no `agata.target`) — reidrata a Seth; ver "Interface".
+ - `seth-verificador` (`:20141`) — **único caminho de execução da Seth, read-only.** `POST /verificar` roda um de 10 comandos fixos (`perimetro`, `estado`, `git_status`, `git_log`, `git_diff_stat`, `git_sync`, `selos`, `suite_controles`, `servicos`, `p8_verificar`), argv fixo, sem shell, saída redigida pela régua do P-1, teto com total declarado (423).
+ - `seth-escriba` (`:20140`) — escrita append-only; detalhes de autorização, limites e isolamento em `extras/projeto-detalhe/servicos-e-interface.md`.
+ - `seth-gateway` — bloqueia envio a modelo externo sem classificação explícita `public`; o modelo `seth-public` declara publicamente que todo o contexto da conversa pode sair para provedores externos. Outros modelos externos sem classe retornam 403; aliases locais continuam locais. O bloqueio atua antes do encaminhamento ao sanitizador/OmniRoute.
+-- Stack Docker do **LibreChat**: `librechat` na bridge de ferramentas `librechat`/`br-librechat` e na bridge interna `librechat-data` (Mongo/Meili); publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538). Mongo e Meili ficam somente em `librechat-data`, sem rota para o relé. `restart: unless-stopped` em tudo. Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
++- Stack Docker do **LibreChat**: `librechat` na bridge de ferramentas `librechat`/`br-librechat` e na bridge interna `librechat-data` (Mongo/Meili); publica só `127.0.0.1:3080` e fala com a Máquina pelo relé `librechat-ponte-host` (538). Mongo e Meili ficam somente em `librechat-data`, sem rota para o relé. **Em substituição** pelo chat do painel (decisão do Humano, 07/11/2026): sai do sistema depois que o substituto estiver no ar e medido. Desde 07/11/2026 os quatro contêineres estão com `restart=no` (medido com `docker inspect`, rodando), então nada do LibreChat sobe no boot; antes era `unless-stopped` em tudo. A fonte `redesign/librechat/docker-compose.yml` ainda diz `unless-stopped` (pendente: alinhar em proposta própria). Compose em `~/librechat/`, fonte em `redesign/librechat/`; o atalho `seth` sincroniza `librechat.yaml` e `data/mcp/canon-mcp.mjs` e reinicia o container só se algo mudou (401).
+ - `piper-tts` (`:8890`, voz pt-BR local, habilitada no `agata.target`) (387) · `discord-mcp` (`:20135`) e `navegador-mcp` (`:20136`), ver "Interface".
+ 
+-**Também no boot:** `ollama.service` (sistema, `:11434`) · `agata-manutencao.timer` (janela diária) · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele.
++**Também no boot:** `agata-manutencao.timer` (janela diária) · `agata-vault-inbox.timer` (a cada 15 min: nota parada há 10 min no `memoria/obsidian-inbox/`, que o decisor não ache rascunho, vira entrada pelo `seth-escriba`, no working tree, sem commit). Os services de consolidação e de pesquisa só rodam com o OmniRoute respondendo (`ExecCondition` = `scripts/esperar_servico.sh`): no boot, a recuperação do timer chegava 1 s antes dele.
+ 
+ **Manuais:** `agata-warmup.service` pré-aquece o modelo local pesado (cold-start do Ollama). `agata-jogo` (`~/.local/bin/`) lança jogo com o Agata fora da RTX 4060, via `game-performance` da distro — **não** Feral GameMode, que briga com o `ananicy-cpp`.
+ 
+@@ -108,12 +108,12 @@ Portas: `config/portas-agata.txt` é o manifesto que o P-4 confere contra o bind
+ ## Interface
+ - **Executor / loop:** grafo + OmniRoute pelo CLI `agata` (`~/.local/bin/agata` → `redesign/grafo/cli.py`: `up`/`down`/`status`/`verify`/`commit-entry`/`run`/`resume`/`logs`).
+ - **`seth_gateway`** (`redesign/router/seth_gateway.py`, `:20126`, sob demanda) — reidrata a Seth antes do sanitizador; **qualquer frontend que aponte para `:20126` fala com a Seth hidratada.** Modo `compacto` (default): identidade + Regra 1 + estado de `estado_para_eco.sh`; filtros de título e keepalive; roteador por complexidade; `X-Modelo-Real` carimbado pela Máquina; a resposta anterior é auditada sem modelo e volta como `AUDITORIA-TURNO-ANTERIOR`; afirmação falsa nova em prosa fica fora e a já desmentida volta acusada pelo catálogo. Texto: `extras/projeto-detalhe/servicos-e-interface.md`.
+-- **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
++- **LibreChat** (`127.0.0.1:3080`, Docker sob demanda) — conversa informal, aponta para `:20126`. **Em substituição** pelo chat do painel (decisão do Humano, 07/11/2026): sai do sistema depois da entrega medida; a descrição abaixo segue valendo até lá. Endpoint `agents` com o Agent `agent_4KlxSMeX5Y8cWQVODkJfH` ("Seth", provider `Seth` → model `seth-livre`, MCP `canon` anexado — MCP só se anexa a Agent) (415). `modelSpecs enforce: true`, spec default `seth-livre` → o Agent; specs `custom` só para debug. `titleConvo: true` (413). Memória do LibreChat desligada (`memory.disabled`) e sem RAG, de propósito: a hidratação vem do `seth_gateway`. Conta única (`ALLOW_REGISTRATION=false`); Meilisearch para busca de conversa. Config em `redesign/librechat/`.
+ - **Goose** (`~/.local/bin/goose`, `:20126`) — agente/código (`goose session`) e shell de fallback operacional; `model: seth-codigo` em `~/.config/goose/config.yaml` (combo próprio, sempre código, sem heurística de tamanho). Codex CLI terciário.
+ - **Voz:** piper-tts (`:8890`, pt-BR local, default desde (387)) + Whisper na iGPU. Remoto = HTTPS via Tailscale.
+ - **Escrita da Seth:** só pelo `seth-escriba` (append-only, sem commit); leitura pelo `canon-mcp`/`:27125` (read-only) (318).
+ - **Portas de entrada** (667): as diretrizes comuns — Regra 1, medir antes de afirmar, P-8, modo conciso padrão, economia de tokens — estão no `AGENTS.md` da raiz, lido por Codex, Gemini CLI, Cursor e outras ferramentas; o `CLAUDE.md` o importa; a nuvem (`PROMPT_CARREGAMENTO.md`), a Seth e o Goose (doutrina do gateway, `redesign/goose/AGENTS.md`) trazem as mesmas linhas. Lista em `config/portas-de-entrada.txt`; o P-23 avisa se alguma porta ficar sem elas.
+-- **Atalhos** (`~/Área de trabalho/`, scripts `~/.local/bin/seth`/`seth-parar`): **Seth** (sobe tudo e abre o navegador), **Seth (agente)** (Goose no terminal), **Parar Seth** (para as frentes; `agata.target` segue de pé). Integrações futuras (Home Assistant, WhatsApp) entram sob demanda, cada uma como servidor MCP.
++- **Atalhos** (`~/Área de trabalho/`, scripts `~/.local/bin/seth`/`seth-parar`): **Seth** (sobe tudo e abre o navegador), **Seth (agente)** (Goose no terminal), **Parar Seth** (para as frentes e o `agata.target`, e libera a VRAM). Integrações futuras (Home Assistant, WhatsApp) entram sob demanda, cada uma como servidor MCP.
+ - **Ponte Discord e controle de navegador** (339): `redesign/mcp/discord/` (poll, não push; egresso sanitizado por `PADROES_SEGREDO`) e `redesign/mcp/navegador/` (Playwright contra Brave real — não `browser-use`, cuja API sumiu na versão avaliada —, perfil isolado, escrita travada por allowlist de domínio em `~/.config/agata/navegador-dominios-permitidos.txt`). Sobem e descem com `seth`/`seth-parar` (`discord-mcp.service`/`navegador-mcp.service`, `redesign/systemd/`, sem `[Install]`). Transporte HTTP; o LibreChat os alcança por `172.29.7.1` (relé, (538)); `librechat.yaml`: `mcpSettings.allowedDomains: ["127.0.0.1", "172.29.7.1"]` — sem isso o LibreChat bloqueia MCP remoto (guarda contra SSRF).
+ 
+ ## Personalidade da Seth
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 1b36d3ef..c7082cb6 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -177,7 +177,11 @@ P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
+ # com sucesso é "inactive", não "failed" -- checar isso soaria falso
+ # alarme a cada execução normal. O que importa pra "vai rodar de novo" é
+ # o TIMER que dispara ele, não o resultado da última corrida.
+-P9_UNIDADES_SISTEMA=("ollama.service")
++# 07/11/2026 (decisão do Humano: ollama.service fora do boot; medido disabled): saiu da linha
++# "Também no boot" do PROJETO, então saiu desta lista, que segue essa linha. Efeito: o P-9 deixa
++# de conferir se o Ollama está no ar; _p9_ollama_na_gpu segue. Trava de "sistema desligado" para
++# unidade de sistema (como a das unidades de usuário): pendente, decisão do Humano.
++P9_UNIDADES_SISTEMA=()
+ # Fase 8 (redesenho): hermes-gateway saiu do loop (P8-05). O executor agora e' o
+ # grafo + OmniRoute -- os membros do agata.target sao os servicos criticos.
+ # seth-gateway/seth-escriba adicionados 04/09/2026 (Camada C): rodam agora
