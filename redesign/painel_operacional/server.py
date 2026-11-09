@@ -151,6 +151,25 @@ def _linhas_do_gateway(resposta):
         return
 
 
+def _motivo_conversa_recusada(dados) -> str:
+    """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
+    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
+    if isinstance(mensagens, list) and len(mensagens) > 200:
+        return "mais de 200 mensagens"
+    if isinstance(mensagens, list) and any(
+            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > armazem.CONVERSA_MENSAGEM_LIMITE
+            for m in mensagens):
+        return f"uma mensagem passa de {armazem.CONVERSA_MENSAGEM_LIMITE} caracteres"
+    modelo = dados.get("modelo") if isinstance(dados, dict) else None
+    if (modelo is not None and not chat_stream.modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
+            isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
+            and not chat_stream.modelo_permitido(m.get("modelo")) for m in mensagens)):
+        return "modelo fora da lista"
+    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
+        return "identificador da conversa inválido"
+    return "formato da conversa inválido"
+
+
 def _relay_modules():
     """Carrega contrato e persistência locais; nenhum módulo faz chamada externa."""
     for directory in (ROOT / "redesign/router", WEB):
@@ -1063,6 +1082,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(302, "text/plain; charset=utf-8", b"", (("Location", destino),))
         if self.path.startswith("/api/grafo"):
             return self._grafo()
+        if self.path == "/api/seth/modelos":
+            return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
         if self.path == "/api/seth/conversas":
             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
         if self.path.startswith("/api/seth/conversa?"):
@@ -1462,13 +1483,17 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(415, "text/plain; charset=utf-8", b"JSON required")
         raw_length = self.headers.get("Content-Length", "")
         if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+            return self._send(413, "text/plain; charset=utf-8", f"pedido acima de {CHAT_STREAM_LIMITE_BYTES} bytes".encode("utf-8"))
         try:
             corpo = json.loads(self.rfile.read(int(raw_length)))
-            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None)
         except (ValueError, RecursionError):
-            # Mensagem genérica: a exceção de montar_pedido não ecoa conteúdo do usuário, e aqui nem ela sai.
-            return self._send(400, "text/plain; charset=utf-8", b"invalid request")
+            return self._send(400, "text/plain; charset=utf-8", "pedido em JSON inválido".encode("utf-8"))
+        try:
+            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None,
+                                               corpo.get("modelo") if isinstance(corpo, dict) else None)
+        except ValueError as erro:
+            # A mensagem de montar_pedido traz só posição e regra (ex.: "mensagem 3 acima de 4000 caracteres"), nunca o texto.
+            return self._send(400, "text/plain; charset=utf-8", str(erro).encode("utf-8"))
         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
             return self._send(429, "text/plain; charset=utf-8", b"busy")
         try:
@@ -1480,11 +1505,13 @@ class Handler(BaseHTTPRequestHandler):
             except OSError:
                 return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
             with resposta:
-                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)))
+                # Modelo real (X-Modelo-Real, fato da Máquina) segue no cabeçalho da resposta; sem ele, a UI mostra o escolhido.
+                real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
+                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)), (("X-Modelo-Real", real),) if real else ())
         finally:
             _SEM_CONVERSA_EM_CURSO.release()
 
-    def _stream_sse(self, eventos) -> None:
+    def _stream_sse(self, eventos, cabecalhos_extra=()) -> None:
         """Repassa eventos como SSE. Sem Content-Length: a conexão fecha ao fim (HTTP/1.0)."""
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream; charset=utf-8")
@@ -1492,6 +1519,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+        for nome, valor in cabecalhos_extra:
+            self.send_header(nome, valor)
         self.end_headers()
         try:
             for evento in eventos:
@@ -1506,52 +1535,59 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
         raw_length = self.headers.get("Content-Length", "")
         if not raw_length.isdecimal() or int(raw_length) > CONVERSA_LIMITE_BYTES:
-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+            return self._send(413, "text/plain; charset=utf-8", f"conversa acima de {CONVERSA_LIMITE_BYTES} bytes".encode("utf-8"))
         try:
             dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
-            return self._send(400, "text/plain; charset=utf-8", b"invalid json")
+            return self._send(400, "text/plain; charset=utf-8", "conversa com JSON inválido".encode("utf-8"))
         if apagar:
             ok = _conversa_apagar(dados.get("id") if isinstance(dados, dict) else "")
             return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
         salvo = _conversa_gravar(dados)
         if salvo is None:
-            return self._send(400, "text/plain; charset=utf-8", b"conversa invalida")
+            return self._send(400, "text/plain; charset=utf-8", _motivo_conversa_recusada(dados).encode("utf-8"))
         return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
 
     def _seth_chat(self) -> None:
-        """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
+        """Conversa com a Seth pelo gateway local, só texto, sem ferramentas e sem escrita. Modelo: lista fixa (chat_stream).
+        Mesmo teto de pedido do stream (CHAT_STREAM_LIMITE_BYTES): a janela que a UI manda cabe nos dois caminhos."""
         if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
         raw_length = self.headers.get("Content-Length", "")
-        if not raw_length.isdecimal() or int(raw_length) > 16384:
-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
+        if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
+            return self._send(413, "text/plain; charset=utf-8", f"pedido acima de {CHAT_STREAM_LIMITE_BYTES} bytes".encode("utf-8"))
         try:
             corpo = json.loads(self.rfile.read(int(raw_length)))
         except (json.JSONDecodeError, UnicodeDecodeError):
-            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+            return self._send(400, "text/plain; charset=utf-8", "pedido em JSON inválido".encode("utf-8"))
         mensagens = corpo.get("messages") if isinstance(corpo, dict) else None
-        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > 20:
-            return self._send(400, "text/plain; charset=utf-8", b"messages must be 1-20 items")
+        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > chat_stream.MAX_MENSAGENS:
+            return self._send(400, "text/plain; charset=utf-8", f"a janela precisa ter de 1 a {chat_stream.MAX_MENSAGENS} mensagens".encode("utf-8"))
         limpas = []
         for m in mensagens:
             if not isinstance(m, dict) or m.get("role") not in ("user", "assistant"):
-                return self._send(400, "text/plain; charset=utf-8", b"invalid message")
+                return self._send(400, "text/plain; charset=utf-8", "mensagem com papel inválido".encode("utf-8"))
             conteudo = m.get("content")
-            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > 4000:
-                return self._send(400, "text/plain; charset=utf-8", b"content must be 1-4000 characters")
+            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > chat_stream.MAX_CARACTERES_MENSAGEM:
+                return self._send(400, "text/plain; charset=utf-8",
+                                  f"mensagem vazia ou acima de {chat_stream.MAX_CARACTERES_MENSAGEM} caracteres".encode("utf-8"))
             limpas.append({"role": m["role"], "content": conteudo})
+        try:
+            modelo = chat_stream.modelo_valido(corpo.get("modelo") if isinstance(corpo, dict) else None)
+        except ValueError:
+            return self._send(400, "text/plain; charset=utf-8", b"modelo fora da lista")
         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
             return self._send(429, "text/plain; charset=utf-8", b"busy")
         try:
-            pedido = {"model": "seth-livre", "stream": False, "messages": limpas, "max_tokens": 1024}
-            req = urllib.request.Request("http://127.0.0.1:20126/v1/chat/completions", data=json.dumps(pedido).encode("utf-8"),
+            pedido = {"model": modelo, "stream": False, "messages": limpas, "max_tokens": 1024}
+            req = urllib.request.Request(GATEWAY_CHAT_URL, data=json.dumps(pedido).encode("utf-8"),
                                          headers={"Content-Type": "application/json"}, method="POST")
             with urllib.request.urlopen(req, timeout=120) as resposta:
                 dados = json.loads(resposta.read().decode("utf-8"))
+                real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
             texto = dados["choices"][0]["message"].get("content") or ""
             body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
-            return self._send(200, "application/json; charset=utf-8", body)
+            return self._send(200, "application/json; charset=utf-8", body, (("X-Modelo-Real", real),) if real else ())
         except (OSError, KeyError, IndexError, ValueError):
             return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
         finally:

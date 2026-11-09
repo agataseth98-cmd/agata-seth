@@ -593,12 +593,44 @@ function ligarCartoesClicaveis() {
 }
 
 /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
-let sethAtual = {id: null, titulo: "", mensagens: []};
+const SETH_MODELO_PADRAO = "seth-livre";
+let sethAtual = {id: null, titulo: "", mensagens: [], modelo: SETH_MODELO_PADRAO};
+// Lista do seletor. Vem de GET /api/seth/modelos (lista fixa no servidor); sem ela, fica só o padrão.
+let sethModelos = [{id: SETH_MODELO_PADRAO, rotulo: "Seth (padrão)", descricao: ""}];
 const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
 const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
+// Limites espelhados do servidor: chat_stream.py (MAX_MENSAGENS, MAX_CARACTERES_MENSAGEM), server.py (CHAT_STREAM_LIMITE_BYTES)
+// e armazem.py (CONVERSA_LIMITE_BYTES). test_chat_ui.py confere que os números são os mesmos.
+const SETH_MAX_MENSAGENS = 20;
+const SETH_MAX_CARACTERES = 4000;
+const SETH_LIMITE_PEDIDO_BYTES = 131072;
+const SETH_LIMITE_CONVERSA_BYTES = 262144;
 function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
 function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
 function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
+function sethMostrarModelo() {
+  const select = byId("seth-modelo"); const desc = byId("seth-modelo-desc");
+  if (select.value !== sethAtual.modelo) select.value = sethAtual.modelo;
+  const escolhido = sethModelos.find((m) => m.id === sethAtual.modelo);
+  desc.textContent = escolhido ? escolhido.descricao : "";
+}
+async function sethCarregarModelos() {
+  const select = byId("seth-modelo");
+  try {
+    const dados = await fetchJson("/api/seth/modelos", {headers: {Accept: "application/json"}});
+    if (!Array.isArray(dados.modelos) || !dados.modelos.length) return;
+    sethModelos = dados.modelos;
+    select.replaceChildren();
+    sethModelos.forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = m.rotulo; select.append(o); });
+    sethMostrarModelo();
+  } catch (_) { /* sem a lista, fica só o padrão do HTML; a conversa segue com seth-livre */ }
+}
+// Modelo que respondeu: o real (cabeçalho X-Modelo-Real do gateway); sem ele, o escolhido, marcado "(escolhido)".
+function sethTextoModelo(m) {
+  if (m.modelo_real) return "modelo: " + m.modelo_real;
+  if (m.modelo) return "modelo: " + m.modelo + " (escolhido)";
+  return "modelo: não registrado";
+}
 function sethInline(container, texto) {
   const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
   for (const p of partes) {
@@ -633,9 +665,11 @@ function sethMensagem(m, indice) {
   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
   const hora = document.createElement("span"); hora.textContent = m.hora || "";
   cab.append(quem, hora);
+  if (m.role === "assistant") { const modelo = document.createElement("span"); modelo.className = "msg-modelo"; modelo.textContent = sethTextoModelo(m); cab.append(modelo); }
   const corpo = document.createElement("div"); corpo.className = "msg-body";
   if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
   msg.append(cab, corpo);
+  if (m.aviso) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.aviso; msg.append(aviso); }
   if (m.role === "assistant") {
     const acoes = document.createElement("div"); acoes.className = "msg-acoes";
     const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
@@ -659,6 +693,7 @@ function sethDesenhar() {
   sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
   log.scrollTop = log.scrollHeight;
   sethTitulo(sethAtual.titulo);
+  sethPintarAvisoSalvar();
 }
 function sethExemplos() {
   const box = byId("seth-exemplos"); if (!box) return;
@@ -697,22 +732,51 @@ async function sethListar() {
 async function sethAbrir(id) {
   try {
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
-    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens};
-    sethDesenhar(); sethListar();
+    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO};
+    sethDesenhar(); sethListar(); sethMostrarModelo();
   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
+}
+// Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
+function sethParaSalvar(m) {
+  const item = {role: m.role, content: m.content};
+  if (m.role === "assistant") { if (m.modelo) item.modelo = m.modelo; if (m.modelo_real) item.modelo_real = m.modelo_real; }
+  return item;
 }
 async function sethSalvar() {
   if (!sethAtual.mensagens.length) return;
   if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
+  const corpo = JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, modelo: sethAtual.modelo, mensagens: sethAtual.mensagens.map(sethParaSalvar)});
+  if (new TextEncoder().encode(corpo).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true); return; }
   try {
-    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
-      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map((m) => ({role: m.role, content: m.content}))})});
-    if (r.ok) { const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar(); }
-  } catch (_) { /* a conversa continua na aba; o aviso fica no status */ }
+    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: corpo});
+    if (!r.ok) { sethNaoSalvou(sethMotivoRecusa(r.status, await sethMotivo(r)), r.status === 413 || r.status === 400); return; }
+    const dados = await r.json(); sethAtual.id = dados.id; sethAtual.naoSalva = ""; sethPintarAvisoSalvar(); sethTitulo(sethAtual.titulo); sethListar();
+  } catch (_) { sethNaoSalvou("sem resposta do painel", false); }
+}
+/* Aviso persistente de conversa não salva (seth-salvar-aviso). Fica na aba até uma gravação dar certo ou a conversa trocar. */
+function sethNaoSalvou(motivo, comecarDeNova) {
+  const guardado = sethAtual.id ? "O que está guardado é a última gravação feita; o que veio depois não está salvo." : "Nada desta conversa está guardado ainda.";
+  sethAtual.naoSalva = "Conversa não salva: " + motivo + ". " + guardado + (comecarDeNova ? " Para seguir salvando, comece uma conversa nova." : "");
+  sethPintarAvisoSalvar();
+}
+/* Texto do motivo quando o painel recusa a gravação: 413 é tamanho; 400 é regra, com o detalhe que o servidor devolve. */
+function sethMotivoRecusa(status, motivo) {
+  if (status === 413) return "a conversa passou de " + SETH_LIMITE_CONVERSA_BYTES + " bytes (256 KB), o limite de cada gravação";
+  if (status === 400) return "o painel recusou a conversa (" + (motivo || "sem detalhe") + ")";
+  return "o painel respondeu com erro " + status;
+}
+/* Aviso de uma gravação que falhou sem ser da conversa aberta (ex.: renomear uma conversa fechada). Some na próxima atualização da aba. */
+function sethMostrarAviso(texto) {
+  const aviso = byId("seth-salvar-aviso"); if (!aviso) return;
+  aviso.textContent = texto; aviso.hidden = false;
+}
+function sethPintarAvisoSalvar() {
+  const aviso = byId("seth-salvar-aviso"); if (!aviso) return;
+  aviso.textContent = sethAtual.naoSalva || ""; aviso.hidden = !sethAtual.naoSalva;
 }
 async function sethApagar(id) {
   await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
-  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); }
+  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); }
   sethListar();
 }
 function sethRenomear(c, linha) {
@@ -722,25 +786,59 @@ function sethRenomear(c, linha) {
     const novo = campo.value.trim() || c.titulo;
     if (c.id === sethAtual.id) { sethAtual.titulo = novo; sethSalvar(); return; }
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(c.id), {headers: {Accept: "application/json"}});
-    await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, mensagens: dados.mensagens})});
+    try {
+      const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, modelo: dados.modelo, mensagens: dados.mensagens})});
+      if (!r.ok) sethMostrarAviso("Não foi possível salvar o novo nome da conversa \"" + c.titulo + "\": " + sethMotivoRecusa(r.status, await sethMotivo(r)) + ".");
+    } catch (_) { sethMostrarAviso("Não foi possível salvar o novo nome da conversa: sem resposta do painel."); }
     sethListar();
   };
   campo.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmar(); if (e.key === "Escape") sethListar(); });
   campo.addEventListener("blur", () => sethListar());
 }
-function sethErro(status, erro) {
+function sethErro(status, motivo) {
   if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
-  return erro && erro.message ? erro.message : "falha desconhecida";
+  if (status === 400 || status === 413) return "o painel recusou o pedido (" + (motivo || "sem detalhe") + ")";
+  if (status) return "o painel respondeu com erro " + status;
+  return "falha desconhecida";
+}
+/* Motivo que o servidor devolve no corpo de um erro (texto curto, em português; mostrado só em 400 e 413). */
+async function sethMotivo(resposta) {
+  try { return (await resposta.text()).trim().slice(0, 200); } catch (_) { return ""; }
+}
+/* Janela enviada ao gateway: as últimas 20 mensagens, cada uma com até 4000 caracteres, e o pedido inteiro até 131072 bytes.
+   Corta o que passa do limite (a conversa salva não muda) e conta o que cortou ou deixou de fora, para o aviso. */
+function sethJanela(mensagens) {
+  const marca = "\n[cortado pelo painel para caber no limite de " + SETH_MAX_CARACTERES + " caracteres]";
+  const espaco = SETH_MAX_CARACTERES - Array.from(marca).length;
+  let cortadas = 0;
+  const janela = mensagens.slice(-SETH_MAX_MENSAGENS).map((m) => {
+    const pontos = Array.from(m.content);
+    if (pontos.length <= SETH_MAX_CARACTERES) return {role: m.role, content: m.content};
+    cortadas++;
+    return {role: m.role, content: pontos.slice(0, espaco).join("") + marca};
+  });
+  const bytes = (lista) => new TextEncoder().encode(JSON.stringify({mensagens: lista})).length;
+  let deixadas = 0;
+  while (janela.length > 1 && bytes(janela) > SETH_LIMITE_PEDIDO_BYTES) { janela.shift(); deixadas++; }
+  return {mensagens: janela, cortadas, deixadas};
+}
+function sethAvisoJanela(janela) {
+  if (!janela.cortadas && !janela.deixadas) return "";
+  const partes = [];
+  if (janela.cortadas) partes.push((janela.cortadas === 1 ? "1 mensagem antiga longa foi cortada" : janela.cortadas + " mensagens antigas longas foram cortadas") + " para " + SETH_MAX_CARACTERES + " caracteres");
+  if (janela.deixadas) partes.push((janela.deixadas === 1 ? "1 mensagem mais antiga ficou" : janela.deixadas + " mensagens mais antigas ficaram") + " de fora, porque o pedido passou do tamanho máximo");
+  return "Para responder, a Seth recebeu a conversa com ajuste: " + partes.join("; ") + ". A conversa salva continua completa.";
 }
 /* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
    Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
    Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
 function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
-async function sethLerStream(mensagens, parcial, aoTexto) {
+async function sethLerStream(mensagens, modelo, parcial, aoTexto) {
   const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
-    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
-  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo})});
+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
+  parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
   if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
   const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
   let pendente = "", fim = false;
@@ -769,10 +867,11 @@ async function sethLerStream(mensagens, parcial, aoTexto) {
     try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
   }
 }
-async function sethChatInteiro(mensagens) {
+async function sethChatInteiro(mensagens, modelo, parcial) {
   const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
-    body: JSON.stringify({messages: mensagens})});
-  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
+    body: JSON.stringify({messages: mensagens, modelo})});
+  if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
+  parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
   return r.json();
 }
 async function sethEnviar(textoUsuario, reaproveitar) {
@@ -782,7 +881,10 @@ async function sethEnviar(textoUsuario, reaproveitar) {
   botao.disabled = true; sethStatus("PENSANDO", "partial");
   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
   log.append(pensando);
-  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
+  const janela = sethJanela(sethAtual.mensagens);
+  const mensagens = janela.mensagens;
+  const avisoJanela = sethAvisoJanela(janela);
+  const modelo = sethAtual.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
   const parcial = {texto: ""};
   let textoNo = null;
   const aoTexto = (delta) => {
@@ -796,22 +898,22 @@ async function sethEnviar(textoUsuario, reaproveitar) {
     textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
   };
   try {
-    let conteudo, modelo = "";
+    let conteudo;
     try {
-      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
+      conteudo = await sethLerStream(mensagens, modelo, parcial, aoTexto);
     } catch (erro) {
       const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
       if (!transporte) throw erro;
-      const dados = await sethChatInteiro(mensagens);
-      conteudo = dados.content; modelo = dados.model || "";
+      const dados = await sethChatInteiro(mensagens, modelo, parcial);
+      conteudo = dados.content;
     }
-    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
+    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo, modelo_real: parcial.modelo_real || "", aviso: avisoJanela});
     sethDesenhar(); sethStatus("PRONTA", "planned");
     sethSalvar();
   } catch (erro) {
     if (!reaproveitar) sethAtual.mensagens.pop();
     sethDesenhar();
-    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
+    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + (erro.message || "falha desconhecida") + ".";
     log.append(aviso);
     sethStatus("INDISPONÍVEL", "horizon");
   } finally { botao.disabled = false; campo.focus(); }
@@ -827,10 +929,11 @@ function ligarConversaSeth() {
   const form = byId("seth-form");
   if (!form || form.dataset.ligado) return;
   form.dataset.ligado = "1";
-  sethExemplos(); sethDesenhar(); sethListar();
+  sethExemplos(); sethDesenhar(); sethListar(); sethCarregarModelos();
+  byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
   const campo = byId("seth-input");
   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const texto = campo.value.trim();
