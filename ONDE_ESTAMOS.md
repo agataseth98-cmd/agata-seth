@@ -1,12 +1,32 @@
 # Onde estamos
 
-Atualizado em 03/11/2026.
+Atualizado em 09/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 09/11 (aplicação do painel unificado)
+
+**Aplicação local validada:** `painel-unificado-07-11`. Assinatura P-8 confirmada, diff aplicado em worktree própria e CI local `TUDO OK`. A aplicação segue para PR; o Humano decide se junta. Registro em MEMÓRIAS (973).
+
+## Hoje, 09/11 (proposta núcleo de desenvolvimento)
+
+PR #951 refeita sobre `origin/main` atual, com C11b no diff e registro (974). A CI local foi executada; assinatura e aplicação do diff aguardam o Humano. O restante da fila está sendo processado um PR por vez.
+
+## Hoje, 09/11 (proposta OpenCode no terminal)
+
+PR #948 atualizada sobre `main`, com registro (975). A proposta troca o atalho de terminal e o membro da equipe para OpenCode; a CI local passou. A proposta de documentação #949 declara dependência desta e segue depois.
+
+## Hoje, 09/11 (proposta docs OpenCode)
+
+PR #949 atualizada como segunda parte da troca, com registro (976). O diff contém apenas os deltas de documentação, configuração e skills; o registro da decisão fica no diff da primeira proposta para não duplicar. A CI local passou.
+
+## Hoje, 09/11 (proposta origem preservada)
+
+PR #947 atualizada sobre `main`, com registro (977). O diff propõe preservar origem dos dados ao salvar conversas; suíte do painel e CI local passaram. Armazenamento real e conversas acima de 8000 caracteres não foram validados.
 
 ## Hoje, 06/11 (aplicação teto do Conselho)
 

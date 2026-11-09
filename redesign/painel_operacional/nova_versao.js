@@ -1,8 +1,11 @@
-// Nova versão do Agata no painel (Experimento GPT): Alexandria, metacognição, corpo, conexões, orçamento, avaliação.
-// Arquivo externo por causa da CSP (script-src 'self'; style-src 'self': nada de style inline, só classes de nova_versao.css).
-// Usa fetchJson/byId de prototipo.js. Todo texto vindo do servidor entra por textContent, nunca como HTML.
+// Nova versão do Agata no painel: Alexandria, metacognição, corpo, conexões, custos, avaliação e sentidos.
+// Arquivo externo por causa da CSP (script-src 'self'; style-src 'self'). Todo texto vindo do servidor entra por textContent.
+// Isolado em IIFE: a única ponte com o /prototipo é window.AgataPainel (criado por prototipo.js antes deste arquivo).
 (function () {
   "use strict";
+  const AgataPainel = window.AgataPainel;
+  const byId = (id) => document.getElementById(id);
+  const fetchJson = (url, options, timeoutMs) => AgataPainel.fetchJson(url, options, timeoutMs);
   const H = {"Content-Type": "application/json", Accept: "application/json"};
   // h("div", {class: "x", text: "y", title: "z"}, filho1, filho2…)
   const h = (tag, props, ...filhos) => {
@@ -61,7 +64,7 @@
       try { await fazer(); } finally { botao.disabled = false; }
     });
   }
-  const recarregar = (nome) => window.carregarNovaVersao(nome);
+  const recarregar = (nome) => AgataPainel.carregarNovaVersao(nome);
 
   // ---------------------------------------------------------------- Alexandria
   function alexandria() {
@@ -301,10 +304,16 @@
       h("td", {class: "num", text: x.tempo_mediano_s === null ? "—" : x.tempo_mediano_s.toFixed(2) + " s"}))));
   }
 
-  const telas = {"nv-acervo": acervo, "nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
-  window.carregarNovaVersao = async function (nome) {
+  const telas = {"nv-acervo": acervo, "nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-tarifas": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
+  AgataPainel.carregarNovaVersao = async function (nome) {
     await ler();
-    if (!estado) { const pg = byId("page-" + nome); if (pg) { const k = pg.querySelector(".kpis"); if (k) k.replaceChildren(kpi("Nova versão", "indisponível", "rose", "o servidor não respondeu")); } return; }
+    const secao = (byId("sub-" + nome) || {dataset: {}}).dataset.secao;
+    if (!estado) {
+      if (secao) AgataPainel.marcarEstado(secao, "erro", "Não medido: o servidor da nova versão não respondeu. Valor antigo, se houver, aparece com a hora dele.");
+      const pg = byId("sub-" + nome); if (pg) { const k = pg.querySelector(".kpis"); if (k) k.replaceChildren(kpi("Nova versão", "indisponível", "rose", "o servidor não respondeu")); }
+      return;
+    }
+    if (secao) AgataPainel.marcarEstado(secao, null);
     (telas[nome] || (() => {}))();
   };
 
@@ -322,15 +331,14 @@
     recarregar("nv-alexandria");
   });
   const consultar = (acao) => async () => {
-    const q = val("nv-consulta"); if (!q) return;
+    const q = val("conhecimento-consulta"); if (!q) return;
     try {
       const r = await executar(acao, {consulta: q, semantica: byId("nv-semantica").value});
       acao === "consultar" ? mostrarPacote(r.resultado) : mostrarSkills(r.resultado);
     } catch (e) { por("nv-resultados"); mostrar("nv-resultados-vazio", true); byId("nv-resultados-vazio").textContent = motivoErro(e); }
   };
-  if (byId("nv-consultar")) byId("nv-consultar").addEventListener("click", consultar("consultar"));
+  // A busca única (Conhecimento) envia o formulário; o escopo decide: dentro = Alexandria, fora = Wikipédia.
   if (byId("nv-skills")) byId("nv-skills").addEventListener("click", consultar("skills"));
-  if (byId("nv-consulta")) byId("nv-consulta").addEventListener("keydown", (e) => { if (e.key === "Enter") consultar("consultar")(); });
   const classificar = async () => {
     const q = val("nv-pedido"); if (!q) return;
     try {
@@ -551,10 +559,12 @@
       })()))));
     if (!(r.resultados || []).length) nota("nv-ext-nota", "Sem resultado: " + (r.motivo || "nada encontrado nesta busca") + ".", r.estado === "falhou" ? "erro" : "");
   }
-  if (byId("nv-ext-pesquisar")) byId("nv-ext-pesquisar").addEventListener("click", async () => {
-    const q = val("nv-ext-consulta"); if (!q) { nota("nv-ext-nota", "Escreva o que procurar.", "erro"); return; }
+  const pesquisarFora = async () => {
+    const q = val("conhecimento-consulta"); if (!q) { nota("nv-ext-nota", "Escreva o que procurar.", "erro"); return; }
     nota("nv-ext-nota", "Pesquisando…");
     try { mostrarExterna((await executar("acervo_externa_pesquisar", {consulta: q})).resultado); }
     catch (e) { nota("nv-ext-nota", motivoErro(e), "erro"); }
-  });
+  };
+  // Ponte para o formulário único de Conhecimento (prototipo.js): escopo "fora" vai à Wikipédia; o resto, à Alexandria.
+  AgataPainel.buscarAcervo = (escopo) => (escopo === "fora" ? pesquisarFora() : consultar("consultar")());
 })();
