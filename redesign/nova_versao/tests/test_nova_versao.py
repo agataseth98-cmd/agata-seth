@@ -58,6 +58,13 @@ class OrcamentoTests(Base):
         self.assertTrue(orcamento.permite("local")[0])
         self.assertFalse(orcamento.permite("local", chamadas_ja=10**6)[0])
 
+    def test_valores_de_fabrica_e_quatro_categorias_da_spec(self):
+        o = orcamento.ler()
+        self.assertEqual(orcamento.PROVEDORES, ("local", "gratuito", "assinatura", "pago"))
+        self.assertEqual(o["provedores"], {"local": True, "gratuito": False, "assinatura": False, "pago": False})
+        self.assertEqual((o["max_chamadas"], o["max_tokens"], o["timeout_s"], o["teto_reais"]), (200, 2_000_000, 120, 0.0))
+        self.assertEqual([orcamento.permite(p)[0] for p in orcamento.PROVEDORES], [True, False, False, False])
+
 
 if __name__ == "__main__":
     unittest.main()

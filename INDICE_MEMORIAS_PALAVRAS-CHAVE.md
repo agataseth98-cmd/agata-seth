@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
+  palavras-chave: spec, unificada, aplicada, nova, versao, união, prs
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
   palavras-chave: proposta, chat, lote, publicada, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, temporária
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: condição, busca, externa, avaliação, passa, usar, fontes, própria, tarefa, piora, era, erro, medição, efeito, modelo, lote, proposta, avaliacao
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por voz, 5 sentidos): o ouvido aceita corpo chunked, que o LibreChat envia sem Content-Length, e o idioma do STT passa a código válido.** Proposta `voz-stt-20261105`.
   palavras-chave: voz, librechat, transcreve, novo, conversa, sentidos, ouvido, aceita, corpo, chunked, envia, content, length, idioma, stt, passa, código, válido, proposta
-(953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
-  palavras-chave: nvidia, gemma, lista, gratuitos, nova, versão, lote, complemento, modelo, respondeu, conta, entra, avaliação, passagem, omniroute, proposta
+(953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, l …
+  palavras-chave: nvidia, gemma, lista, gratuitos, nova, versão
 (952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova …
   palavras-chave: stealth, crouton, alpha, liberado, sob, condições, nova
 (951) DIÁRIO — 05/11/2026 · **Rodada que bate no prazo vira "incompleta", não "c …
