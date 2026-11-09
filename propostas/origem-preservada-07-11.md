@@ -1,6 +1,6 @@
 # Proposta origem-preservada-07-11
 
-Data: 07/11/2026. Branch: proposta/origem-preservada-07-11 (worktree .claude/worktrees/origem-preservada-07-11). Base: origin/main 83334fde.
+Data da proposta: 07/11/2026. Base revalidada: `origin/main` `ed28bd2c` em 09/11/2026. O diff aplica sem conflito nessa base.
 Decisão do Humano (07/11/2026): "sem duplicar, sim".
 Não commitado, não juntado, não assinado. O agente de CI faz o commit a partir do diff.
 
@@ -36,6 +36,7 @@ Versão intermediária descartada (lojas-descartadas/medicao-depois-v1.json, for
 - Antes da correção (recorte -k "origem or cliente_abre"): os 5 testes novos falham; os outros 5 do recorte passam.
 - Depois: suíte do painel, pytest 9.2.0, `pytest -q -p no:cacheprovider redesign/painel_operacional` → 136 passed, 65 subtests passed.
 - CI local: `PYTEST=/home/orusoua/.cache/uv/archive-v0/0obnOoJtclHllQl_/bin/pytest bash scripts/ci_sdd_local.sh` → CI LOCAL: TUDO OK (todos os passos OK).
+- Revalidação em 09/11/2026 com o diff aplicado sobre `ed28bd2c`: suíte do painel 162 passed, 118 subtests passed; CI local `TUDO OK`, exit 0.
 - O CI local regravou criterion-drift.md e evidence.json de nova_versao/spec e sdd_flow/spec. Foram revertidos (git checkout) ou tirados do caminho; não entram no diff.
 
 ## Diff
@@ -43,7 +44,9 @@ Versão intermediária descartada (lojas-descartadas/medicao-depois-v1.json, for
 propostas/origem-preservada-07-11.diff: 12126 bytes, sha256 0c0be5bffb60701fafdd8aaef0f2be0f4438475f08643e1ffc2303885fa91963.
 Conferido com `git apply --cached --check` sobre origin/main, em índice temporário (a worktree não foi tocada): aplica.
 
-## Sobreposição com proposta/corrige-identificador-conversa-07-11
+## Sobreposição avaliada com proposta/corrige-identificador-conversa-07-11
+
+**Estado atual, 09/11:** PR #945 está fechada; seu diff publicado contém apenas os artefatos da proposta e âncoras, sem aplicação de código. A verificação atual deste diff sobre `ed28bd2c` passou. As observações abaixo registram a comparação feita na proposta original, quando o estado era diferente.
 
 Lido no worktree corrige-identificador-conversa (mudanças não commitadas, base 83334fde). A outra proposta toca armazem.py, server.py e test_painel.py.
 
