@@ -16,6 +16,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 PR #951 refeita sobre `origin/main` atual, com C11b no diff e registro (974). A CI local foi executada; assinatura e aplicação do diff aguardam o Humano. O restante da fila está sendo processado um PR por vez.
 
+## Hoje, 09/11 (proposta OpenCode no terminal)
+
+PR #948 atualizada sobre `main`, com registro (975). A proposta troca o atalho de terminal e o membro da equipe para OpenCode; a CI local passou. A proposta de documentação #949 declara dependência desta e segue depois.
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).
