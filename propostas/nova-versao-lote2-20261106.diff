@@ -1,0 +1,196 @@
+diff --git a/redesign/nova_versao/nv.py b/redesign/nova_versao/nv.py
+index 9a816d58..6e157cb8 100644
+--- a/redesign/nova_versao/nv.py
++++ b/redesign/nova_versao/nv.py
+@@ -8,6 +8,7 @@ corpo (fotografia e saúde), orçamento e eventos.
+   nv.py iniciar          cria as pastas de trabalho, tira snapshot do HEAD e indexa
+   nv.py estado           estado de todos os componentes (JSON)
+   nv.py verificar        confere o ledger encadeado e o índice
++  nv.py reverter [dest]  remove só o cache e arquiva os dados num .tar.gz datado (nunca apaga os dados)
+   nv.py --selftest       teste offline, em pasta temporária
+ """
+ from __future__ import annotations
+@@ -136,7 +137,60 @@ def sincronizar(repo: Path | None = None, limite_aplicadas: int = LIMITE_APLICAD
+     return {"propostas": len(alvos), "aplicadas_consideradas": min(len(aplicadas), limite_aplicadas), "movidas": feitos}
+ 
+ 
++CACHE_PADRAO = Path.home() / ".cache" / "agata" / "nova-versao"
++
++
++def _cache() -> Path:
++    # vazio conta como ausente: Path("") é o diretório atual, e o rmtree apagaria o cwd
++    return Path(os.environ.get("AGATA_NV_CACHE") or CACHE_PADRAO)
++
++
++def _dentro_ou_igual(a: Path, b: Path) -> bool:
++    """a == b ou a dentro de b."""
++    return a == b or b in a.parents
++
++
++def reverter(destino: Path | None = None) -> dict:
++    """(lote 2, reversão; spec, "Migração e reversão") Remove só o cache (derivado) e arquiva os dados.
++    `AGATA_NV_DIR` (ledger, eventos, execuções) vira um pacote .tar.gz datado em `destino`, fora dos dados
++    e fora do cache, e NUNCA é apagado: apagar dado é decisão do Humano. O revert do commit é passo à parte.
++    Recusa (ValueError) antes de tocar em qualquer coisa: variável vazia, cache que não seja pasta derivada
++    isolada, cache que contenha o repositório ou o diretório atual, destino dentro dos dados ou do cache."""
++    import shutil
++    import tarfile
++    import time
++    if os.environ.get("AGATA_NV_DIR") == "":
++        raise ValueError("AGATA_NV_DIR vazio: recusado (resolveria para o diretório atual)")
++    dados, cache = eventos.dados().resolve(), _cache().resolve()
++    destino = Path(destino or (dados.parent / "nova-versao-arquivo")).resolve()
++    home = Path.home().resolve()
++    repo = Path(__file__).resolve().parents[2]
++    if cache in (Path("/"), home) or _dentro_ou_igual(dados, cache) or _dentro_ou_igual(cache, dados):
++        raise ValueError(f"cache recusado (não é pasta derivada isolada dos dados): {cache}")
++    if _dentro_ou_igual(repo, cache) or _dentro_ou_igual(Path.cwd().resolve(), cache):
++        raise ValueError(f"cache recusado (contém o repositório ou o diretório atual): {cache}")
++    # estritamente dentro de ~/.cache E com "nova-versao" no nome: recusa ~/.cache, ~/.cache/agata, /usr/x/nova-versao
++    if not ((home / ".cache") in cache.parents and "nova-versao" in cache.name):
++        raise ValueError(f"cache recusado (precisa estar dentro de ~/.cache e ter 'nova-versao' no nome): {cache}")
++    if _dentro_ou_igual(destino, dados) or _dentro_ou_igual(destino, cache):
++        raise ValueError(f"destino recusado (dentro dos dados ou do cache): {destino}")
++    pacote, motivo = None, "sem dados para arquivar"
++    if dados.exists():
++        destino.mkdir(parents=True, exist_ok=True)
++        pacote = destino / f"nova-versao-dados-{time.strftime('%Y%m%d-%H%M%S')}.tar.gz"
++        with tarfile.open(pacote, "x:gz") as tar:          # x: nunca sobrescreve pacote existente
++            tar.add(dados, arcname=dados.name)
++        motivo = "arquivado"
++    removido = cache.exists()
++    if removido:
++        shutil.rmtree(cache)
++    return {"cache_removido": str(cache) if removido else None, "dados_mantidos": str(dados),
++            "pacote": str(pacote) if pacote else None, "pacote_estado": motivo}
++
++
+ def main(argv: list[str]) -> int:
++    if argv[:1] == ["reverter"]:
++        print(json.dumps(reverter(*(argv[1:2] or [None])), ensure_ascii=False, indent=1)); return 0
+     if argv == ["--selftest"]:
+         return _selftest()
+     if argv[:1] == ["iniciar"]:
+diff --git a/redesign/nova_versao/tests/test_nova_versao.py b/redesign/nova_versao/tests/test_nova_versao.py
+index 859817fe..1b6b2a78 100644
+--- a/redesign/nova_versao/tests/test_nova_versao.py
++++ b/redesign/nova_versao/tests/test_nova_versao.py
+@@ -3,6 +3,7 @@ import sys
+ import tempfile
+ import threading
+ import unittest
++from unittest import mock
+ from pathlib import Path
+ 
+ AQUI = Path(__file__).resolve().parent
+@@ -59,5 +60,110 @@ class OrcamentoTests(Base):
+         self.assertFalse(orcamento.permite("local", chamadas_ja=10**6)[0])
+ 
+ 
++class ReversaoTests(unittest.TestCase):
++    """spec, "Migração e reversão": a reversão não apaga AGATA_NV_DIR; só remove o cache."""
++
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        base = Path(self.tmp.name).resolve()
++        self.home = base / "home"                                   # home falsa: nenhum teste toca o ~/.cache real
++        self._home = mock.patch.object(Path, "home", return_value=self.home)
++        self._home.start()
++        self.dados, self.destino = base / "dados", base / "arquivo"
++        self.cache = self.home / ".cache" / "nova-versao-cache"
++        self._env = {k: os.environ.get(k) for k in ("AGATA_NV_DIR", "AGATA_NV_CACHE")}
++        self._cwd = os.getcwd()
++        os.environ["AGATA_NV_DIR"], os.environ["AGATA_NV_CACHE"] = str(self.dados), str(self.cache)
++        self.dados.mkdir(parents=True)
++        (self.cache / "gpu.lock").parent.mkdir(parents=True)
++        (self.cache / "gpu.lock").write_text("x", encoding="utf-8")
++        import nv  # noqa: E402
++        self.nv = nv
++
++    def tearDown(self):
++        self._home.stop()
++        os.chdir(self._cwd)
++        for k, v in self._env.items():
++            if v is None:
++                os.environ.pop(k, None)
++            else:
++                os.environ[k] = v
++        self.tmp.cleanup()
++
++    def _recusa(self, destino=None):
++        with self.assertRaises(ValueError):
++            self.nv.reverter(destino if destino is not None else self.destino)
++        self.assertTrue(self.dados.exists())                       # dados intactos
++        self.assertTrue((self.cache / "gpu.lock").exists())        # cache sobreviveu à recusa
++        self.assertFalse(self.destino.exists())                    # nenhum pacote criado
++
++    def test_reversao_nao_apaga_dados_so_remove_cache(self):
++        import tarfile
++        eventos.registrar("execution", "ok", "antes da reversão")
++        antes = sorted(p.relative_to(self.dados) for p in self.dados.rglob("*"))
++        r = self.nv.reverter(self.destino)
++        self.assertFalse(self.cache.exists())                       # cache derivado removido
++        self.assertTrue(self.dados.exists())                        # dados nunca apagados
++        self.assertEqual(sorted(p.relative_to(self.dados) for p in self.dados.rglob("*")), antes)
++        self.assertTrue(eventos.verificar())                        # ledger íntegro depois
++        pacote = Path(r["pacote"])
++        self.assertEqual(r["pacote_estado"], "arquivado")
++        self.assertTrue(pacote.exists() and pacote.parent == self.destino)
++        with tarfile.open(pacote) as tar:
++            self.assertTrue(any(n.startswith("dados/") for n in tar.getnames()))
++
++    def test_recusa_cache_raiz_ou_home(self):
++        for alvo in ("/", str(Path.home())):
++            os.environ["AGATA_NV_CACHE"] = alvo
++            self._recusa()
++
++    def test_recusa_cache_igual_ou_dentro_dos_dados(self):
++        for alvo in (self.dados, self.dados / "nova-versao-cache"):
++            os.environ["AGATA_NV_CACHE"] = str(alvo)
++            self._recusa()
++
++    def test_recusa_cache_fora_de_cache_e_sem_nome(self):
++        os.environ["AGATA_NV_CACHE"] = str(self.cache.parent / "qualquer")        # em ~/.cache, sem o nome
++        self._recusa()
++
++    def test_recusa_o_proprio_cache_e_cache_agata(self):
++        for alvo in (self.home / ".cache", self.home / ".cache" / "agata"):
++            os.environ["AGATA_NV_CACHE"] = str(alvo)
++            self._recusa()
++
++    def test_recusa_nova_versao_fora_de_cache(self):
++        os.environ["AGATA_NV_CACHE"] = str(Path(self.tmp.name) / "x" / "nova-versao")
++        self._recusa()
++
++    def test_padrao_e_aceito_e_variavel_vazia_reverte_de_ponta_a_ponta(self):
++        padrao = self.home / ".cache" / "agata" / "nova-versao"
++        padrao.mkdir(parents=True)
++        (padrao / "gpu.lock").write_text("x", encoding="utf-8")
++        with mock.patch.object(self.nv, "CACHE_PADRAO", padrao):
++            os.environ["AGATA_NV_CACHE"] = ""
++            r = self.nv.reverter(self.destino)
++        self.assertFalse(padrao.exists())
++        self.assertTrue((self.cache / "gpu.lock").exists())         # outro cache não foi tocado
++        self.assertTrue(self.dados.exists() and Path(r["pacote"]).exists())
++
++    def test_recusa_cache_que_contem_o_diretorio_atual(self):
++        os.chdir(self.cache)
++        self._recusa()
++
++    def test_recusa_destino_igual_aos_dados_ou_dentro_do_cache(self):
++        self._recusa(self.dados)
++        self._recusa(self.cache / "arquivo")
++        self.assertTrue((self.cache / "gpu.lock").exists())
++
++    def test_variavel_vazia_conta_como_ausente(self):
++        os.environ["AGATA_NV_CACHE"] = ""
++        self.assertEqual(self.nv._cache(), self.nv.CACHE_PADRAO)    # nunca o diretório atual
++        os.environ["AGATA_NV_CACHE"] = str(self.cache)
++        os.environ["AGATA_NV_DIR"] = ""
++        with self.assertRaises(ValueError):
++            self.nv.reverter(self.destino)
++        self.assertTrue((self.cache / "gpu.lock").exists())
++
++
+ if __name__ == "__main__":
+     unittest.main()

@@ -26,20 +26,36 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 83334fde2f3bfa49bf487e6ce4051b7b2a338bb3
-  Escrito em: 07/11/2026 13:18 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675
+  Escrito em: 09/11/2026 11:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d44b25f5ba66b4a4bc17a751f08fc6ad5f8fe675/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenciosas do chat, seletor de modelo e modelo real.** O patch segue só em `propostas/chat-lote2-09-11.diff` (SHA-256 `2feb00dcf985b221e1455dc4bb1e027cbeffa4cbae7aa015ae41462f2c409d40`), contra `origin/main` `1bce7d59`, só em `redesign/painel_operacional/`. `git apply --check` passou nesta base. Testes: 215 com 1 falha pré-existente em `test_sdd_painel`, medidos no lote de origem e não repetidos nesta publicação. Não medido: resposta real do gateway com `X-Modelo-Real`; os testes usam gateway falso. Nada aplicado; assinatura pendente do Humano.
+Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: `git apply --check` e `sha256sum` do `.diff` na worktree de publicação · Autorização: Humano — fluxo padrão de proposta (`propostas/README.md`, decisão de 14/10/2026); a assinatura fica com o Humano.
+
+(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
+
+(977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre main.** O patch para `armazem.py` e seus testes segue apenas em `propostas/origem-preservada-07-11.diff`, sem aplicação ao código do repositório. Revalidação sobre `ed28bd2c`: suíte do painel 162 passed e 118 subtests; CI local `TUDO OK`. Colisão de conteúdo longo e estado do armazenamento real continuam fora do escopo, conforme o registro da proposta. Assinatura e aplicação pendentes do Humano.
+
+(976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segunda parte de OpenCode.** O diff documental e de skills foi refeito para a base atual e remove os hunks repetidos de MEMÓRIAS/ONDE_ESTAMOS, que pertencem à proposta agente-opencode-07-11. Patch conferido após aplicar a primeira proposta; CI local `TUDO OK`. Assinatura e aplicação dos diffs pendentes do Humano.
+
+(975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre main.** Propõe trocar o atalho de terminal e o membro de equipe Goose por OpenCode, mantendo `redesign/goose/` e as exceções históricas fora do escopo. O patch de aplicação segue no arquivo `.diff`, não aplicado. CI local atualizada passou; PR #949 é a segunda parte declarada e vem depois desta. Registro sequencial após (974); assinatura e aplicação pendentes do Humano.
+
+(974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobre a base atual.** O diff continua sem aplicação no código do repositório; inclui a correção C11b para remover o ponteiro PROCESSO antigo ao atualizar conversa já hidratada, respeitando `SETH_PROCESSO_HIDRATA=0` e evitando duplicação. Registrada nesta junção após (973). CI local executada nesta worktree; ver corpo da PR para resultados e limitações. Assinatura e aplicação continuam pendentes do Humano.
+
+(973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
+Modelo: Codex (Codex, na Máquina) · vetor: p8_verificar, git apply, git apply --check -R, ci_sdd_local · Autorização: Humano — "feito"
+
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
 - Aplicado em worktree própria a partir de `origin/main`: `git apply` do diff assinado (`redesign/painel_operacional/prototipo.css`, `prototipo.html`, `spec/spec.md` e `test_csp_prototipo.py`). `git apply --check -R` passa; `cmp` entre `git diff origin/main -- redesign/painel_operacional` e o diff assinado é idêntico.
 - Diff movido para `propostas/aplicadas/`; o `APROVADO-csp-prototipo-20261106` copiado (o original permanece na raiz).

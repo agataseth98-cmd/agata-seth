@@ -3,56 +3,47 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PAGINAS = {"panorama", "conselho", "operacao", "visao", "integracoes", "modelos", "manutencao", "plano",
-           "memoria", "grafo", "documentacao", "conversa", "qualidade", "sdd", "operator-console", "lacunas", "capacidades",
-           "nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao", "nv-sentidos", "nv-acervo"}
-GRUPOS = {"sistema": {"operacao", "visao", "integracoes", "modelos", "manutencao", "plano"},
-          "memoria": {"memoria", "grafo", "documentacao", "conversa"},
-          "qualidade": {"qualidade", "sdd", "operator-console", "lacunas", "capacidades"},
-          "novaversao": {"nv-alexandria", "nv-metacognicao", "nv-corpo", "nv-conexoes", "nv-orcamento", "nv-avaliacao", "nv-sentidos", "nv-acervo"}}
+SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
 
 
 class Menu(HTMLParser):
+    """Colhe os botões do menu lateral (data-secao), as seções (class secao) e restos do menu antigo."""
+
     def __init__(self):
         super().__init__()
-        self.pilha, self.grupo_atual = [], None
-        self.botoes, self.grupos, self.secoes = {}, {}, set()
+        self.botoes, self.secoes, self.restos_antigos = [], [], []
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        if tag == "div" and "nav-group" in (a.get("class") or "").split():
-            self.grupo_atual = a.get("data-group"); self.grupos[self.grupo_atual] = set()
-        if tag == "button" and "data-page" in a:
-            self.botoes[a["data-page"]] = self.grupo_atual
-            if self.grupo_atual:
-                self.grupos[self.grupo_atual].add(a["data-page"])
-        if tag == "section" and (a.get("id") or "").startswith("page-"):
-            self.secoes.add(a["id"][5:])
-
-    def handle_endtag(self, tag):
-        if tag == "nav":
-            self.grupo_atual = None
+        classes = (a.get("class") or "").split()
+        if tag == "button" and "data-secao" in a:
+            self.botoes.append(a["data-secao"])
+        if tag == "section" and "secao" in classes:
+            self.secoes.append(a.get("id"))
+        if "data-page" in a or "nav-group" in classes or "nav-sub" in classes:
+            self.restos_antigos.append(tag)
 
 
 class MenuTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.menu = Menu(); cls.menu.feed((HERE / "prototipo.html").read_text(encoding="utf-8"))
+        cls.menu = Menu()
+        cls.menu.feed((HERE / "prototipo.html").read_text(encoding="utf-8"))
 
-    def test_nenhuma_pagina_se_perdeu_no_agrupamento(self):
-        self.assertEqual(set(self.menu.botoes), PAGINAS)
+    def test_menu_tem_um_botao_para_cada_uma_das_sete_secoes(self):
+        self.assertEqual(self.menu.botoes, SECOES)
 
-    def test_grupos_tem_as_paginas_esperadas(self):
-        self.assertEqual(self.menu.grupos, GRUPOS)
+    def test_toda_secao_do_menu_existe_na_pagina(self):
+        self.assertEqual(self.menu.secoes, SECOES)
 
-    def test_todo_botao_do_menu_tem_pagina(self):
-        faltam = PAGINAS - self.menu.secoes
-        self.assertEqual(faltam, set())
+    def test_sem_submenus_nem_botoes_de_pagina_antiga(self):
+        self.assertEqual(self.menu.restos_antigos, [])
 
-    def test_js_conta_so_botoes_de_pagina_na_navegacao(self):
+    def test_js_navega_pelo_botao_de_secao(self):
         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
-        self.assertIn('".nav button[data-page]"', js)
-        self.assertIn("function alternarGrupo", js)
+        self.assertIn('".nav button[data-secao]"', js)
+        self.assertIn("function mostrarSecao", js)
+        self.assertNotIn("alternarGrupo", js)
 
 
 if __name__ == "__main__":
