@@ -28,6 +28,10 @@ PR #949 atualizada como segunda parte da troca, com registro (976). O diff cont�
 
 PR #947 atualizada sobre `main`, com registro (977). O diff propõe preservar origem dos dados ao salvar conversas; suíte do painel e CI local passaram. Armazenamento real e conversas acima de 8000 caracteres não foram validados.
 
+## Hoje, 09/11 (proposta retirar LibreChat dos atalhos)
+
+PR #946 atualizada sobre `main`, com registro (978). O diff retira a subida/parada do LibreChat dos atalhos e seus nomes da checagem P-9. Cobertura de serviços, testes e CI local passaram. O patch não foi aplicado.
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).
