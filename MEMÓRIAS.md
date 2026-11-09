@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a64b0ba585dd2972f50015eb13ac63944be1bf81
-  Escrito em: 09/11/2026 09:35 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e7294576d95f52123a3b57eef209a090471d9207
+  Escrito em: 09/11/2026 09:36 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a64b0ba585dd2972f50015eb13ac63944be1bf81/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a64b0ba585dd2972f50015eb13ac63944be1bf81/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a64b0ba585dd2972f50015eb13ac63944be1bf81/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a64b0ba585dd2972f50015eb13ac63944be1bf81/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a64b0ba585dd2972f50015eb13ac63944be1bf81/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e7294576d95f52123a3b57eef209a090471d9207/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e7294576d95f52123a3b57eef209a090471d9207/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e7294576d95f52123a3b57eef209a090471d9207/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e7294576d95f52123a3b57eef209a090471d9207/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e7294576d95f52123a3b57eef209a090471d9207/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
+
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre main.** O patch para `armazem.py` e seus testes segue apenas em `propostas/origem-preservada-07-11.diff`, sem aplicação ao código do repositório. Revalidação sobre `ed28bd2c`: suíte do painel 162 passed e 118 subtests; CI local `TUDO OK`. Colisão de conteúdo longo e estado do armazenamento real continuam fora do escopo, conforme o registro da proposta. Assinatura e aplicação pendentes do Humano.
 
 (976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segunda parte de OpenCode.** O diff documental e de skills foi refeito para a base atual e remove os hunks repetidos de MEMÓRIAS/ONDE_ESTAMOS, que pertencem à proposta agente-opencode-07-11. Patch conferido após aplicar a primeira proposta; CI local `TUDO OK`. Assinatura e aplicação dos diffs pendentes do Humano.

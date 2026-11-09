@@ -1,11 +1,11 @@
 # Tira o LibreChat dos atalhos e do P-9
 
-**Proposta:** tira-librechat-07-11 · **Data:** 07/11/2026 · **Base:** origin/main 83334fde
+**Proposta:** tira-librechat-07-11 · **Data:** 07/11/2026 · **Base revalidada:** origin/main `38df3322` (09/11/2026)
 **Status:** completa para assinatura do Humano. O commit sai pelo agente de CI, não por este registro.
 
 **Exclusão:** o Humano excluiu hoje, 07/11/2026 às 13:22, os contêineres e os volumes do LibreChat (`librechat`, `librechat-mongodb`, `librechat-meilisearch`, `librechat-ponte-host`). Sem esta proposta, o atalho `seth` roda `docker compose up -d` em `~/librechat` e recria o LibreChat vazio.
 
-**sha256 do `.diff`:** `3cfdd1457c38dc9dbc34d1a9b105fde7c017249efaf31e0317b3002526e4fdad` (`propostas/tira-librechat-07-11.diff`, 222 linhas, gerado contra origin/main 83334fde).
+**sha256 do `.diff`:** `3cfdd1457c38dc9dbc34d1a9b105fde7c017249efaf31e0317b3002526e4fdad` (`propostas/tira-librechat-07-11.diff`, 222 linhas; hash preservado após conferir aplicação na base atual).
 
 ## O que muda (5 arquivos)
 
@@ -38,6 +38,7 @@
 - `scripts/testar_tira_librechat.py`: 5 passed (pytest). Contra o origin/main original: 3 falhas (seth, seth-parar, P9).
 - `scripts/ci_sdd_local.sh` (PYTEST da uv): 33 OK, "CI LOCAL: TUDO OK", medido antes da troca em `testar_cobertura_servicos.py`. O CI local não roda `scripts/testar_*.py`, então esse arquivo não entra nele.
 - O CI local reescreve artefatos de spec dentro da worktree (`redesign/nova_versao/spec/criterion-drift.md`, `redesign/nova_versao/spec/evidence.json` e os dois arquivos criados em `redesign/sdd_flow/spec/`). Isso não entrou no `.diff`.
+- Revalidação em 09/11/2026 sobre `38df3322`, com o diff aplicado: cobertura 11/11, P-9 OK, 5 testes unittest OK e `scripts/ci_sdd_local.sh` `CI LOCAL: TUDO OK`, exit 0.
 
 ## Aplicação
 
