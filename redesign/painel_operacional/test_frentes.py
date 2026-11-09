@@ -1,10 +1,12 @@
-"""Testes da página somente leitura de frentes (/frentes, /api/frentes, /frentes.js)."""
+"""Testes das frentes (somente leitura): /api/frentes continua; /frentes virou redirect para o Panorama.
+
+A lista de frentes agora é o subpainel sub-frentes do /prototipo (prototipo.js lê /api/frentes).
+"""
 import http.client
 import importlib.util
 import json
 import threading
 import unittest
-from html.parser import HTMLParser
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -13,25 +15,6 @@ panel = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(panel)
 
 FRENTES_JSON = panel.ROOT / "config/frentes.json"
-
-
-class MarcacoesPerigosas(HTMLParser):
-    """Conta script sem src, qualquer <style> e atributos style=."""
-
-    def __init__(self):
-        super().__init__()
-        self.script_inline = 0
-        self.style_tag = 0
-        self.style_attr = 0
-
-    def handle_starttag(self, tag, attrs):
-        nomes = {nome for nome, _ in attrs}
-        if tag == "script" and "src" not in nomes:
-            self.script_inline += 1
-        if tag == "style":
-            self.style_tag += 1
-        if "style" in nomes:
-            self.style_attr += 1
 
 
 class FrentesHttpTests(unittest.TestCase):
@@ -69,23 +52,20 @@ class FrentesHttpTests(unittest.TestCase):
         self.assertEqual(dados, json.loads(FRENTES_JSON.read_text(encoding="utf-8")))
         self.assertEqual(dados["dados_reais"], "proibido nesta fase")
 
-    def test_pagina_sem_script_inline_nem_style(self):
-        status, corpo, cabecalhos = self.request("GET", "/frentes")
-        self.assertEqual(status, 200)
-        self.assertTrue(cabecalhos["Content-Type"].startswith("text/html"))
-        marcas = MarcacoesPerigosas()
-        marcas.feed(corpo.decode("utf-8"))
-        self.assertEqual(marcas.script_inline, 0)
-        self.assertEqual(marcas.style_tag, 0)
-        self.assertEqual(marcas.style_attr, 0)
-        self.assertIn(b'src="/frentes.js"', corpo)
-        self.assertIn(b'href="/prototipo"', corpo)
+    def test_frentes_vira_redirect_para_o_panorama(self):
+        status, _, cabecalhos = self.request("GET", "/frentes")
+        self.assertEqual(status, 302)
+        self.assertEqual(cabecalhos["Location"], "/prototipo#panorama")
 
-    def test_script_servido_como_javascript(self):
-        status, corpo, cabecalhos = self.request("GET", "/frentes.js")
-        self.assertEqual(status, 200)
-        self.assertTrue(cabecalhos["Content-Type"].startswith("text/javascript"))
-        self.assertNotIn(b"innerHTML", corpo)
+    def test_frentes_js_saiu_e_a_lista_esta_no_prototipo(self):
+        self.assertEqual(self.request("GET", "/frentes.js")[0], 404)
+        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
+        self.assertIn('id="sub-frentes"', html)
+        self.assertIn('id="frentes-lista"', html)
+        self.assertIn('id="frentes-estado"', html)
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        self.assertIn('"/api/frentes"', js)
+        self.assertNotIn("innerHTML", js)
 
     def test_post_em_api_frentes_e_recusado(self):
         status, _, cabecalhos = self.request(
