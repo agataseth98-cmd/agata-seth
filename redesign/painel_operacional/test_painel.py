@@ -541,5 +541,78 @@ class HttpTests(unittest.TestCase):
             self.assertIsNotNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65536}]}))
             self.assertIsNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65537}]}))
 
+    # Persistência do modelo escolhido (armazem.py): a conversa guarda o modelo dela e o de cada resposta.
+
+    def test_conversa_grava_e_le_o_modelo_da_conversa_e_de_cada_resposta(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "2123456789ab"
+            salvo = panel._conversa_gravar({"id": conversa_id, "titulo": "Com modelo", "modelo": "seth-public",
+                                            "mensagens": [{"role": "user", "content": "oi"},
+                                                          {"role": "assistant", "content": "olá", "modelo": "seth-public"}]})
+            self.assertIsNotNone(salvo)
+            lida = panel._conversa_ler(conversa_id)
+            self.assertEqual(lida["modelo"], "seth-public")
+            self.assertEqual(lida["mensagens"][0], {"role": "user", "content": "oi"})
+            self.assertEqual(lida["mensagens"][1], {"role": "assistant", "content": "olá", "modelo": "seth-public"})
+            gravado = json.loads((Path(tmp) / (conversa_id + ".json")).read_text(encoding="utf-8"))
+            self.assertEqual(gravado["modelo"], "seth-public")
+
+    def test_conversa_sem_modelo_grava_e_le_seth_livre(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "3123456789ab"
+            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [{"role": "user", "content": "oi"}]})
+            self.assertEqual(salvo["modelo"], "seth-livre")
+            self.assertEqual(panel._conversa_ler(conversa_id)["modelo"], "seth-livre")
+
+    def test_gravacao_recusa_modelo_fora_da_lista_e_nao_escreve_arquivo(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            mensagens = [{"role": "user", "content": "oi"}]
+            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab", "modelo": "seth-zai", "mensagens": mensagens}))
+            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab",
+                                                      "mensagens": [{"role": "assistant", "content": "x", "modelo": "seth-auto"}]}))
+            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab", "modelo": ["seth-livre"], "mensagens": mensagens}))
+            self.assertEqual(list(Path(tmp).glob("*.json")), [])
+
+    def test_conversa_antiga_com_modelo_fora_da_lista_abre_com_o_padrao(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "5123456789ab"
+            antiga = {"titulo": "Antiga", "modelo": "seth-zai",
+                      "mensagens": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x", "modelo": "seth-gemini"}]}
+            (Path(tmp) / (conversa_id + ".json")).write_text(json.dumps(antiga), encoding="utf-8")
+            lida = panel._conversa_ler(conversa_id)
+            self.assertIsNotNone(lida)
+            self.assertEqual(lida["modelo"], "seth-livre")
+            self.assertNotIn("modelo", lida["mensagens"][1])
+
+    def test_http_salva_e_devolve_o_modelo_e_recusa_o_que_esta_fora(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            headers = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
+            conversa_id = "6123456789ab"
+            boa = {"id": conversa_id, "titulo": "HTTP", "modelo": "seth-public",
+                   "mensagens": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "ok", "modelo": "seth-public"}]}
+            self.assertEqual(self.request("POST", "/api/seth/conversa", json.dumps(boa).encode("utf-8"), headers)[0], 200)
+            dados = json.loads(self.request("GET", f"/api/seth/conversa?id={conversa_id}")[1])
+            self.assertEqual(dados["modelo"], "seth-public")
+            self.assertEqual(dados["mensagens"][1]["modelo"], "seth-public")
+            ruim = {**boa, "modelo": "seth-zai"}
+            self.assertEqual(self.request("POST", "/api/seth/conversa", json.dumps(ruim).encode("utf-8"), headers)[0], 400)
+            depois = json.loads(self.request("GET", f"/api/seth/conversa?id={conversa_id}")[1])
+            self.assertEqual(depois["modelo"], "seth-public")
+
+    def test_modelo_real_da_resposta_e_guardado_e_formato_ruim_e_descartado(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "7123456789ab"
+            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [
+                {"role": "user", "content": "oi", "modelo_real": "openai/gpt-oss-120b"},
+                {"role": "assistant", "content": "ola", "modelo": "seth-livre", "modelo_real": "openai/gpt-oss-120b"},
+                {"role": "assistant", "content": "tudo", "modelo": "seth-livre", "modelo_real": "lixo com espaço"}]})
+            self.assertIsNotNone(salvo, "modelo_real fora do formato descarta o campo; não recusa a conversa")
+            mensagens = panel._conversa_ler(conversa_id)["mensagens"]
+            self.assertEqual(mensagens[0], {"role": "user", "content": "oi"})
+            self.assertEqual(mensagens[1], {"role": "assistant", "content": "ola", "modelo": "seth-livre",
+                                            "modelo_real": "openai/gpt-oss-120b"})
+            self.assertEqual(mensagens[2], {"role": "assistant", "content": "tudo", "modelo": "seth-livre"})
+
+
 if __name__ == "__main__":
     unittest.main()
