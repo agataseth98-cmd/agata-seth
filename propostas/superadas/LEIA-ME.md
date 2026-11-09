@@ -23,6 +23,7 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | retrato-original-20261026 | retrato-original-r2-20261026 |
 | seth-painel-raiz-20261029 | seth-painel-raiz-rebase-20261029 (PR #726) (confiança média) |
 | seth-sob-demanda-20261029 | sistema-sob-demanda-20261029 (PR #715) (confiança média) |
+| skill-processo-07-11 | substituída por skill-processo-lessons-07-11 (#944), decisão do Humano 09/11 |
 
 Notas:
 - "a própria, já aplicada": a proposta arquivada é cópia idêntica (cmp) da que está em `propostas/aplicadas/`.
