@@ -1,0 +1,207 @@
+diff --git a/redesign/painel_operacional/armazem.py b/redesign/painel_operacional/armazem.py
+index 057f0e68..04054c05 100644
+--- a/redesign/painel_operacional/armazem.py
++++ b/redesign/painel_operacional/armazem.py
+@@ -113,14 +113,88 @@ def _conversa_validar(dados: dict) -> dict | None:
+     return {"titulo": titulo, "mensagens": limpas}
+ 
+ 
++ORIGEM_CAMPOS = ("origem", "origem_id", "titulo_original", "data_original", "importado_em")
++
++
++def _origem_valida(dados: dict) -> dict:
++    """Campos de origem (importação do LibreChat) que o salvar aceita de quem envia. O que não couber fica de fora."""
++    origem, origem_id = dados.get("origem"), dados.get("origem_id")
++    if not (isinstance(origem, str) and 0 < len(origem) <= 40 and isinstance(origem_id, str) and 0 < len(origem_id) <= 200):
++        return {}
++    out = {"origem": origem, "origem_id": origem_id}
++    titulo_original = dados.get("titulo_original")
++    if isinstance(titulo_original, str) and len(titulo_original) <= 500:
++        out["titulo_original"] = titulo_original
++    importado_em = dados.get("importado_em")
++    if isinstance(importado_em, str) and len(importado_em) <= 40:
++        out["importado_em"] = importado_em
++    data = dados.get("data_original")
++    if isinstance(data, dict) and all(v is None or (isinstance(v, str) and len(v) <= 40) for v in data.values()):
++        out["data_original"] = {k: data.get(k) for k in ("criada", "atualizada")}
++    return out
++
++
++def _conversa_lida(arq: Path) -> dict | None:
++    try:
++        dados = json.loads(arq.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++    return dados if isinstance(dados, dict) else None
++
++
++def _conversa_com_origem(origem: str, origem_id: str) -> str | None:
++    """Id do arquivo que já guarda esta origem. Assim, salvar uma conversa importada não cria segundo arquivo."""
++    if not CONVERSAS_DIR.is_dir():
++        return None
++    for arq in CONVERSAS_DIR.glob("*.json"):
++        if not CONVERSA_ID.fullmatch(arq.stem):
++            continue
++        dados = _conversa_lida(arq)
++        if dados and dados.get("origem") == origem and dados.get("origem_id") == origem_id:
++            return arq.stem
++    return None
++
++
++def _origem_do_arquivo(anterior: dict | None) -> dict:
++    """Origem já gravada no arquivo. O salvar nunca a reescreve: vale a que o arquivo já tem."""
++    if not anterior or not isinstance(anterior.get("origem"), str) or not isinstance(anterior.get("origem_id"), str):
++        return {}
++    return {k: anterior[k] for k in ORIGEM_CAMPOS if k in anterior}
++
++
++def _mensagens_com_origem(novas: list, anteriores: list) -> list:
++    """Mantém 'criada' e 'origem_id' de cada mensagem que continua no mesmo lugar, com o mesmo papel e texto."""
++    saida = []
++    for i, m in enumerate(novas):
++        velha = anteriores[i] if i < len(anteriores) and isinstance(anteriores[i], dict) else {}
++        extra = {k: velha[k] for k in ("criada", "origem_id") if isinstance(velha.get(k), str)}
++        if extra and velha.get("role") == m["role"] and velha.get("content") == m["content"]:
++            m = {**m, **extra}
++        saida.append(m)
++    return saida
++
++
+ def _conversa_gravar(dados: dict) -> dict | None:
+     limpo = _conversa_validar(dados)
+     if limpo is None:
+         return None
+-    conversa_id = dados.get("id") or os.urandom(6).hex()
++    origem = _origem_valida(dados)
++    conversa_id = None
++    if origem:
++        conversa_id = _conversa_com_origem(origem["origem"], origem["origem_id"])
++    conversa_id = conversa_id or dados.get("id") or os.urandom(6).hex()
+     arq = _conversa_caminho(conversa_id)
+     if arq is None:
+         return None
++    anterior = _conversa_lida(arq) if arq.is_file() else None
++    origem_gravada = _origem_do_arquivo(anterior)
++    if origem_gravada:
++        origem = origem_gravada  # a origem já gravada não é reescrita
++        anteriores = anterior.get("mensagens")
++        limpo["mensagens"] = _mensagens_com_origem(limpo["mensagens"], anteriores if isinstance(anteriores, list) else [])
++    if origem:
++        limpo.update(origem)
++        limpo["id"] = conversa_id  # arquivo com origem guarda o próprio id, como o importador grava
+     CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
+     tmp = arq.with_suffix(".tmp")
+     tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index d293eb09..53174926 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -496,6 +496,108 @@ class HttpTests(unittest.TestCase):
+         for ruim in ("../../etc/passwd.md", "/etc/passwd.md", "entradas/../../../x.md", "naoexiste.txt"):
+             self.assertIsNone(panel._vault_caminho(ruim), ruim)
+ 
++    ORIGEM_IMPORTADA = {"origem": "librechat", "origem_id": "5a1e0c2e-7b1d-4c3a-9f10-0000000000a1",
++                        "titulo_original": "Importada", "importado_em": "2026-11-07T13:00:00-03:00",
++                        "data_original": {"criada": "2026-11-01T09:00:00-03:00", "atualizada": "2026-11-01T09:05:00-03:00"}}
++
++    def _arquivo_importado(self, tmp):
++        """Arquivo como o importador do LibreChat grava (migrar.py): nome = id, id dentro, origem e mensagens com origem."""
++        dados = {"id": "a1b2c3d4e5f6", "titulo": "[LibreChat] Importada", **self.ORIGEM_IMPORTADA,
++                 "mensagens": [{"role": "user", "content": "pergunta", "criada": "2026-11-01T09:00:00-03:00", "origem_id": "m1"},
++                               {"role": "assistant", "content": "resposta", "criada": "2026-11-01T09:01:00-03:00", "origem_id": "m2"}]}
++        (Path(tmp) / "a1b2c3d4e5f6.json").write_text(json.dumps(dados, ensure_ascii=False), encoding="utf-8")
++        return json.loads((Path(tmp) / "a1b2c3d4e5f6.json").read_text(encoding="utf-8"))
++
++    def test_salvar_do_cliente_preserva_a_origem_da_importacao(self):
++        # prototipo.js salva só id, titulo e mensagens (role, content); a origem já gravada tem que sobreviver
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                original = self._arquivo_importado(tmp)
++                salvo = panel._conversa_gravar({"id": "a1b2c3d4e5f6", "titulo": "Renomeada",
++                                                "mensagens": [{"role": "user", "content": "pergunta"},
++                                                              {"role": "assistant", "content": "resposta"}]})
++                self.assertEqual(salvo["id"], "a1b2c3d4e5f6")
++                gravado = json.loads((Path(tmp) / "a1b2c3d4e5f6.json").read_text(encoding="utf-8"))
++                self.assertEqual(gravado.get("id"), "a1b2c3d4e5f6")
++                for campo in ("origem", "origem_id", "titulo_original", "importado_em", "data_original"):
++                    self.assertEqual(gravado.get(campo), original[campo], campo)
++                self.assertEqual(gravado["titulo"], "Renomeada")
++                self.assertEqual([m.get("origem_id") for m in gravado["mensagens"]], ["m1", "m2"])
++                self.assertEqual([m.get("criada") for m in gravado["mensagens"]], ["2026-11-01T09:00:00-03:00", "2026-11-01T09:01:00-03:00"])
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
++    def test_salvar_com_origem_ja_presente_reusa_o_arquivo_sem_criar_outro(self):
++        # a mesma conversa importada vinda sem id não pode virar um segundo arquivo
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                self._arquivo_importado(tmp)
++                salvo = panel._conversa_gravar({"titulo": "[LibreChat] Importada", **self.ORIGEM_IMPORTADA,
++                                                "mensagens": [{"role": "user", "content": "pergunta"}]})
++                self.assertEqual(salvo["id"], "a1b2c3d4e5f6")
++                self.assertEqual(sorted(p.name for p in Path(tmp).glob("*.json")), ["a1b2c3d4e5f6.json"])
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
++    def test_origem_do_arquivo_nao_e_reescrita_por_salvar(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                original = self._arquivo_importado(tmp)
++                panel._conversa_gravar({"id": "a1b2c3d4e5f6", "titulo": "X", "origem": "outra", "origem_id": "outro-id",
++                                        "mensagens": [{"role": "user", "content": "pergunta"}]})
++                gravado = json.loads((Path(tmp) / "a1b2c3d4e5f6.json").read_text(encoding="utf-8"))
++                self.assertEqual(gravado["origem"], original["origem"])
++                self.assertEqual(gravado["origem_id"], original["origem_id"])
++                self.assertEqual(sorted(p.name for p in Path(tmp).glob("*.json")), ["a1b2c3d4e5f6.json"])
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
++    def test_campos_de_origem_invalidos_saem_e_o_salvar_continua(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                sem_origem = panel._conversa_gravar({"titulo": "T", "origem": 7, "origem_id": "x",
++                                                     "mensagens": [{"role": "user", "content": "oi"}]})
++                self.assertIsNotNone(sem_origem)
++                self.assertNotIn("origem", json.loads((Path(tmp) / (sem_origem["id"] + ".json")).read_text(encoding="utf-8")))
++                com_origem = panel._conversa_gravar({"titulo": "T", "origem": "librechat", "origem_id": "x", "titulo_original": "y" * 600,
++                                                     "mensagens": [{"role": "user", "content": "oi"}]})
++                gravado = json.loads((Path(tmp) / (com_origem["id"] + ".json")).read_text(encoding="utf-8"))
++                self.assertEqual(gravado["origem"], "librechat")
++                self.assertNotIn("titulo_original", gravado)
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
++    def test_cliente_abre_renomeia_pela_api_e_a_origem_fica(self):
++        # caminho do cliente pela API real: GET da conversa e POST com id, titulo e mensagens
++        cab = {"Host": f"127.0.0.1:{panel.PORT}", "Sec-Fetch-Site": "same-origin"}
++        with tempfile.TemporaryDirectory() as tmp:
++            antes = panel.armazem.CONVERSAS_DIR
++            panel.armazem.CONVERSAS_DIR = Path(tmp)
++            try:
++                original = self._arquivo_importado(tmp)
++                status, corpo, _ = self.request("GET", "/api/seth/conversa?id=a1b2c3d4e5f6", None, cab)
++                self.assertEqual(status, 200)
++                aberta = json.loads(corpo)
++                envio = {"id": "a1b2c3d4e5f6", "titulo": "Renomeada",
++                         "mensagens": [{"role": m["role"], "content": m["content"]} for m in aberta["mensagens"]]}
++                status, _, _ = self.request("POST", "/api/seth/conversa", json.dumps(envio).encode("utf-8"),
++                                            {**cab, "Content-Type": "application/json"})
++                self.assertEqual(status, 200)
++                gravado = json.loads((Path(tmp) / "a1b2c3d4e5f6.json").read_text(encoding="utf-8"))
++                self.assertEqual(gravado["origem"], "librechat")
++                self.assertEqual(gravado["origem_id"], original["origem_id"])
++                self.assertEqual(gravado["titulo"], "Renomeada")
++            finally:
++                panel.armazem.CONVERSAS_DIR = antes
++
+     def test_conversa_valida_e_grava_so_formato_esperado(self):
+         with tempfile.TemporaryDirectory() as tmp:
+             antes = panel.armazem.CONVERSAS_DIR

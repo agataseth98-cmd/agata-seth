@@ -1,0 +1,222 @@
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index f1bbcd9a..f48af0dd 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -1,11 +1,12 @@
+ #!/usr/bin/env bash
+-# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway, o LibreChat,
++# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway,
+ # a voz, o painel, o Obsidian e as vigias da Equipe. Depois abre o navegador do sistema
+ # (Chromium, perfil "Sistema Agata") só com as abas que faltam.
++# O LibreChat saiu deste atalho em 07/11/2026: o Humano excluiu os contêineres e os volumes.
++# Este atalho não sobe o LibreChat e não copia nada para ~/librechat.
+ # Contraparte: `seth-parar`, que desliga tudo. O MoE :20129 continua sob demanda.
+ # Fonte versionada: ~/agata/redesign/systemd/seth
+ set -e
+-LC=~/librechat/docker-compose.yml
+ DIARIO=~/.cache/agata/sincronia/eventos.log
+ mkdir -p "$(dirname "$DIARIO")" 2>/dev/null || true
+ echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH subindo (atalho seth)" >> "$DIARIO" 2>/dev/null || true
+@@ -15,9 +16,8 @@ systemctl --user start seth-gateway.service seth-escriba.service seth-verificado
+ systemctl --user start painel-operacional.service 2>/dev/null || true
+ # Obsidian não sobe aqui: abre pelo painel, quando você pedir.
+ # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
+-# navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
+-# LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
+-# o LibreChat nao falha se elas ainda nao responderam, so tenta de novo depois.
++# navegador Playwright+Brave (:20136). Sobem junto com a Seth. O LibreChat, que os
++# consumia, foi excluído em 07/11/2026.
+ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || true
+ # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
+ # fica de pe pra ingles -- ver comentario no librechat.yaml.
+@@ -28,33 +28,6 @@ _ausentes=~/agata/config/equipe-ausentes.txt
+ for _m in claude codex; do
+   grep -qx "$_m" "$_ausentes" 2>/dev/null || systemctl --user start "agata-vigia@$_m.service" 2>/dev/null || true
+ done
+-# Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
+-# cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
+-# rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
+-# so reinicia o container se algo mudou.
+-_lc_changed=0
+-# docker-compose.yml entrou na lista em (532): antes o atalho sincronizava o
+-# librechat.yaml mas NÃO o compose -- os dois podiam divergir (yaml falando com
+-# 172.29.7.1, compose ainda em modo host), exatamente a quebra de (517). Os dois
+-# andam juntos agora. `compose up -d` abaixo aplica a mudança de compose sozinho.
+-for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
+-             "docker-compose.yml|$HOME/librechat/docker-compose.yml" \
+-             "canon-mcp.mjs|$HOME/librechat/data/mcp/canon-mcp.mjs" \
+-             "agata-tema.css|$HOME/librechat/agata-tema.css"; do
+-  # agata-tema.css entrou em (680): o compose monta o tema da Agata, mas o atalho
+-  # não o copiava -- tema editado no repo ficaria velho no LibreChat sem aviso.
+-  _src=~/agata/redesign/librechat/"${_pair%%|*}"; _dst="${_pair#*|}"
+-  if [ -f "$_src" ] && ! cmp -s "$_src" "$_dst"; then
+-    mkdir -p "$(dirname "$_dst")" && cp "$_src" "$_dst" && _lc_changed=1
+-    echo "deploy: $_dst sincronizado da fonte versionada"
+-  fi
+-done
+-docker compose -f "$LC" up -d >/dev/null 2>&1 || true
+-[ "$_lc_changed" = 1 ] && docker restart librechat >/dev/null 2>&1 || true
+-# espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
+-for i in $(seq 1 30); do
+-  curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
+-done
+ # Navegador do sistema: Chromium, perfil "Sistema Agata" (Profile 1 do Chromium).
+ # Se ele já estiver aberto, só entram as abas que faltam (nada duplicado).
+ # Ao abrir do zero, o Chromium volta com as abas da última vez (Continuar de onde parou).
+@@ -68,7 +41,7 @@ _chromium_aberto() {
+   [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
+ }
+ # Modo programa: o painel abre como janela de aplicativo (sem barra de endereço).
+-# As janelas dos modelos e o LibreChat não abrem aqui: abrem pelo painel, quando você clica.
++# As janelas dos modelos não abrem aqui: abrem pelo painel, quando você clica.
+ if ! _chromium_aberto; then
+   setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run --app="$PAINEL/prototipo" >/dev/null 2>&1 &
+   # Dá tempo para a janela do painel aparecer e para a extensão do Conselho avisar o painel.
+@@ -84,6 +57,4 @@ _notifica_unidades() {
+   done
+ }
+ _notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service
+-_lc=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:3080/health 2>/dev/null || echo fora)
+-notify-send -a Seth "LibreChat" "$_lc" 2>/dev/null || true
+ notify-send -a Seth "Seth" "pronta: painel do Agata aberto" 2>/dev/null || true
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index b5640064..3bd7257e 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env bash
+ # Desliga a Seth INTEIRA (atalho "parar Seth"): vigias, Obsidian, navegador do sistema,
+-# LibreChat, serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
++# serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
+ # RTX 4060 e os modelos carregados no Ollama.
+ # O Chromium é só do sistema Agata, então fechá-lo inteiro não atinge outro uso.
++# O LibreChat saiu deste atalho em 07/11/2026 (contêineres excluídos pelo Humano).
+ # Fonte versionada: ~/agata/redesign/systemd/seth-parar
+-LC=~/librechat/docker-compose.yml
+ DIARIO=~/.cache/agata/sincronia/eventos.log
+ # Vigias primeiro: a parada da Seth não deve gerar alertas de "serviço caiu".
+ systemctl --user stop agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
+@@ -17,7 +17,6 @@ _pid=${_lock##*-}
+ if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
+   kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
+ fi
+-docker compose -f "$LC" stop >/dev/null 2>&1 || true
+ systemctl --user stop piper-tts.service 2>/dev/null || true
+ systemctl --user stop painel-operacional.service 2>/dev/null || true
+ systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 1b36d3ef..1fae0d8b 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -185,7 +185,9 @@ P9_UNIDADES_SISTEMA=("ollama.service")
+ # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
+ # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
+ P9_UNIDADES_USUARIO=("agata-manutencao.timer" "agata-manutencao.service" "laya-roteador.service" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer")
+-P9_CONTAINERS_DOCKER=("librechat-ponte-host" "librechat" "librechat-mongodb" "librechat-meilisearch")
++# (07/11/2026) LibreChat excluído pelo Humano (contêineres e volumes): os quatro nomes saíram.
++# Lista vazia: p9_servicos_declarados não consulta o docker. Para declarar outro contêiner, põe o nome aqui.
++P9_CONTAINERS_DOCKER=()
+ 
+ 
+ 
+diff --git a/scripts/testar_cobertura_servicos.py b/scripts/testar_cobertura_servicos.py
+index 93e87348..33874d16 100644
+--- a/scripts/testar_cobertura_servicos.py
++++ b/scripts/testar_cobertura_servicos.py
+@@ -36,8 +36,8 @@ r = shell(base + 'ALVO=nenhum; ESTADO=failed; p9_servicos_declarados')
+ assert r.returncode == 0 and not r.stdout, (r.stdout, r.stderr)
+ n += 1
+ r = shell(base + '''ALVO=nenhum; ESTADO=failed
+-docker() { case "$*" in *librechat-ponte-host*) :;; *) printf '%s\\n' librechat librechat-mongodb librechat-meilisearch;; esac; }
++docker() { :; }
+ p9_servicos_declarados''')
+-assert r.returncode == 0 and 'librechat-ponte-host' in r.stdout, (r.stdout, r.stderr)
++assert r.returncode == 0 and 'librechat' not in r.stdout, (r.stdout, r.stderr)
+ n += 1
+ print(f'COBERTURA SERVICOS OK -- {n}/{n}')
+diff --git a/scripts/testar_tira_librechat.py b/scripts/testar_tira_librechat.py
+new file mode 100644
+index 00000000..b4fa9d60
+--- /dev/null
++++ b/scripts/testar_tira_librechat.py
+@@ -0,0 +1,80 @@
++#!/usr/bin/env python3
++"""Contraprova da proposta tira-librechat-07-11 (07/11/2026).
++
++O LibreChat foi excluído pelo Humano hoje (contêineres e volumes). Enquanto o atalho `seth`
++tiver `docker compose` do LibreChat ou copiar arquivos para ~/librechat, ele recria o LibreChat
++vazio ao rodar. Este teste falha se isso voltar, e falha se o P-9 voltar a conferir os
++contêineres do LibreChat. Só LÊ os arquivos: não roda os atalhos (eles subiriam serviços).
++"""
++import re
++import subprocess
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parent.parent
++SETH = RAIZ / "redesign/systemd/seth"
++SETH_PARAR = RAIZ / "redesign/systemd/seth-parar"
++PERIMETRO = RAIZ / "scripts/perimetro.sh"
++
++# Padrões que não podem aparecer em linha de código (comentário não conta).
++PROIBIDOS = [
++    (re.compile(r"\bdocker\s+(compose|restart|start|stop|up|run)\b"), "docker compose/restart/start/stop/up/run"),
++    (re.compile(r"librechat", re.IGNORECASE), "palavra LibreChat em código"),
++    (re.compile(r"\bLC="), "variável LC (compose do LibreChat)"),
++    (re.compile(r"~/librechat|\$HOME/librechat"), "caminho ~/librechat"),
++    (re.compile(r"docker-compose\.yml"), "docker-compose.yml"),
++    (re.compile(r"\b3080\b"), "porta 3080 (saúde do LibreChat)"),
++]
++
++
++def codigo(caminho):
++    """Linhas de código, sem comentário de linha inteira nem comentário no fim da linha."""
++    saida = []
++    for n, linha in enumerate(caminho.read_text(encoding="utf-8").splitlines(), 1):
++        if linha.lstrip().startswith("#"):
++            continue
++        saida.append((n, re.sub(r"\s#.*$", "", linha)))
++    return saida
++
++
++def achados(caminho):
++    out = []
++    for n, linha in codigo(caminho):
++        for padrao, nome in PROIBIDOS:
++            if padrao.search(linha):
++                out.append(f"{caminho.name}:{n}: {nome}: {linha.strip()}")
++    return out
++
++
++def tem(caminho, trecho):
++    return any(trecho in linha for _, linha in codigo(caminho))
++
++
++class TiraLibrechatDosAtalhos(unittest.TestCase):
++    def test_seth_nao_sobe_nem_copia_librechat(self):
++        self.assertEqual([], achados(SETH), "seth ainda mexe no LibreChat")
++
++    def test_seth_parar_nao_para_librechat(self):
++        self.assertEqual([], achados(SETH_PARAR), "seth-parar ainda mexe no LibreChat")
++
++    def test_gateway_modelos_e_target_continuam(self):
++        self.assertTrue(tem(SETH, "systemctl --user start agata.target"))
++        self.assertTrue(tem(SETH, "seth-gateway.service"))
++        self.assertTrue(tem(SETH, "piper-tts.service"))
++        self.assertTrue(tem(SETH_PARAR, "systemctl --user stop agata.target"))
++        self.assertTrue(tem(SETH_PARAR, "seth-gateway.service"))
++        self.assertTrue(tem(SETH_PARAR, "ollama stop"))
++
++    def test_sintaxe_dos_atalhos(self):
++        for caminho in (SETH, SETH_PARAR):
++            r = subprocess.run(["bash", "-n", str(caminho)], capture_output=True, text=True)
++            self.assertEqual(0, r.returncode, r.stderr)
++
++    def test_p9_nao_confere_containers_do_librechat(self):
++        linhas = [l for l in PERIMETRO.read_text(encoding="utf-8").splitlines() if l.startswith("P9_CONTAINERS_DOCKER=")]
++        self.assertEqual(1, len(linhas), "P9_CONTAINERS_DOCKER tem de existir, mesmo vazia (set -u)")
++        self.assertNotIn("librechat", linhas[0].lower())
++
++
++if __name__ == "__main__":
++    unittest.main()

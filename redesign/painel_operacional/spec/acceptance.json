@@ -1,5 +1,188 @@
 [
   {
+    "criterion": "as telas antigas redirecionam para a seção certa: `/`, `/index.html` e `/frentes` para `/prototipo#panorama`; `/operator_console` para `/prototipo#qualidade`; `/conselho-rede` e `/conselho-rede/` para `/prototipo#conselho`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::RotasDaTelaUnicaTests::test_telas_antigas_redirecionam_para_a_secao_certa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todos os caminhos `/api/*` chamados pelo JS existem no servidor; a rota nova `/api/conselho/memoria` é somente leitura do cache e está documentada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::RotasDaTelaUnicaTests::test_rotas_de_api_e_chamadas_do_js_nao_mudam",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_so_le_e_ignora_caminho_do_cliente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a conversa salva é validada e devolvida com `schema_version` e `id`, e regrava com o mesmo id sem duplicar arquivo; conteúdo de mensagem até 65536 caracteres passa na validação, respeitado o teto total de 262144 bytes por requisição",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_get_conversa_salva_devolve_schema_e_id_e_recusa_ausente",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_conversa_importada_com_mensagem_de_18973_caracteres_e_lida"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a CSP das respostas continua com `script-src 'self'` e `style-src 'self'`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::RotasDaTelaUnicaTests::test_csp_continua_script_e_style_self"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_sete_secoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada tela antiga tem um subpainel `sub-<nome>` dentro da seção de destino do mapeamento",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_cada_tela_antiga_tem_subpainel_na_secao_certa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada função do mapeamento existe na tela, pelo id, em `prototipo.html` ou `prototipo.js`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_cada_funcao_do_mapeamento_existe_na_tela"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o `/prototipo` escolhe a seção pelo hash, troca ao mudar o hash e cai em panorama com hash desconhecido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_hash_escolhe_a_secao_e_cai_em_panorama"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o HTML de `/prototipo` não tem atributo `style=`, tag `style` nem script com código inline",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_html_sem_style_nem_script_inline"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o `/prototipo` carrega uma só folha de estilo, `prototipo.css`, e as folhas antigas respondem 404",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_uma_so_folha_de_estilo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cores e tipografia estão em tokens no `:root` de `prototipo.css`, e nenhuma cor hexadecimal aparece fora dele",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_tokens_em_root_e_sem_cor_literal_fora"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "toda classe usada no HTML de `/prototipo` tem regra em `prototipo.css`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_toda_classe_do_html_tem_regra_no_css"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os scripts de `/prototipo` não declaram o mesmo nome no escopo global",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_scripts_sem_globais_repetidos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada seção que consome API tem marcadores de estado carregando, vazio e erro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_secoes_com_api_tem_estados"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Conhecimento tem uma só caixa de busca, que serve à Alexandria, ao Acervo e à Wiki",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_conhecimento_tem_uma_busca_so"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Custos tem orçamento, eventos e tarifas, e cada controle chama uma ação de `nova-versao/executar` que já existe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_custos_tem_orcamento_eventos_e_tarifas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Operator Console fica na seção Qualidade sem iframe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_operator_console_sem_iframe_na_qualidade"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Conselho não envia nem executa nada sem aprovação individual",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conselho_rede.py::CouncilTests::test_send_requires_approval_and_single_lease"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Conversa mantém o stream com fallback para o chat inteiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_usa_rota_de_stream",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_mantem_fallback_para_chat_inteiro"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os ids preservados e as classes mapeadas pela PR 940 continuam no HTML",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_csp_prototipo.py::CspPrototipoTests"
+    ],
+    "cwd": null
+  },
+  {
     "criterion": "a página não tem script inline por causa da CSP",
     "command": [
       "pytest",
@@ -54,11 +237,11 @@
     "cwd": null
   },
   {
-    "criterion": "o menu agrupa as páginas em submenus sem perder nenhuma",
+    "criterion": "a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá",
     "command": [
       "pytest",
       "-q",
-      "redesign/painel_operacional/test_menu_painel.py::MenuTests::test_nenhuma_pagina_se_perdeu_no_agrupamento"
+      "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
     ],
     "cwd": null
   },
@@ -78,15 +261,6 @@
       "pytest",
       "-q",
       "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_indicador_de_recuperacao_usa_a_medicao_salva"
-    ],
-    "cwd": null
-  },
-  {
-    "criterion": "a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá",
-    "command": [
-      "pytest",
-      "-q",
-      "redesign/painel_operacional/test_sdd_painel.py::ProjetosExternosTests"
     ],
     "cwd": null
   },
@@ -141,6 +315,69 @@
       "pytest",
       "-q",
       "redesign/painel_operacional/test_painel.py::HttpTests::test_json_post_aceita_ate_64k_e_recusa_acima"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`GET /api/conselho/memoria` devolve as últimas entradas do cache, mais recentes primeiro, com número, data e hora, autor, tipo e texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_devolve_as_mais_recentes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a memória do Conselho aceita `n` de 1 a 200 (padrão 40), corta acima de 200 e recusa valor não numérico ou zero",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_limita_n"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota da memória do Conselho não aceita caminho de arquivo do cliente e não escreve no cache",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_so_le_e_ignora_caminho_do_cliente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cache ausente ou sem entradas dá estado `vazio` explícito, sem erro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_cache_ausente_ou_vazio_da_estado_vazio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o texto da memória do Conselho sai pelo mesmo filtro de dado pessoal e de segredo da gravação",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_filtra_dado_pessoal_e_segredo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota da memória do Conselho recusa origem cruzada, como as outras leituras de API",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_memoria_conselho_recusa_origem_cruzada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a aba Memória compartilhada fica dentro da seção Conselho, tem estados carregando, vazio e erro, e monta o texto do cache só com textContent",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_aba_memoria_fica_na_secao_conselho"
     ],
     "cwd": null
   }

@@ -1,3 +1,5 @@
+// Botões do Conselho: abrir os destinos e conferir os conselheiros ao entrar na seção. Isolado em IIFE.
+(function () {
 // Botões "Abrir": pedem só o nome do destino; o servidor tem a lista fixa e decide o comando.
 document.querySelectorAll('[data-alvo]').forEach((botao) => {
   botao.addEventListener('click', async () => {
@@ -22,4 +24,5 @@ async function conferirConselheiros() {
     aviso.textContent = 'Painel fora do ar.';
   }
 }
-document.querySelectorAll('[data-page="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
+document.querySelectorAll('button[data-secao="conselho"], [data-open-page="conselho"]').forEach((b) => b.addEventListener('click', conferirConselheiros));
+})();
