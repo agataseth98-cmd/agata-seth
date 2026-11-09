@@ -1,0 +1,1393 @@
+diff --git a/redesign/painel_operacional/armazem.py b/redesign/painel_operacional/armazem.py
+index d3e0769b..6a3cf42a 100644
+--- a/redesign/painel_operacional/armazem.py
++++ b/redesign/painel_operacional/armazem.py
+@@ -11,6 +11,7 @@ from datetime import datetime
+ from pathlib import Path
+ from zoneinfo import ZoneInfo
+ 
++from chat_stream import MODELO_PADRAO, modelo_permitido, modelo_real_valido
+ from relogio import _reading_window
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+@@ -97,21 +98,43 @@ def _conversas_listar() -> dict:
+     return {"schema_version": 1, "state": "ok", "items": itens}
+ 
+ 
+-def _conversa_validar(dados: dict) -> dict | None:
++def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
++    """Conversa no formato do painel, com o modelo escolhido (`modelo`, e `modelo` em cada resposta da Seth).
++
++    Modelo ausente vale MODELO_PADRAO (conversa antiga, sem o campo). Modelo fora da lista recusa a
++    gravação (None). `leve` é para leitura de arquivo já salvo: modelo fora da lista vira o padrão, e a
++    conversa abre mesmo assim. `modelo_real` (nome que respondeu, cabeçalho do gateway) é só guardado
++    quando tem formato de nome; se não tem, sai da conversa sem recusar a gravação.
++    """
+     if not isinstance(dados, dict):
+         return None
+     titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
+     mensagens = dados.get("mensagens")
+     if not isinstance(mensagens, list) or len(mensagens) > 200:
+         return None
++    modelo = dados.get("modelo")
++    if modelo is None:
++        modelo = MODELO_PADRAO
++    elif not modelo_permitido(modelo):
++        if not leve:
++            return None
++        modelo = MODELO_PADRAO
+     limpas = []
+     for m in mensagens:
+         if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
+             return None
+         if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
+             return None
+-        limpas.append({"role": m["role"], "content": m["content"]})
+-    return {"titulo": titulo, "mensagens": limpas}
++        item = {"role": m["role"], "content": m["content"]}
++        if m["role"] == "assistant" and m.get("modelo") is not None:
++            if modelo_permitido(m["modelo"]):
++                item["modelo"] = m["modelo"]
++            elif not leve:
++                return None
++        if m["role"] == "assistant" and modelo_real_valido(m.get("modelo_real")):
++            item["modelo_real"] = m["modelo_real"]
++        limpas.append(item)
++    return {"titulo": titulo, "modelo": modelo, "mensagens": limpas}
+ 
+ 
+ def _conversa_gravar(dados: dict) -> dict | None:
+@@ -138,7 +161,7 @@ def _conversa_ler(conversa_id: str) -> dict | None:
+         dados = json.loads(arq.read_text(encoding="utf-8"))
+     except (OSError, ValueError):
+         return None
+-    limpo = _conversa_validar(dados)
++    limpo = _conversa_validar(dados, leve=True)
+     if limpo is None:
+         return None
+     return {"schema_version": 1, "id": conversa_id, **limpo}
+diff --git a/redesign/painel_operacional/chat_stream.py b/redesign/painel_operacional/chat_stream.py
+index d92225dc..4b394f25 100644
+--- a/redesign/painel_operacional/chat_stream.py
++++ b/redesign/painel_operacional/chat_stream.py
+@@ -5,6 +5,7 @@ Não registra texto de usuário em log.
+ """
+ 
+ import json
++import re
+ from typing import Iterable, Iterator
+ 
+ PAPEIS_VALIDOS = {"system", "user", "assistant"}
+@@ -13,6 +14,52 @@ MAX_CARACTERES_MENSAGEM = 4000
+ PREFIXO_DADOS = "data:"
+ SENTINELA_FIM = "[DONE]"
+ 
++# Modelos do chat (seletor da tela de conversa). Lista FIXA: o servidor só aceita estes nomes.
++# Conferidos em redesign/router/seth_gateway.py, _politica_dados_externos (09/11/2026): o gateway aceita
++# seth-livre (cascata com sanitização) e seth-public (alias da via pública, sem ferramentas e sem contexto
++# do Agata). Ficam fora seth-zai, seth-gemini, seth-hf, seth-mistral e seth-auto: a política recusa com 403
++# quem não é seth-livre, seth-public ou modelo local, quando não há classificação pública.
++MODELO_PADRAO = "seth-livre"
++MODELOS_CHAT = (
++    {"id": "seth-livre", "rotulo": "Seth (padrão)",
++     "descricao": "Usa o contexto do Agata. Antes de sair, a mensagem passa por filtro de segredos "
++                  "e dados pessoais. Nesta tela não há ferramentas."},
++    {"id": "seth-public", "rotulo": "Seth pública",
++     "descricao": "Só o texto da conversa vai para modelos externos. Sem contexto do Agata e sem ferramentas."},
++)
++MODELOS_PERMITIDOS = frozenset(m["id"] for m in MODELOS_CHAT)
++
++
++def modelo_permitido(valor) -> bool:
++    """True só para um nome exato da lista fixa. Qualquer outro tipo (número, lista, None) é recusado."""
++    return isinstance(valor, str) and valor in MODELOS_PERMITIDOS
++
++
++# Modelo que de fato respondeu: vem do cabeçalho X-Modelo-Real do gateway (fato da Máquina, nome como "openai/gpt-oss-120b").
++# Não é a lista fixa acima (é o nome real, que muda); só passa texto curto, sem espaço nem controle.
++_MODELO_REAL_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/+-]{0,119}")
++
++
++def modelo_real_valido(valor) -> str | None:
++    """Nome do modelo real se for texto curto e limpo; qualquer outra coisa (None, vazio, com espaço) vira None."""
++    if isinstance(valor, str) and _MODELO_REAL_RE.fullmatch(valor):
++        return valor
++    return None
++
++
++def modelo_valido(valor) -> str:
++    """Modelo do pedido: ausente (None) vale o padrão; fora da lista é ValueError."""
++    if valor is None:
++        return MODELO_PADRAO
++    if not modelo_permitido(valor):
++        raise ValueError("modelo fora da lista")
++    return valor
++
++
++def lista_modelos() -> dict:
++    """Corpo de GET /api/seth/modelos: a lista fixa, com o padrão marcado."""
++    return {"schema_version": 1, "padrao": MODELO_PADRAO, "modelos": [dict(m) for m in MODELOS_CHAT]}
++
+ 
+ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
+     """Lê linhas SSE e emite eventos {"tipo": ...}.
+@@ -62,11 +109,13 @@ def codificar_sse(evento: dict) -> bytes:
+     return ("data: " + json.dumps(evento, ensure_ascii=False) + "\n\n").encode("utf-8")
+ 
+ 
+-def montar_pedido(mensagens: list[dict], modelo: str = "seth-livre") -> dict:
++def montar_pedido(mensagens: list[dict], modelo: str | None = None) -> dict:
+     """Monta o corpo do pedido de chat em streaming. Recusa entrada inválida com ValueError.
+ 
++    `modelo` ausente vale MODELO_PADRAO; fora de MODELOS_PERMITIDOS é recusado.
+     As mensagens da exceção não ecoam o conteúdo do usuário.
+     """
++    modelo = modelo_valido(modelo)
+     if not isinstance(mensagens, list) or not mensagens:
+         raise ValueError("lista de mensagens vazia ou inválida")
+     if len(mensagens) > MAX_MENSAGENS:
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 8d2029cf..7fb69b88 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -1109,6 +1109,8 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .nota{display:block;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px;color:var(--cor-a8b8ce)}
+ 
+ .seth-vazio{color:var(--cor-a8b8ce);margin:auto 0}
++.seth-aviso{margin:0;padding:8px 10px;border-radius:10px;border:1px solid var(--gold);color:var(--gold);font-size:13px;line-height:1.45}
++.msg .seth-aviso{border-color:var(--line);color:var(--cor-a8b8ce)}
+ 
+ .seth-acoes{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+ 
+@@ -1140,8 +1142,21 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ 
+ .seth-form{display:flex;gap:8px;margin-top:4px}
+ 
++.seth-modelo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--cor-a8b8ce)}
++
++.seth-modelo-desc{flex-basis:100%;font-size:11px}
++
++.msg-modelo{font-size:12px;color:var(--cor-a8b8ce)}
++
+ .seth-form textarea{flex:1;resize:vertical}
+ 
++/* Campos da conversa no mesmo tema escuro dos demais (tokens de :root: paper, line, ink, teal). Sem branco do navegador. */
++.seth-modelo select,.seth-form textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans)}
++.seth-modelo select{padding:4px 8px;color-scheme:dark}
++.seth-modelo select option{background:var(--sheet);color:var(--ink)}
++.seth-form textarea::placeholder{color:var(--muted);opacity:.75}
++.seth-modelo select:focus,.seth-form textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
++
+ .msg-acoes{display:flex;gap:14px;margin-top:8px;font-size:12px}
+ 
+ .msg-body p{margin:0 0 .6em}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index ab7e1ce1..8f7885ca 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -100,8 +100,9 @@
+ <div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
+ <article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
+ <div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
+-<div class="seth-main"><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
++<div class="seth-main"><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
+ <div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
++<div class="seth-modelo"><label for="seth-modelo">Modelo</label><select id="seth-modelo"><option value="seth-livre">Seth (padrão)</option></select><span id="seth-modelo-desc" class="seth-modelo-desc"></span></div>
+ <form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+ <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article>
+ </div>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index db5605b8..f3a30222 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -593,12 +593,44 @@ function ligarCartoesClicaveis() {
+ }
+ 
+ /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
+-let sethAtual = {id: null, titulo: "", mensagens: []};
++const SETH_MODELO_PADRAO = "seth-livre";
++let sethAtual = {id: null, titulo: "", mensagens: [], modelo: SETH_MODELO_PADRAO};
++// Lista do seletor. Vem de GET /api/seth/modelos (lista fixa no servidor); sem ela, fica só o padrão.
++let sethModelos = [{id: SETH_MODELO_PADRAO, rotulo: "Seth (padrão)", descricao: ""}];
+ const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
+ const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"];
++// Limites espelhados do servidor: chat_stream.py (MAX_MENSAGENS, MAX_CARACTERES_MENSAGEM), server.py (CHAT_STREAM_LIMITE_BYTES)
++// e armazem.py (CONVERSA_LIMITE_BYTES). test_chat_ui.py confere que os números são os mesmos.
++const SETH_MAX_MENSAGENS = 20;
++const SETH_MAX_CARACTERES = 4000;
++const SETH_LIMITE_PEDIDO_BYTES = 131072;
++const SETH_LIMITE_CONVERSA_BYTES = 262144;
+ function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+ function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
+ function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
++function sethMostrarModelo() {
++  const select = byId("seth-modelo"); const desc = byId("seth-modelo-desc");
++  if (select.value !== sethAtual.modelo) select.value = sethAtual.modelo;
++  const escolhido = sethModelos.find((m) => m.id === sethAtual.modelo);
++  desc.textContent = escolhido ? escolhido.descricao : "";
++}
++async function sethCarregarModelos() {
++  const select = byId("seth-modelo");
++  try {
++    const dados = await fetchJson("/api/seth/modelos", {headers: {Accept: "application/json"}});
++    if (!Array.isArray(dados.modelos) || !dados.modelos.length) return;
++    sethModelos = dados.modelos;
++    select.replaceChildren();
++    sethModelos.forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = m.rotulo; select.append(o); });
++    sethMostrarModelo();
++  } catch (_) { /* sem a lista, fica só o padrão do HTML; a conversa segue com seth-livre */ }
++}
++// Modelo que respondeu: o real (cabeçalho X-Modelo-Real do gateway); sem ele, o escolhido, marcado "(escolhido)".
++function sethTextoModelo(m) {
++  if (m.modelo_real) return "modelo: " + m.modelo_real;
++  if (m.modelo) return "modelo: " + m.modelo + " (escolhido)";
++  return "modelo: não registrado";
++}
+ function sethInline(container, texto) {
+   const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
+   for (const p of partes) {
+@@ -633,9 +665,11 @@ function sethMensagem(m, indice) {
+   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
+   const hora = document.createElement("span"); hora.textContent = m.hora || "";
+   cab.append(quem, hora);
++  if (m.role === "assistant") { const modelo = document.createElement("span"); modelo.className = "msg-modelo"; modelo.textContent = sethTextoModelo(m); cab.append(modelo); }
+   const corpo = document.createElement("div"); corpo.className = "msg-body";
+   if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
+   msg.append(cab, corpo);
++  if (m.aviso) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.aviso; msg.append(aviso); }
+   if (m.role === "assistant") {
+     const acoes = document.createElement("div"); acoes.className = "msg-acoes";
+     const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
+@@ -659,6 +693,7 @@ function sethDesenhar() {
+   sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
+   log.scrollTop = log.scrollHeight;
+   sethTitulo(sethAtual.titulo);
++  sethPintarAvisoSalvar();
+ }
+ function sethExemplos() {
+   const box = byId("seth-exemplos"); if (!box) return;
+@@ -697,22 +732,51 @@ async function sethListar() {
+ async function sethAbrir(id) {
+   try {
+     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
+-    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens};
+-    sethDesenhar(); sethListar();
++    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO};
++    sethDesenhar(); sethListar(); sethMostrarModelo();
+   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
+ }
++// Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
++function sethParaSalvar(m) {
++  const item = {role: m.role, content: m.content};
++  if (m.role === "assistant") { if (m.modelo) item.modelo = m.modelo; if (m.modelo_real) item.modelo_real = m.modelo_real; }
++  return item;
++}
+ async function sethSalvar() {
+   if (!sethAtual.mensagens.length) return;
+   if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
++  const corpo = JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, modelo: sethAtual.modelo, mensagens: sethAtual.mensagens.map(sethParaSalvar)});
++  if (new TextEncoder().encode(corpo).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true); return; }
+   try {
+-    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+-      body: JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, mensagens: sethAtual.mensagens.map((m) => ({role: m.role, content: m.content}))})});
+-    if (r.ok) { const dados = await r.json(); sethAtual.id = dados.id; sethTitulo(sethAtual.titulo); sethListar(); }
+-  } catch (_) { /* a conversa continua na aba; o aviso fica no status */ }
++    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: corpo});
++    if (!r.ok) { sethNaoSalvou(sethMotivoRecusa(r.status, await sethMotivo(r)), r.status === 413 || r.status === 400); return; }
++    const dados = await r.json(); sethAtual.id = dados.id; sethAtual.naoSalva = ""; sethPintarAvisoSalvar(); sethTitulo(sethAtual.titulo); sethListar();
++  } catch (_) { sethNaoSalvou("sem resposta do painel", false); }
++}
++/* Aviso persistente de conversa não salva (seth-salvar-aviso). Fica na aba até uma gravação dar certo ou a conversa trocar. */
++function sethNaoSalvou(motivo, comecarDeNova) {
++  const guardado = sethAtual.id ? "O que está guardado é a última gravação feita; o que veio depois não está salvo." : "Nada desta conversa está guardado ainda.";
++  sethAtual.naoSalva = "Conversa não salva: " + motivo + ". " + guardado + (comecarDeNova ? " Para seguir salvando, comece uma conversa nova." : "");
++  sethPintarAvisoSalvar();
++}
++/* Texto do motivo quando o painel recusa a gravação: 413 é tamanho; 400 é regra, com o detalhe que o servidor devolve. */
++function sethMotivoRecusa(status, motivo) {
++  if (status === 413) return "a conversa passou de " + SETH_LIMITE_CONVERSA_BYTES + " bytes (256 KB), o limite de cada gravação";
++  if (status === 400) return "o painel recusou a conversa (" + (motivo || "sem detalhe") + ")";
++  return "o painel respondeu com erro " + status;
++}
++/* Aviso de uma gravação que falhou sem ser da conversa aberta (ex.: renomear uma conversa fechada). Some na próxima atualização da aba. */
++function sethMostrarAviso(texto) {
++  const aviso = byId("seth-salvar-aviso"); if (!aviso) return;
++  aviso.textContent = texto; aviso.hidden = false;
++}
++function sethPintarAvisoSalvar() {
++  const aviso = byId("seth-salvar-aviso"); if (!aviso) return;
++  aviso.textContent = sethAtual.naoSalva || ""; aviso.hidden = !sethAtual.naoSalva;
+ }
+ async function sethApagar(id) {
+   await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
+-  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); }
++  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); }
+   sethListar();
+ }
+ function sethRenomear(c, linha) {
+@@ -722,25 +786,59 @@ function sethRenomear(c, linha) {
+     const novo = campo.value.trim() || c.titulo;
+     if (c.id === sethAtual.id) { sethAtual.titulo = novo; sethSalvar(); return; }
+     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(c.id), {headers: {Accept: "application/json"}});
+-    await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, mensagens: dados.mensagens})});
++    try {
++      const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, modelo: dados.modelo, mensagens: dados.mensagens})});
++      if (!r.ok) sethMostrarAviso("Não foi possível salvar o novo nome da conversa \"" + c.titulo + "\": " + sethMotivoRecusa(r.status, await sethMotivo(r)) + ".");
++    } catch (_) { sethMostrarAviso("Não foi possível salvar o novo nome da conversa: sem resposta do painel."); }
+     sethListar();
+   };
+   campo.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmar(); if (e.key === "Escape") sethListar(); });
+   campo.addEventListener("blur", () => sethListar());
+ }
+-function sethErro(status, erro) {
++function sethErro(status, motivo) {
+   if (status === 429) return "outra conversa está em curso; tente de novo em instantes";
+   if (status === 502) return "o gateway não respondeu; confira o serviço seth-gateway em Operação";
+-  return erro && erro.message ? erro.message : "falha desconhecida";
++  if (status === 400 || status === 413) return "o painel recusou o pedido (" + (motivo || "sem detalhe") + ")";
++  if (status) return "o painel respondeu com erro " + status;
++  return "falha desconhecida";
++}
++/* Motivo que o servidor devolve no corpo de um erro (texto curto, em português; mostrado só em 400 e 413). */
++async function sethMotivo(resposta) {
++  try { return (await resposta.text()).trim().slice(0, 200); } catch (_) { return ""; }
++}
++/* Janela enviada ao gateway: as últimas 20 mensagens, cada uma com até 4000 caracteres, e o pedido inteiro até 131072 bytes.
++   Corta o que passa do limite (a conversa salva não muda) e conta o que cortou ou deixou de fora, para o aviso. */
++function sethJanela(mensagens) {
++  const marca = "\n[cortado pelo painel para caber no limite de " + SETH_MAX_CARACTERES + " caracteres]";
++  const espaco = SETH_MAX_CARACTERES - Array.from(marca).length;
++  let cortadas = 0;
++  const janela = mensagens.slice(-SETH_MAX_MENSAGENS).map((m) => {
++    const pontos = Array.from(m.content);
++    if (pontos.length <= SETH_MAX_CARACTERES) return {role: m.role, content: m.content};
++    cortadas++;
++    return {role: m.role, content: pontos.slice(0, espaco).join("") + marca};
++  });
++  const bytes = (lista) => new TextEncoder().encode(JSON.stringify({mensagens: lista})).length;
++  let deixadas = 0;
++  while (janela.length > 1 && bytes(janela) > SETH_LIMITE_PEDIDO_BYTES) { janela.shift(); deixadas++; }
++  return {mensagens: janela, cortadas, deixadas};
++}
++function sethAvisoJanela(janela) {
++  if (!janela.cortadas && !janela.deixadas) return "";
++  const partes = [];
++  if (janela.cortadas) partes.push((janela.cortadas === 1 ? "1 mensagem antiga longa foi cortada" : janela.cortadas + " mensagens antigas longas foram cortadas") + " para " + SETH_MAX_CARACTERES + " caracteres");
++  if (janela.deixadas) partes.push((janela.deixadas === 1 ? "1 mensagem mais antiga ficou" : janela.deixadas + " mensagens mais antigas ficaram") + " de fora, porque o pedido passou do tamanho máximo");
++  return "Para responder, a Seth recebeu a conversa com ajuste: " + partes.join("; ") + ". A conversa salva continua completa.";
+ }
+ /* Stream SSE de /api/seth/chat/stream: linhas "data: {json}" separadas por linha em branco.
+    Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
+    Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
+ function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
+-async function sethLerStream(mensagens, parcial, aoTexto) {
++async function sethLerStream(mensagens, modelo, parcial, aoTexto) {
+   const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
+-    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens})});
+-  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
++    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo})});
++  if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
++  parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
+   if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
+   const leitor = r.body.getReader(); const decodificador = new TextDecoder("utf-8");
+   let pendente = "", fim = false;
+@@ -769,10 +867,11 @@ async function sethLerStream(mensagens, parcial, aoTexto) {
+     try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
+   }
+ }
+-async function sethChatInteiro(mensagens) {
++async function sethChatInteiro(mensagens, modelo, parcial) {
+   const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+-    body: JSON.stringify({messages: mensagens})});
+-  if (!r.ok) throw Object.assign(new Error(sethErro(r.status)), {status: r.status});
++    body: JSON.stringify({messages: mensagens, modelo})});
++  if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
++  parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
+   return r.json();
+ }
+ async function sethEnviar(textoUsuario, reaproveitar) {
+@@ -782,7 +881,10 @@ async function sethEnviar(textoUsuario, reaproveitar) {
+   botao.disabled = true; sethStatus("PENSANDO", "partial");
+   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+   log.append(pensando);
+-  const mensagens = sethAtual.mensagens.slice(-20).map((m) => ({role: m.role, content: m.content}));
++  const janela = sethJanela(sethAtual.mensagens);
++  const mensagens = janela.mensagens;
++  const avisoJanela = sethAvisoJanela(janela);
++  const modelo = sethAtual.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
+   const parcial = {texto: ""};
+   let textoNo = null;
+   const aoTexto = (delta) => {
+@@ -796,22 +898,22 @@ async function sethEnviar(textoUsuario, reaproveitar) {
+     textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
+   };
+   try {
+-    let conteudo, modelo = "";
++    let conteudo;
+     try {
+-      conteudo = await sethLerStream(mensagens, parcial, aoTexto);
++      conteudo = await sethLerStream(mensagens, modelo, parcial, aoTexto);
+     } catch (erro) {
+       const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
+       if (!transporte) throw erro;
+-      const dados = await sethChatInteiro(mensagens);
+-      conteudo = dados.content; modelo = dados.model || "";
++      const dados = await sethChatInteiro(mensagens, modelo, parcial);
++      conteudo = dados.content;
+     }
+-    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo});
++    sethAtual.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo, modelo_real: parcial.modelo_real || "", aviso: avisoJanela});
+     sethDesenhar(); sethStatus("PRONTA", "planned");
+     sethSalvar();
+   } catch (erro) {
+     if (!reaproveitar) sethAtual.mensagens.pop();
+     sethDesenhar();
+-    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + sethErro(erro.status, erro) + ".";
++    const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + (erro.message || "falha desconhecida") + ".";
+     log.append(aviso);
+     sethStatus("INDISPONÍVEL", "horizon");
+   } finally { botao.disabled = false; campo.focus(); }
+@@ -827,10 +929,11 @@ function ligarConversaSeth() {
+   const form = byId("seth-form");
+   if (!form || form.dataset.ligado) return;
+   form.dataset.ligado = "1";
+-  sethExemplos(); sethDesenhar(); sethListar();
++  sethExemplos(); sethDesenhar(); sethListar(); sethCarregarModelos();
++  byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
+   const campo = byId("seth-input");
+   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+-  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: []}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
++  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+   form.addEventListener("submit", (e) => {
+     e.preventDefault();
+     const texto = campo.value.trim();
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 50602099..8ab690cf 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -151,6 +151,25 @@ def _linhas_do_gateway(resposta):
+         return
+ 
+ 
++def _motivo_conversa_recusada(dados) -> str:
++    """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
++    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
++    if isinstance(mensagens, list) and len(mensagens) > 200:
++        return "mais de 200 mensagens"
++    if isinstance(mensagens, list) and any(
++            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > armazem.CONVERSA_MENSAGEM_LIMITE
++            for m in mensagens):
++        return f"uma mensagem passa de {armazem.CONVERSA_MENSAGEM_LIMITE} caracteres"
++    modelo = dados.get("modelo") if isinstance(dados, dict) else None
++    if (modelo is not None and not chat_stream.modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
++            isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
++            and not chat_stream.modelo_permitido(m.get("modelo")) for m in mensagens)):
++        return "modelo fora da lista"
++    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
++        return "identificador da conversa inválido"
++    return "formato da conversa inválido"
++
++
+ def _relay_modules():
+     """Carrega contrato e persistência locais; nenhum módulo faz chamada externa."""
+     for directory in (ROOT / "redesign/router", WEB):
+@@ -1063,6 +1082,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(302, "text/plain; charset=utf-8", b"", (("Location", destino),))
+         if self.path.startswith("/api/grafo"):
+             return self._grafo()
++        if self.path == "/api/seth/modelos":
++            return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
+         if self.path == "/api/seth/conversas":
+             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
+         if self.path.startswith("/api/seth/conversa?"):
+@@ -1462,13 +1483,17 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(415, "text/plain; charset=utf-8", b"JSON required")
+         raw_length = self.headers.get("Content-Length", "")
+         if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
+-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++            return self._send(413, "text/plain; charset=utf-8", f"pedido acima de {CHAT_STREAM_LIMITE_BYTES} bytes".encode("utf-8"))
+         try:
+             corpo = json.loads(self.rfile.read(int(raw_length)))
+-            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None)
+         except (ValueError, RecursionError):
+-            # Mensagem genérica: a exceção de montar_pedido não ecoa conteúdo do usuário, e aqui nem ela sai.
+-            return self._send(400, "text/plain; charset=utf-8", b"invalid request")
++            return self._send(400, "text/plain; charset=utf-8", "pedido em JSON inválido".encode("utf-8"))
++        try:
++            pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None,
++                                               corpo.get("modelo") if isinstance(corpo, dict) else None)
++        except ValueError as erro:
++            # A mensagem de montar_pedido traz só posição e regra (ex.: "mensagem 3 acima de 4000 caracteres"), nunca o texto.
++            return self._send(400, "text/plain; charset=utf-8", str(erro).encode("utf-8"))
+         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
+             return self._send(429, "text/plain; charset=utf-8", b"busy")
+         try:
+@@ -1480,11 +1505,13 @@ class Handler(BaseHTTPRequestHandler):
+             except OSError:
+                 return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
+             with resposta:
+-                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)))
++                # Modelo real (X-Modelo-Real, fato da Máquina) segue no cabeçalho da resposta; sem ele, a UI mostra o escolhido.
++                real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
++                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)), (("X-Modelo-Real", real),) if real else ())
+         finally:
+             _SEM_CONVERSA_EM_CURSO.release()
+ 
+-    def _stream_sse(self, eventos) -> None:
++    def _stream_sse(self, eventos, cabecalhos_extra=()) -> None:
+         """Repassa eventos como SSE. Sem Content-Length: a conexão fecha ao fim (HTTP/1.0)."""
+         self.send_response(200)
+         self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+@@ -1492,6 +1519,8 @@ class Handler(BaseHTTPRequestHandler):
+         self.send_header("X-Content-Type-Options", "nosniff")
+         self.send_header("Referrer-Policy", "no-referrer")
+         self.send_header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
++        for nome, valor in cabecalhos_extra:
++            self.send_header(nome, valor)
+         self.end_headers()
+         try:
+             for evento in eventos:
+@@ -1506,52 +1535,59 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+         raw_length = self.headers.get("Content-Length", "")
+         if not raw_length.isdecimal() or int(raw_length) > CONVERSA_LIMITE_BYTES:
+-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++            return self._send(413, "text/plain; charset=utf-8", f"conversa acima de {CONVERSA_LIMITE_BYTES} bytes".encode("utf-8"))
+         try:
+             dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+         except (ValueError, UnicodeDecodeError):
+-            return self._send(400, "text/plain; charset=utf-8", b"invalid json")
++            return self._send(400, "text/plain; charset=utf-8", "conversa com JSON inválido".encode("utf-8"))
+         if apagar:
+             ok = _conversa_apagar(dados.get("id") if isinstance(dados, dict) else "")
+             return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
+         salvo = _conversa_gravar(dados)
+         if salvo is None:
+-            return self._send(400, "text/plain; charset=utf-8", b"conversa invalida")
++            return self._send(400, "text/plain; charset=utf-8", _motivo_conversa_recusada(dados).encode("utf-8"))
+         return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
+ 
+     def _seth_chat(self) -> None:
+-        """Conversa com a Seth pelo gateway local (seth-livre), só texto, sem ferramentas e sem escrita."""
++        """Conversa com a Seth pelo gateway local, só texto, sem ferramentas e sem escrita. Modelo: lista fixa (chat_stream).
++        Mesmo teto de pedido do stream (CHAT_STREAM_LIMITE_BYTES): a janela que a UI manda cabe nos dois caminhos."""
+         if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+         raw_length = self.headers.get("Content-Length", "")
+-        if not raw_length.isdecimal() or int(raw_length) > 16384:
+-            return self._send(413, "text/plain; charset=utf-8", b"request too large")
++        if not raw_length.isdecimal() or int(raw_length) > CHAT_STREAM_LIMITE_BYTES:
++            return self._send(413, "text/plain; charset=utf-8", f"pedido acima de {CHAT_STREAM_LIMITE_BYTES} bytes".encode("utf-8"))
+         try:
+             corpo = json.loads(self.rfile.read(int(raw_length)))
+         except (json.JSONDecodeError, UnicodeDecodeError):
+-            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++            return self._send(400, "text/plain; charset=utf-8", "pedido em JSON inválido".encode("utf-8"))
+         mensagens = corpo.get("messages") if isinstance(corpo, dict) else None
+-        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > 20:
+-            return self._send(400, "text/plain; charset=utf-8", b"messages must be 1-20 items")
++        if not isinstance(mensagens, list) or not mensagens or len(mensagens) > chat_stream.MAX_MENSAGENS:
++            return self._send(400, "text/plain; charset=utf-8", f"a janela precisa ter de 1 a {chat_stream.MAX_MENSAGENS} mensagens".encode("utf-8"))
+         limpas = []
+         for m in mensagens:
+             if not isinstance(m, dict) or m.get("role") not in ("user", "assistant"):
+-                return self._send(400, "text/plain; charset=utf-8", b"invalid message")
++                return self._send(400, "text/plain; charset=utf-8", "mensagem com papel inválido".encode("utf-8"))
+             conteudo = m.get("content")
+-            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > 4000:
+-                return self._send(400, "text/plain; charset=utf-8", b"content must be 1-4000 characters")
++            if not isinstance(conteudo, str) or not conteudo.strip() or len(conteudo) > chat_stream.MAX_CARACTERES_MENSAGEM:
++                return self._send(400, "text/plain; charset=utf-8",
++                                  f"mensagem vazia ou acima de {chat_stream.MAX_CARACTERES_MENSAGEM} caracteres".encode("utf-8"))
+             limpas.append({"role": m["role"], "content": conteudo})
++        try:
++            modelo = chat_stream.modelo_valido(corpo.get("modelo") if isinstance(corpo, dict) else None)
++        except ValueError:
++            return self._send(400, "text/plain; charset=utf-8", b"modelo fora da lista")
+         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
+             return self._send(429, "text/plain; charset=utf-8", b"busy")
+         try:
+-            pedido = {"model": "seth-livre", "stream": False, "messages": limpas, "max_tokens": 1024}
+-            req = urllib.request.Request("http://127.0.0.1:20126/v1/chat/completions", data=json.dumps(pedido).encode("utf-8"),
++            pedido = {"model": modelo, "stream": False, "messages": limpas, "max_tokens": 1024}
++            req = urllib.request.Request(GATEWAY_CHAT_URL, data=json.dumps(pedido).encode("utf-8"),
+                                          headers={"Content-Type": "application/json"}, method="POST")
+             with urllib.request.urlopen(req, timeout=120) as resposta:
+                 dados = json.loads(resposta.read().decode("utf-8"))
++                real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
+             texto = dados["choices"][0]["message"].get("content") or ""
+             body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
+-            return self._send(200, "application/json; charset=utf-8", body)
++            return self._send(200, "application/json; charset=utf-8", body, (("X-Modelo-Real", real),) if real else ())
+         except (OSError, KeyError, IndexError, ValueError):
+             return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")
+         finally:
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 7d90507a..cd48d905 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -54,6 +54,8 @@
+ ### Rotas de API
+ 
+ - Os caminhos e verbos existentes permanecem; o JS só chama caminhos presentes no servidor. A resposta da leitura de conversa salva é normalizada com `schema_version` e `id`, exigidos pelo cliente. Mensagens importadas até 65536 caracteres são aceitas.
++- Seletor de modelo da conversa (09/11/2026): `GET /api/seth/modelos` devolve `padrao` (`seth-livre`) e a lista fixa `modelos` (`id`, `rotulo`, `descricao`): `seth-livre` e `seth-public`. `/api/seth/chat/stream` e `/api/seth/chat` aceitam `modelo` opcional (ausente vale o padrão); fora da lista, 400 sem chamar o gateway. A conversa salva guarda `modelo` e o `modelo` de cada resposta da Seth; conversa antiga sem o campo abre como `seth-livre`. Fora da lista ficam `seth-zai`, `seth-gemini`, `seth-hf`, `seth-mistral` e `seth-auto`, porque o gateway recusa com 403 quem não é `seth-livre` nem `seth-public` sem classificação pública.
++- Modelo que respondeu (09/11/2026): o gateway manda o cabeçalho `X-Modelo-Real` com o nome real do modelo (não o alias). `/api/seth/chat/stream` e `/api/seth/chat` repassam esse cabeçalho ao navegador só quando o valor tem formato de nome (`chat_stream.modelo_real_valido`). A conversa salva guarda `modelo_real` em cada resposta da Seth quando o cabeçalho veio; gravação com `modelo_real` fora do formato descarta só esse campo. A UI mostra o modelo real em cada resposta; sem ele, mostra o escolhido com `(escolhido)`.
+ - Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
+   - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
+   - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
+diff --git a/redesign/painel_operacional/test_chat_stream.py b/redesign/painel_operacional/test_chat_stream.py
+index a985b504..7883bf39 100644
+--- a/redesign/painel_operacional/test_chat_stream.py
++++ b/redesign/painel_operacional/test_chat_stream.py
+@@ -4,11 +4,22 @@ import unittest
+ from chat_stream import (
+     MAX_CARACTERES_MENSAGEM,
+     MAX_MENSAGENS,
++    MODELO_PADRAO,
++    MODELOS_PERMITIDOS,
+     codificar_sse,
+     eventos_do_stream,
++    lista_modelos,
++    modelo_permitido,
++    modelo_real_valido,
++    modelo_valido,
+     montar_pedido,
+ )
+ 
++MENSAGEM_OI = [{"role": "user", "content": "oi"}]
++# Nomes do librechat.yaml que o gateway não aceita sem classificação pública, e nomes de fila do Seth.
++NOMES_FORA_DA_LISTA = ("seth-zai", "seth-gemini", "seth-hf", "seth-mistral", "seth-auto",
++                       "seth-rapido", "seth-pesado", "seth-codigo")
++
+ 
+ def chunk(conteudo):
+     return "data: " + json.dumps(
+@@ -130,6 +141,79 @@ class MontarPedidoTest(unittest.TestCase):
+         with self.assertRaises(ValueError):
+             montar_pedido([])
+ 
++    def test_erro_de_mensagem_longa_diz_o_limite_sem_ecoar_o_texto(self):
++        # O servidor devolve esta frase no 400 e a UI a mostra: precisa dizer o limite e não trazer o texto do usuário.
++        with self.assertRaises(ValueError) as contexto:
++            montar_pedido([{"role": "user", "content": "SEGREDO" + "x" * MAX_CARACTERES_MENSAGEM}])
++        motivo = str(contexto.exception)
++        self.assertIn(f"{MAX_CARACTERES_MENSAGEM} caracteres", motivo)
++        self.assertNotIn("SEGREDO", motivo)
++
++
++class ModelosDoChatTest(unittest.TestCase):
++    """Allowlist de modelos do chat: lista fixa, padrão, recusa e o modelo que vai ao pedido."""
++
++    def test_lista_fixa_so_com_os_dois_nomes_aceitos_pelo_gateway(self):
++        self.assertEqual(MODELOS_PERMITIDOS, frozenset({"seth-livre", "seth-public"}))
++
++    def test_padrao_e_seth_livre(self):
++        self.assertEqual(MODELO_PADRAO, "seth-livre")
++        self.assertEqual(modelo_valido(None), "seth-livre")
++        self.assertEqual(montar_pedido(MENSAGEM_OI)["model"], "seth-livre")
++        self.assertEqual(montar_pedido(MENSAGEM_OI, None)["model"], "seth-livre")
++
++    def test_modelo_escolhido_vai_ao_pedido(self):
++        self.assertEqual(montar_pedido(MENSAGEM_OI, "seth-public")["model"], "seth-public")
++        self.assertEqual(montar_pedido(MENSAGEM_OI, "seth-livre")["model"], "seth-livre")
++
++    def test_lista_para_o_seletor_traz_padrao_rotulo_e_descricao(self):
++        dados = lista_modelos()
++        self.assertEqual(dados["schema_version"], 1)
++        self.assertEqual(dados["padrao"], "seth-livre")
++        self.assertEqual([m["id"] for m in dados["modelos"]], ["seth-livre", "seth-public"])
++        for modelo in dados["modelos"]:
++            self.assertTrue(modelo["rotulo"].strip(), modelo)
++            self.assertTrue(modelo["descricao"].strip(), modelo)
++
++    def test_lista_devolvida_nao_altera_a_lista_interna(self):
++        lista_modelos()["modelos"].append({"id": "seth-zai", "rotulo": "x", "descricao": "x"})
++        self.assertEqual([m["id"] for m in lista_modelos()["modelos"]], ["seth-livre", "seth-public"])
++
++    def test_recusa_nomes_fora_da_lista(self):
++        for ruim in NOMES_FORA_DA_LISTA + ("", "SETH-LIVRE", " seth-livre", "seth-livre ", "seth-livre-longo"):
++            with self.subTest(modelo=ruim):
++                self.assertFalse(modelo_permitido(ruim))
++                with self.assertRaises(ValueError):
++                    modelo_valido(ruim)
++                with self.assertRaises(ValueError):
++                    montar_pedido(MENSAGEM_OI, ruim)
++
++    def test_recusa_tipos_que_nao_sao_texto(self):
++        for ruim in (["seth-livre"], {"id": "seth-livre"}, 1, True, 0.5):
++            with self.subTest(modelo=ruim):
++                self.assertFalse(modelo_permitido(ruim))
++                with self.assertRaises(ValueError):
++                    montar_pedido(MENSAGEM_OI, ruim)
++
++    def test_erro_de_modelo_nao_ecoa_o_valor_recusado(self):
++        with self.assertRaises(ValueError) as contexto:
++            montar_pedido(MENSAGEM_OI, "seth-zai-segredo-xyz")
++        self.assertNotIn("segredo-xyz", str(contexto.exception))
++
++
++class ModeloRealTest(unittest.TestCase):
++    """Nome do modelo que respondeu (cabeçalho X-Modelo-Real do gateway): só passa texto curto e limpo."""
++
++    def test_aceita_nome_de_modelo_com_barra_e_versao(self):
++        for bom in ("openai/gpt-oss-120b", "seth-livre", "a.b_c:d+e-f/g", "x" * 120):
++            with self.subTest(modelo=bom):
++                self.assertEqual(modelo_real_valido(bom), bom)
++
++    def test_recusa_vazio_espaco_controle_inicio_invalido_e_tipo_errado(self):
++        for ruim in (None, "", " openai", "openai ", "lixo com espaço", "a\nb", "<script>", "x" * 121, "-inicio", 3, ["openai/x"]):
++            with self.subTest(modelo=ruim):
++                self.assertIsNone(modelo_real_valido(ruim))
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/painel_operacional/test_chat_stream_rota.py b/redesign/painel_operacional/test_chat_stream_rota.py
+index 150f9906..be53a9c6 100644
+--- a/redesign/painel_operacional/test_chat_stream_rota.py
++++ b/redesign/painel_operacional/test_chat_stream_rota.py
+@@ -7,10 +7,12 @@ import http.client
+ import importlib.util
+ import json
+ import socket
++import tempfile
+ import threading
+ import unittest
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
++from unittest import mock
+ 
+ from chat_stream import codificar_sse
+ 
+@@ -30,9 +32,26 @@ def _chunk(texto):
+ class GatewayFalsoHandler(BaseHTTPRequestHandler):
+     def do_POST(self):
+         tamanho = int(self.headers.get("Content-Length", "0"))
+-        self.server.recebidos.append(json.loads(self.rfile.read(tamanho).decode("utf-8")))
++        pedido = json.loads(self.rfile.read(tamanho).decode("utf-8"))
++        self.server.recebidos.append(pedido)
++        # X-Modelo-Real do gateway de verdade (seth_gateway.py): só vai no cabeçalho quando o teste pede.
++        cabecalhos = [("X-Modelo-Real", self.server.modelo_real)] if self.server.modelo_real else []
++        if pedido.get("stream") is False:  # fallback /api/seth/chat: resposta inteira em JSON (roteiro, se o teste der um)
++            corpo = (self.server.roteiro or json.dumps(
++                {"model": "seth-livre", "choices": [{"message": {"content": self.server.resposta_json}}]},
++                ensure_ascii=False)).encode("utf-8")
++            self.send_response(200)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(corpo)))
++            for nome, valor in cabecalhos:
++                self.send_header(nome, valor)
++            self.end_headers()
++            self.wfile.write(corpo)
++            return
+         self.send_response(200)
+         self.send_header("Content-Type", "text/event-stream")
++        for nome, valor in cabecalhos:
++            self.send_header(nome, valor)
+         self.end_headers()
+         self.wfile.write(self.server.roteiro.encode("utf-8"))
+ 
+@@ -67,6 +86,8 @@ class RotaChatStreamTests(unittest.TestCase):
+         cls.gateway = ThreadingHTTPServer(("127.0.0.1", 0), GatewayFalsoHandler)
+         cls.gateway.daemon_threads = True
+         cls.gateway.roteiro = ""
++        cls.gateway.resposta_json = "resposta do gateway falso"
++        cls.gateway.modelo_real = ""
+         cls.gateway.recebidos = []
+         cls.gateway_thread = threading.Thread(target=cls.gateway.serve_forever, daemon=True)
+         cls.gateway_thread.start()
+@@ -85,6 +106,7 @@ class RotaChatStreamTests(unittest.TestCase):
+     def setUp(self):
+         self.gateway.recebidos.clear()
+         self.gateway.roteiro = ""
++        self.gateway.modelo_real = ""
+         panel.GATEWAY_CHAT_URL = self.gateway_url
+ 
+     def tearDown(self):
+@@ -190,6 +212,169 @@ class RotaChatStreamTests(unittest.TestCase):
+         self.assertEqual(status, 415)
+         self.assertEqual(self.gateway.recebidos, [])
+ 
++    # Motivo do 400/413 (a UI mostra o corpo da resposta) e teto do fallback
++
++    def post_chat(self, corpo):
++        dados = json.dumps(corpo).encode("utf-8")
++        return self.request("POST", "/api/seth/chat", body=dados,
++                            headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}"})
++
++    def post_conversa(self, corpo_bytes, extra=None):
++        cabecalhos = {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}",
++                      "Sec-Fetch-Site": "same-origin"}
++        cabecalhos.update(extra or {})
++        return self.request("POST", "/api/seth/conversa", body=corpo_bytes, headers=cabecalhos)
++
++    def test_mensagem_longa_no_stream_recusada_com_motivo_sem_ecoar_o_texto(self):
++        status, corpo, _ = self.post_stream({"mensagens": [{"role": "user", "content": "SEGREDO" + "x" * 4000}]})
++        self.assertEqual(status, 400)
++        self.assertIn("4000 caracteres", corpo.decode("utf-8"))
++        self.assertNotIn(b"SEGREDO", corpo)
++        self.assertEqual(self.gateway.recebidos, [])
++
++    def test_pedido_acima_do_limite_do_stream_tem_motivo_em_portugues(self):
++        status, corpo, _ = self.post_stream(b"{}", extra={"Content-Length": str(panel.CHAT_STREAM_LIMITE_BYTES + 1)})
++        self.assertEqual(status, 413)
++        self.assertEqual(corpo.decode("utf-8"), f"pedido acima de {panel.CHAT_STREAM_LIMITE_BYTES} bytes")
++
++    def test_fallback_aceita_janela_maior_que_16384_bytes(self):
++        # 20 mensagens de 4000 caracteres ~ 80 KB em JSON: antes o fallback recusava acima de 16384 bytes
++        mensagens = [{"role": "user" if i % 2 == 0 else "assistant", "content": "a" * 4000} for i in range(20)]
++        status, corpo, _ = self.post_chat({"messages": mensagens})
++        self.assertEqual(status, 200)
++        self.assertEqual(json.loads(corpo)["content"], "resposta do gateway falso")
++        self.assertEqual(len(self.gateway.recebidos[-1]["messages"]), 20)
++
++    def test_fallback_recusa_acima_do_limite_do_stream_com_motivo(self):
++        # Cada quebra de linha vira \\n no JSON (2 bytes): 20 x 4000 quebras passam de 131072 bytes
++        mensagens = [{"role": "user", "content": "\n" * 4000} for _ in range(20)]
++        status, corpo, _ = self.post_chat({"messages": mensagens})
++        self.assertEqual(status, 413)
++        self.assertEqual(corpo.decode("utf-8"), f"pedido acima de {panel.CHAT_STREAM_LIMITE_BYTES} bytes")
++        self.assertEqual(self.gateway.recebidos, [])
++
++    def test_fallback_recusa_mensagem_longa_com_motivo_em_portugues(self):
++        status, corpo, _ = self.post_chat({"messages": [{"role": "user", "content": "x" * 4001}]})
++        self.assertEqual(status, 400)
++        self.assertEqual(corpo.decode("utf-8"), "mensagem vazia ou acima de 4000 caracteres")
++        self.assertEqual(self.gateway.recebidos, [])
++
++    def test_conversa_acima_do_limite_recusada_com_motivo(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            status, corpo, _ = self.post_conversa(b"{}", extra={"Content-Length": str(panel.CONVERSA_LIMITE_BYTES + 1)})
++            self.assertEqual(status, 413)
++            self.assertEqual(corpo.decode("utf-8"), f"conversa acima de {panel.CONVERSA_LIMITE_BYTES} bytes")
++            self.assertEqual(list(Path(tmp).glob("*.json")), [])
++
++    def test_conversa_recusada_diz_a_regra_que_falhou(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            muitas = json.dumps({"titulo": "Longa", "mensagens": [{"role": "user", "content": "oi"}] * 201}).encode("utf-8")
++            status, corpo, _ = self.post_conversa(muitas)
++            self.assertEqual((status, corpo.decode("utf-8")), (400, "mais de 200 mensagens"))
++            grande = json.dumps({"titulo": "X", "mensagens": [{"role": "user", "content": "x" * 65537}]}).encode("utf-8")
++            status, corpo, _ = self.post_conversa(grande)
++            self.assertEqual((status, corpo.decode("utf-8")), (400, "uma mensagem passa de 65536 caracteres"))
++            self.assertEqual(list(Path(tmp).glob("*.json")), [])
++    # Modelo do chat: lista fixa. O servidor recusa o que está fora dela antes de chamar o gateway.
++
++    def test_stream_manda_ao_gateway_o_modelo_escolhido(self):
++        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
++        status, _, _ = self.post_stream({**self.MENSAGENS, "modelo": "seth-public"})
++        self.assertEqual(status, 200)
++        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-public")
++
++    def test_stream_sem_modelo_manda_seth_livre(self):
++        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
++        status, _, _ = self.post_stream(self.MENSAGENS)
++        self.assertEqual(status, 200)
++        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-livre")
++
++    def test_stream_recusa_modelo_fora_da_lista_com_400_sem_chegar_ao_gateway(self):
++        for ruim in ("seth-zai", "seth-gemini", "seth-hf", "seth-mistral", "seth-auto",
++                     "seth-rapido", "seth-pesado", "seth-codigo", "", 3, ["seth-livre"]):
++            with self.subTest(modelo=ruim):
++                status, _, _ = self.post_stream({**self.MENSAGENS, "modelo": ruim})
++                self.assertEqual(status, 400)
++        self.assertEqual(self.gateway.recebidos, [])
++
++    def test_get_modelos_devolve_padrao_e_lista_fixa(self):
++        status, corpo, cabecalhos = self.request("GET", "/api/seth/modelos")
++        self.assertEqual(status, 200)
++        self.assertTrue(cabecalhos["content-type"].startswith("application/json"))
++        dados = json.loads(corpo)
++        self.assertEqual(dados["padrao"], "seth-livre")
++        self.assertEqual([m["id"] for m in dados["modelos"]], ["seth-livre", "seth-public"])
++
++    def test_get_modelos_recusa_origem_cruzada(self):
++        status, _, _ = self.request("GET", "/api/seth/modelos", headers={"Origin": "http://evil.example"})
++        self.assertEqual(status, 403)
++
++    def test_chat_inteiro_valida_o_modelo_e_repassa_o_escolhido(self):
++        self.gateway.roteiro = json.dumps({"model": "m", "choices": [{"message": {"content": "ok"}}]})
++        origem = {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}"}
++        mensagens = [{"role": "user", "content": "oi"}]
++        bom = json.dumps({"messages": mensagens, "modelo": "seth-public"}).encode("utf-8")
++        status, corpo, _ = self.request("POST", "/api/seth/chat", body=bom, headers=origem)
++        self.assertEqual(status, 200)
++        self.assertEqual(json.loads(corpo)["content"], "ok")
++        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-public")
++        self.gateway.recebidos.clear()
++        for ruim in ("seth-zai", ""):
++            with self.subTest(modelo=ruim):
++                corpo_ruim = json.dumps({"messages": mensagens, "modelo": ruim}).encode("utf-8")
++                status, _, _ = self.request("POST", "/api/seth/chat", body=corpo_ruim, headers=origem)
++                self.assertEqual(status, 400)
++        self.assertEqual(self.gateway.recebidos, [])
++        sem_modelo = json.dumps({"messages": mensagens}).encode("utf-8")
++        status, _, _ = self.request("POST", "/api/seth/chat", body=sem_modelo, headers=origem)
++        self.assertEqual(status, 200)
++        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-livre")
++
++    # Modelo real: o cabeçalho X-Modelo-Real do gateway segue até o navegador, no stream e no fallback.
++
++    def test_stream_repassa_o_modelo_real_no_cabecalho(self):
++        self.gateway.modelo_real = "openai/gpt-oss-120b"
++        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
++        status, corpo, cabecalhos = self.post_stream(self.MENSAGENS)
++        self.assertEqual(status, 200)
++        self.assertEqual(cabecalhos["x-modelo-real"], "openai/gpt-oss-120b")
++        self.assertEqual(_eventos(corpo)[-1], {"tipo": "fim"})
++
++    def test_stream_sem_cabecalho_do_gateway_nao_manda_modelo_real(self):
++        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
++        status, _, cabecalhos = self.post_stream(self.MENSAGENS)
++        self.assertEqual(status, 200)
++        self.assertNotIn("x-modelo-real", cabecalhos)
++
++    def test_stream_nao_repassa_cabecalho_do_gateway_fora_do_formato(self):
++        self.gateway.modelo_real = "lixo com espaço"
++        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
++        status, _, cabecalhos = self.post_stream(self.MENSAGENS)
++        self.assertEqual(status, 200)
++        self.assertNotIn("x-modelo-real", cabecalhos)
++
++    def test_fallback_repassa_o_modelo_real_no_cabecalho(self):
++        self.gateway.modelo_real = "openai/gpt-oss-120b"
++        status, corpo, cabecalhos = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
++        self.assertEqual(status, 200)
++        self.assertEqual(cabecalhos["x-modelo-real"], "openai/gpt-oss-120b")
++        self.assertEqual(json.loads(corpo)["content"], "resposta do gateway falso")
++
++    def test_fallback_sem_cabecalho_do_gateway_nao_manda_modelo_real(self):
++        status, _, cabecalhos = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
++        self.assertEqual(status, 200)
++        self.assertNotIn("x-modelo-real", cabecalhos)
++
++    def test_conversa_com_modelo_fora_da_lista_recusada_com_motivo(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            ruim = json.dumps({"titulo": "X", "modelo": "seth-zai", "mensagens": [{"role": "user", "content": "oi"}]}).encode("utf-8")
++            status, corpo, _ = self.post_conversa(ruim)
++            self.assertEqual((status, corpo.decode("utf-8")), (400, "modelo fora da lista"))
++            ruim_na_resposta = json.dumps({"titulo": "X", "mensagens": [{"role": "assistant", "content": "oi", "modelo": "seth-auto"}]})
++            status, corpo, _ = self.post_conversa(ruim_na_resposta.encode("utf-8"))
++            self.assertEqual((status, corpo.decode("utf-8")), (400, "modelo fora da lista"))
++            self.assertEqual(list(Path(tmp).glob("*.json")), [])
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/painel_operacional/test_chat_ui.py b/redesign/painel_operacional/test_chat_ui.py
+index 57099f94..c2c2522c 100644
+--- a/redesign/painel_operacional/test_chat_ui.py
++++ b/redesign/painel_operacional/test_chat_ui.py
+@@ -4,13 +4,155 @@
+ Não abre navegador e não chama o gateway: lê os dois arquivos e confere a CSP (sem script inline,
+ sem style=, sem atributos on*) e o uso do stream com render por textContent.
+ """
++import json
++import os
+ import re
++import subprocess
+ import unittest
+ from pathlib import Path
+ 
++import armazem
++import chat_stream
++
+ HERE = Path(__file__).resolve().parent
+ HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
+ JS = (HERE / "prototipo.js").read_text(encoding="utf-8")
++SERVIDOR = (HERE / "server.py").read_text(encoding="utf-8")
++
++# Carrega o prototipo.js de verdade (IIFE) num contexto node, com um DOM mínimo e um fetch roteirizado pelo cenário.
++# Nada sai da máquina: o fetch não chega à rede. Os passos: abrir uma conversa da lista, enviar mensagens e
++# devolver o que foi enviado (chamadas), o texto do aviso de salvamento e a transcrição.
++NODE_PAINEL = r"""
++const fs = require('fs'); const path = require('path'); const vm = require('vm');
++const {TextEncoder, TextDecoder} = require('util');
++process.on('unhandledRejection', () => {});
++const cen = JSON.parse(fs.readFileSync(0, 'utf8')); const dir = process.env.PAINEL_DIR;
++class Texto { constructor(t) { this.textContent = t; } appendData(d) { this.textContent += d; } }
++class Elemento {
++  constructor(tag) {
++    this.tag = tag; this.textContent = ''; this.hidden = false; this.className = ''; this.value = ''; this.disabled = false;
++    this.dataset = {}; this.children = []; this.ouvintes = {}; this.scrollTop = 0; this.scrollHeight = 0; this.title = '';
++    this.classList = {add() {}, remove() {}, toggle() {}, contains() { return false; }}; this.style = {};
++  }
++  append(...nos) { this.children.push(...nos); }
++  replaceChildren(...nos) { this.children = nos; }
++  setAttribute() {} getAttribute() { return null; }
++  addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
++  focus() {} blur() {} remove() {} select() {}
++  closest() { return null; } querySelector() { return null; } querySelectorAll() { return []; }
++}
++const registro = new Map();
++const documento = {
++  visibilityState: 'visible',
++  getElementById(id) { if (!registro.has(id)) registro.set(id, new Elemento('id:' + id)); return registro.get(id); },
++  querySelector() { return new Elemento('q'); }, querySelectorAll() { return []; },
++  createElement(tag) { return new Elemento(tag); }, createElementNS(ns, tag) { return new Elemento(tag); },
++  createTextNode(t) { return new Texto(t); }, addEventListener() {},
++};
++const cargas = []; const chamadas = [];
++function escolher(valor) { if (Array.isArray(valor)) return valor.length > 1 ? valor.shift() : valor[0]; return valor; }
++function cabecalhosDe(cab) { return {get: (nome) => (cab || {})[String(nome).toLowerCase()] ?? null}; }
++function respostaJson(status, obj, cab) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe(cab), json: async () => obj, text: async () => JSON.stringify(obj)}; }
++function respostaTexto(status, texto) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe({}), json: async () => { throw new Error('sem json'); }, text: async () => texto}; }
++function respostaStream(sse, cab) {
++  const bytes = new TextEncoder().encode(sse); let lido = false;
++  return {ok: true, status: 200, headers: cabecalhosDe(cab), json: async () => ({}), text: async () => '', body: {getReader() { return {
++    read: async () => { if (lido) return {done: true, value: undefined}; lido = true; return {done: false, value: bytes}; },
++    cancel: async () => {}}; }}};
++}
++const ctx = {};
++ctx.window = ctx; ctx.document = documento; ctx.location = {hash: ''}; ctx.history = {};
++ctx.localStorage = {getItem() { return null; }, setItem() {}}; ctx.navigator = {clipboard: {}}; ctx.Node = function () {};
++ctx.TextEncoder = TextEncoder; ctx.TextDecoder = TextDecoder;
++ctx.AbortController = function () { this.signal = {}; this.abort = () => {}; };
++ctx.setTimeout = () => 0; ctx.clearTimeout = () => {}; ctx.setInterval = () => 0; ctx.clearInterval = () => {};
++ctx.addEventListener = (tipo, fn) => { if (tipo === 'load') cargas.push(fn); };
++ctx.fetch = async (url, opcoes = {}) => {
++  const metodo = String(opcoes.method || 'GET').toUpperCase();
++  chamadas.push({url, metodo, corpo: typeof opcoes.body === 'string' ? opcoes.body : null});
++  if (url === '/api/seth/conversas') return respostaJson(200, {schema_version: 1, state: 'ok', items: cen.conversas || []});
++  if (url.startsWith('/api/seth/conversa?id=')) return respostaJson(200, cen.conversa);
++  if (url === '/api/seth/conversa' && metodo === 'POST') {
++    const r = escolher(cen.salvar);
++    if (r && r.rede) throw new TypeError('Failed to fetch');
++    if (r && r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    return respostaJson(200, {schema_version: 1, id: '0123456789ab', titulo: '', mensagens: []});
++  }
++  if (url === '/api/seth/chat/stream') {
++    const r = escolher(cen.stream) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    return respostaStream('data: {"tipo": "texto", "delta": "resposta"}\n\ndata: {"tipo": "fim"}\n\n', r.cabecalhos || {});
++  }
++  if (url === '/api/seth/chat') {
++    const r = escolher(cen.chat) || {};
++    return respostaJson(200, {schema_version: 1, content: 'resposta', model: 'seth-livre'}, r.cabecalhos || {});
++  }
++  return respostaTexto(404, '');
++};
++function coletar(no, saida) {
++  if (!no || !no.children) return;
++  for (const c of no.children) {
++    if (typeof c.className === 'string' && (c.className.includes('seth-aviso') || c.className.includes('seth-vazio') || c.className.includes('msg-modelo'))) saida.push(c.textContent);
++    coletar(c, saida);
++  }
++}
++const esperar = async () => { for (let i = 0; i < 80; i++) await new Promise((r) => setImmediate(r)); };
++(async () => {
++  try {
++    vm.createContext(ctx);
++    vm.runInContext(fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8'), ctx, {filename: 'prototipo.js'});
++  } catch (e) { console.log(JSON.stringify({erro: 'carga: ' + e.message})); return; }
++  for (const f of cargas) { try { f(); } catch (e) { /* carga de outras seções: fora do teste */ } }
++  await esperar();
++  if (cen.abrir) { documento.getElementById('seth-conversas').children[0].children[0].ouvintes.click[0](); await esperar(); }
++  if (cen.renomear !== undefined) {
++    const linha = documento.getElementById('seth-conversas').children[0];
++    linha.children[1].children[0].ouvintes.click[0]();  // botão Renomear da conversa (sem abrir)
++    const campo = linha.children[0]; campo.value = cen.renomear;
++    campo.ouvintes.keydown[0]({key: 'Enter'}); await esperar();
++  }
++  if (cen.modelo) { const sel = documento.getElementById('seth-modelo'); sel.value = cen.modelo; sel.ouvintes.change[0]({target: sel}); }
++  for (const texto of cen.enviar || []) {
++    documento.getElementById('seth-input').value = texto;
++    documento.getElementById('seth-form').ouvintes.submit[0]({preventDefault() {}});
++    await esperar();
++  }
++  const transcricao = []; coletar(documento.getElementById('seth-transcript'), transcricao);
++  const salvar = documento.getElementById('seth-salvar-aviso');
++  console.log(JSON.stringify({chamadas, transcricao, salvarTexto: salvar.textContent, salvarOculto: salvar.hidden,
++                              status: documento.getElementById('seth-status').textContent}));
++})();
++"""
++
++
++def rodar_painel(cenario):
++    # O cenário vai por stdin: uma conversa grande não cabe numa variável de ambiente (limite do sistema).
++    ambiente = dict(os.environ, PAINEL_DIR=str(HERE))
++    resultado = subprocess.run(["node", "-e", NODE_PAINEL], input=json.dumps(cenario, ensure_ascii=False),
++                               capture_output=True, text=True, timeout=120, env=ambiente)
++    linhas = resultado.stdout.strip().splitlines()
++    if resultado.returncode != 0 or not linhas:
++        raise AssertionError("node não rodou (não medido): " + resultado.stderr[-400:])
++    medido = json.loads(linhas[-1])
++    if "erro" in medido:
++        raise AssertionError("prototipo.js não carregou: " + medido["erro"])
++    return medido
++
++
++def chamadas_para(medido, url, metodo="POST"):
++    return [c for c in medido["chamadas"] if c["url"] == url and c["metodo"] == metodo]
++
++
++def corpo_de(chamada):
++    return json.loads(chamada["corpo"])
++
++
++CONVERSA_ID = "0123456789ab"
++LISTA = [{"id": CONVERSA_ID, "titulo": "Antiga", "atualizada": "2026-11-09T10:00:00-03:00", "mensagens": 2}]
++
++
++def conversa(mensagens):
++    return {"schema_version": 1, "id": CONVERSA_ID, "titulo": "Antiga", "mensagens": mensagens}
+ 
+ INICIO_SECAO = '<div class="sub" id="sub-conversa"'
+ INICIO_BLOCO_JS = "/* (27/10/2026) Conversa com a Seth"
+@@ -43,6 +185,10 @@ class ConversaHtml(unittest.TestCase):
+     def test_secao_conversa_sem_atributo_on(self):
+         self.assertIsNone(re.search(r"\son[a-z]+\s*=", secao_conversa(), flags=re.IGNORECASE))
+ 
++    def test_seletor_de_modelo_na_secao_conversa(self):
++        self.assertIn('<select id="seth-modelo"', secao_conversa())
++        self.assertIn('<label for="seth-modelo">', secao_conversa())
++
+ 
+ class ConversaJs(unittest.TestCase):
+     def test_usa_rota_de_stream(self):
+@@ -51,10 +197,26 @@ class ConversaJs(unittest.TestCase):
+     def test_mantem_fallback_para_chat_inteiro(self):
+         self.assertIn('"/api/seth/chat"', JS)
+ 
+-    def test_envia_chave_mensagens_no_stream(self):
+-        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens\}\)'
++    def test_envia_chave_mensagens_e_modelo_no_stream(self):
++        # O corpo leva 'mensagens' e o 'modelo' escolhido (server.py, _seth_chat_stream).
++        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens,\s*modelo\}\)'
+         self.assertIsNotNone(re.search(padrao, bloco_conversa_js(), flags=re.DOTALL),
+-                             "o stream deve enviar o campo 'mensagens' (server.py, _seth_chat_stream)")
++                             "o stream deve enviar os campos 'mensagens' e 'modelo' (server.py, _seth_chat_stream)")
++
++    def test_fallback_tambem_envia_o_modelo(self):
++        self.assertIn("JSON.stringify({messages: mensagens, modelo})", bloco_conversa_js())
++
++    def test_seletor_busca_a_lista_no_servidor(self):
++        self.assertIn('"/api/seth/modelos"', bloco_conversa_js())
++
++    def test_seletor_usa_listener_no_js_e_nao_atributo_inline(self):
++        self.assertIn('byId("seth-modelo").addEventListener("change"', bloco_conversa_js())
++        self.assertIsNone(re.search(r"<select\b[^>]*\bon[a-z]+\s*=", HTML, flags=re.IGNORECASE))
++
++    def test_resposta_mostra_o_modelo_que_a_respondeu(self):
++        bloco = bloco_conversa_js()
++        self.assertIn('"msg-modelo"', bloco)
++        self.assertIn('"modelo: "', bloco)
+ 
+     def test_bloco_conversa_sem_innerhtml(self):
+         self.assertNotIn("innerHTML", bloco_conversa_js())
+@@ -79,6 +241,132 @@ class ConversaJs(unittest.TestCase):
+         self.assertIn('evento.tipo === "erro"', bloco)
+         self.assertIn("evento.motivo", bloco)
+ 
++    def test_aviso_de_conversa_nao_salva_existe_e_comeca_escondido(self):
++        tag = re.search(r'<p id="seth-salvar-aviso"[^>]*>', secao_conversa())
++        self.assertIsNotNone(tag, "falta o aviso de conversa não salva na seção Conversa")
++        self.assertIn("hidden", tag.group(0))
++        self.assertIn('role="status"', tag.group(0))
++
++
++class ConversaComportamento(unittest.TestCase):
++    """Fluxo real do prototipo.js (node + DOM mínimo + fetch roteirizado), sem rede."""
++
++    def test_mensagem_longa_antiga_e_cortada_na_janela_com_aviso(self):
++        antigas = [{"role": "user", "content": "x" * 4500}, {"role": "assistant", "content": "ok"}]
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": ["nova pergunta"]})
++        pedidos = chamadas_para(medido, "/api/seth/chat/stream")
++        self.assertEqual(len(pedidos), 1)
++        mensagens = corpo_de(pedidos[0])["mensagens"]
++        self.assertEqual(len(mensagens[0]["content"]), chat_stream.MAX_CARACTERES_MENSAGEM)
++        self.assertTrue(mensagens[0]["content"].endswith("[cortado pelo painel para caber no limite de 4000 caracteres]"))
++        self.assertEqual(mensagens[-1]["content"], "nova pergunta")
++        self.assertTrue(any("1 mensagem antiga longa foi cortada para 4000 caracteres" in t for t in medido["transcricao"]),
++                        medido["transcricao"])
++
++    def test_conversa_salva_continua_com_a_mensagem_inteira(self):
++        antigas = [{"role": "user", "content": "x" * 4500}, {"role": "assistant", "content": "ok"}]
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": ["nova pergunta"]})
++        salvos = chamadas_para(medido, "/api/seth/conversa")
++        self.assertTrue(salvos, "a conversa devia ser salva depois da resposta")
++        self.assertEqual(len(corpo_de(salvos[-1])["mensagens"][0]["content"]), 4500)
++
++    def test_janela_respeita_o_teto_de_bytes_do_pedido(self):
++        antigas = [{"role": "user" if i % 2 == 0 else "assistant", "content": "\n" * 4000} for i in range(19)]
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": ["oi"]})
++        pedido = chamadas_para(medido, "/api/seth/chat/stream")[0]
++        self.assertLessEqual(len(pedido["corpo"].encode("utf-8")), panel_limite_pedido())
++        self.assertEqual(corpo_de(pedido)["mensagens"][-1]["content"], "oi")
++        self.assertTrue(any("de fora" in t for t in medido["transcricao"]), medido["transcricao"])
++
++    def test_400_do_stream_mostra_o_motivo_real_e_nao_cai_em_falha_desconhecida(self):
++        medido = rodar_painel({"stream": {"status": 400, "texto": "mensagem 1 acima de 4000 caracteres"}, "enviar": ["oi"]})
++        self.assertIn("Não consegui responder agora: o painel recusou o pedido (mensagem 1 acima de 4000 caracteres).",
++                      medido["transcricao"])
++        self.assertFalse(any("falha desconhecida" in t for t in medido["transcricao"]))
++        self.assertEqual(chamadas_para(medido, "/api/seth/chat"), [], "erro 400 não repete a pergunta pelo fallback")
++
++    def test_conversa_acima_de_262144_bytes_nao_e_enviada_e_avisa_o_motivo(self):
++        grande = conversa([{"role": "user" if i % 2 == 0 else "assistant", "content": "y" * 65000} for i in range(5)])
++        medido = rodar_painel({"conversas": LISTA, "conversa": grande, "abrir": True, "enviar": ["oi"]})
++        self.assertEqual(chamadas_para(medido, "/api/seth/conversa"), [], "conversa acima do limite não devia ir ao servidor")
++        self.assertFalse(medido["salvarOculto"])
++        self.assertTrue(medido["salvarTexto"].startswith(
++            "Conversa não salva: a conversa passou de 262144 bytes (256 KB), o limite de cada gravação."), medido["salvarTexto"])
++        self.assertIn("O que está guardado é a última gravação feita", medido["salvarTexto"])
++        self.assertIn("comece uma conversa nova", medido["salvarTexto"])
++
++    def test_413_do_servidor_avisa_que_nao_salvou(self):
++        medido = rodar_painel({"salvar": {"status": 413, "texto": "conversa acima de 262144 bytes"}, "enviar": ["oi"]})
++        self.assertEqual(len(chamadas_para(medido, "/api/seth/conversa")), 1)
++        self.assertFalse(medido["salvarOculto"])
++        self.assertIn("Conversa não salva: a conversa passou de 262144 bytes", medido["salvarTexto"])
++        self.assertIn("Nada desta conversa está guardado ainda.", medido["salvarTexto"])
++
++    def test_400_do_servidor_mostra_o_motivo_da_conversa(self):
++        medido = rodar_painel({"salvar": {"status": 400, "texto": "mais de 200 mensagens"}, "enviar": ["oi"]})
++        self.assertIn("Conversa não salva: o painel recusou a conversa (mais de 200 mensagens).", medido["salvarTexto"])
++
++    def test_falha_de_rede_ao_salvar_avisa(self):
++        medido = rodar_painel({"salvar": {"rede": True}, "enviar": ["oi"]})
++        self.assertTrue(medido["salvarTexto"].startswith("Conversa não salva: sem resposta do painel."), medido["salvarTexto"])
++
++    def test_renomear_conversa_fechada_com_falha_avisa(self):
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]),
++                               "renomear": "Novo nome", "salvar": {"status": 413, "texto": "x"}})
++        self.assertEqual(len(chamadas_para(medido, "/api/seth/conversa")), 1, "renomear grava a conversa fechada")
++        self.assertFalse(medido["salvarOculto"])
++        self.assertIn('Não foi possível salvar o novo nome da conversa "Antiga": a conversa passou de 262144 bytes',
++                      medido["salvarTexto"])
++
++    def test_gravacao_que_volta_a_dar_certo_limpa_o_aviso(self):
++        medido = rodar_painel({"salvar": [{"status": 413, "texto": "x"}, {"status": 200}], "enviar": ["um", "dois"]})
++        self.assertTrue(medido["salvarOculto"])
++        self.assertEqual(medido["salvarTexto"], "")
++
++    # Modelo que respondeu: o real (cabeçalho X-Modelo-Real do gateway) ou, sem ele, o escolhido marcado "(escolhido)".
++
++    def test_modelo_real_do_cabecalho_aparece_na_resposta_e_vai_salvo(self):
++        medido = rodar_painel({"stream": {"cabecalhos": {"x-modelo-real": "openai/gpt-oss-120b"}}, "enviar": ["oi"]})
++        self.assertIn("modelo: openai/gpt-oss-120b", medido["transcricao"])
++        salvos = chamadas_para(medido, "/api/seth/conversa")
++        self.assertEqual(corpo_de(salvos[-1])["mensagens"][-1],
++                         {"role": "assistant", "content": "resposta", "modelo": "seth-livre", "modelo_real": "openai/gpt-oss-120b"})
++
++    def test_sem_cabecalho_mostra_o_escolhido_marcado_e_nao_grava_modelo_real(self):
++        medido = rodar_painel({"stream": {}, "modelo": "seth-public", "enviar": ["oi"]})
++        self.assertIn("modelo: seth-public (escolhido)", medido["transcricao"])
++        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/chat/stream")[0])["modelo"], "seth-public")
++        salvos = chamadas_para(medido, "/api/seth/conversa")
++        self.assertNotIn("modelo_real", corpo_de(salvos[-1])["mensagens"][-1])
++
++    def test_fallback_com_cabecalho_mostra_o_modelo_real(self):
++        medido = rodar_painel({"stream": {"status": 404}, "chat": {"cabecalhos": {"x-modelo-real": "openai/gpt-oss-120b"}},
++                               "enviar": ["oi"]})
++        self.assertEqual(len(chamadas_para(medido, "/api/seth/chat")), 1, "o 404 do stream cai no fallback")
++        self.assertIn("modelo: openai/gpt-oss-120b", medido["transcricao"])
++
++    def test_fallback_sem_cabecalho_mostra_o_escolhido_marcado(self):
++        medido = rodar_painel({"stream": {"status": 404}, "enviar": ["oi"]})
++        self.assertIn("modelo: seth-livre (escolhido)", medido["transcricao"])
++
++    def test_conversa_antiga_sem_modelo_real_mostra_o_escolhido(self):
++        antigas = [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "ok", "modelo": "seth-public"}]
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": []})
++        self.assertIn("modelo: seth-public (escolhido)", medido["transcricao"])
++
++
++def panel_limite_pedido() -> int:
++    return int(re.search(r"^CHAT_STREAM_LIMITE_BYTES = ([\d_]+)", SERVIDOR, flags=re.M).group(1).replace("_", ""))
++
++
++class LimitesDaUi(unittest.TestCase):
++    def test_constantes_da_ui_sao_as_do_servidor(self):
++        constantes = dict(re.findall(r"^const (SETH_[A-Z_]+) = ([\d_]+);", JS, flags=re.M))
++        self.assertEqual(int(constantes["SETH_MAX_MENSAGENS"]), chat_stream.MAX_MENSAGENS)
++        self.assertEqual(int(constantes["SETH_MAX_CARACTERES"]), chat_stream.MAX_CARACTERES_MENSAGEM)
++        self.assertEqual(int(constantes["SETH_LIMITE_PEDIDO_BYTES"]), panel_limite_pedido())
++        self.assertEqual(int(constantes["SETH_LIMITE_CONVERSA_BYTES"]), armazem.CONVERSA_LIMITE_BYTES)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 7c7da12b..291f2688 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -541,5 +541,78 @@ class HttpTests(unittest.TestCase):
+             self.assertIsNotNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65536}]}))
+             self.assertIsNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65537}]}))
+ 
++    # Persistência do modelo escolhido (armazem.py): a conversa guarda o modelo dela e o de cada resposta.
++
++    def test_conversa_grava_e_le_o_modelo_da_conversa_e_de_cada_resposta(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "2123456789ab"
++            salvo = panel._conversa_gravar({"id": conversa_id, "titulo": "Com modelo", "modelo": "seth-public",
++                                            "mensagens": [{"role": "user", "content": "oi"},
++                                                          {"role": "assistant", "content": "olá", "modelo": "seth-public"}]})
++            self.assertIsNotNone(salvo)
++            lida = panel._conversa_ler(conversa_id)
++            self.assertEqual(lida["modelo"], "seth-public")
++            self.assertEqual(lida["mensagens"][0], {"role": "user", "content": "oi"})
++            self.assertEqual(lida["mensagens"][1], {"role": "assistant", "content": "olá", "modelo": "seth-public"})
++            gravado = json.loads((Path(tmp) / (conversa_id + ".json")).read_text(encoding="utf-8"))
++            self.assertEqual(gravado["modelo"], "seth-public")
++
++    def test_conversa_sem_modelo_grava_e_le_seth_livre(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "3123456789ab"
++            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [{"role": "user", "content": "oi"}]})
++            self.assertEqual(salvo["modelo"], "seth-livre")
++            self.assertEqual(panel._conversa_ler(conversa_id)["modelo"], "seth-livre")
++
++    def test_gravacao_recusa_modelo_fora_da_lista_e_nao_escreve_arquivo(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            mensagens = [{"role": "user", "content": "oi"}]
++            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab", "modelo": "seth-zai", "mensagens": mensagens}))
++            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab",
++                                                      "mensagens": [{"role": "assistant", "content": "x", "modelo": "seth-auto"}]}))
++            self.assertIsNone(panel._conversa_gravar({"id": "4123456789ab", "modelo": ["seth-livre"], "mensagens": mensagens}))
++            self.assertEqual(list(Path(tmp).glob("*.json")), [])
++
++    def test_conversa_antiga_com_modelo_fora_da_lista_abre_com_o_padrao(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "5123456789ab"
++            antiga = {"titulo": "Antiga", "modelo": "seth-zai",
++                      "mensagens": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "x", "modelo": "seth-gemini"}]}
++            (Path(tmp) / (conversa_id + ".json")).write_text(json.dumps(antiga), encoding="utf-8")
++            lida = panel._conversa_ler(conversa_id)
++            self.assertIsNotNone(lida)
++            self.assertEqual(lida["modelo"], "seth-livre")
++            self.assertNotIn("modelo", lida["mensagens"][1])
++
++    def test_http_salva_e_devolve_o_modelo_e_recusa_o_que_esta_fora(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            headers = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
++            conversa_id = "6123456789ab"
++            boa = {"id": conversa_id, "titulo": "HTTP", "modelo": "seth-public",
++                   "mensagens": [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "ok", "modelo": "seth-public"}]}
++            self.assertEqual(self.request("POST", "/api/seth/conversa", json.dumps(boa).encode("utf-8"), headers)[0], 200)
++            dados = json.loads(self.request("GET", f"/api/seth/conversa?id={conversa_id}")[1])
++            self.assertEqual(dados["modelo"], "seth-public")
++            self.assertEqual(dados["mensagens"][1]["modelo"], "seth-public")
++            ruim = {**boa, "modelo": "seth-zai"}
++            self.assertEqual(self.request("POST", "/api/seth/conversa", json.dumps(ruim).encode("utf-8"), headers)[0], 400)
++            depois = json.loads(self.request("GET", f"/api/seth/conversa?id={conversa_id}")[1])
++            self.assertEqual(depois["modelo"], "seth-public")
++
++    def test_modelo_real_da_resposta_e_guardado_e_formato_ruim_e_descartado(self):
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
++            conversa_id = "7123456789ab"
++            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [
++                {"role": "user", "content": "oi", "modelo_real": "openai/gpt-oss-120b"},
++                {"role": "assistant", "content": "ola", "modelo": "seth-livre", "modelo_real": "openai/gpt-oss-120b"},
++                {"role": "assistant", "content": "tudo", "modelo": "seth-livre", "modelo_real": "lixo com espaço"}]})
++            self.assertIsNotNone(salvo, "modelo_real fora do formato descarta o campo; não recusa a conversa")
++            mensagens = panel._conversa_ler(conversa_id)["mensagens"]
++            self.assertEqual(mensagens[0], {"role": "user", "content": "oi"})
++            self.assertEqual(mensagens[1], {"role": "assistant", "content": "ola", "modelo": "seth-livre",
++                                            "modelo_real": "openai/gpt-oss-120b"})
++            self.assertEqual(mensagens[2], {"role": "assistant", "content": "tudo", "modelo": "seth-livre"})
++
++
+ if __name__ == "__main__":
+     unittest.main()

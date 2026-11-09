@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 09/11 (proposta chat lote 2)
+
+PR publicada sobre `origin/main`, com registro (979). A proposta `chat-lote2-09-11` junta falhas silenciosas do chat, seletor de modelo e exibição do modelo real. Não aplicada; a assinatura é do Humano. O gateway real com `X-Modelo-Real` não foi medido.
+
 ## Hoje, 09/11 (aplicação do painel unificado)
 
 **Aplicação local validada:** `painel-unificado-07-11`. Assinatura P-8 confirmada, diff aplicado em worktree própria e CI local `TUDO OK`. A aplicação segue para PR; o Humano decide se junta. Registro em MEMÓRIAS (973).
