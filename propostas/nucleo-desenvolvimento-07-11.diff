@@ -949,10 +949,10 @@ index 00000000..09a2efa5
 +    unittest.main()
 diff --git a/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py b/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py
 new file mode 100644
-index 00000000..250846b4
+index 00000000..03e3324a
 --- /dev/null
 +++ b/redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py
-@@ -0,0 +1,82 @@
+@@ -0,0 +1,155 @@
 +"""C11a e C11b (condicionais à decisão D2, aceita): o ponteiro PROCESSO no gateway.
 +
 +C11a: o ponteiro aparece numa conversa de faixa interna e não aparece na faixa pública.
@@ -986,18 +986,26 @@ index 00000000..250846b4
 +        except Exception as e:  # noqa: BLE001
 +            raise AssertionError(f"seth_gateway não importa: {e!r}")
 +
-+    def injetar(self, env_extra=None, remover=()):
-+        """Chama _injeta com estado fixo e sem cache real; devolve o texto da mensagem de sistema."""
++    def transformar(self, payload, env_extra=None, remover=(), *, estado="HEAD: teste (medido no teste)",
++                    modo="compacto", hidratacao=None):
++        """Chama _injeta com estado fixo e sem cache real."""
 +        g = self.g
 +        env = {k: v for k, v in os.environ.items() if k not in remover}
 +        if env_extra:
 +            env.update(env_extra)
 +        with mock.patch.dict(os.environ, env, clear=True), \
-+                mock.patch.object(g, "_estado", return_value="HEAD: teste (medido no teste)"), \
-+                mock.patch.object(g, "MODO", "compacto"), \
++                mock.patch.object(g, "_estado", return_value=estado), \
++                mock.patch.object(g, "MODO", modo), \
 +                mock.patch.object(g.auditoria_turno, "linha_estado", return_value=""), \
 +                mock.patch.object(self.cc, "resumo_hidratacao", return_value=""):
-+            out = g._injeta(json.loads(json.dumps(PAYLOAD)))
++            if hidratacao is None:
++                return g._injeta(json.loads(json.dumps(payload)))
++            with mock.patch.object(g, "_hidratacao", return_value=hidratacao):
++                return g._injeta(json.loads(json.dumps(payload)))
++
++    def injetar(self, env_extra=None, remover=()):
++        """Devolve o texto da primeira mensagem de sistema de um payload novo."""
++        out = self.transformar(PAYLOAD, env_extra=env_extra, remover=remover)
 +        return out["messages"][0]["content"]
 +
 +    def test_ponteiro_so_nas_faixas_internas(self):
@@ -1026,6 +1034,71 @@ index 00000000..250846b4
 +        self.assertEqual(self.g.MARCADOR, MARCADOR_BASE,
 +                         "o MARCADOR mudou: a linha PROCESSO não pode entrar em _DOUTRINA_FIXA")
 +        self.assertNotIn(PREFIXO, self.g._DOUTRINA_FIXA, "o ponteiro entrou na doutrina fixa")
++
++    def test_ponteiro_se_atualiza_em_conversa_ja_hidratada(self):
++        self.assertTrue(hasattr(self.g, "_LINHA_PROCESSO"),
++                        "seth_gateway não tem _LINHA_PROCESSO: o ponteiro PROCESSO ainda não foi implementado")
++        primeiro = self.transformar(PAYLOAD, remover=("SETH_PROCESSO_HIDRATA",))
++        segunda_desligada = self.transformar(
++            primeiro, env_extra={"SETH_PROCESSO_HIDRATA": "0"})
++        sistemas_off = [m.get("content", "") for m in segunda_desligada["messages"]
++                        if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_off), 0,
++                         "SETH_PROCESSO_HIDRATA=0 deixou o ponteiro antigo na conversa")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_off),
++                        "atualizar o estado apagou o MARCADOR da doutrina")
++        self.assertEqual(self.g.MARCADOR, MARCADOR_BASE,
++                         "o MARCADOR mudou: o ponteiro não pode entrar em _DOUTRINA_FIXA")
++
++        segunda_ligada = self.transformar(
++            primeiro, remover=("SETH_PROCESSO_HIDRATA",))
++        sistemas_on = [m.get("content", "") for m in segunda_ligada["messages"]
++                       if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_on), 1,
++                         "a conversa já hidratada duplicou a linha PROCESSO")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_on),
++                        "atualizar o estado apagou o MARCADOR da doutrina")
++
++    def test_estado_indisponivel_preserva_ponteiro_ligado_e_remove_desligado(self):
++        primeiro = self.transformar(PAYLOAD, remover=("SETH_PROCESSO_HIDRATA",))
++        ligado_sem_estado = self.transformar(
++            primeiro, remover=("SETH_PROCESSO_HIDRATA",), estado="")
++        sistemas_ligado = [m.get("content", "") for m in ligado_sem_estado["messages"]
++                           if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_ligado), 1,
++                         "falha de medição apagou o ponteiro ainda ligado")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_ligado))
++
++        desligado_sem_estado = self.transformar(
++            primeiro, env_extra={"SETH_PROCESSO_HIDRATA": "0"}, estado="")
++        sistemas_desligado = [m.get("content", "") for m in desligado_sem_estado["messages"]
++                              if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_desligado), 0,
++                         "a chave desligada preservou o ponteiro apesar da falha de medição")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_desligado))
++
++    def test_modo_full_injeta_e_atualiza_ponteiro_so_no_caminho_interno(self):
++        self.assertTrue(hasattr(self.g, "_LINHA_PROCESSO"))
++        primeiro = self.transformar(PAYLOAD, remover=("SETH_PROCESSO_HIDRATA",),
++                                    modo="full", hidratacao=f"{MARCADOR_BASE}\nCANON\n")
++        sistemas_primeiro = [m.get("content", "") for m in primeiro["messages"]
++                             if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_primeiro), 1,
++                         "modo full não injetou o ponteiro na conversa interna")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_primeiro))
++
++        desligado = self.transformar(primeiro, env_extra={"SETH_PROCESSO_HIDRATA": "0"},
++                                     modo="full", estado="HEAD: teste (medido no teste)")
++        sistemas_desligado = [m.get("content", "") for m in desligado["messages"]
++                              if isinstance(m, dict) and m.get("role") == "system"]
++        self.assertEqual(sum(texto.count(PREFIXO) for texto in sistemas_desligado), 0,
++                         "modo full não respeitou a troca da chave para desligado")
++        self.assertTrue(any(MARCADOR_BASE in texto for texto in sistemas_desligado))
++
++        with mock.patch.object(self.g, "MODO", "full"):
++            publica = self.g._preparar_payload_publico(json.loads(json.dumps(PAYLOAD)))
++        self.assertNotIn(PREFIXO, json.dumps(publica, ensure_ascii=False),
++                         "modo full expôs o ponteiro na faixa pública")
 +
 +    def test_linha_do_gateway_ate_200_caracteres(self):
 +        # D3 (aceita): a linha do gateway tem até 200 caracteres.
@@ -1112,7 +1185,7 @@ index 00000000..bcf24f7e
 +if __name__ == "__main__":
 +    unittest.main()
 diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
-index 56f98b5b..c5371ae8 100644
+index 56f98b5b..f3021157 100644
 --- a/redesign/router/seth_gateway.py
 +++ b/redesign/router/seth_gateway.py
 @@ -346,6 +346,19 @@ def _linha_propostas(pasta: Path | None = None) -> str:
@@ -1135,7 +1208,31 @@ index 56f98b5b..c5371ae8 100644
  def _hidratacao(extra: str = "") -> str:
      """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
      `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
-@@ -1159,6 +1172,10 @@ def _injeta(payload: dict) -> dict:
+@@ -385,6 +398,23 @@ def _bloco_estado_atual(extra: str = "") -> str:
+             f"o cabeçalho é escrito pela Máquina):**\n{corpo}\n")
+ 
+ 
++def _retirar_ponteiro_processo_antigo(msgs: list) -> list:
++    """Remove o PROCESSO anterior da mensagem hidratada antes de atualizar o estado.
++
++    O ponteiro é estado de turno, não doutrina. Ao refrescar uma conversa já
++    hidratada, ele precisa acompanhar SETH_PROCESSO_HIDRATA e não acumular.
++    """
++    saida = []
++    for msg in msgs:
++        if (isinstance(msg, dict) and msg.get("role") == "system"
++                and isinstance(msg.get("content"), str) and MARCADOR in msg["content"]):
++            conteudo = re.sub(r"(?m)^PROCESSO:[^\r\n]*(?:\r?\n|$)", "", msg["content"])
++            if conteudo != msg["content"]:
++                msg = {**msg, "content": conteudo}
++        saida.append(msg)
++    return saida
++
++
+ def _lembrar_modelo_real(nome: str) -> None:
+     """Grava o modelo real medido NESTA resposta (`X-Modelo-Real`), pro PRÓXIMO
+     turno poder citá-lo -- só se sabe o modelo depois da resposta terminar, daí
+@@ -1159,6 +1189,10 @@ def _injeta(payload: dict) -> dict:
          _cc = ""
      if _cc and os.environ.get("SETH_CACHE_CONSELHO_HIDRATA") != "0":
          auditoria = (auditoria + "\n" if auditoria else "") + _cc
@@ -1146,6 +1243,35 @@ index 56f98b5b..c5371ae8 100644
      # (05/11/2026, nova versão lote 4 item 3) evidência da Alexandria para a pergunta da vez, com as notas da
      # curadoria; DESLIGADA por padrão (SETH_ALEXANDRIA_HIDRATA=1 liga). Só no 1º passo da resposta (não em
      # continuação de ferramenta); sem índice ou com erro, segue sem o bloco.
+@@ -1185,15 +1219,26 @@ def _injeta(payload: dict) -> dict:
+         for m in msgs)
+     if ja_hidratado:
+         # não repete a doutrina, mas REFRESCA o estado (MEMÓRIAS (417)): tira o
+-        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora.
++        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora. O
++        # ponteiro PROCESSO também é estado de turno: remove a cópia anterior
++        # para respeitar SETH_PROCESSO_HIDRATA e evitar duplicação. Se a medição
++        # falhar, conserva o ponteiro anterior quando ainda estiver ligado.
+         msgs = [m for m in msgs if not (
+             isinstance(m, dict) and m.get("role") == "system"
+             and isinstance(m.get("content"), str) and MARCADOR_ESTADO in m["content"])]
+         bloco = _bloco_estado_atual(auditoria)
++        if not _proc or bloco:
++            msgs = _retirar_ponteiro_processo_antigo(msgs)
+         payload["messages"] = ([{"role": "system", "content": bloco}] + msgs
+                                if bloco else msgs)
+         return payload
+-    sys_msg = {"role": "system", "content": _hidratacao(auditoria)}
++    hidratacao = _hidratacao(auditoria)
++    # No modo full, _hidratacao usa o arquivo completo e não consome `extra`.
++    # Mantém o ponteiro como estado variável após o conteúdo hidratado, fora da
++    # doutrina fixa e só neste caminho interno.
++    if _proc and MODO != "compacto":
++        hidratacao = f"{hidratacao.rstrip()}\n{_proc}\n"
++    sys_msg = {"role": "system", "content": hidratacao}
+     # se o frontend já mandou um system próprio, o nosso entra ANTES dele
+     payload["messages"] = [sys_msg] + msgs
+     return payload
 diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
 index 11be07d3..e272363d 100755
 --- a/scripts/ci_sdd_local.sh

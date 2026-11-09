@@ -1,9 +1,9 @@
 # Proposta nucleo-desenvolvimento-07-11: núcleo de desenvolvimento (Ma'at, Ptah, Thoth)
 
 **Nome para assinatura:** `nucleo-desenvolvimento-07-11`
-**Base:** origin/main 83334fde. **Worktree:** `.claude/worktrees/nucleo-desenvolvimento-07-11` (branch `proposta/nucleo-desenvolvimento-07-11`).
-**Diff:** `propostas/nucleo-desenvolvimento-07-11.diff` (87181 bytes, 16 caminhos).
-**sha256 do diff:** `21fa9fbd6fa6bd7922af223ff527bf54d0e6cb26a63425039a380014ff59e707`
+**Base:** origin/main 619416ed. **Revisão da proposta:** Codex, 09/11/2026. O patch de aplicação foi conferido sobre esta base; a revisão trata da correção C11b e da atualização dos registros.
+**Diff:** `propostas/nucleo-desenvolvimento-07-11.diff` (tamanho atualizado no arquivo versionado, 16 caminhos).
+**sha256 do diff:** `1dbab5069ad21ef8a1ae838f7cfb9bc82d228e0260b150fb0f8b95247dd00d63`
 **Assinatura:** pendente do Humano, depois do merge do PR de proposta: `bash scripts/aprovar.sh nucleo-desenvolvimento-07-11`. Quem propõe não roda isso.
 
 ## Caminhos do diff
@@ -61,6 +61,8 @@ Pendência do C7: a lista de caminhos de memória restrita não é escrita no re
 
 ## CI local e gates
 - `PYTEST=/home/orusoua/.cache/uv/archive-v0/0obnOoJtclHllQl_/bin/pytest bash scripts/ci_sdd_local.sh`: "CI LOCAL: TUDO OK", 34 OK, 0 FALHA (saída em scratchpad).
+- Reexecutado em 09/11/2026 sobre a base atual `619416ed`, com o patch de aplicação aplicado: "CI LOCAL: TUDO OK", exit 0.
+- C11b, `test_ponteiro_gateway.py`: 6 testes passaram; inclui desligamento por `SETH_PROCESSO_HIDRATA=0` e atualização sem duplicar ponteiro em conversa hidratada.
 - `python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec`: SPEC GATES: OK.
 - `python3 redesign/sdd_flow/anchor.py . redesign/nucleo-desenvolvimento`: ANCHOR: OK.
 - Listas de pytest em `scripts/ci_sdd_local.sh` e `.github/workflows/sdd.yml`: iguais.
@@ -72,8 +74,7 @@ Pendência do C7: a lista de caminhos de memória restrita não é escrita no re
 - Verificador mecânico (`auditoria_turno.py --verificar`) sobre este registro: nada a apontar.
 
 ## Fora desta proposta
-- Entrada de registro em MEMÓRIAS.md (lição i e D7): pendente. Vai no PR de proposta, com número na junção. Não entrou no diff (canon).
-- ONDE_ESTAMOS.md: pendente (propostas/README.md, item 0).
+- Registros de proposta em MEMÓRIAS.md (974) e ONDE_ESTAMOS.md estão incluídos nesta PR. Nenhuma mudança funcional do diff foi aplicada ao código rastreado.
 - Revisão de agente pelo caminho oficial (passo 8 da spec, `redesign/review_mesh/mesh.py prepare` e `consolidate`): não feita. Exige revisor de outro modelo.
 - PR #944: não é pré-requisito (D8).
 - Artefatos do ciclo SDD gerados pelo CI local, fora do componente: `redesign/nova_versao/spec/criterion-drift.md` e `evidence.json` (modificados) e `redesign/sdd_flow/spec/criterion-drift.md` e `evidence.json` (não rastreados). Não entram no diff. Não foram restaurados nem removidos: a restauração depende de ordem do Humano.
