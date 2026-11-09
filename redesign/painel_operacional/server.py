@@ -38,7 +38,7 @@ import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
-    CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar,
+    CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar, _conversa_ler,
     _conversas_listar, _vault_caminho, _vault_item)
 BIND = "127.0.0.1"
 PORT = 20146
@@ -52,6 +52,10 @@ GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os
 CHAT_STREAM_LIMITE_BYTES = 131_072
 CHAT_STREAM_TIMEOUT_S = 120
 WIKI_RESULT_MAX = 12000
+# Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): leitura do cache, n de 1 a 200.
+MEMORIA_CONSELHO_PADRAO = 40
+MEMORIA_CONSELHO_MAX = 200
+MEMORIA_CONSELHO_RECUSADO = "[conteúdo recusado: contém segredo (régua do P-1)]"
 
 # Allowlist de unidades de usuário. A API não aceita nome de unidade do cliente.
 SERVICE_ALLOWLIST = (
@@ -100,28 +104,24 @@ _DETAILS_CACHE: dict | None = None
 _DETAILS_CACHE_AT: float | None = None
 
 _ASSETS = {
-    "/": ("index.html", "text/html; charset=utf-8"),
-    "/index.html": ("index.html", "text/html; charset=utf-8"),
-    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
-    "/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/prototipo": ("prototipo.html", "text/html; charset=utf-8"),
     "/prototipo.css": ("prototipo.css", "text/css; charset=utf-8"),
     "/prototipo.js": ("prototipo.js", "text/javascript; charset=utf-8"),
     "/abrir.js": ("abrir.js", "text/javascript; charset=utf-8"),
-    "/frentes": ("frentes.html", "text/html; charset=utf-8"),
-    "/frentes.js": ("frentes.js", "text/javascript; charset=utf-8"),
     "/nova_versao.js": ("nova_versao.js", "text/javascript; charset=utf-8"),
-    "/nova_versao.css": ("nova_versao.css", "text/css; charset=utf-8"),
-    "/operator_console": ("operator_console/index.html", "text/html; charset=utf-8"),
-    "/operator_console/": ("operator_console/index.html", "text/html; charset=utf-8"),
-    "/operator_console/index.html": ("operator_console/index.html", "text/html; charset=utf-8"),
-    "/operator_console/style.css": ("operator_console/style.css", "text/css; charset=utf-8"),
     "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
-    "/conselho-rede": ("conselho-rede/index.html", "text/html; charset=utf-8"),
-    "/conselho-rede/": ("conselho-rede/index.html", "text/html; charset=utf-8"),
-    "/conselho-rede/style.css": ("conselho-rede/style.css", "text/css; charset=utf-8"),
     "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
+}
+# Telas antigas (painel unificado, spec 07/11/2026): link antigo cai na seção certa do /prototipo.
+_REDIRECTS = {
+    "/": "/prototipo#panorama",
+    "/index.html": "/prototipo#panorama",
+    "/frentes": "/prototipo#panorama",
+    "/operator_console": "/prototipo#qualidade",
+    "/operator_console/": "/prototipo#qualidade",
+    "/conselho-rede": "/prototipo#conselho",
+    "/conselho-rede/": "/prototipo#conselho",
 }
 _STATUS_CACHE: dict | None = None
 _STATUS_CACHE_AT: float | None = None
@@ -162,6 +162,32 @@ def _relay_modules():
     import relay_council_contract
     import sanitizar
     return cache_conselho, relay_catalog, relay_council_contract, sanitizar
+
+
+def _memoria_conselho_modulo():
+    """Módulo do cache do Conselho, usado só para ler. A gravação fica com o CLI e com a Seth."""
+    path = str(ROOT / "redesign/router")
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    import cache_conselho
+    return cache_conselho
+
+
+def _memoria_entrada(cache, reg: dict) -> dict:
+    """Uma entrada para a tela. Aplica ao lido o mesmo filtro da gravação (cache_conselho.filtrar):
+    dado pessoal vira marca e texto com segredo não sai."""
+    def limpo(valor) -> str:
+        try:
+            return cache.filtrar(str(valor))
+        except ValueError:
+            return MEMORIA_CONSELHO_RECUSADO
+    ts = str(reg.get("ts", ""))
+    try:
+        data_hora = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S%z").strftime("%d/%m/%Y %H:%M")
+    except ValueError:
+        data_hora = limpo(ts)
+    return {"n": reg.get("n"), "data_hora": data_hora, "autor": limpo(reg.get("autor", "")),
+            "tipo": limpo(reg.get("tipo", "")), "texto": limpo(reg.get("texto", ""))}
 
 
 def _relay_rate_limited() -> bool:
@@ -1031,20 +1057,19 @@ class Handler(BaseHTTPRequestHandler):
         if (self.path.startswith("/api/") and self.path.split("?", 1)[0] not in ROTAS_DA_EXTENSAO
                 and not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin"))):
             return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
-        # Painel unificado (P9-A): as páginas antigas continuam no disco, mas a entrada agora é o protótipo.
-        if self.path == "/":
-            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo"),))
-        if self.path == "/conselho-rede":
-            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", "/prototipo#conselho"),))
+        # Painel unificado: as telas antigas redirecionam para a seção certa do /prototipo (tabela _REDIRECTS).
+        destino = _REDIRECTS.get(self.path)
+        if destino is not None:
+            return self._send(302, "text/plain; charset=utf-8", b"", (("Location", destino),))
         if self.path.startswith("/api/grafo"):
             return self._grafo()
         if self.path == "/api/seth/conversas":
             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
         if self.path.startswith("/api/seth/conversa?"):
-            arq = _conversa_caminho((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
-            if arq is None or not arq.is_file():
+            dados = _conversa_ler((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
+            if dados is None:
                 return self._send(404, "text/plain; charset=utf-8", b"conversa indisponivel")
-            return self._send(200, "application/json; charset=utf-8", arq.read_bytes())
+            return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
         if self.path.startswith("/api/vault/item"):
             q = parse_qs(urlparse(self.path).query)
             if q.get("caminho"):
@@ -1096,6 +1121,8 @@ class Handler(BaseHTTPRequestHandler):
                 pedidos = list(FOCOS_PENDENTES)
                 FOCOS_PENDENTES.clear()
             return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
+        if self.path.split("?", 1)[0] == "/api/conselho/memoria":
+            return self._conselho_memoria()
         if self.path == "/api/eventos":
             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
         if self.path == "/api/relay-council/catalog":
@@ -1530,6 +1557,24 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             _SEM_CONVERSA_EM_CURSO.release()
 
+
+    def _conselho_memoria(self) -> None:
+        """Memória compartilhada do Conselho, só leitura: as últimas n entradas, mais recentes primeiro.
+        A checagem de origem já rodou em do_GET. Não aceita caminho e não escreve no cache.
+        n é inteiro de 1 a 200: acima do limite corta; vazio, zero ou não numérico recusa com 400."""
+        bruto = (parse_qs(urlparse(self.path).query).get("n") or [str(MEMORIA_CONSELHO_PADRAO)])[0]
+        if not re.fullmatch(r"[0-9]{1,4}", bruto) or int(bruto) < 1:
+            return self._send(400, "text/plain; charset=utf-8", b"n invalido")
+        n = min(int(bruto), MEMORIA_CONSELHO_MAX)
+        observed_at, fresh_until = _reading_window()
+        try:
+            cache = _memoria_conselho_modulo()
+            entradas = [_memoria_entrada(cache, reg) for reg in reversed(cache.ler(n))]
+        except (OSError, ValueError, ImportError):
+            return self._send(500, "text/plain; charset=utf-8", b"memoria indisponivel")
+        dados = {"estado": "ok" if entradas else "vazio", "n": n, "entradas": entradas,
+                 "observed_at": observed_at, "fresh_until": fresh_until}
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
 
     def _grafo(self) -> None:
         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
