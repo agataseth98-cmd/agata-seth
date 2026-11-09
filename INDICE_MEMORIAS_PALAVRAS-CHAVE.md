@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
+  palavras-chave: proposta, chat, lote, publicada, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, temporária
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
   palavras-chave: lote, chat, aplicado, falhas, silenciosas, seletor, modelo, real
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: voz, librechat, transcreve, novo, conversa, sentidos, ouvido, aceita, corpo, chunked, envia, content, length, idioma, stt, passa, código, válido, proposta
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, lote 7, complemento): o modelo NVIDIA que respondeu na conta entra na avaliação por passagem pelo OmniRoute.** Proposta `nvidia-gemma-20261105`.
   palavras-chave: nvidia, gemma, lista, gratuitos, nova, versão, lote, complemento, modelo, respondeu, conta, entra, avaliação, passagem, omniroute, proposta
-(952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova versão, lote 7, complemento): origem anônima, usada só com dados redigidos e um modelo de contingência nomeado.** Proposta `crouton-condicoes-20261105`.
-  palavras-chave: stealth, crouton, alpha, liberado, sob, condições, nova, versão, lote, complemento, origem, anônima, usada, dados, redigidos, modelo, contingência, nomeado, proposta, condicoes
+(952) DIÁRIO — 05/11/2026 · **Stealth/crouton-alpha liberado sob condições (nova …
+  palavras-chave: stealth, crouton, alpha, liberado, sob, condições, nova
 (951) DIÁRIO — 05/11/2026 · **Rodada que bate no prazo vira "incompleta", não "c …
   palavras-chave: rodada, bate, prazo, vira, incompleta
 (950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada …
