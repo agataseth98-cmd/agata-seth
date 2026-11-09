@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
+  palavras-chave: proposta, chat, protege, conversas, publicada, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
   palavras-chave: lote, chat, aplicado, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, conversa, temporária
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: notificação, componente, ligar, desligar, agata, serviço, avisa, estado, desktop, atalhos, parar, proposta, notificacoes
 (956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxico, semântica e externa ficam disponíveis, e o modo auto escolhe caso a caso, registrando o motivo de cada etapa.** Proposta `alexandria-hierarquia-20261106`.
   palavras-chave: hierarquia, buscas, alexandria, lote, léxico, semântica, externa, ficam, disponíveis, modo, auto, escolhe, caso, registrando, motivo, etapa, proposta
-(955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a usar as fontes da própria tarefa: a piora de −0,5 a −0,8 era um erro de medição, não um efeito do modelo (avaliação, lote 8).** Proposta `avaliacao-externa-20261105`.
-  palavras-chave: condição, busca, externa, avaliação, passa, usar, fontes, própria, tarefa, piora, era, erro, medição, efeito, modelo, lote, proposta, avaliacao
+(955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a u …
+  palavras-chave: condição, busca, externa, avaliação, passa
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por …
   palavras-chave: voz, librechat, transcreve, novo, conversa
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, l …
