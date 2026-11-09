@@ -1,0 +1,2192 @@
+diff --git a/redesign/painel_operacional/armazem.py b/redesign/painel_operacional/armazem.py
+index 6a3cf42a..3fee5e50 100644
+--- a/redesign/painel_operacional/armazem.py
++++ b/redesign/painel_operacional/armazem.py
+@@ -1,12 +1,17 @@
+ """Armazém local do painel: itens do vault (só leitura, lista fechada) e conversas salvas.
+ 
+ Saiu de server.py em 03/11/2026 sem mudar comportamento; o servidor importa estes nomes.
++Lote 3 (09/11/2026): organização das conversas (fixar, arquivar, marcadores, pastas) em `organizacao.json`
++dentro de CONVERSAS_DIR, busca por texto, exportação JSON/Markdown e importação de JSON exportado.
++Tudo local, em ~/.cache/agata/painel-conversas. Conversa antiga (sem organização) abre com os valores padrão.
+ """
+ from __future__ import annotations
+ 
+ import json
+ import os
+ import re
++import threading
++import unicodedata
+ from datetime import datetime
+ from pathlib import Path
+ from zoneinfo import ZoneInfo
+@@ -74,6 +79,31 @@ CONVERSAS_DIR = Path.home() / ".cache/agata/painel-conversas"
+ CONVERSA_ID = re.compile(r"[0-9a-f]{12}")
+ CONVERSA_LIMITE_BYTES = 262144
+ CONVERSA_MENSAGEM_LIMITE = 65536
++# Lote 3 (09/11/2026). O nome do arquivo de organização não casa com CONVERSA_ID: a lista de conversas o ignora.
++ORGANIZACAO_ARQUIVO = "organizacao.json"
++IMPORTACAO_LIMITE_BYTES = CONVERSA_LIMITE_BYTES + 1024  # conversa de até 262144 bytes mais o cabeçalho do arquivo exportado
++CONVERSAS_LISTA_LIMITE = 200
++PASTAS_LIMITE = 50
++PASTA_NOME_LIMITE = 60
++MARCADORES_LIMITE = 10
++MARCADOR_LIMITE = 24
++BUSCA_TERMO_LIMITE = 120
++BUSCA_RESULTADOS_LIMITE = 50
++BUSCA_CONTEXTO = 60
++FORMATOS_EXPORTACAO = ("json", "md")
++FORMATO_EXPORTACAO = "agata-conversa"
++VERSAO_EXPORTACAO = 1
++CAMPOS_ORGANIZAR = ("fixada", "arquivada", "marcadores", "pasta")
++_ORGANIZACAO_TRAVA = threading.Lock()
++
++
++class ErroConversa(Exception):
++    """Recusa de uma operação de conversa: status HTTP e motivo curto em português, sem o conteúdo da conversa."""
++
++    def __init__(self, status: int, motivo: str):
++        super().__init__(motivo)
++        self.status = status
++        self.motivo = motivo
+ 
+ 
+ def _conversa_caminho(conversa_id: str) -> Path | None:
+@@ -82,20 +112,250 @@ def _conversa_caminho(conversa_id: str) -> Path | None:
+     return CONVERSAS_DIR / (conversa_id + ".json")
+ 
+ 
++def _conversa_arquivos() -> list[Path]:
++    """Arquivos de conversa válidos (nome de 12 hex). Organização, temporários e lixo ficam de fora."""
++    if not CONVERSAS_DIR.is_dir():
++        return []
++    return [a for a in CONVERSAS_DIR.glob("*.json") if CONVERSA_ID.fullmatch(a.stem) and a.is_file()]
++
++
++def _conversa_ids() -> set[str]:
++    return {a.stem for a in _conversa_arquivos()}
++
++
++def _atualizada(arq: Path) -> str:
++    return datetime.fromtimestamp(arq.stat().st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds")
++
++
++def _entrada_padrao() -> dict:
++    return {"fixada": False, "arquivada": False, "marcadores": [], "pasta": None, "origem_id": None}
++
++
++# Organização: pastas e uma entrada por conversa, em organizacao.json (escrito inteiro, por troca atômica).
++
++def _organizacao_caminho() -> Path:
++    return CONVERSAS_DIR / ORGANIZACAO_ARQUIVO
++
++
++def _marcador_ok(marcador: str) -> bool:
++    return 0 < len(marcador) <= MARCADOR_LIMITE and all(c.isalnum() or c in " -" for c in marcador)
++
++
++def _organizacao_ler() -> tuple[dict, bool]:
++    """(organização, legível). Arquivo ausente vale vazio. Arquivo ilegível devolve legível=False: quem escreve
++    recusa, para não sobrescrever o que não se conseguiu ler. Entradas malformadas são ignoradas."""
++    vazia = {"pastas": [], "conversas": {}}
++    arq = _organizacao_caminho()
++    if not arq.is_file():
++        return vazia, True
++    try:
++        dados = json.loads(arq.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return vazia, False
++    if not isinstance(dados, dict):
++        return vazia, False
++    pastas = []
++    for p in dados["pastas"] if isinstance(dados.get("pastas"), list) else []:
++        if not isinstance(p, dict) or not isinstance(p.get("id"), str) or not CONVERSA_ID.fullmatch(p["id"]):
++            continue
++        nome = " ".join(p["nome"].split()) if isinstance(p.get("nome"), str) else ""
++        if 0 < len(nome) <= PASTA_NOME_LIMITE and p["id"] not in {x["id"] for x in pastas}:
++            pastas.append({"id": p["id"], "nome": nome})
++    ids_pastas = {p["id"] for p in pastas}
++    conversas = {}
++    entradas = dados["conversas"] if isinstance(dados.get("conversas"), dict) else {}
++    for cid, e in entradas.items():
++        if not CONVERSA_ID.fullmatch(cid) or not isinstance(e, dict):
++            continue
++        bruto = e.get("marcadores") if isinstance(e.get("marcadores"), list) else []
++        marcadores = []
++        for m in bruto:
++            if isinstance(m, str) and _marcador_ok(m) and m not in marcadores:
++                marcadores.append(m)
++        pasta = e.get("pasta")
++        origem = e.get("origem_id")
++        conversas[cid] = {
++            "fixada": e.get("fixada") is True,
++            "arquivada": e.get("arquivada") is True,
++            "marcadores": marcadores[:MARCADORES_LIMITE],
++            "pasta": pasta if isinstance(pasta, str) and pasta in ids_pastas else None,
++            "origem_id": origem if isinstance(origem, str) and CONVERSA_ID.fullmatch(origem) else None,
++        }
++    return {"pastas": pastas, "conversas": conversas}, True
++
++
++def _organizacao_gravar(org: dict) -> None:
++    CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
++    arq = _organizacao_caminho()
++    tmp = arq.with_suffix(".tmp")
++    tmp.write_text(json.dumps({"schema_version": 1, **org}, ensure_ascii=False), encoding="utf-8")
++    os.replace(tmp, arq)
++
++
++def _organizacao_mudar(alterar):
++    """Lê, altera e grava a organização sob trava. `alterar(org)` muda o dicionário e devolve o resultado.
++    Se `alterar` recusar (ErroConversa), nada é gravado. Arquivo ilegível recusa com 409."""
++    with _ORGANIZACAO_TRAVA:
++        org, legivel = _organizacao_ler()
++        if not legivel:
++            raise ErroConversa(409, "organização das conversas ilegível; nada foi alterado")
++        resultado = alterar(org)
++        _organizacao_gravar(org)
++        return resultado
++
++
++def _marcadores_novos(valor) -> list[str]:
++    """Marcadores pedidos pelo painel: texto curto, sem repetir, até MARCADORES_LIMITE. Recusa o resto com motivo."""
++    if not isinstance(valor, list):
++        raise ErroConversa(400, "marcadores precisa ser uma lista")
++    saida = []
++    for item in valor:
++        if not isinstance(item, str):
++            raise ErroConversa(400, "cada marcador precisa ser texto")
++        marcador = " ".join(item.split()).lower()
++        if not marcador:
++            raise ErroConversa(400, "marcador vazio")
++        if len(marcador) > MARCADOR_LIMITE:
++            raise ErroConversa(400, f"marcador passa de {MARCADOR_LIMITE} caracteres")
++        if not _marcador_ok(marcador):
++            raise ErroConversa(400, "marcador só pode ter letras, números, espaço e hífen")
++        if marcador not in saida:
++            saida.append(marcador)
++    if len(saida) > MARCADORES_LIMITE:
++        raise ErroConversa(400, f"a conversa aceita até {MARCADORES_LIMITE} marcadores")
++    return saida
++
++
++def _conversa_organizar(conversa_id, campos) -> dict:
++    """Fixar, arquivar, marcadores e pasta de uma conversa salva. Não mexe no conteúdo nem na data da conversa."""
++    arq = _conversa_caminho(conversa_id)
++    if arq is None or not arq.is_file():
++        raise ErroConversa(404, "conversa não encontrada")
++    if not isinstance(campos, dict) or not campos:
++        raise ErroConversa(400, "nada para mudar")
++    for nome in campos:
++        if nome not in CAMPOS_ORGANIZAR:
++            raise ErroConversa(400, f"campo desconhecido: {nome}")
++    for nome in ("fixada", "arquivada"):
++        if nome in campos and not isinstance(campos[nome], bool):
++            raise ErroConversa(400, f"{nome} precisa ser sim ou não")
++    if "pasta" in campos and campos["pasta"] is not None and not isinstance(campos["pasta"], str):
++        raise ErroConversa(400, "pasta precisa ser um identificador ou vazio")
++    marcadores = _marcadores_novos(campos["marcadores"]) if "marcadores" in campos else None
++
++    def alterar(org):
++        if campos.get("pasta") is not None and campos.get("pasta") not in {p["id"] for p in org["pastas"]}:
++            raise ErroConversa(400, "a pasta não existe")
++        atual = {**_entrada_padrao(), **org["conversas"].get(conversa_id, {})}
++        for nome in ("fixada", "arquivada", "pasta"):
++            if nome in campos:
++                atual[nome] = campos[nome]
++        if marcadores is not None:
++            atual["marcadores"] = marcadores
++        if atual == _entrada_padrao():
++            org["conversas"].pop(conversa_id, None)
++        else:
++            org["conversas"][conversa_id] = atual
++        return {"id": conversa_id, "fixada": atual["fixada"], "arquivada": atual["arquivada"],
++                "marcadores": list(atual["marcadores"]), "pasta": atual["pasta"]}
++    return _organizacao_mudar(alterar)
++
++
++def _nome_pasta_pedido(nome) -> str:
++    if not isinstance(nome, str):
++        raise ErroConversa(400, "nome da pasta precisa ser texto")
++    limpo = " ".join(nome.split())
++    if not limpo:
++        raise ErroConversa(400, "nome da pasta vazio")
++    if len(limpo) > PASTA_NOME_LIMITE:
++        raise ErroConversa(400, f"nome da pasta passa de {PASTA_NOME_LIMITE} caracteres")
++    return limpo
++
++
++def _pasta_mudar(acao, pasta_id=None, nome=None) -> dict:
++    """Pastas (projetos): criar, renomear e apagar. Apagar pasta não apaga conversa: as conversas dela ficam sem pasta."""
++    if acao not in ("criar", "renomear", "apagar"):
++        raise ErroConversa(400, "ação de pasta desconhecida")
++    if acao != "criar" and (not isinstance(pasta_id, str) or not CONVERSA_ID.fullmatch(pasta_id)):
++        raise ErroConversa(400, "pasta inválida")
++    nome_limpo = _nome_pasta_pedido(nome) if acao in ("criar", "renomear") else None
++
++    def repetido(pastas, ignorar):
++        return any(p["nome"].casefold() == nome_limpo.casefold() and p["id"] != ignorar for p in pastas)
++
++    def alterar(org):
++        pastas = org["pastas"]
++        if acao == "criar":
++            if len(pastas) >= PASTAS_LIMITE:
++                raise ErroConversa(400, f"limite de {PASTAS_LIMITE} pastas; apague alguma antes")
++            if repetido(pastas, None):
++                raise ErroConversa(400, "já existe pasta com esse nome")
++            ids = {p["id"] for p in pastas}
++            novo = os.urandom(6).hex()
++            while novo in ids:
++                novo = os.urandom(6).hex()
++            pastas.append({"id": novo, "nome": nome_limpo})
++            return {"id": novo, "nome": nome_limpo}
++        alvo = next((p for p in pastas if p["id"] == pasta_id), None)
++        if alvo is None:
++            raise ErroConversa(404, "pasta não encontrada")
++        if acao == "renomear":
++            if repetido(pastas, pasta_id):
++                raise ErroConversa(400, "já existe pasta com esse nome")
++            alvo["nome"] = nome_limpo
++            return {"id": pasta_id, "nome": nome_limpo}
++        org["pastas"] = [p for p in pastas if p["id"] != pasta_id]
++        soltas = 0
++        for entrada in org["conversas"].values():
++            if entrada.get("pasta") == pasta_id:
++                entrada["pasta"] = None
++                soltas += 1
++        return {"apagada": True, "conversas_soltas": soltas}
++    return _organizacao_mudar(alterar)
++
++
+ def _conversas_listar() -> dict:
++    org, legivel = _organizacao_ler()
++    arquivos = sorted(_conversa_arquivos(), key=lambda a: a.stat().st_mtime, reverse=True)
+     itens = []
+-    if CONVERSAS_DIR.is_dir():
+-        for arq in sorted(CONVERSAS_DIR.glob("*.json"), key=lambda a: a.stat().st_mtime, reverse=True)[:200]:
+-            if not CONVERSA_ID.fullmatch(arq.stem):
+-                continue
+-            try:
+-                dados = json.loads(arq.read_text(encoding="utf-8"))
+-            except (OSError, ValueError):
+-                continue
+-            itens.append({"id": arq.stem, "titulo": dados.get("titulo", "Sem título"),
+-                          "atualizada": datetime.fromtimestamp(arq.stat().st_mtime, ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds"),
+-                          "mensagens": len(dados.get("mensagens", []))})
+-    return {"schema_version": 1, "state": "ok", "items": itens}
++    for arq in arquivos[:CONVERSAS_LISTA_LIMITE]:
++        try:
++            dados = json.loads(arq.read_text(encoding="utf-8"))
++        except (OSError, ValueError):
++            continue
++        if not isinstance(dados, dict):
++            continue
++        meta = {**_entrada_padrao(), **org["conversas"].get(arq.stem, {})}
++        mensagens = dados.get("mensagens")
++        itens.append({"id": arq.stem, "titulo": dados.get("titulo") or "Sem título", "atualizada": _atualizada(arq),
++                      "mensagens": len(mensagens) if isinstance(mensagens, list) else 0,
++                      "fixada": meta["fixada"], "arquivada": meta["arquivada"],
++                      "marcadores": list(meta["marcadores"]), "pasta": meta["pasta"]})
++    itens.sort(key=lambda c: not c["fixada"])  # estável: dentro de cada grupo, a mais recente primeiro
++    pastas = [{"id": p["id"], "nome": p["nome"], "conversas": sum(1 for c in itens if c["pasta"] == p["id"])}
++              for p in org["pastas"]]
++    marcadores = sorted({m for c in itens for m in c["marcadores"]})
++    return {"schema_version": 1, "state": "ok", "items": itens, "total": len(arquivos), "pastas": pastas,
++            "marcadores": marcadores, "organizacao": "ok" if legivel else "ilegivel"}
++
++
++def motivo_conversa_recusada(dados) -> str:
++    """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
++    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
++    if isinstance(mensagens, list) and len(mensagens) > 200:
++        return "mais de 200 mensagens"
++    if isinstance(mensagens, list) and any(
++            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > CONVERSA_MENSAGEM_LIMITE
++            for m in mensagens):
++        return f"uma mensagem passa de {CONVERSA_MENSAGEM_LIMITE} caracteres"
++    modelo = dados.get("modelo") if isinstance(dados, dict) else None
++    if (modelo is not None and not modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
++            isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
++            and not modelo_permitido(m.get("modelo")) for m in mensagens)):
++        return "modelo fora da lista"
++    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
++        return "identificador da conversa inválido"
++    return "formato da conversa inválido"
+ 
+ 
+ def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
+@@ -172,4 +432,164 @@ def _conversa_apagar(conversa_id: str) -> bool:
+     if arq is None or not arq.is_file():
+         return False
+     arq.unlink()
++    with _ORGANIZACAO_TRAVA:
++        org, legivel = _organizacao_ler()
++        if legivel and conversa_id in org["conversas"]:
++            del org["conversas"][conversa_id]
++            _organizacao_gravar(org)
+     return True
++
++
++# Busca: texto em títulos e mensagens das conversas salvas. Ignora caixa e acento; posição preservada.
++
++def _dobrar(texto: str) -> str:
++    """Minúsculas e sem acento, letra a letra: cada caractere vira exatamente um, então a posição no texto original vale."""
++    saida = []
++    for c in texto:
++        base = "".join(d for d in unicodedata.normalize("NFD", c) if not unicodedata.combining(d)) or c
++        minusc = base.lower()
++        if len(minusc) != 1:
++            minusc = c.lower() if len(c.lower()) == 1 else c
++        saida.append(minusc)
++    return "".join(saida)
++
++
++def _posicoes(texto: str, alvo: str) -> list[int]:
++    saida, i = [], texto.find(alvo)
++    while i >= 0:
++        saida.append(i)
++        i = texto.find(alvo, i + len(alvo))
++    return saida
++
++
++def _trecho(texto: str, inicio: int, tamanho: int) -> str:
++    a = max(0, inicio - BUSCA_CONTEXTO)
++    b = min(len(texto), inicio + tamanho + BUSCA_CONTEXTO)
++    corte = " ".join(texto[a:b].split())
++    return ("…" if a > 0 else "") + corte + ("…" if b < len(texto) else "")
++
++
++def _conversas_buscar(termo) -> dict:
++    limpo = " ".join(termo.split()) if isinstance(termo, str) else ""
++    if not limpo:
++        raise ErroConversa(400, "digite o que procurar")
++    if len(limpo) > BUSCA_TERMO_LIMITE:
++        raise ErroConversa(400, f"a busca aceita até {BUSCA_TERMO_LIMITE} caracteres")
++    alvo = _dobrar(limpo)
++    org, _ = _organizacao_ler()
++    achados = []
++    for arq in sorted(_conversa_arquivos(), key=lambda a: a.stat().st_mtime, reverse=True):
++        try:
++            dados = json.loads(arq.read_text(encoding="utf-8"))
++        except (OSError, ValueError):
++            continue
++        if not isinstance(dados, dict):
++            continue
++        titulo = str(dados.get("titulo") or "Sem título")
++        mensagens = dados.get("mensagens") if isinstance(dados.get("mensagens"), list) else []
++        pos_titulo = _posicoes(_dobrar(titulo), alvo)
++        ocorrencias = len(pos_titulo)
++        primeira = None  # (índice da mensagem, texto, posição)
++        for i, m in enumerate(mensagens):
++            if not isinstance(m, dict) or not isinstance(m.get("content"), str):
++                continue
++            pos = _posicoes(_dobrar(m["content"]), alvo)
++            ocorrencias += len(pos)
++            if pos and primeira is None:
++                primeira = (i, m["content"], pos[0])
++        if primeira is not None:
++            indice, texto, posicao = primeira
++            campo, mensagem, trecho = "mensagem", indice, _trecho(texto, posicao, len(alvo))
++        elif pos_titulo:
++            campo, mensagem, trecho = "titulo", None, _trecho(titulo, pos_titulo[0], len(alvo))
++        else:
++            continue
++        achados.append({"id": arq.stem, "titulo": titulo, "atualizada": _atualizada(arq),
++                        "arquivada": (org["conversas"].get(arq.stem) or {}).get("arquivada") is True,
++                        "ocorrencias": ocorrencias, "campo": campo, "mensagem": mensagem, "trecho": trecho})
++    return {"schema_version": 1, "state": "ok", "termo": limpo, "total": len(achados),
++            "resultados": achados[:BUSCA_RESULTADOS_LIMITE]}
++
++
++# Exportação (download pelo navegador) e importação de JSON exportado.
++
++def _markdown(dados: dict, agora: datetime) -> str:
++    titulo = " ".join(dados["titulo"].split()) or "Sem título"
++    linhas = [f"# {titulo}", "", f"Modelo escolhido: {dados['modelo']}. Exportada em {agora.strftime('%d/%m/%Y %H:%M')}.", ""]
++    for m in dados["mensagens"]:
++        if m["role"] == "user":
++            cabeca = "## Você"
++        else:
++            if m.get("modelo_real"):
++                detalhe = "modelo: " + m["modelo_real"]
++            elif m.get("modelo"):
++                detalhe = "modelo escolhido: " + m["modelo"]
++            else:
++                detalhe = "modelo não registrado"
++            cabeca = f"## Seth ({detalhe})"
++        linhas += [cabeca, "", m["content"], ""]
++    return "\n".join(linhas)
++
++
++def _conversa_exportar(conversa_id, formato) -> tuple[bytes, str, str]:
++    """(corpo, nome do arquivo, tipo). O nome usa só o id (12 hex): nenhum texto do usuário vai ao cabeçalho."""
++    if formato not in FORMATOS_EXPORTACAO:
++        raise ErroConversa(400, "formato de exportação desconhecido (use json ou md)")
++    dados = _conversa_ler(conversa_id)
++    if dados is None:
++        raise ErroConversa(404, "conversa não encontrada")
++    org, _ = _organizacao_ler()
++    origem = (org["conversas"].get(conversa_id) or {}).get("origem_id") or conversa_id
++    agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
++    if formato == "md":
++        return _markdown(dados, agora).encode("utf-8"), f"agata-conversa-{conversa_id}.md", "text/markdown; charset=utf-8"
++    payload = {"formato": FORMATO_EXPORTACAO, "versao": VERSAO_EXPORTACAO, "id": conversa_id, "origem_id": origem,
++               "titulo": dados["titulo"], "modelo": dados["modelo"], "mensagens": dados["mensagens"],
++               "exportada_em": agora.isoformat(timespec="seconds")}
++    corpo = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
++    return corpo, f"agata-conversa-{conversa_id}.json", "application/json; charset=utf-8"
++
++
++def _id_livre() -> str:
++    novo = os.urandom(6).hex()
++    while (CONVERSAS_DIR / (novo + ".json")).exists():
++        novo = os.urandom(6).hex()
++    return novo
++
++
++def _conversa_importar(dados) -> dict:
++    """Importa um JSON exportado pelo painel. Reconhece a conversa pelo `id` e pelo `origem_id` do arquivo: se já
++    existe aqui (como id ou como origem de outra conversa), não grava nada e devolve `ja_existe`."""
++    if not isinstance(dados, dict) or dados.get("formato") != FORMATO_EXPORTACAO \
++            or type(dados.get("versao")) is not int or dados.get("versao") != VERSAO_EXPORTACAO:
++        raise ErroConversa(400, "o arquivo não é uma conversa exportada pelo painel (formato ou versão)")
++    ids = []
++    for campo in ("id", "origem_id"):
++        if campo in dados:
++            if not isinstance(dados[campo], str) or not CONVERSA_ID.fullmatch(dados[campo]):
++                raise ErroConversa(400, "identificador da conversa inválido")
++            ids.append(dados[campo])
++    if not ids:
++        raise ErroConversa(400, "arquivo sem identificador da conversa")
++    limpo = _conversa_validar(dados)
++    if limpo is None:
++        raise ErroConversa(400, motivo_conversa_recusada(dados))
++    origem = dados["origem_id"] if "origem_id" in dados else dados["id"]
++
++    def alterar(org):
++        locais = _conversa_ids()
++        origens = {e["origem_id"]: cid for cid, e in org["conversas"].items() if e.get("origem_id")}
++        for chave in ids:
++            if chave in locais:
++                return {"estado": "ja_existe", "id": chave, "titulo": limpo["titulo"]}
++            if chave in origens:
++                return {"estado": "ja_existe", "id": origens[chave], "titulo": limpo["titulo"]}
++        novo = _id_livre()
++        CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
++        arq = CONVERSAS_DIR / (novo + ".json")
++        tmp = arq.with_suffix(".tmp")
++        tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
++        os.replace(tmp, arq)
++        org["conversas"][novo] = {**_entrada_padrao(), "origem_id": origem}
++        return {"estado": "importada", "id": novo, "titulo": limpo["titulo"]}
++    return _organizacao_mudar(alterar)
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 7fb69b88..4b9df320 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -1173,6 +1173,47 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ 
+ @media (max-width:760px){.seth-layout{grid-template-columns:1fr}.seth-conversas{max-height:22vh}}
+ 
++/* Lote 3 (09/11/2026): busca, fixadas, arquivadas, pastas, marcadores, conversa temporária e importação. Cores só por token. */
++.seth-busca-bloco{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
++.seth-busca-bloco input,.seth-filtros select,.seth-pasta-form input,.seth-org-campo select,.seth-marcador-form input,.seth-importar input[type="file"]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:12px/1.4 var(--sans);min-width:0;max-width:100%}
++.seth-busca-bloco input:focus,.seth-filtros select:focus,.seth-pasta-form input:focus,.seth-org-campo select:focus,.seth-marcador-form input:focus{outline:2px solid var(--teal);outline-offset:1px}
++.seth-filtros{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;font-size:12px;color:var(--muted)}
++.seth-busca-resultados{display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow:auto}
++.seth-busca-resultados .seth-vazio{margin:0;font-size:12px}
++.seth-resultado{display:flex;flex-direction:column;gap:4px;padding:8px 9px;border-radius:10px;border:1px solid var(--line)}
++.seth-resultado strong{font-size:13px;overflow-wrap:anywhere}
++.seth-trecho{margin:0;font-size:12px;line-height:1.45;color:var(--ink);overflow-wrap:anywhere}
++.seth-resultado-meta{margin:0;font-size:11px;color:var(--muted)}
++.seth-grupo{margin:6px 0 0;font:10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
++.seth-item.fixada{border-left:3px solid var(--gold)}
++.seth-item-meta{display:flex;flex-wrap:wrap;gap:4px}
++.seth-selo{font:10px var(--mono);border-radius:99px;padding:2px 7px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
++.seth-selo-fixada{border-color:var(--gold);color:var(--gold)}
++.seth-selo-arquivada{color:var(--muted)}
++.seth-selo-pasta{border-color:var(--blue);color:var(--blue)}
++.seth-selo-marcador{border-color:var(--violet);color:var(--violet)}
++.seth-item-acoes{flex-wrap:wrap;row-gap:4px}
++.seth-item-org{font-size:12px;color:var(--muted)}
++.seth-item-org summary{cursor:pointer;color:var(--ink)}
++.seth-org-campo{display:flex;flex-direction:column;gap:4px;margin-top:6px}
++.seth-marcadores{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
++.seth-marcador-form{display:flex;gap:6px;align-items:center;margin-top:4px}
++.seth-marcador-form input{flex:1;min-width:0}
++.seth-bloco{border-top:1px solid var(--line);padding-top:8px}
++.seth-bloco summary{cursor:pointer;font-size:12px;color:var(--ink)}
++.seth-pastas{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
++.seth-pasta{display:flex;flex-direction:column;gap:4px}
++.seth-pasta-form{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
++.seth-pasta-form input{flex:1;min-width:120px}
++.seth-importar{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
++.seth-importar input[type="file"]{font-size:11px}
++.seth-temporaria{margin:0;padding:8px 10px;border-radius:10px;border:1px solid var(--rose);color:var(--rose);font-size:13px;line-height:1.45}
++.text-link[type="submit"]{padding:0;background:transparent;border:0;border-bottom:1px solid var(--cor-rgba-97-217-237-35);color:var(--teal);font:11px var(--mono);cursor:pointer}
++.text-link[type="submit"]:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
++.seth-pasta > .seth-item-abrir{font-size:13px;line-height:1.4}
++.seth-exportar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
++.msg.destacada{outline:2px solid var(--teal);outline-offset:2px}
++
+ 
+ 
+ .abrir-lista{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 4px;margin-top:0}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 8f7885ca..e73bd5b2 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -99,9 +99,19 @@
+ <div class="sub" id="sub-conversa" data-sub="conversa" data-secao="conversa">
+ <div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
+ <article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
+-<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
+-<div class="seth-main"><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
+-<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
++<div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><button class="text-link" type="button" id="seth-temporaria" aria-pressed="false">Conversa temporária: desligada</button>
++<div class="seth-busca-bloco"><label for="seth-busca">Buscar nas conversas</label><input id="seth-busca" type="search" maxlength="120" autocomplete="off" placeholder="Título ou texto"></div>
++<div id="seth-busca-resultados" class="seth-busca-resultados" hidden></div>
++<div class="seth-filtros"><label for="seth-filtro-pasta">Pasta</label><select id="seth-filtro-pasta"><option value="">Todas as pastas</option><option value="-">Sem pasta</option></select><label for="seth-filtro-marcador">Marcador</label><select id="seth-filtro-marcador"><option value="">Todos os marcadores</option></select></div>
++<p id="seth-org-aviso" class="seth-aviso" role="status" hidden></p>
++<div id="seth-conversas" class="seth-conversas"></div>
++<details id="seth-arquivadas-bloco" class="seth-bloco"><summary>Arquivadas (<span id="seth-arquivadas-total">0</span>)</summary><div id="seth-arquivadas" class="seth-conversas"></div></details>
++<details id="seth-pastas-bloco" class="seth-bloco" open><summary>Pastas (projetos)</summary>
++<form id="seth-pasta-form" class="seth-pasta-form"><label for="seth-pasta-nome" class="sr-only">Nome da nova pasta</label><input id="seth-pasta-nome" type="text" maxlength="60" autocomplete="off" placeholder="Nome da pasta"><button class="text-link" type="submit" id="seth-pasta-criar">Criar pasta</button></form>
++<ul id="seth-pastas" class="seth-pastas"></ul></details>
++<div class="seth-importar"><label for="seth-importar-arquivo">Importar conversa (arquivo JSON exportado)</label><input id="seth-importar-arquivo" type="file" accept="application/json,.json"></div></aside>
++<div class="seth-main"><p id="seth-temporaria-aviso" class="seth-temporaria" role="status" hidden>Conversa temporária: não é salva. Não aparece na lista nem na busca, e some ao trocar de conversa ou recarregar a página.</p><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
++<div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div><div class="seth-exportar"><span id="seth-exportar-texto"></span><a class="text-link" id="seth-export-json" href="#" download hidden>Exportar JSON</a><a class="text-link" id="seth-export-md" href="#" download hidden>Exportar Markdown</a></div></div>
+ <div class="seth-modelo"><label for="seth-modelo">Modelo</label><select id="seth-modelo"><option value="seth-livre">Seth (padrão)</option></select><span id="seth-modelo-desc" class="seth-modelo-desc"></span></div>
+ <form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
+ <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index f3a30222..a9afc7ad 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -605,9 +605,16 @@ const SETH_MAX_MENSAGENS = 20;
+ const SETH_MAX_CARACTERES = 4000;
+ const SETH_LIMITE_PEDIDO_BYTES = 131072;
+ const SETH_LIMITE_CONVERSA_BYTES = 262144;
++const SETH_LIMITE_IMPORTACAO_BYTES = 263168;
++const SETH_BUSCA_MAX_CARACTERES = 120;
++// Organização (lote 3, 09/11/2026): estado da lista vindo de GET /api/seth/conversas; filtros e busca só na tela.
++let sethLista = {items: [], pastas: [], marcadores: [], total: 0, organizacao: "ok"};
++let sethFiltro = {pasta: "", marcador: ""};
++let sethBuscaSeq = 0;
++function sethNova(temporaria = false) { return {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo, temporaria}; }
+ function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+ function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
+-function sethTitulo(texto) { byId("seth-titulo").textContent = texto || "Nova conversa"; }
++function sethTitulo(texto) { byId("seth-titulo").textContent = texto || (sethAtual.temporaria ? "Conversa temporária" : "Nova conversa"); }
+ function sethMostrarModelo() {
+   const select = byId("seth-modelo"); const desc = byId("seth-modelo-desc");
+   if (select.value !== sethAtual.modelo) select.value = sethAtual.modelo;
+@@ -661,6 +668,7 @@ function sethMarkdown(texto, destino) {
+ function sethMensagem(m, indice) {
+   const log = byId("seth-transcript");
+   const msg = document.createElement("article"); msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant");
++  msg.dataset.indice = String(indice);
+   const cab = document.createElement("div"); cab.className = "msg-head";
+   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
+   const hora = document.createElement("span"); hora.textContent = m.hora || "";
+@@ -694,6 +702,8 @@ function sethDesenhar() {
+   log.scrollTop = log.scrollHeight;
+   sethTitulo(sethAtual.titulo);
+   sethPintarAvisoSalvar();
++  sethPintarTemporaria();
++  sethPintarExportar();
+ }
+ function sethExemplos() {
+   const box = byId("seth-exemplos"); if (!box) return;
+@@ -704,38 +714,290 @@ function sethExemplos() {
+     box.append(b);
+   });
+ }
++function sethOpcao(valor, rotulo) { const o = document.createElement("option"); o.value = valor; o.textContent = rotulo; return o; }
++function sethTexto(rotulo, aoClicar) { const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = rotulo; b.addEventListener("click", aoClicar); return b; }
++function sethSelo(texto, classe) { const s = document.createElement("span"); s.className = "seth-selo " + classe; s.textContent = texto; return s; }
++function sethVazio(texto) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = texto; return p; }
++function sethMostrarOrg(texto) { const aviso = byId("seth-org-aviso"); if (!aviso) return; aviso.textContent = texto || ""; aviso.hidden = !texto; }
++// Motivo de recusa do painel em português, sem o conteúdo da conversa (o servidor só devolve a regra).
++function sethErroOrg(status, motivo) {
++  if (status === 404) return "Conversa ou pasta não encontrada; a lista foi atualizada.";
++  if (status === 409) return "A organização das conversas está ilegível; nada foi alterado.";
++  if (status === 413) return "Pedido grande demais; nada foi alterado.";
++  if (status === 400) return "Não foi possível salvar: " + (motivo || "pedido recusado") + ".";
++  return "Não foi possível salvar: o painel respondeu com erro " + status + ".";
++}
++// Lista: fixadas no topo, arquivadas numa seção própria, filtros por pasta e marcador. Estado vem de GET /api/seth/conversas.
+ async function sethListar() {
+   const box = byId("seth-conversas"); if (!box) return;
+   try {
+     const dados = await fetchJson("/api/seth/conversas", {headers: {Accept: "application/json"}});
+-    box.replaceChildren();
+-    (dados.items || []).forEach((c) => {
+-      const linha = document.createElement("div"); linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "");
+-      const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
+-      abrir.title = c.mensagens + " mensagens · " + c.atualizada;
+-      abrir.addEventListener("click", () => sethAbrir(c.id));
+-      const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
+-      const renomear = document.createElement("button"); renomear.type = "button"; renomear.className = "text-link"; renomear.textContent = "Renomear";
+-      renomear.addEventListener("click", () => sethRenomear(c, linha));
+-      const apagar = document.createElement("button"); apagar.type = "button"; apagar.className = "text-link"; apagar.textContent = "Apagar";
+-      apagar.addEventListener("click", () => {
+-        if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
+-        sethApagar(c.id);
+-      });
+-      acoes.append(renomear, apagar);
+-      linha.append(abrir, acoes);
+-      box.append(linha);
+-    });
+-    if (!(dados.items || []).length) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = "Nenhuma conversa salva."; box.append(p); }
++    sethLista = {items: dados.items || [], pastas: dados.pastas || [], marcadores: dados.marcadores || [], total: dados.total || 0, organizacao: dados.organizacao || "ok"};
++    sethPintarLista();
+   } catch (erro) { box.textContent = "Lista indisponível (" + erro.message + ")."; }
+ }
+-async function sethAbrir(id) {
++function sethPassaFiltro(c) {
++  const semPasta = sethFiltro.pasta === "-";
++  if (semPasta ? c.pasta : (sethFiltro.pasta && c.pasta !== sethFiltro.pasta)) return false;
++  return !sethFiltro.marcador || (c.marcadores || []).includes(sethFiltro.marcador);
++}
++function sethPintarFiltros() {
++  const pasta = byId("seth-filtro-pasta"); const marcador = byId("seth-filtro-marcador");
++  if (sethFiltro.pasta && sethFiltro.pasta !== "-" && !sethLista.pastas.some((p) => p.id === sethFiltro.pasta)) sethFiltro.pasta = "";
++  if (sethFiltro.marcador && !sethLista.marcadores.includes(sethFiltro.marcador)) sethFiltro.marcador = "";
++  pasta.replaceChildren(sethOpcao("", "Todas as pastas"), sethOpcao("-", "Sem pasta"), ...sethLista.pastas.map((p) => sethOpcao(p.id, p.nome)));
++  pasta.value = sethFiltro.pasta;
++  marcador.replaceChildren(sethOpcao("", "Todos os marcadores"), ...sethLista.marcadores.map((m) => sethOpcao(m, "#" + m)));
++  marcador.value = sethFiltro.marcador;
++}
++function sethGrupo(texto) { const h = document.createElement("p"); h.className = "seth-grupo"; h.textContent = texto; return h; }
++function sethPreencher(box, itens, vazio) {
++  box.replaceChildren();
++  if (!itens.length) { box.append(sethVazio(vazio)); return; }
++  const fixadas = itens.filter((c) => c.fixada); const outras = itens.filter((c) => !c.fixada);
++  if (fixadas.length) { box.append(sethGrupo("Fixadas")); fixadas.forEach((c) => box.append(sethLinha(c))); }
++  if (outras.length) { if (fixadas.length) box.append(sethGrupo("Recentes")); outras.forEach((c) => box.append(sethLinha(c))); }
++}
++function sethPintarLista() {
++  if (!byId("seth-conversas")) return;
++  sethPintarFiltros();
++  sethPintarPastas();
++  const filtrando = Boolean(sethFiltro.pasta || sethFiltro.marcador);
++  const visiveis = sethLista.items.filter(sethPassaFiltro);
++  const lista = byId("seth-conversas");
++  sethPreencher(lista, visiveis.filter((c) => !c.arquivada), filtrando ? "Nenhuma conversa com este filtro." : "Nenhuma conversa salva.");
++  if (sethLista.total > sethLista.items.length) lista.append(sethVazio("Mostrando as " + sethLista.items.length + " conversas mais recentes de " + sethLista.total + "."));
++  const arquivadas = sethLista.items.filter((c) => c.arquivada);
++  byId("seth-arquivadas-total").textContent = String(arquivadas.length);
++  sethPreencher(byId("seth-arquivadas"), visiveis.filter((c) => c.arquivada), arquivadas.length ? "Nenhuma conversa arquivada com este filtro." : "Nenhuma conversa arquivada.");
++  if (sethLista.organizacao === "ilegivel") sethMostrarOrg("A organização das conversas (fixadas, arquivadas, marcadores e pastas) está ilegível. Nada será alterado até o arquivo ser conferido.");
++}
++function sethLinha(c) {
++  const linha = document.createElement("div");
++  linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "") + (c.fixada ? " fixada" : "");
++  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
++  abrir.title = c.mensagens + " mensagens · " + c.atualizada;
++  abrir.addEventListener("click", () => sethAbrir(c.id));
++  const meta = document.createElement("div"); meta.className = "seth-item-meta";
++  if (c.fixada) meta.append(sethSelo("Fixada", "seth-selo-fixada"));
++  if (c.arquivada) meta.append(sethSelo("Arquivada", "seth-selo-arquivada"));
++  const pasta = sethLista.pastas.find((p) => p.id === c.pasta);
++  if (pasta) meta.append(sethSelo("Pasta: " + pasta.nome, "seth-selo-pasta"));
++  (c.marcadores || []).forEach((m) => meta.append(sethSelo("#" + m, "seth-selo-marcador")));
++  const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
++  const renomear = sethTexto("Renomear", () => sethRenomear(c, linha));
++  const fixar = sethTexto(c.fixada ? "Desfixar" : "Fixar", () => sethOrganizar(c.id, {fixada: !c.fixada}));
++  const arquivar = sethTexto(c.arquivada ? "Desarquivar" : "Arquivar", () => sethOrganizar(c.id, {arquivada: !c.arquivada}));
++  const apagar = sethTexto("Apagar", () => {
++    if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar"; return; }
++    sethApagar(c.id);
++  });
++  acoes.append(renomear, fixar, arquivar, apagar);
++  const org = document.createElement("details"); org.className = "seth-item-org";
++  const resumo = document.createElement("summary"); resumo.textContent = "Pasta e marcadores";
++  org.append(resumo, sethCampoPasta(c), sethCampoMarcadores(c));
++  linha.append(abrir, meta, acoes, org);
++  return linha;
++}
++function sethCampoPasta(c) {
++  const rotulo = document.createElement("label"); rotulo.className = "seth-org-campo";
++  const select = document.createElement("select"); select.className = "seth-org-pasta";
++  select.append(sethOpcao("", "Sem pasta"), ...sethLista.pastas.map((p) => sethOpcao(p.id, p.nome)));
++  select.value = c.pasta || "";
++  select.addEventListener("change", () => sethOrganizar(c.id, {pasta: select.value || null}));
++  rotulo.append(document.createTextNode("Pasta "), select);
++  return rotulo;
++}
++function sethCampoMarcadores(c) {
++  const bloco = document.createElement("div"); bloco.className = "seth-org-campo";
++  const titulo = document.createElement("span"); titulo.textContent = "Marcadores";
++  const lista = document.createElement("div"); lista.className = "seth-marcadores";
++  (c.marcadores || []).forEach((m) => {
++    const tirar = sethTexto("tirar", () => sethOrganizar(c.id, {marcadores: (c.marcadores || []).filter((x) => x !== m)}));
++    tirar.setAttribute("aria-label", "Tirar o marcador " + m);
++    lista.append(sethSelo("#" + m, "seth-selo-marcador"), tirar);
++  });
++  const form = document.createElement("form"); form.className = "seth-marcador-form";
++  const campo = document.createElement("input"); campo.type = "text"; campo.maxLength = 24; campo.placeholder = "novo marcador";
++  campo.setAttribute("aria-label", "Novo marcador");
++  const adicionar = document.createElement("button"); adicionar.type = "submit"; adicionar.className = "text-link"; adicionar.textContent = "Adicionar";
++  form.append(campo, adicionar);
++  form.addEventListener("submit", (e) => {
++    e.preventDefault();
++    const novo = campo.value.trim();
++    if (!novo) { sethMostrarOrg("Digite o marcador antes de adicionar."); return; }
++    sethOrganizar(c.id, {marcadores: [...(c.marcadores || []), novo]});
++  });
++  bloco.append(titulo, lista, form);
++  return bloco;
++}
++async function sethOrganizar(id, campos) {
++  let ok = false;
++  try {
++    const r = await fetch("/api/seth/conversa/organizar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify({id, ...campos})});
++    if (!r.ok) sethMostrarOrg(sethErroOrg(r.status, await sethMotivo(r)));
++    else { ok = true; sethMostrarOrg(""); }
++  } catch (_) { sethMostrarOrg("Não foi possível salvar: sem resposta do painel."); }
++  await sethListar();
++  return ok;
++}
++// Pastas (projetos). Apagar pasta não apaga conversa: as conversas dela ficam sem pasta.
++function sethPintarPastas() {
++  const ul = byId("seth-pastas"); if (!ul) return;
++  ul.replaceChildren();
++  if (!sethLista.pastas.length) { const li = document.createElement("li"); li.append(sethVazio("Nenhuma pasta ainda. Crie uma para agrupar conversas.")); ul.append(li); return; }
++  sethLista.pastas.forEach((p) => ul.append(sethLinhaPasta(p)));
++}
++function sethLinhaPasta(p) {
++  const li = document.createElement("li"); li.className = "seth-pasta";
++  const nome = document.createElement("button"); nome.type = "button"; nome.className = "seth-item-abrir";
++  nome.textContent = p.nome + " (" + p.conversas + ")"; nome.title = "Mostrar só as conversas desta pasta";
++  nome.addEventListener("click", () => { sethFiltro = {pasta: p.id, marcador: sethFiltro.marcador}; sethPintarLista(); });
++  const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
++  const renomear = sethTexto("Renomear", () => sethRenomearPasta(p, li));
++  const apagar = sethTexto("Apagar", () => {
++    if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar apagar pasta"; return; }
++    sethPastaMudar({acao: "apagar", id: p.id});
++  });
++  acoes.append(renomear, apagar);
++  li.append(nome, acoes);
++  return li;
++}
++function sethRenomearPasta(p, li) {
++  const campo = document.createElement("input"); campo.type = "text"; campo.value = p.nome; campo.maxLength = 60; campo.className = "seth-renomear";
++  campo.setAttribute("aria-label", "Novo nome da pasta");
++  li.replaceChildren(campo); campo.focus();
++  campo.addEventListener("keydown", (e) => { if (e.key === "Enter") sethPastaMudar({acao: "renomear", id: p.id, nome: campo.value}); if (e.key === "Escape") sethPintarLista(); });
++  campo.addEventListener("blur", () => sethPintarLista());
++}
++function sethAvisoPasta(acao, dados) {
++  if (acao === "criar") return "Pasta criada: " + dados.nome + ".";
++  if (acao === "renomear") return "Pasta renomeada: " + dados.nome + ".";
++  const n = dados.conversas_soltas || 0;
++  if (!n) return "Pasta apagada. Não havia conversas nela.";
++  if (n === 1) return "Pasta apagada. A conversa dela continua na lista, sem pasta.";
++  return "Pasta apagada. As " + n + " conversas dela continuam na lista, sem pasta.";
++}
++async function sethPastaMudar(corpo) {
++  let ok = false;
++  try {
++    const r = await fetch("/api/seth/pastas", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
++    if (!r.ok) sethMostrarOrg(sethErroOrg(r.status, await sethMotivo(r)));
++    else { ok = true; sethMostrarOrg(sethAvisoPasta(corpo.acao, await r.json())); }
++  } catch (_) { sethMostrarOrg("Não foi possível salvar a pasta: sem resposta do painel."); }
++  await sethListar();
++  return ok;
++}
++// Busca nas conversas salvas. Resposta antiga (de uma digitação anterior) não sobrescreve a atual.
++async function sethBuscar(texto) {
++  const termo = String(texto || "").trim();
++  if (!termo) { sethLimparBusca(); return; }
++  const seq = ++sethBuscaSeq;
++  const box = byId("seth-busca-resultados");
++  byId("seth-conversas").hidden = true; byId("seth-arquivadas-bloco").hidden = true;
++  box.hidden = false; box.replaceChildren(sethVazio("Buscando…"));
++  try {
++    const r = await fetch("/api/seth/conversas/busca?q=" + encodeURIComponent(termo), {headers: {Accept: "application/json"}, credentials: "same-origin", cache: "no-store"});
++    if (seq !== sethBuscaSeq) return;
++    if (!r.ok) { box.replaceChildren(sethVazio(sethErroBusca(r.status, await sethMotivo(r)))); return; }
++    const dados = await r.json();
++    if (seq === sethBuscaSeq) sethPintarBusca(dados);
++  } catch (_) { if (seq === sethBuscaSeq) box.replaceChildren(sethVazio("Busca indisponível: sem resposta do painel.")); }
++}
++function sethErroBusca(status, motivo) {
++  if (status === 400) return "Busca não feita: " + (motivo || "termo recusado") + ".";
++  return "Busca indisponível: o painel respondeu com erro " + status + ".";
++}
++function sethPintarBusca(dados) {
++  const box = byId("seth-busca-resultados");
++  const total = dados.total || 0; const lista = dados.resultados || [];
++  box.replaceChildren();
++  let resumo = "Nenhuma conversa salva tem este texto (a busca vê só as conversas salvas).";
++  if (total) resumo = total + (total === 1 ? " conversa salva tem este texto." : " conversas salvas têm este texto.") + (total > lista.length ? " Mostrando as " + lista.length + " primeiras." : "");
++  box.append(sethVazio(resumo));
++  lista.forEach((r) => box.append(sethResultado(r)));
++}
++function sethResultado(r) {
++  const item = document.createElement("div"); item.className = "seth-resultado";
++  const titulo = document.createElement("strong"); titulo.textContent = r.titulo;
++  const trecho = document.createElement("p"); trecho.className = "seth-trecho"; trecho.textContent = r.trecho;
++  const meta = document.createElement("p"); meta.className = "seth-resultado-meta";
++  meta.textContent = (r.ocorrencias === 1 ? "1 ocorrência" : r.ocorrencias + " ocorrências") + (r.arquivada ? " · arquivada" : "") + " · " + (r.mensagem === null ? "no título" : "na mensagem " + (r.mensagem + 1));
++  const abrir = sethTexto(r.mensagem === null ? "Abrir conversa" : "Abrir na mensagem " + (r.mensagem + 1), () => sethAbrir(r.id, r.mensagem));
++  item.append(titulo, trecho, meta, abrir);
++  return item;
++}
++function sethLimparBusca() {
++  sethBuscaSeq++;
++  const campo = byId("seth-busca"); if (campo) campo.value = "";
++  const box = byId("seth-busca-resultados"); box.replaceChildren(); box.hidden = true;
++  byId("seth-conversas").hidden = false; byId("seth-arquivadas-bloco").hidden = false;
++}
++async function sethAbrir(id, indice = null) {
+   try {
+     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
+-    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO};
++    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO, temporaria: false};
+     sethDesenhar(); sethListar(); sethMostrarModelo();
++    if (indice !== null) sethDestacar(indice);
+   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
+ }
++// Leva à mensagem que a busca apontou: rola até ela e marca com a borda de destaque.
++function sethDestacar(indice) {
++  const alvo = byId("seth-transcript").querySelector('[data-indice="' + indice + '"]');
++  if (!alvo) return;
++  alvo.classList.add("destacada");
++  if (typeof alvo.scrollIntoView === "function") alvo.scrollIntoView({block: "center"});
++}
++// Conversa temporária: não é gravada, não entra na lista nem na busca, e não tem exportação. Some ao trocar de conversa.
++function sethPintarTemporaria() {
++  const botao = byId("seth-temporaria"); const aviso = byId("seth-temporaria-aviso");
++  if (!botao || !aviso) return;
++  const ligada = Boolean(sethAtual.temporaria);
++  botao.setAttribute("aria-pressed", ligada ? "true" : "false");
++  botao.textContent = "Conversa temporária: " + (ligada ? "ligada" : "desligada");
++  aviso.hidden = !ligada;
++}
++function sethAlternarTemporaria() {
++  const ligar = !sethAtual.temporaria;
++  sethAtual = sethNova(ligar);
++  sethDesenhar(); sethListar();
++  sethStatus(ligar ? "TEMPORÁRIA" : "PRONTA", ligar ? "partial" : "planned");
++  byId("seth-input").focus();
++}
++function sethPintarExportar() {
++  const texto = byId("seth-exportar-texto"); const json = byId("seth-export-json"); const md = byId("seth-export-md");
++  if (!texto || !json || !md) return;
++  const salva = Boolean(sethAtual.id) && !sethAtual.temporaria;
++  json.hidden = !salva; md.hidden = !salva;
++  if (salva) {
++    json.href = "/api/seth/conversa/exportar?id=" + encodeURIComponent(sethAtual.id) + "&formato=json";
++    md.href = "/api/seth/conversa/exportar?id=" + encodeURIComponent(sethAtual.id) + "&formato=md";
++  }
++  if (sethAtual.temporaria) texto.textContent = "Conversa temporária não é salva, por isso não há o que exportar.";
++  else texto.textContent = salva ? "Exporta a última gravação." : "Exporta depois de salvar (uma resposta basta).";
++}
++// Importa um JSON exportado. O servidor valida o formato e não duplica: se o id ou a origem já existe, não grava.
++async function sethImportar(arquivo) {
++  if (!arquivo) return;
++  if (arquivo.size > SETH_LIMITE_IMPORTACAO_BYTES) { sethMostrarOrg("Arquivo não importado: passa do limite de " + SETH_LIMITE_IMPORTACAO_BYTES + " bytes (257 KB)."); return; }
++  try {
++    const texto = await arquivo.text();
++    const r = await fetch("/api/seth/conversa/importar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: texto});
++    if (!r.ok) { sethMostrarOrg(sethErroImportacao(r.status, await sethMotivo(r))); }
++    else {
++      const dados = await r.json();
++      sethMostrarOrg(dados.estado === "importada" ? "Conversa importada: " + dados.titulo + "." : "Esta conversa já estava aqui (" + dados.titulo + "); nada foi duplicado.");
++    }
++  } catch (_) { sethMostrarOrg("Não foi possível importar: sem resposta do painel."); }
++  await sethListar();
++}
++function sethErroImportacao(status, motivo) {
++  if (status === 413) return "Arquivo não importado: passa do limite de " + SETH_LIMITE_IMPORTACAO_BYTES + " bytes (257 KB).";
++  if (status === 400) return "Arquivo não importado: " + (motivo || "arquivo recusado") + ".";
++  if (status === 409) return "Arquivo não importado: a organização das conversas está ilegível; nada foi alterado.";
++  return "Arquivo não importado: o painel respondeu com erro " + status + ".";
++}
+ // Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
+ function sethParaSalvar(m) {
+   const item = {role: m.role, content: m.content};
+@@ -743,7 +1005,7 @@ function sethParaSalvar(m) {
+   return item;
+ }
+ async function sethSalvar() {
+-  if (!sethAtual.mensagens.length) return;
++  if (sethAtual.temporaria || !sethAtual.mensagens.length) return; // conversa temporária nunca é gravada
+   if (!sethAtual.titulo) sethAtual.titulo = sethAtual.mensagens[0].content.slice(0, 60);
+   const corpo = JSON.stringify({id: sethAtual.id, titulo: sethAtual.titulo, modelo: sethAtual.modelo, mensagens: sethAtual.mensagens.map(sethParaSalvar)});
+   if (new TextEncoder().encode(corpo).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true); return; }
+@@ -776,7 +1038,7 @@ function sethPintarAvisoSalvar() {
+ }
+ async function sethApagar(id) {
+   await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
+-  if (sethAtual.id === id) { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); }
++  if (sethAtual.id === id) { sethAtual = sethNova(false); sethDesenhar(); }
+   sethListar();
+ }
+ function sethRenomear(c, linha) {
+@@ -933,7 +1195,7 @@ function ligarConversaSeth() {
+   byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
+   const campo = byId("seth-input");
+   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+-  byId("seth-nova").addEventListener("click", () => { sethAtual = {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo}; sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
++  byId("seth-nova").addEventListener("click", () => { sethAtual = sethNova(false); sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+   form.addEventListener("submit", (e) => {
+     e.preventDefault();
+     const texto = campo.value.trim();
+@@ -941,6 +1203,24 @@ function ligarConversaSeth() {
+     campo.value = "";
+     sethEnviar(texto, false);
+   });
++  // Organização (lote 3, 09/11/2026): temporária, busca, filtros, pastas e importação.
++  byId("seth-temporaria").addEventListener("click", sethAlternarTemporaria);
++  const busca = byId("seth-busca");
++  busca.addEventListener("input", () => sethBuscar(busca.value));
++  busca.addEventListener("keydown", (e) => { if (e.key === "Escape") sethLimparBusca(); });
++  byId("seth-filtro-pasta").addEventListener("change", (e) => { sethFiltro.pasta = e.target.value; sethPintarLista(); });
++  byId("seth-filtro-marcador").addEventListener("change", (e) => { sethFiltro.marcador = e.target.value; sethPintarLista(); });
++  byId("seth-pasta-form").addEventListener("submit", async (e) => {
++    e.preventDefault();
++    const nomeCampo = byId("seth-pasta-nome"); const nome = nomeCampo.value.trim();
++    if (!nome) { sethMostrarOrg("Digite o nome da pasta."); return; }
++    if (await sethPastaMudar({acao: "criar", nome})) nomeCampo.value = "";
++  });
++  byId("seth-importar-arquivo").addEventListener("change", async (e) => {
++    const arquivo = e.target.files && e.target.files[0];
++    e.target.value = "";
++    await sethImportar(arquivo);
++  });
+ }
+ window.addEventListener("load", ligarConversaSeth);
+ 
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8ab690cf..cfe8388d 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -38,8 +38,9 @@ import nova_versao_painel  # noqa: E402
+ import chat_stream  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+-    CONVERSA_LIMITE_BYTES, VAULT_ITENS, _conversa_apagar, _conversa_caminho, _conversa_gravar, _conversa_ler,
+-    _conversas_listar, _vault_caminho, _vault_item)
++    CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
++    _conversa_exportar, _conversa_gravar, _conversa_importar, _conversa_ler, _conversa_organizar, _conversas_buscar,
++    _conversas_listar, _pasta_mudar, _vault_caminho, _vault_item)
+ BIND = "127.0.0.1"
+ PORT = 20146
+ VERIFIER_URL = "http://127.0.0.1:20141/verificar"
+@@ -51,6 +52,8 @@ ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
+ GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os testes trocam por servidor falso
+ CHAT_STREAM_LIMITE_BYTES = 131_072
+ CHAT_STREAM_TIMEOUT_S = 120
++# Organização das conversas (lote 3, 09/11/2026): pedidos pequenos de fixar, pasta, marcador, pasta e nome.
++SETH_ORGANIZACAO_LIMITE_BYTES = 4096
+ WIKI_RESULT_MAX = 12000
+ # Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): leitura do cache, n de 1 a 200.
+ MEMORIA_CONSELHO_PADRAO = 40
+@@ -151,25 +154,6 @@ def _linhas_do_gateway(resposta):
+         return
+ 
+ 
+-def _motivo_conversa_recusada(dados) -> str:
+-    """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
+-    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
+-    if isinstance(mensagens, list) and len(mensagens) > 200:
+-        return "mais de 200 mensagens"
+-    if isinstance(mensagens, list) and any(
+-            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > armazem.CONVERSA_MENSAGEM_LIMITE
+-            for m in mensagens):
+-        return f"uma mensagem passa de {armazem.CONVERSA_MENSAGEM_LIMITE} caracteres"
+-    modelo = dados.get("modelo") if isinstance(dados, dict) else None
+-    if (modelo is not None and not chat_stream.modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
+-            isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
+-            and not chat_stream.modelo_permitido(m.get("modelo")) for m in mensagens)):
+-        return "modelo fora da lista"
+-    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
+-        return "identificador da conversa inválido"
+-    return "formato da conversa inválido"
+-
+-
+ def _relay_modules():
+     """Carrega contrato e persistência locais; nenhum módulo faz chamada externa."""
+     for directory in (ROOT / "redesign/router", WEB):
+@@ -1086,6 +1070,10 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
+         if self.path == "/api/seth/conversas":
+             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
++        if self.path.startswith("/api/seth/conversas/busca?"):
++            return self._seth_busca()
++        if self.path.startswith("/api/seth/conversa/exportar?"):
++            return self._seth_exportar()
+         if self.path.startswith("/api/seth/conversa?"):
+             dados = _conversa_ler((parse_qs(urlparse(self.path).query).get("id") or [""])[0])
+             if dados is None:
+@@ -1219,6 +1207,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._seth_chat_stream()
+         if self.path in ("/api/seth/conversa", "/api/seth/conversa/apagar"):
+             return self._seth_conversa(self.path.endswith("/apagar"))
++        if self.path in ("/api/seth/conversa/organizar", "/api/seth/pastas", "/api/seth/conversa/importar"):
++            return self._seth_organizacao(self.path)
+         if self.path == "/api/nova-versao/upload":
+             return self._nova_versao_upload()
+         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+@@ -1545,9 +1535,54 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
+         salvo = _conversa_gravar(dados)
+         if salvo is None:
+-            return self._send(400, "text/plain; charset=utf-8", _motivo_conversa_recusada(dados).encode("utf-8"))
++            return self._send(400, "text/plain; charset=utf-8", armazem.motivo_conversa_recusada(dados).encode("utf-8"))
+         return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
+ 
++    def _seth_busca(self) -> None:
++        """Busca por texto nas conversas salvas (títulos e mensagens), só leitura e local."""
++        termo = (parse_qs(urlparse(self.path).query).get("q") or [""])[0]
++        try:
++            dados = _conversas_buscar(termo)
++        except ErroConversa as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
++    def _seth_exportar(self) -> None:
++        """Download de uma conversa salva, em JSON ou Markdown. O nome do arquivo leva só o id."""
++        query = parse_qs(urlparse(self.path).query)
++        try:
++            corpo, nome, tipo = _conversa_exportar((query.get("id") or [""])[0], (query.get("formato") or [""])[0])
++        except ErroConversa as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, tipo, corpo, (("Content-Disposition", f'attachment; filename="{nome}"'),))
++
++    def _seth_organizacao(self, rota: str) -> None:
++        """Fixar, arquivar, marcadores, pastas e importação das conversas (lote 3). Só valida e grava o que o painel envia."""
++        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++        importando = rota.endswith("/importar")
++        limite = IMPORTACAO_LIMITE_BYTES if importando else SETH_ORGANIZACAO_LIMITE_BYTES
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > limite:
++            aviso = f"arquivo acima de {limite} bytes" if importando else f"pedido acima de {limite} bytes"
++            return self._send(413, "text/plain; charset=utf-8", aviso.encode("utf-8"))
++        try:
++            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
++        except (ValueError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", "pedido com JSON inválido".encode("utf-8"))
++        try:
++            if importando:
++                resultado = _conversa_importar(dados)
++            elif not isinstance(dados, dict):
++                raise ErroConversa(400, "pedido precisa ser um objeto JSON")
++            elif rota == "/api/seth/pastas":
++                resultado = _pasta_mudar(dados.get("acao"), dados.get("id"), dados.get("nome"))
++            else:
++                resultado = _conversa_organizar(dados.get("id"), {k: v for k, v in dados.items() if k != "id"})
++        except ErroConversa as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(resultado, ensure_ascii=False).encode("utf-8"))
++
+     def _seth_chat(self) -> None:
+         """Conversa com a Seth pelo gateway local, só texto, sem ferramentas e sem escrita. Modelo: lista fixa (chat_stream).
+         Mesmo teto de pedido do stream (CHAT_STREAM_LIMITE_BYTES): a janela que a UI manda cabe nos dois caminhos."""
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 5bdd2a62..e61e94c1 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -380,5 +380,177 @@
+       "redesign/painel_operacional/test_painel_unificado.py::MemoriaConselhoTests::test_aba_memoria_fica_na_secao_conselho"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a busca de conversas (`GET /api/seth/conversas/busca?q=`) procura em títulos e mensagens das conversas salvas, sem serviço externo, e devolve trecho, número da mensagem e data; termo vazio ou acima de 120 caracteres responde 400 com motivo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_pela_rota_devolve_trecho_e_posicao",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_recusa_termo_vazio_longo_e_origem_cruzada",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_acha_mensagem_sem_acento_nem_caixa_e_aponta_a_posicao",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_recusa_termo_vazio_e_longo",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_termo_sem_resultado_nao_e_erro"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a busca ignora caixa e acento (`acao` acha `AÇÃO`), o trecho mostra o contexto da ocorrência, e a busca devolve até 50 resultados",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_dobrar_mantem_o_tamanho_para_a_posicao_valer",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_trecho_tem_contexto_e_reticencias",
++      "redesign/painel_operacional/test_conversas_lote3.py::BuscaTests::test_busca_marca_arquivada_e_limita_a_50_resultados"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "fixar, arquivar e marcadores ficam em `organizacao.json` dentro da pasta de conversas e não reescrevem a conversa; conversa antiga, sem esse arquivo, abre com os valores padrão",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_conversa_antiga_sem_organizacao_lista_e_abre_com_padrao",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_fixar_arquivar_marcar_e_pasta_nao_mexem_no_conteudo",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_salvar_a_conversa_depois_nao_apaga_a_organizacao",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_apagar_conversa_tira_a_entrada_da_organizacao"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a conversa fixada vem antes das outras; a arquivada sai da lista principal e aparece na seção Arquivadas, com Desarquivar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_fixada_fica_no_topo_com_grupo_e_selo",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_arquivadas_saem_da_lista_principal_e_ficam_na_secao",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_desarquivar_chama_organizar_com_arquivada_falsa",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_fixada_vai_para_o_topo_mesmo_mais_antiga"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "marcadores têm até 10 por conversa e até 24 caracteres (letras, números, espaço e hífen); pasta só aceita pasta existente; a recusa diz o motivo em português",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizar_recusa_fora_do_contrato_com_motivo",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_marcador_adicionado_e_tirado_manda_a_lista_inteira",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_organizar_recusado_mostra_motivo_em_portugues"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "pastas: criar, renomear e apagar; apagar pasta não apaga conversa, que fica sem pasta; limite de 50 pastas e nome de até 60 caracteres",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_criar_mover_renomear_e_apagar_pasta_sem_apagar_conversa",
++      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_pasta_recusa_nome_repetido_longo_e_acao_fora_da_lista",
++      "redesign/painel_operacional/test_conversas_lote3.py::PastasTests::test_limite_de_50_pastas",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_apagar_pasta_pede_confirmacao_e_avisa_que_conversas_ficam",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_pasta_criar_envia_post_e_limpa_o_campo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a lista filtra por pasta e por marcador, e move a conversa para outra pasta pelo seletor da própria conversa",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_filtro_por_pasta_e_por_marcador",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_mover_para_pasta_e_sem_pasta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a exportação baixa a conversa salva em JSON ou Markdown por `GET /api/seth/conversa/exportar`, com `Content-Disposition: attachment` e nome de arquivo só com o id; formato ou id inválido recusam",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_exporta_json_e_markdown_com_nome_so_com_o_id",
++      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_exportacao_recusa_formato_e_id",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_exportar_pela_rota_baixa_com_nome_so_com_o_id",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_exportacao_aponta_para_a_rota_da_conversa_salva"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a importação (`POST /api/seth/conversa/importar`) valida formato, versão e conversa, recusa arquivo acima de 263168 bytes com 413 e não duplica: id ou origem_id já conhecido responde `ja_existe` sem gravar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_importa_em_outra_instalacao_e_nao_duplica_por_id_ou_origem",
++      "redesign/painel_operacional/test_conversas_lote3.py::ExportacaoImportacaoTests::test_importa_recusa_arquivo_que_nao_e_do_painel",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_importar_pela_rota_recusa_acima_do_limite_sem_ler_e_nao_duplica",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_envia_o_arquivo_e_avisa",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_ja_existente_nao_duplica_e_avisa",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_importar_acima_do_limite_nem_e_enviado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a conversa temporária não é gravada, não aparece na lista e mostra na tela que não é salva; não tem exportação",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_mostra_o_estado_na_tela",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_nao_grava_a_resposta",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_temporaria_desligada_volta_a_gravar",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_abrir_conversa_salva_tira_a_temporaria"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "as rotas novas de conversa recusam origem cruzada, e a organização recusa pedido acima de 4096 bytes com 413",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_organizar_pela_rota_grava_e_recusa_origem_cruzada_e_pedido_grande",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_busca_recusa_termo_vazio_longo_e_origem_cruzada",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_exportar_pela_rota_baixa_com_nome_so_com_o_id",
++      "redesign/painel_operacional/test_conversas_lote3.py::RotasConversasTests::test_pastas_pela_rota_e_lista_com_contagem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "organização ilegível não é sobrescrita: a lista avisa na tela e a escrita responde 409 sem gravar",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizacao_ilegivel_recusa_escrita_e_avisa_na_lista",
++      "redesign/painel_operacional/test_conversas_lote3.py::OrganizacaoTests::test_organizacao_malformada_e_lida_com_tolerancia",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_organizacao_ilegivel_avisa_e_mantem_a_lista"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a busca abre a conversa na mensagem indicada e destaca essa mensagem; sem busca, a lista volta; a lista mostra quantas faltam quando passa de 200",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_mostra_trecho_e_abre_na_mensagem_destacada",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_vazia_volta_para_a_lista_sem_chamar_o_servidor",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_sem_resultado_diz_que_so_ve_conversas_salvas",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_busca_recusada_pelo_servidor_mostra_o_motivo",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaLista::test_lista_mostra_quantas_faltam_quando_passa_de_200"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "os controles novos da Conversa (busca, filtros, pastas, importação, exportação e temporária) têm id em `prototipo.html`, com limite de tamanho nos campos e as constantes da UI iguais às do servidor; a seção continua sem `style=` nem atributo `on*`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_ids_da_organizacao_existem_na_secao_conversa",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_campo_de_busca_e_nome_de_pasta_com_limite",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_exportacao_e_link_com_download_e_sem_script",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_aviso_de_temporaria_comeca_escondido_e_com_status",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_style",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_atributo_on",
++      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_bloco_conversa_sem_innerhtml",
++      "redesign/painel_operacional/test_chat_ui.py::LimitesDaUi::test_constantes_da_ui_sao_as_do_servidor"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index cd48d905..c4b39320 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -30,6 +30,7 @@
+ - Nenhuma rota nova de API. As rotas `/api/*` ficam como estão. Exceção pedida pelo Humano em 07/11/2026: `GET /api/conselho/memoria`, só leitura, para a aba Memória compartilhada (ver Contrato).
+ - Conhecimento tem uma busca única, que serve à Alexandria (escopo "dentro"), ao Acervo (escopo "fora", busca externa) e à Wiki, a documentação do `/index.html` (escopo "documentação"). Decidido pelo Humano em 07/11/2026.
+ - Casca registrada, fora das sete seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
++- Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
+ 
+ ## Fora desta versão
+ 
+@@ -38,6 +39,7 @@
+ - Remoção do LibreChat: o botão "LibreChat" continua em Sistema e a rota de abertura continua. Motivo: decisão separada.
+ - Ajuste fino de design: sem nova paleta e sem novo layout. Os valores visuais atuais viram tokens sem mudar. Motivo: a verificação visual depende do navegador, e ele não foi medido.
+ - Mudança em `/api/*`, em CSP, em propostas, assinatura, PR ou merge. Continuam fora do painel.
++- Link público de compartilhamento de conversa: fora deste lote. Pendência: precisa decisão de segurança do Humano (quem vê, por quanto tempo, como revoga).
+ 
+ ## Contrato
+ 
+@@ -56,6 +58,16 @@
+ - Os caminhos e verbos existentes permanecem; o JS só chama caminhos presentes no servidor. A resposta da leitura de conversa salva é normalizada com `schema_version` e `id`, exigidos pelo cliente. Mensagens importadas até 65536 caracteres são aceitas.
+ - Seletor de modelo da conversa (09/11/2026): `GET /api/seth/modelos` devolve `padrao` (`seth-livre`) e a lista fixa `modelos` (`id`, `rotulo`, `descricao`): `seth-livre` e `seth-public`. `/api/seth/chat/stream` e `/api/seth/chat` aceitam `modelo` opcional (ausente vale o padrão); fora da lista, 400 sem chamar o gateway. A conversa salva guarda `modelo` e o `modelo` de cada resposta da Seth; conversa antiga sem o campo abre como `seth-livre`. Fora da lista ficam `seth-zai`, `seth-gemini`, `seth-hf`, `seth-mistral` e `seth-auto`, porque o gateway recusa com 403 quem não é `seth-livre` nem `seth-public` sem classificação pública.
+ - Modelo que respondeu (09/11/2026): o gateway manda o cabeçalho `X-Modelo-Real` com o nome real do modelo (não o alias). `/api/seth/chat/stream` e `/api/seth/chat` repassam esse cabeçalho ao navegador só quando o valor tem formato de nome (`chat_stream.modelo_real_valido`). A conversa salva guarda `modelo_real` em cada resposta da Seth quando o cabeçalho veio; gravação com `modelo_real` fora do formato descarta só esse campo. A UI mostra o modelo real em cada resposta; sem ele, mostra o escolhido com `(escolhido)`.
++- Conversa, lote 3 (09/11/2026). Tudo local, em `~/.cache/agata/painel-conversas`; nenhum serviço externo.
++  - `GET /api/seth/conversas` (já existia) devolve, em cada item, `fixada`, `arquivada`, `marcadores` e `pasta`; e no topo `pastas` (`id`, `nome`, `conversas`), `marcadores` (distintos), `total` (conversas salvas) e `organizacao` (`ok` ou `ilegivel`). Fixadas vêm primeiro. Mostra até 200 conversas, as mais recentes.
++  - `GET /api/seth/conversas/busca?q=` procura `q` (1 a 120 caracteres, sem diferenciar caixa nem acento) em títulos e mensagens das conversas salvas. Resposta 200: `termo`, `total` e `resultados` (até 50; cada um com `id`, `titulo`, `atualizada`, `arquivada`, `ocorrencias`, `campo` `titulo` ou `mensagem`, `mensagem` (posição na conversa, ou `null` se foi no título) e `trecho`, de até 120 caracteres com reticências). `q` vazio ou acima de 120 caracteres: 400 com motivo. Termo sem resultado: 200 com `total` 0.
++  - `POST /api/seth/conversa/organizar` com `{id, fixada?, arquivada?, marcadores?, pasta?}`: muda só a organização da conversa, nunca o conteúdo. `marcadores` é lista de até 10 textos de até 24 caracteres (letras, números, espaço e hífen), guardados em minúsculas e sem repetir. `pasta` é `null` ou o `id` de pasta existente. Corpo até 4096 bytes; acima, 413. Conversa inexistente: 404. Campo desconhecido ou valor fora do contrato: 400 com motivo.
++  - `POST /api/seth/pastas` com `{acao: criar|renomear|apagar, id?, nome?}`. Nome de 1 a 60 caracteres, sem repetir (sem diferenciar caixa), até 50 pastas. Apagar pasta não apaga conversa: as conversas dela ficam sem pasta. Ação desconhecida ou id inválido: 400; pasta inexistente: 404.
++  - `GET /api/seth/conversa/exportar?id=&formato=json|md`: download (`Content-Disposition: attachment`) com nome `agata-conversa-<id>.json` ou `.md`. JSON: `formato` (`agata-conversa`), `versao` (1), `id`, `origem_id`, `titulo`, `modelo`, `mensagens` e `exportada_em`. Formato fora da lista: 400; conversa inexistente: 404. A conversa temporária não é salva e não tem exportação.
++  - `POST /api/seth/conversa/importar` com o JSON exportado. Limite de 263168 bytes (262144 da conversa mais 1024 de cabeçalho); acima, 413. Valida `formato`, `versao`, identificador e conversa (as mesmas regras da gravação). Reconhece pelo `id` e pelo `origem_id` do arquivo: se o id já é de uma conversa daqui, ou se alguma conversa daqui guarda esse `origem_id`, responde `estado: ja_existe` e não grava nada; senão grava com id novo e guarda o `origem_id`. Resposta: `estado` (`importada` ou `ja_existe`), `id` e `titulo`.
++  - Origem cruzada nas rotas novas: 403, como nas outras leituras e escritas de `/api/seth/*`.
++  - `organizacao.json`, dentro da pasta de conversas, guarda `pastas` e uma entrada por conversa (`fixada`, `arquivada`, `marcadores`, `pasta`, `origem_id`). Sem o arquivo, toda conversa vale o padrão (sem fixada, sem arquivada, sem marcador, sem pasta). Entrada malformada é ignorada na leitura. Arquivo ilegível: a lista avisa (`organizacao: ilegivel`) e as escritas respondem 409 sem sobrescrever.
++  - Conversa temporária: existe só na tela. A UI não chama `POST /api/seth/conversa` enquanto ela está ligada.
+ - Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
+   - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
+   - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
+@@ -142,6 +154,14 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ | /index.html | Serviços e Git do painel antigo | panorama | sub-panorama (já coberto; sem card duplicado) |
+ | /index.html | Wiki da Agata: busca, pela busca única de Conhecimento (escopo "documentação") | conhecimento | busca única (`conhecimento-busca`, `conhecimento-consulta`, `conhecimento-escopo`, `wiki-mode`, `wiki-source`, `wiki-results`) |
+ | prototipo · Conversa com a Seth | Lista de conversas; nova, abrir, renomear e apagar | conversa | sub-conversa (`seth-conversas`, `seth-nova`) |
++| prototipo · Conversa com a Seth (lote 3, 09/11/2026) | Busca nas conversas salvas (título e mensagens), com trecho e link para a mensagem | conversa | sub-conversa (`seth-busca`, `seth-busca-resultados`) |
++| prototipo · Conversa com a Seth (lote 3) | Fixar e desfixar; fixadas no topo da lista | conversa | sub-conversa (`seth-conversas`) |
++| prototipo · Conversa com a Seth (lote 3) | Arquivar e desarquivar; seção Arquivadas | conversa | sub-conversa (`seth-arquivadas-bloco`, `seth-arquivadas`) |
++| prototipo · Conversa com a Seth (lote 3) | Marcadores (tags livres) por conversa e filtro por marcador | conversa | sub-conversa (`seth-filtro-marcador`) |
++| prototipo · Conversa com a Seth (lote 3) | Pastas (projetos): criar, renomear, apagar (as conversas ficam), mover conversa e filtrar por pasta | conversa | sub-conversa (`seth-pasta-form`, `seth-pastas`, `seth-filtro-pasta`) |
++| prototipo · Conversa com a Seth (lote 3) | Exportar a conversa salva em JSON e Markdown (download pelo navegador) | conversa | sub-conversa (`seth-export-json`, `seth-export-md`) |
++| prototipo · Conversa com a Seth (lote 3) | Importar JSON exportado (valida; não duplica) | conversa | sub-conversa (`seth-importar-arquivo`) |
++| prototipo · Conversa com a Seth (lote 3) | Conversa temporária: não é salva, com aviso visível | conversa | sub-conversa (`seth-temporaria`, `seth-temporaria-aviso`) |
+ | prototipo · Conversa com a Seth | Envio com stream e fallback para o chat inteiro; Enter envia | conversa | sub-conversa (`seth-form`, `seth-input`) |
+ | prototipo · Conversa com a Seth | Copiar, regerar, exemplos e salvamento automático | conversa | sub-conversa |
+ | prototipo · Conselho e /conselho-rede | Novo turno: aba, prompt e solicitação de aprovação de envio | conselho | sub-conselho (`promptForm`, `site`, `pergunta`, `btnEnviar`) |
+@@ -242,6 +262,20 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] o texto da memória do Conselho sai pelo mesmo filtro de dado pessoal e de segredo da gravação
+ - [ ] a rota da memória do Conselho recusa origem cruzada, como as outras leituras de API
+ - [ ] a aba Memória compartilhada fica dentro da seção Conselho, tem estados carregando, vazio e erro, e monta o texto do cache só com textContent
++- [ ] a busca de conversas (`GET /api/seth/conversas/busca?q=`) procura em títulos e mensagens das conversas salvas, sem serviço externo, e devolve trecho, número da mensagem e data; termo vazio ou acima de 120 caracteres responde 400 com motivo
++- [ ] a busca ignora caixa e acento (`acao` acha `AÇÃO`), o trecho mostra o contexto da ocorrência, e a busca devolve até 50 resultados
++- [ ] fixar, arquivar e marcadores ficam em `organizacao.json` dentro da pasta de conversas e não reescrevem a conversa; conversa antiga, sem esse arquivo, abre com os valores padrão
++- [ ] a conversa fixada vem antes das outras; a arquivada sai da lista principal e aparece na seção Arquivadas, com Desarquivar
++- [ ] marcadores têm até 10 por conversa e até 24 caracteres (letras, números, espaço e hífen); pasta só aceita pasta existente; a recusa diz o motivo em português
++- [ ] pastas: criar, renomear e apagar; apagar pasta não apaga conversa, que fica sem pasta; limite de 50 pastas e nome de até 60 caracteres
++- [ ] a lista filtra por pasta e por marcador, e move a conversa para outra pasta pelo seletor da própria conversa
++- [ ] a exportação baixa a conversa salva em JSON ou Markdown por `GET /api/seth/conversa/exportar`, com `Content-Disposition: attachment` e nome de arquivo só com o id; formato ou id inválido recusam
++- [ ] a importação (`POST /api/seth/conversa/importar`) valida formato, versão e conversa, recusa arquivo acima de 263168 bytes com 413 e não duplica: id ou origem_id já conhecido responde `ja_existe` sem gravar
++- [ ] a conversa temporária não é gravada, não aparece na lista e mostra na tela que não é salva; não tem exportação
++- [ ] as rotas novas de conversa recusam origem cruzada, e a organização recusa pedido acima de 4096 bytes com 413
++- [ ] organização ilegível não é sobrescrita: a lista avisa na tela e a escrita responde 409 sem gravar
++- [ ] a busca abre a conversa na mensagem indicada e destaca essa mensagem; sem busca, a lista volta; a lista mostra quantas faltam quando passa de 200
++- [ ] os controles novos da Conversa (busca, filtros, pastas, importação, exportação e temporária) têm id em `prototipo.html`, com limite de tamanho nos campos e as constantes da UI iguais às do servidor; a seção continua sem `style=` nem atributo `on*`
+ 
+ ## Desenho e alternativas
+ 
+@@ -286,6 +320,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
+ - Links antigos continuam funcionando: redirect para a seção certa.
+ - Reversão: `git revert` do commit de aplicação. Os arquivos retirados (HTML e CSS) voltam com o revert.
+ - Ordem de reversão: se a aplicação tiver ido em mais de um passo, reverter do último para o primeiro.
++- Lote 3 (09/11/2026): `organizacao.json` nasce só quando alguém fixa, arquiva, marca ou põe em pasta uma conversa. Sem ele, as conversas valem o padrão. Reverter o código deixa o arquivo ignorado; apagá-lo desfaz a organização sem tocar nas conversas.
+ 
+ ## Riscos e dependências
+ 
+@@ -328,6 +363,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
+ - `test_chat_stream.py`
+ - `test_chat_stream_rota.py`
+ - `test_painel_unificado.py`
++- `test_conversas_lote3.py`
+ - `test_chat_ui.py`
+ - `test_frentes.py`
+ - `conselho-rede/`
+diff --git a/redesign/painel_operacional/test_chat_ui.py b/redesign/painel_operacional/test_chat_ui.py
+index c2c2522c..5e185090 100644
+--- a/redesign/painel_operacional/test_chat_ui.py
++++ b/redesign/painel_operacional/test_chat_ui.py
+@@ -32,14 +32,33 @@ class Elemento {
+   constructor(tag) {
+     this.tag = tag; this.textContent = ''; this.hidden = false; this.className = ''; this.value = ''; this.disabled = false;
+     this.dataset = {}; this.children = []; this.ouvintes = {}; this.scrollTop = 0; this.scrollHeight = 0; this.title = '';
+-    this.classList = {add() {}, remove() {}, toggle() {}, contains() { return false; }}; this.style = {};
++    this.attrs = {}; this._classes = new Set();
++    this.classList = {add: (...c) => c.forEach((x) => this._classes.add(x)), remove: (...c) => c.forEach((x) => this._classes.delete(x)),
++      toggle() {}, contains: (x) => this._classes.has(x)};
++    this.style = {};
+   }
+   append(...nos) { this.children.push(...nos); }
+   replaceChildren(...nos) { this.children = nos; }
+-  setAttribute() {} getAttribute() { return null; }
++  setAttribute(nome, valor) { this.attrs[nome] = String(valor); }
++  getAttribute(nome) { return Object.prototype.hasOwnProperty.call(this.attrs, nome) ? this.attrs[nome] : null; }
+   addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
+   focus() {} blur() {} remove() {} select() {}
+-  closest() { return null; } querySelector() { return null; } querySelectorAll() { return []; }
++  closest() { return null; }
++  querySelector(sel) { return buscar(this, sel)[0] || null; }
++  querySelectorAll(sel) { return buscar(this, sel); }
++}
++function descendentes(no, saida = []) { for (const c of (no.children || [])) { if (c instanceof Elemento) saida.push(c); descendentes(c, saida); } return saida; }
++function buscar(raiz, sel) {
++  const m = /^\[data-([a-z-]+)="([^"]*)"\]$/.exec(sel);
++  if (!m) return [];
++  const chave = m[1].replace(/-([a-z])/g, (_, l) => l.toUpperCase());
++  return descendentes(raiz).filter((e) => e.dataset[chave] === m[2]);
++}
++function texto(no) {
++  if (!no) return '';
++  if (no instanceof Texto) return no.textContent;
++  if (typeof no === 'string') return no;
++  return (no.textContent || '') + (no.children || []).map(texto).join('');
+ }
+ const registro = new Map();
+ const documento = {
+@@ -70,8 +89,31 @@ ctx.addEventListener = (tipo, fn) => { if (tipo === 'load') cargas.push(fn); };
+ ctx.fetch = async (url, opcoes = {}) => {
+   const metodo = String(opcoes.method || 'GET').toUpperCase();
+   chamadas.push({url, metodo, corpo: typeof opcoes.body === 'string' ? opcoes.body : null});
+-  if (url === '/api/seth/conversas') return respostaJson(200, {schema_version: 1, state: 'ok', items: cen.conversas || []});
++  if (url === '/api/seth/conversas') return respostaJson(200, {schema_version: 1, state: 'ok', items: cen.conversas || [],
++    pastas: cen.pastas || [], marcadores: cen.marcadores || [], total: cen.total ?? (cen.conversas || []).length, organizacao: cen.organizacao || 'ok'});
++  if (url.startsWith('/api/seth/conversas/busca?')) {
++    const r = escolher(cen.busca) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    return respostaJson(200, r.corpo || {schema_version: 1, state: 'ok', termo: '', total: 0, resultados: []});
++  }
+   if (url.startsWith('/api/seth/conversa?id=')) return respostaJson(200, cen.conversa);
++  if (url.startsWith('/api/seth/conversa/organizar') && metodo === 'POST') {
++    const r = escolher(cen.organizar) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    const c = JSON.parse(opcoes.body);
++    return respostaJson(200, {id: c.id, fixada: !!c.fixada, arquivada: !!c.arquivada, marcadores: c.marcadores || [], pasta: c.pasta ?? null});
++  }
++  if (url === '/api/seth/pastas' && metodo === 'POST') {
++    const r = escolher(cen.pastas_resp) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    const c = JSON.parse(opcoes.body);
++    return respostaJson(200, c.acao === 'apagar' ? {apagada: true, conversas_soltas: r.soltas ?? 0} : {id: '0a0a0a0a0a0a', nome: c.nome});
++  }
++  if (url === '/api/seth/conversa/importar' && metodo === 'POST') {
++    const r = escolher(cen.importar) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    return respostaJson(200, r.corpo || {estado: 'importada', id: '1111aaaa2222', titulo: 'Importada'});
++  }
+   if (url === '/api/seth/conversa' && metodo === 'POST') {
+     const r = escolher(cen.salvar);
+     if (r && r.rede) throw new TypeError('Failed to fetch');
+@@ -97,6 +139,38 @@ function coletar(no, saida) {
+   }
+ }
+ const esperar = async () => { for (let i = 0; i < 80; i++) await new Promise((r) => setImmediate(r)); };
++function acharTodos(raiz, pred) { return descendentes(raiz).filter(pred); }
++async function executar(a) {
++  const em = () => documento.getElementById(a.em || 'seth-conversas');
++  if (a.tipo === 'clicar') {
++    const alvos = a.id ? [documento.getElementById(a.id)]
++      : acharTodos(em(), (e) => e.tag === 'button' && texto(e).trim() === a.texto);
++    const alvo = alvos[a.indice || 0];
++    alvo.ouvintes.click[0]({target: alvo});
++  } else if (a.tipo === 'mudar') {
++    const el = a.id ? documento.getElementById(a.id) : acharTodos(em(), (e) => e.tag === 'select')[a.indice || 0]; el.value = a.valor; el.ouvintes.change[0]({target: el});
++  } else if (a.tipo === 'digitar') {
++    const el = documento.getElementById(a.id); el.value = a.valor; (el.ouvintes.input || []).forEach((f) => f({target: el}));
++  } else if (a.tipo === 'tecla') {
++    const el = documento.getElementById(a.id); el.ouvintes.keydown[0]({key: a.tecla, preventDefault() {}});
++  } else if (a.tipo === 'enviar') {
++    const form = a.id ? documento.getElementById(a.id) : acharTodos(em(), (e) => e.tag === 'form')[a.indice || 0];
++    if (a.campo) documento.getElementById(a.campo).value = a.valor;
++    else if (a.valor !== undefined) acharTodos(form, (e) => e.tag === 'input')[0].value = a.valor;
++    form.ouvintes.submit[0]({preventDefault() {}, target: form});
++  } else if (a.tipo === 'arquivo') {
++    const el = documento.getElementById(a.id);
++    el.files = [{size: a.tamanho ?? a.texto.length, text: async () => a.texto}];
++    el.ouvintes.change[0]({target: el});
++  }
++  await esperar();
++}
++function itensDe(id) {
++  return documento.getElementById(id).children
++    .filter((c) => typeof c.className === 'string' && c.className.split(' ').includes('seth-item'))
++    .map((c) => ({titulo: c.children[0].textContent, texto: texto(c), ativa: c.className.includes('ativa'), fixada: c.className.includes('fixada')}));
++}
++function opcoesDe(id) { return documento.getElementById(id).children.map((o) => [o.value, o.textContent]); }
+ (async () => {
+   try {
+     vm.createContext(ctx);
+@@ -107,20 +181,37 @@ const esperar = async () => { for (let i = 0; i < 80; i++) await new Promise((r)
+   if (cen.abrir) { documento.getElementById('seth-conversas').children[0].children[0].ouvintes.click[0](); await esperar(); }
+   if (cen.renomear !== undefined) {
+     const linha = documento.getElementById('seth-conversas').children[0];
+-    linha.children[1].children[0].ouvintes.click[0]();  // botão Renomear da conversa (sem abrir)
++    acharTodos(linha, (e) => e.tag === 'button' && texto(e).trim() === 'Renomear')[0].ouvintes.click[0]({});  // botão Renomear da conversa (sem abrir)
+     const campo = linha.children[0]; campo.value = cen.renomear;
+     campo.ouvintes.keydown[0]({key: 'Enter'}); await esperar();
+   }
+   if (cen.modelo) { const sel = documento.getElementById('seth-modelo'); sel.value = cen.modelo; sel.ouvintes.change[0]({target: sel}); }
+-  for (const texto of cen.enviar || []) {
+-    documento.getElementById('seth-input').value = texto;
++  for (const a of cen.acoes || []) await executar(a);
++  for (const texto_ of cen.enviar || []) {
++    documento.getElementById('seth-input').value = texto_;
+     documento.getElementById('seth-form').ouvintes.submit[0]({preventDefault() {}});
+     await esperar();
+   }
+   const transcricao = []; coletar(documento.getElementById('seth-transcript'), transcricao);
+   const salvar = documento.getElementById('seth-salvar-aviso');
++  const el = (id) => documento.getElementById(id);
+   console.log(JSON.stringify({chamadas, transcricao, salvarTexto: salvar.textContent, salvarOculto: salvar.hidden,
+-                              status: documento.getElementById('seth-status').textContent}));
++    status: el('seth-status').textContent,
++    org: el('seth-org-aviso').textContent, orgOculto: el('seth-org-aviso').hidden,
++    lista: itensDe('seth-conversas'), listaTexto: texto(el('seth-conversas')), grupos: descendentes(el('seth-conversas')).filter((e) => e.className === 'seth-grupo').map((e) => e.textContent),
++    arquivadas: itensDe('seth-arquivadas'), arquivadasTotal: el('seth-arquivadas-total').textContent,
++    listaOculta: el('seth-conversas').hidden, arquivadasOculta: el('seth-arquivadas-bloco').hidden,
++    buscaOculta: el('seth-busca-resultados').hidden, busca: texto(el('seth-busca-resultados')),
++    tempOculta: el('seth-temporaria-aviso').hidden, tempTexto: el('seth-temporaria-aviso').textContent,
++    temporariaBotao: el('seth-temporaria').textContent, temporariaPressionado: el('seth-temporaria').getAttribute('aria-pressed'),
++    tituloConversa: el('seth-titulo').textContent,
++    exportTexto: el('seth-exportar-texto').textContent, exportJsonOculto: el('seth-export-json').hidden,
++    exportJsonHref: el('seth-export-json').href, exportMdHref: el('seth-export-md').href,
++    pastas: texto(el('seth-pastas')), filtroPasta: opcoesDe('seth-filtro-pasta'), filtroMarcador: opcoesDe('seth-filtro-marcador'),
++    filtroPastaValor: el('seth-filtro-pasta').value, filtroMarcadorValor: el('seth-filtro-marcador').value,
++    pastaNomeValor: el('seth-pasta-nome').value,
++    destacadas: descendentes(el('seth-transcript')).filter((e) => e._classes.has('destacada')).map((e) => e.dataset.indice),
++    transcritos: descendentes(el('seth-transcript')).filter((e) => e.tag === 'article').map((e) => e.dataset.indice)}));
+ })();
+ """
+ 
+@@ -359,6 +450,248 @@ def panel_limite_pedido() -> int:
+     return int(re.search(r"^CHAT_STREAM_LIMITE_BYTES = ([\d_]+)", SERVIDOR, flags=re.M).group(1).replace("_", ""))
+ 
+ 
++PASTA_ID = "a00000000001"
++PASTA = {"id": PASTA_ID, "nome": "Projeto X", "conversas": 1}
++JSON_IMPORTAVEL = json.dumps({"formato": "agata-conversa", "versao": 1, "id": "1111aaaa2222", "origem_id": "1111aaaa2222",
++                              "titulo": "Vinda", "modelo": "seth-livre", "mensagens": [{"role": "user", "content": "oi"}]})
++
++
++def conversa_item(id_, titulo, **extra):
++    base = {"id": id_, "titulo": titulo, "atualizada": "2026-11-09T10:00:00-03:00", "mensagens": 2,
++            "fixada": False, "arquivada": False, "marcadores": [], "pasta": None}
++    return {**base, **extra}
++
++
++class ConversaOrganizacaoHtml(unittest.TestCase):
++    IDS = ["seth-temporaria", "seth-temporaria-aviso", "seth-busca", "seth-busca-resultados", "seth-filtro-pasta",
++           "seth-filtro-marcador", "seth-org-aviso", "seth-arquivadas-bloco", "seth-arquivadas", "seth-arquivadas-total",
++           "seth-pastas-bloco", "seth-pasta-form", "seth-pasta-nome", "seth-pasta-criar", "seth-pastas",
++           "seth-importar-arquivo", "seth-exportar-texto", "seth-export-json", "seth-export-md"]
++
++    def test_ids_da_organizacao_existem_na_secao_conversa(self):
++        for ident in self.IDS:
++            with self.subTest(ident=ident):
++                self.assertIn(f'id="{ident}"', secao_conversa())
++
++    def test_campo_de_busca_e_nome_de_pasta_com_limite(self):
++        self.assertRegex(secao_conversa(), r'<input id="seth-busca" type="search" maxlength="120"')
++        self.assertRegex(secao_conversa(), r'<input id="seth-pasta-nome" type="text" maxlength="60"')
++
++    def test_exportacao_e_link_com_download_e_sem_script(self):
++        self.assertRegex(secao_conversa(), r'<a class="text-link" id="seth-export-json" href="#" download hidden>')
++        self.assertRegex(secao_conversa(), r'<a class="text-link" id="seth-export-md" href="#" download hidden>')
++
++    def test_aviso_de_temporaria_comeca_escondido_e_com_status(self):
++        tag = re.search(r'<p id="seth-temporaria-aviso"[^>]*>', secao_conversa())
++        self.assertIsNotNone(tag)
++        self.assertIn("hidden", tag.group(0))
++        self.assertIn('role="status"', tag.group(0))
++
++
++class ConversaLista(unittest.TestCase):
++    """Lista, busca, pastas, marcadores, temporária, exportação e importação no prototipo.js (node, DOM mínimo, sem rede)."""
++
++    def test_fixada_fica_no_topo_com_grupo_e_selo(self):
++        itens = [conversa_item("0000000000a2", "Fixada antiga", fixada=True), conversa_item("0000000000a1", "Recente")]
++        medido = rodar_painel({"conversas": itens})
++        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Fixada antiga", "Recente"])
++        self.assertEqual(medido["grupos"], ["Fixadas", "Recentes"])
++        self.assertIn("Fixada", medido["lista"][0]["texto"])
++        self.assertTrue(medido["lista"][0]["fixada"])
++
++    def test_arquivadas_saem_da_lista_principal_e_ficam_na_secao(self):
++        itens = [conversa_item("0000000000a1", "Ativa"), conversa_item("0000000000a2", "Guardada", arquivada=True)]
++        medido = rodar_painel({"conversas": itens})
++        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Ativa"])
++        self.assertEqual([i["titulo"] for i in medido["arquivadas"]], ["Guardada"])
++        self.assertEqual(medido["arquivadasTotal"], "1")
++        self.assertIn("Arquivada", medido["arquivadas"][0]["texto"])
++
++    def test_desarquivar_chama_organizar_com_arquivada_falsa(self):
++        medido = rodar_painel({"conversas": [conversa_item("0000000000a2", "Guardada", arquivada=True)],
++                               "acoes": [{"tipo": "clicar", "em": "seth-arquivadas", "texto": "Desarquivar"}]})
++        pedidos = chamadas_para(medido, "/api/seth/conversa/organizar")
++        self.assertEqual(corpo_de(pedidos[-1]), {"id": "0000000000a2", "arquivada": False})
++
++    def test_fixar_chama_organizar_com_fixada_verdadeira(self):
++        medido = rodar_painel({"conversas": [conversa_item("0000000000a1", "Uma")],
++                               "acoes": [{"tipo": "clicar", "texto": "Fixar"}]})
++        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/conversa/organizar")[-1]), {"id": "0000000000a1", "fixada": True})
++        self.assertTrue(medido["orgOculto"], "sem erro, o aviso de organização fica escondido")
++
++    def test_organizar_recusado_mostra_motivo_em_portugues(self):
++        medido = rodar_painel({"conversas": [conversa_item("0000000000a1", "Uma")],
++                               "acoes": [{"tipo": "clicar", "texto": "Fixar"}],
++                               "organizar": {"status": 404, "texto": "conversa não encontrada"}})
++        self.assertEqual(medido["org"], "Conversa ou pasta não encontrada; a lista foi atualizada.")
++
++    def test_marcador_adicionado_e_tirado_manda_a_lista_inteira(self):
++        itens = [conversa_item("0000000000a1", "Marcada", marcadores=["auditoria", "ideia"])]
++        medido = rodar_painel({"conversas": itens, "acoes": [
++            {"tipo": "enviar", "em": "seth-conversas", "valor": "Revisão"},
++            {"tipo": "clicar", "texto": "tirar", "indice": 0}]})
++        pedidos = chamadas_para(medido, "/api/seth/conversa/organizar")
++        self.assertEqual(corpo_de(pedidos[0]), {"id": "0000000000a1", "marcadores": ["auditoria", "ideia", "Revisão"]})
++        self.assertEqual(corpo_de(pedidos[1]), {"id": "0000000000a1", "marcadores": ["ideia"]})
++
++    def test_mover_para_pasta_e_sem_pasta(self):
++        itens = [conversa_item("0000000000a1", "Uma")]
++        medido = rodar_painel({"conversas": itens, "pastas": [PASTA],
++                               "acoes": [{"tipo": "mudar", "em": "seth-conversas", "valor": PASTA_ID}]})
++        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/conversa/organizar")[-1]), {"id": "0000000000a1", "pasta": PASTA_ID})
++        medido2 = rodar_painel({"conversas": [conversa_item("0000000000a1", "Uma", pasta=PASTA_ID)], "pastas": [PASTA],
++                                "acoes": [{"tipo": "mudar", "em": "seth-conversas", "valor": ""}]})
++        self.assertEqual(corpo_de(chamadas_para(medido2, "/api/seth/conversa/organizar")[-1]), {"id": "0000000000a1", "pasta": None})
++
++    def test_filtro_por_pasta_e_por_marcador(self):
++        itens = [conversa_item("0000000000a1", "Na pasta", pasta=PASTA_ID, marcadores=["auditoria"]),
++                 conversa_item("0000000000a2", "Solta")]
++        base = {"conversas": itens, "pastas": [PASTA], "marcadores": ["auditoria"]}
++        por_pasta = rodar_painel({**base, "acoes": [{"tipo": "mudar", "id": "seth-filtro-pasta", "valor": PASTA_ID}]})
++        self.assertEqual([i["titulo"] for i in por_pasta["lista"]], ["Na pasta"])
++        self.assertEqual(por_pasta["filtroPastaValor"], PASTA_ID)
++        sem_pasta = rodar_painel({**base, "acoes": [{"tipo": "mudar", "id": "seth-filtro-pasta", "valor": "-"}]})
++        self.assertEqual([i["titulo"] for i in sem_pasta["lista"]], ["Solta"])
++        por_marcador = rodar_painel({**base, "acoes": [{"tipo": "mudar", "id": "seth-filtro-marcador", "valor": "auditoria"}]})
++        self.assertEqual([i["titulo"] for i in por_marcador["lista"]], ["Na pasta"])
++        vazio = rodar_painel({**base, "acoes": [{"tipo": "mudar", "id": "seth-filtro-marcador", "valor": "auditoria"},
++                                                {"tipo": "mudar", "id": "seth-filtro-pasta", "valor": "-"}]})
++        self.assertIn("Nenhuma conversa com este filtro.", vazio["listaTexto"])
++        self.assertIn("#auditoria", por_pasta["lista"][0]["texto"])
++
++    def test_pasta_criar_envia_post_e_limpa_o_campo(self):
++        medido = rodar_painel({"conversas": [], "acoes": [
++            {"tipo": "digitar", "id": "seth-pasta-nome", "valor": "Projeto X"}, {"tipo": "enviar", "id": "seth-pasta-form"}]})
++        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/pastas")[0]), {"acao": "criar", "nome": "Projeto X"})
++        self.assertEqual(medido["org"], "Pasta criada: Projeto X.")
++        self.assertEqual(medido["pastaNomeValor"], "")
++
++    def test_pasta_recusada_mantem_o_nome_e_mostra_motivo(self):
++        medido = rodar_painel({"conversas": [], "pastas_resp": {"status": 400, "texto": "já existe pasta com esse nome"},
++                               "acoes": [{"tipo": "digitar", "id": "seth-pasta-nome", "valor": "Projeto X"},
++                                         {"tipo": "enviar", "id": "seth-pasta-form"}]})
++        self.assertEqual(medido["org"], "Não foi possível salvar: já existe pasta com esse nome.")
++        self.assertEqual(medido["pastaNomeValor"], "Projeto X")
++
++    def test_apagar_pasta_pede_confirmacao_e_avisa_que_conversas_ficam(self):
++        medido = rodar_painel({"conversas": [conversa_item("0000000000a1", "Uma", pasta=PASTA_ID)], "pastas": [PASTA],
++                               "pastas_resp": {"soltas": 1},
++                               "acoes": [{"tipo": "clicar", "em": "seth-pastas", "texto": "Apagar"}]})
++        self.assertEqual(chamadas_para(medido, "/api/seth/pastas"), [], "o primeiro clique só pede confirmação")
++        medido = rodar_painel({"conversas": [conversa_item("0000000000a1", "Uma", pasta=PASTA_ID)], "pastas": [PASTA],
++                               "pastas_resp": {"soltas": 1},
++                               "acoes": [{"tipo": "clicar", "em": "seth-pastas", "texto": "Apagar"},
++                                         {"tipo": "clicar", "em": "seth-pastas", "texto": "Confirmar apagar pasta"}]})
++        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/pastas")[0]), {"acao": "apagar", "id": PASTA_ID})
++        self.assertEqual(medido["org"], "Pasta apagada. A conversa dela continua na lista, sem pasta.")
++
++    def test_busca_mostra_trecho_e_abre_na_mensagem_destacada(self):
++        busca = {"corpo": {"schema_version": 1, "state": "ok", "termo": "acao", "total": 1, "resultados": [
++            {"id": CONVERSA_ID, "titulo": "Antiga", "atualizada": "2026-11-09T10:00:00-03:00", "arquivada": False,
++             "ocorrencias": 2, "campo": "mensagem", "mensagem": 1, "trecho": "…revisar a AÇÃO do decisor…"}]}}
++        conv = conversa([{"role": "user", "content": "oi"}, {"role": "assistant", "content": "nada"},
++                         {"role": "user", "content": "revisar a ação do decisor"}])
++        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "busca": busca, "acoes": [
++            {"tipo": "digitar", "id": "seth-busca", "valor": "acao"},
++            {"tipo": "clicar", "em": "seth-busca-resultados", "texto": "Abrir na mensagem 2"}]})
++        self.assertIn("/api/seth/conversas/busca?q=acao", [c["url"] for c in medido["chamadas"]])
++        self.assertIn("1 conversa salva tem este texto.", medido["busca"])
++        self.assertIn("…revisar a AÇÃO do decisor…", medido["busca"])
++        self.assertIn("na mensagem 2", medido["busca"])
++        self.assertTrue(medido["listaOculta"], "com busca ativa, a lista principal sai da tela")
++        self.assertEqual(medido["destacadas"], ["1"])
++
++    def test_busca_vazia_volta_para_a_lista_sem_chamar_o_servidor(self):
++        medido = rodar_painel({"conversas": LISTA, "acoes": [
++            {"tipo": "digitar", "id": "seth-busca", "valor": "ab"}, {"tipo": "digitar", "id": "seth-busca", "valor": "   "}]})
++        self.assertEqual(len([c for c in medido["chamadas"] if "/busca?q=" in c["url"]]), 1)
++        self.assertFalse(medido["listaOculta"])
++        self.assertTrue(medido["buscaOculta"])
++
++    def test_busca_sem_resultado_diz_que_so_ve_conversas_salvas(self):
++        medido = rodar_painel({"conversas": LISTA, "busca": {"corpo": {"schema_version": 1, "state": "ok", "termo": "x", "total": 0, "resultados": []}},
++                               "acoes": [{"tipo": "digitar", "id": "seth-busca", "valor": "xyz"}]})
++        self.assertIn("Nenhuma conversa salva tem este texto (a busca vê só as conversas salvas).", medido["busca"])
++
++    def test_busca_recusada_pelo_servidor_mostra_o_motivo(self):
++        medido = rodar_painel({"conversas": LISTA, "busca": {"status": 400, "texto": "a busca aceita até 120 caracteres"},
++                               "acoes": [{"tipo": "digitar", "id": "seth-busca", "valor": "xyz"}]})
++        self.assertIn("Busca não feita: a busca aceita até 120 caracteres.", medido["busca"])
++
++    def test_temporaria_mostra_o_estado_na_tela(self):
++        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "id": "seth-temporaria"}]})
++        self.assertFalse(medido["tempOculta"])
++        self.assertIn("Conversa temporária: não é salva.", secao_conversa())  # o texto do aviso é estático (HTML)
++        self.assertEqual(medido["temporariaPressionado"], "true")
++        self.assertEqual(medido["temporariaBotao"], "Conversa temporária: ligada")
++        self.assertEqual(medido["tituloConversa"], "Conversa temporária")
++        self.assertEqual(medido["status"], "TEMPORÁRIA")
++        self.assertTrue(medido["exportJsonOculto"])
++        self.assertIn("não há o que exportar", medido["exportTexto"])
++
++    def test_temporaria_nao_grava_a_resposta(self):
++        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "id": "seth-temporaria"}], "enviar": ["oi"]})
++        self.assertEqual(chamadas_para(medido, "/api/seth/conversa"), [], "conversa temporária não é gravada")
++        self.assertEqual(len(chamadas_para(medido, "/api/seth/chat/stream")), 1, "a resposta segue pelo mesmo caminho")
++        self.assertEqual(len([t for t in medido["transcricao"] if t.startswith("modelo:")]), 1)
++        self.assertTrue(medido["exportJsonOculto"])
++        self.assertIn("não há o que exportar", medido["exportTexto"])
++        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Antiga"], "a temporária não entra na lista")
++
++    def test_temporaria_desligada_volta_a_gravar(self):
++        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "id": "seth-temporaria"},
++                                                             {"tipo": "clicar", "id": "seth-temporaria"}], "enviar": ["oi"]})
++        self.assertTrue(medido["tempOculta"])
++        self.assertEqual(medido["status"], "PRONTA")
++        self.assertTrue(chamadas_para(medido, "/api/seth/conversa"), "conversa normal volta a ser salva")
++
++    def test_abrir_conversa_salva_tira_a_temporaria(self):
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]),
++                               "acoes": [{"tipo": "clicar", "id": "seth-temporaria"}, {"tipo": "clicar", "texto": "Antiga"}]})
++        self.assertTrue(medido["tempOculta"])
++        self.assertEqual(medido["temporariaPressionado"], "false")
++        self.assertEqual(medido["transcritos"], ["0"])
++
++    def test_exportacao_aponta_para_a_rota_da_conversa_salva(self):
++        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]), "abrir": True})
++        self.assertFalse(medido["exportJsonOculto"])
++        self.assertEqual(medido["exportJsonHref"], f"/api/seth/conversa/exportar?id={CONVERSA_ID}&formato=json")
++        self.assertEqual(medido["exportMdHref"], f"/api/seth/conversa/exportar?id={CONVERSA_ID}&formato=md")
++
++    def test_importar_envia_o_arquivo_e_avisa(self):
++        medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo", "texto": JSON_IMPORTAVEL}],
++                               "importar": {"corpo": {"estado": "importada", "id": "2222bbbb3333", "titulo": "Vinda"}}})
++        pedidos = chamadas_para(medido, "/api/seth/conversa/importar")
++        self.assertEqual(pedidos[0]["corpo"], JSON_IMPORTAVEL)
++        self.assertEqual(medido["org"], "Conversa importada: Vinda.")
++
++    def test_importar_ja_existente_nao_duplica_e_avisa(self):
++        medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo", "texto": JSON_IMPORTAVEL}],
++                               "importar": {"corpo": {"estado": "ja_existe", "id": CONVERSA_ID, "titulo": "Vinda"}}})
++        self.assertEqual(medido["org"], "Esta conversa já estava aqui (Vinda); nada foi duplicado.")
++
++    def test_importar_acima_do_limite_nem_e_enviado(self):
++        medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo",
++                                                           "texto": JSON_IMPORTAVEL, "tamanho": 263169}]})
++        self.assertEqual(chamadas_para(medido, "/api/seth/conversa/importar"), [])
++        self.assertEqual(medido["org"], "Arquivo não importado: passa do limite de 263168 bytes (257 KB).")
++
++    def test_importar_recusado_pelo_servidor_mostra_motivo(self):
++        medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo", "texto": "{}"}],
++                               "importar": {"status": 400, "texto": "o arquivo não é uma conversa exportada pelo painel (formato ou versão)"}})
++        self.assertEqual(medido["org"], "Arquivo não importado: o arquivo não é uma conversa exportada pelo painel (formato ou versão).")
++
++    def test_organizacao_ilegivel_avisa_e_mantem_a_lista(self):
++        medido = rodar_painel({"conversas": LISTA, "organizacao": "ilegivel"})
++        self.assertTrue(medido["org"].startswith("A organização das conversas"))
++        self.assertFalse(medido["orgOculto"])
++        self.assertEqual(len(medido["lista"]), 1)
++
++    def test_lista_mostra_quantas_faltam_quando_passa_de_200(self):
++        medido = rodar_painel({"conversas": LISTA, "total": 230})
++        self.assertIn("Mostrando as 1 conversas mais recentes de 230.", medido["listaTexto"])
++
++
+ class LimitesDaUi(unittest.TestCase):
+     def test_constantes_da_ui_sao_as_do_servidor(self):
+         constantes = dict(re.findall(r"^const (SETH_[A-Z_]+) = ([\d_]+);", JS, flags=re.M))
+@@ -366,6 +699,8 @@ class LimitesDaUi(unittest.TestCase):
+         self.assertEqual(int(constantes["SETH_MAX_CARACTERES"]), chat_stream.MAX_CARACTERES_MENSAGEM)
+         self.assertEqual(int(constantes["SETH_LIMITE_PEDIDO_BYTES"]), panel_limite_pedido())
+         self.assertEqual(int(constantes["SETH_LIMITE_CONVERSA_BYTES"]), armazem.CONVERSA_LIMITE_BYTES)
++        self.assertEqual(int(constantes["SETH_BUSCA_MAX_CARACTERES"]), armazem.BUSCA_TERMO_LIMITE)
++        self.assertEqual(int(constantes["SETH_LIMITE_IMPORTACAO_BYTES"]), armazem.IMPORTACAO_LIMITE_BYTES)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/redesign/painel_operacional/test_conversas_lote3.py b/redesign/painel_operacional/test_conversas_lote3.py
+new file mode 100644
+index 00000000..99d783cd
+--- /dev/null
++++ b/redesign/painel_operacional/test_conversas_lote3.py
+@@ -0,0 +1,411 @@
++#!/usr/bin/env python3
++"""Testes do lote 3 das conversas (09/11/2026): organização, busca, exportação e importação.
++
++Cada teste usa um diretório temporário no lugar de armazem.CONVERSAS_DIR; nada toca em
++~/.cache/agata/painel-conversas. Os de rota sobem o servidor numa porta livre (127.0.0.1).
++"""
++import http.client
++import importlib.util
++import json
++import os
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++from unittest import mock
++
++import armazem
++
++HERE = Path(__file__).resolve().parent
++_spec = importlib.util.spec_from_file_location("painel_lote3", HERE / "server.py")
++panel = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(panel)
++
++
++def id_de(n):
++    return f"{n:012x}"
++
++
++def conversas_em(pasta):
++    """Arquivos de conversa da pasta (sem organizacao.json)."""
++    return [a for a in pasta.glob("*.json") if a.name != armazem.ORGANIZACAO_ARQUIVO]
++
++
++class ConversasBase(unittest.TestCase):
++    """Diretório temporário no lugar de CONVERSAS_DIR, com datas de modificação crescentes (n)."""
++
++    def setUp(self):
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        self.dir = Path(tmp.name)
++        patch = mock.patch.object(armazem, "CONVERSAS_DIR", self.dir)
++        patch.start()
++        self.addCleanup(patch.stop)
++
++    def conversa(self, n, titulo, textos=("oi",), **extra):
++        mensagens = [{"role": "user" if i % 2 == 0 else "assistant", "content": t} for i, t in enumerate(textos)]
++        salvo = armazem._conversa_gravar({"id": id_de(n), "titulo": titulo, "mensagens": mensagens, **extra})
++        self.assertIsNotNone(salvo, "a conversa de teste devia ser válida")
++        os.utime(self.dir / (id_de(n) + ".json"), (1_700_000_000 + n, 1_700_000_000 + n))
++        return salvo
++
++
++class OrganizacaoTests(ConversasBase):
++    def test_conversa_antiga_sem_organizacao_lista_e_abre_com_padrao(self):
++        # Arquivo de antes do lote 3: sem modelo, sem organização, sem origem.
++        (self.dir / (id_de(1) + ".json")).write_text(json.dumps({"titulo": "Antiga", "mensagens": [
++            {"role": "user", "content": "oi"}, {"role": "assistant", "content": "olá"}]}), encoding="utf-8")
++        item = armazem._conversas_listar()["items"][0]
++        self.assertEqual((item["fixada"], item["arquivada"], item["marcadores"], item["pasta"]), (False, False, [], None))
++        self.assertEqual(armazem._conversa_ler(id_de(1))["modelo"], "seth-livre")
++        self.assertEqual(armazem._conversas_buscar("olá")["resultados"][0]["id"], id_de(1))
++        corpo, nome, _ = armazem._conversa_exportar(id_de(1), "json")
++        self.assertEqual(json.loads(corpo)["origem_id"], id_de(1))
++
++    def test_fixar_arquivar_marcar_e_pasta_nao_mexem_no_conteudo(self):
++        self.conversa(1, "Primeira", ("texto original",))
++        arq = self.dir / (id_de(1) + ".json")
++        antes = arq.read_bytes()
++        armazem._conversa_organizar(id_de(1), {"fixada": True, "arquivada": False, "marcadores": ["Auditoria", "  ideia  "]})
++        self.assertEqual(arq.read_bytes(), antes, "organizar não pode reescrever a conversa")
++        item = armazem._conversas_listar()["items"][0]
++        self.assertTrue(item["fixada"])
++        self.assertEqual(item["marcadores"], ["auditoria", "ideia"])
++
++    def test_fixada_vai_para_o_topo_mesmo_mais_antiga(self):
++        self.conversa(1, "Antiga fixada")
++        self.conversa(2, "Nova")
++        armazem._conversa_organizar(id_de(1), {"fixada": True})
++        self.assertEqual([c["titulo"] for c in armazem._conversas_listar()["items"]], ["Antiga fixada", "Nova"])
++
++    def test_organizar_recusa_fora_do_contrato_com_motivo(self):
++        self.conversa(1, "Uma")
++        casos = [
++            ({"marcadores": ["x" * 25]}, 400, "marcador passa de 24 caracteres"),
++            ({"marcadores": [f"m{i}" for i in range(11)]}, 400, "a conversa aceita até 10 marcadores"),
++            ({"marcadores": ["#tag"]}, 400, "marcador só pode ter letras, números, espaço e hífen"),
++            ({"marcadores": ["   "]}, 400, "marcador vazio"),
++            ({"marcadores": "auditoria"}, 400, "marcadores precisa ser uma lista"),
++            ({"fixada": "sim"}, 400, "fixada precisa ser sim ou não"),
++            ({"pasta": "naoexiste0000"}, 400, "a pasta não existe"),
++            ({"apagar": True}, 400, "campo desconhecido: apagar"),
++        ]
++        for campos, status, motivo in casos:
++            with self.subTest(campos=campos), self.assertRaises(armazem.ErroConversa) as erro:
++                armazem._conversa_organizar(id_de(1), campos)
++            self.assertEqual((erro.exception.status, erro.exception.motivo), (status, motivo))
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversa_organizar(id_de(99), {"fixada": True})
++        self.assertEqual(erro.exception.status, 404)
++        with self.assertRaises(armazem.ErroConversa):
++            armazem._conversa_organizar(id_de(1), {})
++        self.assertFalse((self.dir / armazem.ORGANIZACAO_ARQUIVO).exists(), "recusa não grava nada")
++
++    def test_salvar_a_conversa_depois_nao_apaga_a_organizacao(self):
++        self.conversa(1, "Guardada")
++        armazem._conversa_organizar(id_de(1), {"fixada": True, "marcadores": ["ideia"]})
++        armazem._conversa_gravar({"id": id_de(1), "titulo": "Guardada", "mensagens": [{"role": "user", "content": "nova"}]})
++        item = armazem._conversas_listar()["items"][0]
++        self.assertEqual((item["fixada"], item["marcadores"]), (True, ["ideia"]))
++
++    def test_apagar_conversa_tira_a_entrada_da_organizacao(self):
++        self.conversa(1, "Apagar")
++        armazem._conversa_organizar(id_de(1), {"fixada": True})
++        self.assertTrue(armazem._conversa_apagar(id_de(1)))
++        org = json.loads((self.dir / armazem.ORGANIZACAO_ARQUIVO).read_text(encoding="utf-8"))
++        self.assertNotIn(id_de(1), org["conversas"])
++
++    def test_organizacao_malformada_e_lida_com_tolerancia(self):
++        self.conversa(1, "Uma")
++        (self.dir / armazem.ORGANIZACAO_ARQUIVO).write_text(json.dumps({"pastas": [
++            {"id": "a00000000001", "nome": "  Projeto  X "}, {"id": "ruim", "nome": "x"}, "lixo"],
++            "conversas": {id_de(1): {"fixada": "sim", "marcadores": [["lista"], "ok", "ok"], "pasta": ["x"]},
++                          "nao-hex": {"fixada": True}}}), encoding="utf-8")
++        org, legivel = armazem._organizacao_ler()
++        self.assertTrue(legivel)
++        self.assertEqual(org["pastas"], [{"id": "a00000000001", "nome": "Projeto X"}])
++        self.assertEqual(org["conversas"], {id_de(1): {"fixada": False, "arquivada": False, "marcadores": ["ok"],
++                                                        "pasta": None, "origem_id": None}})
++
++    def test_organizacao_ilegivel_recusa_escrita_e_avisa_na_lista(self):
++        self.conversa(1, "Uma")
++        arq = self.dir / armazem.ORGANIZACAO_ARQUIVO
++        arq.write_text("{não é json", encoding="utf-8")
++        listado = armazem._conversas_listar()
++        self.assertEqual(listado["organizacao"], "ilegivel")
++        self.assertEqual(len(listado["items"]), 1, "a lista continua funcionando")
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversa_organizar(id_de(1), {"fixada": True})
++        self.assertEqual(erro.exception.status, 409)
++        self.assertEqual(arq.read_text(encoding="utf-8"), "{não é json", "o arquivo ilegível não pode ser sobrescrito")
++
++
++class PastasTests(ConversasBase):
++    def test_criar_mover_renomear_e_apagar_pasta_sem_apagar_conversa(self):
++        self.conversa(1, "Da pasta")
++        criada = armazem._pasta_mudar("criar", nome="  Projeto   X ")
++        self.assertEqual(criada["nome"], "Projeto X")
++        armazem._conversa_organizar(id_de(1), {"pasta": criada["id"]})
++        lista = armazem._conversas_listar()
++        self.assertEqual(lista["pastas"], [{"id": criada["id"], "nome": "Projeto X", "conversas": 1}])
++        self.assertEqual(lista["items"][0]["pasta"], criada["id"])
++        renomeada = armazem._pasta_mudar("renomear", criada["id"], "Projeto Y")
++        self.assertEqual(renomeada["nome"], "Projeto Y")
++        apagada = armazem._pasta_mudar("apagar", criada["id"])
++        self.assertEqual(apagada, {"apagada": True, "conversas_soltas": 1})
++        lista = armazem._conversas_listar()
++        self.assertEqual(lista["pastas"], [])
++        self.assertEqual([c["id"] for c in lista["items"]], [id_de(1)], "apagar pasta não apaga conversa")
++        self.assertIsNone(lista["items"][0]["pasta"])
++
++    def test_pasta_recusa_nome_repetido_longo_e_acao_fora_da_lista(self):
++        armazem._pasta_mudar("criar", nome="Ideias")
++        casos = [
++            (("criar", None, "ideias"), 400, "já existe pasta com esse nome"),
++            (("criar", None, "x" * 61), 400, "nome da pasta passa de 60 caracteres"),
++            (("criar", None, "   "), 400, "nome da pasta vazio"),
++            (("mover", None, "x"), 400, "ação de pasta desconhecida"),
++            (("apagar", "../etc", None), 400, "pasta inválida"),
++            (("renomear", id_de(77), "Outro"), 404, "pasta não encontrada"),
++        ]
++        for argumentos, status, motivo in casos:
++            with self.subTest(argumentos=argumentos), self.assertRaises(armazem.ErroConversa) as erro:
++                armazem._pasta_mudar(*argumentos)
++            self.assertEqual((erro.exception.status, erro.exception.motivo), (status, motivo))
++
++    def test_limite_de_50_pastas(self):
++        for i in range(50):
++            armazem._pasta_mudar("criar", nome=f"Pasta {i}")
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._pasta_mudar("criar", nome="Pasta 51")
++        self.assertEqual(erro.exception.motivo, "limite de 50 pastas; apague alguma antes")
++
++
++class BuscaTests(ConversasBase):
++    def setUp(self):
++        super().setUp()
++        self.conversa(1, "Revisão da ação", ("nada aqui", "Vamos revisar a AÇÃO do decisor"))
++        self.conversa(2, "Proposta de cadeia", ("texto sem termo",))
++        self.conversa(3, "Outra conversa", ("Ação",))
++
++    def test_busca_acha_mensagem_sem_acento_nem_caixa_e_aponta_a_posicao(self):
++        resultado = armazem._conversas_buscar("ACAO")
++        self.assertEqual(resultado["termo"], "ACAO")
++        por_id = {r["id"]: r for r in resultado["resultados"]}
++        self.assertEqual(por_id[id_de(1)]["campo"], "mensagem")
++        self.assertEqual(por_id[id_de(1)]["mensagem"], 1)
++        self.assertEqual(por_id[id_de(1)]["ocorrencias"], 2, "título e mensagem contam")
++        self.assertIn("AÇÃO", por_id[id_de(1)]["trecho"])
++        self.assertEqual(por_id[id_de(3)]["mensagem"], 0)
++        self.assertNotIn(id_de(2), por_id)
++
++    def test_busca_no_titulo_nao_tem_mensagem_para_abrir(self):
++        resultado = armazem._conversas_buscar("proposta")
++        self.assertEqual(resultado["total"], 1)
++        self.assertEqual(resultado["resultados"][0]["campo"], "titulo")
++        self.assertIsNone(resultado["resultados"][0]["mensagem"])
++
++    def test_termo_sem_resultado_nao_e_erro(self):
++        resultado = armazem._conversas_buscar("inexistente")
++        self.assertEqual((resultado["total"], resultado["resultados"]), (0, []))
++
++    def test_busca_recusa_termo_vazio_e_longo(self):
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversas_buscar("   ")
++        self.assertEqual(erro.exception.motivo, "digite o que procurar")
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversas_buscar("x" * 121)
++        self.assertEqual(erro.exception.motivo, "a busca aceita até 120 caracteres")
++
++    def test_busca_marca_arquivada_e_limita_a_50_resultados(self):
++        armazem._conversa_organizar(id_de(3), {"arquivada": True})
++        for n in range(10, 61):
++            self.conversa(n, f"Alvo {n}", ("alvo",))
++        resultado = armazem._conversas_buscar("alvo")
++        self.assertEqual(resultado["total"], 51)
++        self.assertEqual(len(resultado["resultados"]), 50)
++        self.assertEqual(armazem._conversas_buscar("outra")["resultados"][0]["arquivada"], True)
++
++    def test_trecho_tem_contexto_e_reticencias(self):
++        self.conversa(20, "Longa", ("a" * 300 + "ALVO" + "b" * 300,))
++        trecho = armazem._conversas_buscar("alvo")["resultados"][0]["trecho"]
++        self.assertTrue(trecho.startswith("…") and trecho.endswith("…"))
++        self.assertIn("ALVO", trecho)
++        self.assertLessEqual(len(trecho), 130)
++
++    def test_dobrar_mantem_o_tamanho_para_a_posicao_valer(self):
++        for texto in ("Ação", "AÇÃO revisada", "İstanbul ß", "combinação"):
++            self.assertEqual(len(armazem._dobrar(texto)), len(texto))
++        self.assertEqual(armazem._dobrar("AÇÃO"), "acao")
++
++
++class ExportacaoImportacaoTests(ConversasBase):
++    def setUp(self):
++        super().setUp()
++        self.conversa(1, "Para levar", ("pergunta", "resposta"), modelo="seth-public")
++        mensagens = [{"role": "user", "content": "oi"},
++                     {"role": "assistant", "content": "olá", "modelo": "seth-public", "modelo_real": "openai/gpt-oss-120b"}]
++        armazem._conversa_gravar({"id": id_de(2), "titulo": "Com modelo", "modelo": "seth-public", "mensagens": mensagens})
++
++    def test_exporta_json_e_markdown_com_nome_so_com_o_id(self):
++        corpo, nome, tipo = armazem._conversa_exportar(id_de(2), "json")
++        dados = json.loads(corpo)
++        self.assertEqual((dados["formato"], dados["versao"], dados["id"], dados["origem_id"]),
++                         ("agata-conversa", 1, id_de(2), id_de(2)))
++        self.assertEqual(nome, f"agata-conversa-{id_de(2)}.json")
++        self.assertEqual(tipo, "application/json; charset=utf-8")
++        corpo_md, nome_md, tipo_md = armazem._conversa_exportar(id_de(2), "md")
++        texto = corpo_md.decode("utf-8")
++        self.assertTrue(texto.startswith("# Com modelo\n"))
++        self.assertIn("## Você", texto)
++        self.assertIn("## Seth (modelo: openai/gpt-oss-120b)", texto)
++        self.assertEqual((nome_md, tipo_md), (f"agata-conversa-{id_de(2)}.md", "text/markdown; charset=utf-8"))
++
++    def test_exportacao_recusa_formato_e_id(self):
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversa_exportar(id_de(2), "pdf")
++        self.assertEqual(erro.exception.status, 400)
++        with self.assertRaises(armazem.ErroConversa) as erro:
++            armazem._conversa_exportar(id_de(42), "json")
++        self.assertEqual(erro.exception.status, 404)
++
++    def test_importa_em_outra_instalacao_e_nao_duplica_por_id_ou_origem(self):
++        corpo, _, _ = armazem._conversa_exportar(id_de(2), "json")
++        tmp_outra = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp_outra.cleanup)
++        outra = Path(tmp_outra.name)
++        with mock.patch.object(armazem, "CONVERSAS_DIR", outra):
++            primeira = armazem._conversa_importar(json.loads(corpo))
++            self.assertEqual(primeira["estado"], "importada")
++            self.assertNotEqual(primeira["id"], id_de(2))
++            self.assertEqual(len(conversas_em(outra)), 1)
++            self.assertEqual(armazem._organizacao_ler()[0]["conversas"][primeira["id"]]["origem_id"], id_de(2))
++            segunda = armazem._conversa_importar(json.loads(corpo))
++            self.assertEqual((segunda["estado"], segunda["id"]), ("ja_existe", primeira["id"]))
++            self.assertEqual(len(conversas_em(outra)), 1, "reconhecida não grava de novo")
++            por_origem = dict(json.loads(corpo), id=id_de(9), origem_id=id_de(2))
++            self.assertEqual(armazem._conversa_importar(por_origem)["estado"], "ja_existe")
++        terceira = armazem._conversa_importar(json.loads(corpo))
++        self.assertEqual((terceira["estado"], terceira["id"]), ("ja_existe", id_de(2)), "na mesma instalação, pelo id")
++
++    def test_importa_recusa_arquivo_que_nao_e_do_painel(self):
++        corpo = json.loads(armazem._conversa_exportar(id_de(2), "json")[0])
++        casos = [
++            (dict(corpo, formato="outro"), "o arquivo não é uma conversa exportada pelo painel (formato ou versão)"),
++            (dict(corpo, versao=2), "o arquivo não é uma conversa exportada pelo painel (formato ou versão)"),
++            (dict(corpo, versao=True), "o arquivo não é uma conversa exportada pelo painel (formato ou versão)"),
++            ({k: v for k, v in corpo.items() if k not in ("id", "origem_id")}, "arquivo sem identificador da conversa"),
++            (dict(corpo, id="../../etc"), "identificador da conversa inválido"),
++            (dict(corpo, modelo="seth-zai"), "modelo fora da lista"),
++        ]
++        for dados, motivo in casos:
++            with self.subTest(motivo=motivo), self.assertRaises(armazem.ErroConversa) as erro:
++                armazem._conversa_importar(dados)
++            self.assertEqual((erro.exception.status, erro.exception.motivo), (400, motivo))
++        self.assertEqual(len(conversas_em(self.dir)), 2, "recusa não grava nada")
++
++
++class RotasConversasTests(ConversasBase):
++    """Rotas novas pelo servidor de verdade, numa porta livre."""
++
++    @classmethod
++    def setUpClass(cls):
++        cls.porta_antiga, cls.origem_antiga = panel.PORT, panel.ALLOWED_ORIGIN
++        cls.servidor = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.servidor.daemon_threads = True
++        panel.PORT = cls.servidor.server_address[1]
++        panel.ALLOWED_ORIGIN = f"http://127.0.0.1:{panel.PORT}"
++        cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
++        cls.thread.start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.servidor.shutdown()
++        cls.servidor.server_close()
++        cls.thread.join(timeout=3)
++        panel.PORT, panel.ALLOWED_ORIGIN = cls.porta_antiga, cls.origem_antiga
++
++    def pede(self, metodo, caminho, corpo=None, cabecalhos=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=5)
++        try:
++            conn.request(metodo, caminho, body=corpo, headers=cabecalhos or {})
++            resposta = conn.getresponse()
++            return resposta.status, resposta.read(), {k.lower(): v for k, v in resposta.getheaders()}
++        finally:
++            conn.close()
++
++    def mesma_origem(self, tipo="application/json"):
++        return {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": tipo}
++
++    def test_busca_pela_rota_devolve_trecho_e_posicao(self):
++        self.conversa(1, "Rota", ("primeiro", "fala sobre a ação"))
++        status, corpo, cab = self.pede("GET", "/api/seth/conversas/busca?q=acao")
++        self.assertEqual(status, 200)
++        dados = json.loads(corpo)
++        self.assertEqual((dados["schema_version"], dados["resultados"][0]["mensagem"]), (1, 1))
++        self.assertEqual(cab["cache-control"], "no-store")
++
++    def test_busca_recusa_termo_vazio_longo_e_origem_cruzada(self):
++        self.assertEqual(self.pede("GET", "/api/seth/conversas/busca?q=")[0], 400)
++        self.assertEqual(self.pede("GET", "/api/seth/conversas/busca?q=" + "x" * 121)[0], 400)
++        cruzada = {"Origin": "https://exemplo.invalid"}
++        self.assertEqual(self.pede("GET", "/api/seth/conversas/busca?q=oi", cabecalhos=cruzada)[0], 403)
++
++    def test_exportar_pela_rota_baixa_com_nome_so_com_o_id(self):
++        self.conversa(1, "Baixar")
++        status, corpo, cab = self.pede("GET", f"/api/seth/conversa/exportar?id={id_de(1)}&formato=md")
++        self.assertEqual(status, 200)
++        self.assertEqual(cab["content-disposition"], f'attachment; filename="agata-conversa-{id_de(1)}.md"')
++        self.assertTrue(corpo.decode("utf-8").startswith("# Baixar"))
++        self.assertEqual(self.pede("GET", f"/api/seth/conversa/exportar?id={id_de(1)}&formato=exe")[0], 400)
++        self.assertEqual(self.pede("GET", f"/api/seth/conversa/exportar?id={id_de(9)}&formato=json")[0], 404)
++        self.assertEqual(self.pede("GET", f"/api/seth/conversa/exportar?id={id_de(1)}&formato=json",
++                                   cabecalhos={"Origin": "https://exemplo.invalid"})[0], 403)
++
++    def test_organizar_pela_rota_grava_e_recusa_origem_cruzada_e_pedido_grande(self):
++        self.conversa(1, "Rota")
++        corpo = json.dumps({"id": id_de(1), "fixada": True, "marcadores": ["ideia"]}).encode("utf-8")
++        status, dados, _ = self.pede("POST", "/api/seth/conversa/organizar", corpo, self.mesma_origem())
++        self.assertEqual(status, 200)
++        self.assertEqual(json.loads(dados)["marcadores"], ["ideia"])
++        cruzado = dict(self.mesma_origem(), **{"Sec-Fetch-Site": "cross-site"})
++        self.assertEqual(self.pede("POST", "/api/seth/conversa/organizar", corpo, cruzado)[0], 403)
++        grande = b"{" + b" " * 4200 + b"}"
++        self.assertEqual(self.pede("POST", "/api/seth/conversa/organizar", grande, self.mesma_origem())[0], 413)
++        ruim = json.dumps({"id": id_de(1), "fixada": "sim"}).encode("utf-8")
++        status, texto, _ = self.pede("POST", "/api/seth/conversa/organizar", ruim, self.mesma_origem())
++        self.assertEqual((status, texto), (400, b"fixada precisa ser sim ou n\xc3\xa3o"))
++
++    def test_pastas_pela_rota_e_lista_com_contagem(self):
++        self.conversa(1, "Na pasta")
++        status, corpo, _ = self.pede("POST", "/api/seth/pastas", json.dumps({"acao": "criar", "nome": "Projeto"}).encode(),
++                                     self.mesma_origem())
++        self.assertEqual(status, 200)
++        pasta = json.loads(corpo)
++        self.pede("POST", "/api/seth/conversa/organizar", json.dumps({"id": id_de(1), "pasta": pasta["id"]}).encode(),
++                  self.mesma_origem())
++        listado = json.loads(self.pede("GET", "/api/seth/conversas")[1])
++        self.assertEqual(listado["pastas"], [{"id": pasta["id"], "nome": "Projeto", "conversas": 1}])
++        self.assertEqual(listado["organizacao"], "ok")
++        self.assertEqual(self.pede("POST", "/api/seth/pastas", json.dumps({"acao": "mover"}).encode(), self.mesma_origem())[0], 400)
++        self.assertEqual(self.pede("POST", "/api/seth/pastas", b"[1]", self.mesma_origem())[0], 400)
++        cruzado = dict(self.mesma_origem(), **{"Sec-Fetch-Site": "cross-site"})
++        self.assertEqual(self.pede("POST", "/api/seth/pastas", json.dumps({"acao": "criar", "nome": "X"}).encode(), cruzado)[0], 403)
++
++    def test_importar_pela_rota_recusa_acima_do_limite_sem_ler_e_nao_duplica(self):
++        self.conversa(1, "Para importar")
++        corpo = armazem._conversa_exportar(id_de(1), "json")[0]
++        cabecalhos = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json",
++                      "Content-Length": str(armazem.IMPORTACAO_LIMITE_BYTES + 1)}
++        status, texto, _ = self.pede("POST", "/api/seth/conversa/importar", None, cabecalhos)
++        self.assertEqual(status, 413)
++        self.assertIn(f"arquivo acima de {armazem.IMPORTACAO_LIMITE_BYTES} bytes".encode(), texto)
++        status, dados, _ = self.pede("POST", "/api/seth/conversa/importar", corpo, self.mesma_origem())
++        self.assertEqual(json.loads(dados)["estado"], "ja_existe")
++        self.assertEqual(self.pede("POST", "/api/seth/conversa/importar", b"{nao json", self.mesma_origem())[0], 400)
++        cruzado = dict(self.mesma_origem(), **{"Sec-Fetch-Site": "cross-site"})
++        self.assertEqual(self.pede("POST", "/api/seth/conversa/importar", corpo, cruzado)[0], 403)
++
++
++if __name__ == "__main__":
++    unittest.main()
