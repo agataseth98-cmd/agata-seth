@@ -117,7 +117,7 @@ class RotaChatStreamTests(unittest.TestCase):
     def test_raiz_redireciona_para_prototipo(self):
         status, _, cabecalhos = self.request("GET", "/")
         self.assertEqual(status, 302)
-        self.assertEqual(cabecalhos["location"], "/prototipo")
+        self.assertEqual(cabecalhos["location"], "/prototipo#panorama")
 
     def test_conselho_rede_redireciona_para_o_conselho_no_prototipo(self):
         status, _, cabecalhos = self.request("GET", "/conselho-rede")
@@ -126,7 +126,9 @@ class RotaChatStreamTests(unittest.TestCase):
 
     def test_rotas_existentes_seguem_respondendo(self):
         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
-        self.assertEqual(self.request("GET", "/index.html")[0], 200)
+        status, _, cabecalhos = self.request("GET", "/index.html")
+        self.assertEqual(status, 302)
+        self.assertEqual(cabecalhos["location"], "/prototipo#panorama")
 
     # Stream
 
