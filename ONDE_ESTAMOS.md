@@ -1,6 +1,6 @@
 # Onde estamos
 
-Atualizado em 03/11/2026.
+Atualizado em 09/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
@@ -11,6 +11,10 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 ## Hoje, 09/11 (aplicação do painel unificado)
 
 **Aplicação local validada:** `painel-unificado-07-11`. Assinatura P-8 confirmada, diff aplicado em worktree própria e CI local `TUDO OK`. A aplicação segue para PR; o Humano decide se junta. Registro em MEMÓRIAS (973).
+
+## Hoje, 09/11 (proposta núcleo de desenvolvimento)
+
+PR #951 refeita sobre `origin/main` atual, com C11b no diff e registro (974). A CI local foi executada; assinatura e aplicação do diff aguardam o Humano. O restante da fila está sendo processado um PR por vez.
 
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
