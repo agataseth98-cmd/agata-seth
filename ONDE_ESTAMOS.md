@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 09/11 (proposta chat protege conversas)
+
+Proposta sobre `origin/main`, com registro (985). A `chat-protege-conversas-09-11` faz apagar virar mover para a lixeira, exige cabeçalho do painel para escrever conversa, registra cada escrita sem conteúdo e preserva a origem ao salvar. Não aplicada; a assinatura é do Humano. Pendência: decidir a regra de origem (403 sem cabeçalho) e a purga manual por item.
+
 ## Hoje, 09/11 (proposta chat lote 3)
 
 Proposta sobre `origin/main`, com registro (982). A `chat-lote3-09-11` junta busca nas conversas, pastas, fixar, arquivar, marcadores, exportar e importar sem duplicar, e conversa temporária. Não aplicada; a assinatura é do Humano. Link público de compartilhamento fica de fora até decisão de segurança do Humano. Busca com muitas conversas e fluxo no navegador não medidos.
