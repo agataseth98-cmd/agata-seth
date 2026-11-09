@@ -2,7 +2,7 @@
 
 **Nome para assinatura:** `agente-opencode-07-11`
 **Decisão do Humano (07/11/2026):** "a goose sai e o open code entra, integrado de forma primeira palavra ao sistema".
-**Base:** `origin/main` = `83334fde`. Diff: `propostas/agente-opencode-07-11.diff` (230 linhas).
+**Base conferida:** `origin/main` = `012ded7c`. Diff: `propostas/agente-opencode-07-11.diff` (230 linhas; SHA-256 preservado).
 **sha256 do .diff:** `a37db9d089892350c75a4130655c298a3016b0dae00e48cf209337e00abc55d2`
 
 ## O que o diff faz
@@ -43,6 +43,9 @@
 - `scripts/equipe/equipe.py --selftest` com `EQUIPE_DIR` e `EQUIPE_REPO` apontando para diretórios isolados: 34/34 OK. O estado vivo de sincronia não foi tocado.
 - `PYTEST=<pytest 9.2.0> scripts/ci_sdd_local.sh`, rodado duas vezes com as mudanças aplicadas: `CI LOCAL: TUDO OK`, 33 passos OK e 0 FALHA.
 - `git apply --check` do diff contra `83334fde`: OK.
+- `git apply --check` do diff contra `012ded7c`: OK.
+- CI local sobre `012ded7c` com o diff aplicado: `CI LOCAL: TUDO OK`, exit 0.
+- Teste novo `scripts/testar_sem_goose_ativo.py -v`: 6/6 OK; `scripts/equipe/equipe.py --selftest`: 34/34; `bash -n` nos três scripts alterados: OK.
 
 ## O que falta antes de aplicar (passos do Humano, não automáticos)
 1. **Configurar o provedor do OpenCode** (modelo e chave no próprio OpenCode, sem colar a chave aqui). Hoje não há modelo configurado. Sem isso, o terminal abre, mas o OpenCode não responde.
@@ -53,5 +56,5 @@
 
 ## Fora desta proposta (pendências)
 - **Segunda proposta, só docs canon e skills:** `PROJETO.md`, `AGENTS.md`, `config/modelos-gratuitos.md`, `redesign/librechat/README.md`, `redesign/mcp/README.md`, `redesign/router/goose.md`, as skills de `.agents/` que citam o Goose e o índice derivado `ferramentas/`. Preparada depois desta, com os mesmos passos, e sem misturar no mesmo diff.
-- **Entrada em MEMÓRIAS e ONDE_ESTAMOS:** vai na segunda proposta.
+- **Registro da aplicação** em MEMÓRIAS e ONDE_ESTAMOS: vai na segunda proposta. O registro desta proposta (975) e seu estado no painel estão nesta PR.
 - **Dados do Goose:** remoção em proposta separada, depois da pergunta do Passo 4 respondida pelo Humano.

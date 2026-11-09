@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre main.** Propõe trocar o atalho de terminal e o membro de equipe Goose por OpenCode, mantendo `redesign/goose/` e as exceções históricas fora do escopo. O patch de aplicação segue no arquivo `.diff`, não aplicado. CI local atualizada passou; PR #949 é a segunda parte declarada e vem depois desta. Registro sequencial após (974); assinatura e aplicação pendentes do Humano.
+  palavras-chave: proposta, agente, opencode, atualizada, main, propõe, trocar, atalho, terminal, membro, equipe, goose, mantendo, redesign, exceções, históricas, fora, escopo, patch, aplicação, segue, arquivo, diff, aplicado, local, passou, segunda, parte, declarada, vem, desta, registro, sequencial, após, assinatura, pendentes, humano
 (974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobre a base atual.** O diff continua sem aplicação no código do repositório; inclui a correção C11b para remover o ponteiro PROCESSO antigo ao atualizar conversa já hidratada, respeitando `SETH_PROCESSO_HIDRATA=0` e evitando duplicação. Registrada nesta junção após (973). CI local executada nesta worktree; ver corpo da PR para resultados e limitações. Assinatura e aplicação continuam pendentes do Humano.
   palavras-chave: proposta, nucleo, desenvolvimento, refeita, base, atual, diff, continua, aplicação, código, repositório, inclui, correção, remover, ponteiro, processo, antigo, atualizar, conversa, hidratada, respeitando, seth, hidrata, evitando, duplicação, registrada, junção, após, local, executada, worktree, corpo, resultados, limitações, assinatura, continuam, pendentes, humano
 (973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: nova, versão, lote, fecha, lacunas, especificação, entrada, controlada, fontes, pesquisa, externa, efêmera, ciclo, skills, papéis, redundância, orçamento, turno, avaliação, ampliada, painel, acervo, novidades, seth, atrás, flags, desligadas, proposta, versao, pedida, humano, siga, pare, tiver, assinar, decisões, dele, reservado, escrito, assistente, revisado, terminal, direitos, caso, teto, post, rotas, gerais, assinatura
 (946) DIÁRIO — 05/11/2026 · **Nova versão, lote 4 item 3: a evidência da Alexandria pode entrar na hidratação da Seth, desligada por padrão; a sombra observa o bloco e a guarda.** Proposta `alexandria-hidratacao-20261105`.
   palavras-chave: nova, versão, lote, item, evidência, alexandria, pode, entrar, hidratação, seth, desligada, padrão, sombra, observa, bloco, guarda, proposta, hidratacao
-(945) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forjada (nova versão, lote 4 item 2): a resposta que repete segredo ou frase mandada por fonte suspeita ou privada vira recusa.** Proposta `metacognicao-guarda-20261105`.
-  palavras-chave: guarda, contra, instrução, embutida, autoridade, forjada, nova, versão, lote, item, resposta, repete, segredo, frase, mandada, fonte, suspeita, privada, vira, recusa, proposta, metacognicao
+(945) DIÁRIO — 05/11/2026 · **Guarda contra instrução embutida e autoridade forj …
+  palavras-chave: guarda, contra, instrução, embutida, autoridade, forj
 (944) DIÁRIO — 05/11/2026 · **Conversa natural por voz no LibreChat, tudo local: …
   palavras-chave: conversa, natural, voz, librechat, tudo, local
 (943) DIÁRIO — 05/11/2026 · **Projeto 5 sentidos, primeira peça: o ouvido local …
