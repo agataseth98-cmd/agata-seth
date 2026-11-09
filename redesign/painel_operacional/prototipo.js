@@ -1,8 +1,11 @@
 "use strict";
-
+// Painel unificado (/prototipo): uma tela com sete seções, roteadas pelo hash (#panorama, #conversa, ...).
+// O arquivo inteiro fica numa IIFE; o único nome exposto no escopo global é window.AgataPainel.
+(function () {
 const byId = (id) => document.getElementById(id);
-const nav = [...document.querySelectorAll(".nav button[data-page]")];
-const pages = [...document.querySelectorAll(".page")];
+const AgataPainel = (window.AgataPainel = window.AgataPainel || {});
+const SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"];
+const navSecoes = [...document.querySelectorAll(".nav button[data-secao]")];
 const shell = document.querySelector(".shell");
 const sidebarToggle = byId("sidebar-toggle");
 const search = byId("search");
@@ -24,7 +27,7 @@ function setSidebarCollapsed(collapsed) {
   sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
   sidebarToggle.setAttribute("aria-label", collapsed ? "Expandir navegação lateral" : "Recolher navegação lateral");
   sidebarToggle.title = sidebarToggle.getAttribute("aria-label");
-  nav.forEach((button) => { button.title = button.textContent.trim(); });
+  navSecoes.forEach((button) => { button.title = button.textContent.trim(); });
   try { localStorage.setItem("agata-sidebar-collapsed", String(collapsed)); } catch (_) { /* sem persistência */ }
 }
 let sidebarCollapsed = false;
@@ -32,56 +35,98 @@ try { sidebarCollapsed = localStorage.getItem("agata-sidebar-collapsed") === "tr
 setSidebarCollapsed(sidebarCollapsed);
 sidebarToggle.addEventListener("click", () => setSidebarCollapsed(!shell.classList.contains("sidebar-collapsed")));
 
+// Subpainel visível da seção aberta (filho direto da seção, sem atributo hidden).
+function subAtivo() {
+  return document.querySelector(".secao:not([hidden]) > .sub:not([hidden])");
+}
 function filterSearch(value) {
-  const active = document.querySelector(".page.active");
-  if (!active) return;
-  const cards = [...active.querySelectorAll(".cap-card")];
+  const ativo = subAtivo();
+  if (!ativo) return;
+  const cards = [...ativo.querySelectorAll(".cap-card")];
   const query = value.toLocaleLowerCase("pt-BR");
   let visible = 0;
   cards.forEach((card) => {
     const matchesText = !query || card.innerText.toLocaleLowerCase("pt-BR").includes(query);
-    const matchesState = active.id !== "page-capacidades" || capFilter === "all" || card.dataset.state === capFilter;
+    const matchesState = ativo.dataset.sub !== "capacidades" || capFilter === "all" || card.dataset.state === capFilter;
     card.hidden = !(matchesText && matchesState);
     if (!card.hidden) visible++;
   });
   const empty = byId("no-results");
-  if (empty) empty.classList.toggle("show", active.id === "page-capacidades" && cards.length > 0 && visible === 0);
+  if (empty) empty.classList.toggle("show", ativo.dataset.sub === "capacidades" && cards.length > 0 && visible === 0);
 }
-function alternarGrupo(grupo, abrir) {
-  const toggle = grupo.querySelector(".nav-group-toggle"); const sub = grupo.querySelector(".nav-sub");
-  if (!toggle || !sub) return;
-  const aberto = abrir === undefined ? toggle.getAttribute("aria-expanded") !== "true" : abrir;
-  toggle.setAttribute("aria-expanded", String(aberto)); sub.hidden = !aberto;
+
+// Estados de uma seção: carregando, vazio ou erro. Ficam ocultos no HTML; aqui só um aparece por vez.
+function marcarEstado(secao, tipo, texto) {
+  const el = typeof secao === "string" ? byId(secao) : secao;
+  if (!el) return;
+  el.querySelectorAll(":scope > .estados > .estado").forEach((p) => {
+    p.hidden = !tipo || p.dataset.estado !== tipo;
+    if (texto && tipo && p.dataset.estado === tipo) p.textContent = texto;
+  });
+  el.setAttribute("aria-busy", String(tipo === "carregando"));
 }
-document.querySelectorAll(".nav-group-toggle").forEach((toggle) => toggle.addEventListener("click", () => alternarGrupo(toggle.closest(".nav-group"))));
-function showPage(name) {
-  const page = byId("page-" + name);
-  if (!page) return;
-  pages.forEach((item) => item.classList.toggle("active", item === page));
-  nav.forEach((button) => {
-    if (button.dataset.page === name) button.setAttribute("aria-current", "page");
-    else button.removeAttribute("aria-current");
+AgataPainel.marcarEstado = marcarEstado;
+AgataPainel.fetchJson = (url, options, timeoutMs) => fetchJson(url, options, timeoutMs);
+
+// Carregamento de cada subpainel quando ele abre (nomes = data-sub do HTML).
+const CARREGAR_SUB = {
+  integracoes: () => loadDetails(),
+  memoria: () => loadDetails(),
+  capacidades: () => loadCapacidades(),
+  grafo: () => carregarGrafo(),
+  lacunas: () => { calcularLacunas(); carregarLacunasCanon(); },
+  visao: () => carregarVisaoSistema(),
+  qualidade: () => { carregarQualidade(); carregarMedicoes(); },
+  sdd: () => carregarSdd(),
+  frentes: () => carregarFrentes(),
+  "conselho-memoria": () => carregarMemoriaConselho(),
+};
+
+function mostrarSub(secao, sub) {
+  const alvo = byId(secao);
+  if (!alvo) return;
+  const subs = [...alvo.querySelectorAll(":scope > .sub")];
+  const escolhido = subs.find((item) => item.dataset.sub === sub) || subs[0];
+  if (!escolhido) return;
+  subs.forEach((item) => { item.hidden = item !== escolhido; });
+  alvo.querySelectorAll(":scope > .abas > button[data-sub]").forEach((botao) => {
+    const ativa = botao.dataset.sub === escolhido.dataset.sub;
+    botao.setAttribute("aria-selected", String(ativa));
+    botao.classList.toggle("ativa", ativa);
   });
-  document.querySelectorAll(".nav-group").forEach((grupo) => {
-    const atual = !!grupo.querySelector('button[data-page][aria-current="page"]');
-    grupo.classList.toggle("tem-pagina-atual", atual);
-    if (atual) alternarGrupo(grupo, true);
+  const nome = escolhido.dataset.sub;
+  if (CARREGAR_SUB[nome]) CARREGAR_SUB[nome]();
+  else if (nome.startsWith("nv-") && typeof AgataPainel.carregarNovaVersao === "function") AgataPainel.carregarNovaVersao(nome);
+  filterSearch(search.value.trim());
+}
+function mostrarSecao(secao, sub) {
+  const alvo = byId(SECOES.includes(secao) ? secao : "panorama");
+  document.querySelectorAll(".secao").forEach((item) => { item.hidden = item !== alvo; });
+  navSecoes.forEach((botao) => {
+    if (botao.dataset.secao === alvo.id) botao.setAttribute("aria-current", "page");
+    else botao.removeAttribute("aria-current");
   });
-  byId("crumb").textContent = "Agata / " + (page.dataset.title || "Panorama");
+  byId("crumb").textContent = "Agata / " + (alvo.dataset.titulo || "Panorama");
   search.value = "";
-  filterSearch("");
-  if (name === "integracoes" || name === "memoria") loadDetails();
-  if (name === "capacidades") loadCapacidades();
-  if (name === "grafo") carregarGrafo();
-  if (name === "lacunas") { calcularLacunas(); carregarLacunasCanon(); }
-  if (name === "visao") carregarVisaoSistema();
-  if (name === "qualidade") { carregarQualidade(); carregarMedicoes(); }
-  if (name === "sdd") carregarSdd();
-  if (name.startsWith("nv-") && typeof window.carregarNovaVersao === "function") window.carregarNovaVersao(name);
-  if (name === "conselho") loadRelayCatalog();
+  mostrarSub(alvo.id, sub);
 }
-nav.forEach((button) => button.addEventListener("click", () => showPage(button.dataset.page)));
-document.addEventListener("click", (e) => { const b = e.target.closest("[data-open-page]"); if (b) showPage(b.dataset.openPage); });
+function secaoDoHash() {
+  let nome = "";
+  try { nome = decodeURIComponent(location.hash.replace(/^#/, "")); } catch (_) { nome = ""; }
+  return SECOES.includes(nome) ? nome : "panorama";
+}
+function irPara(secao, sub) {
+  mostrarSecao(secao, sub);
+  if (location.hash !== "#" + secao) history.pushState(null, "", "#" + secao);
+}
+function aoMudarHash() { mostrarSecao(secaoDoHash()); }
+window.addEventListener("hashchange", aoMudarHash);
+window.addEventListener("popstate", aoMudarHash);
+navSecoes.forEach((botao) => botao.addEventListener("click", () => irPara(botao.dataset.secao)));
+document.querySelectorAll(".abas > button[data-sub]").forEach((botao) => botao.addEventListener("click", () => {
+  mostrarSub(botao.closest(".secao").id, botao.dataset.sub);
+}));
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-open-page]"); if (b) irPara(b.dataset.openPage, b.dataset.openSub); });
 search.addEventListener("input", () => filterSearch(search.value.trim()));
 document.querySelectorAll(".filterbar button").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".filterbar button").forEach((item) => item.classList.remove("selected"));
@@ -338,15 +383,16 @@ async function fetchJson(url, options = {}, timeoutMs = 30000) {
     return data;
   } finally { clearTimeout(timeout); }
 }
-async function refresh(manual = false) {
+async function atualizarPanorama(manual = false) {
   if (busy || document.visibilityState === "hidden") return;
   busy = true;
+  if (!lastSnapshot) marcarEstado("panorama", "carregando");
   byId("refresh-main").disabled = true; byId("refresh-status").disabled = true;
   try {
     const data = await fetchJson("/api/status", {headers: {Accept: "application/json"}});
     if (!Array.isArray(data.services) || !Array.isArray(data.timers) || !data.git) throw new Error("resposta incompleta");
     const before = lastSnapshot && JSON.stringify(lastSnapshot.services.map((item) => [item.unit, item.state]));
-    lastSnapshot = mergeSnapshot(lastSnapshot, data); collectionFailed = false;
+    lastSnapshot = mergeSnapshot(lastSnapshot, data); collectionFailed = false; marcarEstado("panorama", null);
     render(lastSnapshot);
     const after = JSON.stringify(lastSnapshot.services.map((item) => [item.unit, item.state]));
     if (manual) announce("Leitura manual concluída.");
@@ -354,6 +400,7 @@ async function refresh(manual = false) {
     else if (!before) announce("Leitura local concluída.");
   } catch (_) {
     collectionFailed = true;
+    marcarEstado("panorama", "erro", "Não medido: coleta local indisponível." + (lastSnapshot ? " Última leitura preservada como vencida." : " Sem leitura válida ainda."));
     if (lastSnapshot) render(lastSnapshot, true);
     announce(lastSnapshot ? "Coleta indisponível; última leitura preservada como vencida." : "Coleta local indisponível; sem leitura válida.");
   } finally { busy = false; byId("refresh-main").disabled = false; byId("refresh-status").disabled = false; }
@@ -366,9 +413,10 @@ async function loadDetails() {
     if (!Array.isArray(data.integrations) || !data.memory) throw new Error("resposta incompleta");
     if (lastDetails) data.integrations = preserveList(lastDetails.integrations, data.integrations, "unit");
     if (lastDetails) data.memory = preserveReading(lastDetails.memory, data.memory);
-    lastDetails = data; detailsFailed = false; renderDetails(data);
+    lastDetails = data; detailsFailed = false; marcarEstado("sistema", null); renderDetails(data);
   } catch (_) {
     detailsFailed = true;
+    marcarEstado("sistema", "erro", "Não medido: consulta de integrações indisponível." + (lastDetails ? " Última leitura preservada como vencida." : ""));
     if (lastDetails) renderDetails(lastDetails, true);
     else { set("integration-source", "Consulta indisponível."); set("memory-source", "Consulta indisponível."); }
   } finally { detailsBusy = false; }
@@ -409,9 +457,9 @@ function renderWiki() {
 }
 async function searchWiki(event) {
   event.preventDefault();
-  const query = byId("wiki-query").value.trim();
+  const query = byId("conhecimento-consulta").value.trim();
   if (!query || query.length > 200 || /[\r\n\0]/.test(query)) { set("wiki-status", "Informe uma busca de até 200 caracteres em uma linha."); return; }
-  byId("wiki-submit").disabled = true; wikiData = null; byId("wiki-results").replaceChildren();
+  byId("nv-consultar").disabled = true; wikiData = null; byId("wiki-results").replaceChildren(); marcarEstado("conhecimento", "carregando");
   set("wiki-status", "Consultando fontes locais…");
   try {
     // Busca semântica pode levar até 95 s; não repete nem guarda a consulta.
@@ -419,34 +467,46 @@ async function searchWiki(event) {
     if (!response.ok) throw new Error("HTTP " + response.status);
     const data = await response.json();
     if (!data || data.schema_version !== 1 || !Array.isArray(data.results)) throw new Error("resposta incompatível");
-    wikiData = data; renderWiki();
+    wikiData = data; renderWiki(); marcarEstado("conhecimento", null);
     set("wiki-status", "Fonte: " + data.source + " · observado " + niceTime(data.observed_at) + " · " + data.source_ref + ". O filtro atua sobre os resultados retornados.");
-  } catch (_) { set("wiki-status", "Busca indisponível. Nenhum resultado foi preservado."); }
-  finally { byId("wiki-submit").disabled = false; }
+  } catch (_) { set("wiki-status", "Busca indisponível. Nenhum resultado foi preservado."); marcarEstado("conhecimento", "erro", "Não medido: a busca na documentação falhou. Nenhum resultado foi preservado."); }
+  finally { byId("nv-consultar").disabled = false; }
 }
-byId("wiki-form").addEventListener("submit", searchWiki);
+function aplicarEscopo() {
+  const escopo = byId("conhecimento-escopo").value;
+  document.querySelectorAll(".busca-unica [data-escopo]").forEach((item) => { item.hidden = item.dataset.escopo !== escopo; });
+}
+byId("conhecimento-escopo").addEventListener("change", aplicarEscopo);
+aplicarEscopo();
+// Uma busca só: documentação fica aqui; Alexandria e fora do acervo passam pelo nova_versao.js.
+byId("conhecimento-busca").addEventListener("submit", (event) => {
+  const escopo = byId("conhecimento-escopo").value;
+  if (escopo === "documentacao") { searchWiki(event); return; }
+  event.preventDefault();
+  if (typeof AgataPainel.buscarAcervo === "function") AgataPainel.buscarAcervo(escopo);
+});
 byId("wiki-source").addEventListener("change", renderWiki);
-byId("refresh-main").addEventListener("click", () => refresh(true));
-byId("refresh-status").addEventListener("click", () => refresh(true));
+byId("refresh-main").addEventListener("click", () => atualizarPanorama(true));
+byId("refresh-status").addEventListener("click", () => atualizarPanorama(true));
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
-    refresh();
-    const active = document.querySelector(".page.active");
-    if (active && ["page-integracoes", "page-memoria"].includes(active.id)) loadDetails();
+    atualizarPanorama();
+    const ativo = subAtivo();
+    if (ativo && ["integracoes", "memoria"].includes(ativo.dataset.sub)) loadDetails();
   }
 });
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
-  refresh();
-  const active = document.querySelector(".page.active");
-  if (active && ["page-integracoes", "page-memoria"].includes(active.id)) loadDetails();
+  atualizarPanorama();
+  const ativo = subAtivo();
+  if (ativo && ["integracoes", "memoria"].includes(ativo.dataset.sub)) loadDetails();
 }, 60000);
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
   if (lastSnapshot && snapshotStateKey(lastSnapshot, collectionFailed) !== renderedSnapshotState) render(lastSnapshot, collectionFailed);
   if (lastDetails && detailsStateKey(lastDetails, detailsFailed) !== renderedDetailsState) renderDetails(lastDetails, detailsFailed);
 }, 5000);
-refresh();
+atualizarPanorama();
 
 /* (27/10/2026) Selo de cada capacidade vem de /api/capacidades; sem sonda, o cartão é documento. */
 async function loadCapacidades() {
@@ -458,7 +518,7 @@ async function loadCapacidades() {
     const item = porId.get(el.dataset.live);
     el.textContent = item ? (rotuloVivo[item.state] || "sem leitura") : "sem leitura";
   });
-  document.querySelectorAll("#page-capacidades .cap-card").forEach((cartao) => {
+  document.querySelectorAll("[data-sub='capacidades'] .cap-card").forEach((cartao) => {
     const chip = cartao.querySelector(".chip");
     const probe = cartao.dataset.probe;
     if (!chip) return;
@@ -523,7 +583,7 @@ function abrirEvidenciaDoCartao(cartao) {
   dialogo.showModal();
 }
 function ligarCartoesClicaveis() {
-  document.querySelectorAll("#page-capacidades .cap-card[data-probe]:not([data-probe='documento'])").forEach((cartao) => {
+  document.querySelectorAll("[data-sub='capacidades'] .cap-card[data-probe]:not([data-probe='documento'])").forEach((cartao) => {
     if (cartao.dataset.ligado) return;
     cartao.dataset.ligado = "1";
     cartao.tabIndex = 0; cartao.setAttribute("role", "button");
@@ -846,7 +906,7 @@ window.addEventListener("load", () => { ligarGrafo(); });
 /* (27/10/2026) Mapa de lacunas: cada item do painel sem fonte medida agora vira LACUNA, com o motivo. Lido do próprio DOM. */
 function calcularLacunas() {
   const itens = [];
-  document.querySelectorAll("#page-capacidades .cap-card").forEach((cartao) => {
+  document.querySelectorAll("[data-sub='capacidades'] .cap-card").forEach((cartao) => {
     const titulo = cartao.querySelector("h3").textContent;
     const probe = cartao.dataset.probe;
     if (probe === "documento") itens.push({nome: titulo, motivo: "sem sonda: é documento, não leitura do sistema", onde: "O que posso fazer"});
@@ -863,7 +923,7 @@ function calcularLacunas() {
   return itens.length;
 }
 function marcarLacunasNosCartoes() {
-  document.querySelectorAll("#page-capacidades .cap-card[data-probe='documento'] .chip").forEach((chip) => {
+  document.querySelectorAll("[data-sub='capacidades'] .cap-card[data-probe='documento'] .chip").forEach((chip) => {
     chip.className = "chip horizon"; chip.textContent = "LACUNA · sem sonda";
   });
 }
@@ -1080,3 +1140,117 @@ document.addEventListener("click", (e) => {
 });
 document.querySelectorAll(".close-vault").forEach((b) => b.addEventListener("click", () => byId("vault-dialog").close()));
 byId("vault-dialog").addEventListener("click", (e) => { if (e.target === byId("vault-dialog")) byId("vault-dialog").close(); });
+
+// Frentes (antiga /frentes): leitura somente de /api/frentes, sem ação de controle.
+async function carregarFrentes() {
+  const estado = byId("frentes-estado");
+  const lista = byId("frentes-lista");
+  const cabecalho = byId("frentes-cabecalho");
+  if (!estado || !lista) return;
+  const CAMPOS = [["Entregável", "entregavel"], ["Gate", "gate"], ["Bloqueios", "bloqueios"]];
+  const item = (frenta) => {
+    const li = document.createElement("li");
+    const titulo = document.createElement("h3");
+    titulo.textContent = `${frenta.id} · ${frenta.nome}`;
+    li.appendChild(titulo);
+    for (const [rotulo, campo] of CAMPOS) {
+      const p = document.createElement("p");
+      const b = document.createElement("strong");
+      b.textContent = `${rotulo}: `;
+      p.append(b, document.createTextNode(String(frenta[campo] ?? "")));
+      li.appendChild(p);
+    }
+    if (frenta.piloto_sintetico) {
+      const p = document.createElement("p");
+      const b = document.createElement("strong");
+      b.textContent = "Piloto sintético: ";
+      p.append(b, document.createTextNode(String(frenta.piloto_sintetico)));
+      li.appendChild(p);
+    }
+    return li;
+  };
+  estado.textContent = "Carregando frentes…";
+  try {
+    const resposta = await fetch("/api/frentes", {cache: "no-store", credentials: "same-origin", headers: {Accept: "application/json"}});
+    if (!resposta.ok) throw new Error("status " + resposta.status);
+    const dados = await resposta.json();
+    const frentes = Array.isArray(dados.frentes) ? dados.frentes : [];
+    cabecalho.textContent = `Frentes · palavra atual: ${dados.palavra_atual ?? ""} · dados reais: ${dados.dados_reais ?? ""}`;
+    lista.replaceChildren(...frentes.map(item));
+    estado.textContent = `${frentes.length} frentes.`;
+  } catch (_) {
+    lista.replaceChildren();
+    estado.textContent = "Não medido: não foi possível carregar as frentes.";
+  }
+}
+
+// Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): só leitura de GET /api/conselho/memoria.
+// O texto do cache entra só com textContent. Erro esvazia a lista: nada antigo aparece como atual.
+const MEMORIA_TIPOS = {fato: ["Fato", "active"], decisao: ["Decisão", "planned"], pendencia: ["Pendência", "partial"], nota: ["Nota", "horizon"], diario: ["Diário", ""]};
+let memoriaDados = null;
+let memoriaBusy = false;
+function renderizarMemoria() {
+  const lista = byId("memoria-lista");
+  const resumo = byId("memoria-resumo");
+  if (!lista || !resumo || !memoriaDados) return;
+  const tipo = byId("memoria-tipo").value;
+  const entradas = memoriaDados.entradas.filter((entrada) => tipo === "todos" || entrada.tipo === tipo);
+  const item = (entrada) => {
+    const evento = document.createElement("article");
+    evento.className = "event";
+    const hora = document.createElement("time");
+    hora.textContent = `nº ${entrada.n} · ${entrada.data_hora}`;
+    const titulo = document.createElement("h3");
+    const [rotulo, classe] = MEMORIA_TIPOS[entrada.tipo] || [String(entrada.tipo), ""];
+    const chip = document.createElement("span");
+    chip.className = classe ? `chip ${classe}` : "chip";
+    chip.textContent = rotulo;
+    titulo.append(document.createTextNode(`${entrada.autor} `), chip);
+    const texto = document.createElement("p");
+    texto.textContent = entrada.texto;
+    evento.append(hora, titulo, texto);
+    return evento;
+  };
+  lista.replaceChildren(...entradas.map(item));
+  resumo.textContent = `${entradas.length} de ${memoriaDados.entradas.length} entradas mostradas · lido em ${horaDaLeitura(memoriaDados)}`;
+}
+function horaDaLeitura(dados) {
+  return String(dados.observed_at).slice(0, 16).replace("T", " ");
+}
+// Clique dentro da aba não pode disparar o "entrar no Conselho" de abrir.js, que escuta todo [data-secao="conselho"]:
+// este listener é registrado antes (prototipo.js carrega antes de abrir.js; o teste confere a ordem).
+byId("sub-conselho-memoria").addEventListener("click", (e) => e.stopImmediatePropagation());
+async function carregarMemoriaConselho() {
+  const sub = byId("sub-conselho-memoria");
+  const botao = byId("memoria-atualizar");
+  if (!sub || memoriaBusy) return;
+  memoriaBusy = true;
+  marcarEstado(sub, "carregando");
+  byId("memoria-resumo").textContent = memoriaDados
+    ? `Atualizando · os valores abaixo são de ${horaDaLeitura(memoriaDados)}`
+    : "Lendo a memória do cache…";
+  if (botao) botao.disabled = true;
+  try {
+    const resposta = await fetch("/api/conselho/memoria?n=40", {cache: "no-store", credentials: "same-origin", headers: {Accept: "application/json"}});
+    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
+    const dados = await resposta.json();
+    if (!dados || !Array.isArray(dados.entradas)) throw new Error("resposta incompleta");
+    memoriaDados = dados;
+    marcarEstado(sub, dados.entradas.length ? null : "vazio");
+    renderizarMemoria();
+  } catch (_) {
+    memoriaDados = null;
+    byId("memoria-lista").replaceChildren();
+    byId("memoria-resumo").textContent = "Não medido: a leitura da memória falhou.";
+    marcarEstado(sub, "erro");
+  } finally {
+    memoriaBusy = false;
+    if (botao) botao.disabled = false;
+  }
+}
+byId("memoria-tipo").addEventListener("change", renderizarMemoria);
+byId("memoria-atualizar").addEventListener("click", () => carregarMemoriaConselho());
+
+// Entrada: a seção vem do hash; sem hash ou com hash desconhecido, abre panorama.
+aoMudarHash();
+})();

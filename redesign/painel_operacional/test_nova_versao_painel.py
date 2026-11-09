@@ -119,15 +119,16 @@ class NovaVersaoPainelTests(unittest.TestCase):
         # style-src 'self': atributo style é ignorado pelo navegador; foi a causa da tela crua dos lotes 1 e 2
         import re
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
-        self.assertIn('<link rel="stylesheet" href="nova_versao.css">', html)
-        for sec in re.findall(r'<section class="page nv-page".*?</section>', html, re.S):
-            self.assertNotIn("style=", sec)
-        self.assertEqual(len(re.findall(r'<section class="page nv-page"', html)), 8)
+        # Uma folha só (prototipo.css), com as classes nv-* absorvidas; nova_versao.css saiu.
+        self.assertIn('<link rel="stylesheet" href="prototipo.css">', html)
+        self.assertNotIn('href="nova_versao.css"', html)
+        self.assertNotIn("style=", html)
+        self.assertEqual(len(re.findall(r'<div class="sub nv-page" id="sub-nv-', html)), 9)
         js = (HERE / "nova_versao.js").read_text(encoding="utf-8")
         self.assertNotIn(".style.", js)
         self.assertNotIn('"style"', js)
         import server
-        self.assertIn("/nova_versao.css", server._ASSETS)
+        self.assertNotIn("/nova_versao.css", server._ASSETS)
         self.assertIn("style-src 'self'", (HERE / "server.py").read_text(encoding="utf-8"))
 
     def test_avaliacao_pelo_painel_respeita_os_portoes(self):

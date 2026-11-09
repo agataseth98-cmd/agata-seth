@@ -12,14 +12,14 @@ HERE = Path(__file__).resolve().parent
 HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
 JS = (HERE / "prototipo.js").read_text(encoding="utf-8")
 
-INICIO_SECAO = '<section class="page" id="page-conversa"'
+INICIO_SECAO = '<div class="sub" id="sub-conversa"'
 INICIO_BLOCO_JS = "/* (27/10/2026) Conversa com a Seth"
 FIM_BLOCO_JS = "/* (27/10/2026) Grafo do vault"
 
 
 def secao_conversa() -> str:
     inicio = HTML.index(INICIO_SECAO)
-    fim = HTML.index("<section", inicio + len(INICIO_SECAO))
+    fim = HTML.index("</section>", inicio + len(INICIO_SECAO))
     return HTML[inicio:fim]
 
 
