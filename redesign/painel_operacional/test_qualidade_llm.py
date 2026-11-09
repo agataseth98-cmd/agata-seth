@@ -68,14 +68,14 @@ class QualidadeLlmTests(unittest.TestCase):
 
     def test_pagina_e_navegacao_existem_sem_script_inline(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")
-        self.assertIn('id="page-qualidade"', html)
-        self.assertIn('data-page="qualidade"', html)
+        self.assertIn('id="sub-qualidade"', html)
+        self.assertIn('data-sub="qualidade"', html)
         parser = ScriptInline()
         parser.feed(html)
         self.assertEqual(parser.inline, 0)
         js = (HERE / "prototipo.js").read_text(encoding="utf-8")
         self.assertIn("/api/qualidade-llm", js)
-        self.assertIn('name === "qualidade"', js)
+        self.assertIn("qualidade: () => { carregarQualidade(); carregarMedicoes(); }", js)  # subpainel qualidade
 
 
 if __name__ == "__main__":

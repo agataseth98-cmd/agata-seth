@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 09/11 (aplicação do painel unificado)
+
+**Aplicação local validada:** `painel-unificado-07-11`. Assinatura P-8 confirmada, diff aplicado em worktree própria e CI local `TUDO OK`. A aplicação segue para PR; o Humano decide se junta. Registro em MEMÓRIAS (973).
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).

@@ -72,6 +72,7 @@ def _vault_caminho(caminho: str) -> dict | None:
 CONVERSAS_DIR = Path.home() / ".cache/agata/painel-conversas"
 CONVERSA_ID = re.compile(r"[0-9a-f]{12}")
 CONVERSA_LIMITE_BYTES = 262144
+CONVERSA_MENSAGEM_LIMITE = 65536
 
 
 def _conversa_caminho(conversa_id: str) -> Path | None:
@@ -107,7 +108,7 @@ def _conversa_validar(dados: dict) -> dict | None:
     for m in mensagens:
         if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
             return None
-        if len(m["content"]) > 8000:
+        if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
             return None
         limpas.append({"role": m["role"], "content": m["content"]})
     return {"titulo": titulo, "mensagens": limpas}
@@ -126,6 +127,21 @@ def _conversa_gravar(dados: dict) -> dict | None:
     tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, arq)
     return {"id": conversa_id, **limpo}
+
+
+def _conversa_ler(conversa_id: str) -> dict | None:
+    """Lê e valida uma conversa no contrato que o cliente exige: versão, id e conteúdo."""
+    arq = _conversa_caminho(conversa_id)
+    if arq is None or not arq.is_file():
+        return None
+    try:
+        dados = json.loads(arq.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    limpo = _conversa_validar(dados)
+    if limpo is None:
+        return None
+    return {"schema_version": 1, "id": conversa_id, **limpo}
 
 
 def _conversa_apagar(conversa_id: str) -> bool:

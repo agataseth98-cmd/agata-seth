@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 83334fde2f3bfa49bf487e6ce4051b7b2a338bb3
-  Escrito em: 07/11/2026 15:31 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4946b52bf36ac3c77557d0e48ee68d487aa718c4
+  Escrito em: 09/11/2026 09:02 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/83334fde2f3bfa49bf487e6ce4051b7b2a338bb3/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4946b52bf36ac3c77557d0e48ee68d487aa718c4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4946b52bf36ac3c77557d0e48ee68d487aa718c4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4946b52bf36ac3c77557d0e48ee68d487aa718c4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4946b52bf36ac3c77557d0e48ee68d487aa718c4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4946b52bf36ac3c77557d0e48ee68d487aa718c4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
+Modelo: Codex (Codex, na Máquina) · vetor: p8_verificar, git apply, git apply --check -R, ci_sdd_local · Autorização: Humano — "feito"
+
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
 - Aplicado em worktree própria a partir de `origin/main`: `git apply` do diff assinado (`redesign/painel_operacional/prototipo.css`, `prototipo.html`, `spec/spec.md` e `test_csp_prototipo.py`). `git apply --check -R` passa; `cmp` entre `git diff origin/main -- redesign/painel_operacional` e o diff assinado é idêntico.
 - Diff movido para `propostas/aplicadas/`; o `APROVADO-csp-prototipo-20261106` copiado (o original permanece na raiz).
