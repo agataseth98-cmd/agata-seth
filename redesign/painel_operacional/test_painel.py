@@ -37,7 +37,7 @@ class PainelTests(unittest.TestCase):
         parser.feed((HERE / "prototipo.html").read_text(encoding="utf-8"))
         duplicates = [name for name, count in collections.Counter(parser.ids).items() if count > 1]
         self.assertEqual(duplicates, [])
-        for name in ("wiki-form", "wiki-query", "wiki-mode", "wiki-source", "wiki-results",
+        for name in ("conhecimento-busca", "conhecimento-consulta", "conhecimento-escopo", "wiki-mode", "wiki-source", "wiki-results",
                      "refresh-main", "refresh-status", "live-services", "live-timers",
                      "maintenance-tasks", "proposal-list", "model-list", "integration-list", "memory-total"):
             self.assertIn(name, parser.ids)
@@ -230,12 +230,13 @@ class HttpTests(unittest.TestCase):
     def test_html_e_status_sao_servidos_e_origem_cruzada_recusada(self):
         self.assertEqual(self.request("GET", "/prototipo")[0], 200)
         self.assertEqual(self.request("GET", "/prototipo.js")[0], 200)
-        self.assertEqual(self.request("GET", "/operator_console/")[0], 200)
-        self.assertEqual(self.request("GET", "/operator_console/index.html")[0], 200)
+        # Operator Console agora vive na seção Qualidade: a tela antiga redireciona; só o script continua servido.
+        status, _, console_headers = self.request("GET", "/operator_console/")
+        self.assertEqual(status, 302)
+        self.assertEqual(console_headers["Location"], "/prototipo#qualidade")
+        self.assertEqual(self.request("GET", "/operator_console/index.html")[0], 404)
         self.assertEqual(self.request("GET", "/operator_console/app.js")[0], 200)
-        self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 200)
-        _, _, console_headers = self.request("GET", "/operator_console/")
-        self.assertIn("frame-ancestors 'self'", console_headers["Content-Security-Policy"])
+        self.assertEqual(self.request("GET", "/operator_console/style.css")[0], 404)
         _, _, panel_headers = self.request("GET", "/prototipo")
         self.assertIn("frame-ancestors 'none'", panel_headers["Content-Security-Policy"])
         with mock.patch.object(panel, "_cached_status", return_value={"schema_version": 1, "state": "ok"}):
@@ -246,6 +247,23 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/api/status", headers={"Origin": "https://exemplo.invalid"})[0], 403)
         self.assertEqual(self.request("GET", "/prototipo", headers={"Host": "exemplo.invalid"})[0], 421)
         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
+
+    def test_get_conversa_salva_devolve_schema_e_id_e_recusa_ausente(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "0123456789ab"
+            panel._conversa_gravar({"id": conversa_id, "titulo": "Importada", "mensagens": [{"role": "user", "content": "oi"}]})
+            status, body, _ = self.request("GET", f"/api/seth/conversa?id={conversa_id}")
+            self.assertEqual(status, 200)
+            dados = json.loads(body)
+            self.assertEqual((dados["schema_version"], dados["id"]), (1, conversa_id))
+            headers = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
+                       "Content-Type": "application/json"}
+            status_salvar, body_salvar, _ = self.request("POST", "/api/seth/conversa",
+                json.dumps(dados).encode("utf-8"), headers)
+            self.assertEqual(status_salvar, 200)
+            self.assertEqual(json.loads(body_salvar)["id"], conversa_id)
+            self.assertEqual(len(list(Path(tmp).glob("*.json"))), 1)
+            self.assertEqual(self.request("GET", "/api/seth/conversa?id=aaaaaaaaaaaa")[0], 404)
 
 
     def test_leituras_de_api_recusam_origem_cruzada_mas_a_extensao_passa(self):
@@ -300,7 +318,7 @@ class HttpTests(unittest.TestCase):
 
     def test_pagina_do_painel_nao_tem_script_inline_por_causa_da_csp(self):
         # A CSP serve script-src 'self': <script> sem src é bloqueado e o botão não faz nada.
-        for nome in ("prototipo.html", "index.html"):
+        for nome in ("prototipo.html",):
             html = (Path(__file__).parent / nome).read_text(encoding="utf-8")
             inline = []
 
@@ -510,6 +528,18 @@ class HttpTests(unittest.TestCase):
                 self.assertFalse(panel._conversa_apagar(salvo["id"]))
             finally:
                 panel.armazem.CONVERSAS_DIR = antes
+
+    def test_conversa_importada_com_mensagem_de_18973_caracteres_e_lida(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            conversa_id = "0123456789ab"
+            salvo = panel._conversa_gravar({"id": conversa_id, "mensagens": [{"role": "user", "content": "x" * 18973}]})
+            self.assertIsNotNone(salvo)
+            lida = panel._conversa_ler(conversa_id)
+            self.assertEqual(lida["schema_version"], 1)
+            self.assertEqual(lida["id"], conversa_id)
+            self.assertEqual(len(lida["mensagens"][0]["content"]), 18973)
+            self.assertIsNotNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65536}]}))
+            self.assertIsNone(panel.armazem._conversa_validar({"mensagens": [{"role": "user", "content": "x" * 65537}]}))
 
 if __name__ == "__main__":
     unittest.main()

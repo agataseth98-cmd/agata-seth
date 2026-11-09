@@ -10,7 +10,15 @@ Na raiz do repositório:
 python3 redesign/painel_operacional/server.py
 ```
 
-Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede**, ou acesse diretamente `http://127.0.0.1:20146/conselho-rede`. Instale/atualize `redesign/painel_operacional/relay-extension-v2/` como extensão não empacotada no Chromium e habilite-a. O painel e a extensão devem pertencer à mesma versão da entrega. Para encerrar uma execução manual, use Ctrl-C no terminal em que ela foi iniciada.
+Abra `http://127.0.0.1:20146/prototipo`. A tela tem sete seções, escolhidas pelo menu lateral ou pelo hash: `#panorama`, `#conversa`, `#conselho`, `#sistema`, `#conhecimento`, `#custos` e `#qualidade`. Hash desconhecido abre o Panorama. Links antigos (`/`, `/index.html`, `/frentes`, `/operator_console`, `/conselho-rede`) redirecionam para a seção certa. Instale/atualize `redesign/painel_operacional/relay-extension-v2/` como extensão não empacotada no Chromium e habilite-a. O painel e a extensão devem pertencer à mesma versão da entrega. Para encerrar uma execução manual, use Ctrl-C no terminal em que ela foi iniciada.
+
+## Telas do /prototipo
+
+- Cada tela antiga virou um subpainel (`sub-<nome>`) dentro de uma seção. A tabela de funções está em `spec/spec.md` (seção Mapeamento de funções).
+- A busca única de Conhecimento serve à Alexandria (escopo `dentro`), ao Acervo com busca externa (escopo `fora`) e à documentação da Agata (escopo `documentacao`).
+- Estado carregando, vazio e erro aparecem em cada seção que consome API. Erro é "não medido"; valor antigo, se houver, sai com a hora dele.
+- O estilo é um arquivo só, `prototipo.css`, com tokens em `:root`. Cada cor hexadecimal ou rgb virou token nomeado pelo valor (`--cor-...`); não há cor literal fora de `:root`.
+- Os scripts ficam em IIFE. O único nome global é `window.AgataPainel`, usado por `nova_versao.js` para falar com o `prototipo.js`.
 
 ## Conselho em Rede
 
@@ -27,6 +35,8 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
 - `/api/status` consulta unidades, Git, timers, tarefas, propostas locais e o catálogo de capacidades, com origem, horário e validade para as leituras.
 - `/api/details` consulta sob demanda integrações e contagem de notas do vault derivado. Unidade ativa não prova funcionamento completo da integração.
 - `/api/wiki/search` usa o verificador local, limita consulta e retorno e não guarda histórico.
+- A leitura `/api/seth/conversa?id=` valida o arquivo e devolve `schema_version` e `id` esperados pelo cliente; mensagens importadas de até 65536 caracteres podem ser reabertas e salvas.
+- `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
 - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
 
 ## Verificar em cópia isolada
@@ -34,6 +44,8 @@ Abra `http://127.0.0.1:20146/prototipo` e escolha **Conselho de Modelos em Rede*
 ```sh
 python3 redesign/painel_operacional/server.py --selftest
 python3 -m unittest discover -s redesign/painel_operacional -p 'test_*.py'
+# suíte do painel (inclui test_painel_unificado.py; o teste de globais usa node)
+pytest -q redesign/painel_operacional
 node --check redesign/painel_operacional/prototipo.js
 ```
 
