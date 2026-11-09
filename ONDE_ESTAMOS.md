@@ -24,6 +24,10 @@ PR #948 atualizada sobre `main`, com registro (975). A proposta troca o atalho d
 
 PR #949 atualizada como segunda parte da troca, com registro (976). O diff contém apenas os deltas de documentação, configuração e skills; o registro da decisão fica no diff da primeira proposta para não duplicar. A CI local passou.
 
+## Hoje, 09/11 (proposta origem preservada)
+
+PR #947 atualizada sobre `main`, com registro (977). O diff propõe preservar origem dos dados ao salvar conversas; suíte do painel e CI local passaram. Armazenamento real e conversas acima de 8000 caracteres não foram validados.
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).
