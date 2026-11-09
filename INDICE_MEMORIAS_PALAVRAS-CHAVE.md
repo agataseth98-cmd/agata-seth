@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenciosas do chat, seletor de modelo e modelo real.** O patch segue só em `propostas/chat-lote2-09-11.diff` (SHA-256 `2feb00dcf985b221e1455dc4bb1e027cbeffa4cbae7aa015ae41462f2c409d40`), contra `origin/main` `1bce7d59`, só em `redesign/painel_operacional/`. `git apply --check` passou nesta base. Testes: 215 com 1 falha pré-existente em `test_sdd_painel`, medidos no lote de origem e não repetidos nesta publicação. Não medido: resposta real do gateway com `X-Modelo-Real`; os testes usam gateway falso. Nada aplicado; assinatura pendente do Humano.
+  palavras-chave: proposta, chat, lote, publicada, falhas, silenciosas, seletor, modelo, real, patch, segue, propostas, diff, sha, feb, dcf, cbeffa, cbae, contra, origin, main, bce, redesign, painel, operacional, git, apply, check, passou, base, testes, falha, pré, existente, test, sdd, medidos, origem, repetidos, publicação, medido, resposta, gateway, usam, falso, nada, aplicado, assinatura, pendente, humano
 (978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
   palavras-chave: proposta, tira, librechat, refeita, main, patch, retirar, atalhos, seth, parar, lista, segue, propostas, diff, aplicação, revalidação, cobertura, cinco, testes, unitários, local, tudo, contêineres, volumes, excluídos, foram, recriados, assinatura, pendentes, humano
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre main.** O patch para `armazem.py` e seus testes segue apenas em `propostas/origem-preservada-07-11.diff`, sem aplicação ao código do repositório. Revalidação sobre `ed28bd2c`: suíte do painel 162 passed e 118 subtests; CI local `TUDO OK`. Colisão de conteúdo longo e estado do armazenamento real continuam fora do escopo, conforme o registro da proposta. Assinatura e aplicação pendentes do Humano.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: rodada, bate, prazo, vira, incompleta, concluída, avaliação, lote, reservado, teste, itens, tinha, teto, rodou, saiu, proposta, avaliacao
 (950) DIÁRIO — 05/11/2026 · **Gratuitos por passagem e cota esgotada sinalizada (nova versão, lote 7): os modelos gratuitos do OpenRouter e o Z.AI entram na avaliação, e 429 vira estado próprio, não falha de rede.** Proposta `gratuitos-cota-20261105`.
   palavras-chave: gratuitos, passagem, cota, esgotada, sinalizada, nova, versão, lote, modelos, openrouter, entram, avaliação, vira, estado, próprio, falha, rede, proposta
-(949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão, lote 6): a Máquina confere, em sombra, se os números que a resposta anterior afirma aparecem nas fontes do turno.** Proposta `suporte-sombra-20261105`.
-  palavras-chave: revisão, suporte, mecânica, sombra, nova, versão, lote, máquina, confere, números, resposta, anterior, afirma, aparecem, fontes, turno, proposta
+(949) DIÁRIO — 05/11/2026 · **Revisão de suporte mecânica em sombra (nova versão …
+  palavras-chave: revisão, suporte, mecânica, sombra, nova, versão
 (948) DIÁRIO — 05/11/2026 · **Limites do lote 5 resolvidos com alternativas grat …
   palavras-chave: limites, lote, resolvidos, alternativas, grat
 (947) DIÁRIO — 05/11/2026 · **Nova versão, lote 5: fecha as lacunas da especific …
