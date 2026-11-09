@@ -20,6 +20,10 @@ PR #951 refeita sobre `origin/main` atual, com C11b no diff e registro (974). A 
 
 PR #948 atualizada sobre `main`, com registro (975). A proposta troca o atalho de terminal e o membro da equipe para OpenCode; a CI local passou. A proposta de documentação #949 declara dependência desta e segue depois.
 
+## Hoje, 09/11 (proposta docs OpenCode)
+
+PR #949 atualizada como segunda parte da troca, com registro (976). O diff contém apenas os deltas de documentação, configuração e skills; o registro da decisão fica no diff da primeira proposta para não duplicar. A CI local passou.
+
 ## Hoje, 06/11 (aplicação teto do Conselho)
 
 **Aplicado:** `sem-teto-conselho-20261106`. O pedido ao Conselho Remoto não tem mais teto de tamanho (`scripts/conselho_remoto.py`, 4 linhas removidas). Assinado pelo Humano e verificado com `p8_verificar` (PODE APLICAR). Registro em MEMÓRIAS (971).

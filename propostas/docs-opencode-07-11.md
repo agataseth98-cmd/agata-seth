@@ -2,17 +2,17 @@
 
 **Nome para assinatura:** `docs-opencode-07-11`
 **Decisão do Humano (07/11/2026):** "a goose sai e o open code entra, integrado de forma primeira palavra ao sistema".
-**Base:** `origin/main` = `83334fde`. Diff: `propostas/docs-opencode-07-11.diff` (12 arquivos, sem misturar código).
-**sha256 do .diff:** `afb8a9f5813a761105365e1263ba4d2074a5fe806f343abc02eec8aadbdaee6c`
+**Base conferida:** `origin/main` = `13c34c1a`. Diff: `propostas/docs-opencode-07-11.diff` (10 arquivos; delta documental/skills para vir depois da aplicação da proposta 1).
+**sha256 do .diff:** `96e2cd126889d19851a7f6e5cd224c6ecc39eb1280f342f1ad3b0de57fc0b43d`
 
-**Ordem:** esta proposta é separada da `agente-opencode-07-11` (atalho, equipe, teste e CI). Não há conflito de arquivo entre as duas. O texto desta descreve o OpenCode como agente de terminal, o que só vale depois que a primeira for aplicada. Assine a primeira antes.
+**Ordem:** esta é a segunda parte e vem depois de `agente-opencode-07-11` (atalho, equipe, teste e CI). O registro da decisão em MEMÓRIAS/ONDE_ESTAMOS pertence ao diff da primeira parte; removi esses hunks daqui para não repetir a mesma entrada. O texto desta descreve o OpenCode como agente de terminal, o que só vale depois que a primeira for aplicada. Assine a primeira antes.
 
 ## O que o diff faz
 - **Canon:** `PROJETO.md` (Frentes, combo `seth-codigo`, lista de agentes, atalho "Seth (agente)", voz comum); `AGENTS.md` (lista de ferramentas, aprovação de ferramenta, voz comum, `seth_gateway`).
 - **Configuração e docs:** `config/modelos-gratuitos.md` (tier 0 do `seth-codigo` e cabeçalhos; o histórico das decisões antigas fica como está); `redesign/librechat/README.md` (agente de código); `redesign/mcp/README.md` (lista de executores e exemplo de cliente); `redesign/router/goose.md` (banner de histórico no topo, o texto fica).
 - **Skills:** `agata-aplicar-proposta` (config do agente no runtime); `agata-conversar-com-seth` (descrição e MCP de navegador); `agata-fluxo-equipe` (descrição e nome do membro `opencode`).
 - **Índice derivado:** `ferramentas/indice.json`, regenerado com `python3 -I ferramentas/ferramentas.py reindexar`. O comando mudou só os dois resumos que citam o Goose; `ferramentas/INDICE.md` não mudou.
-- **Registro:** `MEMÓRIAS.md`, entrada (973), logo abaixo do marcador `ENTRADAS-NOVAS` (5 linhas acrescentadas, nenhuma removida). `ONDE_ESTAMOS.md`, bloco "Hoje, 07/11" no topo e data da página.
+- **Registro da decisão:** fica no diff da primeira parte; este diff não altera `MEMÓRIAS.md` nem `ONDE_ESTAMOS.md`, para evitar duplicação.
 
 ## O que fica de propósito
 - O histórico continua: decisões com data (ex.: 13/10 sobre o Groq e o `seth-codigo`), entradas antigas de MEMÓRIAS e `redesign/LOG.md`, fora desta proposta.
@@ -23,9 +23,7 @@
 | Arquivo | Tipo | sha256 |
 |---|---|---|
 | `AGENTS.md` | canon | `e8e752931c5570e50db1bb7fd0e506f2dd3e55391175933ea3bc7c602164db17` |
-| `MEMÓRIAS.md` | canon (append-only) | `d9a595bcc7d613b130b9cc9d90e7dbdefd067bc7cc371e1096dac42bc2fde96d` |
-| `ONDE_ESTAMOS.md` | página viva | `f7ef95c2d6e736ced11cec2ed742c214508bbf3c9802eda38484ad0b12ed427b` |
-| `PROJETO.md` | canon | `587413fb88211fa6012ced3dac635fa7602b854d83cdd901ed4804cac8810a4d` |
+| `PROJETO.md` | canon | `20c7f74128015f28fecd633ba4b7a2573e7d84a2a19f24c690197e1d2c3a47cf` |
 | `config/modelos-gratuitos.md` | config | `bdede05c876b1417659b752f4259bfe466ea869229d5c766de4073dddc460b9e` |
 | `ferramentas/indice.json` | derivado (reindexar) | `9a324014fec1a2b300448ae727d6bd4f6ff023f50f33931dabcc329846363a99` |
 | `redesign/librechat/README.md` | doc | `3b6dd8a6fcf00acc15839126837b36aaa1eaef0f5792c41c6b06705c64ab40d0` |
@@ -37,12 +35,12 @@
 
 ## Verificação feita
 - `PYTEST=<pytest 9.2.0> scripts/ci_sdd_local.sh` com as mudanças aplicadas na worktree: `CI LOCAL: TUDO OK`, 33 OK e 0 FALHA. Inclui o lint das skills e o selftest de qualidade.
-- `git apply --check` do diff contra `83334fde`: OK. Aplicado de novo e revertido, para conferir os sha256 acima.
-- `MEMÓRIAS.md`: o diff só acrescenta linhas (5 linhas, nenhuma removida), então o P-5 de append-only deve passar.
-- Nenhuma citação numerada de MEMÓRIAS nova na entrada (973): o P-7 não tem o que checar além disso. A frase entre aspas é o pedido do Humano, transcrito como recebido; não conferi em canon.
+- `git apply --check` do diff contra `13c34c1a`: OK. Também foi conferido em sequência após aplicar o diff da primeira proposta.
+- As somas dos arquivos finais foram medidas após aplicar os dois diffs em sequência, sobre `13c34c1a`.
+- Reexecução em 09/11/2026 com a primeira proposta e este delta aplicados sequencialmente: `CI LOCAL: TUDO OK`, exit 0.
 
 ## O que falta antes de assinar e aplicar
-1. **Número da entrada:** a (973) assume que a (972) continua no topo. Se outra entrada entrar antes, a numeração é ajustada na entrada seguinte, sem editar esta.
+1. **Número da entrada de aplicação:** pertence ao diff da primeira proposta; a numeração final da aplicação deve ser conferida quando o Humano assinar, após a fila de propostas.
 2. **Hook de commit:** o pre-commit roda os controles P-1 a P-23 e grava âncoras de SHA em REGRAS, PROJETO, MEMÓRIAS e PROMPT_CARREGAMENTO, o que é normal nas outras propostas. Não rodei o perímetro sobre esta mudança.
 3. **Ordem de aplicação:** aplicar `agente-opencode-07-11` antes desta, para o texto ficar verdadeiro.
 4. **Passos do Humano:** os mesmos da primeira proposta (modelo do OpenCode configurado e PATH). Sem isso, o texto "OpenCode no terminal" descreve um estado que ainda não existe.
