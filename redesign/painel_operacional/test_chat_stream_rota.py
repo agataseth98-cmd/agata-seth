@@ -7,10 +7,12 @@ import http.client
 import importlib.util
 import json
 import socket
+import tempfile
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest import mock
 
 from chat_stream import codificar_sse
 
@@ -30,9 +32,26 @@ def _chunk(texto):
 class GatewayFalsoHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         tamanho = int(self.headers.get("Content-Length", "0"))
-        self.server.recebidos.append(json.loads(self.rfile.read(tamanho).decode("utf-8")))
+        pedido = json.loads(self.rfile.read(tamanho).decode("utf-8"))
+        self.server.recebidos.append(pedido)
+        # X-Modelo-Real do gateway de verdade (seth_gateway.py): só vai no cabeçalho quando o teste pede.
+        cabecalhos = [("X-Modelo-Real", self.server.modelo_real)] if self.server.modelo_real else []
+        if pedido.get("stream") is False:  # fallback /api/seth/chat: resposta inteira em JSON (roteiro, se o teste der um)
+            corpo = (self.server.roteiro or json.dumps(
+                {"model": "seth-livre", "choices": [{"message": {"content": self.server.resposta_json}}]},
+                ensure_ascii=False)).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(corpo)))
+            for nome, valor in cabecalhos:
+                self.send_header(nome, valor)
+            self.end_headers()
+            self.wfile.write(corpo)
+            return
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
+        for nome, valor in cabecalhos:
+            self.send_header(nome, valor)
         self.end_headers()
         self.wfile.write(self.server.roteiro.encode("utf-8"))
 
@@ -67,6 +86,8 @@ class RotaChatStreamTests(unittest.TestCase):
         cls.gateway = ThreadingHTTPServer(("127.0.0.1", 0), GatewayFalsoHandler)
         cls.gateway.daemon_threads = True
         cls.gateway.roteiro = ""
+        cls.gateway.resposta_json = "resposta do gateway falso"
+        cls.gateway.modelo_real = ""
         cls.gateway.recebidos = []
         cls.gateway_thread = threading.Thread(target=cls.gateway.serve_forever, daemon=True)
         cls.gateway_thread.start()
@@ -85,6 +106,7 @@ class RotaChatStreamTests(unittest.TestCase):
     def setUp(self):
         self.gateway.recebidos.clear()
         self.gateway.roteiro = ""
+        self.gateway.modelo_real = ""
         panel.GATEWAY_CHAT_URL = self.gateway_url
 
     def tearDown(self):
@@ -189,6 +211,169 @@ class RotaChatStreamTests(unittest.TestCase):
         status, _, _ = self.post_stream(self.MENSAGENS, content_type="text/plain")
         self.assertEqual(status, 415)
         self.assertEqual(self.gateway.recebidos, [])
+
+    # Motivo do 400/413 (a UI mostra o corpo da resposta) e teto do fallback
+
+    def post_chat(self, corpo):
+        dados = json.dumps(corpo).encode("utf-8")
+        return self.request("POST", "/api/seth/chat", body=dados,
+                            headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}"})
+
+    def post_conversa(self, corpo_bytes, extra=None):
+        cabecalhos = {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}",
+                      "Sec-Fetch-Site": "same-origin"}
+        cabecalhos.update(extra or {})
+        return self.request("POST", "/api/seth/conversa", body=corpo_bytes, headers=cabecalhos)
+
+    def test_mensagem_longa_no_stream_recusada_com_motivo_sem_ecoar_o_texto(self):
+        status, corpo, _ = self.post_stream({"mensagens": [{"role": "user", "content": "SEGREDO" + "x" * 4000}]})
+        self.assertEqual(status, 400)
+        self.assertIn("4000 caracteres", corpo.decode("utf-8"))
+        self.assertNotIn(b"SEGREDO", corpo)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_pedido_acima_do_limite_do_stream_tem_motivo_em_portugues(self):
+        status, corpo, _ = self.post_stream(b"{}", extra={"Content-Length": str(panel.CHAT_STREAM_LIMITE_BYTES + 1)})
+        self.assertEqual(status, 413)
+        self.assertEqual(corpo.decode("utf-8"), f"pedido acima de {panel.CHAT_STREAM_LIMITE_BYTES} bytes")
+
+    def test_fallback_aceita_janela_maior_que_16384_bytes(self):
+        # 20 mensagens de 4000 caracteres ~ 80 KB em JSON: antes o fallback recusava acima de 16384 bytes
+        mensagens = [{"role": "user" if i % 2 == 0 else "assistant", "content": "a" * 4000} for i in range(20)]
+        status, corpo, _ = self.post_chat({"messages": mensagens})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(corpo)["content"], "resposta do gateway falso")
+        self.assertEqual(len(self.gateway.recebidos[-1]["messages"]), 20)
+
+    def test_fallback_recusa_acima_do_limite_do_stream_com_motivo(self):
+        # Cada quebra de linha vira \\n no JSON (2 bytes): 20 x 4000 quebras passam de 131072 bytes
+        mensagens = [{"role": "user", "content": "\n" * 4000} for _ in range(20)]
+        status, corpo, _ = self.post_chat({"messages": mensagens})
+        self.assertEqual(status, 413)
+        self.assertEqual(corpo.decode("utf-8"), f"pedido acima de {panel.CHAT_STREAM_LIMITE_BYTES} bytes")
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_fallback_recusa_mensagem_longa_com_motivo_em_portugues(self):
+        status, corpo, _ = self.post_chat({"messages": [{"role": "user", "content": "x" * 4001}]})
+        self.assertEqual(status, 400)
+        self.assertEqual(corpo.decode("utf-8"), "mensagem vazia ou acima de 4000 caracteres")
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_conversa_acima_do_limite_recusada_com_motivo(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            status, corpo, _ = self.post_conversa(b"{}", extra={"Content-Length": str(panel.CONVERSA_LIMITE_BYTES + 1)})
+            self.assertEqual(status, 413)
+            self.assertEqual(corpo.decode("utf-8"), f"conversa acima de {panel.CONVERSA_LIMITE_BYTES} bytes")
+            self.assertEqual(list(Path(tmp).glob("*.json")), [])
+
+    def test_conversa_recusada_diz_a_regra_que_falhou(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            muitas = json.dumps({"titulo": "Longa", "mensagens": [{"role": "user", "content": "oi"}] * 201}).encode("utf-8")
+            status, corpo, _ = self.post_conversa(muitas)
+            self.assertEqual((status, corpo.decode("utf-8")), (400, "mais de 200 mensagens"))
+            grande = json.dumps({"titulo": "X", "mensagens": [{"role": "user", "content": "x" * 65537}]}).encode("utf-8")
+            status, corpo, _ = self.post_conversa(grande)
+            self.assertEqual((status, corpo.decode("utf-8")), (400, "uma mensagem passa de 65536 caracteres"))
+            self.assertEqual(list(Path(tmp).glob("*.json")), [])
+    # Modelo do chat: lista fixa. O servidor recusa o que está fora dela antes de chamar o gateway.
+
+    def test_stream_manda_ao_gateway_o_modelo_escolhido(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, _ = self.post_stream({**self.MENSAGENS, "modelo": "seth-public"})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-public")
+
+    def test_stream_sem_modelo_manda_seth_livre(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, _ = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-livre")
+
+    def test_stream_recusa_modelo_fora_da_lista_com_400_sem_chegar_ao_gateway(self):
+        for ruim in ("seth-zai", "seth-gemini", "seth-hf", "seth-mistral", "seth-auto",
+                     "seth-rapido", "seth-pesado", "seth-codigo", "", 3, ["seth-livre"]):
+            with self.subTest(modelo=ruim):
+                status, _, _ = self.post_stream({**self.MENSAGENS, "modelo": ruim})
+                self.assertEqual(status, 400)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_get_modelos_devolve_padrao_e_lista_fixa(self):
+        status, corpo, cabecalhos = self.request("GET", "/api/seth/modelos")
+        self.assertEqual(status, 200)
+        self.assertTrue(cabecalhos["content-type"].startswith("application/json"))
+        dados = json.loads(corpo)
+        self.assertEqual(dados["padrao"], "seth-livre")
+        self.assertEqual([m["id"] for m in dados["modelos"]], ["seth-livre", "seth-public"])
+
+    def test_get_modelos_recusa_origem_cruzada(self):
+        status, _, _ = self.request("GET", "/api/seth/modelos", headers={"Origin": "http://evil.example"})
+        self.assertEqual(status, 403)
+
+    def test_chat_inteiro_valida_o_modelo_e_repassa_o_escolhido(self):
+        self.gateway.roteiro = json.dumps({"model": "m", "choices": [{"message": {"content": "ok"}}]})
+        origem = {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}"}
+        mensagens = [{"role": "user", "content": "oi"}]
+        bom = json.dumps({"messages": mensagens, "modelo": "seth-public"}).encode("utf-8")
+        status, corpo, _ = self.request("POST", "/api/seth/chat", body=bom, headers=origem)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(corpo)["content"], "ok")
+        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-public")
+        self.gateway.recebidos.clear()
+        for ruim in ("seth-zai", ""):
+            with self.subTest(modelo=ruim):
+                corpo_ruim = json.dumps({"messages": mensagens, "modelo": ruim}).encode("utf-8")
+                status, _, _ = self.request("POST", "/api/seth/chat", body=corpo_ruim, headers=origem)
+                self.assertEqual(status, 400)
+        self.assertEqual(self.gateway.recebidos, [])
+        sem_modelo = json.dumps({"messages": mensagens}).encode("utf-8")
+        status, _, _ = self.request("POST", "/api/seth/chat", body=sem_modelo, headers=origem)
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["model"], "seth-livre")
+
+    # Modelo real: o cabeçalho X-Modelo-Real do gateway segue até o navegador, no stream e no fallback.
+
+    def test_stream_repassa_o_modelo_real_no_cabecalho(self):
+        self.gateway.modelo_real = "openai/gpt-oss-120b"
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, corpo, cabecalhos = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertEqual(cabecalhos["x-modelo-real"], "openai/gpt-oss-120b")
+        self.assertEqual(_eventos(corpo)[-1], {"tipo": "fim"})
+
+    def test_stream_sem_cabecalho_do_gateway_nao_manda_modelo_real(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, cabecalhos = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertNotIn("x-modelo-real", cabecalhos)
+
+    def test_stream_nao_repassa_cabecalho_do_gateway_fora_do_formato(self):
+        self.gateway.modelo_real = "lixo com espaço"
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, cabecalhos = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertNotIn("x-modelo-real", cabecalhos)
+
+    def test_fallback_repassa_o_modelo_real_no_cabecalho(self):
+        self.gateway.modelo_real = "openai/gpt-oss-120b"
+        status, corpo, cabecalhos = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
+        self.assertEqual(status, 200)
+        self.assertEqual(cabecalhos["x-modelo-real"], "openai/gpt-oss-120b")
+        self.assertEqual(json.loads(corpo)["content"], "resposta do gateway falso")
+
+    def test_fallback_sem_cabecalho_do_gateway_nao_manda_modelo_real(self):
+        status, _, cabecalhos = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
+        self.assertEqual(status, 200)
+        self.assertNotIn("x-modelo-real", cabecalhos)
+
+    def test_conversa_com_modelo_fora_da_lista_recusada_com_motivo(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            ruim = json.dumps({"titulo": "X", "modelo": "seth-zai", "mensagens": [{"role": "user", "content": "oi"}]}).encode("utf-8")
+            status, corpo, _ = self.post_conversa(ruim)
+            self.assertEqual((status, corpo.decode("utf-8")), (400, "modelo fora da lista"))
+            ruim_na_resposta = json.dumps({"titulo": "X", "mensagens": [{"role": "assistant", "content": "oi", "modelo": "seth-auto"}]})
+            status, corpo, _ = self.post_conversa(ruim_na_resposta.encode("utf-8"))
+            self.assertEqual((status, corpo.decode("utf-8")), (400, "modelo fora da lista"))
+            self.assertEqual(list(Path(tmp).glob("*.json")), [])
 
 
 if __name__ == "__main__":

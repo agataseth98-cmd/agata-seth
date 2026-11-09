@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from chat_stream import MODELO_PADRAO, modelo_permitido, modelo_real_valido
 from relogio import _reading_window
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -97,21 +98,43 @@ def _conversas_listar() -> dict:
     return {"schema_version": 1, "state": "ok", "items": itens}
 
 
-def _conversa_validar(dados: dict) -> dict | None:
+def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
+    """Conversa no formato do painel, com o modelo escolhido (`modelo`, e `modelo` em cada resposta da Seth).
+
+    Modelo ausente vale MODELO_PADRAO (conversa antiga, sem o campo). Modelo fora da lista recusa a
+    gravação (None). `leve` é para leitura de arquivo já salvo: modelo fora da lista vira o padrão, e a
+    conversa abre mesmo assim. `modelo_real` (nome que respondeu, cabeçalho do gateway) é só guardado
+    quando tem formato de nome; se não tem, sai da conversa sem recusar a gravação.
+    """
     if not isinstance(dados, dict):
         return None
     titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
     mensagens = dados.get("mensagens")
     if not isinstance(mensagens, list) or len(mensagens) > 200:
         return None
+    modelo = dados.get("modelo")
+    if modelo is None:
+        modelo = MODELO_PADRAO
+    elif not modelo_permitido(modelo):
+        if not leve:
+            return None
+        modelo = MODELO_PADRAO
     limpas = []
     for m in mensagens:
         if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
             return None
         if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
             return None
-        limpas.append({"role": m["role"], "content": m["content"]})
-    return {"titulo": titulo, "mensagens": limpas}
+        item = {"role": m["role"], "content": m["content"]}
+        if m["role"] == "assistant" and m.get("modelo") is not None:
+            if modelo_permitido(m["modelo"]):
+                item["modelo"] = m["modelo"]
+            elif not leve:
+                return None
+        if m["role"] == "assistant" and modelo_real_valido(m.get("modelo_real")):
+            item["modelo_real"] = m["modelo_real"]
+        limpas.append(item)
+    return {"titulo": titulo, "modelo": modelo, "mensagens": limpas}
 
 
 def _conversa_gravar(dados: dict) -> dict | None:
@@ -138,7 +161,7 @@ def _conversa_ler(conversa_id: str) -> dict | None:
         dados = json.loads(arq.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    limpo = _conversa_validar(dados)
+    limpo = _conversa_validar(dados, leve=True)
     if limpo is None:
         return None
     return {"schema_version": 1, "id": conversa_id, **limpo}

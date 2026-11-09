@@ -1109,6 +1109,8 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .nota{display:block;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px;color:var(--cor-a8b8ce)}
 
 .seth-vazio{color:var(--cor-a8b8ce);margin:auto 0}
+.seth-aviso{margin:0;padding:8px 10px;border-radius:10px;border:1px solid var(--gold);color:var(--gold);font-size:13px;line-height:1.45}
+.msg .seth-aviso{border-color:var(--line);color:var(--cor-a8b8ce)}
 
 .seth-acoes{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 
@@ -1140,7 +1142,20 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 
 .seth-form{display:flex;gap:8px;margin-top:4px}
 
+.seth-modelo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--cor-a8b8ce)}
+
+.seth-modelo-desc{flex-basis:100%;font-size:11px}
+
+.msg-modelo{font-size:12px;color:var(--cor-a8b8ce)}
+
 .seth-form textarea{flex:1;resize:vertical}
+
+/* Campos da conversa no mesmo tema escuro dos demais (tokens de :root: paper, line, ink, teal). Sem branco do navegador. */
+.seth-modelo select,.seth-form textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans)}
+.seth-modelo select{padding:4px 8px;color-scheme:dark}
+.seth-modelo select option{background:var(--sheet);color:var(--ink)}
+.seth-form textarea::placeholder{color:var(--muted);opacity:.75}
+.seth-modelo select:focus,.seth-form textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
 
 .msg-acoes{display:flex;gap:14px;margin-top:8px;font-size:12px}
 

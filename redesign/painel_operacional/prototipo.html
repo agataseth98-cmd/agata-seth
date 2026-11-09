@@ -100,8 +100,9 @@
 <div class="section-heading"><div><div class="eyebrow">Seth · gateway local</div><h1>Conversa com a Seth</h1><p>Só texto. Sem ferramentas e sem escrita no canon. Cada resposta vem do gateway, na hora.</p></div></div>
 <article class="panel seth-panel"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title" id="seth-titulo">Nova conversa</h2></div><span class="chip planned" id="seth-status">PRONTA</span></div>
 <div class="seth-layout"><aside class="seth-lista" aria-label="Conversas salvas"><button class="btn" type="button" id="seth-nova">Nova conversa</button><div id="seth-conversas" class="seth-conversas"></div></aside>
-<div class="seth-main"><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
+<div class="seth-main"><p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p><div id="seth-transcript" class="seth-log" role="log" aria-live="polite"></div>
 <div class="seth-acoes"><div id="seth-exemplos" class="seth-exemplos"></div></div>
+<div class="seth-modelo"><label for="seth-modelo">Modelo</label><select id="seth-modelo"><option value="seth-livre">Seth (padrão)</option></select><span id="seth-modelo-desc" class="seth-modelo-desc"></span></div>
 <form id="seth-form" class="seth-form"><label for="seth-input" class="sr-only">Mensagem para a Seth</label><textarea id="seth-input" rows="2" maxlength="4000" required placeholder="Escreva para a Seth. Enter envia; Shift+Enter quebra a linha."></textarea><button class="btn" type="submit" id="seth-send">Enviar</button></form>
 <p class="subnote">A Seth responde com o que está no canon e no estado medido. Confira a fonte antes de citar.</p></div></div></article>
 </div>
