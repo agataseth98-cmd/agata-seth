@@ -1,4 +1,6 @@
 "use strict";
+// Conselho de Modelos em Rede (seção Conselho do /prototipo). Isolado em IIFE; sem globais.
+(function () {
 
 const $ = (id) => document.getElementById(id);
 const state = { csrf: "", providers: [], actions: [], legacy: [] };
@@ -85,7 +87,7 @@ function renderApproval(item) {
 async function decide(item, approve) {
   try {
     await api("/api/relay-council/decision", jsonOptions({ id: item.id, hash: item.hash, approve }));
-    await refresh();
+    await atualizarConselho();
   } catch (error) { $("status").textContent = `decisão não concluída: ${error.message}`; }
 }
 
@@ -137,7 +139,7 @@ function renderHistory(actions, legacy) {
   }
 }
 
-async function refresh() {
+async function atualizarConselho() {
   try {
     const [snapshot, catalog] = await Promise.all([
       api("/api/relay-council/state"), api("/api/relay-council/catalog"),
@@ -170,7 +172,7 @@ $("promptForm").addEventListener("submit", async (event) => {
     await api("/api/relay-council/actions", jsonOptions({ kind: "send", payload: { site, text } }));
     $("pergunta").value = "";
     $("turnoHint").textContent = "Pedido criado. Ele só será enviado depois da sua aprovação na fila.";
-    await refresh();
+    await atualizarConselho();
   } catch (error) { $("turnoHint").textContent = `pedido não criado: ${error.message}`; }
 });
 
@@ -184,7 +186,7 @@ $("btnConversa").addEventListener("click", async () => {
   try {
     await api("/api/relay-council/groups", jsonOptions({ kind, sites, prompt, repetitions }));
     $("turnoHint").textContent = "Rodada preparada; cada prompt aguarda sua aprovação individual.";
-    await refresh();
+    await atualizarConselho();
   } catch (error) { $("turnoHint").textContent = `rodada não preparada: ${error.message}`; }
 });
 
@@ -203,9 +205,10 @@ $("toolForm").addEventListener("submit", async (event) => {
   try {
     await api("/api/relay-council/actions", jsonOptions({ kind: "tool", payload: { tool, args, text } }));
     $("toolText").value = "";
-    await refresh();
+    await atualizarConselho();
   } catch (error) { $("status").textContent = `pedido de ferramenta não criado: ${error.message}`; }
 });
 
-refresh();
-window.setInterval(refresh, 3000);
+atualizarConselho();
+window.setInterval(atualizarConselho, 3000);
+})();
