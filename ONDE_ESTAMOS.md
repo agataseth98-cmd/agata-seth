@@ -1,12 +1,16 @@
 # Onde estamos
 
-Atualizado em 09/11/2026.
+Atualizado em 11/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 11/11 (proposta chat lote 4)
+
+Proposta sobre `origin/main` `c1a190c6`, com registro (987). A `chat-lote4-09-11` junta editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema claro. Não aplicada; a assinatura é do Humano. Parar só corta o stream de verdade com o gateway real, depois de `chat-stream-verificar-depois-09-11`. Não medido: gateway real, lixeira com ramos no navegador, contraste da paleta clara.
 
 ## Hoje, 09/11 (proposta chat protege conversas)
 
