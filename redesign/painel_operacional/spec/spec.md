@@ -31,6 +31,7 @@
 - Conhecimento tem uma busca única, que serve à Alexandria (escopo "dentro"), ao Acervo (escopo "fora", busca externa) e à Wiki, a documentação do `/index.html` (escopo "documentação"). Decidido pelo Humano em 07/11/2026.
 - Casca registrada, fora das sete seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
 - Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
+- Proteção das conversas (09/11/2026, pedido do Humano depois do sumiço de duas conversas importadas, confirmado por ele em 09/11/2026 às 16:20 como apagadas pela própria tela): apagar vai para a Lixeira, escritas exigem origem do painel e ficam registradas, salvar preserva a origem de conversa importada, e arquivo ilegível é contado e não é apagado. Contrato em Rotas de API (bloco de proteção) e critérios no fim da seção de Critérios.
 
 ## Fora desta versão
 
@@ -68,6 +69,17 @@
   - Origem cruzada nas rotas novas: 403, como nas outras leituras e escritas de `/api/seth/*`.
   - `organizacao.json`, dentro da pasta de conversas, guarda `pastas` e uma entrada por conversa (`fixada`, `arquivada`, `marcadores`, `pasta`, `origem_id`). Sem o arquivo, toda conversa vale o padrão (sem fixada, sem arquivada, sem marcador, sem pasta). Entrada malformada é ignorada na leitura. Arquivo ilegível: a lista avisa (`organizacao: ilegivel`) e as escritas respondem 409 sem sobrescrever.
   - Conversa temporária: existe só na tela. A UI não chama `POST /api/seth/conversa` enquanto ela está ligada.
+  - Conversa, proteção (09/11/2026, `chat-protege-conversas-09-11`). Tudo local, em `~/.cache/agata/painel-conversas`.
+    - `POST /api/seth/conversa/apagar` não apaga de vez: move a conversa para `.lixeira/<id>-<AAAAMMDD-HHMMSS>.json` (mesmos bytes) e leva a entrada de organização junto, guardada na chave `lixeira` de `organizacao.json`. Resposta 200 com `apagada` e `lixeira` (nome do item). Conversa inexistente: 404. Organização ilegível: 409, nada é movido.
+    - `GET /api/seth/lixeira` devolve `schema_version`, `items` (até 200, mais recentes primeiro; cada um com `nome`, `id`, `titulo`, `apagada_em` em `dd/mm/aaaa hh:mm` e `mensagens`), `total` (itens legíveis) e `ilegiveis`.
+    - `POST /api/seth/lixeira/restaurar` com `{nome}`: devolve a conversa ao lugar dela e a entrada de organização (pasta apagada enquanto a conversa estava fora vira sem pasta). Nome inválido: 400; item fora da lixeira: 404; já existe conversa com o mesmo id, ou organização ilegível: 409, nada é mexido.
+    - `POST /api/seth/lixeira/purgar` com `{nome}`: apaga de vez, só por pedido manual (a tela pede confirmação). Nenhuma rotina apaga sozinha. Nome inválido: 400; fora da lixeira: 404; organização ilegível: 409.
+    - Escritas (salvar, apagar, organizar, pastas, importar, restaurar e purgar) exigem `Origin` igual ao do painel ou `Sec-Fetch-Site: same-origin`. Sem cabeçalho nenhum: 403. Cabeçalho que diz outra origem (cross-site, `Origin` de outro site ou `null`): 403, mesmo que o outro cabeçalho bata.
+    - Registro: cada pedido de escrita, inclusive o recusado, acrescenta uma linha em `.registro.jsonl`: `hora` (ISO com -03:00), `rota`, `id` (12 hex, ou nome do item da lixeira; `null` quando não há) e `status`. Sem título, texto, marcador ou nome de pasta. Só acréscimo. Se o arquivo não puder ser escrito, a ação segue e a linha se perde (limite declarado).
+    - Conversa importada (LibreChat): o arquivo guarda `origem`, `origem_id`, `titulo_original`, `data_original`, `importado_em` e `id`. O salvar não reescreve essa origem; quem envia sem `id`, mas com origem já gravada, cai no mesmo arquivo. Campo de origem fora do formato sai sem recusar o salvar. Mensagem mantém `criada` e `origem_id` só se continua no mesmo lugar, com o mesmo papel e texto.
+    - Importação: item que está na lixeira conta como existente: responde `ja_existe` com `lixeira: true`, sem gravar.
+    - Listagem: `total` passa a contar só as conversas legíveis; `ilegiveis` conta os arquivos de conversa que não puderam ser lidos. Eles não aparecem na lista e não são apagados nem mexidos.
+    - Tela: a aba Conversa tem a seção Lixeira (restaurar; apagar de vez em dois cliques). Enquanto a Seth responde, trocar de conversa, Nova conversa e temporária ficam bloqueados, com aviso. Apagar só sai da tela depois da confirmação do painel. Salvar grava na conversa de origem. A contagem de arquivos ilegíveis aparece na lista.
 - Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
   - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
   - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
@@ -103,7 +115,7 @@
 ### APIs usadas por seção (sem rota nova)
 
 - panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`; POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
-- conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`.
+- conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`; GET `/api/seth/lixeira`; POST `/api/seth/lixeira/restaurar` e `/api/seth/lixeira/purgar`.
 - conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
 - sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
 - conhecimento: GET `/api/grafo`, `/api/vault/item`, `/api/nova-versao/estado`; POST `/api/wiki/search`, `/api/nova-versao/executar` (`consultar`, `skills`, `indexar`, `iniciar`, `acervo_*`, `acervo_externa_*`), POST `/api/nova-versao/upload`.
@@ -276,6 +288,24 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] organização ilegível não é sobrescrita: a lista avisa na tela e a escrita responde 409 sem gravar
 - [ ] a busca abre a conversa na mensagem indicada e destaca essa mensagem; sem busca, a lista volta; a lista mostra quantas faltam quando passa de 200
 - [ ] os controles novos da Conversa (busca, filtros, pastas, importação, exportação e temporária) têm id em `prototipo.html`, com limite de tamanho nos campos e as constantes da UI iguais às do servidor; a seção continua sem `style=` nem atributo `on*`
+- [ ] apagar uma conversa a move para `.lixeira/<id>-<AAAAMMDD-HHMMSS>.json`, com os mesmos bytes, e leva a entrada de organização junto; ela sai da lista principal
+- [ ] `GET /api/seth/lixeira` lista o título, a data de apagar e a contagem de mensagens, sem o texto delas, com `schema_version`
+- [ ] restaurar devolve a conversa ao lugar dela com a organização; recusa id repetido (409), nome inválido (400) e item fora da lixeira (404) sem mexer na lixeira
+- [ ] a purga apaga de vez só por pedido manual (`POST /api/seth/lixeira/purgar`); listar, buscar e abrir a lixeira não apagam nada
+- [ ] a seção Lixeira da aba Conversa mostra restaurar e apagar de vez; apagar de vez pede confirmação em dois cliques e só então chama a purga
+- [ ] as escritas de conversa (salvar, apagar, organizar, pastas, importar, restaurar e purgar) respondem 403 sem `Origin` igual ao do painel nem `Sec-Fetch-Site: same-origin`, e não gravam nada
+- [ ] um cabeçalho que diz outra origem (cross-site, `Origin` de outro site ou `null`) recusa a escrita com 403, mesmo com a origem do painel no outro cabeçalho; a origem do painel e same-origin passam
+- [ ] cada pedido de escrita de conversa, inclusive o recusado, acrescenta uma linha em `.registro.jsonl` com hora, rota, id e status, e nenhuma linha traz título, texto ou marcador
+- [ ] o registro só acrescenta linhas, e se ele não puder ser escrito a ação segue
+- [ ] salvar uma conversa importada mantém `origem`, `origem_id`, `titulo_original`, `data_original`, `importado_em` e `id`, e o salvar não reescreve a origem já gravada
+- [ ] salvar pela API uma conversa importada, com id ou sem id, não cria segundo arquivo
+- [ ] uma mensagem reeditada perde a marca de origem dela; a que continua no mesmo lugar, com o mesmo papel e texto, mantém `criada` e `origem_id`
+- [ ] importar uma conversa que está na lixeira não duplica: responde `ja_existe` com `lixeira: true`
+- [ ] a listagem conta os arquivos de conversa ilegíveis em `ilegiveis`, sem apagá-los nem esconder a lista; a tela mostra a contagem
+- [ ] apagar só sai da tela quando o painel confirma; com erro, a mensagem diz o motivo e a conversa aberta continua
+- [ ] enquanto a Seth responde, a tela não troca de conversa, não abre Nova conversa e não liga a temporária: avisa e espera; depois da resposta, volta a funcionar
+- [ ] salvar grava o id e o aviso na conversa de origem, e a tela só é repintada se ela ainda é a aberta
+- [ ] a lixeira fora do ar não derruba a lista de conversas, e a lixeira vazia diz que está vazia
 
 ## Desenho e alternativas
 
@@ -314,6 +344,8 @@ Testes que continuam como estão: `test_csp_prototipo.py`, `test_conselho_rede.p
 
 Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytest 9.2.0 (a versão do CI).
 
+Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: lixeira, escrita com origem, registro, origem preservada ao salvar e arquivos ilegíveis, com servidor numa porta livre) e `test_chat_ui.py::ConversaProtecao` (tela: apagar, bloqueio durante a resposta, salvar na conversa de origem, lixeira e contagem de ilegíveis, em node com DOM mínimo). O harness de `test_chat_ui.py` ganhou a lixeira; `sethSalvar` é exposta só na cópia em memória do arquivo, durante o teste (uma linha antes do fim da IIFE), sem hook no código de produção.
+
 ## Migração e reversão
 
 - Sem migração de dados. O painel não guarda estado além do cache em `~/.cache/agata/painel/`.
@@ -321,6 +353,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 - Reversão: `git revert` do commit de aplicação. Os arquivos retirados (HTML e CSS) voltam com o revert.
 - Ordem de reversão: se a aplicação tiver ido em mais de um passo, reverter do último para o primeiro.
 - Lote 3 (09/11/2026): `organizacao.json` nasce só quando alguém fixa, arquiva, marca ou põe em pasta uma conversa. Sem ele, as conversas valem o padrão. Reverter o código deixa o arquivo ignorado; apagá-lo desfaz a organização sem tocar nas conversas.
+- Proteção (09/11/2026): a pasta `.lixeira/` e o `.registro.jsonl` nascem no primeiro uso. Reverter o código deixa a lixeira fora da lista; as conversas que estiverem nela voltam à mão (mover `.lixeira/<id>-<data>.json` para `<id>.json`). A chave `lixeira` de `organizacao.json` é ignorada pelo código antigo.
 
 ## Riscos e dependências
 
@@ -332,6 +365,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 - Decidido pelo Humano em 07/11/2026: a barra lateral, o cabeçalho e o chip LOCAL ficam fora das sete seções, como casca registrada.
 - A verificação no navegador foi feita em 07/11/2026 (critério 35), com o que está medido e o que não foi medido listado ali. Não é aceite visual do Humano.
 - `pytest` precisa estar disponível. Sem ele, a execução devolve não medido, não falha em silêncio.
+- Proteção (09/11/2026): cliente local que escreve sem cabeçalho (curl, script) passa a receber 403 em toda escrita de conversa. O chat (`/api/seth/chat` e `/api/seth/chat/stream`) não mudou. Salvar uma conversa com um `id` que está na lixeira recria o arquivo com esse id; a restauração depois responde 409 (nada se perde).
 
 ## Código
 
@@ -364,6 +398,7 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 - `test_chat_stream_rota.py`
 - `test_painel_unificado.py`
 - `test_conversas_lote3.py`
+- `test_conversas_protege.py`
 - `test_chat_ui.py`
 - `test_frentes.py`
 - `conselho-rede/`

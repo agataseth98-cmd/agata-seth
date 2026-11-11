@@ -40,7 +40,8 @@ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
     _conversa_exportar, _conversa_gravar, _conversa_importar, _conversa_ler, _conversa_organizar, _conversas_buscar,
-    _conversas_listar, _pasta_mudar, _vault_caminho, _vault_item)
+    _conversas_listar, _lixeira_listar, _lixeira_purgar, _lixeira_restaurar, _pasta_mudar, _registro_escrever,
+    _vault_caminho, _vault_item)
 BIND = "127.0.0.1"
 PORT = 20146
 VERIFIER_URL = "http://127.0.0.1:20141/verificar"
@@ -143,6 +144,15 @@ def _same_origin_request(fetch_site: str | None, origin: str | None) -> bool:
     if fetch_site and fetch_site not in {"same-origin", "none"}:
         return False
     return not origin or origin == ALLOWED_ORIGIN
+
+
+def _escrita_permitida(fetch_site: str | None, origin: str | None) -> bool:
+    """Escrita de conversa (salvar, apagar, organizar, pastas, importar, restaurar, purgar) (09/11/2026): precisa de
+    Origin igual ao do painel ou Sec-Fetch-Site same-origin. Sem cabeçalho nenhum, 403. Cabeçalho que diz outra
+    origem (cross-site, Origin de outro site) também é 403, mesmo que o outro cabeçalho bata."""
+    if fetch_site not in (None, "same-origin") or (origin is not None and origin != ALLOWED_ORIGIN):
+        return False
+    return fetch_site == "same-origin" or origin == ALLOWED_ORIGIN
 
 
 def _linhas_do_gateway(resposta):
@@ -1070,6 +1080,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
         if self.path == "/api/seth/conversas":
             return self._send(200, "application/json; charset=utf-8", json.dumps(_conversas_listar(), ensure_ascii=False).encode("utf-8"))
+        if self.path == "/api/seth/lixeira":
+            return self._send(200, "application/json; charset=utf-8", json.dumps(_lixeira_listar(), ensure_ascii=False).encode("utf-8"))
         if self.path.startswith("/api/seth/conversas/busca?"):
             return self._seth_busca()
         if self.path.startswith("/api/seth/conversa/exportar?"):
@@ -1209,6 +1221,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_conversa(self.path.endswith("/apagar"))
         if self.path in ("/api/seth/conversa/organizar", "/api/seth/pastas", "/api/seth/conversa/importar"):
             return self._seth_organizacao(self.path)
+        if self.path in ("/api/seth/lixeira/restaurar", "/api/seth/lixeira/purgar"):
+            return self._seth_lixeira(self.path.endswith("/restaurar"))
         if self.path == "/api/nova-versao/upload":
             return self._nova_versao_upload()
         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
@@ -1519,24 +1533,62 @@ class Handler(BaseHTTPRequestHandler):
         except OSError:
             return  # o navegador saiu no meio do stream
 
+    def _responder_escrita(self, rota: str, identificador, status: int, corpo: bytes,
+                           tipo: str = "text/plain; charset=utf-8") -> None:
+        """Toda resposta de escrita de conversa passa aqui: grava a linha do registro (sem conteúdo) e responde."""
+        _registro_escrever(rota, identificador, status)
+        return self._send(status, tipo, corpo)
+
     def _seth_conversa(self, apagar: bool) -> None:
-        """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia."""
-        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
-            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        """Histórico de conversas da Seth, em ~/.cache (fora do canon). Só valida e grava o que o próprio painel envia.
+        Apagar move a conversa para a lixeira (09/11/2026); nada é apagado de vez aqui."""
+        rota = self.path
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._responder_escrita(rota, None, 403, b"cross-origin request denied")
         raw_length = self.headers.get("Content-Length", "")
         if not raw_length.isdecimal() or int(raw_length) > CONVERSA_LIMITE_BYTES:
-            return self._send(413, "text/plain; charset=utf-8", f"conversa acima de {CONVERSA_LIMITE_BYTES} bytes".encode("utf-8"))
+            return self._responder_escrita(rota, None, 413, f"conversa acima de {CONVERSA_LIMITE_BYTES} bytes".encode("utf-8"))
         try:
             dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
-            return self._send(400, "text/plain; charset=utf-8", "conversa com JSON inválido".encode("utf-8"))
+            return self._responder_escrita(rota, None, 400, "conversa com JSON inválido".encode("utf-8"))
+        pedido_id = dados.get("id") if isinstance(dados, dict) else None
         if apagar:
-            ok = _conversa_apagar(dados.get("id") if isinstance(dados, dict) else "")
-            return self._send(200 if ok else 404, "application/json; charset=utf-8", json.dumps({"apagada": ok}).encode("utf-8"))
+            try:
+                nome = _conversa_apagar(pedido_id if isinstance(pedido_id, str) else "")
+            except ErroConversa as erro:
+                return self._responder_escrita(rota, pedido_id, erro.status, erro.motivo.encode("utf-8"))
+            if nome is None:
+                return self._responder_escrita(rota, pedido_id, 404, json.dumps({"apagada": False}).encode("utf-8"),
+                                               "application/json; charset=utf-8")
+            corpo = {"apagada": True, "lixeira": nome}
+            return self._responder_escrita(rota, pedido_id, 200, json.dumps(corpo, ensure_ascii=False).encode("utf-8"),
+                                           "application/json; charset=utf-8")
         salvo = _conversa_gravar(dados)
         if salvo is None:
-            return self._send(400, "text/plain; charset=utf-8", armazem.motivo_conversa_recusada(dados).encode("utf-8"))
-        return self._send(200, "application/json; charset=utf-8", json.dumps(salvo, ensure_ascii=False).encode("utf-8"))
+            return self._responder_escrita(rota, pedido_id, 400, armazem.motivo_conversa_recusada(dados).encode("utf-8"))
+        return self._responder_escrita(rota, salvo["id"], 200, json.dumps(salvo, ensure_ascii=False).encode("utf-8"),
+                                       "application/json; charset=utf-8")
+
+    def _seth_lixeira(self, restaurar: bool) -> None:
+        """Lixeira de conversas (09/11/2026): restaurar devolve a conversa; purgar apaga de vez (só manual, com confirmação na tela)."""
+        rota = self.path
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._responder_escrita(rota, None, 403, b"cross-origin request denied")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > SETH_ORGANIZACAO_LIMITE_BYTES:
+            return self._responder_escrita(rota, None, 413, f"pedido acima de {SETH_ORGANIZACAO_LIMITE_BYTES} bytes".encode("utf-8"))
+        try:
+            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._responder_escrita(rota, None, 400, "pedido com JSON inválido".encode("utf-8"))
+        nome = dados.get("nome") if isinstance(dados, dict) else None
+        try:
+            resultado = _lixeira_restaurar(nome) if restaurar else _lixeira_purgar(nome)
+        except ErroConversa as erro:
+            return self._responder_escrita(rota, nome, erro.status, erro.motivo.encode("utf-8"))
+        return self._responder_escrita(rota, nome, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
+                                       "application/json; charset=utf-8")
 
     def _seth_busca(self) -> None:
         """Busca por texto nas conversas salvas (títulos e mensagens), só leitura e local."""
@@ -1558,30 +1610,34 @@ class Handler(BaseHTTPRequestHandler):
 
     def _seth_organizacao(self, rota: str) -> None:
         """Fixar, arquivar, marcadores, pastas e importação das conversas (lote 3). Só valida e grava o que o painel envia."""
-        if not _same_origin_request(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
-            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._responder_escrita(rota, None, 403, b"cross-origin request denied")
         importando = rota.endswith("/importar")
         limite = IMPORTACAO_LIMITE_BYTES if importando else SETH_ORGANIZACAO_LIMITE_BYTES
         raw_length = self.headers.get("Content-Length", "")
         if not raw_length.isdecimal() or int(raw_length) > limite:
             aviso = f"arquivo acima de {limite} bytes" if importando else f"pedido acima de {limite} bytes"
-            return self._send(413, "text/plain; charset=utf-8", aviso.encode("utf-8"))
+            return self._responder_escrita(rota, None, 413, aviso.encode("utf-8"))
         try:
             dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
-            return self._send(400, "text/plain; charset=utf-8", "pedido com JSON inválido".encode("utf-8"))
+            return self._responder_escrita(rota, None, 400, "pedido com JSON inválido".encode("utf-8"))
+        identificador = dados.get("id") if isinstance(dados, dict) and not importando else None
         try:
             if importando:
                 resultado = _conversa_importar(dados)
+                identificador = resultado["id"]
             elif not isinstance(dados, dict):
                 raise ErroConversa(400, "pedido precisa ser um objeto JSON")
             elif rota == "/api/seth/pastas":
                 resultado = _pasta_mudar(dados.get("acao"), dados.get("id"), dados.get("nome"))
+                identificador = resultado.get("id", identificador)
             else:
                 resultado = _conversa_organizar(dados.get("id"), {k: v for k, v in dados.items() if k != "id"})
         except ErroConversa as erro:
-            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
-        return self._send(200, "application/json; charset=utf-8", json.dumps(resultado, ensure_ascii=False).encode("utf-8"))
+            return self._responder_escrita(rota, identificador, erro.status, erro.motivo.encode("utf-8"))
+        return self._responder_escrita(rota, identificador, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
+                                       "application/json; charset=utf-8")
 
     def _seth_chat(self) -> None:
         """Conversa com a Seth pelo gateway local, só texto, sem ferramentas e sem escrita. Modelo: lista fixa (chat_stream).

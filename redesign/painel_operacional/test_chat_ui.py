@@ -73,6 +73,11 @@ function escolher(valor) { if (Array.isArray(valor)) return valor.length > 1 ? v
 function cabecalhosDe(cab) { return {get: (nome) => (cab || {})[String(nome).toLowerCase()] ?? null}; }
 function respostaJson(status, obj, cab) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe(cab), json: async () => obj, text: async () => JSON.stringify(obj)}; }
 function respostaTexto(status, texto) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe({}), json: async () => { throw new Error('sem json'); }, text: async () => texto}; }
+// Resposta que nunca termina: a Seth "está respondendo" até o fim do teste (proteção durante a resposta).
+function respostaPendente() {
+  return {ok: true, status: 200, headers: cabecalhosDe({}), json: async () => ({}), text: async () => '', body: {getReader() { return {
+    read: () => new Promise(() => {}), cancel: async () => {}}; }}};
+}
 function respostaStream(sse, cab) {
   const bytes = new TextEncoder().encode(sse); let lido = false;
   return {ok: true, status: 200, headers: cabecalhosDe(cab), json: async () => ({}), text: async () => '', body: {getReader() { return {
@@ -90,7 +95,27 @@ ctx.fetch = async (url, opcoes = {}) => {
   const metodo = String(opcoes.method || 'GET').toUpperCase();
   chamadas.push({url, metodo, corpo: typeof opcoes.body === 'string' ? opcoes.body : null});
   if (url === '/api/seth/conversas') return respostaJson(200, {schema_version: 1, state: 'ok', items: cen.conversas || [],
-    pastas: cen.pastas || [], marcadores: cen.marcadores || [], total: cen.total ?? (cen.conversas || []).length, organizacao: cen.organizacao || 'ok'});
+    pastas: cen.pastas || [], marcadores: cen.marcadores || [], total: cen.total ?? (cen.conversas || []).length, organizacao: cen.organizacao || 'ok',
+    ilegiveis: cen.ilegiveis || 0});
+  if (url === '/api/seth/lixeira' && metodo === 'GET') {
+    if (cen.lixeiraErro) return respostaTexto(500, '');
+    return respostaJson(200, {schema_version: 1, state: 'ok', items: cen.lixeira || [], total: (cen.lixeira || []).length, ilegiveis: cen.lixeiraIlegiveis || 0});
+  }
+  if (url === '/api/seth/lixeira/restaurar' && metodo === 'POST') {
+    const r = escolher(cen.lixeiraRestaurar) || {};
+    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
+    return respostaJson(200, {id: '0000000000b1', titulo: 'Apagada antes', restaurada: true});
+  }
+  if (url === '/api/seth/lixeira/purgar' && metodo === 'POST') {
+    const r = escolher(cen.lixeiraPurgar) || {};
+    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
+    return respostaJson(200, {purgada: true});
+  }
+  if (url === '/api/seth/conversa/apagar' && metodo === 'POST') {
+    const r = escolher(cen.apagar) || {};
+    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
+    return respostaJson(200, {apagada: true, lixeira: '0123456789ab-20261109-161800'});
+  }
   if (url.startsWith('/api/seth/conversas/busca?')) {
     const r = escolher(cen.busca) || {};
     if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
@@ -123,6 +148,7 @@ ctx.fetch = async (url, opcoes = {}) => {
   if (url === '/api/seth/chat/stream') {
     const r = escolher(cen.stream) || {};
     if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
+    if (r.pendente) return respostaPendente();
     return respostaStream('data: {"tipo": "texto", "delta": "resposta"}\n\ndata: {"tipo": "fim"}\n\n', r.cabecalhos || {});
   }
   if (url === '/api/seth/chat') {
@@ -140,9 +166,13 @@ function coletar(no, saida) {
 }
 const esperar = async () => { for (let i = 0; i < 80; i++) await new Promise((r) => setImmediate(r)); };
 function acharTodos(raiz, pred) { return descendentes(raiz).filter(pred); }
+const resultados = [];  // valores devolvidos pelas ações 'js' (código rodado dentro da página, para testar funções internas)
 async function executar(a) {
   const em = () => documento.getElementById(a.em || 'seth-conversas');
-  if (a.tipo === 'clicar') {
+  if (a.tipo === 'js') {
+    try { resultados.push(await vm.runInContext(a.codigo, ctx)); }
+    catch (e) { resultados.push({erro: String((e && e.message) || e)}); }
+  } else if (a.tipo === 'clicar') {
     const alvos = a.id ? [documento.getElementById(a.id)]
       : acharTodos(em(), (e) => e.tag === 'button' && texto(e).trim() === a.texto);
     const alvo = alvos[a.indice || 0];
@@ -173,8 +203,12 @@ function itensDe(id) {
 function opcoesDe(id) { return documento.getElementById(id).children.map((o) => [o.value, o.textContent]); }
 (async () => {
   try {
+    // Só para o teste: uma linha antes do fim da IIFE expõe sethSalvar e a conversa aberta (o arquivo em disco não muda).
+    const fonte = fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8');
+    const fim = fonte.lastIndexOf('})();');
+    const instrumentado = fonte.slice(0, fim) + 'window.__teste = {sethSalvar, sethAtual: () => sethAtual};\n' + fonte.slice(fim);
     vm.createContext(ctx);
-    vm.runInContext(fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8'), ctx, {filename: 'prototipo.js'});
+    vm.runInContext(instrumentado, ctx, {filename: 'prototipo.js'});
   } catch (e) { console.log(JSON.stringify({erro: 'carga: ' + e.message})); return; }
   for (const f of cargas) { try { f(); } catch (e) { /* carga de outras seções: fora do teste */ } }
   await esperar();
@@ -192,6 +226,7 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     documento.getElementById('seth-form').ouvintes.submit[0]({preventDefault() {}});
     await esperar();
   }
+  for (const a of cen.depois || []) await executar(a);  // ações depois dos envios (ex.: trocar de conversa durante a resposta)
   const transcricao = []; coletar(documento.getElementById('seth-transcript'), transcricao);
   const salvar = documento.getElementById('seth-salvar-aviso');
   const el = (id) => documento.getElementById(id);
@@ -211,7 +246,11 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     filtroPastaValor: el('seth-filtro-pasta').value, filtroMarcadorValor: el('seth-filtro-marcador').value,
     pastaNomeValor: el('seth-pasta-nome').value,
     destacadas: descendentes(el('seth-transcript')).filter((e) => e._classes.has('destacada')).map((e) => e.dataset.indice),
-    transcritos: descendentes(el('seth-transcript')).filter((e) => e.tag === 'article').map((e) => e.dataset.indice)}));
+    transcritos: descendentes(el('seth-transcript')).filter((e) => e.tag === 'article').map((e) => e.dataset.indice),
+    ilegiveisOculto: el('seth-ilegiveis-aviso').hidden, ilegiveisTexto: el('seth-ilegiveis-aviso').textContent,
+    lixeiraTotal: el('seth-lixeira-total').textContent, lixeiraTexto: texto(el('seth-lixeira')),
+    lixeiraItens: descendentes(el('seth-lixeira')).filter((c) => c.className === 'seth-item').map((c) => ({titulo: c.children[0].textContent, texto: texto(c)})),
+    resultados}));
 })();
 """
 
@@ -466,7 +505,8 @@ class ConversaOrganizacaoHtml(unittest.TestCase):
     IDS = ["seth-temporaria", "seth-temporaria-aviso", "seth-busca", "seth-busca-resultados", "seth-filtro-pasta",
            "seth-filtro-marcador", "seth-org-aviso", "seth-arquivadas-bloco", "seth-arquivadas", "seth-arquivadas-total",
            "seth-pastas-bloco", "seth-pasta-form", "seth-pasta-nome", "seth-pasta-criar", "seth-pastas",
-           "seth-importar-arquivo", "seth-exportar-texto", "seth-export-json", "seth-export-md"]
+           "seth-importar-arquivo", "seth-exportar-texto", "seth-export-json", "seth-export-md",
+           "seth-ilegiveis-aviso", "seth-lixeira-bloco", "seth-lixeira-total", "seth-lixeira"]
 
     def test_ids_da_organizacao_existem_na_secao_conversa(self):
         for ident in self.IDS:
@@ -690,6 +730,138 @@ class ConversaLista(unittest.TestCase):
     def test_lista_mostra_quantas_faltam_quando_passa_de_200(self):
         medido = rodar_painel({"conversas": LISTA, "total": 230})
         self.assertIn("Mostrando as 1 conversas mais recentes de 230.", medido["listaTexto"])
+
+
+LIXEIRA_NOME = "0000000000b1-20261109-161800"
+LIXEIRA_ITEM = {"nome": LIXEIRA_NOME, "id": "0000000000b1", "titulo": "Apagada antes", "apagada_em": "09/11/2026 16:18", "mensagens": 2}
+CONFIRMA_APAGAR = "Confirmar: mover para a Lixeira"
+ENVIO_EM_CURSO = "A Seth ainda está respondendo. Espere a resposta para trocar de conversa."
+
+
+class ConversaProtecao(unittest.TestCase):
+    """Proteção das conversas (09/11/2026): apagar vai para a Lixeira, a tela não troca durante a resposta,
+    salvar grava na conversa de origem, arquivos ilegíveis são contados e a Lixeira tem restaurar e purga manual."""
+
+    def test_apagar_pede_confirmacao_e_manda_para_a_lixeira(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "texto": "Apagar"}]})
+        self.assertEqual(chamadas_para(medido, "/api/seth/conversa/apagar"), [], "o primeiro clique só pede confirmação")
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "texto": "Apagar"},
+                                                             {"tipo": "clicar", "texto": CONFIRMA_APAGAR}]})
+        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/conversa/apagar")[0]), {"id": CONVERSA_ID})
+        self.assertEqual(medido["org"], "Conversa movida para a Lixeira. Restaure-a por lá, se precisar.")
+
+    def test_erro_ao_apagar_nao_fecha_a_conversa_aberta(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]), "abrir": True,
+                               "apagar": {"status": 500, "texto": "x"},
+                               "acoes": [{"tipo": "clicar", "texto": "Apagar"}, {"tipo": "clicar", "texto": CONFIRMA_APAGAR}]})
+        self.assertEqual(medido["org"], "Não foi possível apagar a conversa: o painel respondeu com erro 500.")
+        self.assertEqual(medido["tituloConversa"], "Antiga", "sem a confirmação do painel, a conversa segue aberta")
+        self.assertEqual(medido["transcritos"], ["0"])
+
+    def test_apagar_confirmado_fecha_a_conversa_aberta(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]), "abrir": True,
+                               "acoes": [{"tipo": "clicar", "texto": "Apagar"}, {"tipo": "clicar", "texto": CONFIRMA_APAGAR}]})
+        self.assertEqual(medido["tituloConversa"], "Nova conversa")
+        self.assertEqual(medido["transcritos"], [])
+
+    def test_nova_conversa_e_bloqueada_enquanto_a_seth_responde(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]), "abrir": True,
+                               "stream": {"pendente": True}, "enviar": ["pergunta"],
+                               "depois": [{"tipo": "clicar", "id": "seth-nova"}]})
+        self.assertEqual(medido["tituloConversa"], "Antiga", "a conversa aberta continua na tela")
+        self.assertEqual(medido["org"], ENVIO_EM_CURSO)
+        self.assertIn("A Seth está respondendo…", medido["transcricao"])
+
+    def test_abrir_outra_conversa_e_bloqueado_enquanto_a_seth_responde(self):
+        outra = conversa_item("0000000000a2", "Outra")
+        medido = rodar_painel({"conversas": LISTA + [outra], "conversa": conversa([{"role": "user", "content": "oi"}]),
+                               "abrir": True, "stream": {"pendente": True}, "enviar": ["pergunta"],
+                               "depois": [{"tipo": "clicar", "em": "seth-conversas", "texto": "Outra"}]})
+        self.assertEqual(medido["org"], ENVIO_EM_CURSO)
+        self.assertEqual([c for c in medido["chamadas"] if c["url"] == "/api/seth/conversa?id=0000000000a2"], [],
+                         "a conversa pedida não é nem carregada enquanto a resposta não termina")
+
+    def test_depois_da_resposta_a_troca_volta_a_funcionar(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa([{"role": "user", "content": "oi"}]), "abrir": True,
+                               "enviar": ["pergunta"], "depois": [{"tipo": "clicar", "id": "seth-nova"}]})
+        self.assertEqual(medido["tituloConversa"], "Nova conversa")
+        self.assertEqual(medido["org"], "")
+
+    def test_salvar_grava_na_conversa_de_origem_e_nao_na_tela(self):
+        # sethSalvar(alvo) grava o id na conversa passada, não na conversa aberta na tela.
+        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', mensagens: [{role: 'user', content: 'x'}], "
+                  "modelo: 'seth-livre', temporaria: false}; const ok = await __teste.sethSalvar(outra); "
+                  "return {ok, outraId: outra.id, atualId: __teste.sethAtual().id}; })()")
+        medido = rodar_painel({"acoes": [{"tipo": "js", "codigo": codigo}]})
+        self.assertEqual(medido["resultados"][0], {"ok": True, "outraId": "0123456789ab", "atualId": None})
+
+    def test_falha_ao_salvar_conversa_que_nao_esta_na_tela_avisa_pelo_titulo(self):
+        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', mensagens: [{role: 'user', content: 'x'}], "
+                  "modelo: 'seth-livre', temporaria: false}; const ok = await __teste.sethSalvar(outra); "
+                  "return {ok, naoSalva: outra.naoSalva}; })()")
+        medido = rodar_painel({"salvar": {"status": 413, "texto": "x"}, "acoes": [{"tipo": "js", "codigo": codigo}]})
+        self.assertFalse(medido["resultados"][0]["ok"])
+        self.assertTrue(medido["resultados"][0]["naoSalva"].startswith("Conversa não salva: "))
+        self.assertTrue(medido["salvarTexto"].startswith('A conversa "Outra" não foi salva: a conversa passou de 262144 bytes'),
+                        medido["salvarTexto"])
+
+    def test_ilegiveis_avisa_a_contagem_e_mantem_a_lista(self):
+        medido = rodar_painel({"conversas": LISTA, "ilegiveis": 2})
+        self.assertFalse(medido["ilegiveisOculto"])
+        self.assertEqual(medido["ilegiveisTexto"], "2 arquivos de conversa não puderam ser lidos e não aparecem aqui. "
+                                                   "Nada foi apagado; confira a pasta de conversas.")
+        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Antiga"])
+
+    def test_ilegivel_da_lixeira_entra_na_mesma_contagem(self):
+        medido = rodar_painel({"conversas": LISTA, "ilegiveis": 0, "lixeira": [LIXEIRA_ITEM], "lixeiraIlegiveis": 1})
+        self.assertEqual(medido["ilegiveisTexto"], "1 arquivo de conversa não pôde ser lido e não aparece aqui. "
+                                                   "Nada foi apagado; confira a pasta de conversas.")
+
+    def test_sem_ilegiveis_o_aviso_fica_escondido(self):
+        medido = rodar_painel({"conversas": LISTA})
+        self.assertTrue(medido["ilegiveisOculto"])
+        self.assertEqual(medido["ilegiveisTexto"], "")
+
+    def test_lixeira_lista_titulo_data_e_botoes(self):
+        medido = rodar_painel({"conversas": [], "lixeira": [LIXEIRA_ITEM]})
+        self.assertEqual(medido["lixeiraTotal"], "1")
+        self.assertEqual(medido["lixeiraItens"][0]["titulo"], "Apagada antes")
+        self.assertIn("Apagada em 09/11/2026 16:18 · 2 mensagens", medido["lixeiraItens"][0]["texto"])
+        self.assertIn("Restaurar", medido["lixeiraItens"][0]["texto"])
+        self.assertIn("Apagar de vez", medido["lixeiraItens"][0]["texto"])
+
+    def test_lixeira_vazia_e_indisponivel_dizem_isso(self):
+        self.assertIn("A lixeira está vazia.", rodar_painel({"conversas": LISTA})["lixeiraTexto"])
+        medido = rodar_painel({"conversas": LISTA, "lixeiraErro": True})
+        self.assertIn("Lixeira indisponível agora.", medido["lixeiraTexto"])
+        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Antiga"], "a lixeira fora do ar não derruba a lista")
+
+    def test_restaurar_chama_a_rota_com_o_nome_do_item_e_avisa(self):
+        medido = rodar_painel({"conversas": [], "lixeira": [LIXEIRA_ITEM],
+                               "acoes": [{"tipo": "clicar", "em": "seth-lixeira", "texto": "Restaurar"}]})
+        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/lixeira/restaurar")[0]), {"nome": LIXEIRA_NOME})
+        self.assertEqual(medido["org"], "Conversa restaurada: Apagada antes.")
+
+    def test_restaurar_recusado_mostra_o_motivo(self):
+        medido = rodar_painel({"conversas": [], "lixeira": [LIXEIRA_ITEM],
+                               "lixeiraRestaurar": {"status": 409, "texto": "já existe conversa com este identificador; nada foi restaurado"},
+                               "acoes": [{"tipo": "clicar", "em": "seth-lixeira", "texto": "Restaurar"}]})
+        self.assertEqual(medido["org"], "Não foi possível: já existe conversa com este identificador; nada foi restaurado.")
+
+    def test_apagar_de_vez_pede_confirmacao_e_so_depois_chama_a_purga(self):
+        medido = rodar_painel({"conversas": [], "lixeira": [LIXEIRA_ITEM],
+                               "acoes": [{"tipo": "clicar", "em": "seth-lixeira", "texto": "Apagar de vez"}]})
+        self.assertEqual(chamadas_para(medido, "/api/seth/lixeira/purgar"), [], "o primeiro clique só pede confirmação")
+        medido = rodar_painel({"conversas": [], "lixeira": [LIXEIRA_ITEM],
+                               "acoes": [{"tipo": "clicar", "em": "seth-lixeira", "texto": "Apagar de vez"},
+                                         {"tipo": "clicar", "em": "seth-lixeira", "texto": "Confirmar apagar de vez"}]})
+        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/lixeira/purgar")[0]), {"nome": LIXEIRA_NOME})
+        self.assertEqual(medido["org"], "Conversa apagada de vez. Não tem como desfazer.")
+
+    def test_importar_conversa_que_esta_na_lixeira_avisa_sem_duplicar(self):
+        medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo", "texto": JSON_IMPORTAVEL}],
+                               "importar": {"corpo": {"estado": "ja_existe", "id": "0000000000b1", "titulo": "Vinda", "lixeira": True}}})
+        self.assertEqual(medido["org"], "Esta conversa já estava na Lixeira (Vinda); nada foi duplicado. Restaure-a por lá.")
 
 
 class LimitesDaUi(unittest.TestCase):

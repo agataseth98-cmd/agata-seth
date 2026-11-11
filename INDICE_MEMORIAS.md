@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-acervo-egress-20261106` substitui a v1, que não deve ser assinada.** Proposta `m2b-acervo-egress-20261106`.
 (958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
 (957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o Agata: cada serviço avisa seu estado no desktop, nos atalhos Agata e Parar Agata.** Proposta `notificacoes-agata-20261106`.
-(956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxico, semântica e externa ficam disponíveis, e o modo auto escolhe caso a caso, registrando o motivo de cada etapa.** Proposta `alexandria-hierarquia-20261106`.
+(956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxic …
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a u …
 (954) DIÁRIO — 05/11/2026 · **Voz do LibreChat transcreve de novo (conversa por …
 (953) DIÁRIO — 05/11/2026 · **NVIDIA Gemma na lista de gratuitos (nova versão, l …

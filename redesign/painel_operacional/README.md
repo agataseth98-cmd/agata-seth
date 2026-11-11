@@ -36,6 +36,7 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem sete seções, escolhidas pe
 - `/api/details` consulta sob demanda integrações e contagem de notas do vault derivado. Unidade ativa não prova funcionamento completo da integração.
 - `/api/wiki/search` usa o verificador local, limita consulta e retorno e não guarda histórico.
 - A leitura `/api/seth/conversa?id=` valida o arquivo e devolve `schema_version` e `id` esperados pelo cliente; mensagens importadas de até 65536 caracteres podem ser reabertas e salvas.
+- Conversas (09/11/2026): apagar move a conversa para `~/.cache/agata/painel-conversas/.lixeira/`, de onde ela volta com `restaurar`; apagar de vez é pedido manual, com confirmação. Toda escrita de conversa exige origem do painel (`Origin` igual ou `Sec-Fetch-Site: same-origin`; sem cabeçalho, 403) e gera uma linha em `.registro.jsonl`, sem conteúdo. Arquivo de conversa que não pode ser lido é contado na tela e não é apagado.
 - `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
 - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
 
