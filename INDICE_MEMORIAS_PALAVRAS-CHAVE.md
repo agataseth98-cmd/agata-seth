@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista de Importantes no painel (aba em Panorama, cartão, cache fora do repositório e trazer do Conselho).**
+  palavras-chave: proposta, painel, importantes, publicada, lista, aba, panorama, cartão, cache, fora, repositório, trazer
 (990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
   palavras-chave: proposta, spec, primeiro, publicada, entrevista, gate, sincronia, specs, revisor, contra, três, classes, tarefa
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, proposta, acervo, parcial, assinada, humano, teste, estado, entra, árvore, aplicação, aplica
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
   palavras-chave: proposta, teste, estado, parcial, acervo, achado, ciclo, sdd
-(961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
-  palavras-chave: correção, entrada, commit, aplicação, tinha, cinco, arquivos, código, completa, aplica, acervo, egress
+(961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação ` …
+  palavras-chave: correção, entrada, commit, aplicação
 (960) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2b (`m2b-acervo-egress-202611 …
   palavras-chave: aplicada, proposta, acervo, egress
 (959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-a …
