@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6
-  Escrito em: 11/11/2026 19:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d782dad080ed68edc4a3ba0e1a8acb117d4f63ea
+  Escrito em: 11/11/2026 20:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d782dad080ed68edc4a3ba0e1a8acb117d4f63ea/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d782dad080ed68edc4a3ba0e1a8acb117d4f63ea/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d782dad080ed68edc4a3ba0e1a8acb117d4f63ea/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d782dad080ed68edc4a3ba0e1a8acb117d4f63ea/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d782dad080ed68edc4a3ba0e1a8acb117d4f63ea/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção História no painel (somente leitura, com o botão Ouvir), pasta historia/ com o Texto 1 do Tomo I e quarentena P-8 para historia/.**
+- Diff `propostas/historia-tomo1-11-11.diff` toca `historia/` (README e Texto 1, cópia sem alteração), `scripts/perimetro/p08_quarentena.sh` (linha `historia/*` nos caminhos de comportamento) e `redesign/painel_operacional/` (servidor, `historia_painel.py`, `historia.js`, página, CSS, testes e spec). Pede assinatura porque toca `scripts/*`. Base do diff `182310d0`; aplica limpo sobre `origin/main` `bdbdca6c`.
+- Medido: unittest do painel com 342 testes, 1 falha pré-existente (`test_sdd_painel`, `ProjetosExternosTests`); CI local TUDO OK (33 passos). O Ouvir foi testado por HTTP com voz falsa, não com a voz real. Texto 1 sai com 11980 caracteres para fala, abaixo do teto de 12000 de `agata_falar.py`.
+- Limite R1 por componente, medido em `origin/main` `d782dad0`: o painel tem três propostas abertas que tocam `redesign/painel_operacional/`: `chat-lote4-09-11`, `painel-importantes-11-11` e esta. A regra R1 ainda não está em vigor (`processo-agil-11-11` sem assinatura), então não bloqueia; fica registrado para a fila de assinatura.
+- Conflito de arquivos com `painel-importantes-11-11` (mesmos `prototipo.css`, `prototipo.html`, `prototipo.js`, `server.py`, spec e `test_painel_unificado.py`): assinar e aplicar em sequência, com cada diff checado antes de aplicar.
+Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: worktree `historia-impl-11-11`, captura no Chromium headless e PR #970 · Autorização: Humano — "primeiro texto do primeiro TOMO da História canônica", 11/11 19:40.
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista de Importantes no painel (aba em Panorama, cartão, cache fora do repositório e trazer do Conselho).**
 - Diff `propostas/painel-importantes-11-11.diff` (SHA-256 `373e957075b18ad3d1e68e46908b0c45302ca9f669369648ab5ff941bf6b8249`, 109074 bytes) contra `origin/main` `bdbdca6c`: `git apply --check` limpo nesta publicação. Só o caminho `redesign/painel_operacional/`, com 8 arquivos alterados e 3 novos, 1517 linhas adicionadas e 4 removidas. Nenhum código de `redesign/` foi commitado; a aplicação fica com o Humano, depois da assinatura.
 - A base mudou: o `.md` da proposta diz base `182310d0`; o check foi feito sobre `bdbdca6c`, depois de #966, #967 e #968. Os testes medidos no `.md` são da base antiga e não foram repetidos aqui; o CI do PR mede a base atual.
