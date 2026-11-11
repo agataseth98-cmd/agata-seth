@@ -26,20 +26,34 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c1a190c6d4a9a3f1ed02407abd62be42632c6ed1
-  Escrito em: 11/11/2026 18:54 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1d69754aeca9ba2ac088f9ecbb863026d44b2163
+  Escrito em: 11/11/2026 19:07 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d69754aeca9ba2ac088f9ecbb863026d44b2163/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d69754aeca9ba2ac088f9ecbb863026d44b2163/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d69754aeca9ba2ac088f9ecbb863026d44b2163/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d69754aeca9ba2ac088f9ecbb863026d44b2163/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1d69754aeca9ba2ac088f9ecbb863026d44b2163/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
+- A (986) diz "60 testes de navegador falham por ambiente". Medido em 11/11 na worktree do processo ágil (base `c1a190c6`): `test_chat_ui` e `test_painel_unificado` somam 105 testes. Com um executável `node` no PATH que sai com erro (código 127), 59 saem como FAIL; com o node do sistema, os 105 passam.
+- Método: simulação por PATH, não a falha de libsimdjson da (986). O node do sistema carrega hoje, então a falha original não foi reproduzida; o número 59 vale para a simulação.
+- A (986) fica como está. Esta entrada é a correção (Regra 4).
+(988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
+- Diff `propostas/processo-agil-11-11.diff` (14 linhas) toca só `.agents/skills/agata-processo-lote/SKILL.md`, caminho protegido pelo P-8 (`.agents/*`). Base `origin/main` `1d69754a`; o blob da base confere com o cabeçalho do diff (`1443ccc`); `git apply --check -R` passou na árvore.
+- Problema medido, base `c1a190c6`: 10 propostas sem assinatura, com 4,1 a 5,4 dias. Proposta até aplicação em `origin/main` (adição do `.diff` até a mudança para `propostas/aplicadas/`): mediana 0,20 h em 432 pares; 7 de 335 acima de 24 h desde 01/10, máximo 110 h. A mediana de 6,5 h do relatório não reproduziu; a cauda reproduziu (50 h em PR de proposta e aplicação, chat-protege-conversas-09-11).
+- MEMÓRIAS: 46% dos commits sem merge (767 de 1669) alteram entrada DIÁRIO; desde 12/10, 36%. O relatório dizia 60%, não reproduzido.
+- Registro fora do diff: `ONDE_ESTAMOS.md` (tabela de lotes em andamento), esta entrada e a (989). A lista de quarentena em `scripts/perimetro/p08_quarentena.sh` deixa `ONDE_ESTAMOS.md` de fora (SEM quarentena).
+- CI local: `CI LOCAL: TUDO OK`, pytest 9.2.0, saída 0. Lint `qualidade_llm.py`: a skill sem problemas nem avisos (168 linhas).
+- Medição de 14 dias (R2, até 25/11/2026): nada é cortado automaticamente. Critério de manter ou reverter fica para o Humano decidir, com o `.md` da proposta.
+- Reversão: proposta própria com `git apply -R` do diff, assinada à parte. Entradas são append-only; reverter registro é entrada nova.
+- Não medido: efeito das regras sobre o fluxo; quando o E-2 foi esquecido (o relatório diz até o lote 4; a skill não tinha regra de emoji antes desta proposta).
+- Assinatura pelo Humano só depois do merge deste PR: `bash scripts/aprovar.sh processo-agil-11-11 "<motivo>"`.
 (987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
 - O patch segue só em `propostas/chat-lote4-09-11.diff` (SHA-256 `49f62fadd67bed0c4ee062157d2b246f3a588612c647447a2b108bc3de09ea43`, 174590 bytes), contra `origin/main` `c1a190c6` (base com a proteção aplicada, PR #963, commit `56c49849`). Só `redesign/painel_operacional/`: 8 arquivos (7 alterados e `test_conversas_lote4.py` novo). `git apply --check` e `git apply --cached --check` limpos contra `c1a190c6` nesta publicação. Nenhum código de `redesign/` foi commitado; a aplicação fica com o Humano, depois da assinatura.
 - Testes medidos antes da publicação, sobre `e63e18b7` mais a proteção (não repetidos sobre `c1a190c6`): unittest 383 testes, 1 falha pré-existente (`test_sdd_painel.ProjetosExternosTests`); CI local TUDO OK, 33 passos. Não medido: Parar com o gateway real.
