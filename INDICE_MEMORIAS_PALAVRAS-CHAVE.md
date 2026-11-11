@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
+  palavras-chave: proposta, chat, lote, publicada, editar, reenviar, ramos, parar, continuar, feedback, contexto, atalhos, tema
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
   palavras-chave: proposta, chat, protege, conversas, aplicada, assinada, humano, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: correção, proposta, acervo, egress, substitui, deve, assinada
 (958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
   palavras-chave: acervo, erro, visível, registros, ilegíveis, contados, userinfo, recusado, egress, proposta, auditoria, próprio, agata
-(957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o Agata: cada serviço avisa seu estado no desktop, nos atalhos Agata e Parar Agata.** Proposta `notificacoes-agata-20261106`.
-  palavras-chave: notificação, componente, ligar, desligar, agata, serviço, avisa, estado, desktop, atalhos, parar, proposta, notificacoes
+(957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o A …
+  palavras-chave: notificação, componente, ligar, desligar
 (956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxic …
   palavras-chave: hierarquia, buscas, alexandria, lote, léxic
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a u …

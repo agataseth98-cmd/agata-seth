@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e63e18b70fadb10e159461a2455b4f0b9e006f63
-  Escrito em: 11/11/2026 18:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c1a190c6d4a9a3f1ed02407abd62be42632c6ed1
+  Escrito em: 11/11/2026 18:54 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e63e18b70fadb10e159461a2455b4f0b9e006f63/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e63e18b70fadb10e159461a2455b4f0b9e006f63/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e63e18b70fadb10e159461a2455b4f0b9e006f63/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e63e18b70fadb10e159461a2455b4f0b9e006f63/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e63e18b70fadb10e159461a2455b4f0b9e006f63/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c1a190c6d4a9a3f1ed02407abd62be42632c6ed1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
+- O patch segue só em `propostas/chat-lote4-09-11.diff` (SHA-256 `49f62fadd67bed0c4ee062157d2b246f3a588612c647447a2b108bc3de09ea43`, 174590 bytes), contra `origin/main` `c1a190c6` (base com a proteção aplicada, PR #963, commit `56c49849`). Só `redesign/painel_operacional/`: 8 arquivos (7 alterados e `test_conversas_lote4.py` novo). `git apply --check` e `git apply --cached --check` limpos contra `c1a190c6` nesta publicação. Nenhum código de `redesign/` foi commitado; a aplicação fica com o Humano, depois da assinatura.
+- Testes medidos antes da publicação, sobre `e63e18b7` mais a proteção (não repetidos sobre `c1a190c6`): unittest 383 testes, 1 falha pré-existente (`test_sdd_painel.ProjetosExternosTests`); CI local TUDO OK, 33 passos. Não medido: Parar com o gateway real.
+- Pendência para o Humano: confirmar as 8 decisões do `.md` (seção "Decisões tomadas na implementação") e aceitar que Parar com o gateway real depende de `chat-stream-verificar-depois-09-11`, que ainda não tem `.diff` nem commit em `propostas/`.
+- Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: sha256 do `.diff` conferido (`49f62fad`), `git apply --check` e `--cached` limpos contra `origin/main` `c1a190c6` nesta worktree · Autorização: Humano — fluxo padrão de proposta (MEMÓRIAS (692)); a assinatura fica com o Humano.
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 - Assinatura do Humano verificada com `scripts/p8_verificar.sh chat-protege-conversas-09-11` na worktree: PODE APLICAR (sha256 do `.diff` `b8570b0c44b7`; assinatura `agata-aprovacao-p8` de `agata-humano`; `git apply --check` limpo). O diff foi aplicado com `git apply` a partir de `origin/main` `e63e18b7`, posterior à base `1e9c90f4` da proposta; o `--check` passou sobre o main atual.
 - Arquivos alterados: só `redesign/painel_operacional/` (8 alterados e `test_conversas_protege.py` novo). Par `.diff` e `APROVADO-chat-protege-conversas-09-11` movido para `propostas/aplicadas/`.
