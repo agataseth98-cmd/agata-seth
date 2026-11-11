@@ -25,7 +25,14 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | seth-sob-demanda-20261029 | sistema-sob-demanda-20261029 (PR #715) (confiança média) |
 | skill-processo-07-11 | substituída por skill-processo-lessons-07-11 (#944), decisão do Humano 09/11 |
 | origem-preservada-07-11 | chat-protege-conversas-09-11, aplicada em 56c49849 (merge c1a190c6). Evidência: a origem foi portada para `armazem.py` (`_origem_valida`, `_conversa_com_origem`, `_origem_do_arquivo`, `_mensagens_com_origem`) e os cinco cenários estão em `test_conversas_protege.py`; o `.diff` não aplica mais em origin/main c1a190c6 (`armazem.py:113`). Motivo: superada pelo código que já está no main. Decisão do Humano 11/11. |
+| chat-lote4-09-11 | incluída em pacote-11-11 (11/11/2026) |
+| processo-agil-11-11 | incluída em pacote-11-11 (11/11/2026) |
+| spec-primeiro-11-11 | incluída em pacote-11-11 (11/11/2026) |
+| voz-compreender-11-11 | incluída em pacote-11-11 (11/11/2026) |
+| painel-importantes-11-11 | incluída em pacote-11-11 (11/11/2026) |
+| historia-tomo1-11-11 | incluída em pacote-11-11 (11/11/2026) |
 
 Notas:
+- "incluída em pacote-11-11": a parte passa a valer dentro do pacote único `propostas/pacote-11-11.diff`, com uma só assinatura; o `.md` do pacote lista a ordem e os conflitos resolvidos (regra "Pacote de assinatura (Humano, 11/11)" da skill agata-processo-lote).
 - "a própria, já aplicada": a proposta arquivada é cópia idêntica (cmp) da que está em `propostas/aplicadas/`.
 - "(confiança média)": marcação conforme a seção "Limites" do relatório de classificação.
