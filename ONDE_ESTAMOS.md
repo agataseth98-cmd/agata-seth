@@ -8,7 +8,7 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Lotes em andamento (medido em 11/11/2026, 19h, base `origin/main` `1d69754a`)
+## Lotes em andamento (medido em 11/11/2026, 19h, base `origin/main` `98dd5839`)
 
 Fonte: `propostas/*.diff` sem `APROVADO-`, `propostas/aplicadas/` e `gh pr list --state open` (nenhuma PR aberta). Última aplicação: `chat-protege-conversas-09-11`, 11/11 18:45. Limite R1 (2 propostas abertas por componente): o componente OpenCode está no limite, com duas.
 
@@ -20,14 +20,14 @@ Fonte: `propostas/*.diff` sem `APROVADO-`, `propostas/aplicadas/` e `gh pr list 
 | Docs canon e skills da troca OpenCode | docs-opencode-07-11 | proposta | 07/11 13:42 |
 | PROJETO.md: o que sobe no boot | canon-boot-07-11 | proposta | 07/11 13:07 |
 | Núcleo de desenvolvimento (Ma'at, Ptah, Thoth) | nucleo-desenvolvimento-07-11 | proposta | 07/11 15:31 |
-| Origem preservada ao salvar conversas | origem-preservada-07-11 | proposta | 07/11 13:39 |
+| Origem preservada ao salvar conversas | origem-preservada-07-11 | superada (PR #965) | 07/11 13:39 |
 | Skill de processo: lições medidas | skill-processo-lessons-07-11 | proposta | 07/11 13:18 |
 | Tira o LibreChat dos atalhos e do P-9 | tira-librechat-07-11 | proposta | 07/11 13:39 |
 | Nova versão (lote 2) | nova-versao-lote2-20261106 | proposta | 06/11 21:21 |
 | Orçamento do turno em sombra (lote 9) | sombra-orcamento-20261106 | proposta | 06/11 09:35 |
 | `--verificar` deixa rastro no log da auditoria | verificar-rastro-20261106 | proposta | 06/11 23:54 |
 
-Sem assinatura: 11 propostas (sem contar a deste lote). Nenhuma assinada, nenhuma superada nesta lista.
+Sem assinatura: 10 propostas (sem contar a deste lote). Nenhuma assinada. Uma superada: `origem-preservada-07-11`, arquivada pela PR #965.
 
 ## Hoje, 11/11 (proposta chat lote 4)
 
