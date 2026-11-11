@@ -40,6 +40,12 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
+- Adoção decidida pelo Humano em 11/11 19:20 ("ok a todas", cache do Conselho, entrada 495). Diff `propostas/spec-primeiro-11-11.diff` sobre `origin/main` `182310d0` mais `processo-agil-11-11`, que toca o mesmo arquivo de skill: aplicar depois dela. Caminhos de código: skills de processo-lote e time-inovação, agentes arquiteto e revisor, `scripts/gate_spec_sync.py` (novo), `scripts/ci_sdd_local.sh`, `.github/workflows/sdd.yml`, e o drift e a evidência de `redesign/nova_versao/spec`.
+- Medido em 11/11: `alexandria` tem 5 critérios no acceptance.json sem linha no spec.md; `nova_versao` tem drift commitado de 04/11, mais antigo que o spec de 09/11. Sem as duas correções o gate fica vermelho. Entra o drift de nova_versao; alexandria fica como dívida conhecida (AVISO), porque corrigir o spec.md exige proposta própria.
+- Medição de 14 dias, até 25/11/2026, decisão do Humano. O `.md` da proposta registra o que não foi medido.
+- Assinatura pelo Humano só depois da aplicação de processo-agil-11-11 e do merge deste PR: `bash scripts/aprovar.sh spec-primeiro-11-11 "<motivo>"`.
+Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: worktree própria, CI local, leitura de specs e `git grep` no main · Autorização: Humano — "ok a todas" (11/11 19:20, adoção de P1 a P4).
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
 - A (986) diz "60 testes de navegador falham por ambiente". Medido em 11/11 na worktree do processo ágil (base `c1a190c6`): `test_chat_ui` e `test_painel_unificado` somam 105 testes. Com um executável `node` no PATH que sai com erro (código 127), 59 saem como FAIL; com o node do sistema, os 105 passam.
 - Método: simulação por PATH, não a falha de libsimdjson da (986). O node do sistema carrega hoje, então a falha original não foi reproduzida; o número 59 vale para a simulação.

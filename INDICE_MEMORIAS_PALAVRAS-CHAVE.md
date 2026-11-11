@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
+  palavras-chave: proposta, spec, primeiro, publicada, entrevista, gate, sincronia, specs, revisor, contra, três, classes, tarefa
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
   palavras-chave: correção, entrada, testes, navegador, falham, node
 (988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, teste, estado, parcial, acervo, achado, ciclo, sdd
 (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
   palavras-chave: correção, entrada, commit, aplicação, tinha, cinco, arquivos, código, completa, aplica, acervo, egress
-(960) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2b (`m2b-acervo-egress-20261106`), assinada pelo Humano: o Acervo mostra estados explícitos, registros ilegíveis são contados e URL com usuário ou senha é recusada antes do DNS.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
-  palavras-chave: aplicada, proposta, acervo, egress, assinada, humano, mostra, estados, explícitos, registros, ilegíveis, contados, url, usuário, senha, recusada, dns, aplicação, aplica
+(960) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2b (`m2b-acervo-egress-202611 …
+  palavras-chave: aplicada, proposta, acervo, egress
 (959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-a …
   palavras-chave: correção, proposta
 (958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis conta …
