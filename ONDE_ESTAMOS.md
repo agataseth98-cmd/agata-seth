@@ -16,6 +16,7 @@ Fonte: `propostas/*.diff` sem `APROVADO-`, `propostas/aplicadas/` e `gh pr list 
 |---|---|---|---|
 | Chat lote 4: editar, ramos, parar, feedback, atalhos, tema | chat-lote4-09-11 | proposta | 11/11 18:54 |
 | Processo ágil da skill de lote (R1, R3, R5, R2) | processo-agil-11-11 | proposta | 11/11 |
+| História canônica: Tomo I, Texto 1 e aba História no painel (somente leitura, botão Ouvir) | historia-tomo1-11-11 | proposta | 11/11 19:56 |
 | Spec primeiro: entrevista, gate de sincronia, revisor contra a spec, classes de tarefa (P1 a P4) | spec-primeiro-11-11 | proposta | 11/11 19:40 |
 | Troca Goose por OpenCode no terminal | agente-opencode-07-11 | proposta | 07/11 13:40 |
 | Docs canon e skills da troca OpenCode | docs-opencode-07-11 | proposta | 07/11 13:42 |

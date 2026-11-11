@@ -1,0 +1,1472 @@
+diff --git a/historia/README.md b/historia/README.md
+new file mode 100644
+index 00000000..18ae7e02
+--- /dev/null
++++ b/historia/README.md
+@@ -0,0 +1,30 @@
++# História canônica do Agata
++
++A História é o relato do que o sistema fez, texto por texto, organizado em tomos. Este diretório guarda os textos. O painel (seção História) lê daqui, só para leitura.
++
++## Para modelos (LLM first)
++
++- Escrita primeiro para modelos retomarem o fio: o texto diz o que foi feito, por que e o que ficou aberto. A leitura do Humano vem depois.
++- Lembrança do modelo não é conhecimento do sistema (decisão do Humano, 07/11/2026, cache do Conselho, entrada 421). Antes de citar, leia a prova no repositório, no cache do Conselho ou em MEMÓRIAS.
++- Cada afirmação verificável traz uma marca de origem (regra F0):
++  - `[medido]`: conferido na Máquina (git, testes, arquivos, navegador);
++  - `[relato]`: dito pelo Humano ou por outro modelo, sem reprodução independente;
++  - `[inferência]`: leitura do autor, sem prova.
++- Textos são append-only. Correção vira texto novo, que diz o que corrige. Texto publicado não se edita (Regra 4).
++- Citação inventada se expurga (AGENTS.md). Achada num texto, troca-se o trecho por `[citação inventada, expurgada em DATA por ordem do Humano]` e confere-se com `grep -F`.
++
++## Estrutura
++
++`tomo-NN/NN-titulo.md`, com frontmatter:
++
++- `tomo`, `titulo_tomo`, `texto`, `titulo`, `periodo`, `autor`, `estado`, `protocolo`.
++
++`estado` diz se o texto é canônico. Sem assinatura do Humano, o texto é rascunho.
++
++## Lente
++
++Até virar regra, a História é lida pela lente do Protocolo de Inclusão Humana contínua (brainstorm de 07/11/2026, guardado fora do repositório, na Área de trabalho do Humano).
++
++## Mudança
++
++Este diretório está na quarentena do P-8 (`scripts/perimetro/p08_quarentena.sh`). Nenhum modelo muda a História sem o par `.diff` e `APROVADO-` assinado em `propostas/`.
+diff --git a/historia/tomo-01/01-a-casa-propria-da-conversa.md b/historia/tomo-01/01-a-casa-propria-da-conversa.md
+new file mode 100644
+index 00000000..bc79316c
+--- /dev/null
++++ b/historia/tomo-01/01-a-casa-propria-da-conversa.md
+@@ -0,0 +1,128 @@
++---
++tomo: I
++titulo_tomo: "O plano das ideias aprende a morar"
++texto: 1
++titulo: "A casa própria da conversa"
++periodo: "09/11/2026 a 11/11/2026"
++autor: "Claude Opus 5.5 (orquestrador), na sessão de 09–11/11/2026"
++estado: "rascunho para proposta P-8; não canônico até a assinatura do Humano"
++protocolo: "Protocolo de Inclusão Humana contínua (brainstorm de 07/11/2026, Área de trabalho)"
++---
++
++# História canônica do Agata
++
++## Tomo I — O plano das ideias aprende a morar
++
++### Texto 1 — A casa própria da conversa
++
++#### Nota de origem (LLM first)
++
++Este texto foi escrito por um modelo, o Claude Opus 5.5, que orquestrou a sessão de 9 a 11 de novembro de 2026. Ele é escrito primeiro para outros modelos lerem e retomarem o fio, e depois para o Humano conferir. Cada afirmação traz a marca de origem exigida pela regra F0:
++
++- **[medido]** — conferido na Máquina durante a sessão (git, gh, testes, navegador, arquivos);
++- **[relato]** — dito pelo Humano ou por outro modelo e não reproduzido de forma independente;
++- **[inferência]** — leitura do autor, sem prova.
++
++A lembrança do modelo não é conhecimento do sistema (decisão do Humano, 07/11, registrada no cache do Conselho, entrada 421). Onde este texto diz o que aconteceu, a prova está no repositório, no cache do Conselho ou em MEMÓRIAS. Onde não está, ele diz.
++
++#### Prólogo: por que começar aqui
++
++O Humano pediu que este fosse o primeiro texto do primeiro tomo. Não porque estes três dias sejam o começo do Agata — o sistema já tinha quase mil entradas em MEMÓRIAS **[medido: entrada (986) em 11/11]** —, mas porque neles o sistema fez três coisas pela primeira vez ao mesmo tempo: construiu a sua própria casa para conversar, descobriu como cuidar do que o Humano guarda nela, e passou a pensar sobre o próprio jeito de trabalhar. É um bom lugar para começar a contar.
++
++#### 1. A conversa morava de aluguel
++
++Até novembro, a Seth conversava com o Humano dentro do LibreChat, um programa de terceiros **[medido: `~/librechat/librechat.yaml`]**. Em 7 de novembro o Humano mandou excluí-lo **[medido: cache do Conselho, entrada 406]**. As dezesseis conversas antigas foram levadas para o painel do Agata antes da remoção **[medido: entrada 407]**.
++
++Na manhã de 9 de novembro, o Humano escreveu que a conversa com a Seth não estava funcionando. A investigação mostrou duas coisas **[medido]**:
++
++- o LibreChat tinha sido recriado vazio às 15h19 de 7 de novembro, depois da exclusão das 13h22, e por isso a senha do Humano não encontrava conta nenhuma;
++- o painel novo já estava no main, mas o serviço continuava rodando o programa de 7 de novembro, e a página nova não conseguia abrir as conversas.
++
++Um reinício resolveu o segundo problema **[medido: `/api/seth/conversa` passou a responder com `schema_version`]**. O primeiro não precisava de solução: a casa alugada já tinha sido devolvida.
++
++Então o Humano disse o que queria de verdade: substituir o LibreChat por uma aplicação própria, com todos os recursos que ele oferecia **[relato]**.
++
++#### 2. Medir a casa antiga antes de construir a nova
++
++O sistema não construiu de memória. Usou a skill de engenharia reversa (`agata-engenharia-reversa`, com o REA) para ler o código do cliente do LibreChat, versão v0.8.8-rc3, copiado do contêiner só para leitura, sem executá-lo **[medido: 365 arquivos; 90 analisados; 0 falhas de leitura; cache do Conselho, entrada 444]**. Daí saiu um inventário de 42 recursos e um plano de lotes.
++
++Também leu o que o próprio Humano já tinha pensado: a pasta Experimento 2, na Área de trabalho, com o plano `P9-pre-paridade-librechat.md` **[medido]**. O plano novo não substituiu o antigo; partiu dele.
++
++Os lotes foram assim **[medido: PRs no GitHub]**:
++
++- **Lote 2** — falhas silenciosas do chat, seletor de modelo e o nome do modelo que de fato respondeu (propostas #953, aplicação #956).
++- **Lote 3** — busca, pastas, fixar, arquivar, marcadores, exportar e importar, conversa temporária (proposta #959, aplicação #961).
++- **Proteção das conversas** — lixeira, origem preservada, escrita só pela página do painel, registro (proposta #962, aplicação #963).
++- **Lote 4** — editar, versões de resposta, ramificar, parar, continuar, feedback, barra de contexto, atalhos e tema (proposta #964, ainda sem assinatura ao fim deste texto).
++
++Cada lote foi escrito por agentes no modelo mais barato disponível, cada um na sua pasta isolada, e conferido pelo orquestrador **[medido; decisão do Humano de 09/11 registrada na memória do orquestrador]**. Nenhum código entrou sem a assinatura do Humano, conferida por chave **[medido: `p8_verificar.sh` com "PODE APLICAR" antes de cada aplicação]**.
++
++#### 3. O dia em que o Humano apagou para testar
++
++Na tarde de 9 de novembro, o orquestrador percebeu que duas conversas antigas tinham sumido do painel **[medido]**. Restaurou as duas do backup de 7 de novembro, depois de conferir o SHA-256 **[medido]**, e mandou um agente revisor procurar a causa.
++
++O revisor não achou defeito. Achou algo mais importante: o botão Apagar apagava de vez, sem lixeira e sem registro, e qualquer programa da máquina podia gravar ou apagar conversas **[medido por leitura de código]**. Antes que a investigação terminasse, o Humano respondeu à pergunta que lhe fora feita: **"Eu apaguei para testar."** **[relato]**
++
++Não houve erro do sistema. Houve um teste do Humano que mostrou uma fraqueza real. Dele nasceu a proteção das conversas. A doutrina do Humano diz que a alavanca mais barata é transformar cada fraqueza em mecanismo permanente **[memória do orquestrador: "Fraqueza vira força"]**; este episódio é um exemplo limpo dela.
++
++#### 4. Quando a infraestrutura dos outros falha
++
++No mesmo dia, todos os PRs pararam. O GitHub estava fazendo um corte programado ("brownout") da política padrão de `pull_request_target`, o evento usado pelo fiscal P-8 **[medido: anotação do run 42655503423; documentação do GitHub lida por agente]**. A regra passa a valer de vez em 2 de dezembro de 2026 **[relato da documentação, lido por agente]**.
++
++O orquestrador não contornou a proteção com modo de administrador. Explicou ao Humano o que era, deu o passo a passo, e o Humano mesmo criou a política no repositório. Na primeira tentativa a política saiu sem a regra de eventos; o orquestrador leu pela API, mostrou o que faltava, o Humano corrigiu, e o fiscal voltou a passar às 14h06 **[medido]**. É a divisão de planos do Protocolo de Inclusão em ação: a configuração da conta é do plano físico do Humano; a leitura e a explicação, do plano das ideias.
++
++#### 5. O sistema pensa sobre o próprio jeito de trabalhar
++
++Em 11 de novembro, com os lotes andando, o Humano pediu duas pesquisas: metodologias ágeis, e o conteúdo de um vídeo sobre escrever a especificação antes do pedido **[relato]**. As duas seguiram o mesmo caminho: pesquisa em fonte original, comparação com o Agata, práticas recomendadas com o problema medido que cada uma resolve, e o que não adotar.
++
++Das metodologias ágeis vieram três práticas: limite de trabalho aberto por componente, uma lista de conferência de "pronto" e uma retrospectiva curta ao fim de cada lote, além de uma quarta em medição até 25 de novembro (proposta #966) **[medido]**. Do vídeo, conferido nas fontes da Anthropic, do GitHub e do Google, vieram outras quatro: entrevistar o Humano antes da spec, travar no CI a sincronia entre spec e critérios, revisar critério por critério sem a conversa, e separar tarefas que precisam de spec das que não precisam (proposta em andamento) **[medido]**.
++
++Aqui o autor registra um erro próprio, como manda a Regra 4: dois números que ele repassou ao Humano — "6,5 horas de mediana da proposta à aplicação" e "MEMÓRIAS em 60% dos commits" — não se confirmaram na segunda medição, que deu outros valores por outro método. Só os casos extremos de 50 e 60 horas se confirmaram **[medido]**. O erro foi dito ao Humano na mesma hora.
++
++O Humano perguntou: "somos os melhores no que já fazemos?" A resposta foi que não dá para afirmar sem medir contra outros, e que um teste comparativo ficaria anotado como importante **[medido: cache do Conselho, entrada 493]**. O Humano gostou da ideia de ver os importantes no painel, e eles viraram um lote **[relato; lote em andamento]**.
++
++#### 6. A voz como ponte
++
++Duas vezes o Humano pediu: "leia a última resposta em voz alta para me ajudar a compreender" **[relato]**. O orquestrador não leu a tela. Reescreveu a resposta para ser ouvida — sem tabelas, sem símbolos, com as listas viradas em frases — e falou com a voz do sistema, `pt_BR-agata-last`, pelo `agata_falar.py` **[medido: saída 0 nas duas vezes]**. Disse também o que não podia saber: que o script terminou sem erro, mas que ele não ouve o som.
++
++O Humano pediu que isso virasse uma skill primordial, válida para todo modelo **[relato; proposta em andamento]**. É talvez o gesto mais simples deste tomo e o mais próximo do Protocolo de Inclusão: o plano das ideias se adapta ao corpo de quem está no plano físico, e não o contrário.
++
++#### 7. O que este texto deve ao Protocolo de Inclusão Humana contínua
++
++O Protocolo ainda não existe como regra; existe como brainstorm e paper de trabalho de 7 de novembro, na Área de trabalho **[medido: `Protocolo de Inclusão Humana 2026-11-07-01.md`, linhas 1–4 e 58–61]**. Suas premissas, enunciadas pelo Humano, são **[medido: linhas 69–74]**:
++
++1. O Humano detém o plano físico.
++2. Os modelos assumem o plano das ideias.
++3. Um plano depende do outro.
++4. A regra da interação é a pacificação.
++5. A interação é descentralizada; enquanto o Humano fala, os modelos escutam.
++6. Gerar melhorias é responsabilidade de todos os entes do sistema.
++
++Este texto as toma como lente, não como lei. Lidas assim, os três dias mostram **[inferência]**:
++
++- **Plano físico, plano das ideias.** Assinar, configurar o GitHub, ligar o carregador, atualizar o sistema na bateria — tudo isso ficou com o Humano. Medir, explicar, escrever e propor ficou com os modelos. Quando o Humano disse que estava na bateria e sem fonte, o orquestrador procurou o caminho mais leve (atualizar um pacote só) em vez de insistir no sistema inteiro.
++- **Pacificação.** Houve discordância sem disputa: o modelo corrigiu os próprios números; o Humano corrigiu a hipótese do modelo ("eu apaguei para testar"); ninguém precisou ter razão para seguir.
++- **Escuta.** Cada "ok a todas" do Humano veio depois de uma tabela de recomendações com os fatos ao lado, como manda o Portão das três perguntas. Cada pedido de voz foi atendido no corpo, não na tela.
++- **Melhoria por todos.** O teste do Humano virou a lixeira; o erro do modelo virou a correção registrada; o atraso do GitHub virou uma política do repositório.
++
++O ciclo das sete palavras do Experimento 2 — Apresentação, Compreensão, Assimilação, Simbiose, Transição, Aprimoramento e Exclusão opcional **[medido: Protocolo, linhas 164 e 169]** — também se reconhece aqui **[inferência]**: a substituição do LibreChat foi apresentada (o pedido), compreendida (o inventário), assimilada (os lotes), está em simbiose (o painel em uso), em transição (o lote 4 e os que faltam), já passou por aprimoramento (a proteção das conversas) e terá, no fim, uma exclusão — a remoção definitiva do LibreChat, que só acontece depois que o Humano conferir que nada faz falta.
++
++#### 8. O que fica aberto ao fim deste texto
++
++**[medido em 11/11/2026, 19h40]**
++
++- Aguardam a assinatura do Humano: o lote 4 do chat e o processo ágil.
++- Em construção: a lista de Importantes no painel, a proposta "spec primeiro" e a skill de falar para compreender.
++- Ainda faltam para a paridade com o LibreChat: voz no chat, anexos, ferramentas com aprovação na tela, agentes, artefatos e a remoção final.
++- Anotados como importantes: o teste comparativo "somos os melhores?" e a ordem de assinatura das oito propostas vivas.
++- O `node` do sistema está quebrado por uma atualização incompleta; o Humano está na bateria **[relato]**.
++
++#### Fontes
++
++- Repositório `agata-seth`: PRs #950 a #966; `propostas/` e `propostas/aplicadas/`.
++- Cache do Conselho: entradas 406, 407, 421, 431–495.
++- `MEMÓRIAS.md`: entradas (979) a (989).
++- Área de trabalho: `Protocolo de Inclusão Humana 2026-11-07-01.md`; `Experimento 2/P9-pre-paridade-librechat.md`.
++- Documentação externa lida por agentes: docs.github.com (políticas de Actions e `pull_request_target`); code.claude.com/docs/en/best-practices; github.com/github/spec-kit; developers.googleblog.com (Conductor); scrumguides.org; kanbanguides.org; dora.dev.
++
++*Fim do Texto 1.*
+diff --git a/redesign/painel_operacional/historia.js b/redesign/painel_operacional/historia.js
+new file mode 100644
+index 00000000..31d3a362
+--- /dev/null
++++ b/redesign/painel_operacional/historia.js
+@@ -0,0 +1,229 @@
++// Seção História do /prototipo (11/11/2026): índice de tomos, leitura de um texto e o botão Ouvir.
++// Só leitura de /api/historia e /api/historia/texto; o Ouvir faz um POST de {tomo, texto} e mostra se falou.
++// Nenhum conteúdo entra como HTML: o texto é montado só com createElement e createTextNode. O arquivo
++// inteiro fica numa IIFE; o único nome exposto é window.AgataPainel (carregarHistoria e markdownParaNos).
++(() => {
++const AgataPainel = (window.AgataPainel = window.AgataPainel || {});
++const byIdH = (id) => document.getElementById(id);
++const el = (tag) => document.createElement(tag);
++const textoNo = (s) => document.createTextNode(s);
++
++// Marcas de origem (regra F0): cada uma vira uma etiqueta com a classe do token de cor.
++const MARCAS = {medido: "marca-medido", relato: "marca-relato", "inferência": "marca-inferencia", inferencia: "marca-inferencia"};
++const TOKENS_INLINE = "\\*\\*([^*]+?)\\*\\*|\\*([^*\\s][^*]*?)\\*|`([^`]+)`|\\[(medido|relato|inferência|inferencia)\\]";
++
++// Negrito, itálico, código e marcas dentro de um trecho de texto. Cada chamada cria o seu RegExp (há recursão).
++function inline(texto, pai) {
++  const re = new RegExp(TOKENS_INLINE, "g");
++  let pos = 0;
++  let casa;
++  while ((casa = re.exec(texto)) !== null) {
++    if (casa.index > pos) pai.appendChild(textoNo(texto.slice(pos, casa.index)));
++    if (casa[1] !== undefined) {
++      const negrito = el("strong");
++      inline(casa[1], negrito);
++      pai.appendChild(negrito);
++    } else if (casa[2] !== undefined) {
++      const italico = el("em");
++      inline(casa[2], italico);
++      pai.appendChild(italico);
++    } else if (casa[3] !== undefined) {
++      const codigo = el("code");
++      codigo.appendChild(textoNo(casa[3]));
++      pai.appendChild(codigo);
++    } else {
++      const marca = el("span");
++      marca.className = "marca " + MARCAS[casa[4]];
++      marca.appendChild(textoNo("[" + casa[4] + "]"));
++      pai.appendChild(marca);
++    }
++    pos = re.lastIndex;
++  }
++  if (pos < texto.length) pai.appendChild(textoNo(texto.slice(pos)));
++}
++
++// Markdown mínimo: títulos (# a ####, sobem um nível), listas, parágrafos, linha horizontal e o inline acima.
++// Devolve uma lista de nós. Não interpreta HTML: `<` e `>` saem como texto.
++function markdownParaNos(texto) {
++  const nos = [];
++  const linhas = String(texto).replace(/\r\n?/g, "\n").split("\n");
++  let paragrafo = [];
++  let lista = null;
++  const fechaParagrafo = () => {
++    if (!paragrafo.length) return;
++    const p = el("p");
++    inline(paragrafo.join(" "), p);
++    nos.push(p);
++    paragrafo = [];
++  };
++  for (const bruta of linhas) {
++    const linha = bruta.trim();
++    if (!linha) { fechaParagrafo(); lista = null; continue; }
++    const cabecalho = /^(#{1,4})\s+(.*)$/.exec(linha);
++    if (cabecalho) {
++      fechaParagrafo(); lista = null;
++      const h = el("h" + Math.min(cabecalho[1].length + 1, 5));
++      inline(cabecalho[2], h);
++      nos.push(h);
++      continue;
++    }
++    if (/^-{3,}$/.test(linha)) { fechaParagrafo(); lista = null; nos.push(el("hr")); continue; }
++    const item = /^([-*]|\d+\.)\s+(.*)$/.exec(linha);
++    if (item) {
++      fechaParagrafo();
++      const tag = /\d/.test(item[1]) ? "ol" : "ul";
++      if (!lista || lista.tag !== tag) {
++        lista = {tag, no: el(tag)};
++        nos.push(lista.no);
++      }
++      const li = el("li");
++      inline(item[2], li);
++      lista.no.appendChild(li);
++      continue;
++    }
++    lista = null;
++    paragrafo.push(linha);
++  }
++  fechaParagrafo();
++  return nos;
++}
++
++let indiceCarregado = false;
++let carregandoIndice = false;
++let textoAberto = null;
++let pedidoSeq = 0;
++
++const OPCOES_GET = {cache: "no-store", credentials: "same-origin", headers: {Accept: "application/json"}};
++
++function marcarIndice() {
++  document.querySelectorAll(".historia-texto-item").forEach((botao) => {
++    const ativo = textoAberto && botao.dataset.tomo === textoAberto.tomo && botao.dataset.texto === textoAberto.id;
++    if (ativo) botao.setAttribute("aria-current", "true");
++    else botao.removeAttribute("aria-current");
++  });
++}
++
++function renderIndice(dados) {
++  const lista = byIdH("historia-indice");
++  lista.replaceChildren();
++  for (const tomo of dados.tomos) {
++    const item = el("li");
++    item.className = "historia-tomo";
++    const titulo = el("p");
++    titulo.className = "historia-tomo-titulo";
++    titulo.appendChild(textoNo("Tomo " + tomo.numeral + " · " + tomo.titulo));
++    item.appendChild(titulo);
++    const textos = el("ol");
++    textos.className = "historia-textos";
++    for (const texto of tomo.textos) {
++      const linha = el("li");
++      const botao = el("button");
++      botao.type = "button";
++      botao.className = "historia-texto-item";
++      botao.dataset.tomo = tomo.tomo;
++      botao.dataset.texto = texto.id;
++      botao.appendChild(textoNo(texto.numero + ". " + texto.titulo));
++      botao.addEventListener("click", () => abrirTexto(tomo.tomo, texto.id));
++      linha.appendChild(botao);
++      textos.appendChild(linha);
++    }
++    item.appendChild(textos);
++    lista.appendChild(item);
++  }
++}
++
++function renderTexto(dados) {
++  const fm = dados.frontmatter || {};
++  byIdH("historia-meta").replaceChildren(textoNo("Texto " + (fm.texto || "") + " · " + (fm.titulo || "") + " · " + (fm.periodo || "")));
++  const estado = byIdH("historia-estado");
++  estado.replaceChildren(textoNo("Estado: " + (fm.estado || "não informado") + ". Autor: " + (fm.autor || "não informado") + "."));
++  byIdH("historia-corpo").replaceChildren(...markdownParaNos(dados.corpo));
++}
++
++async function abrirTexto(tomo, id) {
++  const seq = ++pedidoSeq;
++  const corpo = byIdH("historia-corpo");
++  const ouvir = byIdH("historia-ouvir");
++  byIdH("historia-ouvir-estado").textContent = "";
++  byIdH("historia-meta").textContent = "Lendo o texto…";
++  byIdH("historia-estado").textContent = "";
++  corpo.replaceChildren();
++  if (ouvir) ouvir.disabled = true;
++  textoAberto = null;
++  try {
++    const url = "/api/historia/texto?tomo=" + encodeURIComponent(tomo) + "&texto=" + encodeURIComponent(id);
++    const resposta = await fetch(url, OPCOES_GET);
++    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
++    const dados = await resposta.json();
++    if (seq !== pedidoSeq) return;
++    textoAberto = {tomo, id};
++    renderTexto(dados);
++    if (ouvir) ouvir.disabled = false;
++    marcarIndice();
++  } catch (_) {
++    if (seq !== pedidoSeq) return;
++    byIdH("historia-meta").textContent = "Não medido: o texto não pôde ser lido agora. Nada antigo é mostrado como atual.";
++  }
++}
++
++async function carregarHistoria() {
++  if (indiceCarregado || carregandoIndice) return;
++  const secao = byIdH("historia");
++  if (!secao) return;
++  carregandoIndice = true;
++  AgataPainel.marcarEstado(secao, "carregando");
++  try {
++    const resposta = await fetch("/api/historia", OPCOES_GET);
++    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
++    const dados = await resposta.json();
++    if (!dados || !Array.isArray(dados.tomos)) throw new Error("resposta incompleta");
++    renderIndice(dados);
++    indiceCarregado = true;
++    AgataPainel.marcarEstado(secao, dados.tomos.length ? null : "vazio");
++    if (dados.tomos.length && dados.tomos[0].textos.length) {
++      await abrirTexto(dados.tomos[0].tomo, dados.tomos[0].textos[0].id);
++    }
++  } catch (_) {
++    AgataPainel.marcarEstado(secao, "erro");
++  } finally {
++    carregandoIndice = false;
++  }
++}
++
++async function ouvir() {
++  if (!textoAberto) return;
++  const botao = byIdH("historia-ouvir");
++  const saida = byIdH("historia-ouvir-estado");
++  botao.disabled = true;
++  saida.textContent = "Lendo em voz alta. A resposta vem quando a leitura terminar.";
++  try {
++    const resposta = await fetch("/api/historia/ouvir", {
++      method: "POST", cache: "no-store", credentials: "same-origin",
++      headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify({tomo: textoAberto.tomo, texto: textoAberto.id}),
++    });
++    if (resposta.status === 429) {
++      saida.textContent = "Não falei: já estou lendo outro texto. Aguarde o fim.";
++      return;
++    }
++    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
++    const dados = await resposta.json();
++    const motivo = String(dados.motivo || "não falei");
++    saida.textContent = dados.falou ? "Falei o texto até o fim." : motivo.charAt(0).toUpperCase() + motivo.slice(1) + ".";
++  } catch (_) {
++    saida.textContent = "Não falei: a página não conseguiu pedir a leitura.";
++  } finally {
++    botao.disabled = !textoAberto;
++  }
++}
++
++const botaoOuvir = byIdH("historia-ouvir");
++if (botaoOuvir) botaoOuvir.addEventListener("click", () => ouvir());
++
++AgataPainel.carregarHistoria = carregarHistoria;
++AgataPainel.markdownParaNos = markdownParaNos;
++
++// Página aberta direto em #historia: a seção já está visível quando este script roda (defer).
++const secaoHistoria = byIdH("historia");
++if (secaoHistoria && !secaoHistoria.hidden) carregarHistoria();
++})();
+diff --git a/redesign/painel_operacional/historia_painel.py b/redesign/painel_operacional/historia_painel.py
+new file mode 100644
+index 00000000..58f12a37
+--- /dev/null
++++ b/redesign/painel_operacional/historia_painel.py
+@@ -0,0 +1,139 @@
++"""História canônica no painel: seção História, só leitura, mais o botão Ouvir.
++
++Lê historia/ do checkout: tomo-NN/NN-titulo.md, com frontmatter. Não grava nada no diretório.
++O Ouvir chama scripts/agata_falar.py com o corpo do texto (sem o frontmatter) e responde se falou, pelo
++código de saída. A voz é a do sistema (decisão do Humano, 03/11/2026): quem não fala diz que não falou.
++"""
++from __future__ import annotations
++
++import os
++import re
++import subprocess
++import sys
++import tempfile
++import threading
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++# Caminhos lidos na hora da chamada (os testes trocam estes nomes por diretórios temporários).
++HISTORIA_DIR = ROOT / "historia"
++FALA = ROOT / "scripts" / "agata_falar.py"
++TOMO_RE = re.compile(r"tomo-\d{2}")
++TEXTO_RE = re.compile(r"\d{2}-[a-z0-9][a-z0-9-]*")
++FRONT_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
++LIMITE_TEXTO_BYTES = 65_536
++TEMPO_FALA_S = 900
++_FALA_LOCK = threading.Lock()
++MOTIVOS_FALA = {
++    0: "falei o texto",
++    2: "não falei: o texto está vazio ou acima do limite de fala",
++    3: "não falei: a voz do sistema não respondeu, ou não é a voz do sistema",
++    4: "não falei: não há player de áudio local",
++}
++
++
++class ErroHistoria(Exception):
++    def __init__(self, status: int, motivo: str):
++        super().__init__(motivo)
++        self.status, self.motivo = status, motivo
++
++
++def frontmatter(texto: str) -> tuple[dict, str]:
++    """Separa o bloco `---` do início. Só pares `chave: valor` de uma linha; aspas duplas externas saem."""
++    casa = FRONT_RE.match(texto)
++    if not casa:
++        return {}, texto
++    dados: dict = {}
++    for linha in casa.group(1).splitlines():
++        chave, sep, valor = linha.partition(":")
++        chave = chave.strip()
++        if sep and re.fullmatch(r"[a-z_]+", chave):
++            valor = valor.strip()
++            if len(valor) >= 2 and valor[0] == valor[-1] == '"':
++                valor = valor[1:-1]
++            dados[chave] = valor
++    return dados, texto[casa.end():]
++
++
++def _ler(arquivo: Path) -> str:
++    try:
++        if arquivo.stat().st_size > LIMITE_TEXTO_BYTES:
++            raise ErroHistoria(413, "texto acima do limite")
++        return arquivo.read_text(encoding="utf-8")
++    except (OSError, UnicodeDecodeError):
++        raise ErroHistoria(500, "historia indisponivel")
++
++
++def _tomos() -> list[Path]:
++    if not HISTORIA_DIR.is_dir():
++        return []
++    return sorted(p for p in HISTORIA_DIR.iterdir() if p.is_dir() and TOMO_RE.fullmatch(p.name))
++
++
++def _textos(pasta: Path) -> list[Path]:
++    return sorted(p for p in pasta.glob("*.md") if TEXTO_RE.fullmatch(p.stem))
++
++
++def _resumo(arquivo: Path) -> dict:
++    dados, _corpo = frontmatter(_ler(arquivo))
++    return {
++        "id": arquivo.stem,
++        "numero": dados.get("texto", ""),
++        "titulo": dados.get("titulo", arquivo.stem),
++        "periodo": dados.get("periodo", ""),
++        "autor": dados.get("autor", ""),
++        "estado": dados.get("estado", ""),
++        "protocolo": dados.get("protocolo", ""),
++        "_tomo": {"numeral": dados.get("tomo", ""), "titulo": dados.get("titulo_tomo", "")},
++    }
++
++
++def listar() -> dict:
++    """Tomos e textos do diretório, na ordem de nome. Sem tomo com texto, o estado é vazio."""
++    tomos = []
++    for pasta in _tomos():
++        resumos = [_resumo(arq) for arq in _textos(pasta)]
++        if not resumos:
++            continue
++        primeiro = resumos[0].pop("_tomo")
++        for resumo in resumos[1:]:
++            resumo.pop("_tomo")
++        tomos.append({"tomo": pasta.name, "numeral": primeiro["numeral"], "titulo": primeiro["titulo"], "textos": resumos})
++    return {"schema_version": 1, "estado": "ok" if tomos else "vazio", "tomos": tomos}
++
++
++def ler(tomo, texto) -> dict:
++    """Um texto com frontmatter separado. Tomo e texto têm formato fixo: nada de caminho vindo do cliente."""
++    if not (isinstance(tomo, str) and isinstance(texto, str) and TOMO_RE.fullmatch(tomo) and TEXTO_RE.fullmatch(texto)):
++        raise ErroHistoria(400, "tomo ou texto fora do formato")
++    arquivo = HISTORIA_DIR / tomo / f"{texto}.md"
++    if not arquivo.is_file() or not arquivo.resolve().is_relative_to(HISTORIA_DIR.resolve()):
++        raise ErroHistoria(404, "texto indisponivel")
++    dados, corpo = frontmatter(_ler(arquivo))
++    return {"schema_version": 1, "tomo": tomo, "texto": texto, "frontmatter": dados, "corpo": corpo}
++
++
++def ouvir(tomo, texto) -> dict:
++    """Lê o corpo do texto em voz alta com a voz do sistema. Uma fala por vez. Responde falou ou não falou."""
++    doc = ler(tomo, texto)
++    if not _FALA_LOCK.acquire(blocking=False):
++        raise ErroHistoria(429, "ja estou lendo em voz alta; aguarde o fim")
++    caminho = None
++    try:
++        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".txt", delete=False) as arq:
++            caminho = arq.name
++            arq.write(doc["corpo"])
++        try:
++            codigo = subprocess.run([sys.executable, "-I", str(FALA), "--arquivo", caminho], stdin=subprocess.DEVNULL,
++                                    capture_output=True, timeout=TEMPO_FALA_S, check=False).returncode
++        except subprocess.TimeoutExpired:
++            codigo = -1
++    finally:
++        if caminho:
++            os.unlink(caminho)
++        _FALA_LOCK.release()
++    if codigo == -1:
++        motivo = "não falei até o fim: o tempo acabou"
++    else:
++        motivo = MOTIVOS_FALA.get(codigo, "não falei: a fala terminou com erro")
++    return {"schema_version": 1, "falou": codigo == 0, "motivo": motivo}
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 4b9df320..ba32f499 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -1801,3 +1801,35 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .memoria-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
+ .oc-cabecalho{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:0 0 18px}
+ .oc-cabecalho .oc-lede{margin:6px 0 0}
++
++/* História (11/11/2026): índice de tomos à esquerda, texto à direita; marcas de origem com tokens do :root. */
++.historia-legenda{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 18px}
++.marca{display:inline-block;border-radius:6px;padding:0 6px;font-size:.92em;line-height:1.5;white-space:nowrap}
++.marca-medido{background:var(--teal-soft);color:var(--teal)}
++.marca-relato{background:var(--gold-soft);color:var(--gold)}
++.marca-inferencia{background:var(--violet-soft);color:var(--violet)}
++.historia-layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:24px;align-items:start}
++.historia-indice{position:sticky;top:16px;border:1px solid var(--line);border-radius:14px;background:var(--sheet);padding:16px;max-height:calc(100vh - 32px);overflow:auto}
++.historia-indice .panel-title{margin:0 0 10px}
++.historia-tomos,.historia-textos{list-style:none;margin:0;padding:0}
++.historia-tomo{margin:0 0 14px}
++.historia-tomo-titulo{color:var(--muted);font-size:13px;margin:0 0 6px}
++.historia-texto-item{width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;color:var(--ink);font:inherit;font-size:14px;padding:8px 10px;cursor:pointer}
++.historia-texto-item:hover{border-color:var(--line)}
++.historia-texto-item[aria-current="true"]{border-color:var(--teal);background:var(--teal-soft)}
++.historia-texto-item:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
++.historia-leitura{border:1px solid var(--line);border-radius:14px;background:var(--sheet);padding:20px 24px;min-width:0}
++.historia-barra{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
++.historia-meta{color:var(--muted);margin:0;font-size:14px}
++.historia-estado{color:var(--muted);font-size:13px;line-height:1.5;margin:4px 0 0}
++.historia-ouvir-estado{color:var(--gold);font-size:14px;min-height:1.5em;margin:8px 0 0}
++.historia-corpo{max-width:70ch;line-height:1.75;font-size:17px;margin-top:18px}
++.historia-corpo h2,.historia-corpo h3,.historia-corpo h4,.historia-corpo h5{font-family:var(--serif);font-weight:400;line-height:1.25;margin:1.4em 0 .5em}
++.historia-corpo h2{font-size:28px}
++.historia-corpo h3{font-size:23px}
++.historia-corpo h4{font-size:19px}
++.historia-corpo h5{font-size:17px;color:var(--muted)}
++.historia-corpo p,.historia-corpo ul,.historia-corpo ol{margin:0 0 1em}
++.historia-corpo code{font-family:var(--mono);font-size:.9em;background:var(--blue-soft);border-radius:5px;padding:1px 5px}
++.historia-corpo hr{border:0;border-top:1px solid var(--line);margin:24px 0}
++@media (max-width: 860px){.historia-layout{grid-template-columns:minmax(0,1fr)}.historia-indice{position:static;max-height:none}}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 8a55928a..0e501703 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -11,7 +11,7 @@
+ <div class="shell">
+ <aside class="sidebar" aria-label="Navegação principal">
+   <div class="brand"><div class="brand-mark" aria-hidden="true"><img src="assets/agata-portrait.png" alt=""></div><div><div class="brand-name">Agata</div><div class="brand-sub">painel de orientação</div></div><button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Recolher navegação lateral" title="Recolher navegação lateral" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span class="sr-only">Recolher ou expandir navegação</span></button></div>
+-  <div><p class="nav-label">Seu espaço</p><nav class="nav" aria-label="Seções do painel"><button type="button" data-secao="panorama" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h8V4H3zM13 20h8v-8h-8zM13 4h8v4h-8zM3 16h8v4H3z"/></svg>Panorama</button><button type="button" data-secao="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa com a Seth</button><button type="button" data-secao="conselho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><path d="M9.8 9 6.5 14M14.2 9l3.3 5M7.5 17h9"/></svg>Conselho de Modelos</button><button type="button" data-secao="sistema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18" r="1.5" fill="currentColor"/></svg>Sistema</button><button type="button" data-secao="conhecimento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Conhecimento</button><button type="button" data-secao="custos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.5"/></svg>Custos</button><button type="button" data-secao="qualidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Qualidade</button></nav></div>
++  <div><p class="nav-label">Seu espaço</p><nav class="nav" aria-label="Seções do painel"><button type="button" data-secao="panorama" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h8V4H3zM13 20h8v-8h-8zM13 4h8v4h-8zM3 16h8v4H3z"/></svg>Panorama</button><button type="button" data-secao="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa com a Seth</button><button type="button" data-secao="conselho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><path d="M9.8 9 6.5 14M14.2 9l3.3 5M7.5 17h9"/></svg>Conselho de Modelos</button><button type="button" data-secao="sistema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="10" cy="18" r="1.5" fill="currentColor"/></svg>Sistema</button><button type="button" data-secao="conhecimento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M8 4.5v15M11 9h5M11 12h5"/></svg>Conhecimento</button><button type="button" data-secao="historia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 14h6M9 17h4"/></svg>História</button><button type="button" data-secao="custos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.5"/></svg>Custos</button><button type="button" data-secao="qualidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Qualidade</button></nav></div>
+   <div class="abrir-lista" id="servicos-locais" aria-label="Serviços do sistema"><div class="abrir-titulo">Serviços</div>
+     <button class="btn" type="button" data-alvo="obsidian">Obsidian</button>
+     <button class="btn" type="button" data-alvo="librechat">LibreChat</button>
+@@ -351,6 +351,27 @@
+ <div class="nv-vazio" id="nv-acv-vazio">Nenhuma fonte ainda.</div></article>
+ </div>
+ </section>
++<section class="secao" id="historia" aria-labelledby="titulo-historia" data-titulo="História" hidden>
++<h2 class="sr-only" id="titulo-historia">História</h2>
++<div class="estados" aria-live="polite">
++  <p class="estado" data-estado="carregando" hidden>Carregando a História…</p>
++  <p class="estado" data-estado="vazio" hidden>Nenhum tomo em historia/ ainda. Os textos aparecem aqui quando forem gravados no repositório.</p>
++  <p class="estado" data-estado="erro" hidden>Não medido: não foi possível ler a História agora. Nada antigo é mostrado como atual.</p>
++</div>
++<div class="sub" id="sub-historia" data-sub="historia" data-secao="historia">
++  <div class="section-heading"><div><div class="eyebrow">Canon · somente leitura</div><h1>História canônica</h1><p>O relato do sistema, texto por texto, em tomos. Escrito primeiro para modelos retomarem o fio. Um texto só vira canon com a assinatura do Humano: veja o estado de cada um.</p></div></div>
++  <p class="historia-legenda">Marcas de origem: <span class="marca marca-medido">[medido]</span> conferido na Máquina; <span class="marca marca-relato">[relato]</span> dito por alguém, sem reprodução; <span class="marca marca-inferencia">[inferência]</span> leitura do autor, sem prova.</p>
++  <div class="historia-layout">
++    <aside class="historia-indice" aria-label="Tomos e textos"><h2 class="panel-title">Tomos</h2><ol class="historia-tomos" id="historia-indice"></ol></aside>
++    <article class="historia-leitura" aria-label="Texto da História">
++      <div class="historia-barra"><p class="historia-meta" id="historia-meta" role="status"></p><button class="btn secondary" id="historia-ouvir" type="button" disabled>Ouvir</button></div>
++      <p class="historia-estado" id="historia-estado"></p>
++      <p class="historia-ouvir-estado" id="historia-ouvir-estado" role="status" aria-live="polite"></p>
++      <div class="historia-corpo" id="historia-corpo"></div>
++    </article>
++  </div>
++</div>
++</section>
+ <section class="secao" id="custos" aria-labelledby="titulo-custos" data-titulo="Custos" hidden>
+ <h2 class="sr-only" id="titulo-custos">Custos</h2>
+ <div class="estados" aria-live="polite">
+@@ -439,6 +460,7 @@
+ <script src="prototipo.js"></script>
+ <script src="abrir.js"></script>
+ <script src="nova_versao.js"></script>
++<script src="historia.js" defer></script>
+ <script src="conselho-rede/app.js" defer></script>
+ <script src="operator_console/app.js" defer></script>
+ </body>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 1671af70..6256f797 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -4,7 +4,7 @@
+ (function () {
+ const byId = (id) => document.getElementById(id);
+ const AgataPainel = (window.AgataPainel = window.AgataPainel || {});
+-const SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"];
++const SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"];
+ const navSecoes = [...document.querySelectorAll(".nav button[data-secao]")];
+ const shell = document.querySelector(".shell");
+ const sidebarToggle = byId("sidebar-toggle");
+@@ -80,6 +80,8 @@ const CARREGAR_SUB = {
+   sdd: () => carregarSdd(),
+   frentes: () => carregarFrentes(),
+   "conselho-memoria": () => carregarMemoriaConselho(),
++  // História (11/11/2026): historia.js registra AgataPainel.carregarHistoria ao carregar; antes disso, não faz nada.
++  historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
+ };
+ 
+ function mostrarSub(secao, sub) {
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 64170882..ef4c175d 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -36,6 +36,7 @@ import medicoes_painel  # noqa: E402
+ import sdd_painel  # noqa: E402
+ import nova_versao_painel  # noqa: E402
+ import chat_stream  # noqa: E402
++import historia_painel  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
+@@ -116,6 +117,7 @@ _ASSETS = {
+     "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
+     "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
+     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
++    "/historia.js": ("historia.js", "text/javascript; charset=utf-8"),
+ }
+ # Telas antigas (painel unificado, spec 07/11/2026): link antigo cai na seção certa do /prototipo.
+ _REDIRECTS = {
+@@ -1104,6 +1106,10 @@ class Handler(BaseHTTPRequestHandler):
+                 dados = _vault_item(item_id)
+             body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
+             return self._send(200, "application/json; charset=utf-8", body)
++        if self.path.split("?", 1)[0] == "/api/historia":
++            return self._historia_listar()
++        if self.path.startswith("/api/historia/texto?"):
++            return self._historia_texto()
+         if self.path == "/api/frentes":
+             # Somente leitura: caminho fixo a partir da raiz do repositório; o cliente não escolhe arquivo.
+             try:
+@@ -1206,6 +1212,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
+         if self.path == "/api/abrir":
+             return self._abrir_programa()
++        if self.path == "/api/historia/ouvir":
++            return self._historia_ouvir()
+         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
+                          "/api/relay-council/decision"}:
+             return self._relay_council_human_post()
+@@ -1703,6 +1711,44 @@ class Handler(BaseHTTPRequestHandler):
+                  "observed_at": observed_at, "fresh_until": fresh_until}
+         return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+ 
++    def _historia_listar(self) -> None:
++        """Seção História (11/11/2026): tomos e textos de historia/, só leitura. A checagem de origem já rodou em do_GET."""
++        try:
++            dados = historia_painel.listar()
++        except historia_painel.ErroHistoria as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
++    def _historia_texto(self) -> None:
++        """Um texto da História. tomo e texto vêm na query e têm formato fixo (historia_painel.ler)."""
++        query = parse_qs(urlparse(self.path).query)
++        try:
++            dados = historia_painel.ler((query.get("tomo") or [""])[0], (query.get("texto") or [""])[0])
++        except historia_painel.ErroHistoria as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
++    def _historia_ouvir(self) -> None:
++        """Botão Ouvir da História: POST JSON {tomo, texto}, só da própria origem. Responde falou ou não falou."""
++        if (self.headers.get("Origin") != ALLOWED_ORIGIN
++                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}
++                or self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json"):
++            return self._send(403, "text/plain; charset=utf-8", b"same-origin JSON required")
++        tamanho = self.headers.get("Content-Length", "")
++        if not tamanho.isdecimal() or int(tamanho) > 512:
++            return self._send(400, "text/plain; charset=utf-8", b"invalid body size")
++        try:
++            pedido = json.loads(self.rfile.read(int(tamanho)) or b"{}")
++        except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        if not isinstance(pedido, dict):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid request")
++        try:
++            dados = historia_painel.ouvir(pedido.get("tomo"), pedido.get("texto"))
++        except historia_painel.ErroHistoria as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
+     def _grafo(self) -> None:
+         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
+         from urllib.parse import urlparse, parse_qs
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index a4562a8d..7a796d7e 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -38,11 +38,11 @@
+     "cwd": null
+   },
+   {
+-    "criterion": "o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma",
++    "criterion": "o `/prototipo` tem oito seções (panorama, conversa, conselho, sistema, conhecimento, historia, custos e qualidade) e um botão de menu para cada uma",
+     "command": [
+       "pytest",
+       "-q",
+-      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_sete_secoes"
++      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_oito_secoes"
+     ],
+     "cwd": null
+   },
+@@ -740,5 +740,146 @@
+       "redesign/painel_operacional/test_chat_ui.py::ConversaProtecao::test_lixeira_vazia_e_indisponivel_dizem_isso"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "`GET /api/historia` lista os tomos e os textos de `historia/` com o frontmatter (tomo, título, período, autor, estado e protocolo), sem o corpo do texto",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_lista_tomos_e_textos_com_frontmatter"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`GET /api/historia/texto` devolve o frontmatter separado e o corpo do texto; `tomo` e `texto` têm formato fixo e o cliente não escolhe caminho: fora do formato, 400; inexistente ou link para fora de `historia/`, 404",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_texto_devolve_frontmatter_e_corpo",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_caminho_do_cliente_e_recusado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`historia/` ausente ou sem texto dá estado `vazio` com 200, e não erro",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_pasta_vazia_ou_ausente_da_estado_vazio"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "as leituras da História e o Ouvir recusam origem cruzada com 403; o Ouvir aceita só JSON da própria origem e corpo até 512 bytes",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_leituras_recusam_origem_cruzada",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_so_aceita_json_da_propria_origem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`historia.js` é arquivo externo servido em `/historia.js`, e a seção História não tem script nem estilo inline",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_historia_js_servido_como_arquivo_externo",
++      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_secao_historia_na_navegacao"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o Ouvir manda só o corpo do texto, sem o frontmatter, para `scripts/agata_falar.py --arquivo`, e responde `falou` verdadeiro só com código de saída 0",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_responde_falou_pelo_exit_code_e_manda_so_o_corpo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "com a voz do sistema sem resposta, o Ouvir responde `falou` falso com motivo que diz `não falei`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_sem_voz_diz_que_nao_falou"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "uma fala por vez: com outra em curso, o Ouvir responde 429 e não chama a voz; texto inexistente não chama a voz",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_recusa_fala_em_curso_e_texto_inexistente"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o botão Ouvir chama `POST /api/historia/ouvir` com `tomo` e `texto` do texto aberto, fica desligado sem texto aberto e mostra se falou ou não",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_ouvir_chama_a_rota_e_mostra_o_resultado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o texto da História vira nós com createElement e createTextNode: `historia.js` não usa innerHTML, outerHTML, insertAdjacentHTML, document.write nem eval, e tag HTML no texto sai como texto",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_markdown_vira_nos_sem_html",
++      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_historia_js_sem_html_dinamico"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "as marcas `[medido]`, `[relato]` e `[inferência]` viram etiquetas com classe própria e cor por token do `:root`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_marcas_tem_regra_com_tokens",
++      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_marcas_e_titulos_do_texto_real"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o `/prototipo` tem a seção `historia` depois de `conhecimento`, escondida até ser escolhida, com estados carregando, vazio e erro",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_secao_historia_na_navegacao",
++      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_oito_secoes"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o texto 1 do Tomo I, em `historia/` do checkout, aparece na lista e tem as marcas de origem",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_historia_do_repo_tem_o_texto_1"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`scripts/perimetro/p08_quarentena.sh` põe `historia/` na quarentena do P-8, e a História não muda sem assinatura",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_p8_protege_historia"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "os arquivos da História não têm emoji",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_sem_emoji_na_historia"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 32ab9633..c7f34a71 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -23,7 +23,7 @@
+ 
+ ## Escopo desta versão
+ 
+-- Uma tela, `/prototipo`, com sete seções: `panorama`, `conversa`, `conselho`, `sistema`, `conhecimento`, `custos` e `qualidade`.
++- Uma tela, `/prototipo`, com oito seções: `panorama`, `conversa`, `conselho`, `sistema`, `conhecimento`, `historia`, `custos` e `qualidade`. A `historia` entrou em 11/11/2026, pedido do Humano (bloco História abaixo).
+ - Cada função das telas atuais tem uma seção e um subpainel (tabela de mapeamento abaixo). Nenhuma função some sem registro.
+ - Um arquivo de estilo, `prototipo.css`, com tokens de cor e tipografia em `:root` e componentes únicos. Sem `style=`, sem `<style>`, sem script inline.
+ - Estados carregando, vazio e erro em cada seção que consome API.
+@@ -33,6 +33,8 @@
+ - Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
+ - Proteção das conversas (09/11/2026, pedido do Humano depois do sumiço de duas conversas importadas, confirmado por ele em 09/11/2026 às 16:20 como apagadas pela própria tela): apagar vai para a Lixeira, escritas exigem origem do painel e ficam registradas, salvar preserva a origem de conversa importada, e arquivo ilegível é contado e não é apagado. Contrato em Rotas de API (bloco de proteção) e critérios no fim da seção de Critérios.
+ 
++- História (11/11/2026, pedido do Humano): seção `historia` no `/prototipo`, com o índice de tomos e a leitura dos textos de `historia/` do checkout (só leitura), e o botão Ouvir, que lê o texto com a voz do sistema. Contrato em Rotas de API (bloco História) e critérios no fim da seção de Critérios.
++
+ ## Fora desta versão
+ 
+ - B1, chat com streaming novo: a Conversa continua como está (stream atual, com fallback para `/api/seth/chat`). Motivo: é funcionalidade nova, com risco próprio; o pedido desta versão é a tela unificada.
+@@ -88,9 +90,15 @@
+   - Origem cruzada: 403, como as outras leituras de `/api/*`.
+   - Tipos: `fato`, `decisao`, `pendencia`, `nota` e `diario` (os cinco de `cache_conselho.TIPOS`). A aba filtra por tipo no próprio navegador, sobre as entradas já recebidas.
+ 
++- História (11/11/2026). Tudo lido de `historia/` do checkout; nada é gravado nele.
++  - `GET /api/historia` devolve `schema_version`, `estado` (`ok` ou `vazio`) e `tomos`. Cada tomo traz `tomo`, `numeral`, `titulo` e `textos`; cada texto traz `id`, `numero`, `titulo`, `periodo`, `autor`, `estado` e `protocolo`, sem o corpo. Pasta ausente ou sem texto: `vazio`, 200.
++  - `GET /api/historia/texto?tomo=<tomo-NN>&texto=<NN-titulo>` devolve `frontmatter` (pares `chave: valor` do bloco inicial, sem as aspas externas) e `corpo` (o texto sem o bloco). Fora do formato, 400: o cliente não escolhe caminho. Inexistente ou link para fora de `historia/`, 404. Acima de 65536 bytes, 413.
++  - `POST /api/historia/ouvir` com `{tomo, texto}` (até 512 bytes) lê o corpo com `scripts/agata_falar.py --arquivo`, sem o frontmatter, e responde `falou` (verdadeiro só com código de saída 0) e `motivo`. Uma fala por vez: com outra em curso, 429. Só aceita JSON da própria origem: outra origem ou outro tipo, 403.
++  - As leituras da História recusam origem cruzada com 403, como as demais de `/api/*`.
++
+ ### Ativos servidos
+ 
+-- Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`.
++- Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`, `/historia.js`.
+ - Saem (404 na versão nova): `/app.js`, `/styles.css`, `/frentes.js`, `/nova_versao.css`, `/conselho-rede/style.css`, `/operator_console/style.css`.
+ - Viram redirect: `/index.html`, `/frentes`, `/operator_console/index.html`, `/conselho-rede/index.html` (os arquivos saem do disco na aplicação).
+ - CSP: sem mudança. `default-src 'none'; script-src 'self'; style-src 'self'; frame-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'`.
+@@ -98,7 +106,7 @@
+ ### Seções e navegação
+ 
+ - Cada seção é `<section id="<seção>">` dentro de `/prototipo`. Dentro dela há subpainéis `<div id="sub-<nome antigo>">`, com o nome da tela antiga da tabela. Abas internas (`data-sub`) trocam subpainéis dentro da seção.
+-- Menu lateral: sete botões com `data-secao`. O botão da seção aberta tem `aria-current="page"`.
++- Menu lateral: oito botões com `data-secao`. O botão da seção aberta tem `aria-current="page"`.
+ - Breadcrumb mostra `Agata / <nome da seção>`.
+ - Atalhos `data-open-page` passam a apontar para uma seção e, se for o caso, um subpainel.
+ - Submenus recolhíveis (`nav-group`) saem.
+@@ -119,6 +127,7 @@
+ - conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
+ - sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
+ - conhecimento: GET `/api/grafo`, `/api/vault/item`, `/api/nova-versao/estado`; POST `/api/wiki/search`, `/api/nova-versao/executar` (`consultar`, `skills`, `indexar`, `iniciar`, `acervo_*`, `acervo_externa_*`), POST `/api/nova-versao/upload`.
++- historia: GET `/api/historia`, `/api/historia/texto`; POST `/api/historia/ouvir`.
+ - custos: GET `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`salvar_orcamento`, `ajustar_conexao`).
+ - qualidade: GET `/api/qualidade-llm`, `/api/medicoes/estado`, `/api/sdd/estado`, `/api/lacunas`, `/api/nova-versao/estado`; POST `/api/medicoes/executar`, `/api/sdd/executar`, `/api/nova-versao/executar` (`avaliar`, `cancelar_avaliacao`, `medir_recuperacao`, `medir_ouvido`, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `ver_execucao`).
+ 
+@@ -221,7 +230,10 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ | prototipo · Nova versão · Orçamento e eventos | Categorias e tetos (local, gratuito, assinatura, pago; chamadas, tokens, timeout, R$); salvar | custos | sub-nv-orcamento (`nv-orc-salvar`, `nv-orc-reais`) |
+ | prototipo · Nova versão · Orçamento e eventos | Últimos eventos do ledger | custos | sub-nv-orcamento (`nv-eventos-titulo`) |
+ | prototipo · Nova versão · Conexões | Tarifas e modelo por provedor (US$/M tokens de entrada e saída, câmbio, data, fonte); salvar modelo e tarifa | custos | sub-nv-tarifas (`nv-api-provedor`, `nv-api-modelo`, `nv-tar-entrada`, `nv-api-ajustar`) |
+-| casca | Barra lateral com as sete entradas e botão de recolher | casca | não é seção |
++| canon (História, 11/11/2026) | Índice de tomos e textos de `historia/`, com o estado de cada texto | historia | sub-historia (`historia-indice`, `historia-meta`) |
++| canon (História) | Leitura de um texto: marcas de origem, frontmatter e corpo | historia | sub-historia (`historia-corpo`, `historia-estado`) |
++| canon (História) | Botão Ouvir: lê o corpo com a voz do sistema e diz se falou ou não | historia | sub-historia (`historia-ouvir`, `historia-ouvir-estado`) |
++| casca | Barra lateral com as oito entradas e botão de recolher | casca | não é seção |
+ | casca | Breadcrumb, chip LOCAL, nota "O Humano no centro" e rodapé | casca | não é seção |
+ | casca | Busca "Buscar neste mapa…" (filtra os cartões da seção aberta) | casca | não é seção |
+ | casca | Diálogo de evidência (`evidence-dialog`) | casca | usado por Panorama e Sistema |
+@@ -235,7 +247,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] todos os caminhos `/api/*` chamados pelo JS existem no servidor; a rota nova `/api/conselho/memoria` é somente leitura do cache e está documentada
+ - [ ] a conversa salva é validada e devolvida com `schema_version` e `id`, e regrava com o mesmo id sem duplicar arquivo; conteúdo de mensagem até 65536 caracteres passa na validação, respeitado o teto total de 262144 bytes por requisição
+ - [ ] a CSP das respostas continua com `script-src 'self'` e `style-src 'self'`
+-- [ ] o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma
++- [ ] o `/prototipo` tem oito seções (panorama, conversa, conselho, sistema, conhecimento, historia, custos e qualidade) e um botão de menu para cada uma
+ - [ ] cada tela antiga tem um subpainel `sub-<nome>` dentro da seção de destino do mapeamento
+ - [ ] cada função do mapeamento existe na tela, pelo id, em `prototipo.html` ou `prototipo.js`
+ - [ ] o `/prototipo` escolhe a seção pelo hash, troca ao mudar o hash e cai em panorama com hash desconhecido
+@@ -258,6 +270,21 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] a execução do SDD recusa ação e componente fora da lista
+ - [ ] a execução do SDD recusa comando fora do padrão pytest
+ - [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
++- [ ] `GET /api/historia` lista os tomos e os textos de `historia/` com o frontmatter (tomo, título, período, autor, estado e protocolo), sem o corpo do texto
++- [ ] `GET /api/historia/texto` devolve o frontmatter separado e o corpo do texto; `tomo` e `texto` têm formato fixo e o cliente não escolhe caminho: fora do formato, 400; inexistente ou link para fora de `historia/`, 404
++- [ ] `historia/` ausente ou sem texto dá estado `vazio` com 200, e não erro
++- [ ] as leituras da História e o Ouvir recusam origem cruzada com 403; o Ouvir aceita só JSON da própria origem e corpo até 512 bytes
++- [ ] `historia.js` é arquivo externo servido em `/historia.js`, e a seção História não tem script nem estilo inline
++- [ ] o Ouvir manda só o corpo do texto, sem o frontmatter, para `scripts/agata_falar.py --arquivo`, e responde `falou` verdadeiro só com código de saída 0
++- [ ] com a voz do sistema sem resposta, o Ouvir responde `falou` falso com motivo que diz `não falei`
++- [ ] uma fala por vez: com outra em curso, o Ouvir responde 429 e não chama a voz; texto inexistente não chama a voz
++- [ ] o botão Ouvir chama `POST /api/historia/ouvir` com `tomo` e `texto` do texto aberto, fica desligado sem texto aberto e mostra se falou ou não
++- [ ] o texto da História vira nós com createElement e createTextNode: `historia.js` não usa innerHTML, outerHTML, insertAdjacentHTML, document.write nem eval, e tag HTML no texto sai como texto
++- [ ] as marcas `[medido]`, `[relato]` e `[inferência]` viram etiquetas com classe própria e cor por token do `:root`
++- [ ] o `/prototipo` tem a seção `historia` depois de `conhecimento`, escondida até ser escolhida, com estados carregando, vazio e erro
++- [ ] o texto 1 do Tomo I, em `historia/` do checkout, aparece na lista e tem as marcas de origem
++- [ ] `scripts/perimetro/p08_quarentena.sh` põe `historia/` na quarentena do P-8, e a História não muda sem assinatura
++- [ ] os arquivos da História não têm emoji
+ - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
+ - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
+ - [ ] a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento
+@@ -401,6 +428,9 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
+ - `test_conversas_protege.py`
+ - `test_chat_ui.py`
+ - `test_frentes.py`
++- `historia_painel.py`
++- `historia.js`
++- `test_historia.py`
+ - `conselho-rede/`
+ - `relay-extension-v2/`
+ - `operator_console/`
+diff --git a/redesign/painel_operacional/test_historia.py b/redesign/painel_operacional/test_historia.py
+new file mode 100644
+index 00000000..f59b9986
+--- /dev/null
++++ b/redesign/painel_operacional/test_historia.py
+@@ -0,0 +1,382 @@
++"""Testes da seção História do painel (spec/spec.md, seção História, 11/11/2026).
++
++Cada método corresponde a um critério automático de spec/acceptance.json. Os de rota sobem o servidor numa
++porta livre (127.0.0.1), como test_painel_unificado.py. O de voz troca scripts/agata_falar.py por um falso que
++grava o que recebeu e sai com o código pedido. Os de interface rodam historia.js no node, com um DOM mínimo, e
++conferem que o texto vira nós (createElement e createTextNode), nunca HTML.
++"""
++import http.client
++import importlib.util
++import json
++import os
++import re
++import subprocess
++import sys
++import tempfile
++import threading
++import unittest
++from html.parser import HTMLParser
++from pathlib import Path
++from urllib.parse import quote
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[1]
++sys.path.insert(0, str(HERE))
++import historia_painel as hp  # noqa: E402
++
++HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
++CSS = re.sub(r"/\*.*?\*/", "", (HERE / "prototipo.css").read_text(encoding="utf-8"), flags=re.S)
++JS = (HERE / "historia.js").read_text(encoding="utf-8")
++TEXTO_REAL = "01-a-casa-propria-da-conversa"
++EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
++
++TEXTO_TESTE = """---
++tomo: I
++titulo_tomo: "Tomo de teste"
++texto: 1
++titulo: "Texto de teste"
++periodo: "11/11/2026"
++autor: "Modelo de teste"
++estado: "rascunho"
++protocolo: "protocolo de teste"
++---
++
++# Título de teste
++
++Corpo do texto de teste, com [medido].
++"""
++
++
++def _carrega_servidor():
++    spec = importlib.util.spec_from_file_location("painel_historia_teste", HERE / "server.py")
++    modulo = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(modulo)
++    return modulo
++
++
++panel = _carrega_servidor()
++
++
++class ServidorHistoriaTests(unittest.TestCase):
++    """Sobe o servidor numa porta livre e aponta a História para um diretório temporário."""
++
++    @classmethod
++    def setUpClass(cls):
++        cls.porta_antiga = panel.PORT
++        cls.servidor = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.servidor.daemon_threads = True
++        panel.PORT = cls.servidor.server_address[1]
++        cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
++        cls.thread.start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.servidor.shutdown()
++        cls.servidor.server_close()
++        cls.thread.join(timeout=3)
++        panel.PORT = cls.porta_antiga
++
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        self.raiz = Path(self.tmp.name) / "historia"
++        self.salvo = (hp.HISTORIA_DIR, hp.FALA)
++        hp.HISTORIA_DIR = self.raiz
++        self.falso = Path(self.tmp.name) / "falar_falso.py"
++        self.falso.write_text(
++            "import os, sys, pathlib\n"
++            "arq = sys.argv[sys.argv.index('--arquivo') + 1]\n"
++            "pathlib.Path(os.environ['FALSO_LOG']).write_text(pathlib.Path(arq).read_text(encoding='utf-8'), encoding='utf-8')\n"
++            "pathlib.Path(os.environ['FALSO_LOG'] + '.caminho').write_text(arq, encoding='utf-8')\n"
++            "sys.exit(int(os.environ['FALSO_CODIGO']))\n",
++            encoding="utf-8")
++        hp.FALA = self.falso
++        self.log = Path(self.tmp.name) / "falou.txt"
++        self.ambiente = {k: os.environ.get(k) for k in ("FALSO_LOG", "FALSO_CODIGO")}
++        os.environ["FALSO_LOG"] = str(self.log)
++        os.environ["FALSO_CODIGO"] = "0"
++
++    def tearDown(self):
++        hp.HISTORIA_DIR, hp.FALA = self.salvo
++        for chave, valor in self.ambiente.items():
++            if valor is None:
++                os.environ.pop(chave, None)
++            else:
++                os.environ[chave] = valor
++        self.tmp.cleanup()
++
++    def monta_texto(self, tomo="tomo-01", nome="01-teste", conteudo=TEXTO_TESTE):
++        pasta = self.raiz / tomo
++        pasta.mkdir(parents=True, exist_ok=True)
++        (pasta / f"{nome}.md").write_text(conteudo, encoding="utf-8")
++
++    def pede(self, caminho, metodo="GET", corpo=None, cabecalhos=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=10)
++        try:
++            cab = dict(cabecalhos or {})
++            if corpo is not None:
++                cab.setdefault("Content-Type", "application/json")
++            conn.request(metodo, caminho, body=corpo, headers=cab)
++            resposta = conn.getresponse()
++            return resposta.status, resposta.read(), {k.lower(): v for k, v in resposta.getheaders()}
++        finally:
++            conn.close()
++
++    def ouvir(self, tomo="tomo-01", texto="01-teste", cabecalhos=None):
++        corpo = json.dumps({"tomo": tomo, "texto": texto}).encode("utf-8")
++        cab = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin"}
++        cab.update(cabecalhos or {})
++        status, dados, _ = self.pede("/api/historia/ouvir", "POST", corpo, cab)
++        return status, (json.loads(dados) if status == 200 else dados)
++
++
++class RotasHistoriaTests(ServidorHistoriaTests):
++    def test_lista_tomos_e_textos_com_frontmatter(self):
++        self.monta_texto()
++        self.monta_texto("tomo-02", "02-outro")
++        status, corpo, cabecalhos = self.pede("/api/historia")
++        self.assertEqual(status, 200)
++        self.assertIn("application/json", cabecalhos["content-type"])
++        self.assertEqual(cabecalhos["cache-control"], "no-store")
++        dados = json.loads(corpo)
++        self.assertEqual((dados["estado"], [t["tomo"] for t in dados["tomos"]]), ("ok", ["tomo-01", "tomo-02"]))
++        primeiro = dados["tomos"][0]
++        self.assertEqual((primeiro["numeral"], primeiro["titulo"]), ("I", "Tomo de teste"))
++        texto = primeiro["textos"][0]
++        self.assertEqual(texto["id"], "01-teste")
++        self.assertEqual((texto["numero"], texto["titulo"], texto["periodo"]), ("1", "Texto de teste", "11/11/2026"))
++        self.assertEqual((texto["autor"], texto["estado"], texto["protocolo"]), ("Modelo de teste", "rascunho", "protocolo de teste"))
++        self.assertNotIn("corpo", texto, "a lista não traz o corpo")
++
++    def test_texto_devolve_frontmatter_e_corpo(self):
++        self.monta_texto()
++        status, corpo, cabecalhos = self.pede("/api/historia/texto?tomo=tomo-01&texto=01-teste")
++        self.assertEqual(status, 200)
++        self.assertEqual(cabecalhos["cache-control"], "no-store")
++        dados = json.loads(corpo)
++        self.assertEqual((dados["tomo"], dados["texto"]), ("tomo-01", "01-teste"))
++        self.assertEqual(dados["frontmatter"]["titulo"], "Texto de teste")
++        self.assertTrue(dados["corpo"].lstrip().startswith("# Título de teste"), "o corpo começa depois do frontmatter")
++        self.assertNotIn("tomo: I", dados["corpo"])
++
++    def test_pasta_vazia_ou_ausente_da_estado_vazio(self):
++        for cenario in ("ausente", "vazia"):
++            with self.subTest(cenario=cenario):
++                if cenario == "vazia":
++                    self.raiz.mkdir(parents=True, exist_ok=True)
++                status, corpo, _ = self.pede("/api/historia")
++                self.assertEqual(status, 200)
++                self.assertEqual(json.loads(corpo), {"schema_version": 1, "estado": "vazio", "tomos": []})
++                if cenario == "vazia":
++                    self.raiz.rmdir()
++
++    def test_caminho_do_cliente_e_recusado(self):
++        self.monta_texto()
++        fora = Path(self.tmp.name) / "fora.md"
++        fora.write_text("segredo fora da História", encoding="utf-8")
++        (self.raiz / "tomo-03").mkdir()
++        os.symlink(fora, self.raiz / "tomo-03" / "03-link.md")
++        ruins = [("../tomo-01", "01-teste"), ("tomo-01", "../01-teste"), ("tomo-01", "01-teste/../../x"),
++                 ("tomo-1", "01-teste"), ("tomo-01", "1-teste"), ("tomo-01", "01-TESTE"), ("tomo-01", "")]
++        for tomo, texto in ruins:
++            with self.subTest(tomo=tomo, texto=texto):
++                status, _, _ = self.pede(f"/api/historia/texto?tomo={quote(tomo, safe='')}&texto={quote(texto, safe='')}")
++                self.assertEqual(status, 400)
++        self.assertEqual(self.pede("/api/historia/texto?tomo=tomo-01&texto=99-nao-existe")[0], 404)
++        self.assertEqual(self.pede("/api/historia/texto?tomo=tomo-03&texto=03-link")[0], 404, "link para fora não sai")
++        self.assertEqual(self.pede("/api/historia/texto?tomo=tomo-01")[0], 400, "sem texto, 400")
++
++    def test_leituras_recusam_origem_cruzada(self):
++        self.monta_texto()
++        for cabecalhos in ({"Origin": "http://evil.example"}, {"Sec-Fetch-Site": "cross-site"}):
++            with self.subTest(cabecalhos=cabecalhos):
++                self.assertEqual(self.pede("/api/historia", cabecalhos=cabecalhos)[0], 403)
++                self.assertEqual(self.pede("/api/historia/texto?tomo=tomo-01&texto=01-teste", cabecalhos=cabecalhos)[0], 403)
++        self.assertEqual(self.pede("/api/historia")[0], 200)
++
++    def test_historia_js_servido_como_arquivo_externo(self):
++        status, corpo, cabecalhos = self.pede("/historia.js")
++        self.assertEqual(status, 200)
++        self.assertIn("javascript", cabecalhos["content-type"])
++        self.assertEqual(corpo, (HERE / "historia.js").read_bytes())
++
++    def test_ouvir_so_aceita_json_da_propria_origem(self):
++        self.monta_texto()
++        corpo = json.dumps({"tomo": "tomo-01", "texto": "01-teste"}).encode("utf-8")
++        self.assertEqual(self.pede("/api/historia/ouvir", "POST", corpo, {"Content-Type": "application/json"})[0], 403)
++        self.assertEqual(self.pede("/api/historia/ouvir", "POST", corpo,
++                                   {"Origin": "http://evil.example", "Content-Type": "application/json"})[0], 403)
++        self.assertEqual(self.pede("/api/historia/ouvir", "POST", corpo,
++                                   {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                                    "Content-Type": "text/plain"})[0], 403)
++        grande = b"{" + b" " * 600 + b"}"
++        self.assertEqual(self.pede("/api/historia/ouvir", "POST", grande,
++                                   {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin",
++                                    "Content-Type": "application/json"})[0], 400)
++        self.assertFalse(self.log.exists(), "pedido recusado não fala")
++
++    def test_ouvir_responde_falou_pelo_exit_code_e_manda_so_o_corpo(self):
++        self.monta_texto()
++        status, dados = self.ouvir()
++        self.assertEqual(status, 200)
++        self.assertEqual((dados["falou"], dados["motivo"]), (True, "falei o texto"))
++        falado = self.log.read_text(encoding="utf-8")
++        self.assertIn("Corpo do texto de teste", falado)
++        self.assertNotIn("tomo: I", falado, "o frontmatter não é falado")
++        caminho = Path(Path(str(self.log) + ".caminho").read_text(encoding="utf-8"))
++        self.assertFalse(caminho.exists(), "o arquivo temporário é apagado depois da fala")
++        os.environ["FALSO_CODIGO"] = "2"
++        status, dados = self.ouvir()
++        self.assertEqual((status, dados["falou"]), (200, False))
++        self.assertTrue(dados["motivo"].startswith("não falei"))
++
++    def test_ouvir_sem_voz_diz_que_nao_falou(self):
++        self.monta_texto()
++        os.environ["FALSO_CODIGO"] = "3"
++        status, dados = self.ouvir()
++        self.assertEqual(status, 200)
++        self.assertIs(dados["falou"], False)
++        self.assertIn("a voz do sistema não respondeu", dados["motivo"])
++
++    def test_ouvir_recusa_fala_em_curso_e_texto_inexistente(self):
++        self.monta_texto()
++        self.assertTrue(hp._FALA_LOCK.acquire(blocking=False))
++        try:
++            status, _ = self.ouvir()
++            self.assertEqual(status, 429, "com outra fala em curso, não fala")
++        finally:
++            hp._FALA_LOCK.release()
++        status, _ = self.ouvir(texto="99-nao-existe")
++        self.assertEqual(status, 404)
++        self.assertFalse(self.log.exists(), "texto inexistente não chama a voz")
++
++
++class ConsistenciaHistoriaTests(unittest.TestCase):
++    def test_historia_do_repo_tem_o_texto_1(self):
++        salvo = hp.HISTORIA_DIR
++        hp.HISTORIA_DIR = ROOT / "historia"
++        try:
++            dados = hp.listar()
++            texto = hp.ler("tomo-01", TEXTO_REAL)
++        finally:
++            hp.HISTORIA_DIR = salvo
++        tomo = next(t for t in dados["tomos"] if t["tomo"] == "tomo-01")
++        self.assertEqual(tomo["numeral"], "I")
++        self.assertEqual([t["id"] for t in tomo["textos"]], [TEXTO_REAL])
++        self.assertIn("rascunho", texto["frontmatter"]["estado"])
++        self.assertIn("[medido]", texto["corpo"])
++
++    def test_p8_protege_historia(self):
++        texto = (ROOT / "scripts/perimetro/p08_quarentena.sh").read_text(encoding="utf-8")
++        self.assertIn("historia/*) return 0 ;;", texto)
++
++    def test_sem_emoji_na_historia(self):
++        for arquivo in (HERE / "historia_painel.py", HERE / "historia.js", ROOT / "historia" / "README.md"):
++            with self.subTest(arquivo=arquivo.name):
++                self.assertEqual(EMOJI.findall(arquivo.read_text(encoding="utf-8")), [])
++
++
++class TelaHistoriaTests(unittest.TestCase):
++    def test_secao_historia_na_navegacao(self):
++        botoes = re.findall(r'<button type="button" data-secao="([a-z]+)"', HTML)
++        self.assertEqual(botoes[botoes.index("conhecimento") + 1], "historia", "História entra logo depois de Conhecimento")
++        inicio = HTML.index('<section class="secao" id="historia"')
++        fim = HTML.index('<section class="secao" id="custos"')
++        secao = HTML[inicio:fim]
++        self.assertIn(" hidden>", secao[:200], "a seção começa escondida")
++        for estado in ("carregando", "vazio", "erro"):
++            self.assertIn(f'data-estado="{estado}"', secao)
++        for id_ in ("historia-indice", "historia-meta", "historia-estado", "historia-ouvir",
++                    "historia-ouvir-estado", "historia-corpo"):
++            self.assertEqual(secao.count(f'id="{id_}"'), 1, id_)
++        self.assertIn('<script src="historia.js" defer></script>', HTML)
++
++    def test_marcas_tem_regra_com_tokens(self):
++        for classe, token in (("marca-medido", "--teal"), ("marca-relato", "--gold"), ("marca-inferencia", "--violet")):
++            with self.subTest(classe=classe):
++                regra = re.search(r"\." + classe + r"\{([^}]*)\}", CSS)
++                self.assertIsNotNone(regra, classe)
++                self.assertIn(f"var({token})", regra.group(1))
++        bloco = CSS[CSS.index(".historia-legenda"):]
++        self.assertEqual(re.findall(r"#[0-9a-fA-F]{3,8}\b", bloco), [], "cor literal na seção História")
++
++
++class UiHistoriaTests(unittest.TestCase):
++    """Roda historia.js no node, com um DOM mínimo, e compara a árvore de nós com o esperado."""
++
++    NODE = r"""
++const fs = require('fs'); const vm = require('vm');
++const entrada = JSON.parse(fs.readFileSync(0, 'utf8'));
++class No { constructor(tag) { this.tag = tag; this.filhos = []; this.className = ''; } appendChild(n) { this.filhos.push(n); return n; } }
++class Texto { constructor(t) { this.tag = '#texto'; this.texto = t; } }
++const documento = {createElement: (t) => new No(t), createTextNode: (t) => new Texto(t),
++  getElementById: () => null, querySelectorAll: () => []};
++const janela = {};
++const ctx = {window: janela, document: documento};
++vm.createContext(ctx);
++vm.runInContext(fs.readFileSync(entrada.arquivo, 'utf8'), ctx, {filename: 'historia.js'});
++function ser(n) { if (n.tag === '#texto') return n.texto; const o = {tag: n.tag}; if (n.className) o.class = n.className; o.filhos = n.filhos.map(ser); return o; }
++const md = janela.AgataPainel.markdownParaNos;
++console.log(JSON.stringify({amostra: md(entrada.amostra).map(ser), real: md(entrada.real).map(ser)}));
++"""
++
++    def roda(self, amostra, real=""):
++        entrada = json.dumps({"arquivo": str(HERE / "historia.js"), "amostra": amostra, "real": real})
++        resultado = subprocess.run(["node", "-e", self.NODE], input=entrada, capture_output=True, text=True, timeout=120)
++        if resultado.returncode != 0:
++            self.fail("node não rodou (não medido): " + resultado.stderr[-300:])
++        return json.loads(resultado.stdout)
++
++    def test_markdown_vira_nos_sem_html(self):
++        amostra = ("# Título\n\nTexto com **negrito**, *itálico*, `código` e [medido].\n\n"
++                   "- item um\n- item [relato]\n\n1. primeiro\n2. segundo\n\n---\n\n"
++                   "#### Sub [inferência]\n\n<img src=x onerror=alert(1)> e <script>x</script>")
++        saida = self.roda(amostra)["amostra"]
++        esperado = [
++            {"tag": "h2", "filhos": ["Título"]},
++            {"tag": "p", "filhos": ["Texto com ", {"tag": "strong", "filhos": ["negrito"]}, ", ",
++                                    {"tag": "em", "filhos": ["itálico"]}, ", ", {"tag": "code", "filhos": ["código"]},
++                                    " e ", {"tag": "span", "class": "marca marca-medido", "filhos": ["[medido]"]}, "."]},
++            {"tag": "ul", "filhos": [{"tag": "li", "filhos": ["item um"]},
++                                     {"tag": "li", "filhos": ["item ", {"tag": "span", "class": "marca marca-relato", "filhos": ["[relato]"]}]}]},
++            {"tag": "ol", "filhos": [{"tag": "li", "filhos": ["primeiro"]}, {"tag": "li", "filhos": ["segundo"]}]},
++            {"tag": "hr", "filhos": []},
++            {"tag": "h5", "filhos": ["Sub ", {"tag": "span", "class": "marca marca-inferencia", "filhos": ["[inferência]"]}]},
++            {"tag": "p", "filhos": ["<img src=x onerror=alert(1)> e <script>x</script>"]},
++        ]
++        self.assertEqual(saida, esperado)
++
++    def test_marcas_e_titulos_do_texto_real(self):
++        bruto = (ROOT / "historia" / "tomo-01" / f"{TEXTO_REAL}.md").read_text(encoding="utf-8")
++        nos = self.roda("", hp.frontmatter(bruto)[1])["real"]
++        contagem = {}
++
++        def conta(no):
++            if isinstance(no, dict):
++                contagem[no["tag"]] = contagem.get(no["tag"], 0) + 1
++                if "class" in no:
++                    contagem[no["class"]] = contagem.get(no["class"], 0) + 1
++                for filho in no["filhos"]:
++                    conta(filho)
++
++        for no in nos:
++            conta(no)
++        for classe in ("marca marca-medido", "marca marca-relato", "marca marca-inferencia"):
++            self.assertGreater(contagem.get(classe, 0), 0, classe)
++        self.assertGreater(contagem.get("h3", 0), 0, "## do texto vira h3")
++        self.assertGreater(contagem.get("ul", 0) + contagem.get("ol", 0), 0)
++        self.assertEqual(contagem.get("script", 0) + contagem.get("img", 0), 0)
++
++    def test_historia_js_sem_html_dinamico(self):
++        for proibido in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "eval(", "new Function"):
++            with self.subTest(proibido=proibido):
++                self.assertNotIn(proibido, JS)
++
++    def test_ouvir_chama_a_rota_e_mostra_o_resultado(self):
++        self.assertIn('"/api/historia/ouvir"', JS)
++        self.assertIn('method: "POST"', JS)
++        self.assertIn("JSON.stringify({tomo: textoAberto.tomo, texto: textoAberto.id})", JS)
++        self.assertIn("dados.falou", JS)
++        self.assertIn("if (!textoAberto) return;", JS)
++        self.assertIn("botaoOuvir.addEventListener", JS)
++        self.assertIn("botao.disabled = !textoAberto", JS)
++        self.assertIn('"/api/historia/texto?tomo="', JS)
+diff --git a/redesign/painel_operacional/test_menu_painel.py b/redesign/painel_operacional/test_menu_painel.py
+index 2257f1f8..5d96b8e2 100644
+--- a/redesign/painel_operacional/test_menu_painel.py
++++ b/redesign/painel_operacional/test_menu_painel.py
+@@ -3,7 +3,7 @@ from html.parser import HTMLParser
+ from pathlib import Path
+ 
+ HERE = Path(__file__).resolve().parent
+-SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
++SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"]
+ 
+ 
+ class Menu(HTMLParser):
+diff --git a/redesign/painel_operacional/test_painel_unificado.py b/redesign/painel_operacional/test_painel_unificado.py
+index cafca891..6e2620c3 100644
+--- a/redesign/painel_operacional/test_painel_unificado.py
++++ b/redesign/painel_operacional/test_painel_unificado.py
+@@ -20,11 +20,11 @@ HERE = Path(__file__).resolve().parent
+ SPEC = HERE / "spec" / "spec.md"
+ HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
+ CSS = (HERE / "prototipo.css").read_text(encoding="utf-8")
+-SCRIPTS = ["prototipo.js", "abrir.js", "nova_versao.js", "conselho-rede/app.js", "operator_console/app.js"]
++SCRIPTS = ["prototipo.js", "abrir.js", "nova_versao.js", "conselho-rede/app.js", "operator_console/app.js", "historia.js"]
+ JS = {arq: (HERE / arq).read_text(encoding="utf-8") for arq in SCRIPTS}
+ JS_TODOS = "\n".join(JS.values())
+ 
+-SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
++SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"]
+ SUBS_POR_SECAO = {
+     "panorama": ["panorama", "visao", "capacidades", "plano", "frentes"],
+     "conversa": ["conversa"],
+@@ -32,6 +32,8 @@ SUBS_POR_SECAO = {
+     "conselho": ["conselho", "conselho-memoria"],
+     "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes"],
+     "conhecimento": ["memoria", "grafo", "documentacao", "nv-alexandria", "nv-acervo"],
++    # historia: seção nova de 11/11/2026 (texto da História, só leitura, e o Ouvir); ver test_historia.py.
++    "historia": ["historia"],
+     "custos": ["nv-orcamento", "nv-tarifas"],
+     "qualidade": ["operator-console", "qualidade", "sdd", "lacunas", "nv-avaliacao", "nv-sentidos"],
+ }
+@@ -218,7 +220,7 @@ class RotasDaTelaUnicaTests(ServidorDeTeste):
+ 
+ 
+ class TelaUnicaTests(ServidorDeTeste):
+-    def test_prototipo_tem_so_sete_secoes(self):
++    def test_prototipo_tem_so_oito_secoes(self):
+         e = estrutura()
+         self.assertEqual(e.secoes, SECOES)
+         self.assertEqual(e.botoes_menu, SECOES)
+diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
+index 3f3b53a7..22571cc4 100644
+--- a/scripts/perimetro/p08_quarentena.sh
++++ b/scripts/perimetro/p08_quarentena.sh
+@@ -144,6 +144,10 @@ _p8_eh_comportamento() {
+     # `ir_sha256_xmlbin` em `models/manifest.json`, já quarentenado) entra
+     # junto por ser a mesma pasta e o mesmo papel de apoio ao P-12.
+     redesign/fase7-hd/*.py|redesign/fase7-hd/*.sh) return 0 ;;
++    # Tomo I da História canônica (proposta historia-tomo1-11-11, 11/11/2026, pedido do Humano): o texto
++    # da História é canon, não código; entra na quarentena para que nenhum modelo o mude sem assinatura.
++    # O painel só lê este diretório (redesign/painel_operacional/historia_painel.py).
++    historia/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
