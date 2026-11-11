@@ -1,0 +1,26 @@
+diff --git a/.agents/skills/agata-processo-lote/SKILL.md b/.agents/skills/agata-processo-lote/SKILL.md
+index 1443ccc7..24fc9e2d 100644
+--- a/.agents/skills/agata-processo-lote/SKILL.md
++++ b/.agents/skills/agata-processo-lote/SKILL.md
+@@ -95,6 +95,21 @@ Cada papel tem o nome do agente em `.claude/agents/`. A tabela completa (o que c
+ - Check vermelho: não junta, avisa o Humano.
+ - `gh pr view <n> --json mergeStateStatus,statusCheckRollup` mostra o estado por check. `gh pr checks` às vezes lista só parte.
+ 
++## Fluxo e pronto (ágil, 11/11)
++Decisão do Humano em 11/11/2026 ("ok a todas"). Vale para todo lote novo. A regra R2 fica em medição de 14 dias, até 25/11/2026.
++- **R1 Limite de trabalho aberto.** No máximo 2 propostas abertas (sem aplicação) por componente. Antes de abrir a 3ª, aplique, supere ou feche uma. Base: Kanban Guide, edição 2025 (v2025.5, https://kanbanguides.org/english/), controle de WIP; Lei de Little (L = λ·W, teoria de filas) explica por que fila maior alonga o tempo de ciclo. O guia não cita a lei pelo nome.
++- **R3 Definição de pronto do lote.** O relatório do agente preenche este checklist. Item sem marca: o lote não está pronto.
++  - [ ] CI local com `CI LOCAL: TUDO OK` (saída colada)
++  - [ ] run verde no GitHub no `headSha` do PR (`gh run list --branch <b> --json headSha`)
++  - [ ] captura de tela quando há interface
++  - [ ] sem emoji (E-2, decisão de 16/10)
++  - [ ] `.md` da proposta com testes medidos, o que não foi medido e a reversão
++  - [ ] nenhuma falha "pré-existente" sem dono e data
++  - [ ] texto da entrada de MEMÓRIAS sem citação `caminho:número` (P-19 só avisa; não falha)
++  Base: Scrum Guide 2020, Definition of Done.
++- **R5 Retrospectiva de 3 linhas ao fechar cada lote.** Anote no cache do Conselho com `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo nota "<texto>"`: gargalo com número; regra que mudou; o que saiu do WIP. Base: Manifesto Ágil, princípio 12.
++- **R2 Apetite (medição até 25/11/2026).** Cada proposta declara o apetite: máximo de arquivos e de horas de agente. Quando passar do limite, o `.md` registra isso. Nada é cortado automaticamente nesse período.
++
+ ## Armadilhas já pagas
+ - **CI local diferente do CI real:** o job `sdd` roda `pytest` (9.2.0, fixado em `sdd.yml`) nos diretórios listados no workflow, depois anchor e ciclos. Unittest passa e pytest falha, ou o contrário. Use o script.
+ - **pytest:** se `pytest` não estiver no PATH, use o binário do cache do uv: `PYTEST=$(ls /home/orusoua/.cache/uv/archive-v0/*/bin/pytest | head -1)`. Antes de usar, rode `"$PYTEST" --version`. Tem de mostrar `pytest 9.2.0` (em 06/11 foi esse o resultado). Se a saída estiver vazia, pare. Se a versão for outra, pare e avise. Depois: `PYTEST="$PYTEST" bash scripts/ci_sdd_local.sh`. Não instale sem ordem.

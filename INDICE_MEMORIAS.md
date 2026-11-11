@@ -3,6 +3,8 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
+(988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
 (987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
@@ -31,8 +33,8 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, achado pelo ciclo SDD da M2b.** Proposta `m2c-acervo-parcial-20261106`.
 (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação `1e607529` não tinha os cinco arquivos de código; o commit `2bf10fe9` completa a aplicação.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
 (960) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2b (`m2b-acervo-egress-20261106`), assinada pelo Humano: o Acervo mostra estados explícitos, registros ilegíveis são contados e URL com usuário ou senha é recusada antes do DNS.** Aplicação em `aplica/m2b-acervo-egress-20261106`.
-(959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-acervo-egress-20261106` substitui a v1, que não deve ser assinada.** Proposta `m2b-acervo-egress-20261106`.
-(958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis contados e userinfo recusado no egress: proposta M2 da auditoria do próprio Agata (P-8).** Proposta `m2-acervo-egress-20261106`.
+(959) DIÁRIO — 06/11/2026 · **Correção da proposta M2 (v1, PR #911): a v2 `m2b-a …
+(958) DIÁRIO — 06/11/2026 · **Acervo com erro visível, registros ilegíveis conta …
 (957) DIÁRIO — 06/11/2026 · **Notificação por componente ao ligar e desligar o A …
 (956) DIÁRIO — 06/11/2026 · **Hierarquia de buscas da Alexandria (lote 9): léxic …
 (955) DIÁRIO — 05/11/2026 · **A condição de busca externa da avaliação passa a u …
