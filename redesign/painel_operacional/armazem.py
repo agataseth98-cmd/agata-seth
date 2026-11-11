@@ -4,6 +4,9 @@ Saiu de server.py em 03/11/2026 sem mudar comportamento; o servidor importa este
 Lote 3 (09/11/2026): organização das conversas (fixar, arquivar, marcadores, pastas) em `organizacao.json`
 dentro de CONVERSAS_DIR, busca por texto, exportação JSON/Markdown e importação de JSON exportado.
 Tudo local, em ~/.cache/agata/painel-conversas. Conversa antiga (sem organização) abre com os valores padrão.
+Proteção (09/11/2026, chat-protege-conversas-09-11): apagar move a conversa para `.lixeira/` (com a organização dela);
+purga só por pedido manual; cada escrita ganha uma linha em `.registro.jsonl` (sem conteúdo); salvar uma conversa
+importada mantém a origem dela.
 """
 from __future__ import annotations
 
@@ -12,7 +15,7 @@ import os
 import re
 import threading
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -95,6 +98,14 @@ FORMATO_EXPORTACAO = "agata-conversa"
 VERSAO_EXPORTACAO = 1
 CAMPOS_ORGANIZAR = ("fixada", "arquivada", "marcadores", "pasta")
 _ORGANIZACAO_TRAVA = threading.Lock()
+# Proteção (09/11/2026). A lixeira é uma pasta dentro de CONVERSAS_DIR; o nome de cada item é <id>-<AAAAMMDD-HHMMSS>.
+LIXEIRA_PASTA = ".lixeira"
+LIXEIRA_NOME = re.compile(r"[0-9a-f]{12}-[0-9]{8}-[0-9]{6}")
+LIXEIRA_LISTA_LIMITE = 200
+REGISTRO_ARQUIVO = ".registro.jsonl"
+_REGISTRO_TRAVA = threading.Lock()
+# Campos de origem de uma conversa importada (migrar.py, LibreChat). O salvar do painel não os reescreve.
+ORIGEM_CAMPOS = ("origem", "origem_id", "titulo_original", "data_original", "importado_em")
 
 
 class ErroConversa(Exception):
@@ -141,10 +152,29 @@ def _marcador_ok(marcador: str) -> bool:
     return 0 < len(marcador) <= MARCADOR_LIMITE and all(c.isalnum() or c in " -" for c in marcador)
 
 
+def _entrada_lida(e: dict) -> dict:
+    """Entrada de organização com valores seguros. A pasta não é conferida aqui: quem usa a entrada confere."""
+    bruto = e.get("marcadores") if isinstance(e.get("marcadores"), list) else []
+    marcadores = []
+    for m in bruto:
+        if isinstance(m, str) and _marcador_ok(m) and m not in marcadores:
+            marcadores.append(m)
+    pasta = e.get("pasta")
+    origem = e.get("origem_id")
+    return {
+        "fixada": e.get("fixada") is True,
+        "arquivada": e.get("arquivada") is True,
+        "marcadores": marcadores[:MARCADORES_LIMITE],
+        "pasta": pasta if isinstance(pasta, str) else None,
+        "origem_id": origem if isinstance(origem, str) and CONVERSA_ID.fullmatch(origem) else None,
+    }
+
+
 def _organizacao_ler() -> tuple[dict, bool]:
     """(organização, legível). Arquivo ausente vale vazio. Arquivo ilegível devolve legível=False: quem escreve
-    recusa, para não sobrescrever o que não se conseguiu ler. Entradas malformadas são ignoradas."""
-    vazia = {"pastas": [], "conversas": {}}
+    recusa, para não sobrescrever o que não se conseguiu ler. Entradas malformadas são ignoradas.
+    `lixeira` guarda a entrada de cada conversa apagada (chave: nome do item na lixeira)."""
+    vazia = {"pastas": [], "conversas": {}, "lixeira": {}}
     arq = _organizacao_caminho()
     if not arq.is_file():
         return vazia, True
@@ -167,21 +197,16 @@ def _organizacao_ler() -> tuple[dict, bool]:
     for cid, e in entradas.items():
         if not CONVERSA_ID.fullmatch(cid) or not isinstance(e, dict):
             continue
-        bruto = e.get("marcadores") if isinstance(e.get("marcadores"), list) else []
-        marcadores = []
-        for m in bruto:
-            if isinstance(m, str) and _marcador_ok(m) and m not in marcadores:
-                marcadores.append(m)
-        pasta = e.get("pasta")
-        origem = e.get("origem_id")
-        conversas[cid] = {
-            "fixada": e.get("fixada") is True,
-            "arquivada": e.get("arquivada") is True,
-            "marcadores": marcadores[:MARCADORES_LIMITE],
-            "pasta": pasta if isinstance(pasta, str) and pasta in ids_pastas else None,
-            "origem_id": origem if isinstance(origem, str) and CONVERSA_ID.fullmatch(origem) else None,
-        }
-    return {"pastas": pastas, "conversas": conversas}, True
+        entrada = _entrada_lida(e)
+        if entrada["pasta"] not in ids_pastas:
+            entrada["pasta"] = None
+        conversas[cid] = entrada
+    lixeira = {}
+    apagadas = dados["lixeira"] if isinstance(dados.get("lixeira"), dict) else {}
+    for nome, e in apagadas.items():
+        if LIXEIRA_NOME.fullmatch(nome) and isinstance(e, dict):
+            lixeira[nome] = _entrada_lida(e)
+    return {"pastas": pastas, "conversas": conversas, "lixeira": lixeira}, True
 
 
 def _organizacao_gravar(org: dict) -> None:
@@ -315,16 +340,18 @@ def _pasta_mudar(acao, pasta_id=None, nome=None) -> dict:
 
 
 def _conversas_listar() -> dict:
+    """Conversas salvas. `total` conta as legíveis; `ilegiveis` conta os arquivos que não puderam ser lidos.
+    Arquivo ilegível não aparece na lista e não é apagado nem mexido: só entra na contagem."""
     org, legivel = _organizacao_ler()
-    arquivos = sorted(_conversa_arquivos(), key=lambda a: a.stat().st_mtime, reverse=True)
+    arquivos = _conversa_arquivos()
+    lidas = []
+    for arq in arquivos:
+        dados = _conversa_lida(arq)
+        if dados is not None:
+            lidas.append((arq, dados))
+    lidas.sort(key=lambda par: par[0].stat().st_mtime, reverse=True)
     itens = []
-    for arq in arquivos[:CONVERSAS_LISTA_LIMITE]:
-        try:
-            dados = json.loads(arq.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        if not isinstance(dados, dict):
-            continue
+    for arq, dados in lidas[:CONVERSAS_LISTA_LIMITE]:
         meta = {**_entrada_padrao(), **org["conversas"].get(arq.stem, {})}
         mensagens = dados.get("mensagens")
         itens.append({"id": arq.stem, "titulo": dados.get("titulo") or "Sem título", "atualizada": _atualizada(arq),
@@ -335,7 +362,8 @@ def _conversas_listar() -> dict:
     pastas = [{"id": p["id"], "nome": p["nome"], "conversas": sum(1 for c in itens if c["pasta"] == p["id"])}
               for p in org["pastas"]]
     marcadores = sorted({m for c in itens for m in c["marcadores"]})
-    return {"schema_version": 1, "state": "ok", "items": itens, "total": len(arquivos), "pastas": pastas,
+    return {"schema_version": 1, "state": "ok", "items": itens, "total": len(lidas),
+            "ilegiveis": len(arquivos) - len(lidas), "pastas": pastas,
             "marcadores": marcadores, "organizacao": "ok" if legivel else "ilegivel"}
 
 
@@ -397,14 +425,88 @@ def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
     return {"titulo": titulo, "modelo": modelo, "mensagens": limpas}
 
 
+# Origem de conversa importada (09/11/2026, origem-preservada-07-11): o salvar do painel não a perde nem a duplica.
+
+def _origem_valida(dados: dict) -> dict:
+    """Campos de origem (importação do LibreChat) que o salvar aceita de quem envia. O que não couber fica de fora."""
+    origem, origem_id = dados.get("origem"), dados.get("origem_id")
+    if not (isinstance(origem, str) and 0 < len(origem) <= 40 and isinstance(origem_id, str) and 0 < len(origem_id) <= 200):
+        return {}
+    out = {"origem": origem, "origem_id": origem_id}
+    titulo_original = dados.get("titulo_original")
+    if isinstance(titulo_original, str) and len(titulo_original) <= 500:
+        out["titulo_original"] = titulo_original
+    importado_em = dados.get("importado_em")
+    if isinstance(importado_em, str) and len(importado_em) <= 40:
+        out["importado_em"] = importado_em
+    data = dados.get("data_original")
+    if isinstance(data, dict) and all(v is None or (isinstance(v, str) and len(v) <= 40) for v in data.values()):
+        out["data_original"] = {k: data.get(k) for k in ("criada", "atualizada")}
+    return out
+
+
+def _conversa_lida(arq: Path) -> dict | None:
+    """Conteúdo do arquivo como objeto, ou None se não der para ler (sem validar o formato da conversa)."""
+    try:
+        dados = json.loads(arq.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return dados if isinstance(dados, dict) else None
+
+
+def _conversa_com_origem(origem: str, origem_id: str) -> str | None:
+    """Id do arquivo que já guarda esta origem. Assim, salvar uma conversa importada não cria segundo arquivo."""
+    if not CONVERSAS_DIR.is_dir():
+        return None
+    for arq in CONVERSAS_DIR.glob("*.json"):
+        if not CONVERSA_ID.fullmatch(arq.stem):
+            continue
+        dados = _conversa_lida(arq)
+        if dados and dados.get("origem") == origem and dados.get("origem_id") == origem_id:
+            return arq.stem
+    return None
+
+
+def _origem_do_arquivo(anterior: dict | None) -> dict:
+    """Origem já gravada no arquivo. O salvar nunca a reescreve: vale a que o arquivo já tem."""
+    if not anterior or not isinstance(anterior.get("origem"), str) or not isinstance(anterior.get("origem_id"), str):
+        return {}
+    return {k: anterior[k] for k in ORIGEM_CAMPOS if k in anterior}
+
+
+def _mensagens_com_origem(novas: list, anteriores: list) -> list:
+    """Mantém 'criada' e 'origem_id' de cada mensagem que continua no mesmo lugar, com o mesmo papel e texto."""
+    saida = []
+    for i, m in enumerate(novas):
+        velha = anteriores[i] if i < len(anteriores) and isinstance(anteriores[i], dict) else {}
+        extra = {k: velha[k] for k in ("criada", "origem_id") if isinstance(velha.get(k), str)}
+        if extra and velha.get("role") == m["role"] and velha.get("content") == m["content"]:
+            m = {**m, **extra}
+        saida.append(m)
+    return saida
+
+
 def _conversa_gravar(dados: dict) -> dict | None:
     limpo = _conversa_validar(dados)
     if limpo is None:
         return None
-    conversa_id = dados.get("id") or os.urandom(6).hex()
+    origem = _origem_valida(dados)
+    conversa_id = None
+    if origem:
+        conversa_id = _conversa_com_origem(origem["origem"], origem["origem_id"])
+    conversa_id = conversa_id or dados.get("id") or os.urandom(6).hex()
     arq = _conversa_caminho(conversa_id)
     if arq is None:
         return None
+    anterior = _conversa_lida(arq) if arq.is_file() else None
+    origem_gravada = _origem_do_arquivo(anterior)
+    if origem_gravada:
+        origem = origem_gravada  # a origem já gravada não é reescrita
+        anteriores = anterior.get("mensagens")
+        limpo["mensagens"] = _mensagens_com_origem(limpo["mensagens"], anteriores if isinstance(anteriores, list) else [])
+    if origem:
+        limpo.update(origem)
+        limpo["id"] = conversa_id  # arquivo com origem guarda o próprio id, como o importador grava
     CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
     tmp = arq.with_suffix(".tmp")
     tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
@@ -427,17 +529,146 @@ def _conversa_ler(conversa_id: str) -> dict | None:
     return {"schema_version": 1, "id": conversa_id, **limpo}
 
 
-def _conversa_apagar(conversa_id: str) -> bool:
+# Lixeira (09/11/2026). Apagar não apaga: move o arquivo (bytes iguais) e a entrada de organização vai junto.
+# Só a purga, pedida à mão e confirmada na tela, apaga de vez. Nada apaga sozinho.
+
+def _lixeira_caminho(nome) -> Path | None:
+    if not isinstance(nome, str) or not LIXEIRA_NOME.fullmatch(nome):
+        return None
+    return CONVERSAS_DIR / LIXEIRA_PASTA / (nome + ".json")
+
+
+def _lixeira_nome_livre(conversa_id: str) -> str:
+    """<id>-<AAAAMMDD-HHMMSS>, sem repetir item da lixeira: se a mesma conversa foi apagada no mesmo segundo, sobe um segundo."""
+    agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+    for passo in range(3600):
+        marca = (agora + timedelta(seconds=passo)).strftime("%Y%m%d-%H%M%S")
+        nome = f"{conversa_id}-{marca}"
+        if not _lixeira_caminho(nome).exists():
+            return nome
+    raise ErroConversa(500, "não foi possível guardar a conversa na lixeira; nada foi apagado")
+
+
+def _quando_apagada(nome: str) -> str:
+    try:
+        return datetime.strptime(nome[13:], "%Y%m%d-%H%M%S").strftime("%d/%m/%Y %H:%M")
+    except ValueError:
+        return "data desconhecida"
+
+
+def _conversa_apagar(conversa_id: str) -> str | None:
+    """Move a conversa para a lixeira, com a entrada de organização. Devolve o nome do item, ou None se não existe."""
     arq = _conversa_caminho(conversa_id)
     if arq is None or not arq.is_file():
-        return False
-    arq.unlink()
+        return None
     with _ORGANIZACAO_TRAVA:
         org, legivel = _organizacao_ler()
-        if legivel and conversa_id in org["conversas"]:
-            del org["conversas"][conversa_id]
+        if not legivel:
+            raise ErroConversa(409, "organização das conversas ilegível; nada foi apagado")
+        nome = _lixeira_nome_livre(conversa_id)
+        try:
+            _lixeira_caminho(nome).parent.mkdir(parents=True, exist_ok=True)
+            os.replace(arq, _lixeira_caminho(nome))
+        except OSError as erro:
+            raise ErroConversa(500, "não foi possível mover a conversa para a lixeira; nada foi apagado") from erro
+        entrada = org["conversas"].pop(conversa_id, None)
+        if entrada is not None:
+            org["lixeira"][nome] = entrada
             _organizacao_gravar(org)
-    return True
+    return nome
+
+
+def _lixeira_nomes() -> list[str]:
+    """Nomes dos itens da lixeira, pelo que está na pasta (não pela organização)."""
+    pasta = CONVERSAS_DIR / LIXEIRA_PASTA
+    if not pasta.is_dir():
+        return []
+    return [a.stem for a in pasta.glob("*.json") if LIXEIRA_NOME.fullmatch(a.stem) and a.is_file()]
+
+
+def _lixeira_listar() -> dict:
+    """Conversas na lixeira, mais recentes primeiro. Sem conteúdo além do título e da contagem de mensagens."""
+    pasta = CONVERSAS_DIR / LIXEIRA_PASTA
+    nomes = _lixeira_nomes()
+    lidas = []
+    for nome in nomes:
+        dados = _conversa_lida(pasta / (nome + ".json"))
+        if dados is not None:
+            lidas.append((nome, dados))
+    lidas.sort(key=lambda par: par[0][13:], reverse=True)  # AAAAMMDD-HHMMSS ordena como texto
+    itens = []
+    for nome, dados in lidas[:LIXEIRA_LISTA_LIMITE]:
+        mensagens = dados.get("mensagens")
+        itens.append({"nome": nome, "id": nome[:12], "titulo": str(dados.get("titulo") or "Sem título"),
+                      "apagada_em": _quando_apagada(nome), "mensagens": len(mensagens) if isinstance(mensagens, list) else 0})
+    return {"schema_version": 1, "state": "ok", "items": itens, "total": len(lidas), "ilegiveis": len(nomes) - len(lidas)}
+
+
+def _lixeira_restaurar(nome) -> dict:
+    """Devolve a conversa ao lugar dela, com a organização. Recusa se já existe conversa com o mesmo id."""
+    origem = _lixeira_caminho(nome)
+    if origem is None:
+        raise ErroConversa(400, "item da lixeira inválido")
+    conversa_id = nome[:12]
+    with _ORGANIZACAO_TRAVA:
+        if not origem.is_file():
+            raise ErroConversa(404, "conversa não está na lixeira")
+        org, legivel = _organizacao_ler()
+        if not legivel:
+            raise ErroConversa(409, "organização das conversas ilegível; nada foi restaurado")
+        destino = _conversa_caminho(conversa_id)
+        if destino.exists():
+            raise ErroConversa(409, "já existe conversa com este identificador; nada foi restaurado")
+        try:
+            os.replace(origem, destino)
+        except OSError as erro:
+            raise ErroConversa(500, "não foi possível restaurar a conversa; nada foi alterado") from erro
+        entrada = org["lixeira"].pop(nome, None)
+        if entrada is not None:
+            if entrada["pasta"] not in {p["id"] for p in org["pastas"]}:
+                entrada["pasta"] = None  # a pasta pode ter sido apagada enquanto a conversa estava na lixeira
+            if entrada != _entrada_padrao():
+                org["conversas"][conversa_id] = entrada
+        _organizacao_gravar(org)
+    dados = _conversa_lida(destino) or {}
+    return {"id": conversa_id, "titulo": str(dados.get("titulo") or "Sem título"), "restaurada": True}
+
+
+def _lixeira_purgar(nome) -> dict:
+    """Apaga de vez um item da lixeira. Só é chamada por pedido manual, depois de confirmação na tela."""
+    arq = _lixeira_caminho(nome)
+    if arq is None:
+        raise ErroConversa(400, "item da lixeira inválido")
+    with _ORGANIZACAO_TRAVA:
+        if not arq.is_file():
+            raise ErroConversa(404, "conversa não está na lixeira")
+        org, legivel = _organizacao_ler()
+        if not legivel:
+            raise ErroConversa(409, "organização das conversas ilegível; nada foi apagado")
+        try:
+            arq.unlink()
+        except OSError as erro:
+            raise ErroConversa(500, "não foi possível apagar a conversa; ela continua na lixeira") from erro
+        if org["lixeira"].pop(nome, None) is not None:
+            _organizacao_gravar(org)
+    return {"purgada": True}
+
+
+# Registro de escritas (09/11/2026): uma linha por pedido de escrita, só de acréscimo. Hora, rota, id e status.
+# Nunca título, texto da mensagem, marcador ou nome de pasta.
+
+def _registro_escrever(rota: str, conversa_id, status: int) -> None:
+    """Acrescenta uma linha em .registro.jsonl. Se o arquivo não puder ser escrito, a ação segue (sem linha)."""
+    identificador = conversa_id if isinstance(conversa_id, str) and (
+        CONVERSA_ID.fullmatch(conversa_id) or LIXEIRA_NOME.fullmatch(conversa_id)) else None
+    linha = {"hora": datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat(timespec="seconds"),
+             "rota": rota, "id": identificador, "status": status}
+    try:
+        CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
+        with _REGISTRO_TRAVA, (CONVERSAS_DIR / REGISTRO_ARQUIVO).open("a", encoding="utf-8") as arq:
+            arq.write(json.dumps(linha, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 # Busca: texto em títulos e mensagens das conversas salvas. Ignora caixa e acento; posição preservada.
@@ -579,11 +810,21 @@ def _conversa_importar(dados) -> dict:
     def alterar(org):
         locais = _conversa_ids()
         origens = {e["origem_id"]: cid for cid, e in org["conversas"].items() if e.get("origem_id")}
+        # Na lixeira também conta: a conversa existe e pode ser restaurada. Importar de novo não duplica.
+        # A lixeira vale o que está na pasta; a origem guardada na organização só conta para item que ainda está lá.
+        presentes = set(_lixeira_nomes())
+        na_lixeira = {nome[:12]: nome[:12] for nome in presentes}
+        origens_lixeira = {e["origem_id"]: nome[:12] for nome, e in org["lixeira"].items()
+                           if e.get("origem_id") and nome in presentes}
         for chave in ids:
             if chave in locais:
                 return {"estado": "ja_existe", "id": chave, "titulo": limpo["titulo"]}
             if chave in origens:
                 return {"estado": "ja_existe", "id": origens[chave], "titulo": limpo["titulo"]}
+            if chave in na_lixeira:
+                return {"estado": "ja_existe", "id": chave, "titulo": limpo["titulo"], "lixeira": True}
+            if chave in origens_lixeira:
+                return {"estado": "ja_existe", "id": origens_lixeira[chave], "titulo": limpo["titulo"], "lixeira": True}
         novo = _id_livre()
         CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
         arq = CONVERSAS_DIR / (novo + ".json")
