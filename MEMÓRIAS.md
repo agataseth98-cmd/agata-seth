@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6
-  Escrito em: 11/11/2026 19:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 182310d0affe88a4318a6ceb3e99405eff69a07f
+  Escrito em: 11/11/2026 19:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7c5ada6bc411ff62856650ea97a0e2e62d9b8ab6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
+- Adoção decidida pelo Humano em 11/11 19:20 ("ok a todas", cache do Conselho, entrada 495). Diff `propostas/spec-primeiro-11-11.diff` sobre `origin/main` `182310d0` mais `processo-agil-11-11`, que toca o mesmo arquivo de skill: aplicar depois dela. Caminhos de código: skills de processo-lote e time-inovação, agentes arquiteto e revisor, `scripts/gate_spec_sync.py` (novo), `scripts/ci_sdd_local.sh`, `.github/workflows/sdd.yml`, e o drift e a evidência de `redesign/nova_versao/spec`.
+- Medido em 11/11: `alexandria` tem 5 critérios no acceptance.json sem linha no spec.md; `nova_versao` tem drift commitado de 04/11, mais antigo que o spec de 09/11. Sem as duas correções o gate fica vermelho. Entra o drift de nova_versao; alexandria fica como dívida conhecida (AVISO), porque corrigir o spec.md exige proposta própria.
+- Medição de 14 dias, até 25/11/2026, decisão do Humano. O `.md` da proposta registra o que não foi medido.
+- Assinatura pelo Humano só depois da aplicação de processo-agil-11-11 e do merge deste PR: `bash scripts/aprovar.sh spec-primeiro-11-11 "<motivo>"`.
+Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: worktree própria, CI local, leitura de specs e `git grep` no main · Autorização: Humano — "ok a todas" (11/11 19:20, adoção de P1 a P4).
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
 - A (986) diz "60 testes de navegador falham por ambiente". Medido em 11/11 na worktree do processo ágil (base `c1a190c6`): `test_chat_ui` e `test_painel_unificado` somam 105 testes. Com um executável `node` no PATH que sai com erro (código 127), 59 saem como FAIL; com o node do sistema, os 105 passam.
 - Método: simulação por PATH, não a falha de libsimdjson da (986). O node do sistema carrega hoje, então a falha original não foi reproduzida; o número 59 vale para a simulação.
