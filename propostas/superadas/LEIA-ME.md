@@ -24,6 +24,7 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | seth-painel-raiz-20261029 | seth-painel-raiz-rebase-20261029 (PR #726) (confiança média) |
 | seth-sob-demanda-20261029 | sistema-sob-demanda-20261029 (PR #715) (confiança média) |
 | skill-processo-07-11 | substituída por skill-processo-lessons-07-11 (#944), decisão do Humano 09/11 |
+| origem-preservada-07-11 | chat-protege-conversas-09-11, aplicada em 56c49849 (merge c1a190c6). Evidência: a origem foi portada para `armazem.py` (`_origem_valida`, `_conversa_com_origem`, `_origem_do_arquivo`, `_mensagens_com_origem`) e os cinco cenários estão em `test_conversas_protege.py`; o `.diff` não aplica mais em origin/main c1a190c6 (`armazem.py:113`). Motivo: superada pelo código que já está no main. Decisão do Humano 11/11. |
 
 Notas:
 - "a própria, já aplicada": a proposta arquivada é cópia idêntica (cmp) da que está em `propostas/aplicadas/`.
