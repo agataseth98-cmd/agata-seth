@@ -1,0 +1,1728 @@
+diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
+index f77bc6b6..53957bca 100644
+--- a/redesign/painel_operacional/README.md
++++ b/redesign/painel_operacional/README.md
+@@ -40,6 +40,8 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem sete seções, escolhidas pe
+ - `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
+ - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
+ 
++- Importantes (11/11/2026, pedido do Humano): aba Importantes dentro de Panorama, com cartão "Importantes: N abertos" no próprio Panorama. A lista fica em `~/.cache/agata/painel-importantes.json`, fora do repositório. Criar, marcar feito, descartar, reabrir e editar não apagam nada: descartado fica guardado. `POST /api/importantes/trazer` lê o cache do Conselho (sem escrever nele) e traz as entradas cujo texto começa com `IMPORTANTE`, sem repetir; texto com segredo não é trazido. Toda escrita exige origem do painel e gera uma linha em `painel-importantes.registro.jsonl`, sem texto.
++
+ ## Verificar em cópia isolada
+ 
+ ```sh
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 4b9df320..de5bed06 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -1801,3 +1801,25 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
+ .memoria-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
+ .oc-cabecalho{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:0 0 18px}
+ .oc-cabecalho .oc-lede{margin:6px 0 0}
++/* Importantes (11/11/2026): só tokens de :root (paper, sheet, line, ink, muted, teal, gold). */
++.importantes-cartao .chip{align-self:flex-start}
++.importantes-novo{display:grid;gap:8px;margin:0 0 12px}
++.importantes-novo label,.importantes-filtro label{color:var(--muted);font:12px var(--mono)}
++.importantes-novo textarea,.importantes-editar textarea{width:100%;min-height:58px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans);resize:vertical}
++.importantes-editar input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.4 var(--sans)}
++.importantes-novo textarea:focus,.importantes-editar textarea:focus,.importantes-editar input:focus,.importantes-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
++.importantes-barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
++.importantes-filtro{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
++.importantes-filtro select{width:auto;min-width:170px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.4 var(--sans)}
++.importantes-aviso{margin:0 0 12px;padding:8px 10px;border-radius:10px;border:1px solid var(--gold);color:var(--gold);font-size:13px;line-height:1.45}
++.importantes-lista{list-style:none;margin:0;padding:0;display:grid;gap:10px}
++.importantes-item{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--paper)}
++.importantes-item.feito{opacity:.78}
++.importantes-item.descartado{opacity:.6}
++.importantes-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
++.importantes-origem{font:11px var(--mono);color:var(--muted)}
++.importantes-texto{margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
++.importantes-nota{margin:6px 0 0;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
++.importantes-quando{margin:6px 0 0;font:10px var(--mono);color:var(--muted)}
++.importantes-acoes-item{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px}
++.importantes-editar{display:grid;gap:8px}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 8a55928a..e34c4e9c 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -31,7 +31,7 @@
+   <p class="estado" data-estado="vazio" hidden>Sem leitura ainda. Serviços, Git e agenda aparecem na primeira leitura.</p>
+   <p class="estado" data-estado="erro" hidden>Não medido: não foi possível ler agora. Valor antigo, se houver, aparece com a hora dele.</p>
+ </div>
+-<nav class="abas" aria-label="Subpainéis de Panorama"><button type="button" data-sub="panorama" aria-controls="sub-panorama" aria-selected="true">Panorama</button><button type="button" data-sub="visao" aria-controls="sub-visao" aria-selected="false">Visão do sistema</button><button type="button" data-sub="capacidades" aria-controls="sub-capacidades" aria-selected="false">O que posso fazer</button><button type="button" data-sub="plano" aria-controls="sub-plano" aria-selected="false">Plano de trabalho</button><button type="button" data-sub="frentes" aria-controls="sub-frentes" aria-selected="false">Frentes</button></nav>
++<nav class="abas" aria-label="Subpainéis de Panorama"><button type="button" data-sub="panorama" aria-controls="sub-panorama" aria-selected="true">Panorama</button><button type="button" data-sub="visao" aria-controls="sub-visao" aria-selected="false">Visão do sistema</button><button type="button" data-sub="capacidades" aria-controls="sub-capacidades" aria-selected="false">O que posso fazer</button><button type="button" data-sub="plano" aria-controls="sub-plano" aria-selected="false">Plano de trabalho</button><button type="button" data-sub="frentes" aria-controls="sub-frentes" aria-selected="false">Frentes</button><button type="button" data-sub="importantes" aria-controls="sub-importantes" aria-selected="false">Importantes</button></nav>
+ <div class="sub" id="sub-panorama" data-sub="panorama" data-secao="panorama">
+ 
+ 
+@@ -40,7 +40,8 @@
+     <div class="kpis"><div class="kpi teal"><div class="label">Unidades monitoradas</div><div class="value" id="overview-health">—</div><div class="note" id="overview-units-note">Unidades observadas · seth-verificador</div></div><div class="kpi"><div class="label">Git local</div><div class="value" id="overview-git">—</div><div class="note">Referência do último fetch</div></div><div class="kpi violet"><div class="label">Agenda</div><div class="value" id="overview-timers">—</div><div class="note">Timers · não prova execução</div></div><div class="kpi gold"><div class="label">Propostas</div><div class="value" id="overview-proposals">—</div><div class="note">Aguardando assinatura do Humano</div></div></div>
+     <div class="grid"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Detalhe</div><h2 class="panel-title">Serviços, Git e agenda</h2></div><button class="text-link" type="button" data-open-page="sistema" data-open-sub="operacao">Abrir Estado operacional</button></div><p class="subnote">Unidades, Git e timers ficam só em Estado operacional, para não repetir a leitura nesta tela.</p></article>
+     <div class="stack"><article class="panel"><div class="panel-head"><div><div class="panel-kicker">Orientação</div><h2 class="panel-title">A memória tem caminhos</h2></div><button type="button" class="text-link" data-vault="inicio">Abrir vault</button></div><div class="memory-links"><button type="button" data-vault="timeline">Linha do tempo</button><button type="button" data-vault="mapa">Mapa do sistema</button><button type="button" data-open-page="conhecimento" data-open-sub="grafo">Brain Atlas</button><button type="button" data-vault="memorias">Base de memórias</button></div><p class="subnote">O vault é derivado; confirme afirmações no canon.</p></article>
+-    <article class="panel chat-card"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Conversa com a Seth</h2></div><span id="chat-state" class="chip horizon">SEM LEITURA</span></div><p id="chat-source">Aguardando leitura HTTP. A saúde do endpoint não garante cada função do chat.</p><button class="btn" type="button" data-open-page="conversa" data-open-sub="conversa">Abrir conversa da Seth</button></article></div></div>
++    <article class="panel chat-card"><div class="panel-head"><div><div class="panel-kicker">Conversa</div><h2 class="panel-title">Conversa com a Seth</h2></div><span id="chat-state" class="chip horizon">SEM LEITURA</span></div><p id="chat-source">Aguardando leitura HTTP. A saúde do endpoint não garante cada função do chat.</p><button class="btn" type="button" data-open-page="conversa" data-open-sub="conversa">Abrir conversa da Seth</button></article>
++    <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Guardado para depois</div><h2 class="panel-title">Importantes</h2></div><span id="importantes-cartao-estado" class="chip">SEM LEITURA</span></div><p id="importantes-cartao-resumo">Importantes: —</p><button class="btn secondary" type="button" data-open-page="panorama" data-open-sub="importantes">Abrir Importantes</button></article></div></div>
+     <div class="footer-note"><span>LEITURA LOCAL · SEM AÇÕES DE CONTROLE</span><span id="overview-updated" role="status" aria-live="polite"></span></div>
+ 
+ 
+@@ -87,6 +88,24 @@
+ <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Fonte: config/frentes.json</div><h2 class="panel-title" id="frentes-cabecalho">Frentes</h2></div><span class="chip" id="frentes-estado">Carregando frentes…</span></div>
+ <ul id="frentes-lista" class="lista-coluna"></ul></article>
+ </div>
++<div class="sub" id="sub-importantes" data-sub="importantes" data-secao="panorama" hidden>
++<div class="estados" aria-live="polite">
++  <p class="estado" data-estado="carregando" hidden>Carregando os importantes…</p>
++  <p class="estado" data-estado="vazio" hidden>Nenhum importante ainda. Escreva abaixo uma ideia ou pendência para guardar.</p>
++  <p class="estado" data-estado="erro" hidden>Não medido: não foi possível ler os importantes agora. Nada antigo é mostrado como atual.</p>
++</div>
++<div class="section-heading"><div><div class="eyebrow">Guardado para depois · local</div><h1>Importantes</h1><p>Ideias e pendências que você manda guardar. Nada aqui é executado. Feito e descartado ficam guardados e podem voltar a aberto.</p></div></div>
++<div class="callout"><span id="importantes-resumo-lista" role="status" aria-live="polite">Aguardando a primeira leitura.</span><span class="right">LOCAL</span></div>
++<form class="importantes-novo" id="importantes-form">
++  <label for="importantes-texto">Guardar um importante</label>
++  <textarea id="importantes-texto" rows="2" maxlength="4000" placeholder="Escreva a ideia ou a pendência"></textarea>
++  <div class="importantes-barra"><button class="btn" type="submit" id="importantes-adicionar">Guardar</button><button class="btn secondary" type="button" id="importantes-trazer">Trazer do Conselho</button></div>
++  <p class="subnote">Trazer do Conselho copia as entradas do cache do Conselho marcadas com IMPORTANTE, sem repetir. Só lê o cache.</p>
++</form>
++<p class="importantes-aviso" id="importantes-aviso" role="status" hidden></p>
++<div class="importantes-filtro"><label for="importantes-filtro">Mostrar</label><select id="importantes-filtro"><option value="abertos">Abertos</option><option value="feitos">Feitos</option><option value="descartados">Descartados</option><option value="todos">Todos</option></select></div>
++<article class="panel"><div class="panel-head"><div><div class="panel-kicker">GET /api/importantes · abertos primeiro</div><h2 class="panel-title">Lista</h2></div></div><ul id="importantes-lista" class="importantes-lista"></ul></article>
++</div>
+ </section>
+ <section class="secao" id="conversa" aria-labelledby="titulo-conversa" data-titulo="Conversa com a Seth" hidden>
+ <h2 class="sr-only" id="titulo-conversa">Conversa com a Seth</h2>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 1671af70..cf9521e8 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -79,6 +79,7 @@ const CARREGAR_SUB = {
+   qualidade: () => { carregarQualidade(); carregarMedicoes(); },
+   sdd: () => carregarSdd(),
+   frentes: () => carregarFrentes(),
++  importantes: () => carregarImportantes(),
+   "conselho-memoria": () => carregarMemoriaConselho(),
+ };
+ 
+@@ -1735,6 +1736,218 @@ async function carregarMemoriaConselho() {
+ byId("memoria-tipo").addEventListener("change", renderizarMemoria);
+ byId("memoria-atualizar").addEventListener("click", () => carregarMemoriaConselho());
+ 
++// Importantes (11/11/2026, pedido do Humano): ideias e pendências guardadas para depois. Aba Importantes do Panorama
++// e cartão no Panorama. Leitura: GET /api/importantes. Ações: POST /api/importantes, /estado, /editar e /trazer.
++// O texto do item entra só com textContent. Erro esvazia a lista: nada antigo aparece como atual.
++const IMPORTANTES_ESTADOS = {aberto: ["Aberto", ""], feito: ["Feito", "active"], descartado: ["Descartado", "horizon"]};
++const IMPORTANTES_ORIGENS = {humano: "Anotado por você", cache: "Do Conselho", modelo: "De um modelo"};
++const IMPORTANTES_FILTROS = {abertos: "aberto", feitos: "feito", descartados: "descartado"};
++const IMPORTANTES_ACOES = {
++  aberto: [["Marcar feito", "feito"], ["Descartar", "descartado"]],
++  feito: [["Reabrir", "aberto"], ["Descartar", "descartado"]],
++  descartado: [["Reabrir", "aberto"]],
++};
++let importantesDados = null;
++let importantesBusy = false;
++let importantesPendente = false;
++let importantesEnviando = false;
++
++function importantesAviso(texto) {
++  const aviso = byId("importantes-aviso");
++  if (!aviso) return;
++  aviso.textContent = texto || "";
++  aviso.hidden = !texto;
++}
++function importantesData(iso) {
++  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso || ""));
++  return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : "data não conhecida";
++}
++// Pedido de escrita. Erro sai com status e o motivo curto que o servidor devolve; nunca com o texto do item.
++async function importantesPedir(rota, corpo) {
++  let resposta;
++  try {
++    resposta = await fetch(rota, {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
++      credentials: "same-origin", cache: "no-store", body: JSON.stringify(corpo)});
++  } catch (_) {
++    throw Object.assign(new Error("sem resposta"), {status: 0, motivo: ""});
++  }
++  if (!resposta.ok) {
++    let motivo = "";
++    try { motivo = (await resposta.text()).trim().slice(0, 200); } catch (_) { motivo = ""; }
++    throw Object.assign(new Error("recusado"), {status: resposta.status, motivo});
++  }
++  return resposta.json();
++}
++function importantesErro(status, motivo) {
++  if (status === 0) return "Sem resposta do painel. Nada foi alterado.";
++  if (status === 403) return "O painel recusou o pedido: abra esta tela pelo próprio painel.";
++  if (status === 404) return "Item não encontrado; a lista foi atualizada.";
++  if (motivo) return motivo.charAt(0).toUpperCase() + motivo.slice(1) + ".";
++  return "O painel respondeu com erro " + status + ".";
++}
++function importantesCartao(dados, falhou) {
++  const resumo = byId("importantes-cartao-resumo");
++  const estado = byId("importantes-cartao-estado");
++  if (!resumo || !estado) return;
++  if (falhou || !dados) {
++    resumo.textContent = "Importantes: não medido (a leitura falhou).";
++    estado.textContent = "NÃO MEDIDO"; estado.className = "chip partial";
++    return;
++  }
++  if (dados.estado === "ilegivel") {
++    resumo.textContent = "Importantes: lista ilegível; nada foi mostrado.";
++    estado.textContent = "ILEGÍVEL"; estado.className = "chip partial";
++    return;
++  }
++  const abertos = dados.contagem.aberto;
++  resumo.textContent = `Importantes: ${abertos} ${abertos === 1 ? "aberto" : "abertos"}`;
++  estado.textContent = "LIDO"; estado.className = "chip active";
++}
++function importantesBotao(rotulo, aoClicar, classe = "text-link") {
++  const botao = document.createElement("button");
++  botao.type = "button"; botao.className = classe; botao.textContent = rotulo;
++  botao.addEventListener("click", aoClicar);
++  return botao;
++}
++function importantesAcoes(item, li) {
++  const acoes = document.createElement("div");
++  acoes.className = "importantes-acoes-item";
++  for (const [rotulo, estado] of IMPORTANTES_ACOES[item.estado] || []) {
++    acoes.append(importantesBotao(rotulo, () => importantesMudar(item.id, estado)));
++  }
++  if (item.estado !== "descartado") acoes.append(importantesBotao("Editar", () => importantesEditar(item, li)));
++  return acoes;
++}
++function importantesItem(item) {
++  const li = document.createElement("li");
++  li.className = "importantes-item " + item.estado;
++  const topo = document.createElement("div");
++  topo.className = "importantes-topo";
++  const [rotulo, classe] = IMPORTANTES_ESTADOS[item.estado] || [String(item.estado), ""];
++  const chip = document.createElement("span");
++  chip.className = classe ? "chip " + classe : "chip";
++  chip.textContent = rotulo;
++  const origem = document.createElement("span");
++  origem.className = "importantes-origem";
++  origem.textContent = item.origem === "cache" ? `Do Conselho, entrada nº ${item.cache_n}` : (IMPORTANTES_ORIGENS[item.origem] || "Origem não conhecida");
++  topo.append(chip, origem);
++  const texto = document.createElement("p");
++  texto.className = "importantes-texto";
++  texto.textContent = item.texto;
++  li.append(topo, texto);
++  if (item.nota) {
++    const nota = document.createElement("p");
++    nota.className = "importantes-nota";
++    nota.textContent = "Nota: " + item.nota;
++    li.append(nota);
++  }
++  const quando = document.createElement("p");
++  quando.className = "importantes-quando";
++  quando.textContent = "Criado em " + importantesData(item.criado_em) + (item.feito_em ? " · feito em " + importantesData(item.feito_em) : "");
++  li.append(quando, importantesAcoes(item, li));
++  return li;
++}
++function renderizarImportantes() {
++  const lista = byId("importantes-lista");
++  const resumo = byId("importantes-resumo-lista");
++  if (!lista || !resumo || !importantesDados) return;
++  const filtro = byId("importantes-filtro").value;
++  const mostrados = importantesDados.itens.filter((item) => filtro === "todos" || item.estado === IMPORTANTES_FILTROS[filtro]);
++  lista.replaceChildren(...mostrados.map(importantesItem));
++  const c = importantesDados.contagem;
++  resumo.textContent = importantesDados.estado === "ilegivel"
++    ? "Lista ilegível: nada é mostrado nem alterado."
++    : `${c.aberto} abertos · ${c.feito} feitos · ${c.descartado} descartados · mostrando ${mostrados.length}` + (mostrados.length ? "" : " · nenhum item neste filtro");
++}
++async function carregarImportantes() {
++  const sub = byId("sub-importantes");
++  if (!sub) return;
++  if (importantesBusy) { importantesPendente = true; return; }
++  importantesBusy = true;
++  marcarEstado(sub, "carregando");
++  byId("importantes-resumo-lista").textContent = importantesDados ? "Atualizando…" : "Lendo os importantes…";
++  try {
++    const resposta = await fetch("/api/importantes", {cache: "no-store", credentials: "same-origin", headers: {Accept: "application/json"}});
++    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
++    const dados = await resposta.json();
++    if (!dados || !Array.isArray(dados.itens) || !dados.contagem) throw new Error("resposta incompleta");
++    importantesDados = dados;
++    if (dados.estado === "ilegivel") marcarEstado(sub, "erro", "Lista de importantes ilegível no disco. Nada é mostrado nem alterado por este painel.");
++    else marcarEstado(sub, dados.estado === "vazio" ? "vazio" : null);
++    importantesCartao(dados, false);
++    renderizarImportantes();
++  } catch (_) {
++    importantesDados = null;
++    byId("importantes-lista").replaceChildren();
++    byId("importantes-resumo-lista").textContent = "Não medido: a leitura dos importantes falhou.";
++    importantesCartao(null, true);
++    marcarEstado(sub, "erro");
++  } finally {
++    importantesBusy = false;
++    if (importantesPendente) { importantesPendente = false; carregarImportantes(); }
++  }
++}
++async function importantesMudar(id, estado) {
++  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
++  importantesEnviando = true;
++  try { await importantesPedir("/api/importantes/estado", {id, estado}); importantesAviso(""); }
++  catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
++  finally { importantesEnviando = false; }
++  await carregarImportantes();
++}
++function importantesEditar(item, li) {
++  const campoTexto = document.createElement("textarea");
++  campoTexto.rows = 3; campoTexto.maxLength = 4000; campoTexto.value = item.texto;
++  campoTexto.setAttribute("aria-label", "Texto do importante");
++  const campoNota = document.createElement("input");
++  campoNota.type = "text"; campoNota.maxLength = 500; campoNota.value = item.nota || "";
++  campoNota.placeholder = "Nota (opcional)"; campoNota.setAttribute("aria-label", "Nota do importante");
++  const salvar = importantesBotao("Salvar", async () => {
++    const texto = campoTexto.value.trim();
++    if (!texto) { importantesAviso("O texto não pode ficar vazio."); return; }
++    try { await importantesPedir("/api/importantes/editar", {id: item.id, texto, nota: campoNota.value.trim()}); importantesAviso("Alteração guardada."); }
++    catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
++    await carregarImportantes();
++  }, "btn");
++  const cancelar = importantesBotao("Cancelar", () => renderizarImportantes(), "btn secondary");
++  const barra = document.createElement("div");
++  barra.className = "importantes-barra";
++  barra.append(salvar, cancelar);
++  const edicao = document.createElement("div");
++  edicao.className = "importantes-editar";
++  edicao.append(campoTexto, campoNota, barra);
++  li.replaceChildren(edicao);
++  campoTexto.focus();
++}
++async function importantesAdicionar(evento) {
++  evento.preventDefault();
++  const campo = byId("importantes-texto");
++  const texto = campo.value.trim();
++  if (!texto) { importantesAviso("Escreva o texto antes de guardar."); return; }
++  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
++  importantesEnviando = true;
++  try { await importantesPedir("/api/importantes", {texto}); campo.value = ""; importantesAviso("Guardado."); }
++  catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
++  finally { importantesEnviando = false; }
++  await carregarImportantes();
++}
++async function importantesTrazer() {
++  const botao = byId("importantes-trazer");
++  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
++  importantesEnviando = true;
++  botao.disabled = true;
++  try {
++    const dados = await importantesPedir("/api/importantes/trazer", {});
++    importantesAviso(`Trazidas do Conselho: ${dados.trazidas}. Já estavam aqui: ${dados.ja_estavam}. Recusadas por segredo ou tamanho: ${dados.recusadas}.`);
++  } catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
++  finally { importantesEnviando = false; botao.disabled = false; }
++  await carregarImportantes();
++}
++byId("importantes-form").addEventListener("submit", importantesAdicionar);
++byId("importantes-trazer").addEventListener("click", importantesTrazer);
++byId("importantes-filtro").addEventListener("change", renderizarImportantes);
++carregarImportantes();
++
+ // Entrada: a seção vem do hash; sem hash ou com hash desconhecido, abre panorama.
+ aoMudarHash();
+ })();
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 64170882..fbeb5c7a 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -36,6 +36,7 @@ import medicoes_painel  # noqa: E402
+ import sdd_painel  # noqa: E402
+ import nova_versao_painel  # noqa: E402
+ import chat_stream  # noqa: E402
++import importantes  # noqa: E402
+ from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
+ from armazem import (  # noqa: E402
+     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
+@@ -55,6 +56,9 @@ CHAT_STREAM_LIMITE_BYTES = 131_072
+ CHAT_STREAM_TIMEOUT_S = 120
+ # Organização das conversas (lote 3, 09/11/2026): pedidos pequenos de fixar, pasta, marcador, pasta e nome.
+ SETH_ORGANIZACAO_LIMITE_BYTES = 4096
++# Importantes (11/11/2026): pedido de criar, mudar estado, editar ou trazer do Conselho; corpo até 4096 bytes.
++IMPORTANTES_LIMITE_BYTES = 4096
++IMPORTANTES_ROTAS = ("/api/importantes", "/api/importantes/estado", "/api/importantes/editar", "/api/importantes/trazer")
+ WIKI_RESULT_MAX = 12000
+ # Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): leitura do cache, n de 1 a 200.
+ MEMORIA_CONSELHO_PADRAO = 40
+@@ -1144,6 +1148,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
+         if self.path.split("?", 1)[0] == "/api/conselho/memoria":
+             return self._conselho_memoria()
++        if self.path == "/api/importantes":
++            return self._importantes_listar()
+         if self.path == "/api/eventos":
+             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
+         if self.path == "/api/relay-council/catalog":
+@@ -1223,6 +1229,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._seth_organizacao(self.path)
+         if self.path in ("/api/seth/lixeira/restaurar", "/api/seth/lixeira/purgar"):
+             return self._seth_lixeira(self.path.endswith("/restaurar"))
++        if self.path in IMPORTANTES_ROTAS:
++            return self._importantes_escrita(self.path)
+         if self.path == "/api/nova-versao/upload":
+             return self._nova_versao_upload()
+         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
+@@ -1703,6 +1711,53 @@ class Handler(BaseHTTPRequestHandler):
+                  "observed_at": observed_at, "fresh_until": fresh_until}
+         return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+ 
++    def _importantes_listar(self) -> None:
++        """Importantes (11/11/2026): leitura da lista local. A checagem de origem já rodou em do_GET."""
++        corpo = json.dumps(importantes.listar(), ensure_ascii=False).encode("utf-8")
++        return self._send(200, "application/json; charset=utf-8", corpo)
++
++    def _responder_importante(self, rota: str, identificador, status: int, corpo: bytes,
++                              tipo: str = "text/plain; charset=utf-8") -> None:
++        """Toda resposta de escrita de importantes passa aqui: grava a linha do registro (sem conteúdo) e responde."""
++        importantes.registro_escrever(rota, identificador, status)
++        return self._send(status, tipo, corpo)
++
++    def _importantes_escrita(self, rota: str) -> None:
++        """Importantes (11/11/2026): criar, marcar, editar e trazer do cache do Conselho. Escrita exige origem do
++        painel (_escrita_permitida, como as conversas). Cada pedido, inclusive o recusado, gera uma linha no registro."""
++        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._responder_importante(rota, None, 403, b"cross-origin request denied")
++        raw_length = self.headers.get("Content-Length", "")
++        if not raw_length.isdecimal() or int(raw_length) > IMPORTANTES_LIMITE_BYTES:
++            return self._responder_importante(rota, None, 413, f"pedido acima de {IMPORTANTES_LIMITE_BYTES} bytes".encode("utf-8"))
++        try:
++            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
++        except (ValueError, UnicodeDecodeError):
++            return self._responder_importante(rota, None, 400, "pedido com JSON inválido".encode("utf-8"))
++        identificador = dados.get("id") if isinstance(dados, dict) else None
++        try:
++            if rota == "/api/importantes":
++                resultado = importantes.criar(dados)
++            elif rota == "/api/importantes/estado":
++                resultado = importantes.mudar_estado(dados)
++            elif rota == "/api/importantes/editar":
++                resultado = importantes.editar(dados)
++            else:
++                try:
++                    cache = _memoria_conselho_modulo()
++                except ImportError as erro:
++                    raise importantes.ErroImportantes(500, "cache do Conselho indisponível; nada foi trazido") from erro
++                resultado = importantes.trazer_do_conselho(cache)
++                identificador = None
++        except importantes.ErroImportantes as erro:
++            return self._responder_importante(rota, identificador, erro.status, erro.motivo.encode("utf-8"))
++        except OSError:
++            return self._responder_importante(rota, identificador, 500, "gravacao indisponivel; nada foi alterado".encode("utf-8"))
++        if rota != "/api/importantes/trazer":
++            identificador = resultado["id"]
++        return self._responder_importante(rota, identificador, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
++                                          "application/json; charset=utf-8")
++
+     def _grafo(self) -> None:
+         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
+         from urllib.parse import urlparse, parse_qs
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index a4562a8d..56a066e7 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -740,5 +740,125 @@
+       "redesign/painel_operacional/test_chat_ui.py::ConversaProtecao::test_lixeira_vazia_e_indisponivel_dizem_isso"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "`GET /api/importantes` devolve `itens` com abertos primeiro, `contagem` e `estado`; arquivo ausente vale `vazio` e arquivo fora do formato vale `ilegivel`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_lista_mostra_abertos_primeiro_e_o_mais_recente_antes",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_arquivo_ilegivel_nao_e_sobrescrito",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_item_fora_do_formato_torna_o_arquivo_ilegivel",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_get_lista_vazia_e_com_itens"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "criar, marcar feito, descartar, reabrir e editar gravam o arquivo local por troca atômica; descartado fica guardado e nenhum item é apagado de fato",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_grava_item_aberto_de_origem_humano",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_marcar_feito_grava_a_hora_e_reabrir_limpa",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_descartado_nao_some_da_lista_e_volta_com_reabrir",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_editar_muda_texto_e_nota_e_nota_vazia_limpa",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_escrita_nao_deixa_temporario_e_o_arquivo_tem_so_o_formato"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "texto recusado (vazio, acima de 4000 caracteres, com caractere nulo) ou campo fora do contrato responde 400 e não grava nada",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_recusa_texto_vazio_longo_ou_com_nulo",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_recusa_campo_que_nao_existe_no_contrato",
++      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_estado_invalido_id_invalido_e_item_inexistente_recusam",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_erros_de_pedido_respondem_400_404_413_e_nao_gravam"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`Trazer do Conselho` lê o cache sem escrever nele, traz só as entradas `IMPORTANTE`, não duplica nem traz de novo a entrada descartada, e não traz entrada com segredo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_traz_so_as_marcadas_com_origem_cache_e_numero",
++      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_nao_duplica_e_nao_traz_de_novo_o_descartado",
++      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_segredo_nao_e_trazido_e_e_contado",
++      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_com_o_filtro_real_do_cache_dado_pessoal_vira_marca_e_o_cache_nao_muda",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_trazer_pela_rota_usa_o_cache_do_conselho_sem_escrever_nele"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "as escritas de importantes respondem 403 sem origem do painel ou com origem de outro site, 413 acima de 4096 bytes, e cada pedido, inclusive o recusado, gera uma linha no registro sem texto",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_escrita_sem_cabecalhos_responde_403_nao_grava_e_registra",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_origem_de_outro_site_recusa_mesmo_com_a_do_painel_no_outro_cabecalho",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_criar_marcar_editar_pela_rota_e_registro_sem_texto",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_registro_so_acrescenta",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_erros_de_pedido_respondem_400_404_413_e_nao_gravam"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a aba Importantes e o cartão do Panorama mostram estados carregando, vazio e erro, e não mostram lista antiga como atual quando a leitura falha ou o arquivo é ilegível",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_mostra_abertos_primeiro_e_o_cartao_conta_abertos",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_vazia_mostra_estado_vazio_e_cartao_zero",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_falha_de_leitura_mostra_erro_e_nao_mostra_lista_antiga",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_ilegivel_mostra_erro_sem_itens"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a aba envia criar, marcar, reabrir, descartar, editar e trazer pelas rotas de importantes, e mostra o motivo da recusa (403, 404, 409 e 500)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_guardar_envia_o_texto_limpa_o_campo_e_recarrega",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_marcar_feito_e_descartar_chamam_o_estado_certo",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_recusa_403_mostra_aviso_e_a_lista_volta_do_servidor",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_conflito_409_mostra_o_motivo_do_servidor",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_editar_envia_texto_e_nota_e_volta_para_a_lista",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_trazer_mostra_a_contagem_e_reabilita_o_botao",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_erro_500_no_pedido_nao_altera_a_lista_e_avisa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o texto de um item sai como texto puro, sem innerHTML, e o bloco novo não tem `style=`, `on*` nem cor literal fora de `:root`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_texto_do_item_sai_como_texto_puro",
++      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_bloco_novo_nao_usa_html_bruto_nem_atributo_de_estilo",
++      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_html_da_aba_e_do_cartao_sem_style_nem_on",
++      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_cores_do_bloco_novo_so_por_token"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a tela de Importantes chama só rotas que existem no servidor, e as quatro rotas estão em `IMPORTANTES_ROTAS`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes.py::RotasTests::test_tela_tem_a_lista_e_so_chama_as_rotas_que_existem"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "os arquivos da entrega de importantes (tela, módulo, testes e spec) não têm emoji",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_sem_emoji_nos_arquivos_da_entrega"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 32ab9633..6f5ea9c5 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -33,6 +33,8 @@
+ - Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
+ - Proteção das conversas (09/11/2026, pedido do Humano depois do sumiço de duas conversas importadas, confirmado por ele em 09/11/2026 às 16:20 como apagadas pela própria tela): apagar vai para a Lixeira, escritas exigem origem do painel e ficam registradas, salvar preserva a origem de conversa importada, e arquivo ilegível é contado e não é apagado. Contrato em Rotas de API (bloco de proteção) e critérios no fim da seção de Critérios.
+ 
++- Importantes (11/11/2026, pedido do Humano: "importantes no painel"): aba Importantes dentro de Panorama e cartão "Importantes: N abertos" no Panorama. Lista local de ideias e pendências que o Humano manda guardar: criar, marcar feito, descartar, reabrir e editar; nada é apagado de fato. Trazer as entradas marcadas com IMPORTANTE do cache do Conselho, só leitura. Contrato em Rotas de API e critérios no fim da seção de Critérios.
++
+ ## Fora desta versão
+ 
+ - B1, chat com streaming novo: a Conversa continua como está (stream atual, com fallback para `/api/seth/chat`). Motivo: é funcionalidade nova, com risco próprio; o pedido desta versão é a tela unificada.
+@@ -88,6 +90,15 @@
+   - Origem cruzada: 403, como as outras leituras de `/api/*`.
+   - Tipos: `fato`, `decisao`, `pendencia`, `nota` e `diario` (os cinco de `cache_conselho.TIPOS`). A aba filtra por tipo no próprio navegador, sobre as entradas já recebidas.
+ 
++- Importantes (11/11/2026). Tudo local, em `~/.cache/agata/painel-importantes.json` (escrito inteiro, por troca atômica). Registro de escritas em `painel-importantes.registro.jsonl`: hora, rota, id e status; sem texto. Só acréscimo.
++  - `GET /api/importantes` devolve `schema_version`, `estado` (`ok`, `vazio` ou `ilegivel`), `itens` (abertos primeiro; dentro de cada estado, o mais recente antes) e `contagem` (`aberto`, `feito`, `descartado`). Cada item tem `id` (12 hex), `texto`, `origem` (`humano`, `cache` ou `modelo`), `criado_em`, `estado` (`aberto`, `feito` ou `descartado`), `feito_em`, `nota` e `cache_n` (número da entrada do cache do Conselho; só quando `origem` é `cache`).
++  - `POST /api/importantes` com `{texto}` cria um item de origem `humano`. Texto de 1 a 4000 caracteres, sem caractere nulo. Lista com até 2000 itens; acima, 409. A rota grava só `humano`: a origem `modelo` existe no esquema e nenhuma rota a grava ainda.
++  - `POST /api/importantes/estado` com `{id, estado}`: `feito`, `descartado` ou `aberto` (reabrir). Sair de `feito` limpa `feito_em`.
++  - `POST /api/importantes/editar` com `{id, texto?, nota?}`: nota de até 500 caracteres; nota vazia limpa a nota. Campo fora do contrato, ou pedido sem `texto` nem `nota`: 400.
++  - `POST /api/importantes/trazer` (corpo `{}`): lê o cache do Conselho com `cache_conselho.ler`, sem escrever nele, e cria um item para cada entrada cujo texto começa com `IMPORTANTE`, com `origem` `cache` e `cache_n` igual ao número da entrada. Entrada já trazida, mesmo descartada depois, não entra de novo. O texto passa por `cache_conselho.filtrar`: segredo não é trazido (conta em `recusadas`); dado pessoal vira marca. Resposta: `trazidas`, `ja_estavam`, `recusadas`, `lidas`.
++  - Escritas exigem origem do painel (`_escrita_permitida`): 403 sem cabeçalho ou com origem de outro site. Corpo acima de 4096 bytes: 413. JSON inválido: 400. Item inexistente: 404. Arquivo ilegível: 409, sem gravar. Falha de gravação: 500, sem alterar. Cada pedido, inclusive o recusado, acrescenta uma linha no registro.
++  - Arquivo fora do formato (JSON quebrado, `schema_version` diferente ou item fora do esquema) vale `ilegivel`: a leitura diz `ilegivel` e nenhuma escrita o sobrescreve.
++
+ ### Ativos servidos
+ 
+ - Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`.
+@@ -114,7 +125,7 @@
+ 
+ ### APIs usadas por seção (sem rota nova)
+ 
+-- panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`; POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
++- panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`, `/api/importantes` (aba Importantes e cartão, 11/11/2026; POST `/api/importantes`, `/api/importantes/estado`, `/editar` e `/trazer`); POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
+ - conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`; GET `/api/seth/lixeira`; POST `/api/seth/lixeira/restaurar` e `/api/seth/lixeira/purgar`.
+ - conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
+ - sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
+@@ -162,6 +173,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ | prototipo · O que posso fazer | Marca de lacuna nos cartões sem medição | panorama | sub-capacidades (`marcarLacunasNosCartoes`) |
+ | prototipo · Plano de trabalho | Propostas para examinar, só leitura de origem local | panorama | sub-plano (`/api/proposals/verify`) |
+ | prototipo · Plano de trabalho | Atalhos Estado do sistema e Início do vault | panorama | sub-plano |
++| prototipo · Importantes (11/11/2026) | Lista local: guardar, marcar feito, descartar, reabrir, editar e trazer do Conselho | panorama | sub-importantes (`importantes-lista`, `importantes-form`, `importantes-trazer`) |
+ | /frentes | Lista de frentes, somente leitura (`config/frentes.json`) | panorama | sub-frentes (`frentes-lista`, `frentes-estado`, `frentes-cabecalho`) |
+ | /index.html | Serviços e Git do painel antigo | panorama | sub-panorama (já coberto; sem card duplicado) |
+ | /index.html | Wiki da Agata: busca, pela busca única de Conhecimento (escopo "documentação") | conhecimento | busca única (`conhecimento-busca`, `conhecimento-consulta`, `conhecimento-escopo`, `wiki-mode`, `wiki-source`, `wiki-results`) |
+@@ -306,6 +318,16 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] enquanto a Seth responde, a tela não troca de conversa, não abre Nova conversa e não liga a temporária: avisa e espera; depois da resposta, volta a funcionar
+ - [ ] salvar grava o id e o aviso na conversa de origem, e a tela só é repintada se ela ainda é a aberta
+ - [ ] a lixeira fora do ar não derruba a lista de conversas, e a lixeira vazia diz que está vazia
++- [ ] `GET /api/importantes` devolve `itens` com abertos primeiro, `contagem` e `estado`; arquivo ausente vale `vazio` e arquivo fora do formato vale `ilegivel`
++- [ ] criar, marcar feito, descartar, reabrir e editar gravam o arquivo local por troca atômica; descartado fica guardado e nenhum item é apagado de fato
++- [ ] texto recusado (vazio, acima de 4000 caracteres, com caractere nulo) ou campo fora do contrato responde 400 e não grava nada
++- [ ] `Trazer do Conselho` lê o cache sem escrever nele, traz só as entradas `IMPORTANTE`, não duplica nem traz de novo a entrada descartada, e não traz entrada com segredo
++- [ ] as escritas de importantes respondem 403 sem origem do painel ou com origem de outro site, 413 acima de 4096 bytes, e cada pedido, inclusive o recusado, gera uma linha no registro sem texto
++- [ ] a aba Importantes e o cartão do Panorama mostram estados carregando, vazio e erro, e não mostram lista antiga como atual quando a leitura falha ou o arquivo é ilegível
++- [ ] a aba envia criar, marcar, reabrir, descartar, editar e trazer pelas rotas de importantes, e mostra o motivo da recusa (403, 404, 409 e 500)
++- [ ] o texto de um item sai como texto puro, sem innerHTML, e o bloco novo não tem `style=`, `on*` nem cor literal fora de `:root`
++- [ ] a tela de Importantes chama só rotas que existem no servidor, e as quatro rotas estão em `IMPORTANTES_ROTAS`
++- [ ] os arquivos da entrega de importantes (tela, módulo, testes e spec) não têm emoji
+ 
+ ## Desenho e alternativas
+ 
+@@ -346,6 +368,8 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
+ 
+ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: lixeira, escrita com origem, registro, origem preservada ao salvar e arquivos ilegíveis, com servidor numa porta livre) e `test_chat_ui.py::ConversaProtecao` (tela: apagar, bloqueio durante a resposta, salvar na conversa de origem, lixeira e contagem de ilegíveis, em node com DOM mínimo). O harness de `test_chat_ui.py` ganhou a lixeira; `sethSalvar` é exposta só na cópia em memória do arquivo, durante o teste (uma linha antes do fim da IIFE), sem hook no código de produção.
+ 
++Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem navegador; o arquivo e o registro vão para um diretório temporário). `test_importantes_ui.py` roda `prototipo.js` em node, com um DOM mínimo montado no próprio teste e um fetch roteirizado, e confere em texto o bloco novo (sem innerHTML, style nem on*). A lista de subpainéis do Panorama em `test_painel_unificado.py` ganhou `importantes` (única mudança nesse teste).
++
+ ## Migração e reversão
+ 
+ - Sem migração de dados. O painel não guarda estado além do cache em `~/.cache/agata/painel/`.
+@@ -355,6 +379,8 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
+ - Lote 3 (09/11/2026): `organizacao.json` nasce só quando alguém fixa, arquiva, marca ou põe em pasta uma conversa. Sem ele, as conversas valem o padrão. Reverter o código deixa o arquivo ignorado; apagá-lo desfaz a organização sem tocar nas conversas.
+ - Proteção (09/11/2026): a pasta `.lixeira/` e o `.registro.jsonl` nascem no primeiro uso. Reverter o código deixa a lixeira fora da lista; as conversas que estiverem nela voltam à mão (mover `.lixeira/<id>-<data>.json` para `<id>.json`). A chave `lixeira` de `organizacao.json` é ignorada pelo código antigo.
+ 
++- Importantes (11/11/2026): o arquivo `~/.cache/agata/painel-importantes.json` e o registro nascem no primeiro uso. Reverter o código deixa o arquivo sem uso; apagá-lo perde a lista (não há outra cópia). Reverter a aba deixa a lista só no arquivo, sem tela.
++
+ ## Riscos e dependências
+ 
+ - A PR 940 precisa estar na base. Sem ela, `prototipo.html` tem 9 `style=`.
+@@ -365,6 +391,7 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
+ - Decidido pelo Humano em 07/11/2026: a barra lateral, o cabeçalho e o chip LOCAL ficam fora das sete seções, como casca registrada.
+ - A verificação no navegador foi feita em 07/11/2026 (critério 35), com o que está medido e o que não foi medido listado ali. Não é aceite visual do Humano.
+ - `pytest` precisa estar disponível. Sem ele, a execução devolve não medido, não falha em silêncio.
++- Importantes (11/11/2026): o texto digitado pelo Humano fica local, sem filtro de segredo (como as conversas); só o texto trazido do cache passa por `filtrar`. "Trazer do Conselho" depende de a entrada começar com `IMPORTANTE`: é convenção de texto do cache, não campo do esquema.
+ - Proteção (09/11/2026): cliente local que escreve sem cabeçalho (curl, script) passa a receber 403 em toda escrita de conversa. O chat (`/api/seth/chat` e `/api/seth/chat/stream`) não mudou. Salvar uma conversa com um `id` que está na lixeira recria o arquivo com esse id; a restauração depois responde 409 (nada se perde).
+ 
+ ## Código
+@@ -401,6 +428,9 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
+ - `test_conversas_protege.py`
+ - `test_chat_ui.py`
+ - `test_frentes.py`
++- `importantes.py`
++- `test_importantes.py`
++- `test_importantes_ui.py`
+ - `conselho-rede/`
+ - `relay-extension-v2/`
+ - `operator_console/`
+diff --git a/redesign/painel_operacional/test_painel_unificado.py b/redesign/painel_operacional/test_painel_unificado.py
+index cafca891..ea1c0818 100644
+--- a/redesign/painel_operacional/test_painel_unificado.py
++++ b/redesign/painel_operacional/test_painel_unificado.py
+@@ -26,7 +26,8 @@ JS_TODOS = "\n".join(JS.values())
+ 
+ SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
+ SUBS_POR_SECAO = {
+-    "panorama": ["panorama", "visao", "capacidades", "plano", "frentes"],
++    # importantes: aba do Panorama criada em 11/11/2026 (pedido do Humano); é a única mudança nesta lista.
++    "panorama": ["panorama", "visao", "capacidades", "plano", "frentes", "importantes"],
+     "conversa": ["conversa"],
+     # conselho-memoria: aba Memória compartilhada, pedida pelo Humano em 07/11/2026 (leitura do cache do Conselho).
+     "conselho": ["conselho", "conselho-memoria"],
+diff --git a/redesign/painel_operacional/importantes.py b/redesign/painel_operacional/importantes.py
+new file mode 100644
+index 00000000..2f26bf79
+--- /dev/null
++++ b/redesign/painel_operacional/importantes.py
+@@ -0,0 +1,259 @@
++"""Importantes do painel (11/11/2026, pedido do Humano): ideias e pendências que ele manda guardar para depois.
++
++Tudo local e fora do repositório: ~/.cache/agata/painel-importantes.json, escrito inteiro por troca atômica.
++Item não some: "descartado" fica guardado e pode ser reaberto. Cada pedido de escrita, inclusive o recusado,
++acrescenta uma linha em painel-importantes.registro.jsonl (hora, rota, id e status; nunca texto).
++
++Trazer do Conselho: só leitura do cache do Conselho (cache_conselho.ler). Traz as entradas cujo texto começa com
++IMPORTANTE. Cada uma vira item com origem "cache" e cache_n = número da entrada. Entrada já trazida (mesmo que
++descartada depois) não entra de novo. O texto passa pelo mesmo filtro da leitura (cache_conselho.filtrar): segredo
++não é trazido; dado pessoal vira marca.
++
++Arquivo ilegível (JSON quebrado, forma errada ou item inválido) não é sobrescrito: a leitura diz "ilegivel" e a
++escrita responde 409. Nenhum item é apagado de fato.
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++import threading
++import uuid
++from datetime import datetime
++from pathlib import Path
++from zoneinfo import ZoneInfo
++
++ARQUIVO = Path.home() / ".cache/agata/painel-importantes.json"
++SCHEMA_VERSION = 1
++TZ = ZoneInfo("America/Sao_Paulo")
++ORIGENS = ("humano", "cache", "modelo")
++ESTADOS = ("aberto", "feito", "descartado")
++ORDEM_ESTADO = {"aberto": 0, "feito": 1, "descartado": 2}
++TEXTO_LIMITE = 4000          # texto digitado pelo Humano (mesmo teto do campo da tela)
++TEXTO_LIMITE_ITEM = 6000     # teto de validação do arquivo; o texto trazido do cache cabe com folga
++NOTA_LIMITE = 500
++ITENS_LIMITE = 2000
++LEITURA_CACHE = 100000       # n para cache_conselho.ler: o cache inteiro (ele reinicia a cada 15 dias)
++ID = re.compile(r"[0-9a-f]{12}")
++MARCA_IMPORTANTE = re.compile(r"\s*IMPORTANTE\b")
++CAMPOS_CRIAR = ("texto",)
++CAMPOS_ESTADO = ("id", "estado")
++CAMPOS_EDITAR = ("id", "texto", "nota")
++_TRAVA = threading.Lock()
++_REGISTRO_TRAVA = threading.Lock()
++
++
++class ErroImportantes(Exception):
++    """Recusa de uma operação: status HTTP e motivo curto em português, sem o texto do item."""
++
++    def __init__(self, status: int, motivo: str):
++        super().__init__(motivo)
++        self.status = status
++        self.motivo = motivo
++
++
++def _agora() -> str:
++    return datetime.now(TZ).isoformat(timespec="seconds")
++
++
++def _registro_caminho() -> Path:
++    return ARQUIVO.with_name(ARQUIVO.stem + ".registro.jsonl")
++
++
++def registro_escrever(rota: str, identificador, status: int) -> None:
++    """Acrescenta uma linha em painel-importantes.registro.jsonl. Se o arquivo não puder ser escrito, a ação segue."""
++    ident = identificador if isinstance(identificador, str) and ID.fullmatch(identificador) else None
++    linha = {"hora": _agora(), "rota": rota, "id": ident, "status": status}
++    try:
++        ARQUIVO.parent.mkdir(parents=True, exist_ok=True)
++        with _REGISTRO_TRAVA, _registro_caminho().open("a", encoding="utf-8") as arq:
++            arq.write(json.dumps(linha, ensure_ascii=False) + "\n")
++    except OSError:
++        pass
++
++
++def _item_valido(e) -> bool:
++    return (isinstance(e, dict)
++            and isinstance(e.get("id"), str) and ID.fullmatch(e["id"]) is not None
++            and isinstance(e.get("texto"), str) and 0 < len(e["texto"]) <= TEXTO_LIMITE_ITEM
++            and e.get("origem") in ORIGENS and e.get("estado") in ESTADOS
++            and isinstance(e.get("criado_em"), str)
++            and (e.get("feito_em") is None or isinstance(e.get("feito_em"), str))
++            and isinstance(e.get("nota"), str) and len(e["nota"]) <= NOTA_LIMITE
++            and (e.get("cache_n") is None or (isinstance(e.get("cache_n"), int) and not isinstance(e.get("cache_n"), bool))))
++
++
++def _ler() -> tuple[list, bool]:
++    """(itens, legível). Arquivo ausente vale vazio. Qualquer coisa fora do formato devolve legível=False."""
++    if not ARQUIVO.is_file():
++        return [], True
++    try:
++        dados = json.loads(ARQUIVO.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return [], False
++    if not isinstance(dados, dict) or dados.get("schema_version") != SCHEMA_VERSION or not isinstance(dados.get("itens"), list):
++        return [], False
++    itens = dados["itens"]
++    if not all(_item_valido(e) for e in itens) or len({e["id"] for e in itens}) != len(itens):
++        return [], False
++    return itens, True
++
++
++def _gravar(itens: list) -> None:
++    """Escreve o arquivo inteiro: vai para um temporário na mesma pasta, com fsync, e troca por os.replace."""
++    ARQUIVO.parent.mkdir(parents=True, exist_ok=True)
++    tmp = ARQUIVO.with_name(ARQUIVO.name + ".tmp")
++    corpo = json.dumps({"schema_version": SCHEMA_VERSION, "itens": itens}, ensure_ascii=False, indent=1).encode("utf-8")
++    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
++    with os.fdopen(fd, "wb") as arq:
++        arq.write(corpo)
++        arq.flush()
++        os.fsync(arq.fileno())
++    os.replace(tmp, ARQUIVO)
++
++
++def _mudar(alterar):
++    """Lê, altera e grava sob trava. `alterar(itens)` pode recusar com ErroImportantes: então nada é gravado."""
++    with _TRAVA:
++        itens, legivel = _ler()
++        if not legivel:
++            raise ErroImportantes(409, "lista de importantes ilegível; nada foi alterado")
++        resultado = alterar(itens)
++        _gravar(itens)
++        return resultado
++
++
++def _novo(texto: str, origem: str, cache_n=None) -> dict:
++    return {"id": uuid.uuid4().hex[:12], "texto": texto, "origem": origem, "criado_em": _agora(),
++            "estado": "aberto", "feito_em": None, "nota": "", "cache_n": cache_n}
++
++
++def _campos(pedido, permitidos) -> dict:
++    if not isinstance(pedido, dict):
++        raise ErroImportantes(400, "pedido precisa ser um objeto JSON")
++    if set(pedido) - set(permitidos):
++        raise ErroImportantes(400, "campo desconhecido no pedido")
++    return pedido
++
++
++def _texto(valor, limite: int, rotulo: str) -> str:
++    if not isinstance(valor, str) or not valor.strip():
++        raise ErroImportantes(400, f"{rotulo} é obrigatório")
++    if len(valor) > limite:
++        raise ErroImportantes(400, f"{rotulo} passa de {limite} caracteres")
++    if "\x00" in valor:
++        raise ErroImportantes(400, f"{rotulo} tem caractere inválido")
++    return valor.strip()
++
++
++def _id(valor) -> str:
++    if not isinstance(valor, str) or not ID.fullmatch(valor):
++        raise ErroImportantes(400, "id inválido")
++    return valor
++
++
++def _achar(itens: list, ident: str) -> dict:
++    for item in itens:
++        if item["id"] == ident:
++            return item
++    raise ErroImportantes(404, "item não encontrado")
++
++
++def listar() -> dict:
++    """Todos os itens: abertos primeiro, depois feitos e descartados; dentro de cada grupo, o mais recente antes."""
++    itens, legivel = _ler()
++    if not legivel:
++        return {"schema_version": SCHEMA_VERSION, "estado": "ilegivel", "itens": [], "contagem": {e: 0 for e in ESTADOS}}
++    ordenados = sorted(sorted(itens, key=lambda e: e["criado_em"], reverse=True), key=lambda e: ORDEM_ESTADO[e["estado"]])
++    contagem = {estado: sum(1 for e in itens if e["estado"] == estado) for estado in ESTADOS}
++    return {"schema_version": SCHEMA_VERSION, "estado": "vazio" if not itens else "ok", "itens": ordenados,
++            "contagem": contagem}
++
++
++def criar(pedido) -> dict:
++    pedido = _campos(pedido, CAMPOS_CRIAR)
++    texto = _texto(pedido.get("texto"), TEXTO_LIMITE, "texto")
++
++    def alterar(itens):
++        if len(itens) >= ITENS_LIMITE:
++            raise ErroImportantes(409, "lista cheia; feche ou descarte itens antes de guardar outro")
++        item = _novo(texto, "humano")
++        itens.append(item)
++        return item
++    return _mudar(alterar)
++
++
++def mudar_estado(pedido) -> dict:
++    """Marca feito, descarta ou reabre (estado "aberto"). Feito grava a hora; sair de feito a limpa."""
++    pedido = _campos(pedido, CAMPOS_ESTADO)
++    ident = _id(pedido.get("id"))
++    estado = pedido.get("estado")
++    if estado not in ESTADOS:
++        raise ErroImportantes(400, "estado inválido; use aberto, feito ou descartado")
++
++    def alterar(itens):
++        item = _achar(itens, ident)
++        if estado == "feito":
++            if item["estado"] != "feito":
++                item["feito_em"] = _agora()
++        else:
++            item["feito_em"] = None
++        item["estado"] = estado
++        return item
++    return _mudar(alterar)
++
++
++def editar(pedido) -> dict:
++    """Muda o texto e/ou a nota. Nota vazia limpa a nota."""
++    pedido = _campos(pedido, CAMPOS_EDITAR)
++    ident = _id(pedido.get("id"))
++    mudancas = {}
++    if "texto" in pedido:
++        mudancas["texto"] = _texto(pedido["texto"], TEXTO_LIMITE, "texto")
++    if "nota" in pedido:
++        nota = pedido["nota"]
++        if not isinstance(nota, str) or len(nota) > NOTA_LIMITE or "\x00" in nota:
++            raise ErroImportantes(400, f"nota inválida ou acima de {NOTA_LIMITE} caracteres")
++        mudancas["nota"] = nota.strip()
++    if not mudancas:
++        raise ErroImportantes(400, "nada para editar; informe texto ou nota")
++
++    def alterar(itens):
++        item = _achar(itens, ident)
++        item.update(mudancas)
++        return item
++    return _mudar(alterar)
++
++
++def trazer_do_conselho(cache) -> dict:
++    """Traz do cache do Conselho as entradas marcadas IMPORTANTE que ainda não estão aqui. Só lê o cache.
++    `cache` é o módulo cache_conselho (ler e filtrar); a rota passa o módulo, os testes passam um substituto."""
++    try:
++        registros = cache.ler(LEITURA_CACHE)
++    except (OSError, ValueError) as erro:
++        raise ErroImportantes(500, "cache do Conselho indisponível; nada foi trazido") from erro
++    marcadas = [r for r in registros
++                if isinstance(r.get("texto"), str) and isinstance(r.get("n"), int) and MARCA_IMPORTANTE.match(r["texto"])]
++
++    def alterar(itens):
++        ja = {e["cache_n"] for e in itens if e.get("cache_n") is not None}
++        trazidas = ja_estavam = recusadas = 0
++        for registro in marcadas:
++            if registro["n"] in ja:
++                ja_estavam += 1
++                continue
++            try:
++                texto = cache.filtrar(registro["texto"]).strip()
++            except ValueError:
++                recusadas += 1  # segredo: a entrada não é trazida
++                continue
++            if not texto or len(texto) > TEXTO_LIMITE_ITEM:
++                recusadas += 1
++                continue
++            if len(itens) >= ITENS_LIMITE:
++                raise ErroImportantes(409, "lista cheia; feche ou descarte itens antes de trazer outros")
++            itens.append(_novo(texto, "cache", registro["n"]))
++            ja.add(registro["n"])
++            trazidas += 1
++        return {"trazidas": trazidas, "ja_estavam": ja_estavam, "recusadas": recusadas, "lidas": len(registros)}
++    return _mudar(alterar)
+diff --git a/redesign/painel_operacional/test_importantes.py b/redesign/painel_operacional/test_importantes.py
+new file mode 100644
+index 00000000..b5b5992a
+--- /dev/null
++++ b/redesign/painel_operacional/test_importantes.py
+@@ -0,0 +1,388 @@
++#!/usr/bin/env python3
++"""Testes dos Importantes do painel (11/11/2026): armazém (importantes.py) e rotas (server.py).
++
++Cobre: criar, marcar feito/descartado/aberto, editar; nada some (descartado fica); ordem da lista; arquivo ilegível
++não é sobrescrito; escrita atômica; registro só com hora, rota, id e status; trazer do cache do Conselho marca só
++entradas IMPORTANTE, não duplica (nem o descartado), recusa segredo, filtra dado pessoal e não escreve no cache;
++rotas recusam origem alheia (403) e corpo acima de 4096 bytes (413).
++
++Nada toca em ~/.cache/agata: o arquivo e o registro vão para um diretório temporário, e o cache do Conselho
++é trocado por um arquivo temporário. Os de rota sobem o servidor numa porta livre (127.0.0.1).
++"""
++import http.client
++import importlib.util
++import json
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++from unittest import mock
++
++import importantes
++
++HERE = Path(__file__).resolve().parent
++_spec = importlib.util.spec_from_file_location("painel_importantes", HERE / "server.py")
++panel = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(panel)
++
++
++def id_de(n):
++    return f"{n:012x}"
++
++
++class Base(unittest.TestCase):
++    """Arquivo e registro num diretório temporário."""
++
++    def setUp(self):
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        self.dir = Path(tmp.name) / "agata"
++        patch = mock.patch.object(importantes, "ARQUIVO", self.dir / "painel-importantes.json")
++        patch.start()
++        self.addCleanup(patch.stop)
++        self.registro = importantes._registro_caminho()
++
++    def criar(self, texto="ideia"):
++        return importantes.criar({"texto": texto})
++
++    def linhas_registro(self):
++        if not self.registro.exists():
++            return []
++        return [json.loads(linha) for linha in self.registro.read_text(encoding="utf-8").splitlines()]
++
++
++class ArmazemTests(Base):
++    def test_arquivo_padrao_fica_no_cache_do_usuario(self):
++        fonte = (HERE / "importantes.py").read_text(encoding="utf-8")
++        self.assertIn('ARQUIVO = Path.home() / ".cache/agata/painel-importantes.json"', fonte)
++        self.assertEqual(importantes._registro_caminho().name, "painel-importantes.registro.jsonl")
++
++    def test_criar_grava_item_aberto_de_origem_humano(self):
++        item = self.criar("  Pensar no painel de custos  ")
++        self.assertRegex(item["id"], r"^[0-9a-f]{12}$")
++        self.assertEqual((item["texto"], item["origem"], item["estado"], item["feito_em"], item["nota"], item["cache_n"]),
++                         ("Pensar no painel de custos", "humano", "aberto", None, "", None))
++        self.assertRegex(item["criado_em"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-03:00$")
++        self.assertEqual(importantes.listar()["itens"], [item])
++
++    def test_criar_recusa_texto_vazio_longo_ou_com_nulo(self):
++        for ruim in ({}, {"texto": "   "}, {"texto": 7}, {"texto": "x" * 4001}, {"texto": "a\x00b"}):
++            with self.subTest(ruim=ruim):
++                with self.assertRaises(importantes.ErroImportantes) as caso:
++                    importantes.criar(ruim)
++                self.assertEqual(caso.exception.status, 400)
++        self.assertEqual(importantes.listar()["itens"], [], "nenhum recusado foi gravado")
++
++    def test_criar_recusa_campo_que_nao_existe_no_contrato(self):
++        with self.assertRaises(importantes.ErroImportantes) as caso:
++            importantes.criar({"texto": "ok", "origem": "modelo"})
++        self.assertEqual(caso.exception.status, 400)
++        self.assertFalse((self.dir / "painel-importantes.json").exists(), "o pedido recusado não grava nada")
++
++    def test_marcar_feito_grava_a_hora_e_reabrir_limpa(self):
++        item = self.criar()
++        feito = importantes.mudar_estado({"id": item["id"], "estado": "feito"})
++        self.assertEqual(feito["estado"], "feito")
++        self.assertRegex(feito["feito_em"], r"^\d{4}-\d{2}-\d{2}T")
++        reaberto = importantes.mudar_estado({"id": item["id"], "estado": "aberto"})
++        self.assertEqual((reaberto["estado"], reaberto["feito_em"]), ("aberto", None))
++
++    def test_marcar_feito_de_novo_nao_troca_a_hora(self):
++        item = self.criar()
++        primeiro = importantes.mudar_estado({"id": item["id"], "estado": "feito"})["feito_em"]
++        with mock.patch.object(importantes, "_agora", return_value="2099-01-01T00:00:00-03:00"):
++            segundo = importantes.mudar_estado({"id": item["id"], "estado": "feito"})["feito_em"]
++        self.assertEqual(primeiro, segundo)
++
++    def test_descartado_nao_some_da_lista_e_volta_com_reabrir(self):
++        item = self.criar("guardar isto")
++        importantes.mudar_estado({"id": item["id"], "estado": "descartado"})
++        dados = importantes.listar()
++        self.assertEqual([(i["texto"], i["estado"]) for i in dados["itens"]], [("guardar isto", "descartado")])
++        self.assertEqual(dados["contagem"], {"aberto": 0, "feito": 0, "descartado": 1})
++        importantes.mudar_estado({"id": item["id"], "estado": "aberto"})
++        self.assertEqual(importantes.listar()["contagem"]["aberto"], 1)
++
++    def test_estado_invalido_id_invalido_e_item_inexistente_recusam(self):
++        item = self.criar()
++        casos = [({"id": item["id"], "estado": "apagado"}, 400), ({"id": "xyz", "estado": "feito"}, 400),
++                 ({"id": id_de(999), "estado": "feito"}, 404), ({"estado": "feito"}, 400),
++                 ({"id": item["id"], "estado": "feito", "extra": 1}, 400), (["lista"], 400)]
++        for pedido, status in casos:
++            with self.subTest(pedido=pedido):
++                with self.assertRaises(importantes.ErroImportantes) as caso:
++                    importantes.mudar_estado(pedido)
++                self.assertEqual(caso.exception.status, status)
++        self.assertEqual(importantes.listar()["itens"][0]["estado"], "aberto", "nenhuma recusa mudou o item")
++
++    def test_editar_muda_texto_e_nota_e_nota_vazia_limpa(self):
++        item = self.criar("primeiro texto")
++        editado = importantes.editar({"id": item["id"], "texto": "texto novo", "nota": "  ver depois  "})
++        self.assertEqual((editado["texto"], editado["nota"]), ("texto novo", "ver depois"))
++        limpo = importantes.editar({"id": item["id"], "nota": ""})
++        self.assertEqual((limpo["texto"], limpo["nota"]), ("texto novo", ""))
++
++    def test_editar_recusa_campo_desconhecido_nota_longa_e_pedido_vazio(self):
++        item = self.criar()
++        for pedido in ({"id": item["id"], "estado": "feito"}, {"id": item["id"], "nota": "x" * 501},
++                       {"id": item["id"]}, {"id": item["id"], "texto": "   "}):
++            with self.subTest(pedido=pedido):
++                with self.assertRaises(importantes.ErroImportantes) as caso:
++                    importantes.editar(pedido)
++                self.assertEqual(caso.exception.status, 400)
++
++    def test_lista_mostra_abertos_primeiro_e_o_mais_recente_antes(self):
++        instantes = iter(["2026-11-11T10:00:00-03:00", "2026-11-11T11:00:00-03:00", "2026-11-11T12:00:00-03:00"])
++        with mock.patch.object(importantes, "_agora", side_effect=lambda: next(instantes)):
++            antigo = self.criar("antigo aberto")
++            novo = self.criar("novo aberto")
++            feito = self.criar("feito")
++        importantes.mudar_estado({"id": feito["id"], "estado": "feito"})
++        importantes.mudar_estado({"id": antigo["id"], "estado": "descartado"})
++        ordem = [i["texto"] for i in importantes.listar()["itens"]]
++        self.assertEqual(ordem, ["novo aberto", "feito", "antigo aberto"])
++
++    def test_arquivo_ilegivel_nao_e_sobrescrito(self):
++        self.dir.mkdir(parents=True)
++        arquivo = self.dir / "painel-importantes.json"
++        arquivo.write_text("{isto não é json", encoding="utf-8")
++        dados = importantes.listar()
++        self.assertEqual((dados["estado"], dados["itens"]), ("ilegivel", []))
++        with self.assertRaises(importantes.ErroImportantes) as caso:
++            self.criar()
++        self.assertEqual(caso.exception.status, 409)
++        self.assertEqual(arquivo.read_text(encoding="utf-8"), "{isto não é json", "o conteúdo ilegível fica como está")
++
++    def test_item_fora_do_formato_torna_o_arquivo_ilegivel(self):
++        self.dir.mkdir(parents=True)
++        dados = {"schema_version": 1, "itens": [{"id": id_de(1), "texto": "ok", "origem": "humano", "criado_em": "x",
++                                                  "estado": "inventado", "feito_em": None, "nota": "", "cache_n": None}]}
++        (self.dir / "painel-importantes.json").write_text(json.dumps(dados), encoding="utf-8")
++        self.assertEqual(importantes.listar()["estado"], "ilegivel")
++        with self.assertRaises(importantes.ErroImportantes):
++            importantes.mudar_estado({"id": id_de(1), "estado": "feito"})
++
++    def test_escrita_nao_deixa_temporario_e_o_arquivo_tem_so_o_formato(self):
++        self.criar("um")
++        self.criar("dois")
++        nomes = sorted(p.name for p in self.dir.iterdir())
++        self.assertEqual(nomes, ["painel-importantes.json"], "nenhum temporário sobrou")
++        bruto = json.loads((self.dir / "painel-importantes.json").read_text(encoding="utf-8"))
++        self.assertEqual(sorted(bruto), ["itens", "schema_version"])
++        self.assertEqual(bruto["schema_version"], 1)
++
++    def test_lista_cheia_recusa_sem_gravar(self):
++        with mock.patch.object(importantes, "ITENS_LIMITE", 2):
++            self.criar("a")
++            self.criar("b")
++            with self.assertRaises(importantes.ErroImportantes) as caso:
++                self.criar("c")
++        self.assertEqual(caso.exception.status, 409)
++        self.assertEqual(len(importantes.listar()["itens"]), 2)
++
++
++class FonteFalsa:
++    """Substituto do cache_conselho: ler devolve as entradas; filtrar recusa o que contém SEGREDO."""
++
++    def __init__(self, entradas, falha_leitura=None):
++        self.entradas = entradas
++        self.falha_leitura = falha_leitura
++
++    def ler(self, n=20, autor=None):
++        if self.falha_leitura:
++            raise self.falha_leitura
++        return list(self.entradas)[-n:]
++
++    def filtrar(self, texto):
++        if "SEGREDO" in texto:
++            raise ValueError("a nota contém segredo")
++        return texto.replace("fulano@exemplo.com", "[pessoal-email removido]")
++
++
++def entrada(n, texto, autor="Claude Code"):
++    return {"n": n, "ts": "2026-11-11T10:00:00-0300", "autor": autor, "tipo": "pendencia", "texto": texto, "fonte": None}
++
++
++class TrazerTests(Base):
++    def test_traz_so_as_marcadas_com_origem_cache_e_numero(self):
++        cache = FonteFalsa([entrada(1, "comum"), entrada(2, "IMPORTANTE (Humano, 11/11): ver o acervo"),
++                            entrada(3, "IMPORTANTES em ordem"), entrada(4, "no meio IMPORTANTE não conta")])
++        resultado = importantes.trazer_do_conselho(cache)
++        self.assertEqual(resultado, {"trazidas": 1, "ja_estavam": 0, "recusadas": 0, "lidas": 4})
++        item = importantes.listar()["itens"][0]
++        self.assertEqual((item["origem"], item["cache_n"]), ("cache", 2))
++        self.assertEqual(item["texto"], "IMPORTANTE (Humano, 11/11): ver o acervo")
++
++    def test_nao_duplica_e_nao_traz_de_novo_o_descartado(self):
++        cache = FonteFalsa([entrada(2, "IMPORTANTE: uma coisa")])
++        importantes.trazer_do_conselho(cache)
++        item = importantes.listar()["itens"][0]
++        importantes.mudar_estado({"id": item["id"], "estado": "descartado"})
++        segunda = importantes.trazer_do_conselho(cache)
++        self.assertEqual((segunda["trazidas"], segunda["ja_estavam"]), (0, 1))
++        self.assertEqual(len(importantes.listar()["itens"]), 1, "nenhum item novo para a mesma entrada")
++
++    def test_segredo_nao_e_trazido_e_e_contado(self):
++        cache = FonteFalsa([entrada(5, "IMPORTANTE: SEGREDO aqui"), entrada(6, "IMPORTANTE: ok")])
++        resultado = importantes.trazer_do_conselho(cache)
++        self.assertEqual((resultado["trazidas"], resultado["recusadas"]), (1, 1))
++        self.assertNotIn("SEGREDO", json.dumps(importantes.listar(), ensure_ascii=False))
++
++    def test_cache_ilegivel_da_500_e_nada_muda(self):
++        self.criar("ja existia")
++        with self.assertRaises(importantes.ErroImportantes) as caso:
++            importantes.trazer_do_conselho(FonteFalsa([], falha_leitura=ValueError("linha quebrada")))
++        self.assertEqual(caso.exception.status, 500)
++        self.assertEqual([i["texto"] for i in importantes.listar()["itens"]], ["ja existia"])
++
++    def test_com_o_filtro_real_do_cache_dado_pessoal_vira_marca_e_o_cache_nao_muda(self):
++        cache = panel._memoria_conselho_modulo()
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        arq = Path(tmp.name) / "cache.jsonl"
++        linhas = [entrada(9, "IMPORTANTE: escrever para fulano@exemplo.com depois")]
++        arq.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in linhas), encoding="utf-8")
++        antes = arq.read_bytes()
++        with mock.patch.object(cache, "ARQ", arq), mock.patch.object(cache, "LISTA_P20", Path(tmp.name) / "p20.txt"):
++            resultado = importantes.trazer_do_conselho(cache)
++        self.assertEqual(resultado["trazidas"], 1)
++        texto = importantes.listar()["itens"][0]["texto"]
++        self.assertNotIn("fulano@exemplo.com", texto)
++        self.assertIn("[pessoal-email removido]", texto)
++        self.assertEqual(arq.read_bytes(), antes, "o cache do Conselho não é escrito por esta função")
++
++
++class RotasBase(Base):
++    """Rotas de verdade num servidor numa porta livre (127.0.0.1)."""
++
++    @classmethod
++    def setUpClass(cls):
++        cls.porta_antiga, cls.origem_antiga = panel.PORT, panel.ALLOWED_ORIGIN
++        cls.servidor = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.servidor.daemon_threads = True
++        panel.PORT = cls.servidor.server_address[1]
++        panel.ALLOWED_ORIGIN = f"http://127.0.0.1:{panel.PORT}"
++        cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
++        cls.thread.start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.servidor.shutdown()
++        cls.servidor.server_close()
++        cls.thread.join(timeout=3)
++        panel.PORT, panel.ALLOWED_ORIGIN = cls.porta_antiga, cls.origem_antiga
++
++    def pede(self, metodo, caminho, corpo=None, cabecalhos=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=5)
++        try:
++            conn.request(metodo, caminho, body=corpo, headers=cabecalhos or {})
++            resposta = conn.getresponse()
++            return resposta.status, resposta.read(), {k.lower(): v for k, v in resposta.getheaders()}
++        finally:
++            conn.close()
++
++    def mesma_origem(self):
++        return {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
++
++    def post(self, rota, corpo, cabecalhos=None):
++        bruto = corpo if isinstance(corpo, bytes) else json.dumps(corpo, ensure_ascii=False).encode("utf-8")
++        return self.pede("POST", rota, bruto, cabecalhos or self.mesma_origem())
++
++
++class RotasTests(RotasBase):
++    def test_get_lista_vazia_e_com_itens(self):
++        status, corpo, _ = self.pede("GET", "/api/importantes", cabecalhos={"Sec-Fetch-Site": "same-origin"})
++        self.assertEqual(status, 200)
++        self.assertEqual(json.loads(corpo)["estado"], "vazio")
++        self.post("/api/importantes", {"texto": "guardar"})
++        status, corpo, _ = self.pede("GET", "/api/importantes", cabecalhos={"Sec-Fetch-Site": "same-origin"})
++        dados = json.loads(corpo)
++        self.assertEqual((dados["estado"], dados["contagem"]["aberto"]), ("ok", 1))
++
++    def test_get_de_outra_origem_e_recusado(self):
++        status, _, _ = self.pede("GET", "/api/importantes", cabecalhos={"Sec-Fetch-Site": "cross-site"})
++        self.assertEqual(status, 403)
++
++    def test_escrita_sem_cabecalhos_responde_403_nao_grava_e_registra(self):
++        status, corpo, _ = self.post("/api/importantes", {"texto": "sem origem"}, {"Content-Type": "application/json"})
++        self.assertEqual((status, corpo), (403, b"cross-origin request denied"))
++        self.assertFalse((self.dir / "painel-importantes.json").exists())
++        self.assertEqual([(l["rota"], l["status"], l["id"]) for l in self.linhas_registro()], [("/api/importantes", 403, None)])
++
++    def test_origem_de_outro_site_recusa_mesmo_com_a_do_painel_no_outro_cabecalho(self):
++        cabecalhos = {"Origin": "http://evil.example", "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
++        self.assertEqual(self.post("/api/importantes", {"texto": "x"}, cabecalhos)[0], 403)
++        cabecalhos = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "cross-site", "Content-Type": "application/json"}
++        self.assertEqual(self.post("/api/importantes", {"texto": "x"}, cabecalhos)[0], 403)
++
++    def test_criar_marcar_editar_pela_rota_e_registro_sem_texto(self):
++        status, corpo, _ = self.post("/api/importantes", {"texto": "segredo-de-texto-xyz"})
++        self.assertEqual(status, 200)
++        item = json.loads(corpo)
++        status, corpo, _ = self.post("/api/importantes/estado", {"id": item["id"], "estado": "feito"})
++        self.assertEqual((status, json.loads(corpo)["estado"]), (200, "feito"))
++        status, corpo, _ = self.post("/api/importantes/editar", {"id": item["id"], "nota": "nota-segredo-abc"})
++        self.assertEqual(status, 200)
++        linhas = self.linhas_registro()
++        self.assertEqual([(l["rota"], l["status"], l["id"]) for l in linhas],
++                         [("/api/importantes", 200, item["id"]), ("/api/importantes/estado", 200, item["id"]),
++                          ("/api/importantes/editar", 200, item["id"])])
++        self.assertEqual({tuple(sorted(l)) for l in linhas}, {("hora", "id", "rota", "status")})
++        bruto = self.registro.read_text(encoding="utf-8")
++        self.assertNotIn("segredo-de-texto-xyz", bruto)
++        self.assertNotIn("nota-segredo-abc", bruto)
++
++    def test_registro_so_acrescenta(self):
++        self.post("/api/importantes", {"texto": "um"})
++        antes = self.registro.read_bytes()
++        self.post("/api/importantes", {"texto": "dois"})
++        depois = self.registro.read_bytes()
++        self.assertTrue(depois.startswith(antes) and len(depois) > len(antes))
++
++    def test_erros_de_pedido_respondem_400_404_413_e_nao_gravam(self):
++        self.assertEqual(self.post("/api/importantes", b"{nao e json")[0], 400)
++        self.assertEqual(self.post("/api/importantes", {"texto": "x", "outro": 1})[0], 400)
++        self.assertEqual(self.post("/api/importantes", {"texto": ""})[0], 400)
++        self.assertEqual(self.post("/api/importantes/estado", {"id": id_de(42), "estado": "feito"})[0], 404)
++        grande = json.dumps({"texto": "a" * 4200}).encode("utf-8")
++        status, _, _ = self.pede("POST", "/api/importantes", grande, self.mesma_origem())
++        self.assertEqual(status, 413)
++        self.assertFalse((self.dir / "painel-importantes.json").exists(), "nenhum pedido recusado gravou")
++        self.assertEqual([l["status"] for l in self.linhas_registro()], [400, 400, 400, 404, 413])
++
++    def test_arquivo_ilegivel_responde_409_e_nao_e_sobrescrito(self):
++        self.dir.mkdir(parents=True)
++        arquivo = self.dir / "painel-importantes.json"
++        arquivo.write_text("quebrado", encoding="utf-8")
++        status, corpo, _ = self.post("/api/importantes", {"texto": "novo"})
++        self.assertEqual(status, 409)
++        self.assertEqual(arquivo.read_text(encoding="utf-8"), "quebrado")
++
++    def test_trazer_pela_rota_usa_o_cache_do_conselho_sem_escrever_nele(self):
++        cache = FonteFalsa([entrada(7, "IMPORTANTE: pela rota")])
++        with mock.patch.object(panel, "_memoria_conselho_modulo", return_value=cache):
++            status, corpo, _ = self.post("/api/importantes/trazer", {})
++            segunda, corpo2, _ = self.post("/api/importantes/trazer", {})
++        self.assertEqual(status, 200)
++        self.assertEqual((json.loads(corpo)["trazidas"], json.loads(corpo2)["ja_estavam"]), (1, 1))
++        self.assertIsNone(self.linhas_registro()[0]["id"], "trazer não tem um item só para registrar")
++
++    def test_trazer_com_cache_indisponivel_responde_500_e_registra(self):
++        cache = FonteFalsa([], falha_leitura=OSError("sem arquivo"))
++        with mock.patch.object(panel, "_memoria_conselho_modulo", return_value=cache):
++            status, _, _ = self.post("/api/importantes/trazer", {})
++        self.assertEqual(status, 500)
++        self.assertEqual(self.linhas_registro()[-1]["status"], 500)
++
++    def test_tela_tem_a_lista_e_so_chama_as_rotas_que_existem(self):
++        html = (HERE / "prototipo.html").read_text(encoding="utf-8")
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        self.assertIn('id="importantes-lista"', html)
++        for rota in ("/api/importantes", "/api/importantes/estado", "/api/importantes/editar", "/api/importantes/trazer"):
++            with self.subTest(rota=rota):
++                self.assertIn(rota, js)
++                self.assertIn(rota, panel.IMPORTANTES_ROTAS)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/test_importantes_ui.py b/redesign/painel_operacional/test_importantes_ui.py
+new file mode 100644
+index 00000000..4270b8f7
+--- /dev/null
++++ b/redesign/painel_operacional/test_importantes_ui.py
+@@ -0,0 +1,404 @@
++#!/usr/bin/env python3
++"""Testes da aba Importantes e do cartão do Panorama (11/11/2026), no prototipo.js de verdade.
++
++Carrega prototipo.js num contexto node com um DOM mínimo (árvore montada aqui, só com o que a aba usa) e um fetch
++roteirizado pelo cenário. Nada sai da máquina e nenhuma rota real é chamada. Também confere, em texto, que o bloco
++novo não usa innerHTML, atributo style nem on* (a CSP do painel não permite script inline).
++"""
++import json
++import os
++import re
++import subprocess
++import unittest
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
++JS = (HERE / "prototipo.js").read_text(encoding="utf-8")
++CSS = (HERE / "prototipo.css").read_text(encoding="utf-8")
++BLOCO_JS = JS[JS.index("const IMPORTANTES_ESTADOS"): JS.index("// Entrada: a seção vem do hash")]
++
++NODE_IMPORTANTES = r"""
++const fs = require('fs'); const path = require('path'); const vm = require('vm');
++const {TextEncoder, TextDecoder} = require('util');
++process.on('unhandledRejection', (e) => console.error('REJEICAO ' + (e && e.stack)));
++const cen = JSON.parse(fs.readFileSync(0, 'utf8')); const dir = process.env.PAINEL_DIR;
++
++class Elemento {
++  constructor(tag) {
++    this.tag = tag; this._texto = ''; this.children = []; this.parent = null;
++    this.hidden = false; this.className = ''; this.value = ''; this.disabled = false; this.type = '';
++    this.placeholder = ''; this.maxLength = 0; this.rows = 0; this.id = ''; this.title = '';
++    this.dataset = {}; this.attrs = {}; this.ouvintes = {};
++  }
++  get textContent() { return this._texto + this.children.map((c) => c.textContent).join(''); }
++  set textContent(valor) { this._texto = String(valor); this.children = []; }
++  get classes() { return String(this.className || '').split(' ').filter(Boolean); }
++  get classList() {
++    const self = this;
++    return {
++      add(...c) { const s = new Set(self.classes); c.forEach((x) => s.add(x)); self.className = [...s].join(' '); },
++      remove(...c) { self.className = self.classes.filter((x) => !c.includes(x)).join(' '); },
++      toggle(c, forca) { const tem = self.classes.includes(c); const quer = forca === undefined ? !tem : !!forca; quer ? this.add(c) : this.remove(c); return quer; },
++      contains(c) { return self.classes.includes(c); },
++    };
++  }
++  append(...nos) { for (const n of nos) { n.parent = this; this.children.push(n); } }
++  replaceChildren(...nos) { for (const c of this.children) c.parent = null; this.children = []; this._texto = ''; this.append(...nos); }
++  setAttribute(k, v) { this.attrs[k] = String(v); }
++  getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; }
++  addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
++  focus() {} blur() {} select() {} scrollIntoView() {} remove() {}
++  closest(sel) { let n = this; while (n) { if (casa(n, sel)) return n; n = n.parent; } return null; }
++  querySelector(sel) { return buscar(this, sel)[0] || null; }
++  querySelectorAll(sel) { return buscar(this, sel); }
++}
++function casa(el, sel) {
++  const tag = /^[a-z][a-z0-9-]*/i.exec(sel);
++  if (tag && el.tag !== tag[0].toLowerCase()) return false;
++  const partes = sel.slice(tag ? tag[0].length : 0).match(/\.[\w-]+|\[[^\]]+\]/g) || [];
++  for (const p of partes) {
++    if (p[0] === '.') { if (!el.classes.includes(p.slice(1))) return false; continue; }
++    const [chave, valor] = p.slice(1, -1).split('=');
++    const v = valor === undefined ? undefined : valor.replace(/"/g, '');
++    if (chave.startsWith('data-')) {
++      const nome = chave.slice(5).replace(/-([a-z])/g, (_, l) => l.toUpperCase());
++      if (!(nome in el.dataset)) return false;
++      if (v !== undefined && el.dataset[nome] !== v) return false;
++    } else {
++      if (!(chave in el.attrs)) return false;
++      if (v !== undefined && el.attrs[chave] !== v) return false;
++    }
++  }
++  return true;
++}
++function descendentes(no, saida = []) { for (const c of no.children) { saida.push(c); descendentes(c, saida); } return saida; }
++// Seletor simples: ":scope", descendente (espaço) e filho (>). Suficiente para os seletores que o painel usa.
++function buscar(raiz, sel) {
++  let atuais = [raiz]; let modo = 'desc';
++  for (const token of sel.replace(/\s*>\s*/g, ' > ').split(/\s+/).filter(Boolean)) {
++    if (token === ':scope') continue;
++    if (token === '>') { modo = 'filho'; continue; }
++    const proximos = [];
++    for (const no of atuais) {
++      const alvo = modo === 'filho' ? no.children : descendentes(no);
++      for (const c of alvo) if (casa(c, token) && !proximos.includes(c)) proximos.push(c);
++    }
++    atuais = proximos; modo = 'desc';
++  }
++  return atuais;
++}
++const registro = new Map();
++const raiz = new Elemento('body');
++function elementoDoId(id) {
++  if (!registro.has(id)) { const e = new Elemento('div'); e.id = id; registro.set(id, e); }
++  return registro.get(id);
++}
++const documento = {
++  visibilityState: 'visible',
++  getElementById: elementoDoId,
++  querySelector(sel) { return buscar(raiz, sel)[0] || new Elemento('div'); },
++  querySelectorAll(sel) { return buscar(raiz, sel); },
++  createElement(tag) { return new Elemento(tag); },
++  createElementNS(ns, tag) { return new Elemento(tag); },
++  createTextNode(texto) { const e = new Elemento('#texto'); e._texto = String(texto); return e; },
++  addEventListener() {},
++};
++// Montagem mínima do que a aba usa: a seção Panorama com um subpainel visível (o próprio do painel) e a aba.
++const secao = new Elemento('section'); secao.className = 'secao'; secao.id = 'panorama'; secao.dataset.titulo = 'Panorama';
++registro.set('panorama', secao); raiz.append(secao);
++const subPanorama = new Elemento('div'); subPanorama.className = 'sub'; subPanorama.dataset.sub = 'panorama'; subPanorama.dataset.secao = 'panorama';
++secao.append(subPanorama);
++const abas = new Elemento('nav'); abas.className = 'abas';
++const botaoAba = new Elemento('button'); botaoAba.dataset.sub = 'importantes'; botaoAba.textContent = 'Importantes';
++abas.append(botaoAba); secao.append(abas);
++const sub = elementoDoId('sub-importantes'); sub.className = 'sub'; sub.dataset.sub = 'importantes'; sub.dataset.secao = 'panorama'; sub.hidden = true;
++const estados = new Elemento('div'); estados.className = 'estados';
++for (const nome of ['carregando', 'vazio', 'erro']) {
++  const p = new Elemento('p'); p.className = 'estado'; p.dataset.estado = nome; p.hidden = true; estados.append(p);
++}
++sub.append(estados); secao.append(sub);
++const lista = elementoDoId('importantes-lista'); lista.className = 'importantes-lista';
++const formulario = elementoDoId('importantes-form'); formulario.tag = 'form';
++const filtro = elementoDoId('importantes-filtro'); filtro.tag = 'select'; filtro.value = 'abertos';
++const campoTexto = elementoDoId('importantes-texto'); campoTexto.tag = 'textarea';
++// Os demais ids usados no boot entram vazios; o que a aba escreve neles é lido pelo teste.
++
++const ctx = {};
++ctx.window = ctx; ctx.document = documento; ctx.location = {hash: ''}; ctx.history = {};
++ctx.localStorage = {getItem() { return null; }, setItem() {}}; ctx.navigator = {clipboard: {}}; ctx.Node = function () {};
++ctx.TextEncoder = TextEncoder; ctx.TextDecoder = TextDecoder;
++ctx.AbortController = function () { this.signal = {}; this.abort = () => {}; };
++ctx.setTimeout = () => 0; ctx.clearTimeout = () => {}; ctx.setInterval = () => 0; ctx.clearInterval = () => {};
++ctx.addEventListener = () => {};
++
++const chamadas = [];
++function escolher(valor) { if (Array.isArray(valor)) return valor.length > 1 ? valor.shift() : valor[0]; return valor; }
++function respostaJson(status, obj) { return {ok: status >= 200 && status < 300, status, json: async () => obj, text: async () => JSON.stringify(obj)}; }
++function respostaTexto(status, texto) { return {ok: status >= 200 && status < 300, status, json: async () => { throw new Error('sem json'); }, text: async () => texto}; }
++ctx.fetch = async (url, opcoes = {}) => {
++  const metodo = String(opcoes.method || 'GET').toUpperCase();
++  chamadas.push({url, metodo, corpo: typeof opcoes.body === 'string' ? JSON.parse(opcoes.body) : null});
++  if (url === '/api/importantes' && metodo === 'GET') {
++    const r = escolher(cen.lista) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, '');
++    return respostaJson(200, r.corpo);
++  }
++  if (metodo === 'POST' && cen.posts && cen.posts[url]) {
++    const r = escolher(cen.posts[url]) || {};
++    if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
++    return respostaJson(200, r.corpo || {});
++  }
++  return respostaTexto(404, '');
++};
++
++const esperar = async () => { for (let i = 0; i < 120; i++) await new Promise((r) => setImmediate(r)); };
++function botaoNoItem(indice, rotulo) {
++  const li = lista.children[indice];
++  if (!li) throw new Error('item ' + indice + ' não existe');
++  return descendentes(li).find((e) => e.tag === 'button' && e.textContent.trim() === rotulo);
++}
++function clicar(el) { el.ouvintes.click[0]({target: el}); }
++async function executar(a) {
++  if (a.tipo === 'clicarNoItem') clicar(botaoNoItem(a.indice, a.texto));
++  else if (a.tipo === 'clicarNaAba') clicar(botaoAba);
++  else if (a.tipo === 'clicar') clicar(elementoDoId(a.id));
++  else if (a.tipo === 'digitar') { const el = elementoDoId(a.id); el.value = a.valor; }
++  else if (a.tipo === 'valorNoItem') {
++    const li = lista.children[a.indice];
++    const alvo = descendentes(li).find((e) => e.tag === a.tag);
++    alvo.value = a.valor;
++  }
++  else if (a.tipo === 'mudar') { const el = elementoDoId(a.id); el.value = a.valor; el.ouvintes.change[0]({target: el}); }
++  else if (a.tipo === 'enviar') formulario.ouvintes.submit[0]({preventDefault() {}, target: formulario});
++  await esperar();
++}
++(async () => {
++  try {
++    vm.createContext(ctx);
++    vm.runInContext(fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8'), ctx, {filename: 'prototipo.js'});
++  } catch (e) { console.log(JSON.stringify({erro: 'carga: ' + e.message})); return; }
++  await esperar();
++  for (const a of cen.acoes || []) await executar(a);
++  const visivel = (nome) => estados.children.find((p) => p.dataset.estado === nome).hidden === false;
++  const itens = lista.children.map((li) => ({
++    classe: li.className,
++    texto: descendentes(li).find((e) => e.className === 'importantes-texto').textContent,
++    origem: descendentes(li).find((e) => e.className === 'importantes-origem').textContent,
++    botoes: descendentes(li).filter((e) => e.tag === 'button').map((b) => b.textContent),
++    campos: descendentes(li).filter((e) => e.tag === 'textarea' || e.tag === 'input').map((c) => c.value),
++  }));
++  const aviso = elementoDoId('importantes-aviso');
++  console.log(JSON.stringify({
++    chamadas, itens,
++    estadosVisiveis: ['carregando', 'vazio', 'erro'].filter(visivel),
++    subOculta: sub.hidden,
++    cartaoResumo: elementoDoId('importantes-cartao-resumo').textContent,
++    cartaoEstado: elementoDoId('importantes-cartao-estado').textContent,
++    resumoLista: elementoDoId('importantes-resumo-lista').textContent,
++    avisoOculto: aviso.hidden, aviso: aviso.textContent,
++    campoTexto: campoTexto.value, trazerDesabilitado: elementoDoId('importantes-trazer').disabled,
++    listaVazia: lista.children.length === 0,
++  }));
++})();
++"""
++
++
++def rodar(cenario):
++    ambiente = dict(os.environ, PAINEL_DIR=str(HERE))
++    resultado = subprocess.run(["node", "-e", NODE_IMPORTANTES], input=json.dumps(cenario, ensure_ascii=False),
++                               capture_output=True, text=True, timeout=120, env=ambiente)
++    if resultado.returncode != 0 and not resultado.stdout:
++        raise AssertionError("node não rodou (não medido): " + resultado.stderr[-400:])
++    return json.loads(resultado.stdout.strip().splitlines()[-1])
++
++
++def item(i, texto, estado="aberto", origem="humano", cache_n=None, nota="", feito_em=None):
++    return {"id": f"{i:012x}", "texto": texto, "origem": origem, "criado_em": "2026-11-11T10:00:00-03:00",
++            "estado": estado, "feito_em": feito_em, "nota": nota, "cache_n": cache_n}
++
++
++def lista(itens, estado=None):
++    contagem = {e: sum(1 for x in itens if x["estado"] == e) for e in ("aberto", "feito", "descartado")}
++    return {"schema_version": 1, "estado": estado or ("vazio" if not itens else "ok"), "itens": itens, "contagem": contagem}
++
++
++class UiImportantesTests(unittest.TestCase):
++    def test_lista_mostra_abertos_primeiro_e_o_cartao_conta_abertos(self):
++        itens = [item(1, "primeira ideia"), item(2, "pendência feita", "feito", feito_em="2026-11-11T11:00:00-03:00"),
++                 item(3, "segunda ideia")]
++        dados = rodar({"lista": {"status": 200, "corpo": lista(itens)},
++                       "acoes": [{"tipo": "mudar", "id": "importantes-filtro", "valor": "todos"}]})
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["primeira ideia", "pendência feita", "segunda ideia"])
++        self.assertEqual(dados["cartaoResumo"], "Importantes: 2 abertos")
++        self.assertEqual(dados["cartaoEstado"], "LIDO")
++        self.assertEqual(dados["estadosVisiveis"], [], "com itens, nenhum estado de aviso aparece")
++        self.assertEqual(dados["itens"][1]["botoes"], ["Reabrir", "Descartar", "Editar"])
++        self.assertEqual(dados["itens"][0]["botoes"], ["Marcar feito", "Descartar", "Editar"])
++        self.assertEqual(dados["resumoLista"], "2 abertos · 1 feitos · 0 descartados · mostrando 3")
++
++    def test_filtro_padrao_mostra_so_os_abertos(self):
++        itens = [item(1, "aberta"), item(2, "feita", "feito", feito_em="2026-11-11T11:00:00-03:00")]
++        dados = rodar({"lista": {"status": 200, "corpo": lista(itens)}})
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["aberta"])
++        self.assertIn("mostrando 1", dados["resumoLista"])
++
++    def test_lista_vazia_mostra_estado_vazio_e_cartao_zero(self):
++        dados = rodar({"lista": {"status": 200, "corpo": lista([])}})
++        self.assertEqual(dados["estadosVisiveis"], ["vazio"])
++        self.assertEqual(dados["cartaoResumo"], "Importantes: 0 abertos")
++        self.assertTrue(dados["listaVazia"])
++
++    def test_falha_de_leitura_mostra_erro_e_nao_mostra_lista_antiga(self):
++        dados = rodar({"lista": {"status": 500, "texto": "falhou"}})
++        self.assertEqual(dados["estadosVisiveis"], ["erro"])
++        self.assertTrue(dados["listaVazia"])
++        self.assertEqual(dados["cartaoResumo"], "Importantes: não medido (a leitura falhou).")
++        self.assertEqual(dados["cartaoEstado"], "NÃO MEDIDO")
++
++    def test_lista_ilegivel_mostra_erro_sem_itens(self):
++        dados = rodar({"lista": {"status": 200, "corpo": {"schema_version": 1, "estado": "ilegivel", "itens": [],
++                                                           "contagem": {"aberto": 0, "feito": 0, "descartado": 0}}}})
++        self.assertEqual(dados["estadosVisiveis"], ["erro"])
++        self.assertEqual(dados["cartaoEstado"], "ILEGÍVEL")
++        self.assertTrue(dados["listaVazia"])
++
++    def test_guardar_envia_o_texto_limpa_o_campo_e_recarrega(self):
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": lista([])}, {"status": 200, "corpo": lista([item(1, "Nova ideia")])}],
++            "posts": {"/api/importantes": [{"corpo": item(1, "Nova ideia")}]},
++            "acoes": [{"tipo": "digitar", "id": "importantes-texto", "valor": "  Nova ideia  "}, {"tipo": "enviar"}],
++        })
++        posts = [c for c in dados["chamadas"] if c["metodo"] == "POST"]
++        self.assertEqual(posts, [{"url": "/api/importantes", "metodo": "POST", "corpo": {"texto": "Nova ideia"}}])
++        self.assertEqual(dados["campoTexto"], "")
++        self.assertEqual(dados["aviso"], "Guardado.")
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["Nova ideia"])
++
++    def test_guardar_vazio_nao_envia_nada(self):
++        dados = rodar({"lista": {"status": 200, "corpo": lista([])}, "acoes": [{"tipo": "enviar"}]})
++        self.assertEqual([c for c in dados["chamadas"] if c["metodo"] == "POST"], [])
++        self.assertEqual(dados["aviso"], "Escreva o texto antes de guardar.")
++
++    def test_marcar_feito_e_descartar_chamam_o_estado_certo(self):
++        base = lista([item(1, "uma"), item(2, "duas")])
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": base}, {"status": 200, "corpo": base}],
++            "posts": {"/api/importantes/estado": [{"corpo": {}}, {"corpo": {}}]},
++            "acoes": [{"tipo": "clicarNoItem", "indice": 0, "texto": "Marcar feito"},
++                      {"tipo": "clicarNoItem", "indice": 1, "texto": "Descartar"}],
++        })
++        posts = [c for c in dados["chamadas"] if c["metodo"] == "POST"]
++        self.assertEqual([p["corpo"] for p in posts], [{"id": f"{1:012x}", "estado": "feito"},
++                                                       {"id": f"{2:012x}", "estado": "descartado"}])
++
++    def test_filtro_mostra_so_o_estado_escolhido(self):
++        itens = [item(1, "aberta"), item(2, "feita", "feito"), item(3, "descartada", "descartado")]
++        dados = rodar({"lista": {"status": 200, "corpo": lista(itens)},
++                       "acoes": [{"tipo": "mudar", "id": "importantes-filtro", "valor": "descartados"}]})
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["descartada"])
++        self.assertIn("mostrando 1", dados["resumoLista"])
++
++    def test_filtro_sem_itens_diz_que_nao_ha_nada_neste_filtro(self):
++        dados = rodar({"lista": {"status": 200, "corpo": lista([item(1, "aberta")])},
++                       "acoes": [{"tipo": "mudar", "id": "importantes-filtro", "valor": "feitos"}]})
++        self.assertEqual(dados["itens"], [])
++        self.assertIn("nenhum item neste filtro", dados["resumoLista"])
++
++    def test_recusa_403_mostra_aviso_e_a_lista_volta_do_servidor(self):
++        base = lista([item(1, "uma")])
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": base}, {"status": 200, "corpo": base}],
++            "posts": {"/api/importantes/estado": [{"status": 403, "texto": "cross-origin request denied"}]},
++            "acoes": [{"tipo": "clicarNoItem", "indice": 0, "texto": "Marcar feito"}],
++        })
++        self.assertFalse(dados["avisoOculto"])
++        self.assertEqual(dados["aviso"], "O painel recusou o pedido: abra esta tela pelo próprio painel.")
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["uma"], "o item continua aberto na lista")
++
++    def test_conflito_409_mostra_o_motivo_do_servidor(self):
++        dados = rodar({
++            "lista": {"status": 200, "corpo": lista([item(1, "uma")])},
++            "posts": {"/api/importantes/estado": [{"status": 409, "texto": "lista de importantes ilegível; nada foi alterado"}]},
++            "acoes": [{"tipo": "clicarNoItem", "indice": 0, "texto": "Descartar"}],
++        })
++        self.assertEqual(dados["aviso"], "Lista de importantes ilegível; nada foi alterado.")
++
++    def test_editar_envia_texto_e_nota_e_volta_para_a_lista(self):
++        base = lista([item(1, "texto antigo")])
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": base}, {"status": 200, "corpo": base}],
++            "posts": {"/api/importantes/editar": [{"corpo": {}}]},
++            "acoes": [{"tipo": "clicarNoItem", "indice": 0, "texto": "Editar"},
++                      {"tipo": "valorNoItem", "indice": 0, "tag": "textarea", "valor": "texto novo"},
++                      {"tipo": "valorNoItem", "indice": 0, "tag": "input", "valor": "ver com calma"},
++                      {"tipo": "clicarNoItem", "indice": 0, "texto": "Salvar"}],
++        })
++        posts = [c for c in dados["chamadas"] if c["metodo"] == "POST"]
++        self.assertEqual(posts, [{"url": "/api/importantes/editar", "metodo": "POST",
++                                  "corpo": {"id": f"{1:012x}", "texto": "texto novo", "nota": "ver com calma"}}])
++
++    def test_trazer_mostra_a_contagem_e_reabilita_o_botao(self):
++        base = lista([item(1, "de fora", origem="cache", cache_n=493)])
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": lista([])}, {"status": 200, "corpo": base}],
++            "posts": {"/api/importantes/trazer": [{"corpo": {"trazidas": 1, "ja_estavam": 0, "recusadas": 2, "lidas": 9}}]},
++            "acoes": [{"tipo": "clicar", "id": "importantes-trazer"}],
++        })
++        self.assertEqual(dados["aviso"], "Trazidas do Conselho: 1. Já estavam aqui: 0. Recusadas por segredo ou tamanho: 2.")
++        self.assertFalse(dados["trazerDesabilitado"])
++        self.assertEqual(dados["itens"][0]["origem"], "Do Conselho, entrada nº 493")
++
++    def test_texto_do_item_sai_como_texto_puro(self):
++        dados = rodar({"lista": {"status": 200, "corpo": lista([item(1, "<img src=x onerror=alert(1)> & fim")])}})
++        self.assertEqual(dados["itens"][0]["texto"], "<img src=x onerror=alert(1)> & fim")
++
++    def test_erro_500_no_pedido_nao_altera_a_lista_e_avisa(self):
++        base = lista([item(1, "uma")])
++        dados = rodar({
++            "lista": [{"status": 200, "corpo": base}],
++            "posts": {"/api/importantes/estado": [{"status": 500, "texto": ""}]},
++            "acoes": [{"tipo": "clicarNoItem", "indice": 0, "texto": "Marcar feito"}],
++        })
++        self.assertEqual(dados["aviso"], "O painel respondeu com erro 500.")
++        self.assertEqual([i["texto"] for i in dados["itens"]], ["uma"])
++
++
++class EstaticoImportantesTests(unittest.TestCase):
++    def test_bloco_novo_nao_usa_html_bruto_nem_atributo_de_estilo(self):
++        for proibido in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write"):
++            with self.subTest(proibido=proibido):
++                self.assertNotIn(proibido, BLOCO_JS)
++        self.assertNotIn("style", BLOCO_JS.replace("estilo", ""))
++        self.assertIsNone(re.search(r"\bon[a-z]+\s*=", BLOCO_JS), "nada de on* no bloco novo")
++
++    def test_html_da_aba_e_do_cartao_sem_style_nem_on(self):
++        trecho = HTML[HTML.index('id="sub-importantes"'): HTML.index('id="sub-importantes"') + 3000]
++        cartao = HTML[HTML.index('id="importantes-cartao-estado"') - 400: HTML.index('id="importantes-cartao-estado"') + 400]
++        for bloco in (trecho, cartao):
++            self.assertIsNone(re.search(r"\sstyle\s*=", bloco))
++            self.assertIsNone(re.search(r"\son[a-z]+\s*=", bloco))
++        for estado in ("carregando", "vazio", "erro"):
++            self.assertIn(f'data-estado="{estado}"', trecho)
++
++    def test_cartao_e_aba_chamam_a_mesma_secao(self):
++        self.assertIn('data-open-sub="importantes"', HTML)
++        self.assertIn('data-sub="importantes" aria-controls="sub-importantes"', HTML)
++        self.assertIn("importantes: () => carregarImportantes()", JS)
++
++    def test_cores_do_bloco_novo_so_por_token(self):
++        bloco = CSS[CSS.index("/* Importantes (11/11/2026)"):]
++        self.assertEqual(re.findall(r"#[0-9a-fA-F]{3,8}\b|rgba?\(", bloco), [])
++
++    def test_sem_emoji_nos_arquivos_da_entrega(self):
++        emoji = re.compile(r"[\U0001F000-\U0001FAFF\u2600-\u26FF\uFE0F]")
++        arquivos = ["prototipo.html", "prototipo.js", "prototipo.css", "importantes.py", "test_importantes.py",
++                    "test_importantes_ui.py", "server.py", "spec/spec.md"]
++        for nome in arquivos:
++            with self.subTest(arquivo=nome):
++                texto = (HERE / nome).read_text(encoding="utf-8")
++                self.assertEqual(emoji.findall(texto), [], "emoji encontrado")
++
++
++if __name__ == "__main__":
++    unittest.main()

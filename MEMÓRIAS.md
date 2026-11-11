@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 182310d0affe88a4318a6ceb3e99405eff69a07f
-  Escrito em: 11/11/2026 19:43 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6
+  Escrito em: 11/11/2026 19:57 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/182310d0affe88a4318a6ceb3e99405eff69a07f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bdbdca6c1e81ce7a10b0e5d65ea8f1e5dad6a3f6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista de Importantes no painel (aba em Panorama, cartão, cache fora do repositório e trazer do Conselho).**
+- Diff `propostas/painel-importantes-11-11.diff` (SHA-256 `373e957075b18ad3d1e68e46908b0c45302ca9f669369648ab5ff941bf6b8249`, 109074 bytes) contra `origin/main` `bdbdca6c`: `git apply --check` limpo nesta publicação. Só o caminho `redesign/painel_operacional/`, com 8 arquivos alterados e 3 novos, 1517 linhas adicionadas e 4 removidas. Nenhum código de `redesign/` foi commitado; a aplicação fica com o Humano, depois da assinatura.
+- A base mudou: o `.md` da proposta diz base `182310d0`; o check foi feito sobre `bdbdca6c`, depois de #966, #967 e #968. Os testes medidos no `.md` são da base antiga e não foram repetidos aqui; o CI do PR mede a base atual.
+- Registro fora do diff: esta entrada (991). O `.md` diz "Registro fora do diff: Nenhum"; esta entrada acrescenta o registro da publicação, sem alterar o `.md`.
+- Seis decisões para o Humano confirmar estão na seção própria do `.md`. Não medido: uso real da lista com o cache do Conselho, navegadores além do Chromium headless e verificação visual pelo Humano.
+- Falha pré-existente em `test_sdd_painel.ProjetosExternosTests` (python3 puro, sem pytest no PATH), dono e data pendentes com o Humano, como no `.md`.
+- Assinatura pelo Humano só depois do merge deste PR: `bash scripts/aprovar.sh painel-importantes-11-11 "<motivo>"`.
 (990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
 - Adoção decidida pelo Humano em 11/11 19:20 ("ok a todas", cache do Conselho, entrada 495). Diff `propostas/spec-primeiro-11-11.diff` sobre `origin/main` `182310d0` mais `processo-agil-11-11`, que toca o mesmo arquivo de skill: aplicar depois dela. Caminhos de código: skills de processo-lote e time-inovação, agentes arquiteto e revisor, `scripts/gate_spec_sync.py` (novo), `scripts/ci_sdd_local.sh`, `.github/workflows/sdd.yml`, e o drift e a evidência de `redesign/nova_versao/spec`.
 - Medido em 11/11: `alexandria` tem 5 critérios no acceptance.json sem linha no spec.md; `nova_versao` tem drift commitado de 04/11, mais antigo que o spec de 09/11. Sem as duas correções o gate fica vermelho. Entra o drift de nova_versao; alexandria fica como dívida conhecida (AVISO), porque corrigir o spec.md exige proposta própria.
