@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1002) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
+  palavras-chave: proposta, sincronia, publicada, doutrina, seth, passa, viver, protocolos, cópia, gateway, sai, porquês, verificados, mecanismo, gancho, início, sessão, maxturns, agata, dev, muda, aplicada, assinatura, humano
 (1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
   palavras-chave: aplicado, pacote, mecanico, skills, assinatura, humano, mecânico, consolidadas, viram, texto, extras, arquivo, fila, aplicação, corrigida
 (1000) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-skills-12-11 publicada: pacote mecânico e skills numa só proposta, com a fila de aplicação corrigida. Substitui pacote-mecanico-12-11 e skills-consolidadas-12-11 (movidas para propostas/superadas/).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, nucleo, desenvolvimento, refeita, base, atual, diff, continua, aplicação, código, repositório, inclui, correção, remover, ponteiro, processo, antigo, atualizar, conversa, hidratada, respeitando, seth, hidrata, evitando, duplicação, registrada, junção, após, local, executada, worktree, corpo, resultados, limitações, assinatura, continuam, pendentes, humano
 (973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
   palavras-chave: aplicação, assinada, painel, unificado, validada, localmente, assinatura, aceita, diff, aplicado, worktree, própria, reverso, passou, local, terminou, tudo
-(972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
-  palavras-chave: csp, protótipo, painel, aplicado, prototipo, assinado, humano
+(972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo …
+  palavras-chave: csp, protótipo, painel, aplicado, prototipo
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261 …
   palavras-chave: teto, removido
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-202 …
