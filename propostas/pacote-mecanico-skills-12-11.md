@@ -1,6 +1,6 @@
 # Pacote mecânico e skills, com a fila de aplicação corrigida (`pacote-mecanico-skills-12-11`)
 
-Proposta P-8 de `pacote-mecanico-skills-12-11`. Diff: `propostas/pacote-mecanico-skills-12-11.diff` (77 arquivos, 27 novos e 12 removidos; 422 KB; sha256 `760b4f8565bdf3bf89fd15c66fe4e34f798ceaee6cdd9ef2fcd92cb770820e93`). Base: `origin/main` `8c13ed78`. Gerado com `git diff --no-renames` (renomeação escondida não passa pelo P-8: ele precisa ver os dois lados).
+Proposta P-8 de `pacote-mecanico-skills-12-11`. Diff: `propostas/pacote-mecanico-skills-12-11.diff` (77 arquivos, 27 novos e 12 removidos; 422 KB; sha256 `d14e079f40dd1d516e63ab646b4fc7652f36179a38c49690a2a1035df6233946`). Base: `origin/main` `8c13ed78`. Gerado com `git diff --no-renames` (renomeação escondida não passa pelo P-8: ele precisa ver os dois lados).
 
 Substitui `pacote-mecanico-12-11` e `skills-consolidadas-12-11` (movidas para `propostas/superadas/`, com nota). Nenhuma das duas deve ser aplicada. Executado por Claude Haiku 5.5, agente de proposta, a pedido do coordenador, a partir das decisões do Humano de 12/11/2026 (entradas 519 a 523 do cache do Conselho).
 
@@ -87,7 +87,7 @@ Nenhum agente roda `aprovar.sh`. O `APROVADO-` não existe agora.
 
 ## Estado de verificação
 
-Cópia com histórico, árvore candidata staged (`git apply` do `.diff` sobre `8c13ed78`, `git add -A`), `uv run --offline --with pytest bash scripts/ci_sdd_local.sh`: **`CI LOCAL: TUDO OK`**, 43 passos OK, 0 falhas. Passos pedidos e presentes na saída: `testes SDD (pytest)`, `gate de sincronia das specs` (selftest e leitura), `ciclo SDD` (sdd_flow e nova_versao), `skills sem problema de lint`, `pacote mecânico: testes do turno`, `selftest do turno`, `selftest da auditoria do turno`, `testes dos mecanismos do Conselho`, `verificador de mecanismos do Conselho` (`conselho_mecanismos.py --verificar`), e os três selftests novos (`diff_limpo`, `numero_memorias`, `trava`).
+Cópia com histórico, árvore candidata staged (`git apply` do `.diff` sobre `8c13ed78`, `git add -A`), `uv run --offline --with pytest bash scripts/ci_sdd_local.sh`: **`CI LOCAL: TUDO OK`**, 43 passos OK, 0 falhas. Esta é a versão 2 do `.diff` (sha256 acima): a versão 1 tinha a mensagem "RENUMERADO (1000) -> (1000)" quando nada mudava; corrigida para "OK: nenhuma entrada nova com número ocupado" antes da assinatura. Passos pedidos e presentes na saída: `testes SDD (pytest)`, `gate de sincronia das specs` (selftest e leitura), `ciclo SDD` (sdd_flow e nova_versao), `skills sem problema de lint`, `pacote mecânico: testes do turno`, `selftest do turno`, `selftest da auditoria do turno`, `testes dos mecanismos do Conselho`, `verificador de mecanismos do Conselho` (`conselho_mecanismos.py --verificar`), e os três selftests novos (`diff_limpo`, `numero_memorias`, `trava`).
 
 Observação do caminho: a primeira rodada falhou em `ferramentas/test_ferramentas.py::test_indice_em_dia` (FileNotFoundError em `.agents/skills/agata-carregar/SKILL.md`). Causa: a cópia tinha o índice do git antigo (aplicação sem `git add`), e `git ls-files` ainda listava as skills removidas. Com `git add -A` a árvore ficou coerente e o teste passou. Não é defeito da proposta, mas é o tipo de coisa que o commit real corrige: a aplicação precisa do commit, não só do `git apply`.
 

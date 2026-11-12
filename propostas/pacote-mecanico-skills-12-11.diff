@@ -4374,10 +4374,10 @@ index 00000000..d8ae6ebd
 +    sys.exit(main(sys.argv[1:]))
 diff --git a/scripts/equipe/numero_memorias.py b/scripts/equipe/numero_memorias.py
 new file mode 100644
-index 00000000..7cdafe97
+index 00000000..5c372759
 --- /dev/null
 +++ b/scripts/equipe/numero_memorias.py
-@@ -0,0 +1,139 @@
+@@ -0,0 +1,140 @@
 +#!/usr/bin/env python3
 +"""numero_memorias.py -- número das entradas novas de MEMÓRIAS.md, sempre sobre o main do último instante.
 +
@@ -4503,10 +4503,11 @@ index 00000000..7cdafe97
 +    except (OSError, ValueError) as e:
 +        print(f"ERRO: {e}", file=sys.stderr)
 +        return 1
-+    if not mapa:
-+        print(f"OK: nenhuma entrada nova; próximo número livre na base: {livre}")
++    mudou = [(a, b) for a, b in mapa if a != b]
++    if not mudou:
++        print(f"OK: nenhuma entrada nova com número ocupado; próximo número livre na base: {livre}")
 +        return 0
-+    print("RENUMERADO: " + ", ".join(f"({a}) -> ({b})" for a, b in mapa))
++    print("RENUMERADO: " + ", ".join(f"({a}) -> ({b})" for a, b in mudou))
 +    if gravar:
 +        open(alvo_path, "w", encoding="utf-8").write(texto)
 +        print(f"gravado: {alvo_path}")
