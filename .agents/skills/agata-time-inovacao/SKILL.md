@@ -15,11 +15,12 @@ Por quê: ideia sem evidência vira retrabalho, e ideia sem revisão vira alucin
 
 ## Ciclo (uma ideia por vez)
 1. Pesquisa: a ideia tem problema com evidência do Agata e fonte externa. Sem as duas, fica "não verificado" e não avança.
-2. Spec: o arquiteto escreve brainstorm e spec fora do repositório. Nada de código ainda.
-3. Revisão: o crítico avalia a spec. Se o crítico recomendar reduzir escopo ou arquivar, o time segue a recomendação ou registra por que não segue.
-4. Decisão: o Humano decide avançar, reduzir ou arquivar. O time nunca decide.
-5. Proposta P-8: se avançar, a implementação entra como lote, pelo processo de agata-processo-lote. Uma proposta, uma assinatura.
-6. Implementação e drift: depois da aplicação, roda-se o ciclo SDD da spec e o relatório de drift (cada critério passa, falha ou não roda).
+2. Entrevista (P1, 11/11): antes da spec de ideia nova de comportamento, o orquestrador, que fala com o Humano, faz até 5 perguntas de múltipla escolha. Usa AskUserQuestion quando houver; senão, lista numerada no texto. Cada resposta vai para `decision.md` na pasta de trabalho, com a pergunta e a opção escolhida. Sem resposta do Humano, a spec não começa. Base: code.claude.com/docs/en/best-practices, "Interview me until you could write the spec". Manutenção sem ideia nova não passa por aqui.
+3. Spec: o arquiteto lê `decision.md` e escreve brainstorm e spec fora do repositório. Nada de código ainda.
+4. Revisão: o crítico avalia a spec. Se o crítico recomendar reduzir escopo ou arquivar, o time segue a recomendação ou registra por que não segue.
+5. Decisão: o Humano decide avançar, reduzir ou arquivar. O time nunca decide.
+6. Proposta P-8: se avançar, a implementação entra como lote, pelo processo de agata-processo-lote. Uma proposta, uma assinatura.
+7. Implementação e drift: depois da aplicação, roda-se o ciclo SDD da spec e o relatório de drift (cada critério passa, falha ou não roda).
 
 ## Backlog
 Ideias ficam num backlog de trabalho fora do repositório (Área de trabalho, pasta de inovação do Experimento 2), com: id, problema, evidência, hipótese, estado (pesquisada, spec, revisada, decidida, proposta, aplicada, arquivada), decisão do Humano e data. Ideia arquivada também fica registrada, com o motivo.

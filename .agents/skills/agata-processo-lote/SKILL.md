@@ -9,6 +9,12 @@ Por quê: os lotes de 06/11 quebraram em pontos recorrentes: testes que o CI rod
 
 Escopo: o repositório Agata, checkout vivo `/home/orusoua/agata`. Caminhos de worktree são sempre absolutos.
 
+## Classe da tarefa (P4, 11/11)
+Antes do passo 1, o coordenador escolhe uma classe e registra: no lote, linha "Classe:" em `propostas/<lote>.md`; na tarefa sem proposta, na entrada de MEMÓRIAS. Se a classe mudar no meio, registre a troca. Classe errada pula revisão.
+- **Operacional** (sem spec, só registro): nada que muda comportamento nem arquivo protegido pelo P-8 (lista em `propostas/README.md`). Faça e registre no DIÁRIO.
+- **Comportamento** (spec e acceptance): código, teste ou script que muda o que um componente faz. Spec com `acceptance.json` antes do código (`agata-spec`); depois proposta P-8, revisada pelo `agata-revisor` no modo "contra a spec".
+- **Canon** (spec e P-8): `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `AGENTS.md`, `CLAUDE.md`. Spec mínima (o que muda, como medir, reversão) e proposta P-8, com a mesma revisão de comportamento.
+
 ## Regras que não se negociam
 1. Um lote = uma proposta = uma assinatura do Humano. Não assine nada e nunca rode `scripts/aprovar.sh` (a chave é do Humano). Exceção: mudança em `redesign/*/spec/spec.md` exige proposta própria, assinada à parte (armadilha "Spec é P-8"; caso de 06/11: `spec-anchor-lote-pn-20261106`).
 2. Código protegido só entra no main por proposta assinada. O hook P-8 recusa commit direto; não contorne. A lista é a do `AGENTS.md`: `redesign/*`, `scripts/*`, `config/*`, `.githooks/*`, `REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`, `AGENTS.md`, `CLAUDE.md`. `.agents/` não aparece nessa lista nem em `propostas/README.md`; tratá-la como protegida é precaução (não verificado no P-8).
@@ -94,6 +100,28 @@ Cada papel tem o nome do agente em `.claude/agents/`. A tabela completa (o que c
 - Só vale o run do commit atual. Confira com `gh run list --branch <b> --json headSha`. Se o run não aparecer para o seu HEAD (ou o `sdd` não aparecer quando o PR toca os paths), registre e avise o Humano. Não junte.
 - Check vermelho: não junta, avisa o Humano.
 - `gh pr view <n> --json mergeStateStatus,statusCheckRollup` mostra o estado por check. `gh pr checks` às vezes lista só parte.
+
+## Fluxo e pronto (ágil, 11/11)
+Decisão do Humano em 11/11/2026 ("ok a todas"). Vale para todo lote novo. A regra R2 fica em medição de 14 dias, até 25/11/2026.
+- **R1 Limite de trabalho aberto.** No máximo 2 propostas abertas (sem aplicação) por componente. Antes de abrir a 3ª, aplique, supere ou feche uma. Base: Kanban Guide, edição 2025 (v2025.5, https://kanbanguides.org/english/), controle de WIP; Lei de Little (L = λ·W, teoria de filas) explica por que fila maior alonga o tempo de ciclo. O guia não cita a lei pelo nome.
+- **R3 Definição de pronto do lote.** O relatório do agente preenche este checklist. Item sem marca: o lote não está pronto.
+  - [ ] CI local com `CI LOCAL: TUDO OK` (saída colada)
+  - [ ] run verde no GitHub no `headSha` do PR (`gh run list --branch <b> --json headSha`)
+  - [ ] captura de tela quando há interface
+  - [ ] sem emoji (E-2, decisão de 16/10)
+  - [ ] `.md` da proposta com testes medidos, o que não foi medido e a reversão
+  - [ ] nenhuma falha "pré-existente" sem dono e data
+  - [ ] texto da entrada de MEMÓRIAS sem citação `caminho:número` (P-19 só avisa; não falha)
+  Base: Scrum Guide 2020, Definition of Done.
+- **R5 Retrospectiva de 3 linhas ao fechar cada lote.** Anote no cache do Conselho com `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo nota "<texto>"`: gargalo com número; regra que mudou; o que saiu do WIP. Base: Manifesto Ágil, princípio 12.
+- **R2 Apetite (medição até 25/11/2026).** Cada proposta declara o apetite: máximo de arquivos e de horas de agente. Quando passar do limite, o `.md` registra isso. Nada é cortado automaticamente nesse período.
+
+## Pacote de assinatura (Humano, 11/11)
+Decisão do Humano em 11/11/2026 ("me apresente apenas uma assinatura"). Memória "uma assinatura por implementação" (03/11).
+- Propostas prontas no mesmo período que tocam arquivos em comum se juntam num pacote único, com uma só assinatura.
+- O `.md` do pacote lista cada parte, a ordem de aplicação e cada conflito e como foi resolvido.
+- O pacote é testado inteiro antes de propor: unittest do painel, `scripts/ci_sdd_local.sh`, gate de spec e lint de skills.
+- As propostas parciais vão para `propostas/superadas/` quando o pacote entra, com a linha "incluída em <pacote>" no `propostas/superadas/LEIA-ME.md`.
 
 ## Armadilhas já pagas
 - **CI local diferente do CI real:** o job `sdd` roda `pytest` (9.2.0, fixado em `sdd.yml`) nos diretórios listados no workflow, depois anchor e ciclos. Unittest passa e pytest falha, ou o contrário. Use o script.

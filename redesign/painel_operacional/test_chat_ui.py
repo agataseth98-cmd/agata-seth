@@ -42,7 +42,7 @@ class Elemento {
   setAttribute(nome, valor) { this.attrs[nome] = String(valor); }
   getAttribute(nome) { return Object.prototype.hasOwnProperty.call(this.attrs, nome) ? this.attrs[nome] : null; }
   addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
-  focus() {} blur() {} remove() {} select() {}
+  focus() { this.focado = true; } blur() {} remove() {} select() {}
   closest() { return null; }
   querySelector(sel) { return buscar(this, sel)[0] || null; }
   querySelectorAll(sel) { return buscar(this, sel); }
@@ -61,12 +61,20 @@ function texto(no) {
   return (no.textContent || '') + (no.children || []).map(texto).join('');
 }
 const registro = new Map();
+const ouvintesDoc = {};
+// Elementos que começam escondidos no HTML (o atributo hidden): o mock precisa do mesmo estado inicial.
+const OCULTOS_NO_INICIO = ['atalhos-painel'];
 const documento = {
   visibilityState: 'visible',
-  getElementById(id) { if (!registro.has(id)) registro.set(id, new Elemento('id:' + id)); return registro.get(id); },
+  getElementById(id) {
+    if (!registro.has(id)) { const e = new Elemento('id:' + id); if (OCULTOS_NO_INICIO.includes(id)) e.hidden = true; registro.set(id, e); }
+    return registro.get(id);
+  },
   querySelector() { return new Elemento('q'); }, querySelectorAll() { return []; },
   createElement(tag) { return new Elemento(tag); }, createElementNS(ns, tag) { return new Elemento(tag); },
-  createTextNode(t) { return new Texto(t); }, addEventListener() {},
+  createTextNode(t) { return new Texto(t); },
+  addEventListener(tipo, fn) { (ouvintesDoc[tipo] = ouvintesDoc[tipo] || []).push(fn); },
+  documentElement: new Elemento('html'),
 };
 const cargas = []; const chamadas = [];
 function escolher(valor) { if (Array.isArray(valor)) return valor.length > 1 ? valor.shift() : valor[0]; return valor; }
@@ -78,6 +86,18 @@ function respostaPendente() {
   return {ok: true, status: 200, headers: cabecalhosDe({}), json: async () => ({}), text: async () => '', body: {getReader() { return {
     read: () => new Promise(() => {}), cancel: async () => {}}; }}};
 }
+// Stream que espera: entrega o primeiro bloco e só responde de novo quando o fetch é abortado (botão Parar).
+function respostaStreamLenta(sse, cab, sinal) {
+  const bytes = new TextEncoder().encode(sse); let n = 0;
+  return {ok: true, status: 200, headers: cabecalhosDe(cab), json: async () => ({}), text: async () => '', body: {getReader() { return {
+    read: () => new Promise((resolve, reject) => {
+      if (n === 0) { n++; resolve({done: false, value: bytes}); return; }
+      const rejeitar = () => reject(Object.assign(new Error('The operation was aborted.'), {name: 'AbortError'}));
+      if (sinal && sinal.aborted) return rejeitar();
+      if (sinal) sinal.ouvintes.push(rejeitar);
+    }),
+    cancel: async () => {}}; }}};
+}
 function respostaStream(sse, cab) {
   const bytes = new TextEncoder().encode(sse); let lido = false;
   return {ok: true, status: 200, headers: cabecalhosDe(cab), json: async () => ({}), text: async () => '', body: {getReader() { return {
@@ -85,10 +105,18 @@ function respostaStream(sse, cab) {
     cancel: async () => {}}; }}};
 }
 const ctx = {};
-ctx.window = ctx; ctx.document = documento; ctx.location = {hash: ''}; ctx.history = {};
-ctx.localStorage = {getItem() { return null; }, setItem() {}}; ctx.navigator = {clipboard: {}}; ctx.Node = function () {};
+const armazenamento = Object.assign({}, (cen.storage && cen.storage.inicial) || {});
+const gravacoes = []; const copiados = [];
+ctx.window = ctx; ctx.document = documento; ctx.location = {hash: ''}; ctx.history = {pushState() {}};
+ctx.localStorage = {
+  getItem(k) { if (cen.storage && cen.storage.lerErro) throw new Error('bloqueado'); return Object.prototype.hasOwnProperty.call(armazenamento, k) ? armazenamento[k] : null; },
+  setItem(k, v) { if (cen.storage && cen.storage.gravarErro) throw new Error('cheio'); armazenamento[k] = String(v); gravacoes.push([k, String(v)]); }};
+ctx.navigator = {clipboard: {writeText: async (t) => { copiados.push(t); }}}; ctx.Node = function () {};
+if (cen.claroSistema !== undefined) ctx.matchMedia = () => ({matches: Boolean(cen.claroSistema), addEventListener() {}});
 ctx.TextEncoder = TextEncoder; ctx.TextDecoder = TextDecoder;
-ctx.AbortController = function () { this.signal = {}; this.abort = () => {}; };
+// AbortController de verdade para o teste: abort() marca o sinal e acorda quem estiver esperando.
+class ControleFalso { constructor() { this.signal = {aborted: false, ouvintes: [], addEventListener() {}};} abort() { if (this.signal.aborted) return; this.signal.aborted = true; this.signal.ouvintes.forEach((f) => f()); } }
+ctx.AbortController = ControleFalso;
 ctx.setTimeout = () => 0; ctx.clearTimeout = () => {}; ctx.setInterval = () => 0; ctx.clearInterval = () => {};
 ctx.addEventListener = (tipo, fn) => { if (tipo === 'load') cargas.push(fn); };
 ctx.fetch = async (url, opcoes = {}) => {
@@ -149,7 +177,9 @@ ctx.fetch = async (url, opcoes = {}) => {
     const r = escolher(cen.stream) || {};
     if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
     if (r.pendente) return respostaPendente();
-    return respostaStream('data: {"tipo": "texto", "delta": "resposta"}\n\ndata: {"tipo": "fim"}\n\n', r.cabecalhos || {});
+    const sse = r.sse !== undefined ? r.sse : 'data: {"tipo": "texto", "delta": "resposta"}\n\ndata: {"tipo": "fim"}\n\n';
+    if (r.lento) return respostaStreamLenta(sse, r.cabecalhos || {}, opcoes.signal);
+    return respostaStream(sse, r.cabecalhos || {});
   }
   if (url === '/api/seth/chat') {
     const r = escolher(cen.chat) || {};
@@ -188,6 +218,14 @@ async function executar(a) {
     if (a.campo) documento.getElementById(a.campo).value = a.valor;
     else if (a.valor !== undefined) acharTodos(form, (e) => e.tag === 'input')[0].value = a.valor;
     form.ouvintes.submit[0]({preventDefault() {}, target: form});
+  } else if (a.tipo === 'valor') {
+    const el = acharTodos(em(a.em), (e) => e.tag === a.tag)[a.indice || 0]; el.value = a.valor;
+  } else if (a.tipo === 'evento') {
+    const el = acharTodos(em(a.em), (e) => e.tag === a.tag)[a.indice || 0]; (el.ouvintes[a.evento] || []).forEach((f) => f({target: el}));
+  } else if (a.tipo === 'tecla_doc') {
+    const alvo = {tagName: a.tagName || 'BODY', isContentEditable: false};
+    const ev = {key: a.tecla, ctrlKey: !!a.ctrl, metaKey: false, shiftKey: !!a.shift, target: alvo, preventDefault() { ev.prevented = true; }};
+    (ouvintesDoc.keydown || []).forEach((f) => f(ev));
   } else if (a.tipo === 'arquivo') {
     const el = documento.getElementById(a.id);
     el.files = [{size: a.tamanho ?? a.texto.length, text: async () => a.texto}];
@@ -227,10 +265,11 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     await esperar();
   }
   for (const a of cen.depois || []) await executar(a);  // ações depois dos envios (ex.: trocar de conversa durante a resposta)
+  for (const a of cen.acoes_depois || []) await executar(a);
   const transcricao = []; coletar(documento.getElementById('seth-transcript'), transcricao);
   const salvar = documento.getElementById('seth-salvar-aviso');
   const el = (id) => documento.getElementById(id);
-  console.log(JSON.stringify({chamadas, transcricao, salvarTexto: salvar.textContent, salvarOculto: salvar.hidden,
+  const base = {chamadas, transcricao, salvarTexto: salvar.textContent, salvarOculto: salvar.hidden,
     status: el('seth-status').textContent,
     org: el('seth-org-aviso').textContent, orgOculto: el('seth-org-aviso').hidden,
     lista: itensDe('seth-conversas'), listaTexto: texto(el('seth-conversas')), grupos: descendentes(el('seth-conversas')).filter((e) => e.className === 'seth-grupo').map((e) => e.textContent),
@@ -250,7 +289,22 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     ilegiveisOculto: el('seth-ilegiveis-aviso').hidden, ilegiveisTexto: el('seth-ilegiveis-aviso').textContent,
     lixeiraTotal: el('seth-lixeira-total').textContent, lixeiraTexto: texto(el('seth-lixeira')),
     lixeiraItens: descendentes(el('seth-lixeira')).filter((c) => c.className === 'seth-item').map((c) => ({titulo: c.children[0].textContent, texto: texto(c)})),
-    resultados}));
+    resultados};
+  const extra = {
+    contexto: el('seth-contexto').textContent, barra: el('seth-contexto-barra').value,
+    origem: texto(el('seth-origem')), origemOculta: el('seth-origem').hidden,
+    paradaOculta: el('seth-parar').hidden, atalhosOculto: el('atalhos-painel').hidden,
+    tema: documento.documentElement.dataset.tema, temaSelect: el('tema').value,
+    gravacoes, copiados, copiadoAviso: el('seth-copiado').textContent,
+    buscaFocada: Boolean(el('seth-busca').focado), pesquisaFocada: Boolean(el('search').focado),
+    transcricaoCompleta: texto(el('seth-transcript')), entrada: el('seth-input').value,
+    ramos: descendentes(el('seth-transcript')).filter((e) => typeof e.className === 'string' && e.className.includes('seth-ramo')).map((e) => texto(e)),
+    botoes: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button').map((e) => texto(e).trim()),
+    pressionados: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button' && e.getAttribute('aria-pressed') === 'true').map((e) => texto(e).trim()),
+    campos: descendentes(el('seth-transcript')).filter((e) => e.tag === 'input' || e.tag === 'textarea').map((e) => e.value),
+    rotulosFeedback: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button' && String(e.getAttribute('aria-label') || '').startsWith('Resposta')).map((e) => ({texto: texto(e).trim(), aria: e.getAttribute('aria-label'), titulo: e.title})),
+    status: el('seth-status').textContent};
+  console.log(JSON.stringify({...base, ...extra}));
 })();
 """
 
@@ -789,14 +843,14 @@ class ConversaProtecao(unittest.TestCase):
 
     def test_salvar_grava_na_conversa_de_origem_e_nao_na_tela(self):
         # sethSalvar(alvo) grava o id na conversa passada, não na conversa aberta na tela.
-        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', mensagens: [{role: 'user', content: 'x'}], "
+        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', nos: [{id: 'c0', pai: null, role: 'user', content: 'x'}], folha: 'c0', "
                   "modelo: 'seth-livre', temporaria: false}; const ok = await __teste.sethSalvar(outra); "
                   "return {ok, outraId: outra.id, atualId: __teste.sethAtual().id}; })()")
         medido = rodar_painel({"acoes": [{"tipo": "js", "codigo": codigo}]})
         self.assertEqual(medido["resultados"][0], {"ok": True, "outraId": "0123456789ab", "atualId": None})
 
     def test_falha_ao_salvar_conversa_que_nao_esta_na_tela_avisa_pelo_titulo(self):
-        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', mensagens: [{role: 'user', content: 'x'}], "
+        codigo = ("(async () => { const outra = {id: null, titulo: 'Outra', nos: [{id: 'c0', pai: null, role: 'user', content: 'x'}], folha: 'c0', "
                   "modelo: 'seth-livre', temporaria: false}; const ok = await __teste.sethSalvar(outra); "
                   "return {ok, naoSalva: outra.naoSalva}; })()")
         medido = rodar_painel({"salvar": {"status": 413, "texto": "x"}, "acoes": [{"tipo": "js", "codigo": codigo}]})
@@ -862,6 +916,290 @@ class ConversaProtecao(unittest.TestCase):
         medido = rodar_painel({"conversas": [], "acoes": [{"tipo": "arquivo", "id": "seth-importar-arquivo", "texto": JSON_IMPORTAVEL}],
                                "importar": {"corpo": {"estado": "ja_existe", "id": "0000000000b1", "titulo": "Vinda", "lixeira": True}}})
         self.assertEqual(medido["org"], "Esta conversa já estava na Lixeira (Vinda); nada foi duplicado. Restaure-a por lá.")
+BASE_RAMO = [{"role": "user", "content": "pergunta"}, {"role": "assistant", "content": "resposta antiga"}]
+EDITAR = [{"tipo": "clicar", "em": "seth-transcript", "texto": "Editar"},
+          {"tipo": "valor", "em": "seth-transcript", "tag": "textarea", "valor": "pergunta nova"},
+          {"tipo": "clicar", "em": "seth-transcript", "texto": "Enviar"}]
+SETH_CONTINUAR_TXT = "Continue de onde parou, sem repetir o que já foi dito."
+SETH_INTERROMPIDA_TXT = "Resposta interrompida. O texto recebido ficou salvo."
+SETH_INTERROMPIDA_VAZIA_TXT = "Resposta interrompida antes do primeiro texto. Nada foi recebido."
+STREAM_LENTO = {"lento": True, "sse": 'data: {"tipo": "texto", "delta": "parte do texto"}\n\n'}
+
+
+class ConversaLote4Html(unittest.TestCase):
+    IDS = ["tema", "atalhos-abrir", "atalhos-painel", "atalhos-fechar", "seth-parar", "seth-contexto",
+           "seth-contexto-barra", "seth-origem", "seth-copiado", "seth-copiar-ultima"]
+
+    def test_painel_sem_emoji_nos_arquivos_da_tela(self):
+        # Decisão E-2 (16/10): o Agata não usa emoji. Vale para o HTML, o CSS e o JS da tela. Conta os blocos de emoji
+        # e os símbolos que viram emoji; a marca de checagem (U+2713, já usada em nova_versao) não é emoji e fica de fora.
+        padrao = re.compile("[\U0001F000-\U0001FAFF\u2600-\u26FF\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755"
+                            "\u2757\u2795-\u2797\u27B0\u27BF\u2B50\u2B55]")
+        css = (HERE / "prototipo.css").read_text(encoding="utf-8")
+        for nome, conteudo in (("prototipo.html", HTML), ("prototipo.js", JS), ("prototipo.css", css)):
+            with self.subTest(arquivo=nome):
+                self.assertEqual(padrao.findall(conteudo), [])
+
+    def test_controles_do_lote4_existem_com_id(self):
+        for ident in self.IDS:
+            with self.subTest(ident=ident):
+                self.assertIn(f'id="{ident}"', HTML)
+
+    def test_parar_comeca_escondido_e_atalhos_comecam_fechados(self):
+        self.assertRegex(HTML, r'<button class="text-link" type="button" id="seth-parar" hidden>')
+        self.assertRegex(HTML, r'<section id="atalhos-painel" class="atalhos" role="dialog"[^>]*hidden>')
+
+    def test_seletor_de_tema_tem_as_tres_escolhas(self):
+        tema = re.search(r'<select id="tema">(.*?)</select>', HTML)
+        self.assertIsNotNone(tema)
+        self.assertEqual(re.findall(r'<option value="(\w+)"', tema.group(1)), ["escuro", "claro", "sistema"])
+        self.assertNotIn("style=", tema.group(0))
+
+
+class ConversaRamos(unittest.TestCase):
+    """Editar, trocar de versão, regenerar e ramificar (node + DOM mínimo, sem rede)."""
+
+    def test_editar_cria_ramo_e_guarda_a_resposta_antiga(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(BASE_RAMO), "abrir": True, "acoes": EDITAR})
+        corpo = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])
+        self.assertNotIn("mensagens", corpo, "com ramo, a árvore é que vai ao servidor")
+        self.assertEqual([n["content"] for n in corpo["arvore"]["nos"]], ["pergunta", "resposta antiga", "pergunta nova", "resposta"])
+        self.assertIn("pergunta nova", medido["transcricaoCompleta"])
+        self.assertNotIn("resposta antiga", medido["transcricaoCompleta"], "a resposta antiga sai do caminho, mas não some")
+        self.assertEqual(medido["ramos"], ["<2/2>"])
+
+    def test_setas_trocam_de_versao_e_seguem_o_ramo_escolhido(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(BASE_RAMO), "abrir": True,
+                               "acoes": EDITAR + [{"tipo": "clicar", "em": "seth-transcript", "texto": "<"}]})
+        self.assertIn("pergunta", medido["transcricaoCompleta"])
+        self.assertIn("resposta antiga", medido["transcricaoCompleta"])
+        self.assertNotIn("pergunta nova", medido["transcricaoCompleta"])
+        self.assertEqual(medido["ramos"], ["<1/2>"])
+        self.assertEqual(corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["arvore"]["folha"], "c1")
+
+    def test_regenerar_guarda_a_resposta_antiga_como_versao(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(BASE_RAMO), "abrir": True,
+                               "acoes": [{"tipo": "clicar", "em": "seth-transcript", "texto": "Regenerar"}]})
+        self.assertIn("resposta", medido["transcricaoCompleta"])
+        self.assertNotIn("resposta antiga", medido["transcricaoCompleta"])
+        self.assertEqual(medido["ramos"], ["<2/2>"])
+        nos = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["arvore"]["nos"]
+        self.assertIn("resposta antiga", [n["content"] for n in nos])
+
+    def test_ramificar_aqui_cria_conversa_com_o_caminho_ate_a_mensagem(self):
+        conv = conversa([{"role": "user", "content": "um"}, {"role": "assistant", "content": "dois"},
+                         {"role": "user", "content": "tres"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True,
+                               "acoes": [{"tipo": "clicar", "em": "seth-transcript", "texto": "Ramificar aqui", "indice": 1}]})
+        pedidos = chamadas_para(medido, "/api/seth/conversa")
+        self.assertEqual(len(pedidos), 1, "ramificar grava uma conversa nova")
+        corpo = corpo_de(pedidos[0])
+        self.assertEqual(corpo["ramificada_de"], {"id": CONVERSA_ID, "mensagem": 1})
+        self.assertEqual(corpo["mensagens"], [{"role": "user", "content": "um"}, {"role": "assistant", "content": "dois"}])
+        self.assertNotIn("id", corpo, "a conversa nova ganha id no servidor")
+
+    def test_conversa_ramificada_mostra_de_onde_saiu_e_abre_a_original(self):
+        conv = {**conversa(BASE_RAMO), "ramificada_de": {"id": CONVERSA_ID, "mensagem": 0}}
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True})
+        self.assertFalse(medido["origemOculta"])
+        self.assertTrue(medido["origem"].startswith("Conversa ramificada da conversa «Antiga», a partir da mensagem 1."),
+                        medido["origem"])
+        self.assertIn("Abrir a original", medido["origem"])
+
+    def test_ramificar_em_conversa_temporaria_nao_aparece(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "id": "seth-temporaria"}],
+                               "enviar": ["oi"]})
+        self.assertNotIn("Ramificar aqui", medido["botoes"])
+        self.assertEqual(chamadas_para(medido, "/api/seth/conversa"), [])
+
+
+    def test_renomear_conversa_com_ramo_grava_a_arvore_inteira(self):
+        arvore = {"nos": [{"id": "c0", "pai": None, "role": "user", "content": "pergunta"},
+                          {"id": "c1", "pai": "c0", "role": "assistant", "content": "resposta antiga"},
+                          {"id": "k1", "pai": None, "role": "user", "content": "pergunta nova"},
+                          {"id": "k2", "pai": "k1", "role": "assistant", "content": "resposta nova"}], "folha": "k2"}
+        conv = {"schema_version": 1, "id": CONVERSA_ID, "titulo": "Antiga",
+                "mensagens": [{"role": "user", "content": "pergunta nova"}, {"role": "assistant", "content": "resposta nova"}],
+                "arvore": arvore}
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "renomear": "Novo nome"})
+        pedidos = chamadas_para(medido, "/api/seth/conversa")
+        self.assertEqual(len(pedidos), 1)
+        corpo = corpo_de(pedidos[0])
+        self.assertEqual(corpo["titulo"], "Novo nome")
+        self.assertEqual(len(corpo["arvore"]["nos"]), 4, "renomear não pode perder as versões de outros ramos")
+        self.assertNotIn("mensagens", corpo)
+
+
+class ConversaParar(unittest.TestCase):
+    """Parar corta o fetch (AbortController) e mantém o texto recebido marcado como interrompida."""
+
+    def test_parar_mantem_o_texto_recebido_marcado_interrompida(self):
+        medido = rodar_painel({"conversas": LISTA, "stream": STREAM_LENTO, "enviar": ["pergunta"],
+                               "acoes_depois": [{"tipo": "clicar", "id": "seth-parar"}]})
+        self.assertEqual(medido["status"], "INTERROMPIDA")
+        self.assertIn("parte do texto", medido["transcricaoCompleta"])
+        self.assertIn(SETH_INTERROMPIDA_TXT, medido["transcricaoCompleta"])
+        self.assertTrue(medido["paradaOculta"], "sem resposta em curso, o botão Parar some")
+        ultima = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]
+        self.assertEqual((ultima["content"], ultima["interrompida"]), ("parte do texto", True))
+
+    def test_parar_antes_do_primeiro_texto_deixa_resposta_vazia_marcada(self):
+        medido = rodar_painel({"conversas": LISTA, "stream": {"lento": True, "sse": ""}, "enviar": ["pergunta"],
+                               "acoes_depois": [{"tipo": "clicar", "id": "seth-parar"}]})
+        self.assertIn(SETH_INTERROMPIDA_VAZIA_TXT, medido["transcricaoCompleta"])
+        ultima = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]
+        self.assertEqual((ultima["content"], ultima["interrompida"]), ("", True))
+        self.assertEqual(len(chamadas_para(medido, "/api/seth/chat")), 0, "parar não repete a pergunta pelo fallback")
+
+    def test_esc_para_a_resposta_em_curso(self):
+        medido = rodar_painel({"conversas": LISTA, "stream": STREAM_LENTO, "enviar": ["pergunta"],
+                               "acoes_depois": [{"tipo": "tecla_doc", "tecla": "Escape"}]})
+        self.assertEqual(medido["status"], "INTERROMPIDA")
+        self.assertIn("parte do texto", medido["transcricaoCompleta"])
+
+    def test_erro_no_meio_do_stream_mantem_o_texto_marcado(self):
+        sse = 'data: {"tipo": "texto", "delta": "meio"}\n\ndata: {"tipo": "erro", "motivo": "stream interrompido"}\n\n'
+        medido = rodar_painel({"conversas": LISTA, "stream": {"sse": sse}, "enviar": ["pergunta"]})
+        self.assertIn("meio", medido["transcricaoCompleta"])
+        self.assertIn("Não consegui terminar a resposta: stream interrompido.", medido["transcricaoCompleta"])
+        self.assertTrue(corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]["interrompida"])
+
+    def test_erro_sem_texto_devolve_a_pergunta_ao_campo(self):
+        medido = rodar_painel({"stream": {"status": 400, "texto": "mensagem 1 acima de 4000 caracteres"}, "enviar": ["oi"]})
+        self.assertEqual(medido["entrada"], "oi", "a pergunta volta ao campo")
+        self.assertNotIn("Você", medido["transcricaoCompleta"], "a pergunta sai da conversa")
+        self.assertIn("Não consegui responder agora: o painel recusou o pedido (mensagem 1 acima de 4000 caracteres).",
+                      medido["transcricaoCompleta"])
+
+
+class ConversaContinuar(unittest.TestCase):
+    def test_continuar_pede_a_seth_e_anexa_na_mesma_resposta(self):
+        conv = conversa([{"role": "user", "content": "pergunta"}, {"role": "assistant", "content": "parte um"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True,
+                               "stream": {"sse": 'data: {"tipo": "texto", "delta": "parte dois"}\n\ndata: {"tipo": "fim"}\n\n'},
+                               "acoes": [{"tipo": "clicar", "em": "seth-transcript", "texto": "Continuar"}]})
+        pedido = corpo_de(chamadas_para(medido, "/api/seth/chat/stream")[0])
+        self.assertEqual(pedido["mensagens"][-1], {"role": "user", "content": SETH_CONTINUAR_TXT})
+        self.assertEqual(pedido["mensagens"][-2], {"role": "assistant", "content": "parte um"})
+        ultima = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]
+        self.assertEqual(ultima["content"], "parte umparte dois")
+        self.assertEqual(ultima["cortes"], [8], "a continuação começa depois de 'parte um' (8 caracteres)")
+        self.assertIn("Continuação", medido["transcricaoCompleta"])
+        self.assertEqual(len([m for m in medido["transcricao"] if m.startswith("modelo:")]), 1, "não vira outra resposta")
+
+    def test_continuar_so_aparece_com_texto_na_resposta(self):
+        conv = conversa([{"role": "user", "content": "x"}, {"role": "assistant", "content": ""}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True})
+        self.assertNotIn("Continuar", medido["botoes"])
+
+    def test_continuacao_interrompida_mantem_o_que_chegou(self):
+        conv = conversa([{"role": "user", "content": "pergunta"}, {"role": "assistant", "content": "parte um"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True,
+                               "stream": {"lento": True, "sse": 'data: {"tipo": "texto", "delta": " e mais"}\n\n'},
+                               "acoes": [{"tipo": "clicar", "em": "seth-transcript", "texto": "Continuar"}],
+                               "acoes_depois": [{"tipo": "clicar", "id": "seth-parar"}]})
+        ultima = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]
+        self.assertEqual((ultima["content"], ultima.get("interrompida")), ("parte um e mais", True))
+
+
+class ConversaFeedback(unittest.TestCase):
+    CONV = [{"role": "user", "content": "oi"}, {"role": "assistant", "content": "ola"}]
+
+    def test_feedback_util_e_nao_util_com_motivo_vai_salvo_na_conversa(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(self.CONV), "abrir": True, "acoes": [
+            {"tipo": "clicar", "em": "seth-transcript", "texto": "Útil"},
+            {"tipo": "valor", "em": "seth-transcript", "tag": "input", "valor": "resposta clara"},
+            {"tipo": "evento", "em": "seth-transcript", "tag": "input", "evento": "change"},
+            {"tipo": "clicar", "em": "seth-transcript", "texto": "Não útil"}]})
+        feedback = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]["feedback"]
+        self.assertEqual(feedback, {"nota": "ruim", "motivo": "resposta clara"}, "trocar de nota mantém o motivo")
+        self.assertEqual(medido["pressionados"], ["Não útil"])
+
+    def test_botoes_de_feedback_tem_rotulo_e_titulo_sem_emoji(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(self.CONV), "abrir": True})
+        self.assertEqual(medido["rotulosFeedback"], [
+            {"texto": "Útil", "aria": "Resposta útil", "titulo": "Resposta útil"},
+            {"texto": "Não útil", "aria": "Resposta não útil", "titulo": "Resposta não útil"}])
+
+    def test_clicar_de_novo_tira_o_feedback(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(self.CONV), "abrir": True, "acoes": [
+            {"tipo": "clicar", "em": "seth-transcript", "texto": "Útil"},
+            {"tipo": "clicar", "em": "seth-transcript", "texto": "Útil"}]})
+        self.assertNotIn("feedback", corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1])
+        self.assertEqual(medido["pressionados"], [])
+
+    def test_feedback_em_conversa_temporaria_nao_grava(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "clicar", "id": "seth-temporaria"}], "enviar": ["oi"],
+                               "acoes_depois": [{"tipo": "clicar", "em": "seth-transcript", "texto": "Útil"}]})
+        self.assertEqual(chamadas_para(medido, "/api/seth/conversa"), [], "temporária não grava nem o feedback")
+        self.assertEqual(medido["pressionados"], ["Útil"], "o botão fica marcado na tela")
+
+
+class ConversaContextoAtalhosTema(unittest.TestCase):
+    def test_barra_de_contexto_mostra_caracteres_e_mensagens_em_portugues(self):
+        conv = conversa([{"role": "user", "content": "x" * 100}, {"role": "assistant", "content": "ok"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True})
+        self.assertTrue(medido["contexto"].startswith("Contexto da próxima pergunta: 102 caracteres,"), medido["contexto"])
+        self.assertIn("de 128 KB", medido["contexto"])
+        self.assertIn("Vão 2 de 2 mensagens.", medido["contexto"])
+        self.assertIsInstance(medido["barra"], (int, float))
+        self.assertLessEqual(medido["barra"], 100)
+        self.assertRegex(medido["contexto"], r"\(\d+,\d%\)", "a porcentagem tem uma casa decimal, com vírgula")
+
+    def test_conversa_vazia_diz_que_so_vai_a_pergunta(self):
+        medido = rodar_painel({"conversas": LISTA})
+        self.assertTrue(medido["contexto"].startswith("Contexto: a conversa está vazia"), medido["contexto"])
+
+    def test_interrogacao_abre_a_lista_de_atalhos_e_esc_fecha(self):
+        abre = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "tecla_doc", "tecla": "?"}]})
+        self.assertFalse(abre["atalhosOculto"])
+        fecha = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "tecla_doc", "tecla": "?"},
+                                                             {"tipo": "tecla_doc", "tecla": "Escape"}]})
+        self.assertTrue(fecha["atalhosOculto"])
+
+    def test_interrogacao_dentro_de_campo_de_texto_nao_abre_a_lista(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "tecla_doc", "tecla": "?", "tagName": "TEXTAREA"}]})
+        self.assertTrue(medido["atalhosOculto"])
+
+    def test_ctrl_shift_o_comeca_conversa_nova(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(BASE_RAMO), "abrir": True,
+                               "acoes": [{"tipo": "tecla_doc", "tecla": "O", "ctrl": True, "shift": True}]})
+        self.assertEqual(medido["tituloConversa"], "Nova conversa")
+        self.assertNotIn("pergunta", medido["transcricaoCompleta"])
+        self.assertEqual(medido["status"], "PRONTA")
+
+    def test_ctrl_shift_c_copia_a_ultima_resposta(self):
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(BASE_RAMO), "abrir": True,
+                               "acoes": [{"tipo": "tecla_doc", "tecla": "C", "ctrl": True, "shift": True}]})
+        self.assertEqual(medido["copiados"], ["resposta antiga"])
+        self.assertEqual(medido["copiadoAviso"], "Última resposta copiada.")
+
+    def test_barra_foca_a_busca_da_conversa(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "tecla_doc", "tecla": "/"}]})
+        self.assertTrue(medido["buscaFocada"])
+        self.assertFalse(medido["pesquisaFocada"])
+
+    def test_tema_salvo_vale_ao_abrir_e_muda_pelo_seletor(self):
+        salvo = rodar_painel({"conversas": LISTA, "storage": {"inicial": {"agata-tema": "claro"}}})
+        self.assertEqual((salvo["tema"], salvo["temaSelect"]), ("claro", "claro"))
+        trocado = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "mudar", "id": "tema", "valor": "sistema"}]})
+        self.assertIn(["agata-tema", "sistema"], trocado["gravacoes"])
+        self.assertEqual(trocado["tema"], "escuro", "sem preferência clara do navegador, o sistema vale escuro")
+
+    def test_tema_sistema_claro_segue_o_navegador(self):
+        medido = rodar_painel({"conversas": LISTA, "claroSistema": True,
+                               "acoes": [{"tipo": "mudar", "id": "tema", "valor": "sistema"}]})
+        self.assertEqual(medido["tema"], "claro")
+
+    def test_tema_padrao_e_escuro_sem_nada_salvo(self):
+        self.assertEqual(rodar_painel({"conversas": LISTA})["tema"], "escuro")
+
+    def test_localstorage_com_erro_nao_derruba_a_tela(self):
+        medido = rodar_painel({"conversas": LISTA, "storage": {"lerErro": True, "gravarErro": True},
+                               "acoes": [{"tipo": "mudar", "id": "tema", "valor": "claro"}]})
+        self.assertEqual(medido["tema"], "claro", "a escolha vale nesta aba mesmo sem guardar")
+        self.assertEqual(medido["gravacoes"], [])
+        self.assertIn("status", medido)
 
 
 class LimitesDaUi(unittest.TestCase):
@@ -873,6 +1211,7 @@ class LimitesDaUi(unittest.TestCase):
         self.assertEqual(int(constantes["SETH_LIMITE_CONVERSA_BYTES"]), armazem.CONVERSA_LIMITE_BYTES)
         self.assertEqual(int(constantes["SETH_BUSCA_MAX_CARACTERES"]), armazem.BUSCA_TERMO_LIMITE)
         self.assertEqual(int(constantes["SETH_LIMITE_IMPORTACAO_BYTES"]), armazem.IMPORTACAO_LIMITE_BYTES)
+        self.assertEqual(int(constantes["SETH_FEEDBACK_MOTIVO_LIMITE"]), armazem.FEEDBACK_MOTIVO_LIMITE)
 
 
 if __name__ == "__main__":

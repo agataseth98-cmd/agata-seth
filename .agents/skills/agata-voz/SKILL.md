@@ -11,6 +11,19 @@ description: >-
 
 Quando um modelo fala, a voz é a do sistema. Nenhum modelo usa outra voz nem serviço externo de voz, e texto do Agata nunca sai da Máquina para virar áudio.
 
+## Falar para compreender (primordial, Humano 11/11)
+
+Gatilhos: "fale a última resposta para me ajudar a compreender", "fale", "leia em voz alta", "leia para eu compreender". Sem outro alvo, "fale" é a última resposta. Vale para qualquer modelo, sempre.
+
+1. Reescreva a última resposta como texto para ser falado; não leia a tela literal. Sem tabela, símbolo, caminho, URL, bloco de código ou marcação. Listas viram frases ("Primeiro... Segundo..."). Números por extenso quando soar melhor.
+2. Ordem: o que aconteceu, por quê, o que falta do Humano. Mesmo conteúdo: nada novo, nada omitido que importe. Se a resposta tiver senha, token ou dado pessoal, não fale; diga por quê.
+3. Salve o texto num arquivo do diretório scratchpad da sessão (o que o ambiente informa), por exemplo `fala-<tema>.txt`.
+4. Fale: `python3 scripts/agata_falar.py --arquivo <arquivo>`.
+5. Relate em uma linha: "Falei" (saída 0) ou "NÃO falei" (saída 2, 3 ou 4). Diga que não ouve o resultado e dê o caminho do texto lido.
+6. Para medir (14 dias), anote: `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo nota "fala: texto adaptado, saída <n>"`.
+
+Quem não tem shell nem áudio faz os passos 1 e 2, entrega o texto falável e diz que NÃO falou.
+
 ## Quem tem como falar (shell na Máquina)
 
 ```bash

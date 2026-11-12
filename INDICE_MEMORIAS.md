@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(994) DIÁRIO — 12/11/2026 · **Pacote 11/11 aplicado com a assinatura do Humano: as seis propostas (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) entram no canon numa só aplicação.**
 (993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
 (992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção História no painel (somente leitura, com o botão Ouvir), pasta historia/ com o Texto 1 do Tomo I e quarentena P-8 para historia/.**
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista de Importantes no painel (aba em Panorama, cartão, cache fora do repositório e trazer do Conselho).**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros (MEMÓRIAS, ONDE_ESTAMOS, âncoras e a proposta v1) e não aplica no main. Substituída pela v3 `lote3-processo-20261106`, só código.** Proposta `lote3-processo-20261106`.
 (966) DIÁRIO — 06/11/2026 · **Proposta lote2b (v2 do lote 2): substitui a v1 `lote2-processo-20261106`, com as correções da revisão do Codex e do auditor, a skill de inovação e o time de inovação.** Proposta `lote2b-processo-20261106`.
 (965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
-(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
+(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo …
 (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261 …
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, a …
 (961) DIÁRIO — 06/11/2026 · **Correção da entrada (960): o commit de aplicação ` …

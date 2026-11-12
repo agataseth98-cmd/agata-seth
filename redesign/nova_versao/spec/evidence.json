@@ -11,7 +11,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-05T00:24:59+00:00"
+    "at": "2026-11-11T22:40:32+00:00"
   },
   {
     "criterion": "escritas concorrentes no ledger preservam a cadeia",
@@ -23,9 +23,9 @@
       "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
     ],
     "returncode": 0,
-    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-05T00:25:00+00:00"
+    "at": "2026-11-11T22:40:32+00:00"
   },
   {
     "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
@@ -39,7 +39,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-05T00:25:00+00:00"
+    "at": "2026-11-11T22:40:32+00:00"
   },
   {
     "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
@@ -53,7 +53,21 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-05T00:25:00+00:00"
+    "at": "2026-11-11T22:40:33+00:00"
+  },
+  {
+    "criterion": "o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e `orcamento.py` usa as mesmas quatro categorias da spec",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::OrcamentoTests::test_valores_de_fabrica_e_quatro_categorias_da_spec"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.03s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:33+00:00"
   },
   {
     "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
@@ -67,7 +81,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.09s\n",
     "stderr": "",
-    "at": "2026-11-05T00:25:00+00:00"
+    "at": "2026-11-11T22:40:33+00:00"
   },
   {
     "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
@@ -81,6 +95,76 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.03s\n",
     "stderr": "",
-    "at": "2026-11-05T00:25:01+00:00"
+    "at": "2026-11-11T22:40:33+00:00"
+  },
+  {
+    "criterion": "nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_caminhos.py::CaminhosTests::test_recusa_symlink_que_aponta_para_fora"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:33+00:00"
+  },
+  {
+    "criterion": "papel só recebe rota que passou na prova e de família diferente do sintetizador",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::PapeisTests::test_revisor_e_de_familia_diferente_do_sintetizador"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:34+00:00"
+  },
+  {
+    "criterion": "o ensaio de retorno usa a rota alternativa quando a principal cai",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::RedundanciaTests::test_ensaio_de_retorno_usa_alternativa_quando_a_principal_cai"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:34+00:00"
+  },
+  {
+    "criterion": "o orçamento do turno esgota por rodadas, chamadas ou prazo",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_papeis_redundancia.py::OrcamentoTurnoTests::test_esgota_por_rodadas_chamadas_e_prazo"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:34+00:00"
+  },
+  {
+    "criterion": "as sete palavras andam só pelos passos previstos e não repetem o registro",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_sincronizar.py::SincronizarTests::test_propostas_andam_pelos_passos_e_a_segunda_rodada_nao_repete"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": "",
+    "at": "2026-11-11T22:40:34+00:00"
   }
 ]

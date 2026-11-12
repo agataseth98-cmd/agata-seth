@@ -36,6 +36,8 @@ import medicoes_painel  # noqa: E402
 import sdd_painel  # noqa: E402
 import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
+import historia_painel  # noqa: E402
+import importantes  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
@@ -55,6 +57,9 @@ CHAT_STREAM_LIMITE_BYTES = 131_072
 CHAT_STREAM_TIMEOUT_S = 120
 # Organização das conversas (lote 3, 09/11/2026): pedidos pequenos de fixar, pasta, marcador, pasta e nome.
 SETH_ORGANIZACAO_LIMITE_BYTES = 4096
+# Importantes (11/11/2026): pedido de criar, mudar estado, editar ou trazer do Conselho; corpo até 4096 bytes.
+IMPORTANTES_LIMITE_BYTES = 4096
+IMPORTANTES_ROTAS = ("/api/importantes", "/api/importantes/estado", "/api/importantes/editar", "/api/importantes/trazer")
 WIKI_RESULT_MAX = 12000
 # Memória compartilhada do Conselho (aba Conselho > Memória compartilhada): leitura do cache, n de 1 a 200.
 MEMORIA_CONSELHO_PADRAO = 40
@@ -116,6 +121,7 @@ _ASSETS = {
     "/operator_console/app.js": ("operator_console/app.js", "text/javascript; charset=utf-8"),
     "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
+    "/historia.js": ("historia.js", "text/javascript; charset=utf-8"),
 }
 # Telas antigas (painel unificado, spec 07/11/2026): link antigo cai na seção certa do /prototipo.
 _REDIRECTS = {
@@ -1104,6 +1110,10 @@ class Handler(BaseHTTPRequestHandler):
                 dados = _vault_item(item_id)
             body = json.dumps(dados, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
+        if self.path.split("?", 1)[0] == "/api/historia":
+            return self._historia_listar()
+        if self.path.startswith("/api/historia/texto?"):
+            return self._historia_texto()
         if self.path == "/api/frentes":
             # Somente leitura: caminho fixo a partir da raiz do repositório; o cliente não escolhe arquivo.
             try:
@@ -1144,6 +1154,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", json.dumps(pedidos).encode("utf-8"))
         if self.path.split("?", 1)[0] == "/api/conselho/memoria":
             return self._conselho_memoria()
+        if self.path == "/api/importantes":
+            return self._importantes_listar()
         if self.path == "/api/eventos":
             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
         if self.path == "/api/relay-council/catalog":
@@ -1206,6 +1218,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(421, "text/plain; charset=utf-8", b"invalid host")
         if self.path == "/api/abrir":
             return self._abrir_programa()
+        if self.path == "/api/historia/ouvir":
+            return self._historia_ouvir()
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
@@ -1223,6 +1237,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_organizacao(self.path)
         if self.path in ("/api/seth/lixeira/restaurar", "/api/seth/lixeira/purgar"):
             return self._seth_lixeira(self.path.endswith("/restaurar"))
+        if self.path in IMPORTANTES_ROTAS:
+            return self._importantes_escrita(self.path)
         if self.path == "/api/nova-versao/upload":
             return self._nova_versao_upload()
         if self.path not in {"/api/wiki/search", "/api/proposals/verify", "/api/sdd/executar", "/api/medicoes/executar", "/api/nova-versao/executar"} or (self.path == "/api/wiki/search" and not WIKI_LIBERADA):
@@ -1701,6 +1717,91 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(500, "text/plain; charset=utf-8", b"memoria indisponivel")
         dados = {"estado": "ok" if entradas else "vazio", "n": n, "entradas": entradas,
                  "observed_at": observed_at, "fresh_until": fresh_until}
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _importantes_listar(self) -> None:
+        """Importantes (11/11/2026): leitura da lista local. A checagem de origem já rodou em do_GET."""
+        corpo = json.dumps(importantes.listar(), ensure_ascii=False).encode("utf-8")
+        return self._send(200, "application/json; charset=utf-8", corpo)
+
+    def _responder_importante(self, rota: str, identificador, status: int, corpo: bytes,
+                              tipo: str = "text/plain; charset=utf-8") -> None:
+        """Toda resposta de escrita de importantes passa aqui: grava a linha do registro (sem conteúdo) e responde."""
+        importantes.registro_escrever(rota, identificador, status)
+        return self._send(status, tipo, corpo)
+
+    def _importantes_escrita(self, rota: str) -> None:
+        """Importantes (11/11/2026): criar, marcar, editar e trazer do cache do Conselho. Escrita exige origem do
+        painel (_escrita_permitida, como as conversas). Cada pedido, inclusive o recusado, gera uma linha no registro."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._responder_importante(rota, None, 403, b"cross-origin request denied")
+        raw_length = self.headers.get("Content-Length", "")
+        if not raw_length.isdecimal() or int(raw_length) > IMPORTANTES_LIMITE_BYTES:
+            return self._responder_importante(rota, None, 413, f"pedido acima de {IMPORTANTES_LIMITE_BYTES} bytes".encode("utf-8"))
+        try:
+            dados = json.loads(self.rfile.read(int(raw_length)).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._responder_importante(rota, None, 400, "pedido com JSON inválido".encode("utf-8"))
+        identificador = dados.get("id") if isinstance(dados, dict) else None
+        try:
+            if rota == "/api/importantes":
+                resultado = importantes.criar(dados)
+            elif rota == "/api/importantes/estado":
+                resultado = importantes.mudar_estado(dados)
+            elif rota == "/api/importantes/editar":
+                resultado = importantes.editar(dados)
+            else:
+                try:
+                    cache = _memoria_conselho_modulo()
+                except ImportError as erro:
+                    raise importantes.ErroImportantes(500, "cache do Conselho indisponível; nada foi trazido") from erro
+                resultado = importantes.trazer_do_conselho(cache)
+                identificador = None
+        except importantes.ErroImportantes as erro:
+            return self._responder_importante(rota, identificador, erro.status, erro.motivo.encode("utf-8"))
+        except OSError:
+            return self._responder_importante(rota, identificador, 500, "gravacao indisponivel; nada foi alterado".encode("utf-8"))
+        if rota != "/api/importantes/trazer":
+            identificador = resultado["id"]
+        return self._responder_importante(rota, identificador, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
+                                          "application/json; charset=utf-8")
+
+    def _historia_listar(self) -> None:
+        """Seção História (11/11/2026): tomos e textos de historia/, só leitura. A checagem de origem já rodou em do_GET."""
+        try:
+            dados = historia_painel.listar()
+        except historia_painel.ErroHistoria as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _historia_texto(self) -> None:
+        """Um texto da História. tomo e texto vêm na query e têm formato fixo (historia_painel.ler)."""
+        query = parse_qs(urlparse(self.path).query)
+        try:
+            dados = historia_painel.ler((query.get("tomo") or [""])[0], (query.get("texto") or [""])[0])
+        except historia_painel.ErroHistoria as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _historia_ouvir(self) -> None:
+        """Botão Ouvir da História: POST JSON {tomo, texto}, só da própria origem. Responde falou ou não falou."""
+        if (self.headers.get("Origin") != ALLOWED_ORIGIN
+                or self.headers.get("Sec-Fetch-Site") not in {"same-origin", "none"}
+                or self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json"):
+            return self._send(403, "text/plain; charset=utf-8", b"same-origin JSON required")
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal() or int(tamanho) > 512:
+            return self._send(400, "text/plain; charset=utf-8", b"invalid body size")
+        try:
+            pedido = json.loads(self.rfile.read(int(tamanho)) or b"{}")
+        except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+        if not isinstance(pedido, dict):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid request")
+        try:
+            dados = historia_painel.ouvir(pedido.get("tomo"), pedido.get("texto"))
+        except historia_painel.ErroHistoria as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
         return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
 
     def _grafo(self) -> None:

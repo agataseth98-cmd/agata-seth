@@ -38,11 +38,11 @@
     "cwd": null
   },
   {
-    "criterion": "o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma",
+    "criterion": "o `/prototipo` tem oito seções (panorama, conversa, conselho, sistema, conhecimento, historia, custos e qualidade) e um botão de menu para cada uma",
     "command": [
       "pytest",
       "-q",
-      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_sete_secoes"
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_oito_secoes"
     ],
     "cwd": null
   },
@@ -738,6 +738,459 @@
       "pytest",
       "-q",
       "redesign/painel_operacional/test_chat_ui.py::ConversaProtecao::test_lixeira_vazia_e_indisponivel_dizem_isso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "editar uma mensagem e reenviar, ou regenerar uma resposta, não apaga a resposta antiga: ela vira outra versão da conversa, navegável com \"< 1/2 >\", e as setas seguem o ramo escolhido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_editar_cria_ramo_e_guarda_a_resposta_antiga",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_setas_trocam_de_versao_e_seguem_o_ramo_escolhido",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_regenerar_guarda_a_resposta_antiga_como_versao",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_com_ramo_grava_nos_e_le_so_o_caminho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "ramificar a partir de qualquer mensagem cria conversa nova com o histórico até ali, guarda de onde saiu e mostra a origem; em conversa temporária o botão não aparece",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_ramificar_aqui_cria_conversa_com_o_caminho_ate_a_mensagem",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_conversa_ramificada_mostra_de_onde_saiu_e_abre_a_original",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_ramificar_em_conversa_temporaria_nao_aparece",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamificadaTests::test_origem_da_ramificacao_grava_e_le",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamificadaTests::test_origem_fora_do_formato_sai_sem_recusar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a árvore de ramos é validada (pai antes do filho, id no formato, papel conhecido, até 400 nós e 200 mensagens no caminho); árvore inválida responde 400 e nada é gravado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_invalida_e_recusada",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_com_caminho_longo_demais_e_recusada",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_com_nos_demais_tem_motivo_proprio",
+      "redesign/painel_operacional/test_conversas_lote4.py::RotasTests::test_post_com_arvore_invalida_recusa_com_400"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "conversa sem ramo continua gravada no formato de sempre, conversa salva antes do lote 4 abre igual, e árvore ilegível na leitura cai no caminho de mensagens",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_sem_ramo_grava_no_formato_de_sempre",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_sem_ramo_volta_a_lista",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_arvore_ilegivel_na_leitura_cai_no_caminho_mensagens",
+      "redesign/painel_operacional/test_conversas_lote4.py::RamosTests::test_conversa_antiga_sem_campos_novos_le_igual"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "renomear uma conversa com ramo grava a árvore inteira, sem perder as versões",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRamos::test_renomear_conversa_com_ramo_grava_a_arvore_inteira",
+      "redesign/painel_operacional/test_conversas_lote4.py::RotasTests::test_post_com_ramo_e_get_devolve_a_arvore"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o botão Parar e a tecla Esc cancelam o fetch do stream; o texto que já chegou fica na tela e na conversa salva, marcado como interrompida, sem repetir a pergunta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_mantem_o_texto_recebido_marcado_interrompida",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_esc_para_a_resposta_em_curso",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_antes_do_primeiro_texto_deixa_resposta_vazia_marcada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto devolve a pergunta ao campo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_antes_do_primeiro_texto_deixa_resposta_vazia_marcada",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_no_meio_do_stream_mantem_o_texto_marcado",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_sem_texto_devolve_a_pergunta_ao_campo",
+      "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_interrompida_e_feedback_so_valem_para_resposta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "continuar pede à Seth com a mensagem \"Continue de onde parou\" e anexa o texto à mesma resposta, com marca de continuação; sem texto na resposta, o botão não aparece",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContinuar::test_continuar_pede_a_seth_e_anexa_na_mesma_resposta",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContinuar::test_continuar_so_aparece_com_texto_na_resposta",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContinuar::test_continuacao_interrompida_mantem_o_que_chegou",
+      "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_cortes_validos_entram_em_ordem_sem_repetir"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o feedback de boa resposta e de resposta ruim, com motivo opcional, fica salvo na conversa e não sai do navegador; em conversa temporária não grava",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFeedback::test_feedback_util_e_nao_util_com_motivo_vai_salvo_na_conversa",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFeedback::test_clicar_de_novo_tira_o_feedback",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFeedback::test_feedback_em_conversa_temporaria_nao_grava",
+      "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_feedback_interrompida_e_cortes_sobrevivem_ao_reabrir",
+      "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_marcas_fora_do_formato_saem_sem_recusar_a_conversa",
+      "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_motivo_do_feedback_e_cortado_em_200"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a barra de contexto mostra, em português simples, quantos caracteres e KB a próxima pergunta leva, o limite do painel e quantas mensagens vão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_barra_de_contexto_mostra_caracteres_e_mensagens_em_portugues",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_conversa_vazia_diz_que_so_vai_a_pergunta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "atalhos de teclado: ? mostra a lista (Esc fecha), Ctrl+Shift+O começa conversa nova, Ctrl+Shift+C copia a última resposta, / foca a busca; atalhos de uma tecla não disparam dentro de campo de texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_interrogacao_abre_a_lista_de_atalhos_e_esc_fecha",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_interrogacao_dentro_de_campo_de_texto_nao_abre_a_lista",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_ctrl_shift_o_comeca_conversa_nova",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_ctrl_shift_c_copia_a_ultima_resposta",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_barra_foca_a_busca_da_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o tema escuro é o padrão; claro e sistema trocam a paleta pelos tokens do :root; a escolha fica em localStorage com try/catch, e sem armazenamento a tela segue",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_tema_salvo_vale_ao_abrir_e_muda_pelo_seletor",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_tema_sistema_claro_segue_o_navegador",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_tema_padrao_e_escuro_sem_nada_salvo",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaContextoAtalhosTema::test_localstorage_com_erro_nao_derruba_a_tela"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a exportação JSON leva os ramos e a origem; o Markdown traz só o caminho e avisa; a importação preserva os ramos sem duplicar; a busca e a contagem da lista veem só o caminho ativo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::ExportarImportarTests::test_json_leva_os_ramos_e_a_origem_da_ramificacao",
+      "redesign/painel_operacional/test_conversas_lote4.py::ExportarImportarTests::test_markdown_so_traz_o_caminho_e_avisa",
+      "redesign/painel_operacional/test_conversas_lote4.py::ExportarImportarTests::test_importar_json_com_ramos_preserva_a_arvore",
+      "redesign/painel_operacional/test_conversas_lote4.py::ExportarImportarTests::test_importar_de_novo_nao_duplica",
+      "redesign/painel_operacional/test_conversas_lote4.py::BuscaListaTests::test_busca_ve_so_o_caminho_ativo",
+      "redesign/painel_operacional/test_conversas_lote4.py::BuscaListaTests::test_lista_conta_o_caminho_ativo",
+      "redesign/painel_operacional/test_conversas_lote4.py::RotasTests::test_exportacao_pela_rota_leva_os_ramos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os controles novos têm id em `prototipo.html`; a Conversa continua sem `style=` nem atributo `on*`, e o JS da Conversa não usa innerHTML",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLote4Html::test_controles_do_lote4_existem_com_id",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLote4Html::test_parar_comeca_escondido_e_atalhos_comecam_fechados",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaLote4Html::test_seletor_de_tema_tem_as_tres_escolhas",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_style",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaHtml::test_secao_conversa_sem_atributo_on",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_bloco_conversa_sem_innerhtml",
+      "redesign/painel_operacional/test_chat_ui.py::LimitesDaUi::test_constantes_da_ui_sao_as_do_servidor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a paleta clara é gerada dentro do mesmo `:root`: nenhuma cor literal fora dele, nenhum `var()` sem definição, e toda classe do HTML tem regra de estilo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_tokens_em_root_e_sem_cor_literal_fora",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_toda_classe_do_html_tem_regra_no_css"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "apagar uma conversa com ramos leva a árvore para a Lixeira junto com o resto, e restaurar devolve as versões de outros ramos com a conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::LixeiraComRamoTests::test_apagar_leva_a_arvore_para_a_lixeira_e_restaurar_devolve"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`GET /api/importantes` devolve `itens` com abertos primeiro, `contagem` e `estado`; arquivo ausente vale `vazio` e arquivo fora do formato vale `ilegivel`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_lista_mostra_abertos_primeiro_e_o_mais_recente_antes",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_arquivo_ilegivel_nao_e_sobrescrito",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_item_fora_do_formato_torna_o_arquivo_ilegivel",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_get_lista_vazia_e_com_itens"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "criar, marcar feito, descartar, reabrir e editar gravam o arquivo local por troca atômica; descartado fica guardado e nenhum item é apagado de fato",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_grava_item_aberto_de_origem_humano",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_marcar_feito_grava_a_hora_e_reabrir_limpa",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_descartado_nao_some_da_lista_e_volta_com_reabrir",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_editar_muda_texto_e_nota_e_nota_vazia_limpa",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_escrita_nao_deixa_temporario_e_o_arquivo_tem_so_o_formato"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "texto recusado (vazio, acima de 4000 caracteres, com caractere nulo) ou campo fora do contrato responde 400 e não grava nada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_recusa_texto_vazio_longo_ou_com_nulo",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_criar_recusa_campo_que_nao_existe_no_contrato",
+      "redesign/painel_operacional/test_importantes.py::ArmazemTests::test_estado_invalido_id_invalido_e_item_inexistente_recusam",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_erros_de_pedido_respondem_400_404_413_e_nao_gravam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`Trazer do Conselho` lê o cache sem escrever nele, traz só as entradas `IMPORTANTE`, não duplica nem traz de novo a entrada descartada, e não traz entrada com segredo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_traz_so_as_marcadas_com_origem_cache_e_numero",
+      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_nao_duplica_e_nao_traz_de_novo_o_descartado",
+      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_segredo_nao_e_trazido_e_e_contado",
+      "redesign/painel_operacional/test_importantes.py::TrazerTests::test_com_o_filtro_real_do_cache_dado_pessoal_vira_marca_e_o_cache_nao_muda",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_trazer_pela_rota_usa_o_cache_do_conselho_sem_escrever_nele"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as escritas de importantes respondem 403 sem origem do painel ou com origem de outro site, 413 acima de 4096 bytes, e cada pedido, inclusive o recusado, gera uma linha no registro sem texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_escrita_sem_cabecalhos_responde_403_nao_grava_e_registra",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_origem_de_outro_site_recusa_mesmo_com_a_do_painel_no_outro_cabecalho",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_criar_marcar_editar_pela_rota_e_registro_sem_texto",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_registro_so_acrescenta",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_erros_de_pedido_respondem_400_404_413_e_nao_gravam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a aba Importantes e o cartão do Panorama mostram estados carregando, vazio e erro, e não mostram lista antiga como atual quando a leitura falha ou o arquivo é ilegível",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_mostra_abertos_primeiro_e_o_cartao_conta_abertos",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_vazia_mostra_estado_vazio_e_cartao_zero",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_falha_de_leitura_mostra_erro_e_nao_mostra_lista_antiga",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_lista_ilegivel_mostra_erro_sem_itens"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a aba envia criar, marcar, reabrir, descartar, editar e trazer pelas rotas de importantes, e mostra o motivo da recusa (403, 404, 409 e 500)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_guardar_envia_o_texto_limpa_o_campo_e_recarrega",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_marcar_feito_e_descartar_chamam_o_estado_certo",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_recusa_403_mostra_aviso_e_a_lista_volta_do_servidor",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_conflito_409_mostra_o_motivo_do_servidor",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_editar_envia_texto_e_nota_e_volta_para_a_lista",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_trazer_mostra_a_contagem_e_reabilita_o_botao",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_erro_500_no_pedido_nao_altera_a_lista_e_avisa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o texto de um item sai como texto puro, sem innerHTML, e o bloco novo não tem `style=`, `on*` nem cor literal fora de `:root`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes_ui.py::UiImportantesTests::test_texto_do_item_sai_como_texto_puro",
+      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_bloco_novo_nao_usa_html_bruto_nem_atributo_de_estilo",
+      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_html_da_aba_e_do_cartao_sem_style_nem_on",
+      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_cores_do_bloco_novo_so_por_token"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tela de Importantes chama só rotas que existem no servidor, e as quatro rotas estão em `IMPORTANTES_ROTAS`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes.py::RotasTests::test_tela_tem_a_lista_e_so_chama_as_rotas_que_existem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os arquivos da entrega de importantes (tela, módulo, testes e spec) não têm emoji",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_importantes_ui.py::EstaticoImportantesTests::test_sem_emoji_nos_arquivos_da_entrega"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`GET /api/historia` lista os tomos e os textos de `historia/` com o frontmatter (tomo, título, período, autor, estado e protocolo), sem o corpo do texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_lista_tomos_e_textos_com_frontmatter"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`GET /api/historia/texto` devolve o frontmatter separado e o corpo do texto; `tomo` e `texto` têm formato fixo e o cliente não escolhe caminho: fora do formato, 400; inexistente ou link para fora de `historia/`, 404",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_texto_devolve_frontmatter_e_corpo",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_caminho_do_cliente_e_recusado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`historia/` ausente ou sem texto dá estado `vazio` com 200, e não erro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_pasta_vazia_ou_ausente_da_estado_vazio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as leituras da História e o Ouvir recusam origem cruzada com 403; o Ouvir aceita só JSON da própria origem e corpo até 512 bytes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_leituras_recusam_origem_cruzada",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_so_aceita_json_da_propria_origem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`historia.js` é arquivo externo servido em `/historia.js`, e a seção História não tem script nem estilo inline",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_historia_js_servido_como_arquivo_externo",
+      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_secao_historia_na_navegacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Ouvir manda só o corpo do texto, sem o frontmatter, para `scripts/agata_falar.py --arquivo`, e responde `falou` verdadeiro só com código de saída 0",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_responde_falou_pelo_exit_code_e_manda_so_o_corpo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com a voz do sistema sem resposta, o Ouvir responde `falou` falso com motivo que diz `não falei`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_sem_voz_diz_que_nao_falou"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "uma fala por vez: com outra em curso, o Ouvir responde 429 e não chama a voz; texto inexistente não chama a voz",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::RotasHistoriaTests::test_ouvir_recusa_fala_em_curso_e_texto_inexistente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o botão Ouvir chama `POST /api/historia/ouvir` com `tomo` e `texto` do texto aberto, fica desligado sem texto aberto e mostra se falou ou não",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_ouvir_chama_a_rota_e_mostra_o_resultado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o texto da História vira nós com createElement e createTextNode: `historia.js` não usa innerHTML, outerHTML, insertAdjacentHTML, document.write nem eval, e tag HTML no texto sai como texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_markdown_vira_nos_sem_html",
+      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_historia_js_sem_html_dinamico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as marcas `[medido]`, `[relato]` e `[inferência]` viram etiquetas com classe própria e cor por token do `:root`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_marcas_tem_regra_com_tokens",
+      "redesign/painel_operacional/test_historia.py::UiHistoriaTests::test_marcas_e_titulos_do_texto_real"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o `/prototipo` tem a seção `historia` depois de `conhecimento`, escondida até ser escolhida, com estados carregando, vazio e erro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::TelaHistoriaTests::test_secao_historia_na_navegacao",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_prototipo_tem_so_oito_secoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o texto 1 do Tomo I, em `historia/` do checkout, aparece na lista e tem as marcas de origem",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_historia_do_repo_tem_o_texto_1"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`scripts/perimetro/p08_quarentena.sh` põe `historia/` na quarentena do P-8, e a História não muda sem assinatura",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_p8_protege_historia"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os arquivos da História não têm emoji",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_sem_emoji_na_historia"
     ],
     "cwd": null
   }

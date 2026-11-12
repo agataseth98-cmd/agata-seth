@@ -20,18 +20,21 @@ HERE = Path(__file__).resolve().parent
 SPEC = HERE / "spec" / "spec.md"
 HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
 CSS = (HERE / "prototipo.css").read_text(encoding="utf-8")
-SCRIPTS = ["prototipo.js", "abrir.js", "nova_versao.js", "conselho-rede/app.js", "operator_console/app.js"]
+SCRIPTS = ["prototipo.js", "abrir.js", "nova_versao.js", "conselho-rede/app.js", "operator_console/app.js", "historia.js"]
 JS = {arq: (HERE / arq).read_text(encoding="utf-8") for arq in SCRIPTS}
 JS_TODOS = "\n".join(JS.values())
 
-SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
+SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"]
 SUBS_POR_SECAO = {
-    "panorama": ["panorama", "visao", "capacidades", "plano", "frentes"],
+    # importantes: aba do Panorama criada em 11/11/2026 (pedido do Humano); é a única mudança nesta lista.
+    "panorama": ["panorama", "visao", "capacidades", "plano", "frentes", "importantes"],
     "conversa": ["conversa"],
     # conselho-memoria: aba Memória compartilhada, pedida pelo Humano em 07/11/2026 (leitura do cache do Conselho).
     "conselho": ["conselho", "conselho-memoria"],
     "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes"],
     "conhecimento": ["memoria", "grafo", "documentacao", "nv-alexandria", "nv-acervo"],
+    # historia: seção nova de 11/11/2026 (texto da História, só leitura, e o Ouvir); ver test_historia.py.
+    "historia": ["historia"],
     "custos": ["nv-orcamento", "nv-tarifas"],
     "qualidade": ["operator-console", "qualidade", "sdd", "lacunas", "nv-avaliacao", "nv-sentidos"],
 }
@@ -218,7 +221,7 @@ class RotasDaTelaUnicaTests(ServidorDeTeste):
 
 
 class TelaUnicaTests(ServidorDeTeste):
-    def test_prototipo_tem_so_sete_secoes(self):
+    def test_prototipo_tem_so_oito_secoes(self):
         e = estrutura()
         self.assertEqual(e.secoes, SECOES)
         self.assertEqual(e.botoes_menu, SECOES)
