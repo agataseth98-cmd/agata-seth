@@ -26,7 +26,7 @@ Você **nunca** roda `scripts/aprovar.sh` (a chave é do Humano) e **nunca** usa
 3. `git checkout -b aplica/<nome>`; `git apply propostas/<nome>.diff`;
    `git mv propostas/<nome>.diff propostas/aplicadas/`; `mv propostas/APROVADO-<nome> propostas/aplicadas/`.
 4. Se a mudança vale fora do repo (unit em `~/.config/systemd/user`, compose em `~/librechat`, config do
-   Goose): backup do runtime, copie, `cmp` runtime × repo, recarregue, e **prove pelo caminho real**.
+   OpenCode): backup do runtime, copie, `cmp` runtime × repo, recarregue, e **prove pelo caminho real**.
 5. Registre (abaixo), `git add` só os arquivos certos, commit, push e abra PR de aplicação. O Humano junta o PR de aplicação.
 
 ## Registrar em MEMÓRIAS

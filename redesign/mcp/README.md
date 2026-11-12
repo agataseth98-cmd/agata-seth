@@ -3,7 +3,7 @@
 **Tarefa:** P0-02 (Fase 0). **Branch:** `redesign`. **Não é canon.**
 
 Expõe as verificações determinísticas **read-only** do Agata como tools MCP, para que
-qualquer executor (sessão Claude, Codex, Qwen Coder, Goose, humano) dirija a camada de
+qualquer executor (sessão Claude, Codex, Qwen Coder, OpenCode ainda não medido, humano) dirija a camada de
 verificação de forma idêntica. É a cola que faz o handoff funcionar.
 
 ## Invariantes
@@ -66,7 +66,7 @@ latência do GitHub (timeout interno de 180 s → `fetch_exit_code: 124`). Um cl
 deve pôr timeout agressivo nessa tool; as outras quatro são locais (timeout interno 120 s)
 e respondem rápido.
 
-Um cliente MCP (Claude Code, Goose, Cursor, …) aponta para esse comando como servidor
+Um cliente MCP (Claude Code, OpenCode, Cursor, …) aponta para esse comando como servidor
 stdio. Exemplo de entrada no `mcp.json` / config equivalente do cliente:
 
 ```json

@@ -64,8 +64,13 @@ def _estado_sentidos() -> dict:
         servidor = "no ar (porta 20137, LibreChat)"
     except Exception:  # noqa: BLE001
         servidor = "parado (sobe com o sistema)"
+    import seth_voz  # noqa: E402
+    try:
+        voz = seth_voz.resumo_voz()  # só lê o /health do piper e o último uso; não liga o serviço
+    except Exception:  # noqa: BLE001 — a linha da voz não derruba a página Sentidos
+        voz = "piper pt_BR-agata-last · estado não lido agora"
     return {"ouvido": {"principal": ouvido.MODELO, "reserva": "whisper (iGPU, porta 20130, sob demanda)", "servidor": servidor,
-                       "voz": "piper pt_BR-agata-last (inalterada)"},
+                       "voz": voz},
             "ultima_medicao": {k: ult.get(k) for k in ("run_id", "inicio", "fim", "estado", "resumo")} if ult else None}
 
 

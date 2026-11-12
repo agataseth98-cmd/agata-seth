@@ -101,7 +101,7 @@ catálogo, distinguidas pelo `defaultModel`/porta, não por um `provider` custom
 | Modelo | Porta | RAM (Q4_K_M) | Papel | Ajuste de offload |
 |---|---|---|---|---|
 | `llama-cpp/nemotron-3.5-lightning` | 20142 | **23,7GB** (Q4_K_M, medido — corrigido de um ~19GB citado antes, de um quant Q4_0 diferente) | Geral/conversação — tier 0 do `seth-livre` (LibreChat) | **`--n-cpu-moe 44`**, confirmado pela bancada. `36` (copiado do Qwen3-30B-A3B) deu OOM ao carregar. `42` passou no `llama-bench` (que testa com prompt/gen curtos, sem reservar o `-c 8192` inteiro) mas **falhou no servidor real** com `-c 8192` — 1,1GB faltando no buffer de computação. `llama-bench` não é proxy confiável de VRAM do servidor real quando o contexto configurado é grande; só o teste com o `-c` de produção prova. `44` é o mínimo real que carrega com `-c 8192`: **75,2 tok/s prompt-processing, 24,6 tok/s geração** (`llama-bench -p 128 -n 128 -r 3`), 7081MiB de VRAM (~86%, mais apertado que os ~76% do Qwen3-30B-A3B original). **Precisa de `max_tokens` alto** — mesmo padrão do Gemini: com 400 devolveu vazio (`finish=length`, todo o orçamento em reasoning); com 3000 respondeu certo usando só 622 no total. `MAX_TOKENS_POR_MODELO["llama-cpp/nemotron-3.5-lightning"] = 6000` no `conselho_remoto.py`. Testado ao vivo direto, pelo OmniRoute e pelo combo `seth-livre`. |
-| `llama-cpp/qwen3-coder-30b-a3b` | 20143 | 17,3GB (Q4_K_M, medido) | Código — tier 0 do `seth-codigo` (Goose) e do `seth-pesado` | `--n-cpu-moe 36` (mesmo do Qwen3-30B-A3B original, mesmo tamanho de modelo) — **102,2 tok/s prompt-processing, 23,7 tok/s geração** (`llama-bench`), 6967MiB de VRAM (~85%) com `-c 16384`. Testado ao vivo: 200, `finish=stop`, resposta de código correta, margem mais apertada que o Qwen3-30B-A3B original (~1,2GB de folga contra ~1,6GB). |
+| `llama-cpp/qwen3-coder-30b-a3b` | 20143 | 17,3GB (Q4_K_M, medido) | Código — tier 0 do `seth-codigo` (consumidor Goose até 07/11/2026) e do `seth-pesado` | `--n-cpu-moe 36` (mesmo do Qwen3-30B-A3B original, mesmo tamanho de modelo) — **102,2 tok/s prompt-processing, 23,7 tok/s geração** (`llama-bench`), 6967MiB de VRAM (~85%) com `-c 16384`. Testado ao vivo: 200, `finish=stop`, resposta de código correta, margem mais apertada que o Qwen3-30B-A3B original (~1,2GB de folga contra ~1,6GB). |
 | `llama-cpp/phi-4-mini` | 20145 | 2,5GB (Q4_K_M, medido) | Leve/rápido — tier 0 do `seth-rapido` | denso, `-ngl 999` sem offload de MoE (não é MoE) — cabe inteiro na GPU. **4097 tok/s prompt-processing, 86,5 tok/s geração** (`llama-bench`). Testado ao vivo: 200, `finish=stop`, sem reasoning burn. |
 
 | `llama-cpp/gpt-oss-20b` | 20144 | 11,3GB (MXFP4, nativo — medido) | Agentic/tool-use — tier 2 do `seth-pesado` | `--n-cpu-moe 20` — **145 tok/s prompt-processing, 21,5 tok/s geração** (`llama-bench`), 3411MiB de VRAM (~42%, o mais folgado dos 4 locais). Testado ao vivo: direto, via OmniRoute e via `seth-pesado`, `finish=stop`, resposta correta. |
@@ -156,7 +156,7 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
     abaixo do limiar: volta a heurística por tamanho acima. O Jev (`winnow:e4b`) virou
     a **sombra do Laya**: onde os dois discordam, o caso vai para `avaliar_decisor.py`.
     Código: `redesign/router/seth_gateway.py`, `_rota_laya` e `_sombra_rota`.
-- **Goose** (`~/.config/goose/config.yaml`, `model: seth-codigo`, 20/09/2026 —
+- **Goose** (saiu do sistema em 07/11/2026; histórico: `~/.config/goose/config.yaml`, `model: seth-codigo`, 20/09/2026 —
   **antes** apontava pra `auto/coding`, um alias que o próprio PROJETO.md já
   documentava como apodrecido desde (390); nunca tinha sido atualizado pro sistema de
   combos novo): sempre `seth-codigo`, sem heurística — Goose é sempre trabalho de
@@ -198,7 +198,7 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
 | 1 | `gemini/gemini-2.5-flash` | estável, 0,8 s; teto ~20 req/dia |
 | 2 | `ollama-local/qwen3.5-9b-64k:latest` | fundo local final, sempre disponível (voltou em 25/10/2026: o MoE inventava estado com o prompt real) |
 
-### `seth-codigo` (Goose)
+### `seth-codigo` (consumidor: Goose até 07/11/2026; OpenCode sem medição)
 | ordem | modelo | por quê |
 |---|---|---|
 | 0 | `mistral/codestral-latest` | **novo 24/09 (546)** — especialista em código, 0,44 s, tool-call OK |

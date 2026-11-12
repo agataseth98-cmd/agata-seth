@@ -35,6 +35,7 @@
 - Lote 4 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): editar e reenviar, regenerar e ramificar, com ramos navegáveis ("< 1/2 >"); Parar; Continuar; feedback de boa e de ruim resposta; barra de contexto; atalhos de teclado; tema claro, escuro ou do sistema. Contrato em Rotas de API e critérios no fim desta seção. Nenhuma rota nova de API; o gateway não muda.
 - Importantes (11/11/2026, pedido do Humano: "importantes no painel"): aba Importantes dentro de Panorama e cartão "Importantes: N abertos" no Panorama. Lista local de ideias e pendências que o Humano manda guardar: criar, marcar feito, descartar, reabrir e editar; nada é apagado de fato. Trazer as entradas marcadas com IMPORTANTE do cache do Conselho, só leitura. Contrato em Rotas de API e critérios no fim da seção de Critérios.
 - História (11/11/2026, pedido do Humano): seção `historia` no `/prototipo`, com o índice de tomos e a leitura dos textos de `historia/` do checkout (só leitura), e o botão Ouvir, que lê o texto com a voz do sistema. Contrato em Rotas de API (bloco História) e critérios no fim da seção de Critérios.
+- Voz da Seth (11/11/2026, pedido do Humano, paridade com o LibreChat): ler em voz alta (botão Ouvir em cada resposta e modo conversa), ditado pelo microfone e linha da voz na página Sentidos. Tudo com a voz do sistema (`pt_BR-agata-last`, pelo `scripts/agata_falar.py`, sem editar o script). Bloco Voz da Seth abaixo.
 
 ## Fora desta versão
 
@@ -116,6 +117,14 @@
   - `GET /api/historia/texto?tomo=<tomo-NN>&texto=<NN-titulo>` devolve `frontmatter` (pares `chave: valor` do bloco inicial, sem as aspas externas) e `corpo` (o texto sem o bloco). Fora do formato, 400: o cliente não escolhe caminho. Inexistente ou link para fora de `historia/`, 404. Acima de 65536 bytes, 413.
   - `POST /api/historia/ouvir` com `{tomo, texto}` (até 512 bytes) lê o corpo com `scripts/agata_falar.py --arquivo`, sem o frontmatter, e responde `falou` (verdadeiro só com código de saída 0) e `motivo`. Uma fala por vez: com outra em curso, 429. Só aceita JSON da própria origem: outra origem ou outro tipo, 403.
   - As leituras da História recusam origem cruzada com 403, como as demais de `/api/*`.
+
+- Voz da Seth (11/11/2026). Tudo com a voz do sistema (piper `pt_BR-agata-last`, pelo `scripts/agata_falar.py`); nenhuma outra voz, e o texto do Agata não sai da Máquina.
+  - `POST /api/seth/ouvir` com `{texto}` (pedido até 65536 bytes) fala por parágrafo e responde `falou` (verdadeiro se pelo menos um trecho foi tocado), `completo`, `codigo` (`completo`, `parado`, `falha`, `texto`, `voz` ou `player`), `trechos_falados`, `trechos` e `motivo` em português simples. Texto que passa de 12.000 caracteres depois do preparo não é lido. Demora o tempo da leitura. Com outra leitura em curso (Seth ou História): 429. Escrita: 403 sem origem do painel.
+  - `POST /api/seth/ouvir/parar`: pede a parada, que vale entre trechos (o trecho que está tocando termina). Sem leitura, responde `falando` falso e não faz nada. Escrita: 403 sem origem do painel.
+  - `GET /api/seth/ouvir`: só leitura, com `falando`, `trecho`, `trechos`, `ultimo_uso` e `ultimo_motivo` (em memória, desde o início do painel). Origem cruzada: 403.
+  - Serviço: quem fala liga o `piper-tts.service` se estiver parado e desliga depois, só se foi ele que ligou. Piper com modelo diferente de `pt_BR-agata` não fala (`codigo` `voz`).
+  - `POST /api/seth/ditado`: corpo cru do áudio do navegador (`Content-Type` de áudio, até 2 MB; o cliente para em 60 s). O painel repassa a `POST /v1/audio/transcriptions` do `servidor_ouvido` (127.0.0.1:20137) e responde `{texto}` (até 4000 caracteres). Erros em JSON `{erro}`: 403 origem, 411 sem tamanho, 413 grande, 415 não é áudio, 422 sem fala ou áudio não processado, 429 ocupado, 502 formato, 503 ouvido fora do ar ou sem motor. Não liga o ouvido.
+  - Página Sentidos: a linha `voz` vem de `seth_voz.resumo_voz()`, que só lê o `/health` do piper e o último uso.
 
 ### Ativos servidos
 
@@ -389,6 +398,20 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] o texto de um item sai como texto puro, sem innerHTML, e o bloco novo não tem `style=`, `on*` nem cor literal fora de `:root`
 - [ ] a tela de Importantes chama só rotas que existem no servidor, e as quatro rotas estão em `IMPORTANTES_ROTAS`
 - [ ] os arquivos da entrega de importantes (tela, módulo, testes e spec) não têm emoji
+- [ ] o botão Ouvir de cada resposta da Seth manda o texto a `POST /api/seth/ouvir`; a mensagem do usuário não tem Ouvir
+- [ ] o resultado do Ouvir diz falei ou NÃO falei com o motivo que o painel devolve, em português simples, e nunca mostra sucesso quando não falou
+- [ ] a fala é por parágrafo, com a voz do sistema (`pt_BR-agata-last`), usando o preparo e o serviço de `scripts/agata_falar.py`; modelo diferente no piper não fala
+- [ ] Parar interrompe a leitura entre trechos e não pede o trecho seguinte; sem leitura em curso, Parar e Esc não chamam o painel
+- [ ] o piper só é desligado por quem o ligou, e ler o estado da voz não liga o serviço
+- [ ] uma leitura por vez no painel: a Seth e a História dividem a trava, e a segunda leitura responde 429
+- [ ] as rotas de voz recusam origem cruzada com 403, respondem 413 acima do tamanho e 400 para JSON ruim; o GET do estado só lê
+- [ ] o ditado grava o microfone pelo navegador, manda o áudio só à rota do painel, e o texto entra no campo sem ser enviado à Seth
+- [ ] o ditado para em 60 segundos, recusa áudio acima de 2 MB e diz em português o erro de permissão, de microfone, de ouvido fora do ar e de áudio sem fala
+- [ ] a rota de ditado repassa o áudio só ao `servidor_ouvido` local (127.0.0.1:20137), em multipart, e devolve `texto` limitado a 4000 caracteres
+- [ ] modo conversa vem desligado, guarda a preferência com try/catch, lê cada resposta concluída e, com leitura em curso, para a atual e lê a mais nova depois
+- [ ] a linha `voz` da página Sentidos mostra piper no ar ou parado, o último uso e aviso se o modelo não é a voz do sistema; só lê
+- [ ] a CSP do painel segue igual (sem `media-src`); o JS e o HTML da voz são externos ou de texto, sem HTML dinâmico, sem atributo inline e sem emoji
+- [ ] a preferência do modo conversa fica fora do bloco da Conversa, e o bloco da Conversa não guarda nada em localStorage
 
 ## Desenho e alternativas
 
@@ -503,6 +526,11 @@ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem
 - `historia_painel.py`
 - `historia.js`
 - `test_historia.py`
+- `seth_voz.py`
+- `seth_ditado.py`
+- `test_seth_voz.py`
+- `test_seth_ditado.py`
+- `test_voz_ui.py`
 - `conselho-rede/`
 - `relay-extension-v2/`
 - `operator_console/`

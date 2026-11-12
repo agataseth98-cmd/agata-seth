@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
-# Inicia a Seth para AGENTE/CÓDIGO (Goose no terminal). Hidratada pelo :20126.
+# Inicia a Seth para AGENTE/CÓDIGO (OpenCode no terminal, agente de terminal de primeira classe). Hidratada pelo :20126.
 set -e
 systemctl --user start agata.target 2>/dev/null || true
 systemctl --user start seth-gateway.service
-# abre um terminal rodando goose (tenta os mais comuns do KDE/CachyOS)
+# OpenCode: o binário do PATH; sem ele no PATH, o instalador oficial o deixa em ~/.opencode/bin.
+OPENCODE="$(command -v opencode || true)"
+[ -n "$OPENCODE" ] || OPENCODE="$HOME/.opencode/bin/opencode"
+if [ ! -x "$OPENCODE" ]; then
+  echo "OpenCode não encontrado (nem no PATH, nem em ~/.opencode/bin) -- a instalação é passo manual do Humano"
+  exit 1
+fi
+# abre dentro de ~/agata: AGENTS.md da raiz e skills do projeto (OpenCode não medido nesta versão)
+printf -v CMD 'cd %q && exec %q' "$HOME/agata" "$OPENCODE"
+# abre um terminal rodando o OpenCode (tenta os mais comuns do KDE/CachyOS)
 for T in konsole alacritty kitty gnome-terminal xterm; do
   command -v "$T" >/dev/null || continue
   case "$T" in
-    konsole)        exec "$T" -e bash -lc 'goose session' ;;
-    gnome-terminal) exec "$T" -- bash -lc 'goose session' ;;
-    *)              exec "$T" -e bash -lc 'goose session' ;;
+    gnome-terminal) exec "$T" -- bash -lc "$CMD" ;;
+    *)              exec "$T" -e bash -lc "$CMD" ;;
   esac
 done
-echo "nenhum terminal encontrado -- rode: goose session"
+echo "nenhum terminal encontrado -- rode: cd ~/agata && $OPENCODE"

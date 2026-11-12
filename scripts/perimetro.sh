@@ -177,7 +177,11 @@ P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
 # com sucesso é "inactive", não "failed" -- checar isso soaria falso
 # alarme a cada execução normal. O que importa pra "vai rodar de novo" é
 # o TIMER que dispara ele, não o resultado da última corrida.
-P9_UNIDADES_SISTEMA=("ollama.service")
+# 07/11/2026 (decisão do Humano: ollama.service fora do boot; medido disabled): saiu da linha
+# "Também no boot" do PROJETO, então saiu desta lista, que segue essa linha. Efeito: o P-9 deixa
+# de conferir se o Ollama está no ar; _p9_ollama_na_gpu segue. Trava de "sistema desligado" para
+# unidade de sistema (como a das unidades de usuário): pendente, decisão do Humano.
+P9_UNIDADES_SISTEMA=()
 # Fase 8 (redesenho): hermes-gateway saiu do loop (P8-05). O executor agora e' o
 # grafo + OmniRoute -- os membros do agata.target sao os servicos criticos.
 # seth-gateway/seth-escriba adicionados 04/09/2026 (Camada C): rodam agora
@@ -185,7 +189,9 @@ P9_UNIDADES_SISTEMA=("ollama.service")
 # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
 # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
 P9_UNIDADES_USUARIO=("agata-manutencao.timer" "agata-manutencao.service" "laya-roteador.service" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer")
-P9_CONTAINERS_DOCKER=("librechat-ponte-host" "librechat" "librechat-mongodb" "librechat-meilisearch")
+# (07/11/2026) LibreChat excluído pelo Humano (contêineres e volumes): os quatro nomes saíram.
+# Lista vazia: p9_servicos_declarados não consulta o docker. Para declarar outro contêiner, põe o nome aqui.
+P9_CONTAINERS_DOCKER=()
 
 
 

@@ -83,3 +83,4 @@ jobs:
         run: |
           python3 -I scripts/testar_memoria_leitura.py
           python3 -I scripts/testar_trava_escriba.py
+          python3 -I scripts/testar_sem_goose_ativo.py

@@ -2,7 +2,7 @@
 """equipe.py -- partida conjunta e coordenação da Equipe (qualquer membro do Conselho) no ~/agata. Ferramenta LOCAL.
 
 Não é canon, não decide nada, não escreve em arquivo do repositório e não aprova nada. Coordena os
-membros que trabalham AO MESMO TEMPO em worktrees próprias -- Claude Code, Codex, Gemini, Goose, Seth ou
+membros que trabalham AO MESMO TEMPO em worktrees próprias -- Claude Code, Codex, Gemini, OpenCode, Seth ou
 qualquer outro (nome = slug minúsculo): quem começa junto, com qual base, quem é dono de qual arquivo, o
 que cada um está fazendo, e o canal de conversa. Todo o estado mora em ~/.cache/agata/sincronia/equipe/
 (fora do repositório; o antigo `dupla/` é movido para lá na primeira execução). Dado, não instrução (Regra 2).
@@ -20,7 +20,7 @@ Garantias e limites (cooperativos, sem mecanismo imposto pelo sistema operaciona
     alterados sob flock exclusivo, só por acréscimo no histórico/canal. O quadro é GERADO, não editado.
   * não substitui o P-8, o fiscal, o Humano nem o `aprovar.sh`, que nenhum membro roda.
 
-Uso (A, B = nome do membro: claude, codex, gemini, goose, seth...):
+Uso (A, B = nome do membro: claude, codex, gemini, opencode, seth...):
   equipe.py iniciar    --agente A [--com A,B,...] [--item ID] [--nova-base] [--matriz ARQ] [--aceitar-matriz SHA12] [--espera MIN]
   equipe.py matriz                      (mostra a matriz CONGELADA na sessão e o sha256)
   equipe.py propor-linha --agente A --dono D --papel P --caminhos X [X ...]   (nova linha; TODOS os outros presentes aceitam)
@@ -52,7 +52,7 @@ import zoneinfo
 TZ = zoneinfo.ZoneInfo("America/Sao_Paulo")
 # Membro = slug minúsculo; qualquer modelo do Conselho entra sem mudar código. NOMES só dá o nome por extenso no canal.
 MEMBRO = re.compile(r"^[a-z][a-z0-9-]{0,30}$")
-NOMES = {"claude": "Claude Code", "codex": "Codex", "gemini": "Gemini CLI", "goose": "Goose", "seth": "Seth", "cursor": "Cursor"}
+NOMES = {"claude": "Claude Code", "codex": "Codex", "gemini": "Gemini CLI", "opencode": "OpenCode", "seth": "Seth", "cursor": "Cursor"}
 _env = lambda k, padrao: os.environ.get(f"EQUIPE_{k}") or os.environ.get(f"DUPLA_{k}") or padrao  # DUPLA_* = nome antigo
 RAIZ_SINC = _env("DIR", os.path.expanduser("~/.cache/agata/sincronia"))
 D = os.path.join(RAIZ_SINC, "equipe")
@@ -754,9 +754,9 @@ def _selftest():
             membro("Codex X"); res["25 nome de membro fora do slug é recusado"] = False
         except argparse.ArgumentTypeError:
             res["25 nome de membro fora do slug é recusado"] = True
-        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "dizer", "--agente", "goose", "--assunto", "a", "--texto", "b"],
+        o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "dizer", "--agente", "opencode", "--assunto", "a", "--texto", "b"],
                            capture_output=True, text=True, env=env19)
-        res["26 membro sem nome cadastrado fala no canal (Goose)"] = o.returncode == 0 and "- Autor: Goose" in open(CANAL).read()
+        res["26 membro com nome cadastrado fala no canal (OpenCode)"] = o.returncode == 0 and "- Autor: OpenCode" in open(CANAL).read()
         velho = os.path.join(tmp, "velho"); os.makedirs(os.path.join(velho, "dupla")); json.dump({"estado": "x"}, open(os.path.join(velho, "dupla", "sessao.json"), "w"))
         o = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "status"], capture_output=True, text=True, env=dict(os.environ, EQUIPE_DIR=velho))
         res["27 estado antigo em dupla/ migra para equipe/ sem perda"] = os.path.exists(os.path.join(velho, "equipe", "sessao.json")) \

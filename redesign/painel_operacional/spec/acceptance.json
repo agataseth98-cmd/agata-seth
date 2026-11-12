@@ -1193,5 +1193,173 @@
       "redesign/painel_operacional/test_historia.py::ConsistenciaHistoriaTests::test_sem_emoji_na_historia"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o botão Ouvir de cada resposta da Seth manda o texto a `POST /api/seth/ouvir`; a mensagem do usuário não tem Ouvir",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ouvir_aparece_so_nas_respostas_da_seth",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ouvir_manda_o_texto_da_resposta_e_mostra_falei"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o resultado do Ouvir diz falei ou NÃO falei com o motivo que o painel devolve, em português simples, e nunca mostra sucesso quando não falou",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ouvir_mostra_nao_falei_com_o_motivo_do_painel",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_outro_modelo_no_piper_nao_fala",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_servico_que_nao_sobe_diz_que_nao_falou",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_falha_no_meio_diz_quantos_trechos_falou"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a fala é por parágrafo, com a voz do sistema (`pt_BR-agata-last`), usando o preparo e o serviço de `scripts/agata_falar.py`; modelo diferente no piper não fala",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_fala_em_partes_com_a_voz_do_sistema",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_preparo_do_script_tira_codigo_tabela_e_marcacao",
+      "redesign/painel_operacional/test_seth_voz.py::ConsistenciaVozTests::test_fala_usa_o_script_do_sistema_e_nao_fixa_a_porta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Parar interrompe a leitura entre trechos e não pede o trecho seguinte; sem leitura em curso, Parar e Esc não chamam o painel",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_parar_entre_trechos_nao_fala_o_resto",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_parar_sem_leitura_diz_que_nao_estava_lendo",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_esc_interrompe_a_leitura_em_curso",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_parar_voz_e_esc_sem_leitura_nao_chamam_o_painel"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o piper só é desligado por quem o ligou, e ler o estado da voz não liga o serviço",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_servico_parado_e_ligado_por_quem_fala_e_desligado_depois",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_servico_que_ja_estava_no_ar_nao_e_desligado",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_resumo_diz_parado_quando_o_piper_esta_fora"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "uma leitura por vez no painel: a Seth e a História dividem a trava, e a segunda leitura responde 429",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_leitura_ocupada_responde_429"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as rotas de voz recusam origem cruzada com 403, respondem 413 acima do tamanho e 400 para JSON ruim; o GET do estado só lê",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_fala_sem_origem_ou_de_outro_site_recebe_403",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_fala_com_json_ruim_ou_grande_e_recusada",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_estado_so_le_e_recusa_origem_cruzada",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_parar_responde_e_recusa_origem_cruzada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ditado grava o microfone pelo navegador, manda o áudio só à rota do painel, e o texto entra no campo sem ser enviado à Seth",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ditado_grava_e_poe_o_texto_no_campo_sem_enviar_a_seth",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ditado_acrescenta_ao_texto_que_ja_estava_no_campo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ditado para em 60 segundos, recusa áudio acima de 2 MB e diz em português o erro de permissão, de microfone, de ouvido fora do ar e de áudio sem fala",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_permissao_do_microfone_negada_tem_mensagem_clara",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_navegador_sem_gravacao_diz_que_nao_grava",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_limite_de_60_segundos_para_a_gravacao_sozinha",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ditado_grande_demais_nao_vai_ao_painel",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_ditado_sem_ouvido_mostra_o_erro_e_nao_mexe_no_campo",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_resposta_do_painel_sem_texto_nao_entra_no_campo",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_audio_grande_e_recusado_antes_de_chegar_ao_ouvido",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_audio_vazio_e_formato_que_nao_e_audio_sao_recusados",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_ouvido_fora_do_ar_diz_que_nada_foi_transcrito",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_ouvido_sem_motor_no_ar_responde_503_com_razao_clara",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_gravacao_sem_fala_diz_para_tentar_de_novo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota de ditado repassa o áudio só ao `servidor_ouvido` local (127.0.0.1:20137), em multipart, e devolve `texto` limitado a 4000 caracteres",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_manda_o_audio_como_multipart_e_devolve_o_texto",
+      "redesign/painel_operacional/test_seth_ditado.py::TranscreverTests::test_texto_vem_limpo_e_cortado_no_teto_do_campo",
+      "redesign/painel_operacional/test_seth_ditado.py::RotaDitadoTests::test_rota_devolve_o_texto_para_o_campo",
+      "redesign/painel_operacional/test_seth_ditado.py::RotaDitadoTests::test_rota_recusa_origem_cruzada_sem_chamar_o_ouvido",
+      "redesign/painel_operacional/test_seth_ditado.py::RotaDitadoTests::test_rota_recusa_audio_maior_que_o_limite_pelo_tamanho_declarado",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_ditado_pela_rota_recusa_origem_cruzada_e_formato_que_nao_e_audio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "modo conversa vem desligado, guarda a preferência com try/catch, lê cada resposta concluída e, com leitura em curso, para a atual e lê a mais nova depois",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_modo_conversa_vem_desligado_e_a_preferencia_fica_guardada",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_modo_conversa_sem_localstorage_nao_quebra_a_pagina",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_modo_conversa_ligado_le_a_resposta_concluida_sem_clicar",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_modo_conversa_desligado_nao_le_sozinho",
+      "redesign/painel_operacional/test_voz_ui.py::VozUiTests::test_modo_conversa_com_resposta_nova_para_a_leitura_e_le_a_mais_nova_depois"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a linha `voz` da página Sentidos mostra piper no ar ou parado, o último uso e aviso se o modelo não é a voz do sistema; só lê",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_ultimo_uso_e_resumo_da_voz_na_pagina_sentidos",
+      "redesign/painel_operacional/test_seth_voz.py::FalaTests::test_resumo_diz_quando_o_piper_carregou_outro_modelo",
+      "redesign/painel_operacional/test_seth_voz.py::SentidosVozTests::test_linha_voz_da_pagina_sentidos_usa_o_estado_real",
+      "redesign/painel_operacional/test_seth_voz.py::SentidosVozTests::test_se_a_leitura_da_voz_falhar_a_pagina_nao_quebra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a CSP do painel segue igual (sem `media-src`); o JS e o HTML da voz são externos ou de texto, sem HTML dinâmico, sem atributo inline e sem emoji",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_csp_do_painel_segue_igual_e_sem_media_src",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_bloco_de_voz_so_grava_texto_por_textcontent",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_html_novo_sem_atributo_inline_nem_script",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_classes_novas_tem_regra_de_estilo",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_sem_emoji_nas_linhas_novas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a preferência do modo conversa fica fora do bloco da Conversa, e o bloco da Conversa não guarda nada em localStorage",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaJs::test_sem_armazenamento_local_na_conversa",
+      "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_preferencia_do_modo_fica_fora_do_bloco_da_conversa"
+    ],
+    "cwd": null
   }
 ]

@@ -1,5 +1,7 @@
 # P8-04 — Goose como shell operacional de fallback
 
+**Histórico.** O Goose saiu do sistema em 07/11/2026, por decisão do Humano. O agente de terminal passa a ser o OpenCode. Este texto fica como registro da época.
+
 **Não é canon.** Branch `redesign`. **FEITO — 2026-09-03 (chat 6), método B.**
 
 ## Papel

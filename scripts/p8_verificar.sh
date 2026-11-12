@@ -9,7 +9,7 @@
 # Read-only. Exit 0 = pode aplicar; 1 = alguma checagem falhou (diz qual); 2 = uso errado.
 # Por que existe (MEMÓRIAS (543)): esta verificação era feita à mão, comando a comando, a cada
 # aplicação -- 7 vezes só em 24/09/2026. Passo determinístico não deve depender de o modelo
-# lembrar a sequência (bússola B4); e o Goose, fallback do Claude Code, precisa do MESMO passo.
+# lembrar a sequência (bússola B4); e o OpenCode, agente de terminal, precisa do MESMO passo.
 set -u
 nome="${1:-}"
 case "$nome" in ''|*/*|*.diff|*.) echo "uso: bash scripts/p8_verificar.sh <nome>  (basename, sem .diff, sem ponto no fim)"; exit 2 ;; esac

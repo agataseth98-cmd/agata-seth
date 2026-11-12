@@ -1274,6 +1274,122 @@ function sethRegerar() {
   if (sethEmCurso() || !folha || folha.role !== "assistant" || !folha.pai) return;
   sethResponder({modo: "nova", paiId: folha.pai});
 }
+// Voz da Seth (11/11/2026, pedido do Humano: paridade com o LibreChat). Tudo com a voz do sistema.
+// 1) Ouvir: o servidor fala a resposta em partes (POST /api/seth/ouvir) e diz se falou ou NÃO falou.
+// 2) Ditar: o navegador grava o microfone e manda o áudio só ao painel (POST /api/seth/ditado); o texto entra no
+//    campo para revisão. Nada vai à Seth sozinho.
+// 3) Modo conversa (preferência guardada no navegador, desligada por padrão): lê cada resposta concluída. Esc ou Parar voz interrompem.
+// Texto da voz, do ditado e dos avisos entra só por textContent.
+const DITADO_MAX_MS = 60000;
+const DITADO_MAX_BYTES = 2 * 1024 * 1024;
+let vozLendo = false, vozFila = null, ditadoGravador = null, ditadoTimer = null, ditadoPedacos = [];
+function vozEstado(texto, classe) { const e = byId("seth-voz-estado"); e.textContent = texto; e.className = "seth-voz-estado" + (classe ? " " + classe : ""); }
+function vozBotaoParar(ligado) { byId("seth-voz-parar").hidden = !ligado; }
+async function vozErro(resposta) {
+  let motivo = "Não consegui agora (" + resposta.status + ").";
+  try { const dados = await resposta.json(); if (dados && typeof dados.erro === "string") motivo = dados.erro; } catch (_) { /* resposta sem JSON */ }
+  return motivo;
+}
+function vozEnviarParar() { fetch("/api/seth/ouvir/parar", {method: "POST"}).catch(() => {}); }
+// Ler em voz alta. O botão Ouvir (automatico = false) não interrompe leitura em curso: pede para parar antes.
+// O modo conversa (automatico = true) para a leitura atual e guarda esta resposta; só a mais nova fica na fila.
+async function ouvirResposta(texto, automatico) {
+  if (typeof texto !== "string" || !texto.trim()) return;
+  if (vozLendo) {
+    if (!automatico) { vozEstado("Já estou lendo em voz alta. Use Parar voz antes.", "erro"); return; }
+    vozFila = texto;
+    vozEstado("Parando a leitura anterior para ler a resposta nova.", "");
+    vozEnviarParar();
+    return;
+  }
+  vozLendo = true; vozBotaoParar(true); vozEstado("Lendo em voz alta…", "");
+  let motivo = "", classe = "erro";
+  try {
+    const resposta = await fetch("/api/seth/ouvir", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texto: texto})});
+    if (resposta.ok) { const dados = await resposta.json(); motivo = typeof dados.motivo === "string" ? dados.motivo : ""; classe = dados.falou ? "ok" : "erro"; }
+    else motivo = await vozErro(resposta);
+  } catch (_) {
+    motivo = "NÃO falei: não consegui falar com o painel agora.";
+  }
+  vozLendo = false; vozBotaoParar(false); vozEstado(motivo, classe);
+  const proxima = vozFila; vozFila = null;
+  if (proxima !== null && vozModoLigado()) ouvirResposta(proxima, true);
+}
+// Parar voz: interrompe entre trechos e descarta a fila. Sem leitura em curso, não chama o painel.
+function vozParar() {
+  vozFila = null;
+  if (!vozLendo) return;
+  vozEnviarParar();
+  vozEstado("Parando: a leitura para depois do trecho que está tocando.", "");
+}
+function ditarMarcar(gravando) { const b = byId("seth-ditado"); b.setAttribute("aria-pressed", gravando ? "true" : "false"); b.textContent = gravando ? "Parar gravação" : "Ditar"; }
+// Ditar: grava pelo microfone do navegador (o próprio navegador pede a permissão). Clique de novo, ou o limite de
+// 60 s, para a gravação. O áudio vai só ao painel, que repassa ao ouvido local.
+async function ditarPeloMicrofone() {
+  if (ditadoGravador) { ditadoGravador.stop(); return; }
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof window.MediaRecorder !== "function") {
+    vozEstado("Este navegador não grava áudio aqui. Digite a mensagem.", "erro"); return;
+  }
+  let fluxo;
+  try { fluxo = await navigator.mediaDevices.getUserMedia({audio: true}); }
+  catch (erro) {
+    const negado = erro && (erro.name === "NotAllowedError" || erro.name === "SecurityError");
+    vozEstado(negado ? "Permissão do microfone negada. Libere o microfone para este endereço no navegador e tente de novo." : "Não consegui abrir o microfone. Confira se ele está ligado e livre.", "erro");
+    return;
+  }
+  const tipo = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
+  let gravador;
+  try { gravador = new MediaRecorder(fluxo, tipo ? {mimeType: tipo, audioBitsPerSecond: 32000} : {audioBitsPerSecond: 32000}); }
+  catch (_) { fluxo.getTracks().forEach((t) => t.stop()); vozEstado("Não consegui gravar neste navegador. Digite a mensagem.", "erro"); return; }
+  ditadoPedacos = [];
+  gravador.addEventListener("dataavailable", (e) => { if (e.data && e.data.size) ditadoPedacos.push(e.data); });
+  gravador.addEventListener("stop", () => {
+    clearTimeout(ditadoTimer);
+    fluxo.getTracks().forEach((t) => t.stop());
+    const blob = new Blob(ditadoPedacos, {type: gravador.mimeType || tipo || "audio/webm"});
+    ditadoGravador = null; ditadoPedacos = [];
+    ditarMarcar(false);
+    enviarDitado(blob);
+  });
+  ditadoGravador = gravador;
+  ditarMarcar(true);
+  vozEstado("Gravando. Clique em Parar gravação quando terminar (limite de 60 segundos).", "");
+  gravador.start(1000);
+  ditadoTimer = setTimeout(() => { vozEstado("A gravação parou no limite de 60 segundos.", ""); if (ditadoGravador) ditadoGravador.stop(); }, DITADO_MAX_MS);
+}
+async function enviarDitado(blob) {
+  const botao = byId("seth-ditado");
+  if (!blob.size) { vozEstado("Nada foi gravado. Tente de novo.", "erro"); return; }
+  if (blob.size > DITADO_MAX_BYTES) { vozEstado("Gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos.", "erro"); return; }
+  botao.disabled = true; vozEstado("Transcrevendo no ouvido local…", "");
+  try {
+    const resposta = await fetch("/api/seth/ditado", {method: "POST", headers: {"Content-Type": blob.type || "audio/webm"}, body: blob});
+    if (!resposta.ok) { vozEstado(await vozErro(resposta), "erro"); return; }
+    const dados = await resposta.json();
+    const texto = dados && typeof dados.texto === "string" ? dados.texto : "";
+    if (!texto) { vozEstado("Não veio texto da gravação. Tente de novo.", "erro"); return; }
+    const campo = byId("seth-input");
+    const atual = campo.value.trim();
+    campo.value = (atual ? atual + " " + texto : texto).slice(0, 4000);
+    campo.focus();
+    vozEstado("Texto ditado. Revise e envie quando quiser.", "ok");
+  } catch (_) {
+    vozEstado("Não consegui mandar a gravação ao painel. Digite a mensagem.", "erro");
+  } finally {
+    botao.disabled = false;
+  }
+}
+function vozLigarControles() {
+  const modo = byId("seth-modo-conversa");
+  modo.checked = vozModoLigado();
+  modo.addEventListener("change", (e) => {
+    vozGuardarModo(e.target.checked);
+    if (!e.target.checked) vozFila = null;
+    vozEstado(e.target.checked ? "Modo conversa ligado: cada resposta será lida em voz alta." : "Modo conversa desligado.", "");
+  });
+  byId("seth-voz-parar").addEventListener("click", vozParar);
+  byId("seth-ditado").addEventListener("click", ditarPeloMicrofone);
+}
 function ligarConversaSeth() {
   const form = byId("seth-form");
   if (!form || form.dataset.ligado) return;
@@ -1285,6 +1401,7 @@ function ligarConversaSeth() {
   byId("seth-nova").addEventListener("click", sethComecarNova);
   byId("seth-parar").addEventListener("click", sethParar);
   byId("seth-copiar-ultima").addEventListener("click", sethCopiarUltima);
+  vozLigarControles();
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const texto = campo.value.trim();
@@ -1434,6 +1551,7 @@ function sethAcoesMensagem(m, indice) {
     const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
     copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
     acoes.append(copiar);
+    if (m.content) acoes.append(sethTexto("Ouvir", () => ouvirResposta(m.content, false)));
     if (m.id === sethAtual.folha) {
       acoes.append(sethTexto("Regenerar", () => sethRegerar()));
       if (m.content) acoes.append(sethTexto("Continuar", () => sethContinuar()));
@@ -1566,7 +1684,7 @@ async function sethResponder(op) {
   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
   if (conteudo !== null) {
     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
-    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); }
+    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
     await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
   } else if (parada) {
     if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
@@ -2051,6 +2169,10 @@ async function carregarMemoriaConselho() {
 byId("memoria-tipo").addEventListener("change", renderizarMemoria);
 byId("memoria-atualizar").addEventListener("click", () => carregarMemoriaConselho());
 
+/* (11/11/2026) Preferência do modo conversa da Seth (ler cada resposta em voz alta, desligado por padrão). Fica fora do
+bloco da Conversa: é só um sim ou não, não conteúdo de conversa. Como o tema, usa localStorage com try/catch. */
+function vozModoLigado() { try { return localStorage.getItem("agata-modo-conversa") === "1"; } catch (_) { return false; } }
+function vozGuardarModo(ligado) { try { localStorage.setItem("agata-modo-conversa", ligado ? "1" : "0"); } catch (_) { /* sem persistência: vale só nesta aba */ } }
 /* (09/11/2026) Tema (escuro, claro ou do sistema) e atalhos de teclado. Fica fora do bloco da Conversa: o tema usa localStorage, com try/catch. */
 const TEMAS = ["escuro", "claro", "sistema"];
 let temaEscolhido = "escuro";
@@ -2079,7 +2201,7 @@ document.addEventListener("keydown", (e) => {
   const tecla = String(e.key || "").toLowerCase();
   if (comCtrl && tecla === "o") { e.preventDefault(); irPara("conversa"); sethComecarNova(); return; }
   if (comCtrl && tecla === "c") { e.preventDefault(); sethCopiarUltima(); return; }
-  if (e.key === "Escape") { if (atalhosAbertos()) alternarAtalhos(false); else if (sethEmCurso()) sethParar(); return; }
+  if (e.key === "Escape") { if (atalhosAbertos()) alternarAtalhos(false); else { if (sethEmCurso()) sethParar(); vozParar(); } return; }
   if (campoDeTexto(e.target)) return;
   if (e.key === "?") { e.preventDefault(); alternarAtalhos(); return; }
   if (e.key === "/") { e.preventDefault(); const conversa = byId("conversa"); (conversa && !conversa.hidden ? byId("seth-busca") : search).focus(); }

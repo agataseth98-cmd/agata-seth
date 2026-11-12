@@ -2,7 +2,7 @@
 
 Substituiu o Open WebUI em 03/09/2026 (MEMORIAS (313)). Frontend de conversa
 informal, "estilo ChatGPT/Claude", apontado no `seth_gateway` (`:20126`).
-Para agente/codigo continua o Goose (`seth-agente`).
+Para agente/codigo é o OpenCode (`seth-agente`), no lugar do Goose desde a decisão de 07/11/2026.
 
 ## Fork Agata
 
