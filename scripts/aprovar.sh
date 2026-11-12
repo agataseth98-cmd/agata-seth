@@ -52,6 +52,11 @@ if [ -z "$diff_path" ]; then
   exit 1
 fi
 
+# (3a, 12/11/2026) recusa mecânica: diff com hunk em bloco ANCORA-SHA quebra no commit seguinte; não se assina.
+if ! python3 -I "$raiz/scripts/equipe/diff_limpo.py" "$diff_path"; then
+  echo "ERRO: $nome.diff tem hunk em bloco gerado pelo pre-commit (ANCORA-SHA). Não assino; refaça o .diff sem esse trecho." >&2
+  exit 1
+fi
 alvo="$raiz/propostas/APROVADO-$nome"
 [ -e "$alvo" ] && { echo "ERRO: $alvo já existe -- nada a fazer." >&2; exit 1; }
 

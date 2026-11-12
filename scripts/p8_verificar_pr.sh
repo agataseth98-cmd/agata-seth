@@ -67,6 +67,20 @@ while IFS= read -r -d '' f; do
   fi
 done < "$tmp/mudou.z"
 
+# -- 2b. (3a) .diff de proposta novo ou alterado no PR não pode ter hunk em bloco ANCORA-SHA. So vale com o
+#        verificador na base (depois da aplicação que o trouxer); antes disso, o fiscal de P-8 segue como antes.
+if git cat-file -e "$base:scripts/equipe/diff_limpo.py" 2>/dev/null; then
+  git show "$base:scripts/equipe/diff_limpo.py" > "$tmp/diff_limpo.py"
+  while IFS= read -r -d '' f; do
+    case "$f" in
+      propostas/[!/]*.diff)
+        git show "$head:$f" > "$tmp/proposta.diff" 2>/dev/null || continue
+        python3 -I "$tmp/diff_limpo.py" "$tmp/proposta.diff" > "$tmp/limpo.txt" 2>&1 \
+          || falha "$f tem hunk em bloco gerado pelo pre-commit (ANCORA-SHA): $(sed -n 2p "$tmp/limpo.txt"). Refaça o .diff sem esse trecho." ;;
+    esac
+  done < "$tmp/mudou.z"
+fi
+
 # -- 3. pares que o PR consome (presentes em aplicadas/ no head, ausentes la na base) --------
 verificados=(); ignorados=()
 while IFS= read -r -d '' caminho; do
@@ -90,6 +104,24 @@ while IFS= read -r -d '' caminho; do
 done < <(git ls-tree -r --name-only -z "$head" -- propostas/aplicadas | LC_ALL=C sort -z)
 
 for i in "${ignorados[@]:-}"; do [ -n "$i" ] && echo "AVISO P-8 (PR): par ignorado -- $i"; done
+
+# -- 3b. (3b) trava: PR que não consome par e toca o registro espera o fim de aplicação em curso (aplica/* aberta).
+#         O marcador local propostas/.aplicando-<nome> não chega ao runner; o mesmo estado é lido pelo GitHub.
+#         Só vale com trava.py na base. Falha fechada: sem a lista de PRs, a PR não passa.
+if git cat-file -e "$base:scripts/equipe/trava.py" 2>/dev/null; then
+  toca_registro=0
+  while IFS= read -r -d '' f; do
+    case "$f" in MEMÓRIAS.md|ONDE_ESTAMOS.md|INDICE_MEMORIAS.md|INDICE_MEMORIAS_PALAVRAS-CHAVE.md) toca_registro=1 ;; esac
+  done < "$tmp/mudou.z"
+  if [ "$toca_registro" -eq 1 ] && [ "${#verificados[@]}" -eq 0 ]; then
+    repo="${GITHUB_REPOSITORY:-}"; [ -n "$repo" ] || falha "GITHUB_REPOSITORY ausente: não dá para ver as aplicações em curso (falha fechada)"
+    git show "$base:scripts/equipe/trava.py" > "$tmp/trava.py"
+    abertas="$(gh pr list --repo "$repo" --state open --json headRefName --limit 200 2>/dev/null)" \
+      || falha "não consegui listar as PRs abertas (GH_TOKEN ausente?): falha fechada"
+    printf '%s' "$abertas" | python3 -I "$tmp/trava.py" --proposta 1 0 > "$tmp/trava.txt" 2>&1 \
+      || falha "PR de proposta que toca o registro (MEMÓRIAS/ONDE/INDICE) enquanto há aplicação em curso: $(cat "$tmp/trava.txt"). Refaça o registro depois do merge da aplicação."
+  fi
+fi
 
 if [ "${#verificados[@]}" -eq 0 ]; then
   if [ "$n_sem_par" -eq 0 ]; then echo "OK P-8 (PR): nenhum caminho protegido mudou alem do bloco de ancora e nenhum par foi consumido"; exit 0; fi

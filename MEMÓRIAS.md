@@ -26,20 +26,29 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ac986c39f90babfb5876342d26ce9de5ae97e254
-  Escrito em: 12/11/2026 15:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c8a7c2d7405d160bd774c40e13d3c9bf453647ff
+  Escrito em: 12/11/2026 15:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
+- Verificação: `bash scripts/p8_verificar.sh pacote-mecanico-skills-12-11` deu `PODE APLICAR` sobre `origin/main` `c8a7c2d7` (sha256 do `.diff` `d14e079f40dd`; assinatura `agata-aprovacao-p8` de `agata-humano`, ED25519).
+- Aplicação: `git apply` do `pacote-mecanico-skills-12-11.diff` na branch `aplica/pacote-mecanico-skills-12-11`, feito à mão (o `aplicar.py` que vale é o antigo; o novo está no próprio diff). O par `.diff` e `APROVADO-` foi movido para `propostas/aplicadas/` no mesmo commit. As propostas superadas já estavam em `propostas/superadas/`.
+- Número de MEMÓRIAS conferido à mão sobre `origin/main`: (1000) era o maior; (1001) livre, medido antes do commit e de novo antes do merge.
+- Medido nesta worktree: `uv run --offline --with pytest bash scripts/ci_sdd_local.sh` com `CI LOCAL: TUDO OK` (44 linhas OK, 0 FALHA), inclusive testes do turno, dos mecanismos do Conselho, verificador de mecanismos, gate de specs e os três selftests de `scripts/equipe` (diff_limpo, numero_memorias, trava).
+- Artefatos que o CI regenera foram restaurados antes do commit: `redesign/nova_versao/spec/evidence.json` voltou ao commit; `redesign/sdd_flow/spec/criterion-drift.md` e `evidence.json`, gerados e sem versão no repo, foram apagados.
+- Não medido: run verde no GitHub no `headSha` do PR (vem depois do push); `aplicar.py` novo de ponta a ponta (exige `gh` e a chave de assinatura); o efeito dos workflows no runner. Nenhum serviço foi reiniciado por este agente.
+- Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: worktree `agent-ada50591317f27e43`, branch `aplica/pacote-mecanico-skills-12-11`.
+
 (1000) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-skills-12-11 publicada: pacote mecânico e skills numa só proposta, com a fila de aplicação corrigida. Substitui pacote-mecanico-12-11 e skills-consolidadas-12-11 (movidas para propostas/superadas/).**
 Causa do 10:17 (PR #980 fechada): o .diff assinado não tinha bloco ANCORA-SHA (git apply --check RC 0 em 04bfe2e4 e em 8c13ed78); o pre-commit reescreve esse bloco na própria aplicação (d18f7a4d). A falha real foi o número (999) usado duas vezes: a aplicação e a proposta de skills (#979, mesclada às 10:09:51) foram calculadas sobre 2ec04181, e a PR ficou atrás da base. A proposta de skills só aplica depois do pacote (pré-imagem).
 Correção: (a) scripts/equipe/diff_limpo.py recusa .diff com hunk em bloco gerado (aprovar.sh, p8_verificar.sh, aplicar.py, fiscal de PR); (b) scripts/equipe/trava.py: com aplicação em curso (propostas/.aplicando-<nome> ou PR aplica/* aberta), PR de proposta que toca o registro falha; (c) scripts/equipe/numero_memorias.py renumera as entradas novas sobre origin/main no último instante antes do merge.

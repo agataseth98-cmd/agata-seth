@@ -39,14 +39,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ac986c39f90babfb5876342d26ce9de5ae97e254
-  Escrito em: 12/11/2026 15:17 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c8a7c2d7405d160bd774c40e13d3c9bf453647ff
+  Escrito em: 12/11/2026 15:34 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
@@ -98,7 +98,7 @@ Fica dentro do orçamento do hook de hidratação, que nunca corta uma entrada n
 ordem invertida e o tamanho da janela estão em PROJETO.md, "Memória e hidratação". Não são copiados aqui:
 mudam sem aviso, e este arquivo não acompanha essas mudanças.
 
-RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno.
+RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno. O `t=` vem do contador mecânico da Máquina (`scripts/turno.py`, por sessão): com gancho (Claude Code), copie a linha "Cabeçalho deste turno"; sem gancho, rode `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta e copie a linha que ele imprime.
 A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira PROJETO.md, "Estado dos bugs e dos testes", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
 A forma exata das duas está em PROTOCOLOS.md, "Carregar e formatos", e na Regra 1 (REGRAS.md): as 3 linhas do bloco (a linha
 `Nonce:` saiu — TES-002 aposentado em 09/09/2026, MEMÓRIAS (417)), as três formas de `sync:` com os campos que

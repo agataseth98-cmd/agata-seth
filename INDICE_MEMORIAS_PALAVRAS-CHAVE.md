@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
+  palavras-chave: aplicado, pacote, mecanico, skills, assinatura, humano, mecânico, consolidadas, viram, texto, extras, arquivo, fila, aplicação, corrigida
 (1000) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-skills-12-11 publicada: pacote mecânico e skills numa só proposta, com a fila de aplicação corrigida. Substitui pacote-mecanico-12-11 e skills-consolidadas-12-11 (movidas para propostas/superadas/).**
   palavras-chave: proposta, pacote, mecanico, skills, publicada, mecânico, fila, aplicação, corrigida, substitui, consolidadas, movidas, propostas, superadas
 (999) DIÁRIO — 12/11/2026 · **Proposta skills-consolidadas-12-11 publicada, refeita sobre origin/main 2ec04181 com o pacote-mecanico-12-11 já no diff: as skills próprias do Agata caem de 20 pastas para 10, sem perder texto (originais em extras/arquivo-skills-12-11/). Aplicar depois do pacote. Canon intacto; sem assinatura ainda.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicação, assinada, painel, unificado, validada, localmente, assinatura, aceita, diff, aplicado, worktree, própria, reverso, passou, local, terminou, tudo
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
   palavras-chave: csp, protótipo, painel, aplicado, prototipo, assinado, humano
-(971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
-  palavras-chave: teto, removido, pedido, remoto, tem, tamanho
+(971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261 …
+  palavras-chave: teto, removido
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-202 …
   palavras-chave: agência, pesquisa, aplicada, agencia
 (969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-2026 …

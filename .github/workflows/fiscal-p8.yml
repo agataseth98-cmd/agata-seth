@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   fiscal-p8:
@@ -43,4 +44,6 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash scripts/p8_verificar_pr.sh "$BASE_SHA" "$HEAD_SHA"

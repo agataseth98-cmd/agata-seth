@@ -29,12 +29,17 @@ Confere no turno anterior:
 NÃO confere afirmação falsa nova em prosa (não determinístico) -- quando uma for
 achada à mão, vira linha do catálogo.
 
+**Divergência de turno (12/11/2026, decisão do Humano).** `--verificar --sessao ID` compara o `t=`
+do cabeçalho com o contador mecânico da sessão (`scripts/turno.py`). Divergência sai como
+`aviso (não bloqueia)`: não muda o código de saída.
+
 Log por turno em `~/.cache/agata/auditoria-turno.jsonl` (achados, nunca o texto).
 `--verificar [--cliente NOME]` (CLI, (849)) grava um registro de metadado (sem texto) no
 mesmo log e na mesma cadeia: `cli-NOME` com `n_achados` e `tipos` (prefixo de cada achado,
 nunca o literal). NOME fora de `[a-z0-9-]{1,32}` vira `desconhecido`. Falha ao gravar é silenciosa.
 
 Uso: python3 redesign/router/auditoria_turno.py --selftest
+     python3 redesign/router/auditoria_turno.py --verificar [--sessao ID] < arquivo
 """
 from __future__ import annotations
 
@@ -54,6 +59,7 @@ sys.path.insert(0, str(_AQUI.parents[1] / "scripts"))
 import verificar_cabecalho as _cab  # noqa: E402
 import verificar_citacao_arquivo as _cit  # noqa: E402
 import detector_estado_sem_prova as _det  # noqa: E402
+import turno as _turno  # noqa: E402  (scripts/turno.py: contador mecânico de turno, 12/11/2026)
 
 LOG = Path(os.environ.get("AGATA_AUDITORIA_LOG", "~/.cache/agata/auditoria-turno.jsonl")).expanduser()
 CATALOGO = _AQUI / "afirmacoes_desmentidas.json"
@@ -964,6 +970,34 @@ def verificar_resposta_atual(texto: str, msgs_pedido: list) -> list[str]:
     return list(dict.fromkeys(out))
 
 
+_T_NUM = re.compile(r"\bt\s*=\s*(\d+)")
+
+
+def _t_do_cabecalho(texto: str) -> int | None:
+    """t=<n> da primeira linha de cabeçalho (`agata · ...`); None se a forma não traz t= (bloco de prontidão)."""
+    for ln in texto.splitlines():
+        if _CABECALHO.match(ln):
+            m = _T_NUM.search(ln)
+            return int(m.group(1)) if m else None
+    return None
+
+
+def divergencia_turno(texto: str, sessao: str | None) -> list[str]:
+    """(12/11/2026, decisão do Humano) t=<n> do cabeçalho contra o contador mecânico da sessão.
+    Sem sessão, sem contador válido ou sem t= no cabeçalho: nada a acusar. Divergência é AVISO:
+    quem chama decide; esta função nunca bloqueia."""
+    if not sessao:
+        return []
+    t_cab = _t_do_cabecalho(texto)
+    if t_cab is None:
+        return []
+    t_contador = _turno.atual_da_sessao(sessao)
+    if t_contador is None or t_cab == t_contador:
+        return []
+    return [f"aviso (não bloqueia): cabeçalho diz t={t_cab}, mas o contador mecânico da sessão marca "
+            f"t={t_contador} — copie a linha que o contador entrega (scripts/turno.py; decisão de 12/11/2026)"]
+
+
 def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
     out = []
@@ -1643,7 +1677,30 @@ def _selftest() -> int:
          len(_controle_inexistente("restrito a 127.0.0.1 (P-40)")) == 1
          and _controle_inexistente("o P-4 cobre o Ollama e o P-24 avisa") == []),
     ]
-    casos = casos + casos_citacao + casos_redea + casos_lacunas + _casos_cli()
+    # (12/11/2026) divergência entre o t= do cabeçalho e o contador mecânico: aviso, nunca bloqueio.
+    import tempfile as _tf_turno
+    _antes_turnos = os.environ.get("AGATA_TURNOS_DIR")
+    os.environ["AGATA_TURNOS_DIR"] = _tf_turno.mkdtemp()
+    for _ in range(3):
+        _turno.proximo("sel-div")
+    _cab_t = lambda n: (f"agata · claude-haiku-5-5 · t={n} (contador mecânico) · "
+                        "12/11/2026 09:20 -03 (relógio da Máquina)\n\nResultado.")
+    casos_turno = [
+        ("t= igual ao contador -> sem aviso", divergencia_turno(_cab_t(3), "sel-div") == []),
+        ("t= diferente do contador -> aviso, não bloqueio", len(divergencia_turno(_cab_t(2), "sel-div")) == 1
+         and "não bloqueia" in divergencia_turno(_cab_t(2), "sel-div")[0]),
+        ("subagente t=3.sub compara pelo número", divergencia_turno(_cab_t("3.sub"), "sel-div") == []),
+        ("sem --sessao -> nada a acusar", divergencia_turno(_cab_t(2), None) == []),
+        ("sessão sem contador -> nada a acusar", divergencia_turno(_cab_t(2), "sel-sem-contador") == []),
+        ("bloco de prontidão (sem t=) -> nada a acusar", divergencia_turno(
+            "agata · modelo: x · sync: não verificado · lacuna: y · 12/11/2026 09:20 -03 (relógio da Máquina)\n"
+            "Última entrada: (1) x\npronto.", "sel-div") == []),
+    ]
+    if _antes_turnos is None:
+        os.environ.pop("AGATA_TURNOS_DIR", None)
+    else:
+        os.environ["AGATA_TURNOS_DIR"] = _antes_turnos
+    casos = casos + casos_citacao + casos_redea + casos_lacunas + _casos_cli() + casos_turno
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)
@@ -1663,12 +1720,32 @@ if __name__ == "__main__":
             print(f"- linha {_n}: {_motivo}")
         print("cadeia íntegra" if _r["ok"] else f"cadeia com {len(_r['quebras'])} quebra(s)")
         sys.exit(0 if _r["ok"] else 1)
-    _cli = _args_verificar(sys.argv[1:])
+    # (12/11/2026) --sessao ID: confere o t= do cabeçalho com o contador mecânico; só AVISA, não bloqueia.
+    _args = list(sys.argv[1:])
+    _sessao = None
+    if "--sessao" in _args:
+        _k = _args.index("--sessao")
+        if _k + 1 >= len(_args):
+            print("uso: auditoria_turno.py --verificar [--cliente NOME] [--sessao ID] < arquivo", file=sys.stderr)
+            sys.exit(2)
+        _sessao = _args[_k + 1]
+        del _args[_k:_k + 2]
+    _cli = _args_verificar(_args)
+    if _cli is None and _args[:1] == ["--verificar"]:
+        print("uso: auditoria_turno.py --verificar [--cliente NOME] [--sessao ID] < arquivo", file=sys.stderr)
+        sys.exit(2)
     if _cli is not None:
-        _achados = verificar_resposta_atual(sys.stdin.read(), [])
+        _texto = sys.stdin.read()
+        _achados = verificar_resposta_atual(_texto, [])
+        _avisos = divergencia_turno(_texto, _sessao)
         _registrar_cli(_cli, _achados)
-        for _a in _achados:
+        for _a in _achados + _avisos:
             print(f"- {_a}")
-        print("verificação mecânica: nada a apontar" if not _achados else f"verificação mecânica: {len(_achados)} achado(s)")
+        if _achados:
+            print(f"verificação mecânica: {len(_achados)} achado(s)" + (f"; {len(_avisos)} aviso(s)" if _avisos else ""))
+        elif _avisos:
+            print(f"verificação mecânica: nada a bloquear; {len(_avisos)} aviso(s)")
+        else:
+            print("verificação mecânica: nada a apontar")
         sys.exit(1 if _achados else 0)
     print(__doc__)

@@ -4,20 +4,16 @@ Aplica propostas P-8 JÁ ASSINADAS pelo Humano: worktree nova de origin/main, co
 PODE APLICAR), git apply, move o par para aplicadas/, insere a entrada de MEMÓRIAS (número = topo+1, o texto traz {N}),
 commit (pre-commit real), push, PR, espera CI, junta, pull. Se o main andou antes do merge (BEHIND/DIRTY), refaz a branch sobre
 o origin/main novo (verificador, apply e número de MEMÓRIAS de novo) e empurra com --force-with-lease. Nunca assina; não faz nada se faltar a assinatura."""
-import argparse, os, re, subprocess, sys, shutil, time
+import argparse, json, os, re, subprocess, sys, shutil, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import diff_limpo, numero_memorias, trava  # mesma pasta: fonte única (12/11/2026)
 R = os.path.expanduser("~/agata")
 def sh(cwd, *a, ok=True, **k):
     p = subprocess.run(a, cwd=cwd, text=True, capture_output=True, **k)
     if ok and p.returncode:
         sys.exit(f"ERRO: {' '.join(a)}\n{p.stdout[-1500:]}{p.stderr[-1500:]}")
     return p
-def proximo_numero(texto):
-    """Próximo número livre de MEMÓRIAS. Aceita QUALQUER palavra após o número (inclusive acentuada: DIÁRIO, CORREÇÃO);
-    o padrão antigo [A-ZÇÃÕ]+ não reconhecia 'Á' e deu (729) a 14 entradas em 16/10/2026."""
-    nums = [int(x) for x in re.findall(r"^\((\d+)\) \S+ — ", texto, re.M)]
-    if not nums:
-        raise ValueError("nenhuma entrada numerada encontrada em MEMÓRIAS.md")
-    return max(nums) + 1
+proximo_numero = numero_memorias.proximo
 
 
 def precisa_refazer(estado, saida):
@@ -74,14 +70,35 @@ def main():
       dp = f"{R}/propostas/{n}.diff"
       if a.registro and os.path.exists(dp) and re.search(r"^\+\+\+ b/MEMÓRIAS\.md$", open(dp, encoding="utf-8").read(), re.M):
           sys.exit(f"{n} mexe em MEMÓRIAS.md: a entrada já vem no .diff; --registro duplicaria (rode sem --registro)")
+  for n in a.nomes:  # (3a) recusa mecânica: diff com hunk em bloco ANCORA-SHA quebra no commit seguinte
+      achados = diff_limpo.hunks_gerados(open(f"{R}/propostas/{n}.diff", encoding="utf-8").read())
+      if achados: sys.exit(f"{n}.diff tem hunk em bloco gerado (ANCORA-SHA), nada aplicado: {achados[0][0]} linha {achados[0][1]}")
+  if trava.ativos(R): sys.exit(f"outra aplicação em curso nesta cópia: {', '.join(trava.ativos(R))} (nada aplicado)")
+  abertas = aplicacoes_remotas()
+  if abertas: sys.exit(f"aplicação em curso no GitHub ({', '.join(abertas)}): espere o fim (nada aplicado)")
   tag = "-".join(a.nomes)[:60]; wt = f"{R}/.{a.agente}/worktrees/aplica-{a.agente}-{int(time.time())}"; br = f"aplica/{tag}"
+  trava.marcar(R, tag)  # (3b) trava: marcador local com o PID; some no fim, mesmo se a aplicação cair
+  try:
+      _aplicar(a, coautor, tag, wt, br)
+  finally:
+      trava.soltar(R, tag)
+
+
+def aplicacoes_remotas():
+  """Heads `aplica/*` das PRs abertas. Falha fechada: sem a lista, não se aplica."""
+  p = subprocess.run(["gh", "pr", "list", "--repo", "agataseth98-cmd/agata-seth", "--state", "open", "--json", "headRefName", "--limit", "200"],
+                     capture_output=True, text=True)
+  if p.returncode: sys.exit(f"não consegui listar as PRs abertas (falha fechada): {p.stderr.strip()[:200]}")
+  return trava.aplicacoes_abertas([d.get("headRefName", "") for d in json.loads(p.stdout or "[]")])
+
+
+def _aplicar(a, coautor, tag, wt, br):
   sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
   montar(wt, a, coautor)
   sh(wt, "git", "push", "-q", "-u", "origin", br)
   pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
   num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
-  import json
   EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
   def ci():
       """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""

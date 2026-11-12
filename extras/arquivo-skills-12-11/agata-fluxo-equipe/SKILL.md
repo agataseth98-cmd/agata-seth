@@ -58,3 +58,8 @@ Crase em texto de argumento executa comando · `pkill -f` com o padrão na próp
 - Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos/PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
 - Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
 - A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
+
+## 9. Pacote mínimo para subagente (decisão do Humano, 12/11/2026)
+- Quem delega passa ao subagente só: objetivo, arquivos, critérios de pronto, as regras que se aplicam e o turno do pai (`t=<n>.sub`). Nunca a conversa inteira.
+- O subagente segue AGENTS.md, que ele carrega sozinho: pelo CLAUDE.md (Claude Code) ou lendo AGENTS.md na partida (Codex, OpenCode). Não copie AGENTS.md no prompt.
+- O que faltar para a tarefa volta como lacuna em uma linha. Contexto completo "por garantia" não entra.

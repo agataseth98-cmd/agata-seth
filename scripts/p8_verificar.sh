@@ -35,4 +35,7 @@ else echo "FALHA 3: assinatura inválida -- $out"; exit 1; fi
 
 if out="$(git apply --check "$diff_path" 2>&1)"; then echo "OK 4: git apply --check limpo"
 else echo "FALHA 4: não aplica na árvore atual -- $out"; exit 1; fi
+# 5. (3a) o .diff não tem hunk em bloco ANCORA-SHA (o pre-commit reescreve esse bloco em todo commit)
+if out="$(python3 -I "$raiz/scripts/equipe/diff_limpo.py" "$diff_path" 2>&1)"; then echo "OK 5: diff sem bloco gerado"
+else echo "FALHA 5: $out"; exit 1; fi
 echo "PODE APLICAR: $nome"
