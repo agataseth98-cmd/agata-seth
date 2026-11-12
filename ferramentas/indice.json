@@ -3205,23 +3205,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-aplicar-proposta/SKILL.md",
-  "resumo": "Criar, verificar e aplicar uma proposta P-8. O Humano assina; o modelo nunca assina. Use em mudança protegida, sempre em worktree própria."
- },
- {
-  "nome": "agata-carregar",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-carregar/SKILL.md",
-  "resumo": "Abrir uma sessão neste sistema (comando \"carregar\", início de sessão, ou quando o bloco de estado não chegou injetado). Mede sync/hashes/HEA"
- },
- {
-  "nome": "agata-conselho-memoria",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-conselho-memoria/SKILL.md",
-  "resumo": "Trabalhar com a memória comum do Conselho e o canal da Equipe no Agata. Use no início de toda sessão (ler o cache do Conselho e o estado da "
+  "resumo": "-"
  },
  {
   "nome": "agata-conversar-com-seth",
@@ -3230,14 +3214,6 @@
   "tema": "agata",
   "caminho": ".agents/skills/agata-conversar-com-seth/SKILL.md",
   "resumo": "Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou escrever na conversa dele, de qualquer modelo (Claude Code, Codex, Gemini, O"
- },
- {
-  "nome": "agata-disciplina",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-disciplina/SKILL.md",
-  "resumo": "Disciplina obrigatória de qualquer modelo no sistema Agata — cabeçalho em toda resposta com hora medida, modo conciso, aviso antes de ação e"
  },
  {
   "nome": "agata-engenharia-reversa",
@@ -3253,15 +3229,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-equipe/SKILL.md",
-  "resumo": "Papéis da equipe de agentes do Agata (spec, dev, revisor, ci, time de inovação e auditor), com o que cada um pode e não pode fazer, quem rev"
- },
- {
-  "nome": "agata-ferramentas",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-ferramentas/SKILL.md",
-  "resumo": "Abre a caixa de ferramentas do Agata por tema (skills e agentes do ECC, do superpowers e as próprias). Use quando a tarefa pedir uma prática"
+  "resumo": "-"
  },
  {
   "nome": "agata-fluxo",
@@ -3269,15 +3237,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-fluxo/SKILL.md",
-  "resumo": "Fluxo único de trabalho no sistema Agata para qualquer LLM (Claude, Codex, Seth ou outro) que atue numa tarefa. Usar ao começar uma sessão, "
- },
- {
-  "nome": "agata-fluxo-equipe",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-fluxo-equipe/SKILL.md",
-  "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, OpenCode, Seth...), dois ou mais ao mesmo tempo: par"
+  "resumo": "-"
  },
  {
   "nome": "agata-llm-fundamentos",
@@ -3288,28 +3248,12 @@
   "resumo": "-"
  },
  {
-  "nome": "agata-mudanca-segura",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-mudanca-segura/SKILL.md",
-  "resumo": "Antes de mudar qualquer coisa que roda (unit systemd, container, firewall, config de serviço, rede, energia, boot) na Máquina. Portão das tr"
- },
- {
   "nome": "agata-painel",
   "tipo": "skill",
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-painel/SKILL.md",
   "resumo": "Mexer no painel operacional do Agata (redesign/painel_operacional, porta 20146): alterar cores, textos, popups, rolagem, conversa com a Seth"
- },
- {
-  "nome": "agata-processo-lote",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/agata-processo-lote/SKILL.md",
-  "resumo": "Como propor e aplicar um lote de mudanças no Agata do começo ao fim (worktree, testes do CI local, âncora de specs, uma assinatura por lote,"
  },
  {
   "nome": "agata-relay-provedores",
@@ -3325,7 +3269,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-time-inovacao/SKILL.md",
-  "resumo": "Como o time de inovação do Agata propõe melhorias com SDD: pesquisa, spec, revisão independente, decisão humana e só então proposta P-8. Use"
+  "resumo": "-"
  },
  {
   "nome": "agata-voz",
@@ -3342,29 +3286,5 @@
   "tema": "agata",
   "caminho": ".agents/skills/design-taste-frontend/SKILL.md",
   "resumo": "-"
- },
- {
-  "nome": "elephant-goldfish-sdd",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/elephant-goldfish-sdd/SKILL.md",
-  "resumo": "Orientar o Humano e os modelos a aplicar SDD 2.0 em funcionalidades grandes ou arriscadas: contexto profundo para desenhar, revisão independ"
- },
- {
-  "nome": "experimento-agata",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/experimento-agata/SKILL.md",
-  "resumo": "Planejar, executar, analisar e registrar experimentos semânticos e avaliações de confiabilidade interna do Agata no Experimento 2. Use para "
- },
- {
-  "nome": "morse",
-  "tipo": "skill",
-  "fonte": "agata",
-  "tema": "agata",
-  "caminho": ".agents/skills/morse/SKILL.md",
-  "resumo": "Conduzir conversas de voz e debates entre Humano, Codex e Seth com escuta paciente, tolerância a ruído, turnos claros e distinção entre fala"
  }
 ]

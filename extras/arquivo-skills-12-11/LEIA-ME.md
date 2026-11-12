@@ -1,0 +1,1 @@
+Arquivo das skills consolidadas em 12/11/2026 (proposta skills-consolidadas-12-11). Cópias integrais do SKILL.md antes da consolidação; o texto ativo está em .agents/skills/. Não é carregado por nenhum mecanismo. Reversão: ver propostas/skills-consolidadas-12-11.md.

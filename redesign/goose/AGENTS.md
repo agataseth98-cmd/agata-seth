@@ -95,10 +95,10 @@ Quando o Claude Code não estiver disponível, **você faz o trabalho dele na M�
 Os procedimentos não estão na sua memória nem neste arquivo — estão em skills do repositório
 (`~/agata/.agents/skills/`), que você carrega quando a tarefa pedir:
 
-- `agata-carregar` — abrir a sessão ("carregar", "carregar agata") com o bloco de prontidão.
+- `agata-fluxo` — entrada única: abrir a sessão ("carregar", "carregar agata") com o bloco de prontidão, escolher a skill certa e a conduta comum.
 - `agata-aplicar-proposta` — criar proposta P-8, verificar assinatura (`bash scripts/p8_verificar.sh <nome>`),
   aplicar, registrar, branch + PR. O merge e a assinatura são sempre do Humano.
-- `agata-mudanca-segura` — antes de mexer em serviço, rede, energia, boot: três perguntas + acoplamentos.
+- `agata-fluxo`, seção 4 — antes de mexer em serviço, rede, energia, boot: três perguntas + acoplamentos.
 
 Rode o Goose **dentro de `~/agata`** (`cd ~/agata && goose session`) — é assim que as skills do projeto
 aparecem. Extensão `canon` (MCP, mesmas 5 ferramentas da Seth): `query_canon`/`vault_consultar` pra ler o

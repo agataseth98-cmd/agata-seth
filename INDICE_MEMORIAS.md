@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
 (1000) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-skills-12-11 publicada: pacote mecânico e skills numa só proposta, com a fila de aplicação corrigida. Substitui pacote-mecanico-12-11 e skills-consolidadas-12-11 (movidas para propostas/superadas/).**
 (999) DIÁRIO — 12/11/2026 · **Proposta skills-consolidadas-12-11 publicada, refeita sobre origin/main 2ec04181 com o pacote-mecanico-12-11 já no diff: as skills próprias do Agata caem de 20 pastas para 10, sem perder texto (originais em extras/arquivo-skills-12-11/). Aplicar depois do pacote. Canon intacto; sem assinatura ainda.**
 (998) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-12-11 publicada: a verificação passa a valer para todo modelo por mecanismo da Máquina: contador de turno (turno.py), aviso de fim de turno sem bloqueio (auditoria_stop.py), negação de leitura de ~/.config/agata/.env, pontos de entrada que apontam para AGENTS.md (Claude Code, Codex, Gemini CLI, OpenCode e Seth) com verificador (conselho_mecanismos.py) e subagentes com modelo barato, maxTurns e pacote mínimo; uma assinatura, sem aplicar. Base origin/main 04bfe2e4.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobre a base atual.** O diff continua sem aplicação no código do repositório; inclui a correção C11b para remover o ponteiro PROCESSO antigo ao atualizar conversa já hidratada, respeitando `SETH_PROCESSO_HIDRATA=0` e evitando duplicação. Registrada nesta junção após (973). CI local executada nesta worktree; ver corpo da PR para resultados e limitações. Assinatura e aplicação continuam pendentes do Humano.
 (973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
-(971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
+(971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261 …
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-202 …
 (969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-2026 …
 (968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D …

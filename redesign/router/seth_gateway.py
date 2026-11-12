@@ -346,6 +346,25 @@ def _linha_propostas(pasta: Path | None = None) -> str:
             + " · o que está em propostas/aplicadas/ NÃO está pendente")
 
 
+# Pacote mecânico (12/11/2026, decisão do Humano: todo modelo age segundo o mesmo sistema): as diretrizes
+# vêm de AGENTS.md, lido pela Máquina a cada alteração do arquivo. É ponteiro, não cópia: o texto de
+# AGENTS.md entra inteiro na hidratação compacta. A doutrina fixa acima ainda é cópia (pendência do Humano).
+_AGENTS_PATH = Path(__file__).resolve().parents[2] / "AGENTS.md"
+_CACHE_AGENTS: dict = {"mtime": None, "texto": ""}
+
+
+def _diretrizes_agents() -> str:
+    try:
+        st = _AGENTS_PATH.stat()
+        if _CACHE_AGENTS["mtime"] != st.st_mtime:
+            _CACHE_AGENTS["texto"] = _AGENTS_PATH.read_text(encoding="utf-8")
+            _CACHE_AGENTS["mtime"] = st.st_mtime
+    except OSError:
+        return ("**Diretrizes (AGENTS.md):** lacuna: AGENTS.md não pôde ser lido nesta Máquina; "
+                "não afirme diretriz que não medir.\n")
+    return "**Diretrizes de todo modelo (AGENTS.md, lido pela Máquina):**\n" + _CACHE_AGENTS["texto"] + "\n"
+
+
 def _hidratacao(extra: str = "") -> str:
     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
     `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
@@ -361,7 +380,7 @@ def _hidratacao(extra: str = "") -> str:
             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
                              "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
                              + (f"{extra}\n" if extra else ""))
-        return f"{MARCADOR}\n{_DOUTRINA_FIXA}{bloco_estado}"
+        return f"{MARCADOR}\n{_DOUTRINA_FIXA}{_diretrizes_agents()}{bloco_estado}"
     try:
         st = HIDRATA_PATH.stat()
         if _CACHE["mtime"] != st.st_mtime:

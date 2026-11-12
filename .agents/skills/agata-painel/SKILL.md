@@ -37,12 +37,10 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
 5. Depois da aplicação: reinicie o serviço, meça na página e registre o resultado.
 
 ## Armadilhas que já custaram tempo
-- `pkill -f` derrubou o shell e matou processos alheios: liste com `ps` e mate por PID.
-- `git stash` é compartilhado entre worktrees: não use. Para guardar trabalho, faça commit WIP.
 - Caminhos com espaço (`~/Área de trabalho`) quebram `python3 -c` sem aspas: use argumento com aspas ou um script.
 - `grep -o` com caracteres como `↗` pode falhar em alguns locais: use `python3` para contar.
-- `equipe.py aceitar-linha` altera a matriz congelada da sessão: é decisão do Humano, não do agente.
+- Matriz congelada, `pkill -f` e `git stash`: regras de `agata-equipe` e `agata-fluxo`.
 
 ## Pendências conhecidas
 - Layout em celular não foi medido (o navegador não redimensiona a aba).
-- O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-conselho-memoria`.
+- O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-fluxo` (memória comum) e `agata-equipe` (canal).

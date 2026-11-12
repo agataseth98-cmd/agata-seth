@@ -50,4 +50,4 @@ Quando o Humano pedir uma conversa entre modelos, envie a mesma pergunta de form
 
 - [Mapa de hosts e estados registrados](references/estado-provedores.md).
 - [Descobertas operacionais append-only](references/diario-descobertas.md).
-- Fluxo P-8 e segurança: `agata-aplicar-proposta` e `agata-mudanca-segura`.
+- Fluxo P-8 e segurança: `agata-aplicar-proposta` e `agata-fluxo` (seção 4, mudança no runtime).

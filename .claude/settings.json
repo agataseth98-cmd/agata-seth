@@ -7,6 +7,25 @@
           { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/sessao_claude_contexto.sh\"" }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/turno.py\" hook", "timeout": 10 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/auditoria_stop.py\"", "timeout": 30 }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(~/.config/agata/.env)"
     ]
   }
 }

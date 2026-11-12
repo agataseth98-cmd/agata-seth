@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$GEMINI_PROJECT_DIR/scripts/auditoria_stop.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "read_file|run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$GEMINI_PROJECT_DIR/config/cli/gemini/bloquear_env.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

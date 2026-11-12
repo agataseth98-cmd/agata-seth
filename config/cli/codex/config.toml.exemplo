@@ -1,0 +1,25 @@
+# Exemplo de config do Codex (pacote mecânico, 12/11/2026). NÃO é lido pelo sistema.
+# O Humano copia os blocos para ~/.codex/config.toml (fora do repo) e depois roda /hooks no Codex
+# para revisar e confiar no hook (doc: https://learn.chatgpt.com/docs/hooks -- hooks não gerenciados
+# precisam de confiança antes de rodar). Doc da configuração:
+# https://learn.chatgpt.com/docs/config-file/config-reference
+# AGENTS.md: o Codex lê o arquivo do repo sozinho (https://learn.chatgpt.com/docs/agent-configuration/agents-md).
+# Não é preciso configurar nada para isso.
+
+# Negar leitura de ~/.config/agata/.env (mesmo efeito do permissions.deny do Claude Code).
+# Sintaxe: permissions.<nome>.filesystem.<caminho-ou-glob> = "deny", ativada por default_permissions.
+# Chave de topo: fica antes de qualquer tabela.
+# Não medido: se o Codex expande "~" nessa chave na versão instalada; conferir antes de confiar.
+default_permissions = "agata"
+
+[permissions.agata.filesystem]
+"~/.config/agata/.env" = "deny"
+
+# Aviso de fim de turno, sem bloquear (scripts/auditoria_stop.py confere a última resposta e só avisa).
+# O caminho usa a raiz do repo onde o Codex foi aberto.
+[[hooks.Stop]]
+
+[[hooks.Stop.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$(git rev-parse --show-toplevel)/scripts/auditoria_stop.py"'
+timeout = 30
