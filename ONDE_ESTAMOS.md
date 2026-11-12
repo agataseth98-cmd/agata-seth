@@ -14,6 +14,7 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 
 | componente | proposta | estado | desde |
 |---|---|---|---|
+| Skills do Agata: 20 pastas viram 10, sem perder texto (originais em extras/) | skills-consolidadas-12-11 | proposta | 12/11 09:50 |
 | Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
 | Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | proposta | 12/11 09:01 |
 | Chat lote 4: editar, ramos, parar, feedback, atalhos, tema | chat-lote4-09-11 | incluída em pacote-11-11 | 11/11 18:54 |
@@ -32,6 +33,10 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 | `--verificar` deixa rastro no log da auditoria | verificar-rastro-20261106 | incluída em pacote-12-11 (refeita) | 06/11 23:54 |
 
 Assinadas e aplicadas nesta rodada: `pacote-11-11` (12/11, PR #973). Superadas: `origem-preservada-07-11` (PR #965) e `sombra-orcamento-20261106` (spec v2). Fora desta tabela: `chat-voz-11-11` (PR #974, só proposta, aguarda assinatura do Humano).
+
+## Hoje, 12/11 (proposta: skills mais enxutas)
+
+Proposta `skills-consolidadas-12-11`, com registro (998). As skills do Agata passam de 20 pastas para 10, sem perder texto: os originais estão em `extras/arquivo-skills-12-11/`. A lista que todo modelo carrega cai 39%. Nada muda no comportamento até você assinar. Assinatura só depois do merge deste PR: `bash scripts/aprovar.sh skills-consolidadas-12-11 "<motivo>"`, no terminal, sem `!`.
 
 ## Hoje, 11/11 (proposta chat lote 4)
 

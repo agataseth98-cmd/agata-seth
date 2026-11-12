@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(998) DIÁRIO — 12/11/2026 · **Proposta skills-consolidadas-12-11 publicada: as skills próprias do Agata caem de 20 pastas para 10, sem perder texto (originais em extras/arquivo-skills-12-11/); canon intacto; sem assinatura ainda.**
+  palavras-chave: proposta, skills, consolidadas, publicada, próprias, agata, caem, pastas, perder, texto, originais, extras, arquivo, canon, intacto, assinatura
 (997) DIÁRIO — 12/11/2026 · **Aplicados chat-voz-11-11 e pacote-12-11 com a assinatura do Humano (assinaturas de 12/11, 09:16).**
   palavras-chave: aplicados, chat, voz, pacote, assinatura, humano, assinaturas
 (996) DIÁRIO — 12/11/2026 · **Proposta pacote-12-11 publicada: seis propostas paradas (tira-librechat, canon-boot, agente-opencode, docs-opencode refeita, verificar-rastro refeita e skill-processo-lessons só com o que não repete a skill) mais a nota de canonização do Texto 1 da História, numa só assinatura; sombra-orcamento vai para superadas.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: agência, pesquisa, aplicada, agencia, três, pesquisadores, leitura, claude, agents
 (969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-20261106): skill agata-engenharia-reversa e wrapper scripts/rea_leitura.sh, allowlist de 14 subcomandos. Herdr mantido.**
   palavras-chave: rea, leitura, aplicado, herdr, integracao, skill, agata, engenharia, reversa, wrapper, scripts, allowlist, subcomandos, mantido
-(968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D3 em stderr antes da chamada, multicast bloqueado no egress, skill de processo corrigida, portões mecanizados.**
-  palavras-chave: lote, aplicado, processo, aviso, stderr, chamada, multicast, bloqueado, egress, skill, corrigida, portões, mecanizados
+(968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D …
+  palavras-chave: lote, aplicado, processo, aviso
 (967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros …
   palavras-chave: lote, superada, diff, assinado, trazia, registros
 (966) DIÁRIO — 06/11/2026 · **Proposta lote2b (v2 do lote 2): substitui a v1 `lo …
