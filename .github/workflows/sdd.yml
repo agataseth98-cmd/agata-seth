@@ -32,6 +32,15 @@ on:
       - "scripts/medir_*.py"
       - "scripts/agata_falar.py"
       - "scripts/gate_spec_sync.py"
+      - "scripts/turno.py"
+      - "scripts/testar_turno.py"
+      - "scripts/auditoria_stop.py"
+      - "scripts/conselho_mecanismos.py"
+      - "scripts/testar_mecanismos.py"
+      - "redesign/router/auditoria_turno.py"
+      - "redesign/router/spec/**"
+      - "redesign/router/seth_gateway.py"
+      - ".claude/**"
       - ".github/workflows/sdd.yml"
   workflow_dispatch: {}
 
@@ -86,3 +95,11 @@ jobs:
 
       - name: Projeto SDD declarativo (selftest offline)
         run: python3 -I redesign/sdd_flow/project.py --selftest
+
+      - name: Pacote mecânico (turno, gancho Stop, mecanismos do Conselho)
+        run: |
+          python3 scripts/testar_turno.py
+          python3 scripts/turno.py --selftest
+          python3 redesign/router/auditoria_turno.py --selftest
+          python3 scripts/testar_mecanismos.py
+          python3 scripts/conselho_mecanismos.py --verificar

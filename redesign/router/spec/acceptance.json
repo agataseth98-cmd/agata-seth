@@ -1,0 +1,470 @@
+[
+  {
+    "criterion": "proximo começa em 1 numa sessão nova e soma 1 a cada chamada",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_comeca_em_1_e_soma"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sub não avança o contador e imprime t=<n>.sub; atual também não avança",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_sub_nao_incrementa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sessões diferentes têm contadores independentes",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_sessoes_independentes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "id de sessão fora do formato é recusado e nada é gravado fora do diretório",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_id_invalido_nao_escreve_fora_do_diretorio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "hora regional com fuso -03 e selo de origem",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_hora_regional_com_fuso_e_selo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "chamadas em threads na mesma sessão não repetem nem pulam número",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestConcorrencia.test_threads_nao_repetem_nem_pulam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "chamadas em processos na mesma sessão não repetem nem pulam número",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestConcorrencia.test_processos_nao_repetem_nem_pulam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "arquivo corrompido recomeça em 1 com a marca contador reiniciado",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestCorrupcao.test_tipos_invalidos_reiniciam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "arquivo que não é arquivo não quebra o gancho",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestCorrupcao.test_arquivo_ilegivel_nao_quebra_o_gancho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "atual sem turno sai 1 e id inválido sai 2",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestContador.test_cli_codigos_de_saida"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o selftest do turno.py passa",
+    "command": [
+      "python3",
+      "scripts/turno.py",
+      "--selftest"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho injeta Cabeçalho deste turno com a linha pronta a partir do 2º turno",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_segundo_turno_injeta_cabecalho_pronto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho usa o session_id do stdin antes do CLAUDE_SESSION_ID",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_usa_session_id_do_stdin_antes_do_ambiente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "entrada inválida ou sem sessão: o gancho sai 0, sem saída e sem escrever",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_entrada_invalida_nao_quebra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "na 1ª resposta da sessão o gancho pede o bloco de prontidão, sem linha t=",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_primeiro_turno_pede_prontidao_sem_linha_t"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o modelo medido no transcrito entra no cabeçalho",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_modelo_medido_no_transcrito"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "<synthetic> não entra no cabeçalho: vira modelo não verificado",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_modelo_sintetico_e_ignorado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o modelo do payload tem prioridade sobre o transcrito",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_modelo_do_payload_tem_prioridade"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a linha do gancho passa no verificador de cabeçalho",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_linha_do_gancho_passa_no_verificador_de_cabecalho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a auditoria acusa t= divergente do contador como aviso, sem mudar o código de saída",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestAuditoria.test_cli_divergencia_nao_bloqueia"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a auditoria compara t=<n>.sub pelo número",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestAuditoria.test_subagente_compara_pelo_numero"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem --sessao, sem contador ou sem t= no cabeçalho, a auditoria não acusa",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestAuditoria.test_sem_sessao_sem_contador_ou_sem_t_nao_acusa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gateway da Seth usa o mesmo rótulo (contador mecânico)",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestCanonEGateway.test_gateway_usa_o_mesmo_rotulo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "REGRAS, PROTOCOLOS e AGENTS apontam o contador mecânico e o t=<n>.sub",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestCanonEGateway.test_canon_aponta_o_contador"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": ".claude/settings.json registra o gancho UserPromptSubmit e preserva o SessionStart",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestCanonEGateway.test_gancho_registrado_e_sessao_preservada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o CLAUDE.md importa @AGENTS.md",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_claude_aponta_agents"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o GEMINI.md importa @AGENTS.md",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_gemini_aponta_agents"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "ponteiro quebrado faz o verificador de mecanismos falhar",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_ponteiro_quebrado_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "ponteiro convertido em cópia (acima de 500 bytes) faz o verificador falhar",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_ponteiro_virou_copia_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "AGENTS.md acima de 32 KiB faz o verificador falhar, pelo limite do Codex",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_codex_limite_de_32_kib"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "AGENTS.override.md na raiz faz o verificador falhar",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_codex_override_na_raiz_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o verificador sai 1 quando há FALHA",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_verificador_sai_1_com_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "no repositório o verificador não tem FALHA",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_repositorio_sem_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o verificador imprime uma linha por controle e um resumo por estado",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestPontosDeEntrada.test_repositorio_sem_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hidratação do gateway inclui AGENTS.md lido em tempo de execução",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSeth.test_gateway_inclui_agents_na_hidratacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem AGENTS.md o gateway avisa lacuna e não quebra",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSeth.test_gateway_nao_quebra_sem_agents"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o settings registra o gancho Stop com auditoria_stop.py",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_settings_registrado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho Stop avisa por systemMessage e nunca bloqueia",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_avisa_sem_bloquear"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "resposta sem achado sai calada com 0",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_sem_achado_sai_calado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "entrada sem texto ou inválida sai 0 sem saída",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_sem_texto_ou_entrada_ruim_sai_0"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho Stop lê prompt_response do Gemini",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_le_prompt_response_do_gemini"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho Stop confere o t= com o contador da sessão e só avisa",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestGancho.test_stop_confere_t_com_o_contador"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o settings nega Read de ~/.config/agata/.env",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSemLeituraDeSegredo.test_settings_nega_leitura_do_env"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o exemplo do Codex nega o .env pela chave permissions do config.toml",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSemLeituraDeSegredo.test_exemplo_codex_nega_o_env"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o exemplo do OpenCode nega *.env pela sintaxe V2 de permissions",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSemLeituraDeSegredo.test_exemplo_opencode_nega_env"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gancho do Gemini bloqueia a leitura do .env com exit 2",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSemLeituraDeSegredo.test_gancho_gemini_bloqueia_leitura_do_env"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todo agente em .claude/agents tem model haiku e maxTurns",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_agentes_haiku_e_max_turns"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os agentes só de leitura não têm Bash",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_agentes_so_leitura_sem_bash"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "nenhum agente desliga o CLAUDE.md (omitClaudeMd)",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_agentes_sem_omitclaudemd"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todos os agentes têm o mesmo texto de pacote mínimo",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_pacote_minimo_igual_em_todos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a skill de equipe tem a regra de pacote mínimo",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_skill_de_equipe_tem_a_regra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "PROMPT_CARREGAMENTO aponta o contador de turno",
+    "command": [
+      "python3",
+      "scripts/testar_mecanismos.py",
+      "TestSubagentes.test_prompt_carregamento_tem_o_contador"
+    ],
+    "cwd": null
+  }
+]

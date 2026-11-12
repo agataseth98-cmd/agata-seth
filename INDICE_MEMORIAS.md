@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(999) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-12-11 com a assinatura do Humano (assinatura de 12/11, 09:58): a verificação passa a valer para todo modelo por mecanismo da Máquina.**
 (998) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-12-11 publicada: a verificação passa a valer para todo modelo por mecanismo da Máquina: contador de turno (turno.py), aviso de fim de turno sem bloqueio (auditoria_stop.py), negação de leitura de ~/.config/agata/.env, pontos de entrada que apontam para AGENTS.md (Claude Code, Codex, Gemini CLI, OpenCode e Seth) com verificador (conselho_mecanismos.py) e subagentes com modelo barato, maxTurns e pacote mínimo; uma assinatura, sem aplicar. Base origin/main 04bfe2e4.**
 (997) DIÁRIO — 12/11/2026 · **Aplicados chat-voz-11-11 e pacote-12-11 com a assinatura do Humano (assinaturas de 12/11, 09:16).**
 (996) DIÁRIO — 12/11/2026 · **Proposta pacote-12-11 publicada: seis propostas paradas (tira-librechat, canon-boot, agente-opencode, docs-opencode refeita, verificar-rastro refeita e skill-processo-lessons só com o que não repete a skill) mais a nota de canonização do Texto 1 da História, numa só assinatura; sombra-orcamento vai para superadas.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo-20261106), assinado pelo Humano.**
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261106): o pedido ao Conselho Remoto não tem mais teto de tamanho.**
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-20261106): três pesquisadores de leitura em `.claude/agents/`.**
-(969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-20261106): skill agata-engenharia-reversa e wrapper scripts/rea_leitura.sh, allowlist de 14 subcomandos. Herdr mantido.**
+(969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-2026 …
 (968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D …
 (967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros …
 (966) DIÁRIO — 06/11/2026 · **Proposta lote2b (v2 do lote 2): substitui a v1 `lo …

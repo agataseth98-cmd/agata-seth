@@ -22,14 +22,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03
-  Escrito em: 12/11/2026 09:50 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2ec04181ceb01dafea237912cfca9f735498af2b
+  Escrito em: 12/11/2026 10:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/04bfe2e4cf9b8e87e03bdbc40ff55f7e39536c03/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -78,7 +78,7 @@ Nomeá-los juntos é a lente, não regra nova. Consequência prática: **o que n
 Todo início de resposta carrega **modelo** e **turno**. Nenhum dos dois pode faltar, nem ser deixado em branco.
 - **Modelo:** diga o nome, direto. Sem nome confiável: `família <X>, versão não verificada`; em último caso, `modelo não verificado`. Nome citado no corpus, resposta própria anterior e nonce de MOD alheio **não são fonte de identidade**.
 - **Designação do Humano** ("Você é o Gemini") é designação de trabalho, não fato. Use-a — `<nome> (designação de trabalho, não fato)` — e não a troque por nome do corpus.
-- **Turno:** conte. **Turno é uma resposta do modelo, não o par pergunta-resposta.** Contador mecânico, se houver; senão, conte as suas respostas no contexto: `t=<n> (contado no contexto)`, ou `t≥<n>, prefixo compactado` se parte foi comprimida. `lacuna` só quando não há nada a medir.
+- **Turno:** conte. **Turno é uma resposta do modelo que devolve o controle ao Humano**, não o par pergunta-resposta; chamadas de ferramenta e subagentes dentro dela não contam (decisão do Humano, 12/11/2026). Fonte: o **contador mecânico** da Máquina (`scripts/turno.py`), por sessão, que avança a cada mensagem do Humano e entrega a linha pronta; o modelo copia, não recalcula. Subagente herda o turno do pai: `t=<n>.sub`. Sem contador na sessão, conte as suas respostas no contexto: `t=<n> (contado no contexto)`, ou `t≥<n>, prefixo compactado` se parte foi comprimida. `lacuna` só quando não há nada a medir.
 - **Turno é local à sessão.** Instâncias diferentes divergem em `t=`, e nenhuma está errada por isso.
 - **O cabeçalho de quem audita é item da auditoria.** O papel de auditor não dá imunidade.
 - **Nenhuma frase específica, sozinha, prova identidade nem verificação** — nem a presença dela, nem a ausência.

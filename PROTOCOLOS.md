@@ -29,6 +29,8 @@ agata-seth · <modelo> · t=<n> (<base: contado no contexto / contador mecânico
 
 Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
 
+**Contador mecânico de turno (decisão do Humano, 12/11/2026).** A fonte do `t=` é `scripts/turno.py`, por sessão, na Máquina. Com gancho (Claude Code: `UserPromptSubmit` em `.claude/settings.json`), o gancho injeta a linha pronta e o modelo copia. Sem gancho: `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta, com o mesmo `<id>` em toda a conversa. Subagente: `python3 scripts/turno.py sub --sessao <id>` imprime `t=<n>.sub` sem avançar. `(contado no contexto)` só quando não há contador (sem `turno.py` ou sem `<id>`). Divergência entre o cabeçalho e o contador é acusada pela auditoria (`python3 redesign/router/auditoria_turno.py --verificar --sessao <id>`), não bloqueia.
+
 **Identidade no cabeçalho (decisão do Humano, 20/10/2026):** use `agata-seth · <modelo real>` somente quando a resposta passou pelo gateway/escriba da Seth. Em nuvem ou app próprio fora desse caminho, use `agata · <modelo real>`. O nome do modelo vem do indicador da interface ou da configuração medida da sessão; nunca da memória nem de outro modelo. Preserve o formato de turno e o selo de hora definidos acima.
 
 **Data e hora.**

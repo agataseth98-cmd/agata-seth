@@ -32,6 +32,11 @@ passo "medição de contexto (selftest)" python3 -I scripts/medir_contexto_efeti
 passo "teste de português (selftest)" python3 -I scripts/teste_portugues.py --selftest
 passo "voz do sistema (selftest)" python3 -I scripts/agata_falar.py --selftest
 passo "projeto SDD declarativo (selftest)" python3 -I redesign/sdd_flow/project.py --selftest
+passo "pacote mecânico: testes do turno" python3 scripts/testar_turno.py
+passo "pacote mecânico: selftest do turno" python3 scripts/turno.py --selftest
+passo "pacote mecânico: selftest da auditoria do turno" python3 redesign/router/auditoria_turno.py --selftest
+passo "pacote mecânico: testes dos mecanismos do Conselho" python3 scripts/testar_mecanismos.py
+passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/conselho_mecanismos.py --verificar
 
 if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
 echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
