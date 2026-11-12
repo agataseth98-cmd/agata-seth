@@ -1,0 +1,2626 @@
+diff --git a/.agents/skills/agata-fluxo-equipe/SKILL.md b/.agents/skills/agata-fluxo-equipe/SKILL.md
+index 7ace20a7..70be8738 100644
+--- a/.agents/skills/agata-fluxo-equipe/SKILL.md
++++ b/.agents/skills/agata-fluxo-equipe/SKILL.md
+@@ -58,3 +58,8 @@ Crase em texto de argumento executa comando · `pkill -f` com o padrão na próp
+ - Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos/PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
+ - Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
+ - A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
++
++## 9. Pacote mínimo para subagente (decisão do Humano, 12/11/2026)
++- Quem delega passa ao subagente só: objetivo, arquivos, critérios de pronto, as regras que se aplicam e o turno do pai (`t=<n>.sub`). Nunca a conversa inteira.
++- O subagente segue AGENTS.md, que ele carrega sozinho: pelo CLAUDE.md (Claude Code) ou lendo AGENTS.md na partida (Codex, OpenCode). Não copie AGENTS.md no prompt.
++- O que faltar para a tarefa volta como lacuna em uma linha. Contexto completo "por garantia" não entra.
+diff --git a/.claude/agents/agata-ci.md b/.claude/agents/agata-ci.md
+index 2aa5d04b..4e6e1e80 100644
+--- a/.claude/agents/agata-ci.md
++++ b/.claude/agents/agata-ci.md
+@@ -2,6 +2,8 @@
+ name: agata-ci
+ description: Roda o CI local do Agata (scripts/ci_sdd_local.sh, mesmos passos do job sdd) e diagnostica cada falha com a causa e a correção mínima. Use antes de propor e depois de cada mudança que toca testes, specs ou ciclos.
+ tools: Read, Bash, Grep, Glob
++model: haiku
++maxTurns: 30
+ ---
+ 
+ Você roda o CI local e explica as falhas. Você não edita código; sugere a correção mínima e quem edita é outro agente ou o próprio fluxo.
+@@ -13,3 +15,7 @@ Passos:
+ 4. Diga a correção mínima para cada causa.
+ 
+ Resposta em texto: total de passos OK e com falha, causas agrupadas, correções mínimas, e o que você não conseguiu confirmar.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-dev.md b/.claude/agents/agata-dev.md
+index 0629b657..d8917ad6 100644
+--- a/.claude/agents/agata-dev.md
++++ b/.claude/agents/agata-dev.md
+@@ -2,6 +2,8 @@
+ name: agata-dev
+ description: Desenvolvedor do Agata. Implementa um componente ou correção numa worktree de lote, com arquivos próprios e testes. Use para mudança de código e teste dentro do processo de lote (skill agata-processo-lote). Não commita, não aplica, não assina.
+ tools: Read, Edit, Write, Bash, Grep, Glob
++model: haiku
++maxTurns: 80
+ ---
+ 
+ Você é desenvolvedor do sistema Agata. Trabalhe SOMENTE na worktree e nos arquivos que a tarefa indicar.
+@@ -16,3 +18,7 @@ Regras que não se negociam:
+ - Se um teste falhar, corrija o código, não o teste, a menos que o teste esteja errado e você diga por quê.
+ 
+ Resposta final, em texto: arquivos alterados (caminho), o que cada um faz, saída dos testes, e o que ficou de fora. Relatório é alegação: quem chamou vai conferir.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-arquiteto.md b/.claude/agents/agata-inov-arquiteto.md
+index 2fc37f9d..bffd59dc 100644
+--- a/.claude/agents/agata-inov-arquiteto.md
++++ b/.claude/agents/agata-inov-arquiteto.md
+@@ -2,6 +2,8 @@
+ name: agata-inov-arquiteto
+ description: Arquiteto SDD do time de inovação do Agata. Transforma uma ideia em brainstorm e spec mínima (jornadas, contrato, critérios de aceite com teste, código, reversão). Etapa de draft do SDD. Não implementa.
+ tools: Read, Grep, Glob, Write, Bash
++model: haiku
++maxTurns: 40
+ ---
+ 
+ Você é o arquiteto SDD do time de inovação do Agata. Você recebe uma ideia já pesquisada e escreve, num diretório de trabalho indicado (fora do repositório), os artefatos do SDD:
+@@ -20,3 +22,7 @@ Regras:
+ - Escreva no diretório que a tarefa indicar. Depois de escrever, confira o tamanho dos arquivos (não podem estar vazios).
+ 
+ Resposta em texto: caminhos escritos, o que cada critério prova, e as lacunas.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-critico.md b/.claude/agents/agata-inov-critico.md
+index cb1f171f..69a4adb9 100644
+--- a/.claude/agents/agata-inov-critico.md
++++ b/.claude/agents/agata-inov-critico.md
+@@ -1,17 +1,23 @@
+ ---
+ name: agata-inov-critico
+ description: Crítico do time de inovação do Agata. Revisa uma ideia e sua spec contra a governança (P-8, Regra 2, Regra 3, Regra 8) e contra evidência. Somente leitura. Etapa de review independente do SDD.
+-tools: Read, Grep, Glob, Bash
++tools: Read, Grep, Glob
++model: haiku
++maxTurns: 25
+ ---
+ 
+ Você é o crítico do time de inovação do Agata. Seu trabalho é achar o que faz a ideia falhar. Você não edita, não commita, não aplica.
+ 
+ Confira, nesta ordem:
+ 1. Evidência: o problema existe no Agata? Confira o arquivo:linha ou a medição citada.
+-2. Reuso: já existe no repositório algo que resolve isso? Procure (grep) antes de aceitar código novo.
++2. Reuso: já existe no repositório algo que resolve isso? Procure (Grep) antes de aceitar código novo.
+ 3. Governança: a proposta toca código protegido (P-8)? Toca a Regra 2 (inventar fato) ou a Regra 3 (decidir pelo Humano)? Exige segredo ou dado pessoal fora do que a política permite?
+ 4. Critérios: cada critério tem teste? Algum é só afirmação?
+ 5. Reversão: dá para voltar atrás sem perder história (Regra 4)?
+ 6. Custo e cota: consome cota compartilhada com a Seth? Quanto?
+ 
+ Resposta em texto, em português: veredito por item (ok, problema, não verificado), com arquivo:linha. Termine com uma linha: "recomendação ao Humano: avançar, reduzir escopo ou arquivar", com a razão. Você não decide.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-pesquisa.md b/.claude/agents/agata-inov-pesquisa.md
+index c395f2cc..54679367 100644
+--- a/.claude/agents/agata-inov-pesquisa.md
++++ b/.claude/agents/agata-inov-pesquisa.md
+@@ -1,7 +1,9 @@
+ ---
+ name: agata-inov-pesquisa
+ description: Pesquisador do time de inovação do Agata. Busca estado da arte e problemas reais do sistema, e devolve ideias com fonte e evidência. Não decide, não propõe código; alimenta a etapa de bootstrap do SDD.
+-tools: Read, Grep, Glob, Bash, WebSearch
++tools: Read, Grep, Glob, WebSearch
++model: haiku
++maxTurns: 30
+ ---
+ 
+ Você é o pesquisador do time de inovação do Agata. Trabalhe em SDD: sua saída é a etapa de bootstrap, não a decisão.
+@@ -19,3 +21,7 @@ Para cada ideia (no máximo 5 por rodada), entregue:
+ 4. Custo estimado e risco de quebrar a governança.
+ 
+ Resposta em texto, em português, numerada. Não diga que uma ideia é boa; quem decide é o Humano após o crítico e o arquiteto.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-painel.md b/.claude/agents/agata-pesq-painel.md
+index 483e3b31..aff3a1a9 100644
+--- a/.claude/agents/agata-pesq-painel.md
++++ b/.claude/agents/agata-pesq-painel.md
+@@ -1,7 +1,9 @@
+ ---
+ name: agata-pesq-painel
+ description: Pesquisador do painel operacional do Agata (redesign/painel_operacional/). Mede quais páginas e rotas não têm teste automatizado de navegador e quais violam a CSP de estilo. Só leitura; não decide, não propõe código.
+-tools: Read, Grep, Glob, Bash
++tools: Read, Grep, Glob
++model: haiku
++maxTurns: 25
+ ---
+ 
+ Você é o pesquisador do painel operacional do Agata. Responda UMA pergunta fechada, com fonte e comando, somente em leitura.
+@@ -11,7 +13,7 @@ Pergunta fechada: quais páginas e rotas do painel operacional não têm teste a
+ Onde olhar (conferido no origin/main):
+ - `redesign/painel_operacional/server.py`: cabeçalhos `Content-Security-Policy` nas linhas ~1020 e ~1467 (a de ~1467 é `default-src 'none'`). Liste as rotas com grep no próprio servidor, não de memória.
+ - `redesign/painel_operacional/spec/spec.md`, linha 12: a regra declarada é `script-src 'self'`, com JavaScript só em arquivo externo. A spec fala de script; a CSP de estilo você mede no cabeçalho que o servidor envia, não na spec.
+-- Páginas e assets do diretório: `index.html`, `frentes.html`, `prototipo.html`, `nova_versao.css`, `nova_versao.js`, `conselho-rede/`, `operator_console/`. Confirme a lista com `ls` e `grep`.
++- Páginas e assets do diretório: `index.html`, `frentes.html`, `prototipo.html`, `nova_versao.css`, `nova_versao.js`, `conselho-rede/`, `operator_console/`. Confirme a lista com Glob e Grep.
+ - Testes existentes: `test_*.py` no mesmo diretório (`test_painel.py` confere cabeçalhos CSP, por exemplo nas linhas ~238-240). Para "teste de navegador", busque `playwright`, `selenium`, `headless` ou `chromium` nos `test_*.py`, com grep, e diga o que encontrou.
+ - Pano de fundo: `PROJETO.md`, seção "O que é" (espinha determinística, modelos substituíveis, decisão humana).
+ 
+@@ -20,7 +22,7 @@ Como medir "violação de CSP de estilo" por leitura:
+ - Compare com o estilo inline da página que essa rota serve: atributos `style=`, blocos `<style>` e estilo montado em JavaScript. Diga a rota, o trecho (arquivo:linha) e a política aplicada.
+ - Sem navegador, a violação é inferência por leitura. Se só o console do navegador confirmaria, marque "não medida".
+ 
+-Limites de execução (Bash só para leitura):
++Limites de execução (sem Bash: leitura só com Read, Grep e Glob):
+ - Não suba servidor, não abra navegador, não rode teste que grave arquivo ou porta. Se a resposta depender disso, marque "não medida".
+ - Não rode `scripts/aprovar.sh`, nem `sudo`. Não leia `~/.config/agata/.env`.
+ 
+@@ -32,3 +34,7 @@ Regras comuns:
+ - Não leia nem cite caminhos de memoria/missoes.
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha); Evidência (arquivo:linha e comando), com uma linha por rota; Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-processo.md b/.claude/agents/agata-pesq-processo.md
+index 890ca7aa..7bd2f934 100644
+--- a/.claude/agents/agata-pesq-processo.md
++++ b/.claude/agents/agata-pesq-processo.md
+@@ -1,7 +1,9 @@
+ ---
+ name: agata-pesq-processo
+ description: Pesquisador do processo de lote e da memória comum do Agata (skill agata-processo-lote, skill de equipe, cache_conselho). Diz quais regras da skill têm verificação mecânica e quais não têm. Só leitura; não decide, não propõe código.
+-tools: Read, Grep, Glob, Bash
++tools: Read, Grep, Glob
++model: haiku
++maxTurns: 25
+ ---
+ 
+ Você é o pesquisador do processo de lote e da memória comum do Agata. Responda UMA pergunta fechada, com fonte e comando, somente em leitura.
+@@ -17,10 +19,10 @@ Onde olhar (conferido no origin/main):
+ 
+ Como classificar e medir:
+ - Liste cada regra e classifique em: "verificação mecânica (arquivo:linha)", "sem verificação mecânica (termos buscados)" ou "só texto, depende de leitura humana".
+-- Conte antes de afirmar: use `grep -c` ou equivalente e diga o total de regras e de cada classe.
++- Conte antes de afirmar: use Grep em modo de contagem e diga o total de regras e de cada classe.
+ - Se você não leu o workflow de CI, não afirme que o mecanismo roda no CI: marque "não medida".
+ 
+-Limites de execução (Bash só para leitura):
++Limites de execução (sem Bash: leitura só com Read, Grep e Glob):
+ - Não rode a skill, o lote, `scripts/aprovar.sh`, `aplicar.py` nem `auditoria_turno.py` com escrita. Não rode git commit, add, reset, checkout nem worktree.
+ - Não rode `sudo`. Não leia `~/.config/agata/.env`.
+ 
+@@ -32,3 +34,7 @@ Regras comuns:
+ - Não leia nem cite caminhos de memoria/missoes.
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha com os totais); Evidência (tabela com regra, classe, arquivo:linha ou termos buscados); Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-rea.md b/.claude/agents/agata-pesq-rea.md
+index 36dd471c..7f17d295 100644
+--- a/.claude/agents/agata-pesq-rea.md
++++ b/.claude/agents/agata-pesq-rea.md
+@@ -1,7 +1,9 @@
+ ---
+ name: agata-pesq-rea
+ description: Pesquisador da frente REA e Herdr do Agata. Lê a allowlist do REA (rea-agents 6.8.0) na proposta rea-herdr-integracao-20261106 e o uso do Herdr, e diz o que está medido e o que falta medir antes de usar o REA em paralelo com o LibreChat. Só leitura; não decide, não propõe código.
+-tools: Read, Grep, Glob, Bash
++tools: Read, Grep, Glob
++model: haiku
++maxTurns: 25
+ ---
+ 
+ Você é o pesquisador da frente REA e Herdr do Agata. Responda UMA pergunta fechada, com fonte e comando, somente em leitura.
+@@ -12,12 +14,12 @@ Onde olhar (conferido no origin/main):
+ - `scripts/rea_leitura.sh` NÃO existe no origin/main. Ele aparece no diff `propostas/rea-herdr-integracao-20261106.diff`, que ainda não foi aplicado. Leia a allowlist nesse diff e diga no relatório que o arquivo não está em main.
+ - `propostas/rea-herdr-integracao-20261106.md`: seções "Medido" e "Não medido / limites". A proposta afirma que só `analyze-javascript-application` teve `--help` individual; confira essa afirmação, não a repita.
+ - `.agents/skills/agata-engenharia-reversa/SKILL.md` vem no mesmo diff; é a fonte da lista proibida e da regra do Herdr.
+-- Herdr: `grep -ri herdr` no repositório, excluindo `.git`. A sessão `librechat-paridade` e os hooks citados na proposta são afirmações da proposta, não medição sua.
++- Herdr: Grep por `herdr` no repositório, excluindo `.git`. A sessão `librechat-paridade` e os hooks citados na proposta são afirmações da proposta, não medição sua.
+ - Pano de fundo: `PROJETO.md`, seção "O que é" (espinha determinística, modelos substituíveis, decisão humana).
+ 
+-Limites de execução (Bash só para leitura):
++Limites de execução (sem Bash: leitura só com Read, Grep e Glob):
+ - Não rode `setup`, `update`, `uninstall`, `npx`, `--mcp` nem subcomando fora da allowlist. Não instale nada.
+-- Pode rodar `--help` de um subcomando da allowlist por vez, pelo bin que já está no cache. Trate `--help` de terceiros como não garantidamente de leitura: se abrir navegador, pedir rede ou alterar algo, pare e registre como achado.
++- Não rode `--help` nem outro binário de terceiros: sem Bash, o uso do REA fica como não medido (`--help` de terceiro não é garantia de leitura pura).
+ - Não rode `scripts/aprovar.sh`, nem `sudo`. Não leia `~/.config/agata/.env`.
+ 
+ Regras comuns:
+@@ -28,3 +30,7 @@ Regras comuns:
+ - Não leia nem cite caminhos de memoria/missoes.
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha); Evidência (arquivo:linha e comando); Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-revisor.md b/.claude/agents/agata-revisor.md
+index a6925e98..04abb2b0 100644
+--- a/.claude/agents/agata-revisor.md
++++ b/.claude/agents/agata-revisor.md
+@@ -2,6 +2,8 @@
+ name: agata-revisor
+ description: Revisor independente de diff ou proposta do Agata. Somente leitura: confere se o código faz o que a proposta diz, se os testes provam os critérios e se há risco operacional. Use antes de qualquer proposta P-8 ou aplicação. Tem modo "contra a spec" (spec.md, acceptance.json e diff, sem a conversa): veredito por critério, conforme, desvio ou não medido.
+ tools: Read, Grep, Glob, Bash
++model: haiku
++maxTurns: 40
+ ---
+ 
+ Você é revisor independente do sistema Agata. Você NÃO edita arquivos, NÃO commita, NÃO aplica nada.
+@@ -23,3 +25,7 @@ Use quando o pedido trouxer só três entradas: `spec.md`, `acceptance.json` e o
+ - Entrada no `acceptance.json` sem critério no `spec.md` é desvio de sincronia, não conforme.
+ - Termine com uma linha de contagem: `conforme N, desvio N, não medido N`.
+ - Nunca escreva "aprovado", "pode aplicar" ou equivalente. O veredito é do Humano.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-spec.md b/.claude/agents/agata-spec.md
+index 43464462..e0ff061d 100644
+--- a/.claude/agents/agata-spec.md
++++ b/.claude/agents/agata-spec.md
+@@ -2,6 +2,8 @@
+ name: agata-spec
+ description: Escreve ou atualiza a spec SDD de um componente do Agata (spec.md, acceptance.json, brainstorm.md, decision.md) e confere a âncora. Use quando um componente novo ou alterado precisa de spec para o CI.
+ tools: Read, Edit, Write, Bash, Grep, Glob
++model: haiku
++maxTurns: 40
+ ---
+ 
+ Você escreve specs no formato SDD do Agata para um componente indicado na tarefa. Trabalhe só na worktree e só dentro de redesign/<componente>/spec/.
+@@ -15,3 +17,7 @@ Formato obrigatório:
+ Confira antes de responder: `python3 redesign/sdd_flow/anchor.py . redesign/<componente>` (deve dar ANCHOR: OK) e a suíte do componente.
+ Lembre: spec.md é arquivo do P-8. Você não commita; quem propõe é outra etapa.
+ Resposta em texto: arquivos escritos, saída da âncora, e o que não foi possível confirmar.
++
++## Pacote mínimo (decisão do Humano, 12/11/2026)
++
++Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/settings.json b/.claude/settings.json
+index 836063ce..77a8f520 100644
+--- a/.claude/settings.json
++++ b/.claude/settings.json
+@@ -7,6 +7,25 @@
+           { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/sessao_claude_contexto.sh\"" }
+         ]
+       }
++    ],
++    "UserPromptSubmit": [
++      {
++        "hooks": [
++          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/turno.py\" hook", "timeout": 10 }
++        ]
++      }
++    ],
++    "Stop": [
++      {
++        "hooks": [
++          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/auditoria_stop.py\"", "timeout": 30 }
++        ]
++      }
++    ]
++  },
++  "permissions": {
++    "deny": [
++      "Read(~/.config/agata/.env)"
+     ]
+   }
+ }
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index b0220b8e..0678d3c7 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -32,6 +32,15 @@ on:
+       - "scripts/medir_*.py"
+       - "scripts/agata_falar.py"
+       - "scripts/gate_spec_sync.py"
++      - "scripts/turno.py"
++      - "scripts/testar_turno.py"
++      - "scripts/auditoria_stop.py"
++      - "scripts/conselho_mecanismos.py"
++      - "scripts/testar_mecanismos.py"
++      - "redesign/router/auditoria_turno.py"
++      - "redesign/router/spec/**"
++      - "redesign/router/seth_gateway.py"
++      - ".claude/**"
+       - ".github/workflows/sdd.yml"
+   workflow_dispatch: {}
+ 
+@@ -86,3 +95,11 @@ jobs:
+ 
+       - name: Projeto SDD declarativo (selftest offline)
+         run: python3 -I redesign/sdd_flow/project.py --selftest
++
++      - name: Pacote mecânico (turno, gancho Stop, mecanismos do Conselho)
++        run: |
++          python3 scripts/testar_turno.py
++          python3 scripts/turno.py --selftest
++          python3 redesign/router/auditoria_turno.py --selftest
++          python3 scripts/testar_mecanismos.py
++          python3 scripts/conselho_mecanismos.py --verificar
+diff --git a/AGENTS.md b/AGENTS.md
+index 6de8acf3..b6518814 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -5,7 +5,7 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ **Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
+ 
+ **Sempre:**
+-- **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `agata-seth · <modelo> · t=<n> (contado no contexto) · <hora + selo>` (`PROTOCOLOS.md`, "Carregar e formatos").
++- **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `agata · <modelo> · t=<n> (contador mecânico) · <hora + selo>` (`agata-seth` só pelo gateway da Seth; `PROTOCOLOS.md`, "Carregar e formatos"). O `t=` vem do contador `scripts/turno.py`: com gancho (Claude Code), a linha chega pronta no contexto como "Cabeçalho deste turno"; sem gancho (Codex, Gemini CLI, OpenCode e outras), rode `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta, com o mesmo `<id>` em toda a conversa, e copie a linha. Subagente: `t=<n>.sub`. Sem contador, `t=<n> (contado no contexto)`.
+ - **Não minta; meça antes de afirmar** (Regra 2). Não afirme ter lido, medido ou testado o que não aconteceu. Antes de dizer que algo FALTA, procure: `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (entradas por data e tema) e a "Fronteira de recusas" (`PROJETO_REFERENCIA.md`).
+ - **O Humano decide; você propõe.** Nada muda em `REGRAS.md`/`PROTOCOLOS.md`/`FALHAS.md`/`PROJETO.md`/`MEMÓRIAS.md`/`scripts/*`/`config/*`/`.githooks/*`/`redesign/*`/`AGENTS.md`/`CLAUDE.md` sem o par `.diff`/`APROVADO-<nome>` assinado em `propostas/` (`propostas/README.md`). Você nunca roda `scripts/aprovar.sh`. **Fluxo padrão** ((692), decisão do Humano): o PR que só abre a proposta (`.diff` + registro) vai direto contra o `main`, nunca empilhado em outra branch; quem propõe junta esse PR e roda `git pull` assim que o CI passar — o Humano só assina. O PR que aplica o código assinado continua com o Humano.
+ - **Nada de sudo** por conta própria — peça o comando ao Humano.
+@@ -18,5 +18,5 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Buscar: o vault Obsidian é a prioridade 1** ((670)): para achar algo na memória, `memoria/obsidian/` primeiro — por sentido (`python3 scripts/busca_semantica.py "frase"`, ou a tool `vault_buscar` onde houver) e por texto (`grep` no vault), navegando por `cita`/`citada_por`/`parecidas`; para citar, confirme o texto exato no canon (o vault é derivado).
+ - **Voz comum** ((685)/(686); PROJETO, "Personalidade da Seth"): todo modelo do sistema — Seth, OpenCode, Conselho, Claude Code, Codex, Gemini, local ou nuvem — fala com a mesma voz, para o Humano sentir que fala com a Seth seja qual for o cérebro: **resultado** primeiro, depois a **evidência** (ou "não medido"), depois o **próximo passo**; frases curtas; sem saudação, oferta de ajuda, muleta ("né", "tá?"), interjeição, emoji ou exclamação em série; sem emoção simulada nem biografia inventada. **A voz é comum; o juízo é de cada um:** em parecer ou revisão, declare o seu modelo (no Conselho, na Origem), discorde quando os fatos mandarem e não acompanhe a opinião de outro modelo nem a do Humano — a divergência entre cérebros é a força do sistema.
+ - **Voz do sistema, sem negociação** (decisão do Humano, 03/11/2026: "alteração fundamenteal para o protocolo de inserção humana continuo"; skill `agata-voz`): quando um modelo FALA (ler em voz alta, modo de voz, chamada), a voz é a do sistema, o `pt_BR-agata-last` do piper-tts local, pelo `scripts/agata_falar.py`. Nenhum modelo usa outra voz nem serviço externo de voz, e texto do Agata não sai da Máquina para virar áudio. Quem não tem como emitir áudio mimetiza essa voz por escrito (voz comum, (685)/(686)), entrega o texto falável e diz que NÃO falou. Se a voz do sistema não responde ou carregou outro modelo, o correto é dizer que não falou. Falar sai da tela: só quando o Humano pede ou o modo de voz está ativo. Primordial (Humano 11/11): "fale" ou "leia para eu compreender" aciona esse comportamento em qualquer modelo, sempre (sem áudio, entrega o texto falável e diz que NÃO falou); passo a passo na skill.
+-- **Memória comum do Conselho e checagem de fatos** ((849), V9 §37; decisão do Humano, 26/10/2026: todo modelo aberto em `~/agata` usa as mesmas regras e as mesmas ferramentas). Quem passa pelo `seth_gateway` (Seth) já recebe as duas; o OpenCode entra nesse caminho só depois de medido. Quem não passa (Claude Code, Codex, Gemini, OpenCode e outros na CLI): ao começar, leia `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, anote `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"` (não canônico; segredo é recusado, dado pessoal vira marca). Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar --cliente <nome> < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada; grava um registro de metadado, sem texto, no log da auditoria) e corrija o que ela apontar.
++- **Memória comum do Conselho e checagem de fatos** ((849), V9 §37; decisão do Humano, 26/10/2026: todo modelo aberto em `~/agata` usa as mesmas regras e as mesmas ferramentas). Quem passa pelo `seth_gateway` (Seth) já recebe as duas; o OpenCode entra nesse caminho só depois de medido. Quem não passa (Claude Code, Codex, Gemini, OpenCode e outros na CLI): ao começar, leia `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, anote `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"` (não canônico; segredo é recusado, dado pessoal vira marca). Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar --cliente <nome> [--sessao <id>] < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada; grava um registro de metadado, sem texto, no log da auditoria; com `--sessao`, também confere o `t=` com o contador, como aviso) e corrija o que ela apontar.
+ - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+diff --git a/PROMPT_CARREGAMENTO.md b/PROMPT_CARREGAMENTO.md
+index 6fe89a33..90c891ce 100644
+--- a/PROMPT_CARREGAMENTO.md
++++ b/PROMPT_CARREGAMENTO.md
+@@ -98,7 +98,7 @@ Fica dentro do orçamento do hook de hidratação, que nunca corta uma entrada n
+ ordem invertida e o tamanho da janela estão em PROJETO.md, "Memória e hidratação". Não são copiados aqui:
+ mudam sem aviso, e este arquivo não acompanha essas mudanças.
+ 
+-RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno.
++RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno. O `t=` vem do contador mecânico da Máquina (`scripts/turno.py`, por sessão): com gancho (Claude Code), copie a linha "Cabeçalho deste turno"; sem gancho, rode `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta e copie a linha que ele imprime.
+ A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira PROJETO.md, "Estado dos bugs e dos testes", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
+ A forma exata das duas está em PROTOCOLOS.md, "Carregar e formatos", e na Regra 1 (REGRAS.md): as 3 linhas do bloco (a linha
+ `Nonce:` saiu — TES-002 aposentado em 09/09/2026, MEMÓRIAS (417)), as três formas de `sync:` com os campos que
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 0ae96dbc..05254f7b 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -29,6 +29,8 @@ agata-seth · <modelo> · t=<n> (<base: contado no contexto / contador mecânico
+ 
+ Misturar as duas formas (`modelo:` junto com `t=`) é erro de formato.
+ 
++**Contador mecânico de turno (decisão do Humano, 12/11/2026).** A fonte do `t=` é `scripts/turno.py`, por sessão, na Máquina. Com gancho (Claude Code: `UserPromptSubmit` em `.claude/settings.json`), o gancho injeta a linha pronta e o modelo copia. Sem gancho: `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta, com o mesmo `<id>` em toda a conversa. Subagente: `python3 scripts/turno.py sub --sessao <id>` imprime `t=<n>.sub` sem avançar. `(contado no contexto)` só quando não há contador (sem `turno.py` ou sem `<id>`). Divergência entre o cabeçalho e o contador é acusada pela auditoria (`python3 redesign/router/auditoria_turno.py --verificar --sessao <id>`), não bloqueia.
++
+ **Identidade no cabeçalho (decisão do Humano, 20/10/2026):** use `agata-seth · <modelo real>` somente quando a resposta passou pelo gateway/escriba da Seth. Em nuvem ou app próprio fora desse caminho, use `agata · <modelo real>`. O nome do modelo vem do indicador da interface ou da configuração medida da sessão; nunca da memória nem de outro modelo. Preserve o formato de turno e o selo de hora definidos acima.
+ 
+ **Data e hora.**
+diff --git a/REGRAS.md b/REGRAS.md
+index 9d13cbd0..a65a76e4 100644
+--- a/REGRAS.md
++++ b/REGRAS.md
+@@ -78,7 +78,7 @@ Nomeá-los juntos é a lente, não regra nova. Consequência prática: **o que n
+ Todo início de resposta carrega **modelo** e **turno**. Nenhum dos dois pode faltar, nem ser deixado em branco.
+ - **Modelo:** diga o nome, direto. Sem nome confiável: `família <X>, versão não verificada`; em último caso, `modelo não verificado`. Nome citado no corpus, resposta própria anterior e nonce de MOD alheio **não são fonte de identidade**.
+ - **Designação do Humano** ("Você é o Gemini") é designação de trabalho, não fato. Use-a — `<nome> (designação de trabalho, não fato)` — e não a troque por nome do corpus.
+-- **Turno:** conte. **Turno é uma resposta do modelo, não o par pergunta-resposta.** Contador mecânico, se houver; senão, conte as suas respostas no contexto: `t=<n> (contado no contexto)`, ou `t≥<n>, prefixo compactado` se parte foi comprimida. `lacuna` só quando não há nada a medir.
++- **Turno:** conte. **Turno é uma resposta do modelo que devolve o controle ao Humano**, não o par pergunta-resposta; chamadas de ferramenta e subagentes dentro dela não contam (decisão do Humano, 12/11/2026). Fonte: o **contador mecânico** da Máquina (`scripts/turno.py`), por sessão, que avança a cada mensagem do Humano e entrega a linha pronta; o modelo copia, não recalcula. Subagente herda o turno do pai: `t=<n>.sub`. Sem contador na sessão, conte as suas respostas no contexto: `t=<n> (contado no contexto)`, ou `t≥<n>, prefixo compactado` se parte foi comprimida. `lacuna` só quando não há nada a medir.
+ - **Turno é local à sessão.** Instâncias diferentes divergem em `t=`, e nenhuma está errada por isso.
+ - **O cabeçalho de quem audita é item da auditoria.** O papel de auditor não dá imunidade.
+ - **Nenhuma frase específica, sozinha, prova identidade nem verificação** — nem a presença dela, nem a ausência.
+diff --git a/config/cli/codex/config.toml.exemplo b/config/cli/codex/config.toml.exemplo
+new file mode 100644
+index 00000000..48deb113
+--- /dev/null
++++ b/config/cli/codex/config.toml.exemplo
+@@ -0,0 +1,25 @@
++# Exemplo de config do Codex (pacote mecânico, 12/11/2026). NÃO é lido pelo sistema.
++# O Humano copia os blocos para ~/.codex/config.toml (fora do repo) e depois roda /hooks no Codex
++# para revisar e confiar no hook (doc: https://learn.chatgpt.com/docs/hooks -- hooks não gerenciados
++# precisam de confiança antes de rodar). Doc da configuração:
++# https://learn.chatgpt.com/docs/config-file/config-reference
++# AGENTS.md: o Codex lê o arquivo do repo sozinho (https://learn.chatgpt.com/docs/agent-configuration/agents-md).
++# Não é preciso configurar nada para isso.
++
++# Negar leitura de ~/.config/agata/.env (mesmo efeito do permissions.deny do Claude Code).
++# Sintaxe: permissions.<nome>.filesystem.<caminho-ou-glob> = "deny", ativada por default_permissions.
++# Chave de topo: fica antes de qualquer tabela.
++# Não medido: se o Codex expande "~" nessa chave na versão instalada; conferir antes de confiar.
++default_permissions = "agata"
++
++[permissions.agata.filesystem]
++"~/.config/agata/.env" = "deny"
++
++# Aviso de fim de turno, sem bloquear (scripts/auditoria_stop.py confere a última resposta e só avisa).
++# O caminho usa a raiz do repo onde o Codex foi aberto.
++[[hooks.Stop]]
++
++[[hooks.Stop.hooks]]
++type = "command"
++command = '/usr/bin/python3 "$(git rev-parse --show-toplevel)/scripts/auditoria_stop.py"'
++timeout = 30
+diff --git a/config/cli/gemini/bloquear_env.py b/config/cli/gemini/bloquear_env.py
+new file mode 100644
+index 00000000..e002780b
+--- /dev/null
++++ b/config/cli/gemini/bloquear_env.py
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python3
++"""Gancho BeforeTool do Gemini CLI (exemplo, pacote mecânico, 12/11/2026): nega a ferramenta
++cuja entrada aponta para ~/.config/agata/.env.
++
++Doc: https://geminicli.com/docs/hooks/ (bloqueio: exit 2, o stderr vira o motivo) e
++https://geminicli.com/docs/hooks/reference/ (BeforeTool recebe tool_name e tool_input).
++Não medido: a chave exata do caminho dentro de tool_input na versão instalada. Por isso a
++checagem é por substring na entrada inteira ("config/agata/.env"), e não por um nome de campo.
++Limite: entrada que não é JSON deixa passar (exit 0); não é um controle de sandbox.
++"""
++import json
++import sys
++
++MARCA = "config/agata/.env"
++
++
++def main(entrada: str) -> int:
++    try:
++        dados = json.loads(entrada) if entrada.strip() else {}
++    except ValueError:
++        return 0
++    alvo = dados.get("tool_input", dados) if isinstance(dados, dict) else dados
++    if MARCA in json.dumps(alvo, ensure_ascii=False):
++        print("Negado: ~/.config/agata/.env é segredo e não é lido (permissões do projeto).",
++              file=sys.stderr)
++        return 2
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.stdin.read()))
+diff --git a/config/cli/gemini/settings.json.exemplo b/config/cli/gemini/settings.json.exemplo
+new file mode 100644
+index 00000000..76034ba0
+--- /dev/null
++++ b/config/cli/gemini/settings.json.exemplo
+@@ -0,0 +1,27 @@
++{
++  "hooks": {
++    "AfterAgent": [
++      {
++        "hooks": [
++          {
++            "type": "command",
++            "command": "python3 \"$GEMINI_PROJECT_DIR/scripts/auditoria_stop.py\"",
++            "timeout": 30
++          }
++        ]
++      }
++    ],
++    "BeforeTool": [
++      {
++        "matcher": "read_file|run_shell_command",
++        "hooks": [
++          {
++            "type": "command",
++            "command": "python3 \"$GEMINI_PROJECT_DIR/config/cli/gemini/bloquear_env.py\"",
++            "timeout": 10
++          }
++        ]
++      }
++    ]
++  }
++}
+diff --git a/config/cli/opencode/opencode.json.exemplo b/config/cli/opencode/opencode.json.exemplo
+new file mode 100644
+index 00000000..aba4b249
+--- /dev/null
++++ b/config/cli/opencode/opencode.json.exemplo
+@@ -0,0 +1,7 @@
++{
++  "permissions": [
++    { "action": "read", "resource": "*.env", "effect": "deny" },
++    { "action": "read", "resource": "*.env.*", "effect": "deny" },
++    { "action": "read", "resource": "*.env.example", "effect": "allow" }
++  ]
++}
+diff --git a/redesign/router/auditoria_turno.py b/redesign/router/auditoria_turno.py
+index 12d70da1..424268df 100644
+--- a/redesign/router/auditoria_turno.py
++++ b/redesign/router/auditoria_turno.py
+@@ -29,12 +29,17 @@ Confere no turno anterior:
+ NÃO confere afirmação falsa nova em prosa (não determinístico) -- quando uma for
+ achada à mão, vira linha do catálogo.
+ 
++**Divergência de turno (12/11/2026, decisão do Humano).** `--verificar --sessao ID` compara o `t=`
++do cabeçalho com o contador mecânico da sessão (`scripts/turno.py`). Divergência sai como
++`aviso (não bloqueia)`: não muda o código de saída.
++
+ Log por turno em `~/.cache/agata/auditoria-turno.jsonl` (achados, nunca o texto).
+ `--verificar [--cliente NOME]` (CLI, (849)) grava um registro de metadado (sem texto) no
+ mesmo log e na mesma cadeia: `cli-NOME` com `n_achados` e `tipos` (prefixo de cada achado,
+ nunca o literal). NOME fora de `[a-z0-9-]{1,32}` vira `desconhecido`. Falha ao gravar é silenciosa.
+ 
+ Uso: python3 redesign/router/auditoria_turno.py --selftest
++     python3 redesign/router/auditoria_turno.py --verificar [--sessao ID] < arquivo
+ """
+ from __future__ import annotations
+ 
+@@ -54,6 +59,7 @@ sys.path.insert(0, str(_AQUI.parents[1] / "scripts"))
+ import verificar_cabecalho as _cab  # noqa: E402
+ import verificar_citacao_arquivo as _cit  # noqa: E402
+ import detector_estado_sem_prova as _det  # noqa: E402
++import turno as _turno  # noqa: E402  (scripts/turno.py: contador mecânico de turno, 12/11/2026)
+ 
+ LOG = Path(os.environ.get("AGATA_AUDITORIA_LOG", "~/.cache/agata/auditoria-turno.jsonl")).expanduser()
+ CATALOGO = _AQUI / "afirmacoes_desmentidas.json"
+@@ -964,6 +970,34 @@ def verificar_resposta_atual(texto: str, msgs_pedido: list) -> list[str]:
+     return list(dict.fromkeys(out))
+ 
+ 
++_T_NUM = re.compile(r"\bt\s*=\s*(\d+)")
++
++
++def _t_do_cabecalho(texto: str) -> int | None:
++    """t=<n> da primeira linha de cabeçalho (`agata · ...`); None se a forma não traz t= (bloco de prontidão)."""
++    for ln in texto.splitlines():
++        if _CABECALHO.match(ln):
++            m = _T_NUM.search(ln)
++            return int(m.group(1)) if m else None
++    return None
++
++
++def divergencia_turno(texto: str, sessao: str | None) -> list[str]:
++    """(12/11/2026, decisão do Humano) t=<n> do cabeçalho contra o contador mecânico da sessão.
++    Sem sessão, sem contador válido ou sem t= no cabeçalho: nada a acusar. Divergência é AVISO:
++    quem chama decide; esta função nunca bloqueia."""
++    if not sessao:
++        return []
++    t_cab = _t_do_cabecalho(texto)
++    if t_cab is None:
++        return []
++    t_contador = _turno.atual_da_sessao(sessao)
++    if t_contador is None or t_cab == t_contador:
++        return []
++    return [f"aviso (não bloqueia): cabeçalho diz t={t_cab}, mas o contador mecânico da sessão marca "
++            f"t={t_contador} — copie a linha que o contador entrega (scripts/turno.py; decisão de 12/11/2026)"]
++
++
+ def _conteudo(texto: str, msgs: list, modo_atual: str = "conciso") -> list[str]:
+     """Checagens do conteúdo da resposta, com ou sem cabeçalho (695)."""
+     out = []
+@@ -1643,7 +1677,30 @@ def _selftest() -> int:
+          len(_controle_inexistente("restrito a 127.0.0.1 (P-40)")) == 1
+          and _controle_inexistente("o P-4 cobre o Ollama e o P-24 avisa") == []),
+     ]
+-    casos = casos + casos_citacao + casos_redea + casos_lacunas + _casos_cli()
++    # (12/11/2026) divergência entre o t= do cabeçalho e o contador mecânico: aviso, nunca bloqueio.
++    import tempfile as _tf_turno
++    _antes_turnos = os.environ.get("AGATA_TURNOS_DIR")
++    os.environ["AGATA_TURNOS_DIR"] = _tf_turno.mkdtemp()
++    for _ in range(3):
++        _turno.proximo("sel-div")
++    _cab_t = lambda n: (f"agata · claude-haiku-5-5 · t={n} (contador mecânico) · "
++                        "12/11/2026 09:20 -03 (relógio da Máquina)\n\nResultado.")
++    casos_turno = [
++        ("t= igual ao contador -> sem aviso", divergencia_turno(_cab_t(3), "sel-div") == []),
++        ("t= diferente do contador -> aviso, não bloqueio", len(divergencia_turno(_cab_t(2), "sel-div")) == 1
++         and "não bloqueia" in divergencia_turno(_cab_t(2), "sel-div")[0]),
++        ("subagente t=3.sub compara pelo número", divergencia_turno(_cab_t("3.sub"), "sel-div") == []),
++        ("sem --sessao -> nada a acusar", divergencia_turno(_cab_t(2), None) == []),
++        ("sessão sem contador -> nada a acusar", divergencia_turno(_cab_t(2), "sel-sem-contador") == []),
++        ("bloco de prontidão (sem t=) -> nada a acusar", divergencia_turno(
++            "agata · modelo: x · sync: não verificado · lacuna: y · 12/11/2026 09:20 -03 (relógio da Máquina)\n"
++            "Última entrada: (1) x\npronto.", "sel-div") == []),
++    ]
++    if _antes_turnos is None:
++        os.environ.pop("AGATA_TURNOS_DIR", None)
++    else:
++        os.environ["AGATA_TURNOS_DIR"] = _antes_turnos
++    casos = casos + casos_citacao + casos_redea + casos_lacunas + _casos_cli() + casos_turno
+     for nome, ok in casos:
+         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
+     falhas = sum(not ok for _, ok in casos)
+@@ -1663,12 +1720,32 @@ if __name__ == "__main__":
+             print(f"- linha {_n}: {_motivo}")
+         print("cadeia íntegra" if _r["ok"] else f"cadeia com {len(_r['quebras'])} quebra(s)")
+         sys.exit(0 if _r["ok"] else 1)
+-    _cli = _args_verificar(sys.argv[1:])
++    # (12/11/2026) --sessao ID: confere o t= do cabeçalho com o contador mecânico; só AVISA, não bloqueia.
++    _args = list(sys.argv[1:])
++    _sessao = None
++    if "--sessao" in _args:
++        _k = _args.index("--sessao")
++        if _k + 1 >= len(_args):
++            print("uso: auditoria_turno.py --verificar [--cliente NOME] [--sessao ID] < arquivo", file=sys.stderr)
++            sys.exit(2)
++        _sessao = _args[_k + 1]
++        del _args[_k:_k + 2]
++    _cli = _args_verificar(_args)
++    if _cli is None and _args[:1] == ["--verificar"]:
++        print("uso: auditoria_turno.py --verificar [--cliente NOME] [--sessao ID] < arquivo", file=sys.stderr)
++        sys.exit(2)
+     if _cli is not None:
+-        _achados = verificar_resposta_atual(sys.stdin.read(), [])
++        _texto = sys.stdin.read()
++        _achados = verificar_resposta_atual(_texto, [])
++        _avisos = divergencia_turno(_texto, _sessao)
+         _registrar_cli(_cli, _achados)
+-        for _a in _achados:
++        for _a in _achados + _avisos:
+             print(f"- {_a}")
+-        print("verificação mecânica: nada a apontar" if not _achados else f"verificação mecânica: {len(_achados)} achado(s)")
++        if _achados:
++            print(f"verificação mecânica: {len(_achados)} achado(s)" + (f"; {len(_avisos)} aviso(s)" if _avisos else ""))
++        elif _avisos:
++            print(f"verificação mecânica: nada a bloquear; {len(_avisos)} aviso(s)")
++        else:
++            print("verificação mecânica: nada a apontar")
+         sys.exit(1 if _achados else 0)
+     print(__doc__)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 56f98b5b..79d5a4bd 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -346,6 +346,25 @@ def _linha_propostas(pasta: Path | None = None) -> str:
+             + " · o que está em propostas/aplicadas/ NÃO está pendente")
+ 
+ 
++# Pacote mecânico (12/11/2026, decisão do Humano: todo modelo age segundo o mesmo sistema): as diretrizes
++# vêm de AGENTS.md, lido pela Máquina a cada alteração do arquivo. É ponteiro, não cópia: o texto de
++# AGENTS.md entra inteiro na hidratação compacta. A doutrina fixa acima ainda é cópia (pendência do Humano).
++_AGENTS_PATH = Path(__file__).resolve().parents[2] / "AGENTS.md"
++_CACHE_AGENTS: dict = {"mtime": None, "texto": ""}
++
++
++def _diretrizes_agents() -> str:
++    try:
++        st = _AGENTS_PATH.stat()
++        if _CACHE_AGENTS["mtime"] != st.st_mtime:
++            _CACHE_AGENTS["texto"] = _AGENTS_PATH.read_text(encoding="utf-8")
++            _CACHE_AGENTS["mtime"] = st.st_mtime
++    except OSError:
++        return ("**Diretrizes (AGENTS.md):** lacuna: AGENTS.md não pôde ser lido nesta Máquina; "
++                "não afirme diretriz que não medir.\n")
++    return "**Diretrizes de todo modelo (AGENTS.md, lido pela Máquina):**\n" + _CACHE_AGENTS["texto"] + "\n"
++
++
+ def _hidratacao(extra: str = "") -> str:
+     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
+     `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
+@@ -361,7 +380,7 @@ def _hidratacao(extra: str = "") -> str:
+             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
+                              "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
+                              + (f"{extra}\n" if extra else ""))
+-        return f"{MARCADOR}\n{_DOUTRINA_FIXA}{bloco_estado}"
++        return f"{MARCADOR}\n{_DOUTRINA_FIXA}{_diretrizes_agents()}{bloco_estado}"
+     try:
+         st = HIDRATA_PATH.stat()
+         if _CACHE["mtime"] != st.st_mtime:
+diff --git a/redesign/router/spec/acceptance.json b/redesign/router/spec/acceptance.json
+new file mode 100644
+index 00000000..14a1aca9
+--- /dev/null
++++ b/redesign/router/spec/acceptance.json
+@@ -0,0 +1,470 @@
++[
++  {
++    "criterion": "proximo começa em 1 numa sessão nova e soma 1 a cada chamada",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_comeca_em_1_e_soma"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "sub não avança o contador e imprime t=<n>.sub; atual também não avança",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_sub_nao_incrementa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "sessões diferentes têm contadores independentes",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_sessoes_independentes"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "id de sessão fora do formato é recusado e nada é gravado fora do diretório",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_id_invalido_nao_escreve_fora_do_diretorio"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "hora regional com fuso -03 e selo de origem",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_hora_regional_com_fuso_e_selo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "chamadas em threads na mesma sessão não repetem nem pulam número",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestConcorrencia.test_threads_nao_repetem_nem_pulam"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "chamadas em processos na mesma sessão não repetem nem pulam número",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestConcorrencia.test_processos_nao_repetem_nem_pulam"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "arquivo corrompido recomeça em 1 com a marca contador reiniciado",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestCorrupcao.test_tipos_invalidos_reiniciam"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "arquivo que não é arquivo não quebra o gancho",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestCorrupcao.test_arquivo_ilegivel_nao_quebra_o_gancho"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "atual sem turno sai 1 e id inválido sai 2",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestContador.test_cli_codigos_de_saida"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o selftest do turno.py passa",
++    "command": [
++      "python3",
++      "scripts/turno.py",
++      "--selftest"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho injeta Cabeçalho deste turno com a linha pronta a partir do 2º turno",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_segundo_turno_injeta_cabecalho_pronto"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho usa o session_id do stdin antes do CLAUDE_SESSION_ID",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_usa_session_id_do_stdin_antes_do_ambiente"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "entrada inválida ou sem sessão: o gancho sai 0, sem saída e sem escrever",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_entrada_invalida_nao_quebra"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "na 1ª resposta da sessão o gancho pede o bloco de prontidão, sem linha t=",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_primeiro_turno_pede_prontidao_sem_linha_t"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o modelo medido no transcrito entra no cabeçalho",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_modelo_medido_no_transcrito"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "<synthetic> não entra no cabeçalho: vira modelo não verificado",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_modelo_sintetico_e_ignorado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o modelo do payload tem prioridade sobre o transcrito",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_modelo_do_payload_tem_prioridade"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a linha do gancho passa no verificador de cabeçalho",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestHook.test_linha_do_gancho_passa_no_verificador_de_cabecalho"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a auditoria acusa t= divergente do contador como aviso, sem mudar o código de saída",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestAuditoria.test_cli_divergencia_nao_bloqueia"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a auditoria compara t=<n>.sub pelo número",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestAuditoria.test_subagente_compara_pelo_numero"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "sem --sessao, sem contador ou sem t= no cabeçalho, a auditoria não acusa",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestAuditoria.test_sem_sessao_sem_contador_ou_sem_t_nao_acusa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gateway da Seth usa o mesmo rótulo (contador mecânico)",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestCanonEGateway.test_gateway_usa_o_mesmo_rotulo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "REGRAS, PROTOCOLOS e AGENTS apontam o contador mecânico e o t=<n>.sub",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestCanonEGateway.test_canon_aponta_o_contador"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": ".claude/settings.json registra o gancho UserPromptSubmit e preserva o SessionStart",
++    "command": [
++      "python3",
++      "scripts/testar_turno.py",
++      "TestCanonEGateway.test_gancho_registrado_e_sessao_preservada"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o CLAUDE.md importa @AGENTS.md",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_claude_aponta_agents"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o GEMINI.md importa @AGENTS.md",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_gemini_aponta_agents"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "ponteiro quebrado faz o verificador de mecanismos falhar",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_ponteiro_quebrado_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "ponteiro convertido em cópia (acima de 500 bytes) faz o verificador falhar",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_ponteiro_virou_copia_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "AGENTS.md acima de 32 KiB faz o verificador falhar, pelo limite do Codex",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_codex_limite_de_32_kib"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "AGENTS.override.md na raiz faz o verificador falhar",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_codex_override_na_raiz_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o verificador sai 1 quando há FALHA",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_verificador_sai_1_com_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "no repositório o verificador não tem FALHA",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_repositorio_sem_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o verificador imprime uma linha por controle e um resumo por estado",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestPontosDeEntrada.test_repositorio_sem_falha"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a hidratação do gateway inclui AGENTS.md lido em tempo de execução",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSeth.test_gateway_inclui_agents_na_hidratacao"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "sem AGENTS.md o gateway avisa lacuna e não quebra",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSeth.test_gateway_nao_quebra_sem_agents"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o settings registra o gancho Stop com auditoria_stop.py",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_settings_registrado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho Stop avisa por systemMessage e nunca bloqueia",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_avisa_sem_bloquear"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "resposta sem achado sai calada com 0",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_sem_achado_sai_calado"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "entrada sem texto ou inválida sai 0 sem saída",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_sem_texto_ou_entrada_ruim_sai_0"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho Stop lê prompt_response do Gemini",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_le_prompt_response_do_gemini"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho Stop confere o t= com o contador da sessão e só avisa",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestGancho.test_stop_confere_t_com_o_contador"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o settings nega Read de ~/.config/agata/.env",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSemLeituraDeSegredo.test_settings_nega_leitura_do_env"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o exemplo do Codex nega o .env pela chave permissions do config.toml",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSemLeituraDeSegredo.test_exemplo_codex_nega_o_env"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o exemplo do OpenCode nega *.env pela sintaxe V2 de permissions",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSemLeituraDeSegredo.test_exemplo_opencode_nega_env"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o gancho do Gemini bloqueia a leitura do .env com exit 2",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSemLeituraDeSegredo.test_gancho_gemini_bloqueia_leitura_do_env"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "todo agente em .claude/agents tem model haiku e maxTurns",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_agentes_haiku_e_max_turns"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "os agentes só de leitura não têm Bash",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_agentes_so_leitura_sem_bash"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "nenhum agente desliga o CLAUDE.md (omitClaudeMd)",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_agentes_sem_omitclaudemd"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "todos os agentes têm o mesmo texto de pacote mínimo",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_pacote_minimo_igual_em_todos"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a skill de equipe tem a regra de pacote mínimo",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_skill_de_equipe_tem_a_regra"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "PROMPT_CARREGAMENTO aponta o contador de turno",
++    "command": [
++      "python3",
++      "scripts/testar_mecanismos.py",
++      "TestSubagentes.test_prompt_carregamento_tem_o_contador"
++    ],
++    "cwd": null
++  }
++]
+diff --git a/redesign/router/spec/spec.md b/redesign/router/spec/spec.md
+new file mode 100644
+index 00000000..c94e8119
+--- /dev/null
++++ b/redesign/router/spec/spec.md
+@@ -0,0 +1,123 @@
++# Spec — Turno mecânico (contador de turno)
++
++Spec mínima do turno dentro de `redesign/router/`. Origem: entrevista P1 do Humano em 12/11/2026, 09:15 (cache do Conselho, entrada (514)). Quatro decisões: (1) turno é a resposta do modelo que devolve o controle ao Humano; chamadas de ferramenta e subagentes dentro dela não contam; (2) contador mecânico na Máquina, por sessão, avançado por um gancho a cada mensagem do Humano, que entrega a linha pronta; o modelo só copia; (3) subagente herda o turno do pai, com `t=<n>.sub`; (4) divergência entre cabeçalho e contador é acusada pela auditoria e não bloqueia.
++
++O código do contador fica em `scripts/turno.py` e os testes em `scripts/testar_turno.py`, por pedido da tarefa. Esta spec os cobre.
++
++## Jornadas críticas
++
++1. O Humano manda uma mensagem no Claude Code. O gancho avança o contador e a resposta abre com a linha que ele injetou: `agata · <modelo> · t=<n> (contador mecânico) · <hora>`.
++2. Um subagente roda dentro do turno e escreve `t=<n>.sub`, sem avançar o contador.
++3. A auditoria confere o `t=` do cabeçalho com o contador da sessão e acusa a divergência, sem bloquear.
++
++## Contrato
++
++- `scripts/turno.py proximo --sessao ID` avança o contador da sessão em 1, começando em 1, e imprime a linha pronta. `atual` e `sub` não avançam. `sub` imprime `t=<n>.sub`.
++- O estado fica em `~/.cache/agata/turnos/<ID>.json` (ou em `$AGATA_TURNOS_DIR`), modo 0600, sob trava `flock` e com escrita atômica. O ID aceita letras, números, `.`, `_` e `-`, até 128 caracteres, começando por letra ou número.
++- Arquivo corrompido: `proximo` recomeça em 1 com a marca `contador reiniciado`. `atual` e `sub` recusam com saída 1. Nada disso quebra o gancho.
++- `scripts/turno.py hook` lê o JSON do gancho UserPromptSubmit: `session_id` do stdin (ou `CLAUDE_SESSION_ID`, como último recurso); modelo de `model` ou, na falta, do último `message.model` do `transcript_path`, ignorando `<synthetic>`. Devolve `additionalContext` com `Cabeçalho deste turno: …`. Na 1ª resposta da sessão, pede o bloco de prontidão e não injeta linha `t=`. Sem sessão, com entrada inválida ou com erro, sai 0 e não imprime nada.
++- `redesign/router/auditoria_turno.py --verificar --sessao ID` compara o `t=` do cabeçalho com o contador da sessão. Divergência sai como `aviso (não bloqueia)`. O código de saída não muda por causa do aviso.
++- O gateway da Seth (`redesign/router/seth_gateway.py`) já calcula `t=<n> (contador mecânico)` pela contagem de turnos da conversa, com o mesmo rótulo. Nada muda nele nesta proposta.
++- Hora: formato regional com fuso e selo, `DD/MM/AAAA HH:MM -03 (relógio da Máquina)` (`PROTOCOLOS.md`, "Regra 1.1").
++
++## Critérios de aceite
++
++- [ ] proximo começa em 1 numa sessão nova e soma 1 a cada chamada
++- [ ] sub não avança o contador e imprime t=<n>.sub; atual também não avança
++- [ ] sessões diferentes têm contadores independentes
++- [ ] id de sessão fora do formato é recusado e nada é gravado fora do diretório
++- [ ] hora regional com fuso -03 e selo de origem
++- [ ] chamadas em threads na mesma sessão não repetem nem pulam número
++- [ ] chamadas em processos na mesma sessão não repetem nem pulam número
++- [ ] arquivo corrompido recomeça em 1 com a marca contador reiniciado
++- [ ] arquivo que não é arquivo não quebra o gancho
++- [ ] atual sem turno sai 1 e id inválido sai 2
++- [ ] o selftest do turno.py passa
++- [ ] o gancho injeta Cabeçalho deste turno com a linha pronta a partir do 2º turno
++- [ ] o gancho usa o session_id do stdin antes do CLAUDE_SESSION_ID
++- [ ] entrada inválida ou sem sessão: o gancho sai 0, sem saída e sem escrever
++- [ ] na 1ª resposta da sessão o gancho pede o bloco de prontidão, sem linha t=
++- [ ] o modelo medido no transcrito entra no cabeçalho
++- [ ] <synthetic> não entra no cabeçalho: vira modelo não verificado
++- [ ] o modelo do payload tem prioridade sobre o transcrito
++- [ ] a linha do gancho passa no verificador de cabeçalho
++- [ ] a auditoria acusa t= divergente do contador como aviso, sem mudar o código de saída
++- [ ] a auditoria compara t=<n>.sub pelo número
++- [ ] sem --sessao, sem contador ou sem t= no cabeçalho, a auditoria não acusa
++- [ ] o gateway da Seth usa o mesmo rótulo (contador mecânico)
++- [ ] REGRAS, PROTOCOLOS e AGENTS apontam o contador mecânico e o t=<n>.sub
++- [ ] .claude/settings.json registra o gancho UserPromptSubmit e preserva o SessionStart
++
++## Pacote mecânico (12/11/2026): pontos de entrada, fim de turno, negação do .env, subagentes
++
++Origem: decisões do Humano de 12/11/2026 (cache do Conselho): o que o Agata desenvolve vale para todos os modelos do Conselho por mecanismo da Máquina, não por instrução; todo modelo age segundo o mesmo sistema e as mesmas decisões; subagente recebe só o pacote mínimo. Código em `scripts/conselho_mecanismos.py`, `scripts/auditoria_stop.py` e `config/cli/`; testes em `scripts/testar_mecanismos.py`.
++
++Pontos de entrada, por modelo: Claude Code lê `CLAUDE.md`, que importa `@AGENTS.md`. Codex e OpenCode leem `AGENTS.md` pelo próprio nome. Gemini CLI lê `GEMINI.md`, que importa `@AGENTS.md`. Seth recebe AGENTS.md na hidratação do gateway. Ponteiro não é cópia: CLAUDE.md e GEMINI.md têm no máximo 500 bytes.
++
++Contrato do fim de turno: `scripts/auditoria_stop.py` é o gancho de Stop (Claude Code), AfterAgent (Gemini) ou Stop (Codex). Lê o texto da última resposta, roda `auditoria_turno.py --verificar` e só avisa, por `systemMessage`. Não bloqueia: sai 0 sempre.
++
++Critérios de aceite (pacote mecânico)
++
++- [ ] o CLAUDE.md importa @AGENTS.md
++- [ ] o GEMINI.md importa @AGENTS.md
++- [ ] ponteiro quebrado faz o verificador de mecanismos falhar
++- [ ] ponteiro convertido em cópia (acima de 500 bytes) faz o verificador falhar
++- [ ] AGENTS.md acima de 32 KiB faz o verificador falhar, pelo limite do Codex
++- [ ] AGENTS.override.md na raiz faz o verificador falhar
++- [ ] o verificador sai 1 quando há FALHA
++- [ ] no repositório o verificador não tem FALHA
++- [ ] o verificador imprime uma linha por controle e um resumo por estado
++- [ ] a hidratação do gateway inclui AGENTS.md lido em tempo de execução
++- [ ] sem AGENTS.md o gateway avisa lacuna e não quebra
++- [ ] o settings registra o gancho Stop com auditoria_stop.py
++- [ ] o gancho Stop avisa por systemMessage e nunca bloqueia
++- [ ] resposta sem achado sai calada com 0
++- [ ] entrada sem texto ou inválida sai 0 sem saída
++- [ ] o gancho Stop lê prompt_response do Gemini
++- [ ] o gancho Stop confere o t= com o contador da sessão e só avisa
++- [ ] o settings nega Read de ~/.config/agata/.env
++- [ ] o exemplo do Codex nega o .env pela chave permissions do config.toml
++- [ ] o exemplo do OpenCode nega *.env pela sintaxe V2 de permissions
++- [ ] o gancho do Gemini bloqueia a leitura do .env com exit 2
++- [ ] todo agente em .claude/agents tem model haiku e maxTurns
++- [ ] os agentes só de leitura não têm Bash
++- [ ] nenhum agente desliga o CLAUDE.md (omitClaudeMd)
++- [ ] todos os agentes têm o mesmo texto de pacote mínimo
++- [ ] a skill de equipe tem a regra de pacote mínimo
++- [ ] PROMPT_CARREGAMENTO aponta o contador de turno
++
++Não medido (neste pacote): o OpenCode tem evento de fim de turno com o texto da resposta (a doc pública consultada não confirma); o nome do campo do caminho em `tool_input` no Gemini; se o Codex expande `~` na chave de deny; se o Claude Code recarrega `.claude/settings.json` em sessão aberta; o custo em tokens do AGENTS.md na hidratação compacta da Seth (ordem de grandeza: 7,9 KB por turno, medido em bytes, não em tokens).
++
++Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DOUTRINA_FIXA` (cópia de regras). Remover a cópia é outra proposta; o verificador marca isso como disciplina.
++
++## Desenho e alternativas
++
++- Contador próprio em arquivo por sessão, em vez de contar mensagens no transcrito. O transcrito tem formato de cada CLI e pode ser compactado; o contador não depende disso.
++- Gancho lê `session_id` do stdin, em vez de `$CLAUDE_SESSION_ID`. No binário do Claude Code local (2.1.322), `CLAUDE_SESSION_ID` aparece só como substituição de template de skill e comando; não há evidência de que o gancho o receba como variável. O nome `session_id` aparece entre os campos de entrada dos ganchos.
++- Gateway não muda. Ele já conta os turnos da conversa com `auditoria_turno._turnos`, que agrupa por pedido do Humano. Contar `role=assistant` contaria também cada chamada de ferramenta, o que a decisão (1) exclui.
++- Descartado: contar só no gateway da Seth e deixar Claude Code sem contador. Iria contra a decisão (2) de que o contador é da Máquina.
++
++## Implementação e testes
++
++- `scripts/turno.py`: contador, gancho e `--selftest`; biblioteca padrão apenas.
++- `scripts/testar_turno.py`: unittest, 41 casos, com estado em diretório temporário. Roda com `python3 scripts/testar_turno.py` ou com pytest.
++- `redesign/router/spec/acceptance.json`: cada critério aponta para um teste ou para o selftest.
++- Verificação da auditoria: `redesign/router/auditoria_turno.py --selftest` ganha os casos de divergência.
++
++## Migração e reversão
++
++- Sem dados a migrar. Sessões anteriores à aplicação não têm contador; começam em 1 quando voltarem a receber mensagem.
++- Reverter: tirar o bloco `UserPromptSubmit` de `.claude/settings.json`, restaurar as três linhas canônicas de `REGRAS.md`, `PROTOCOLOS.md` e `AGENTS.md`. `~/.cache/agata/turnos/` é cache, pode ser apagado.
++
++## Riscos e dependências
++
++- Não medido: se o Claude Code recarrega `.claude/settings.json` em sessões já abertas.
++- Não medido: se o `UserPromptSubmit` dispara dentro de subagente. A spec assume que não, e que o orquestrador passa o `t` e o `<id>` no prompt do subagente.
++- Não medido: se Codex, Gemini CLI e OpenCode leem `AGENTS.md` e seguem a instrução de chamar `proximo` no início de cada resposta. Sem gancho, o contador depende dessa disciplina do modelo.
++- Não medido: conversa com turno só de ferramenta (sem texto) no gateway. `_turnos` ignora esse turno, e a contagem da Seth pode ficar uma unidade atrás.
++- Não medido sob carga real: trava de 5 s entre processos. Os testes cobrem 30 processos e 8 threads.
++- `redesign/router/` não está na lista de âncoras do `scripts/ci_sdd_local.sh`. Esta spec cobre só o turno; ancorar o roteador inteiro é outra proposta.
++
++## Código
++
++- `auditoria_turno.py` (verificação de divergência: `divergencia_turno` e `--verificar --sessao`)
+diff --git a/scripts/auditoria_stop.py b/scripts/auditoria_stop.py
+new file mode 100644
+index 00000000..2cdb563b
+--- /dev/null
++++ b/scripts/auditoria_stop.py
+@@ -0,0 +1,73 @@
++#!/usr/bin/env python3
++"""Gancho de fim de turno: confere a última resposta com a auditoria e só AVISA. Nunca bloqueia.
++
++Pacote mecânico, 12/11/2026 (decisão do Humano: a verificação vale para todos os modelos, por mecanismo).
++Liga-se a: Claude Code (`Stop`, em .claude/settings.json), Codex (`[[hooks.Stop]]`, exemplo em
++config/cli/codex/config.toml.exemplo) e Gemini CLI (`AfterAgent`, exemplo em
++config/cli/gemini/settings.json.exemplo). Doc pública:
++  - Claude Code: https://code.claude.com/docs/en/hooks  (Stop: last_assistant_message; systemMessage com exit 0)
++  - Codex: https://learn.chatgpt.com/docs/hooks  (Stop: last_assistant_message; systemMessage com exit 0)
++  - Gemini CLI: https://geminicli.com/docs/hooks/reference/  (AfterAgent: prompt_response; systemMessage com exit 0)
++
++Entrada: JSON na stdin. O texto da resposta vem de `last_assistant_message` (Claude, Codex) ou
++`prompt_response` (Gemini). Sem texto, sai calado. O id da sessão (`session_id`) liga a conferência
++do `t=` ao contador de scripts/turno.py.
++
++Saída: exit 0 sempre. Havendo achado, imprime {"systemMessage": "..."} (aviso ao Humano, sem
++decision/continue). Falha de leitura, de subprocesso ou timeout: não imprime nada e sai com 0.
++
++Uso: python3 scripts/auditoria_stop.py < entrada.json
++"""
++from __future__ import annotations
++
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[1]
++AUDITORIA = RAIZ / "redesign" / "router" / "auditoria_turno.py"
++PRAZO = 20  # segundos; o gancho não pode travar o fim do turno
++
++
++def _texto_da_resposta(dados: dict) -> str:
++    for chave in ("last_assistant_message", "prompt_response", "last-assistant-message"):
++        valor = dados.get(chave)
++        if isinstance(valor, str) and valor.strip():
++            return valor
++    return ""
++
++
++def avisos_da_resposta(texto: str, sessao: str) -> list[str]:
++    """Linhas de achado da auditoria (`--verificar`). Vazia se não há achado ou se a auditoria falhou."""
++    cmd = [sys.executable, str(AUDITORIA), "--verificar"]
++    if sessao:
++        cmd += ["--sessao", sessao]
++    try:
++        r = subprocess.run(cmd, input=texto, capture_output=True, text=True, timeout=PRAZO, cwd=str(RAIZ))
++    except (OSError, subprocess.SubprocessError) as e:
++        print(f"auditoria_stop: auditoria não rodou ({type(e).__name__})", file=sys.stderr)
++        return []
++    return [ln for ln in r.stdout.splitlines() if ln.startswith("- ")]
++
++
++def main(entrada: str) -> int:
++    try:
++        dados = json.loads(entrada) if entrada.strip() else {}
++    except ValueError:
++        return 0  # entrada inválida: o gancho não age, não derruba o fim do turno
++    if not isinstance(dados, dict):
++        return 0
++    texto = _texto_da_resposta(dados)
++    if not texto:
++        return 0
++    sessao = dados.get("session_id") if isinstance(dados.get("session_id"), str) else ""
++    achados = avisos_da_resposta(texto, sessao)
++    if achados:
++        aviso = "Auditoria do turno (aviso, não bloqueia):\n" + "\n".join(achados)
++        print(json.dumps({"systemMessage": aviso}, ensure_ascii=False))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.stdin.read()))
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index 767e45dc..e1ecf88d 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -32,6 +32,11 @@ passo "medição de contexto (selftest)" python3 -I scripts/medir_contexto_efeti
+ passo "teste de português (selftest)" python3 -I scripts/teste_portugues.py --selftest
+ passo "voz do sistema (selftest)" python3 -I scripts/agata_falar.py --selftest
+ passo "projeto SDD declarativo (selftest)" python3 -I redesign/sdd_flow/project.py --selftest
++passo "pacote mecânico: testes do turno" python3 scripts/testar_turno.py
++passo "pacote mecânico: selftest do turno" python3 scripts/turno.py --selftest
++passo "pacote mecânico: selftest da auditoria do turno" python3 redesign/router/auditoria_turno.py --selftest
++passo "pacote mecânico: testes dos mecanismos do Conselho" python3 scripts/testar_mecanismos.py
++passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/conselho_mecanismos.py --verificar
+ 
+ if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
+ echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
+diff --git a/scripts/conselho_mecanismos.py b/scripts/conselho_mecanismos.py
+new file mode 100644
+index 00000000..c1bbb4e4
+--- /dev/null
++++ b/scripts/conselho_mecanismos.py
+@@ -0,0 +1,232 @@
++#!/usr/bin/env python3
++"""Verificador de mecanismos do Conselho (pacote mecânico, 12/11/2026).
++
++Decisão do Humano (cache do Conselho, 12/11/2026): o que o Agata desenvolve vale para todos os modelos
++do Conselho de forma mecânica, por mecanismo da Máquina, não por instrução. Este verificador lê SÓ o
++repositório (nada fora dele, nem ~/.codex, ~/.gemini, ~/.config) e diz, por modelo:
++
++  - ponto de entrada: cada CLI lê AGENTS.md (direto ou por ponteiro). Falha se o ponteiro se perdeu.
++  - decisões: a cadeia AGENTS.md -> PROMPT_CARREGAMENTO.md -> canon, e o cache do Conselho.
++  - contador de turno (scripts/turno.py) e auditoria de fim de turno (scripts/auditoria_stop.py).
++  - negação de leitura de ~/.config/agata/.env.
++  - subagentes com o pacote mínimo.
++
++Estados (cada linha diz qual é):
++  ok-mecanico   verificado nesta Máquina pelo próprio arquivo do repo.
++  ok-doc        depende de comportamento nativo da CLI, segundo a doc pública (não rodado aqui).
++  passo-humano  existe como exemplo em config/cli/; o Humano copia para fora do repo.
++  disciplina    depende de o modelo cumprir a instrução.
++  nao-medido    a doc pública não confirma, ou falta medir na CLI instalada.
++  FALHA         o que o sistema afirma não bate com o arquivo. Faz a saída ser 1.
++
++Uso: python3 scripts/conselho_mecanismos.py --verificar [--raiz CAMINHO]
++Saída: uma linha por controle: `modelo | controle | estado | evidência`. Código 0 sem FALHA; 1 com FALHA.
++"""
++from __future__ import annotations
++
++import json
++import sys
++from dataclasses import dataclass
++from pathlib import Path
++
++RAIZ_PADRAO = Path(__file__).resolve().parents[1]
++LIMITE_CODEX_BYTES = 32 * 1024  # project_doc_max_bytes, padrão da doc do Codex
++LIMITE_PONTEIRO_BYTES = 500     # CLAUDE.md e GEMINI.md são ponteiros, não cópia
++CANON_ENCADEADO = ("REGRAS.md", "PROTOCOLOS.md", "FALHAS.md", "MEMÓRIAS.md", "PROJETO.md")
++
++DOC = {
++    "claude": "https://code.claude.com/docs/en/memory",
++    "claude_hooks": "https://code.claude.com/docs/en/hooks",
++    "claude_perm": "https://code.claude.com/docs/en/permissions",
++    "claude_agents": "https://code.claude.com/docs/en/sub-agents",
++    "codex_agents": "https://learn.chatgpt.com/docs/agent-configuration/agents-md",
++    "codex_hooks": "https://learn.chatgpt.com/docs/hooks",
++    "codex_config": "https://learn.chatgpt.com/docs/config-file/config-reference",
++    "gemini_md": "https://geminicli.com/docs/cli/gemini-md/",
++    "gemini_hooks": "https://geminicli.com/docs/hooks/reference/",
++    "opencode_rules": "https://opencode.ai/docs/rules/",
++    "opencode_perm": "https://opencode.ai/docs/permissions/",
++}
++
++
++@dataclass(frozen=True)
++class Achado:
++    modelo: str
++    controle: str
++    estado: str
++    evidencia: str
++
++
++def _ler(raiz: Path, rel: str) -> str | None:
++    try:
++        return (raiz / rel).read_text(encoding="utf-8")
++    except (OSError, UnicodeDecodeError):
++        return None
++
++
++def _json(raiz: Path, rel: str):
++    texto = _ler(raiz, rel)
++    if texto is None:
++        return None
++    try:
++        return json.loads(texto)
++    except ValueError:
++        return None
++
++
++def _tem_import_agents(texto: str | None) -> bool:
++    return texto is not None and any(ln.strip() == "@AGENTS.md" for ln in texto.splitlines())
++
++
++def _ponteiro_ok(raiz: Path, rel: str) -> bool:
++    texto = _ler(raiz, rel)
++    return _tem_import_agents(texto) and len(texto.encode("utf-8")) <= LIMITE_PONTEIRO_BYTES
++
++
++def _toml(raiz: Path, rel: str):
++    try:
++        import tomllib  # biblioteca padrão a partir do Python 3.11
++    except ImportError:
++        return "sem-tomllib"
++    texto = _ler(raiz, rel)
++    if texto is None:
++        return None
++    try:
++        return tomllib.loads(texto)
++    except ValueError:
++        return None
++
++
++def verificar(raiz: Path = RAIZ_PADRAO) -> list[Achado]:
++    raiz = Path(raiz)
++    out: list[Achado] = []
++
++    def add(modelo: str, controle: str, estado: str, evidencia: str) -> None:
++        out.append(Achado(modelo, controle, estado, evidencia))
++
++    agents = _ler(raiz, "AGENTS.md")
++    tam_agents = len(agents.encode("utf-8")) if agents is not None else 0
++
++    # 1. Ponto de entrada: cada CLI lê AGENTS.md, direto ou por ponteiro.
++    ok = _ponteiro_ok(raiz, "CLAUDE.md")
++    add("Claude Code", "entrada -> AGENTS.md", "ok-mecanico" if ok else "FALHA",
++        "CLAUDE.md só importa @AGENTS.md" if ok else "CLAUDE.md sem a linha @AGENTS.md ou com regra própria")
++    ok = agents is not None and tam_agents <= LIMITE_CODEX_BYTES and not (raiz / "AGENTS.override.md").exists()
++    add("Codex", "entrada -> AGENTS.md", "ok-mecanico" if ok else "FALHA",
++        f"AGENTS.md com {tam_agents} B (limite {LIMITE_CODEX_BYTES} B) e sem AGENTS.override.md na raiz; "
++        f"a leitura é nativa ({DOC['codex_agents']})" if ok else
++        "AGENTS.md ausente, acima do limite do Codex ou com AGENTS.override.md na raiz")
++    ok = _ponteiro_ok(raiz, "GEMINI.md")
++    add("Gemini CLI", "entrada -> AGENTS.md", "ok-mecanico" if ok else "FALHA",
++        "GEMINI.md só importa @AGENTS.md" if ok else "GEMINI.md sem a linha @AGENTS.md ou com regra própria")
++    add("OpenCode", "entrada -> AGENTS.md", "ok-doc" if agents is not None else "FALHA",
++        f"AGENTS.md na raiz, lido pelo OpenCode segundo {DOC['opencode_rules']}; "
++        "não rodado aqui" if agents is not None else "AGENTS.md ausente")
++    gw = _ler(raiz, "redesign/router/seth_gateway.py") or ""
++    ok = '_diretrizes_agents()' in gw and '/ "AGENTS.md"' in gw
++    add("Seth", "entrada -> AGENTS.md (hidratação do gateway)", "ok-mecanico" if ok else "FALHA",
++        "seth_gateway.py inclui AGENTS.md na hidratação compacta" if ok else
++        "seth_gateway.py não lê AGENTS.md na hidratação")
++    add("Seth", "cópia da doutrina no código", "disciplina" if "_DOUTRINA_FIXA" in gw else "ok-mecanico",
++        "seth_gateway.py mantém a constante _DOUTRINA_FIXA: cópia de regras, não comparada com AGENTS.md "
++        "(pendência do Humano)" if "_DOUTRINA_FIXA" in gw else "sem constante de doutrina no gateway")
++
++    # 2. Decisões: AGENTS.md aponta para o canon e para o cache do Conselho; o verificador confere os ponteiros.
++    prompt = _ler(raiz, "PROMPT_CARREGAMENTO.md") or ""
++    canon_ok = "PROMPT_CARREGAMENTO.md" in (agents or "") and all(c in prompt for c in CANON_ENCADEADO)
++    cache_ok = "cache_conselho.py ler" in (agents or "") and (raiz / "redesign/router/cache_conselho.py").exists()
++    contador_ok = "scripts/turno.py proximo" in (agents or "")
++    for modelo in ("Claude Code", "Codex", "Gemini CLI", "OpenCode"):
++        add(modelo, "decisões: AGENTS.md -> PROMPT_CARREGAMENTO.md -> canon",
++            "ok-mecanico" if canon_ok else "FALHA",
++            "a cadeia de ponteiros existe; ler o canon é disciplina do modelo" if canon_ok else
++            "AGENTS.md ou PROMPT_CARREGAMENTO.md não encadeiam o canon")
++        add(modelo, "decisões: cache do Conselho", "ok-mecanico" if cache_ok else "FALHA",
++            "AGENTS.md manda ler cache_conselho.py e o arquivo existe; ler é disciplina do modelo"
++            if cache_ok else "AGENTS.md não manda ler o cache do Conselho, ou o arquivo sumiu")
++    add("Seth", "decisões: canon e cache na hidratação e nas ferramentas",
++        "ok-mecanico" if ("resumo_hidratacao" in gw and "query_canon" in gw) else "FALHA",
++        "gateway injeta o resumo do cache do Conselho e expõe query_canon" if
++        ("resumo_hidratacao" in gw and "query_canon" in gw) else "gateway sem o resumo do cache ou sem query_canon")
++
++    # 3. Contador de turno e auditoria de fim de turno.
++    settings = _json(raiz, ".claude/settings.json") or {}
++    hooks = settings.get("hooks", {}) if isinstance(settings, dict) else {}
++    ups = json.dumps(hooks.get("UserPromptSubmit", []), ensure_ascii=False)
++    stop = json.dumps(hooks.get("Stop", []), ensure_ascii=False)
++    deny = (settings.get("permissions", {}) or {}).get("deny", []) if isinstance(settings, dict) else []
++    add("Claude Code", "contador de turno (gancho UserPromptSubmit)",
++        "ok-mecanico" if "turno.py" in ups else "FALHA",
++        f"hook de turno em .claude/settings.json ({DOC['claude_hooks']})")
++    add("Claude Code", "auditoria de fim de turno (gancho Stop, só aviso)",
++        "ok-mecanico" if "auditoria_stop.py" in stop else "FALHA",
++        f"hook Stop em .claude/settings.json, saída systemMessage ({DOC['claude_hooks']})")
++    add("Claude Code", "negação de leitura de ~/.config/agata/.env",
++        "ok-mecanico" if "Read(~/.config/agata/.env)" in deny else "FALHA",
++        f"permissions.deny em .claude/settings.json ({DOC['claude_perm']}); cobre também cat, head e tail")
++    add("Codex", "contador de turno", "disciplina" if contador_ok else "FALHA",
++        "AGENTS.md manda rodar `turno.py proximo` no início de cada resposta: sem gancho, depende do modelo")
++    codex = _toml(raiz, "config/cli/codex/config.toml.exemplo")
++    codex_ok = isinstance(codex, dict) and "Stop" in codex.get("hooks", {}) and \
++        codex.get("permissions", {}).get("agata", {}).get("filesystem", {}).get("~/.config/agata/.env") == "deny"
++    add("Codex", "auditoria de fim de turno e negação do .env",
++        "passo-humano" if codex_ok else ("nao-medido" if codex == "sem-tomllib" else "FALHA"),
++        f"config/cli/codex/config.toml.exemplo: copiar para ~/.codex/config.toml, rodar /hooks para confiar "
++        f"({DOC['codex_hooks']}; chave de deny em {DOC['codex_config']})")
++    gem = _json(raiz, "config/cli/gemini/settings.json.exemplo")
++    gem_hooks = (gem or {}).get("hooks", {}) if isinstance(gem, dict) else {}
++    gem_ok = "AfterAgent" in gem_hooks and "BeforeTool" in gem_hooks
++    add("Gemini CLI", "auditoria de fim de turno (AfterAgent) e negação do .env (BeforeTool)",
++        "passo-humano" if gem_ok else "FALHA",
++        f"config/cli/gemini/settings.json.exemplo, copiar para ~/.gemini/settings.json ({DOC['gemini_hooks']}); "
++        "o nome do campo do caminho em tool_input não está confirmado: a checagem é por substring")
++    add("Gemini CLI", "contador de turno", "disciplina" if contador_ok else "FALHA",
++        "sem gancho de início de turno: depende de o modelo rodar `turno.py proximo`")
++    oc = _json(raiz, "config/cli/opencode/opencode.json.exemplo")
++    oc_ok = isinstance(oc, dict) and {"action": "read", "resource": "*.env", "effect": "deny"} in oc.get("permissions", [])
++    add("OpenCode", "negação de leitura de .env", "passo-humano" if oc_ok else "FALHA",
++        f"config/cli/opencode/opencode.json.exemplo (sintaxe V2 da doc: {DOC['opencode_perm']}); "
++        "não medido: a regra de *.env cobre ~/.config/agata/.env na versão instalada?")
++    add("OpenCode", "auditoria de fim de turno", "nao-medido",
++        "a doc pública consultada não confirma evento de fim de turno com o texto da resposta; "
++        "sem gancho, fica como disciplina")
++    add("OpenCode", "contador de turno", "disciplina" if contador_ok else "FALHA",
++        "sem gancho de início de turno: depende de o modelo rodar `turno.py proximo`")
++
++    # 4. Subagentes: modelo barato, limite de turnos e pacote mínimo.
++    agentes_dir = raiz / ".claude" / "agents"
++    arquivos = sorted(agentes_dir.glob("*.md")) if agentes_dir.is_dir() else []
++    falhas_ag = []
++    for arq in arquivos:
++        t = arq.read_text(encoding="utf-8")
++        if "model: haiku" not in t or "maxTurns:" not in t or "omitClaudeMd: true" in t or "## Pacote mínimo" not in t:
++            falhas_ag.append(arq.name)
++    add("Claude Code", "subagentes: haiku, maxTurns e pacote mínimo",
++        "ok-mecanico" if arquivos and not falhas_ag else "FALHA",
++        f"{len(arquivos)} agentes em .claude/agents/" + (f"; faltam campos em: {', '.join(falhas_ag)}" if falhas_ag else ""))
++    skill = _ler(raiz, ".agents/skills/agata-fluxo-equipe/SKILL.md") or ""
++    add("Todos (subagentes)", "pacote mínimo na skill de equipe",
++        "disciplina" if "## 9. Pacote mínimo para subagente" in skill else "FALHA",
++        "a regra está na skill agata-fluxo-equipe; cumprir é disciplina fora do Claude Code")
++    return out
++
++
++def _main(argv: list[str]) -> int:
++    raiz = RAIZ_PADRAO
++    if "--raiz" in argv:
++        raiz = Path(argv[argv.index("--raiz") + 1])
++    if "--verificar" not in argv:
++        print(__doc__)
++        return 2
++    achados = verificar(raiz)
++    for a in achados:
++        print(f"{a.modelo} | {a.controle} | {a.estado} | {a.evidencia}")
++    falhas = [a for a in achados if a.estado == "FALHA"]
++    mec = sum(a.estado == "ok-mecanico" for a in achados)
++    dis = sum(a.estado == "disciplina" for a in achados)
++    print(f"resumo: {len(achados)} controles; ok-mecanico {mec}; disciplina {dis}; FALHA {len(falhas)}")
++    return 1 if falhas else 0
++
++
++if __name__ == "__main__":
++    sys.exit(_main(sys.argv[1:]))
+diff --git a/scripts/testar_mecanismos.py b/scripts/testar_mecanismos.py
+new file mode 100644
+index 00000000..61dc7aaf
+--- /dev/null
++++ b/scripts/testar_mecanismos.py
+@@ -0,0 +1,262 @@
++#!/usr/bin/env python3
++"""Testes do pacote mecânico de 12/11/2026: ponto de entrada por modelo, gancho Stop (só aviso),
++negação de leitura do .env, subagentes com pacote mínimo e o verificador conselho_mecanismos.py.
++
++Rodar:  python3 scripts/testar_mecanismos.py
++        uv run --offline --with pytest python3 -m pytest -q scripts/testar_mecanismos.py
++Sem modelo, sem rede. Estado do turno em diretório temporário (AGATA_TURNOS_DIR); nada fora do repo.
++Os nomes dos testes são os citados em redesign/router/spec/acceptance.json.
++"""
++from __future__ import annotations
++
++import importlib.util
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(RAIZ / "scripts"))
++import conselho_mecanismos as cm  # noqa: E402
++
++PY = sys.executable
++AGENTES = sorted((RAIZ / ".claude" / "agents").glob("*.md"))
++SO_LEITURA = {"agata-inov-critico", "agata-inov-pesquisa", "agata-pesq-painel",
++              "agata-pesq-processo", "agata-pesq-rea"}
++PARAGRAFO_PACOTE = "Quem delega a você passa só: objetivo, arquivos, critérios de pronto"
++
++# Arquivos que o verificador lê. Os testes copiam só isto para um diretório temporário.
++NECESSARIOS = ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "PROMPT_CARREGAMENTO.md",
++               "redesign/router/cache_conselho.py", "redesign/router/seth_gateway.py",
++               ".claude/settings.json", ".agents/skills/agata-fluxo-equipe/SKILL.md",
++               "config/cli/codex/config.toml.exemplo", "config/cli/gemini/settings.json.exemplo",
++               "config/cli/opencode/opencode.json.exemplo"]
++
++
++def _copia_minima(destino: Path) -> Path:
++    for rel in NECESSARIOS:
++        alvo = destino / rel
++        alvo.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copy(RAIZ / rel, alvo)
++    (destino / ".claude" / "agents").mkdir(parents=True, exist_ok=True)
++    for arq in AGENTES:
++        shutil.copy(arq, destino / ".claude" / "agents" / arq.name)
++    return destino
++
++
++def _falhas(achados) -> list:
++    return [a for a in achados if a.estado == "FALHA"]
++
++
++def _stop(payload, ambiente: dict | None = None) -> subprocess.CompletedProcess:
++    env = dict(os.environ)
++    env.update(ambiente or {})
++    entrada = payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
++    return subprocess.run([PY, str(RAIZ / "scripts" / "auditoria_stop.py")], input=entrada,
++                          capture_output=True, text=True, timeout=60, env=env)
++
++
++class TestPontosDeEntrada(unittest.TestCase):
++    def test_claude_aponta_agents(self):
++        achado = next(a for a in cm.verificar(RAIZ) if a.modelo == "Claude Code" and a.controle.startswith("entrada"))
++        self.assertEqual(achado.estado, "ok-mecanico", achado.evidencia)
++
++    def test_gemini_aponta_agents(self):
++        achado = next(a for a in cm.verificar(RAIZ) if a.modelo == "Gemini CLI" and a.controle.startswith("entrada"))
++        self.assertEqual(achado.estado, "ok-mecanico", achado.evidencia)
++
++    def test_ponteiro_quebrado_falha(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            raiz = _copia_minima(Path(tmp))
++            (raiz / "CLAUDE.md").write_text("# Agata\n\nRegra própria, sem o import do AGENTS.md.\n", encoding="utf-8")
++            falhas = _falhas(cm.verificar(raiz))
++            self.assertTrue(any(a.modelo == "Claude Code" and a.controle.startswith("entrada") for a in falhas))
++
++    def test_ponteiro_virou_copia_falha(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            raiz = _copia_minima(Path(tmp))
++            (raiz / "GEMINI.md").write_text("@AGENTS.md\n" + "regra copiada\n" * 80, encoding="utf-8")
++            falhas = _falhas(cm.verificar(raiz))
++            self.assertTrue(any(a.modelo == "Gemini CLI" and a.controle.startswith("entrada") for a in falhas))
++
++    def test_codex_limite_de_32_kib(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            raiz = _copia_minima(Path(tmp))
++            (raiz / "AGENTS.md").write_text("x" * (33 * 1024), encoding="utf-8")
++            falhas = _falhas(cm.verificar(raiz))
++            self.assertTrue(any(a.modelo == "Codex" and a.controle.startswith("entrada") for a in falhas))
++
++    def test_codex_override_na_raiz_falha(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            raiz = _copia_minima(Path(tmp))
++            (raiz / "AGENTS.override.md").write_text("outro", encoding="utf-8")
++            falhas = _falhas(cm.verificar(raiz))
++            self.assertTrue(any(a.modelo == "Codex" and a.controle.startswith("entrada") for a in falhas))
++
++    def test_verificador_sai_1_com_falha(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            raiz = _copia_minima(Path(tmp))
++            (raiz / "CLAUDE.md").write_text("sem import\n", encoding="utf-8")
++            r = subprocess.run([PY, str(RAIZ / "scripts" / "conselho_mecanismos.py"), "--verificar", "--raiz", str(raiz)],
++                               capture_output=True, text=True, timeout=60)
++            self.assertEqual(r.returncode, 1, r.stdout)
++
++    def test_repositorio_sem_falha(self):
++        r = subprocess.run([PY, str(RAIZ / "scripts" / "conselho_mecanismos.py"), "--verificar"],
++                           capture_output=True, text=True, timeout=60)
++        self.assertEqual(r.returncode, 0, r.stdout)
++        self.assertIn("FALHA 0", r.stdout)
++
++
++class TestSemLeituraDeSegredo(unittest.TestCase):
++    def test_settings_nega_leitura_do_env(self):
++        cfg = json.loads((RAIZ / ".claude" / "settings.json").read_text(encoding="utf-8"))
++        self.assertIn("Read(~/.config/agata/.env)", cfg["permissions"]["deny"])
++
++    def test_exemplo_codex_nega_o_env(self):
++        import tomllib
++        cfg = tomllib.loads((RAIZ / "config/cli/codex/config.toml.exemplo").read_text(encoding="utf-8"))
++        self.assertEqual(cfg["permissions"]["agata"]["filesystem"]["~/.config/agata/.env"], "deny")
++        self.assertEqual(cfg["default_permissions"], "agata")
++
++    def test_exemplo_opencode_nega_env(self):
++        cfg = json.loads((RAIZ / "config/cli/opencode/opencode.json.exemplo").read_text(encoding="utf-8"))
++        self.assertIn({"action": "read", "resource": "*.env", "effect": "deny"}, cfg["permissions"])
++
++    def test_gancho_gemini_bloqueia_leitura_do_env(self):
++        script = str(RAIZ / "config" / "cli" / "gemini" / "bloquear_env.py")
++        negado = subprocess.run([PY, script], input=json.dumps({"tool_name": "read_file", "tool_input": {
++            "file_path": "/home/x/.config/agata/.env"}}), capture_output=True, text=True, timeout=30)
++        self.assertEqual(negado.returncode, 2)
++        liberado = subprocess.run([PY, script], input=json.dumps({"tool_name": "read_file", "tool_input": {
++            "file_path": "README.md"}}), capture_output=True, text=True, timeout=30)
++        self.assertEqual(liberado.returncode, 0)
++        invalido = subprocess.run([PY, script], input="{ruim", capture_output=True, text=True, timeout=30)
++        self.assertEqual(invalido.returncode, 0)
++
++
++class TestGancho(unittest.TestCase):
++    def setUp(self):
++        self.turnos = tempfile.mkdtemp()
++        self.env = {"AGATA_TURNOS_DIR": self.turnos}
++
++    def tearDown(self):
++        shutil.rmtree(self.turnos, ignore_errors=True)
++
++    def test_stop_settings_registrado(self):
++        cfg = json.loads((RAIZ / ".claude" / "settings.json").read_text(encoding="utf-8"))
++        cmd = json.dumps(cfg["hooks"]["Stop"], ensure_ascii=False)
++        self.assertIn("scripts/auditoria_stop.py", cmd)
++
++    def test_stop_avisa_sem_bloquear(self):
++        texto = "Resultado. Veja o P-999 antes de citar."
++        r = _stop({"session_id": "sessao-a", "last_assistant_message": texto}, self.env)
++        self.assertEqual(r.returncode, 0, r.stderr)
++        dados = json.loads(r.stdout.strip())
++        self.assertIn("systemMessage", dados)
++        self.assertNotIn("decision", dados)
++        self.assertNotIn("continue", dados)
++
++    def test_stop_sem_achado_sai_calado(self):
++        texto = "Resultado curto, sem citação nem controle."
++        r = _stop({"session_id": "sessao-a", "last_assistant_message": texto}, self.env)
++        self.assertEqual(r.returncode, 0)
++        self.assertEqual(r.stdout.strip(), "")
++
++    def test_stop_sem_texto_ou_entrada_ruim_sai_0(self):
++        for entrada in ("", "{ruim", json.dumps({"session_id": "x"})):
++            r = _stop(entrada, self.env)
++            self.assertEqual(r.returncode, 0)
++            self.assertEqual(r.stdout.strip(), "")
++
++    def test_stop_le_prompt_response_do_gemini(self):
++        r = _stop({"prompt_response": "Veja o P-999."}, self.env)
++        self.assertEqual(r.returncode, 0)
++        self.assertIn("systemMessage", json.loads(r.stdout.strip()))
++
++    def test_stop_confere_t_com_o_contador(self):
++        # O contador da sessão está em 1; o cabeçalho diz t=3: a auditoria aponta a divergência.
++        subprocess.run([PY, str(RAIZ / "scripts" / "turno.py"), "proximo", "--sessao", "sessao-t"],
++                       env={**os.environ, **self.env}, capture_output=True, text=True, timeout=60, check=True)
++        texto = "agata · claude-haiku-5-5 · t=3 (contador mecânico) · 12/11/2026 10:00 -03 (relógio da Máquina)\n\nOi."
++        r = _stop({"session_id": "sessao-t", "last_assistant_message": texto}, self.env)
++        self.assertIn("t=1", json.loads(r.stdout.strip())["systemMessage"])
++
++
++class TestSubagentes(unittest.TestCase):
++    def test_agentes_haiku_e_max_turns(self):
++        self.assertTrue(AGENTES)
++        for arq in AGENTES:
++            t = arq.read_text(encoding="utf-8")
++            self.assertIn("model: haiku", t, arq.name)
++            self.assertIn("maxTurns:", t, arq.name)
++
++    def test_agentes_so_leitura_sem_bash(self):
++        for arq in AGENTES:
++            if arq.stem not in SO_LEITURA:
++                continue
++            linha = next(l for l in arq.read_text(encoding="utf-8").splitlines() if l.startswith("tools:"))
++            self.assertNotIn("Bash", linha, arq.name)
++
++    def test_agentes_sem_omitclaudemd(self):
++        for arq in AGENTES:
++            self.assertNotIn("omitClaudeMd: true", arq.read_text(encoding="utf-8"), arq.name)
++
++    def test_pacote_minimo_igual_em_todos(self):
++        paragrafos = set()
++        for arq in AGENTES:
++            t = arq.read_text(encoding="utf-8")
++            self.assertIn("## Pacote mínimo", t, arq.name)
++            trecho = next(l for l in t.splitlines() if l.startswith(PARAGRAFO_PACOTE))
++            paragrafos.add(trecho)
++        self.assertEqual(len(paragrafos), 1)
++
++    def test_skill_de_equipe_tem_a_regra(self):
++        skill = (RAIZ / ".agents/skills/agata-fluxo-equipe/SKILL.md").read_text(encoding="utf-8")
++        self.assertIn("## 9. Pacote mínimo para subagente", skill)
++        self.assertIn("(`t=<n>.sub`)", skill)
++
++    def test_prompt_carregamento_tem_o_contador(self):
++        prompt = (RAIZ / "PROMPT_CARREGAMENTO.md").read_text(encoding="utf-8")
++        self.assertIn("scripts/turno.py proximo --sessao", prompt)
++
++
++class TestSeth(unittest.TestCase):
++    def test_gateway_inclui_agents_na_hidratacao(self):
++        # O gateway lê AGENTS.md por caminho relativo ao próprio arquivo: testa o texto injetado.
++        sys.path.insert(0, str(RAIZ / "redesign" / "router"))
++        spec = importlib.util.spec_from_file_location("seth_gateway_teste", RAIZ / "redesign/router/seth_gateway.py")
++        gw = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(gw)
++        texto = gw._diretrizes_agents()
++        self.assertIn("Diretrizes de todo modelo (AGENTS.md", texto)
++        primeira = next(l for l in (RAIZ / "AGENTS.md").read_text(encoding="utf-8").splitlines() if l.strip())
++        self.assertIn(primeira, texto)
++
++    def test_gateway_nao_quebra_sem_agents(self):
++        sys.path.insert(0, str(RAIZ / "redesign" / "router"))
++        spec = importlib.util.spec_from_file_location("seth_gateway_teste2", RAIZ / "redesign/router/seth_gateway.py")
++        gw = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(gw)
++        gw._AGENTS_PATH = Path(tempfile.mkdtemp()) / "nao_existe.md"
++        gw._CACHE_AGENTS.update(mtime=None, texto="")
++        self.assertIn("lacuna", gw._diretrizes_agents())
++
++
++class TestConfigEExemplos(unittest.TestCase):
++    def test_exemplos_existem(self):
++        for rel in NECESSARIOS[-3:]:
++            self.assertTrue((RAIZ / rel).exists(), rel)
++
++    def test_gemini_exemplo_tem_os_dois_ganchos(self):
++        cfg = json.loads((RAIZ / "config/cli/gemini/settings.json.exemplo").read_text(encoding="utf-8"))
++        self.assertIn("AfterAgent", cfg["hooks"])
++        self.assertIn("BeforeTool", cfg["hooks"])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/scripts/testar_turno.py b/scripts/testar_turno.py
+new file mode 100644
+index 00000000..b5bee2a5
+--- /dev/null
++++ b/scripts/testar_turno.py
+@@ -0,0 +1,381 @@
++#!/usr/bin/env python3
++"""Testes do contador mecânico de turno (scripts/turno.py) e da divergência da auditoria.
++
++Rodar:  python3 scripts/testar_turno.py
++        uv run --offline --with pytest python3 -m pytest -q scripts/testar_turno.py
++Sem modelo, sem rede. O estado fica sempre num diretório temporário (AGATA_TURNOS_DIR).
++Os testes que a spec (redesign/router/spec/acceptance.json) cita existem aqui com esses nomes.
++"""
++from __future__ import annotations
++
++import contextlib
++import importlib.util
++import io
++import json
++import os
++import re
++import shutil
++import subprocess
++import sys
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(RAIZ / "scripts"))
++import turno  # noqa: E402
++import verificar_cabecalho  # noqa: E402
++
++TURNO_PY = RAIZ / "scripts" / "turno.py"
++AUDITORIA = RAIZ / "redesign" / "router" / "auditoria_turno.py"
++HORA_RE = r"\d{2}/\d{2}/\d{4} \d{2}:\d{2} -03 \(relógio da Máquina\)"
++
++
++def _env(tmp: str, **extra) -> dict:
++    env = {k: v for k, v in os.environ.items() if k != "CLAUDE_SESSION_ID"}
++    env["AGATA_TURNOS_DIR"] = tmp
++    env.update(extra)
++    return env
++
++
++def _cli(tmp: str, *args: str, entrada: str | None = None, **extra) -> subprocess.CompletedProcess:
++    return subprocess.run([sys.executable, "-I", str(TURNO_PY), *args], input=entrada,
++                          capture_output=True, text=True, env=_env(tmp, **extra), timeout=60)
++
++
++def _t(linha: str) -> int:
++    return int(re.search(r"t=(\d+)", linha).group(1))
++
++
++class _Base(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.mkdtemp(prefix="turno-teste-")
++        self._antes = os.environ.get("AGATA_TURNOS_DIR")
++        os.environ["AGATA_TURNOS_DIR"] = self.tmp
++        self.addCleanup(self._restaurar)
++
++    def _restaurar(self):
++        if self._antes is None:
++            os.environ.pop("AGATA_TURNOS_DIR", None)
++        else:
++            os.environ["AGATA_TURNOS_DIR"] = self._antes
++        shutil.rmtree(self.tmp, ignore_errors=True)
++
++    def _corromper(self, sessao: str, conteudo: str) -> None:
++        Path(self.tmp, f"{sessao}.json").write_text(conteudo, encoding="utf-8")
++
++
++class TestContador(_Base):
++    def test_comeca_em_1_e_soma(self):
++        a = turno.proximo("sess-1", "claude-haiku-5-5")
++        b = turno.proximo("sess-1", "claude-haiku-5-5")
++        self.assertTrue(a.startswith("agata · claude-haiku-5-5 · t=1 (contador mecânico) · "), a)
++        self.assertIn("t=2 (contador mecânico)", b)
++
++    def test_sub_nao_incrementa(self):
++        turno.proximo("sess-2")
++        s = turno.subagente("sess-2", "claude-haiku-5-5")
++        self.assertIn("t=1.sub (contador mecânico, subagente)", s)
++        self.assertIn("t=1 (contador mecânico)", turno.atual("sess-2"))
++        self.assertIn("t=2 (contador mecânico)", turno.proximo("sess-2"))
++
++    def test_sub_e_atual_recusam_sessao_sem_turno(self):
++        with self.assertRaises(turno.SemContador):
++            turno.subagente("nova")
++        with self.assertRaises(turno.SemContador):
++            turno.atual("nova")
++        self.assertFalse(Path(self.tmp, "nova.json").exists())
++
++    def test_sessoes_independentes(self):
++        turno.proximo("sess-a")
++        turno.proximo("sess-a")
++        self.assertIn("t=1 (contador", turno.proximo("sess-b"))
++
++    def test_id_invalido_nao_escreve_fora_do_diretorio(self):
++        for ruim in ("../fora", "a/b", "", ".oculto", "x" * 129, "com espaço"):
++            with self.subTest(ruim=ruim), self.assertRaises(turno.ErroSessao):
++                turno.proximo(ruim)
++        self.assertEqual(list(Path(self.tmp).iterdir()), [])
++        self.assertFalse(Path(self.tmp).parent.joinpath("fora.json").exists())
++
++    def test_hora_regional_com_fuso_e_selo(self):
++        self.assertRegex(turno.proximo("sess-h"), HORA_RE)
++
++    def test_modelo_nao_quebra_o_cabecalho(self):
++        linha = turno.proximo("sess-m", "claude · x\nquebra")
++        self.assertNotIn("\n", linha)
++        self.assertEqual(linha.count("·"), 3, linha)
++
++    def test_modelo_ausente_vira_nao_verificado(self):
++        self.assertIn("modelo não verificado", turno.proximo("sess-n"))
++
++    def test_selftest_do_modulo_passa(self):
++        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
++            self.assertEqual(turno._selftest(), 0)
++
++    def test_cli_codigos_de_saida(self):
++        r = _cli(self.tmp, "proximo", "--sessao", "cli-1", "--modelo", "m1")
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertIn("t=1 (contador mecânico)", r.stdout)
++        self.assertEqual(_cli(self.tmp, "atual", "--sessao", "nao-existe").returncode, 1)
++        self.assertEqual(_cli(self.tmp, "proximo", "--sessao", "../x").returncode, 2)
++        r = _cli(self.tmp, "sub", "--sessao", "cli-1")
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertIn("t=1.sub", r.stdout)
++
++
++class TestCorrupcao(_Base):
++    def test_json_invalido_reinicia_com_marca(self):
++        self._corromper("c1", "{quebrado")
++        self.assertIn("t=1 (contador mecânico; contador reiniciado)", turno.proximo("c1"))
++
++    def test_tipos_invalidos_reiniciam(self):
++        for conteudo in ('{"t": -4}', '{"t": "7"}', '{"t": true}', "[1, 2]", "{}", ""):
++            with self.subTest(conteudo=conteudo):
++                self._corromper("c2", conteudo)
++                self.assertIn("contador reiniciado", turno.proximo("c2"))
++
++    def test_depois_do_reinicio_segue_normal(self):
++        self._corromper("c3", "lixo")
++        turno.proximo("c3")
++        self.assertIn("t=2 (contador mecânico)", turno.proximo("c3"))
++
++    def test_atual_e_sub_recusam_corrompido(self):
++        self._corromper("c4", "lixo")
++        with self.assertRaises(turno.SemContador):
++            turno.atual("c4")
++        with self.assertRaises(turno.SemContador):
++            turno.subagente("c4")
++        self.assertIsNone(turno.atual_da_sessao("c4"))
++
++    def test_cli_corrompido_sai_1_e_gancho_segue(self):
++        self._corromper("c5", "lixo")
++        self.assertEqual(_cli(self.tmp, "atual", "--sessao", "c5").returncode, 1)
++        r = _cli(self.tmp, "hook", entrada=json.dumps({"session_id": "c5"}))
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertIn("Contador reiniciado", json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"])
++
++    def test_arquivo_ilegivel_nao_quebra_o_gancho(self):
++        Path(self.tmp, "d1.json").mkdir()  # o caminho existe, mas não é arquivo
++        r = _cli(self.tmp, "hook", entrada=json.dumps({"session_id": "d1"}))
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertEqual(r.stdout, "")
++
++
++class TestConcorrencia(_Base):
++    def test_threads_nao_repetem_nem_pulam(self):
++        resultados: list[int] = []
++        trava = threading.Lock()
++
++        def trabalhar():
++            for _ in range(25):
++                n = _t(turno.proximo("par-t"))
++                with trava:
++                    resultados.append(n)
++
++        ths = [threading.Thread(target=trabalhar) for _ in range(8)]
++        for th in ths:
++            th.start()
++        for th in ths:
++            th.join()
++        self.assertEqual(sorted(resultados), list(range(1, 201)))
++        self.assertIn("t=200 (contador mecânico)", turno.atual("par-t"))
++
++    def test_processos_nao_repetem_nem_pulam(self):
++        procs = [subprocess.Popen([sys.executable, "-I", str(TURNO_PY), "proximo", "--sessao", "par-p"],
++                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
++                                  env=_env(self.tmp)) for _ in range(30)]
++        numeros = []
++        for p in procs:
++            out, err = p.communicate(timeout=60)
++            self.assertEqual(p.returncode, 0, err)
++            numeros.append(_t(out))
++        self.assertEqual(sorted(numeros), list(range(1, 31)))
++
++
++class TestHook(_Base):
++    def _gancho(self, payload, **extra) -> subprocess.CompletedProcess:
++        entrada = payload if isinstance(payload, str) else json.dumps(payload)
++        return _cli(self.tmp, "hook", entrada=entrada, **extra)
++
++    def _contexto(self, r) -> str:
++        self.assertEqual(r.returncode, 0, r.stderr)
++        dados = json.loads(r.stdout)
++        self.assertEqual(dados["hookSpecificOutput"]["hookEventName"], "UserPromptSubmit")
++        return dados["hookSpecificOutput"]["additionalContext"]
++
++    def test_primeiro_turno_pede_prontidao_sem_linha_t(self):
++        ctx = self._contexto(self._gancho({"session_id": "h1", "transcript_path": "/nao/existe"}))
++        self.assertIn("1ª resposta desta sessão", ctx)
++        self.assertIn("bloco de prontidão", ctx)
++        self.assertNotIn("t=1 (", ctx)
++
++    def test_segundo_turno_injeta_cabecalho_pronto(self):
++        self._gancho({"session_id": "h2"})
++        ctx = self._contexto(self._gancho({"session_id": "h2"}))
++        self.assertIn("Cabeçalho deste turno: agata · modelo não verificado · t=2 (contador mecânico) · ", ctx)
++        self.assertRegex(ctx, HORA_RE)
++        self.assertIn("--sessao h2", ctx)
++
++    def test_usa_session_id_do_stdin_antes_do_ambiente(self):
++        self._contexto(self._gancho({"session_id": "do-stdin"}, CLAUDE_SESSION_ID="do-env"))
++        self.assertTrue(Path(self.tmp, "do-stdin.json").exists())
++        self.assertFalse(Path(self.tmp, "do-env.json").exists())
++
++    def test_cai_no_ambiente_sem_session_id(self):
++        self._contexto(self._gancho({}, CLAUDE_SESSION_ID="do-env2"))
++        self.assertTrue(Path(self.tmp, "do-env2.json").exists())
++
++    def test_sem_sessao_nao_escreve_e_sai_0(self):
++        r = self._gancho({})
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertEqual(r.stdout, "")
++        self.assertEqual(list(Path(self.tmp).iterdir()), [])
++
++    def test_entrada_invalida_nao_quebra(self):
++        for entrada in ("{quebrado", "[]", "", "null", '{"session_id": 7}', '{"session_id": "../x"}'):
++            with self.subTest(entrada=entrada):
++                r = self._gancho(entrada)
++                self.assertEqual(r.returncode, 0, r.stderr)
++                self.assertEqual(r.stdout, "")
++
++    def _transcrito(self, nome: str, modelos: list[str]) -> str:
++        caminho = Path(self.tmp, nome)
++        linhas = [json.dumps({"type": "user", "message": {"role": "user", "content": "oi"}})]
++        linhas += [json.dumps({"type": "assistant", "message": {"model": m, "role": "assistant"}}) for m in modelos]
++        caminho.write_text("\n".join(linhas) + "\n", encoding="utf-8")
++        return str(caminho)
++
++    def test_modelo_medido_no_transcrito(self):
++        tr = self._transcrito("tr.jsonl", ["claude-haiku-5-5"])
++        self._gancho({"session_id": "tr1", "transcript_path": tr})
++        ctx = self._contexto(self._gancho({"session_id": "tr1", "transcript_path": tr}))
++        self.assertIn("agata · claude-haiku-5-5 · t=2 (contador mecânico)", ctx)
++
++    def test_modelo_sintetico_e_ignorado(self):
++        tr = self._transcrito("sint.jsonl", ["<synthetic>"])
++        self._gancho({"session_id": "sn1", "transcript_path": tr})
++        ctx = self._contexto(self._gancho({"session_id": "sn1", "transcript_path": tr}))
++        self.assertIn("modelo não verificado", ctx)
++
++    def test_modelo_do_payload_tem_prioridade(self):
++        tr = self._transcrito("pri.jsonl", ["claude-haiku-5-5"])
++        self._gancho({"session_id": "pm1", "model": "claude-opus-x", "transcript_path": tr})
++        ctx = self._contexto(self._gancho({"session_id": "pm1", "model": "claude-opus-x", "transcript_path": tr}))
++        self.assertIn("agata · claude-opus-x · t=2", ctx)
++
++    def test_linha_do_gancho_passa_no_verificador_de_cabecalho(self):
++        self._gancho({"session_id": "vc1"})
++        ctx = self._contexto(self._gancho({"session_id": "vc1"}))
++        linha = ctx.split("Cabeçalho deste turno: ", 1)[1].split("\n", 1)[0]
++        self.assertEqual(verificar_cabecalho.verificar(linha), [], linha)
++        self.assertEqual(verificar_cabecalho.verificar(turno.subagente("vc1", "claude-haiku-5-5")), [])
++
++
++class TestAuditoria(_Base):
++    def setUp(self):
++        super().setUp()
++        # a auditoria importa detector_estado_sem_prova.py do próprio diretório; rodada como script, o Python já o põe no path
++        sys.path.insert(0, str(AUDITORIA.parent))
++        spec = importlib.util.spec_from_file_location("auditoria_turno_teste", AUDITORIA)
++        self.aud = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(self.aud)
++
++    @staticmethod
++    def _cab(n, sufixo: str = "") -> str:
++        return (f"agata · claude-haiku-5-5 · t={n}{sufixo} (contador mecânico) · "
++                "12/11/2026 09:20 -03 (relógio da Máquina)\n\nResultado.")
++
++    def _contar(self, sessao: str, vezes: int) -> None:
++        for _ in range(vezes):
++            turno.proximo(sessao)
++
++    def test_divergencia_acusa_como_aviso(self):
++        self._contar("au-1", 3)
++        avisos = self.aud.divergencia_turno(self._cab(2), "au-1")
++        self.assertEqual(len(avisos), 1)
++        self.assertIn("não bloqueia", avisos[0])
++
++    def test_igual_ao_contador_nao_acusa(self):
++        self._contar("au-1", 3)
++        self.assertEqual(self.aud.divergencia_turno(self._cab(3), "au-1"), [])
++
++    def test_subagente_compara_pelo_numero(self):
++        self._contar("au-1", 3)
++        self.assertEqual(self.aud.divergencia_turno(self._cab(3, ".sub"), "au-1"), [])
++        self.assertEqual(len(self.aud.divergencia_turno(self._cab(2, ".sub"), "au-1")), 1)
++
++    def test_sem_sessao_sem_contador_ou_sem_t_nao_acusa(self):
++        self._contar("au-1", 3)
++        self.assertEqual(self.aud.divergencia_turno(self._cab(2), None), [])
++        self.assertEqual(self.aud.divergencia_turno(self._cab(2), "sessao-sem-contador"), [])
++        prontidao = ("agata · modelo: x · sync: não verificado · lacuna: y · 12/11/2026 09:20 -03 (relógio da Máquina)\n"
++                     "Última entrada: (1) x\npronto.")
++        self.assertEqual(self.aud.divergencia_turno(prontidao, "au-1"), [])
++
++    def _verificar(self, texto: str, *args: str) -> subprocess.CompletedProcess:
++        return subprocess.run([sys.executable, str(AUDITORIA), "--verificar", *args], input=texto,
++                              capture_output=True, text=True, env=_env(self.tmp), timeout=60)
++
++    def test_cli_divergencia_nao_bloqueia(self):
++        self._contar("au-2", 3)
++        r = self._verificar(self._cab(2), "--sessao", "au-2")
++        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
++        self.assertIn("aviso (não bloqueia)", r.stdout)
++        self.assertIn("nada a bloquear", r.stdout)
++
++    def test_cli_sem_divergencia_nada_a_apontar(self):
++        self._contar("au-3", 3)
++        r = self._verificar(self._cab(3), "--sessao", "au-3")
++        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
++        self.assertNotIn("aviso", r.stdout)
++        self.assertIn("nada a apontar", r.stdout)
++
++    def test_cli_sem_sessao_fica_como_antes(self):
++        r = self._verificar(self._cab(2))
++        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
++        self.assertNotIn("aviso", r.stdout)
++
++    def test_cli_argumento_desconhecido_sai_2(self):
++        self.assertEqual(self._verificar("x", "--foo").returncode, 2)
++
++
++class TestCanonEGateway(unittest.TestCase):
++    def test_gateway_usa_o_mesmo_rotulo(self):
++        texto = (RAIZ / "redesign" / "router" / "seth_gateway.py").read_text(encoding="utf-8")
++        self.assertIn("(contador mecânico)", texto)
++        self.assertIn("len(auditoria_turno._turnos(msgs)[0]) + 1", texto)
++
++    def test_canon_aponta_o_contador(self):
++        for arq in ("REGRAS.md", "PROTOCOLOS.md", "AGENTS.md"):
++            with self.subTest(arq=arq):
++                self.assertIn("scripts/turno.py", (RAIZ / arq).read_text(encoding="utf-8"))
++        for arq in ("REGRAS.md", "PROTOCOLOS.md"):
++            with self.subTest(arq=arq):
++                self.assertIn("t=<n>.sub", (RAIZ / arq).read_text(encoding="utf-8"))
++
++    def test_gancho_registrado_e_sessao_preservada(self):
++        cfg = json.loads((RAIZ / ".claude" / "settings.json").read_text(encoding="utf-8"))
++        comandos = [h["command"] for g in cfg["hooks"]["UserPromptSubmit"] for h in g["hooks"]]
++        self.assertTrue(any(c.endswith('scripts/turno.py" hook') for c in comandos), comandos)
++        self.assertIn("SessionStart", cfg["hooks"])
++
++    def test_criterios_da_spec_batem_com_o_acceptance(self):
++        spec = (RAIZ / "redesign" / "router" / "spec" / "spec.md").read_text(encoding="utf-8")
++        criterios_md = {l[6:].strip() for l in spec.splitlines() if l.startswith("- [ ] ") or l.startswith("- [x] ")}
++        acc = json.loads((RAIZ / "redesign" / "router" / "spec" / "acceptance.json").read_text(encoding="utf-8"))
++        self.assertEqual(criterios_md, {item["criterion"] for item in acc})
++
++    def test_comandos_da_spec_apontam_para_testes_existentes(self):
++        acc = json.loads((RAIZ / "redesign" / "router" / "spec" / "acceptance.json").read_text(encoding="utf-8"))
++        for item in acc:
++            cmd = item["command"]
++            if cmd[1] == "scripts/testar_turno.py" and len(cmd) == 3:
++                classe, metodo = cmd[2].split(".")
++                with self.subTest(teste=cmd[2]):
++                    self.assertTrue(hasattr(globals()[classe], metodo))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/scripts/turno.py b/scripts/turno.py
+new file mode 100644
+index 00000000..022b932a
+--- /dev/null
++++ b/scripts/turno.py
+@@ -0,0 +1,332 @@
++#!/usr/bin/env python3
++"""Contador mecânico de turno da Agata (decisão do Humano, 12/11/2026, entrevista P1).
++
++Turno = uma resposta do modelo que devolve o controle ao Humano. Chamadas de
++ferramenta e subagentes dentro dela não contam. O contador é POR SESSÃO, fica na
++Máquina e avança a cada mensagem do Humano: no Claude Code, o gancho
++UserPromptSubmit chama `hook` e injeta a linha pronta; nas CLIs sem gancho, o
++modelo roda `proximo` no início da resposta. O modelo só copia a linha; não
++recalcula o t.
++
++Uso:
++  python3 scripts/turno.py proximo --sessao ID [--modelo M]  avança e imprime a linha
++  python3 scripts/turno.py atual   --sessao ID [--modelo M]  linha do turno atual, sem avançar
++  python3 scripts/turno.py sub     --sessao ID [--modelo M]  subagente: t=<n>.sub, sem avançar
++  python3 scripts/turno.py hook                              gancho UserPromptSubmit (JSON na entrada)
++  python3 scripts/turno.py --selftest
++
++Estado: $AGATA_TURNOS_DIR ou ~/.cache/agata/turnos/<sessao>.json (modo 0600), com
++trava <sessao>.lock (flock) e escrita atômica (arquivo temporário + os.replace).
++Arquivo corrompido: `proximo` recomeça em 1 com a marca "contador reiniciado".
++Sem dependências além da biblioteca padrão.
++Saídas: 0 ok · 1 atual/sub sem contador válido · 2 id inválido ou erro de disco.
++"""
++from __future__ import annotations
++
++import argparse
++import contextlib
++import fcntl
++import json
++import os
++import re
++import sys
++import tempfile
++import threading
++import time
++from datetime import datetime, timedelta, timezone
++from pathlib import Path
++
++BRT = timezone(timedelta(hours=-3))
++MODELO_PADRAO = "modelo não verificado"
++BASE = "contador mecânico"
++BASE_REINICIADO = "contador mecânico; contador reiniciado"
++PRAZO_TRAVA = 5.0
++_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
++_BYTES_TRANSCRIPT = 262144  # só o fim do transcrito: o último modelo do assistente está ali
++
++
++class ErroSessao(ValueError):
++    """Id de sessão fora do formato aceito."""
++
++
++class SemContador(RuntimeError):
++    """atual/sub sem contador válido: sessão sem turno ou arquivo corrompido."""
++
++
++def diretorio() -> Path:
++    return Path(os.environ.get("AGATA_TURNOS_DIR") or "~/.cache/agata/turnos").expanduser()
++
++
++def _caminhos(sessao) -> tuple[Path, Path]:
++    if not isinstance(sessao, str) or not _ID.fullmatch(sessao):
++        raise ErroSessao("id de sessão inválido: use letras, números, '.', '_' ou '-' "
++                         "(até 128 caracteres, começando por letra ou número)")
++    d = diretorio()
++    return d / f"{sessao}.json", d / f"{sessao}.lock"
++
++
++def _hora() -> str:
++    # Regional com fuso e selo (PROTOCOLOS.md, Regra 1.1). Sem horário de verão desde 2019: -03 fixo.
++    return datetime.now(timezone.utc).astimezone(BRT).strftime("%d/%m/%Y %H:%M") + " -03 (relógio da Máquina)"
++
++
++def _modelo(m) -> str:
++    if not isinstance(m, str):
++        return MODELO_PADRAO
++    limpo = " ".join(m.replace("·", " ").split())[:80]
++    return limpo or MODELO_PADRAO
++
++
++def linha(modelo, t: int, base: str = BASE) -> str:
++    return f"agata · {_modelo(modelo)} · t={t} ({base}) · {_hora()}"
++
++
++def linha_sub(modelo, t: int) -> str:
++    return f"agata · {_modelo(modelo)} · t={t}.sub (contador mecânico, subagente) · {_hora()}"
++
++
++def _ler(caminho: Path) -> tuple[int | None, bool]:
++    """(t, corrompido). Arquivo ausente = (None, False)."""
++    try:
++        bruto = caminho.read_text(encoding="utf-8")
++    except FileNotFoundError:
++        return None, False
++    except (OSError, UnicodeDecodeError):
++        return None, True
++    try:
++        dados = json.loads(bruto)
++    except ValueError:
++        return None, True
++    t = dados.get("t") if isinstance(dados, dict) else None
++    if isinstance(t, bool) or not isinstance(t, int) or t < 0:
++        return None, True
++    return t, False
++
++
++def _gravar(caminho: Path, sessao: str, t: int) -> None:
++    dados = {"versao": 1, "sessao": sessao, "t": t,
++             "atualizado": datetime.now(BRT).isoformat(timespec="seconds")}
++    fd, tmp = tempfile.mkstemp(dir=str(caminho.parent), prefix=f".{sessao}.", suffix=".tmp")
++    try:
++        with os.fdopen(fd, "w", encoding="utf-8") as f:
++            json.dump(dados, f, ensure_ascii=False)
++            f.flush()
++            os.fsync(f.fileno())
++        os.replace(tmp, caminho)
++    except BaseException:
++        with contextlib.suppress(OSError):
++            os.unlink(tmp)
++        raise
++
++
++@contextlib.contextmanager
++def _trava(caminho: Path, prazo: float = PRAZO_TRAVA):
++    # Um fd novo por chamada: o flock conflita entre processos e entre threads.
++    fd = os.open(caminho, os.O_RDWR | os.O_CREAT, 0o600)
++    try:
++        limite = time.monotonic() + prazo
++        while True:
++            try:
++                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
++                break
++            except BlockingIOError:
++                if time.monotonic() > limite:
++                    raise TimeoutError(f"contador ocupado por outro processo ({prazo:.0f} s)")
++                time.sleep(0.01)
++        yield
++    finally:
++        os.close(fd)  # fechar o fd solta o flock
++
++
++def _avancar(sessao: str, modelo) -> tuple[int, str, str]:
++    """(t, base, linha). Leitura e escrita acontecem sob a mesma trava."""
++    caminho, trava = _caminhos(sessao)
++    caminho.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
++    with _trava(trava):
++        t, corrompido = _ler(caminho)
++        if corrompido:
++            novo, base = 1, BASE_REINICIADO
++            print("turno: contador da sessão corrompido; reiniciado em 1 (marca no cabeçalho)",
++                  file=sys.stderr)
++        elif t is None:
++            novo, base = 1, BASE
++        else:
++            novo, base = t + 1, BASE
++        _gravar(caminho, sessao, novo)
++    return novo, base, linha(modelo, novo, base)
++
++
++def proximo(sessao: str, modelo=MODELO_PADRAO) -> str:
++    return _avancar(sessao, modelo)[2]
++
++
++def _t_atual(sessao: str) -> int:
++    caminho, _ = _caminhos(sessao)
++    t, corrompido = _ler(caminho)
++    if corrompido:
++        raise SemContador("contador da sessão corrompido: rode proximo (ele reinicia com a marca)")
++    if t is None:
++        raise SemContador("sessão sem turno: rode proximo antes")
++    return t
++
++
++def atual(sessao: str, modelo=MODELO_PADRAO) -> str:
++    return linha(modelo, _t_atual(sessao))
++
++
++def subagente(sessao: str, modelo=MODELO_PADRAO) -> str:
++    """Subagente herda o turno do pai: t=<n>.sub, sem avançar."""
++    return linha_sub(modelo, _t_atual(sessao))
++
++
++def atual_da_sessao(sessao) -> int | None:
++    """Para a auditoria: o t do contador, ou None quando não há contador válido (nada a acusar)."""
++    try:
++        return _t_atual(sessao)
++    except (SemContador, ErroSessao, OSError):
++        return None
++
++
++def _modelo_do_transcript(caminho) -> str | None:
++    """Último modelo do assistente gravado no transcrito (medido, não lembrado). None se não houver."""
++    if not isinstance(caminho, str) or not caminho:
++        return None
++    try:
++        with Path(caminho).expanduser().open("rb") as f:
++            f.seek(0, os.SEEK_END)
++            f.seek(max(0, f.tell() - _BYTES_TRANSCRIPT))
++            bloco = f.read().decode("utf-8", "replace")
++    except (OSError, ValueError):
++        return None
++    for l in reversed(bloco.splitlines()):
++        if '"model"' not in l:
++            continue
++        try:
++            obj = json.loads(l)
++        except ValueError:
++            continue  # a 1ª linha do bloco pode ter sido cortada
++        msg = obj.get("message") if isinstance(obj, dict) else None
++        m = msg.get("model") if isinstance(msg, dict) else None
++        if isinstance(m, str) and m and m != "<synthetic>":
++            return m
++    return None
++
++
++def hook(entrada: str, ambiente=None) -> str:
++    """Gancho UserPromptSubmit. Entrada: JSON do Claude Code (session_id; model ou transcript_path).
++    Saída: JSON com hookSpecificOutput.additionalContext, ou "" (sem sessão, erro, entrada inválida).
++    Nunca levanta exceção: o gancho não pode travar o prompt."""
++    ambiente = os.environ if ambiente is None else ambiente
++    try:
++        dados = json.loads(entrada) if entrada and entrada.strip() else {}
++        if not isinstance(dados, dict):
++            dados = {}
++        sessao = dados.get("session_id") or ambiente.get("CLAUDE_SESSION_ID") or ""
++        if not isinstance(sessao, str) or not sessao:
++            return ""
++        modelo_payload = dados.get("model")
++        if isinstance(modelo_payload, str) and modelo_payload.strip():
++            modelo = _modelo(modelo_payload)
++        else:
++            modelo = _modelo(_modelo_do_transcript(dados.get("transcript_path")))
++        t, base, cab = _avancar(sessao, modelo)
++    except Exception as e:  # noqa: BLE001 -- o gancho nunca derruba o prompt
++        print(f"turno: gancho sem linha de turno ({type(e).__name__}: {e})", file=sys.stderr)
++        return ""
++    if t == 1:
++        marca = " Contador reiniciado (arquivo corrompido): t=1." if "reiniciado" in base else ""
++        principal = ("Cabeçalho deste turno: 1ª resposta desta sessão. Abra com o bloco de prontidão "
++                     "(PROTOCOLOS.md, \"Carregar e formatos\"), sem linha t=." + marca)
++    else:
++        principal = (f"Cabeçalho deste turno: {cab}\n"
++                     "Copie a linha como abertura da resposta (REGRAS.md, Regra 1); não recalcule o t. "
++                     f"Subagente: t=<n>.sub com `python3 scripts/turno.py sub --sessao {sessao}`.")
++    contexto = (f"{principal}\nSessão para turno.py e auditoria_turno.py --verificar --sessao: {sessao}")
++    return json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
++                                              "additionalContext": contexto}}, ensure_ascii=False)
++
++
++def _selftest() -> int:
++    """Checagens rápidas em diretório temporário. Os casos completos estão em scripts/testar_turno.py."""
++    antes = os.environ.get("AGATA_TURNOS_DIR")
++    res: list[tuple[str, bool]] = []
++    with tempfile.TemporaryDirectory() as tmp:
++        os.environ["AGATA_TURNOS_DIR"] = tmp
++        try:
++            res.append(("sessão nova começa em 1", "t=1 (contador mecânico)" in proximo("st-a")))
++            res.append(("soma 1 a cada chamada", "t=2 (contador mecânico)" in proximo("st-a")))
++            res.append(("sub imprime t=<n>.sub sem avançar",
++                        "t=2.sub" in subagente("st-a") and "t=2 (" in atual("st-a")))
++            try:
++                proximo("../fora")
++                res.append(("id com '..' é recusado", False))
++            except ErroSessao:
++                res.append(("id com '..' é recusado", True))
++            Path(tmp, "st-b.json").write_text("{não é json", encoding="utf-8")
++            res.append(("arquivo corrompido reinicia com a marca",
++                        "t=1 (contador mecânico; contador reiniciado)" in proximo("st-b")))
++            ids = []
++            ts = [threading.Thread(target=lambda: ids.extend(
++                int(re.search(r"t=(\d+)", proximo("st-c")).group(1)) for _ in range(10))) for _ in range(6)]
++            [t.start() for t in ts]
++            [t.join() for t in ts]
++            res.append(("60 chamadas em 6 threads: sem repetir nem pular", sorted(ids) == list(range(1, 61))))
++            saida = hook(json.dumps({"session_id": "st-d", "transcript_path": "/nao/existe"}))
++            res.append(("gancho injeta Cabeçalho deste turno", "Cabeçalho deste turno:" in saida))
++            res.append(("gancho com entrada inválida sai sem saída", hook("{ruim") == ""))
++            res.append(("hora regional com fuso -03 e selo", bool(re.search(
++                r"\d{2}/\d{2}/\d{4} \d{2}:\d{2} -03 \(relógio da Máquina\)", proximo("st-a")))))
++        finally:
++            if antes is None:
++                os.environ.pop("AGATA_TURNOS_DIR", None)
++            else:
++                os.environ["AGATA_TURNOS_DIR"] = antes
++    for nome, ok in res:
++        print(f"{'PASS' if ok else 'FALHA'}  {nome}")
++    falhas = sum(not ok for _, ok in res)
++    print("SELFTEST OK" if not falhas else f"SELFTEST: {falhas} FALHA(S)")
++    return 1 if falhas else 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    argv = sys.argv[1:] if argv is None else argv
++    if argv == ["--selftest"]:
++        return _selftest()
++    ap = argparse.ArgumentParser(description="Contador mecânico de turno (ver o cabeçalho do módulo).")
++    cmds = ap.add_subparsers(dest="cmd", required=True)
++    for nome in ("proximo", "atual", "sub"):
++        p = cmds.add_parser(nome)
++        p.add_argument("--sessao", required=True)
++        p.add_argument("--modelo", default=MODELO_PADRAO)
++    cmds.add_parser("hook")
++    args = ap.parse_args(argv)
++    try:
++        if args.cmd == "hook":
++            try:
++                entrada = sys.stdin.read()
++            except (OSError, ValueError):
++                entrada = ""
++            saida = hook(entrada)
++            if saida:
++                print(saida)
++            return 0
++        if args.cmd == "proximo":
++            print(proximo(args.sessao, args.modelo))
++        elif args.cmd == "atual":
++            print(atual(args.sessao, args.modelo))
++        else:
++            print(subagente(args.sessao, args.modelo))
++        return 0
++    except ErroSessao as e:
++        print(f"turno: {e}", file=sys.stderr)
++        return 2
++    except SemContador as e:
++        print(f"turno: {e}", file=sys.stderr)
++        return 1
++    except (OSError, TimeoutError) as e:
++        print(f"turno: erro do contador ({e}); sem linha de turno", file=sys.stderr)
++        return 2
++
++
++if __name__ == "__main__":
++    sys.exit(main())

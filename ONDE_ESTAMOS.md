@@ -15,7 +15,8 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 | componente | proposta | estado | desde |
 |---|---|---|---|
 | Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
-| Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | proposta | 12/11 09:01 |
+| Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | aplicada (PR #976, 12/11) | 12/11 09:01 |
+| Pacote mecânico: a verificação vale para todo modelo (contador de turno, aviso de fim de turno, negação do .env, ponteiros para AGENTS.md, subagentes com pacote mínimo) | pacote-mecanico-12-11 | proposta | 12/11 09:47 |
 | Chat lote 4: editar, ramos, parar, feedback, atalhos, tema | chat-lote4-09-11 | incluída em pacote-11-11 | 11/11 18:54 |
 | Processo ágil da skill de lote (R1, R3, R5, R2) | processo-agil-11-11 | incluída em pacote-11-11 | 11/11 |
 | História canônica: Tomo I, Texto 1 e aba História no painel (somente leitura, botão Ouvir) | historia-tomo1-11-11 | incluída em pacote-11-11 | 11/11 19:56 |
