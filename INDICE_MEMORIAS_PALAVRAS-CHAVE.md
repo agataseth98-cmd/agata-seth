@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(994) DIÁRIO — 12/11/2026 · **Pacote 11/11 aplicado com a assinatura do Humano: as seis propostas (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) entram no canon numa só aplicação.**
+  palavras-chave: pacote, aplicado, assinatura, humano, seis, propostas, chat, lote, processo, agil, spec, primeiro, voz, compreender, painel, importantes, historia, tomo, entram, canon, aplicação
 (993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
   palavras-chave: proposta, pacote, publicada, seis, propostas, tocavam, painel, skill, processo, chat, lote, agil, spec, primeiro, voz, compreender, importantes, historia, tomo, assinatura, parciais, vão, superadas
 (992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção História no painel (somente leitura, com o botão Ouvir), pasta historia/ com o Texto 1 do Tomo I e quarentena P-8 para historia/.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, lote, substitui, processo, correções, revisão, codex, auditor, skill, inovação, time
 (965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
   palavras-chave: proposta, lote, skill, processo, agentes, especializados, claude, agents, local, página, frentes, chat, stream, regra, camada, rust, egress, diff
-(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo Humano: um diff único com o MVP de autoaprimoramento, os gates, as rotas, as frentes, o Conselho, o stream do painel, a falha segura de voz, as skills e a primeira camada Rust da política de egress.** Aplicação em `aplica/lote-pn-20261106`.
-  palavras-chave: aplicado, lote, assinado, humano, diff, único, mvp, autoaprimoramento, gates, rotas, frentes, stream, painel, falha, segura, voz, skills, primeira, camada, rust, política, egress, aplicação, aplica
+(964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo …
+  palavras-chave: aplicado, lote, assinado
 (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261 …
   palavras-chave: aplicada, proposta, acervo, parcial
 (962) DIÁRIO — 06/11/2026 · **Proposta M2c: teste do estado parcial do Acervo, a …

@@ -144,6 +144,10 @@ _p8_eh_comportamento() {
     # `ir_sha256_xmlbin` em `models/manifest.json`, já quarentenado) entra
     # junto por ser a mesma pasta e o mesmo papel de apoio ao P-12.
     redesign/fase7-hd/*.py|redesign/fase7-hd/*.sh) return 0 ;;
+    # Tomo I da História canônica (proposta historia-tomo1-11-11, 11/11/2026, pedido do Humano): o texto
+    # da História é canon, não código; entra na quarentena para que nenhum modelo o mude sem assinatura.
+    # O painel só lê este diretório (redesign/painel_operacional/historia_painel.py).
+    historia/*) return 0 ;;
     *) return 1 ;;
   esac
 }

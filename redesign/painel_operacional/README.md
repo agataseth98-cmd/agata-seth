@@ -40,6 +40,8 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem sete seções, escolhidas pe
 - `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
 - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
 
+- Importantes (11/11/2026, pedido do Humano): aba Importantes dentro de Panorama, com cartão "Importantes: N abertos" no próprio Panorama. A lista fica em `~/.cache/agata/painel-importantes.json`, fora do repositório. Criar, marcar feito, descartar, reabrir e editar não apagam nada: descartado fica guardado. `POST /api/importantes/trazer` lê o cache do Conselho (sem escrever nele) e traz as entradas cujo texto começa com `IMPORTANTE`, sem repetir; texto com segredo não é trazido. Toda escrita exige origem do painel e gera uma linha em `painel-importantes.registro.jsonl`, sem texto.
+
 ## Verificar em cópia isolada
 
 ```sh

@@ -23,7 +23,7 @@
 
 ## Escopo desta versão
 
-- Uma tela, `/prototipo`, com sete seções: `panorama`, `conversa`, `conselho`, `sistema`, `conhecimento`, `custos` e `qualidade`.
+- Uma tela, `/prototipo`, com oito seções: `panorama`, `conversa`, `conselho`, `sistema`, `conhecimento`, `historia`, `custos` e `qualidade`. A `historia` entrou em 11/11/2026, pedido do Humano (bloco História abaixo).
 - Cada função das telas atuais tem uma seção e um subpainel (tabela de mapeamento abaixo). Nenhuma função some sem registro.
 - Um arquivo de estilo, `prototipo.css`, com tokens de cor e tipografia em `:root` e componentes únicos. Sem `style=`, sem `<style>`, sem script inline.
 - Estados carregando, vazio e erro em cada seção que consome API.
@@ -32,13 +32,16 @@
 - Casca registrada, fora das sete seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
 - Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
 - Proteção das conversas (09/11/2026, pedido do Humano depois do sumiço de duas conversas importadas, confirmado por ele em 09/11/2026 às 16:20 como apagadas pela própria tela): apagar vai para a Lixeira, escritas exigem origem do painel e ficam registradas, salvar preserva a origem de conversa importada, e arquivo ilegível é contado e não é apagado. Contrato em Rotas de API (bloco de proteção) e critérios no fim da seção de Critérios.
+- Lote 4 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): editar e reenviar, regenerar e ramificar, com ramos navegáveis ("< 1/2 >"); Parar; Continuar; feedback de boa e de ruim resposta; barra de contexto; atalhos de teclado; tema claro, escuro ou do sistema. Contrato em Rotas de API e critérios no fim desta seção. Nenhuma rota nova de API; o gateway não muda.
+- Importantes (11/11/2026, pedido do Humano: "importantes no painel"): aba Importantes dentro de Panorama e cartão "Importantes: N abertos" no Panorama. Lista local de ideias e pendências que o Humano manda guardar: criar, marcar feito, descartar, reabrir e editar; nada é apagado de fato. Trazer as entradas marcadas com IMPORTANTE do cache do Conselho, só leitura. Contrato em Rotas de API e critérios no fim da seção de Critérios.
+- História (11/11/2026, pedido do Humano): seção `historia` no `/prototipo`, com o índice de tomos e a leitura dos textos de `historia/` do checkout (só leitura), e o botão Ouvir, que lê o texto com a voz do sistema. Contrato em Rotas de API (bloco História) e critérios no fim da seção de Critérios.
 
 ## Fora desta versão
 
 - B1, chat com streaming novo: a Conversa continua como está (stream atual, com fallback para `/api/seth/chat`). Motivo: é funcionalidade nova, com risco próprio; o pedido desta versão é a tela unificada.
 - B2, ferramentas com aprovação: a aba Ferramentas do Conselho e o fluxo de pedidos ficam como estão. Motivo: mexe em execução de ferramenta; tem spec própria.
 - Remoção do LibreChat: o botão "LibreChat" continua em Sistema e a rota de abertura continua. Motivo: decisão separada.
-- Ajuste fino de design: sem nova paleta e sem novo layout. Os valores visuais atuais viram tokens sem mudar. Motivo: a verificação visual depende do navegador, e ele não foi medido.
+- Ajuste fino de design: sem novo layout e sem mudar as cores escuras. A paleta clara do lote 4 é gerada a partir das cores atuais (Escopo). Motivo: a verificação visual depende do navegador; as capturas do lote 4 mostram o estado, não são aceite visual do Humano.
 - Mudança em `/api/*`, em CSP, em propostas, assinatura, PR ou merge. Continuam fora do painel.
 - Link público de compartilhamento de conversa: fora deste lote. Pendência: precisa decisão de segurança do Humano (quem vê, por quanto tempo, como revoga).
 
@@ -80,6 +83,17 @@
     - Importação: item que está na lixeira conta como existente: responde `ja_existe` com `lixeira: true`, sem gravar.
     - Listagem: `total` passa a contar só as conversas legíveis; `ilegiveis` conta os arquivos de conversa que não puderam ser lidos. Eles não aparecem na lista e não são apagados nem mexidos.
     - Tela: a aba Conversa tem a seção Lixeira (restaurar; apagar de vez em dois cliques). Enquanto a Seth responde, trocar de conversa, Nova conversa e temporária ficam bloqueados, com aviso. Apagar só sai da tela depois da confirmação do painel. Salvar grava na conversa de origem. A contagem de arquivos ilegíveis aparece na lista.
+- Conversa, lote 4 (09/11/2026). Sem rota nova. `POST /api/seth/conversa` e `GET /api/seth/conversa?id=` aceitam e devolvem a árvore de ramos; `mensagens` continua sendo o caminho ativo.
+  - Sem ramo, a conversa grava `mensagens` como antes. Com ramo, grava `arvore` (`nos`: cada nó com `id` de 1 a 16 letras e números, `pai` (id de um nó que vem antes no arquivo, ou `null`), `role`, `content` e os campos de resposta; e `folha`, o último nó do caminho ativo) e também `mensagens`, o caminho, para que uma versão anterior abra a conversa. O caminho sai da folha subindo pelos pais. Com `arvore` no pedido, `mensagens` é ignorado. O painel manda só a árvore quando há ramo.
+  - Limites: até 400 nós; até 200 mensagens no caminho; 65536 caracteres por mensagem; 262144 bytes por gravação. Árvore fora do formato responde 400 com motivo e nada é gravado. Na leitura, árvore ilegível cai no caminho `mensagens`, se houver.
+  - Campos da resposta da Seth, só quando têm valor: `interrompida: true` (Parar, ou erro no meio do stream); `feedback` (`nota` `bom` ou `ruim`, e `motivo` opcional de até 200 caracteres); `cortes` (posições, no texto, onde começa uma continuação; até 20). Valor fora do formato sai da mensagem sem recusar a conversa. `interrompida` e `feedback` só valem para resposta da Seth.
+  - `ramificada_de` (opcional): `{id, mensagem}`, a conversa de onde a ramificação saiu e a posição da mensagem no caminho (inclusive, a partir de 0). Fora do formato, sai sem recusar.
+  - Exportação JSON leva `arvore` e `ramificada_de` quando existem. Markdown leva só o caminho e avisa. Importação aceita o mesmo; a regra de não duplicar não muda.
+  - Busca e contagem da lista veem só o caminho ativo.
+  - Ao trocar de versão (setas `< 1/2 >`), a conversa segue pela resposta mais nova de cada passo seguinte: a última criada em cada ramo. Parar e Continuar atuam na última resposta do caminho ativo.
+  - Editar e reenviar, regenerar, trocar de versão, ramificar, Continuar e feedback usam as rotas que já existem. Continuar manda a janela do caminho com `Continue de onde parou, sem repetir o que já foi dito.` como última mensagem do usuário, só no pedido; essa mensagem não é gravada e a continuação entra na mesma resposta, a partir de um corte.
+  - Parar aborta o fetch do stream (AbortController) e mantém o texto recebido, marcado `interrompida`. O gateway não mudou: o verificador ainda retém o stream das rotas `seth-*` até o fim (`redesign/router/seth_gateway.py`, `_reter` e `_liberar_retidos`; medido no lote 1, `083a4627`). Com a cadeia real, Parar corta a espera e o texto que já chegou, que pode ser nenhum. O gateway também segura o turno no servidor até a retenção acabar: uma pergunta logo após Parar pode receber 429 `busy`.
+  - A UI mostra a nota de Parar com o texto que já foi gravado. Tratamento do estado `interrompida` em relação à proposta `chat-stream-verificar-depois-09-11`: ver Riscos.
 - Exceção pedida pelo Humano em 07/11/2026 (aba Memória compartilhada, seção Conselho): `GET /api/conselho/memoria?n=40`. Só leitura do cache do Conselho (`redesign/router/cache_conselho.py`, função `ler`), com o mesmo filtro de dado pessoal e segredo da gravação (`filtrar`). Não aceita caminho de arquivo do cliente e não escreve nada.
   - `n` é inteiro de 1 a 200; padrão 40; acima de 200 corta em 200; zero, negativo ou não numérico responde 400. `n` vazio vale o padrão.
   - Resposta 200 em JSON: `estado` (`ok` ou `vazio`), `n` (aplicado), `entradas` (mais recentes primeiro; cada uma com `n`, `data_hora` em `dd/mm/aaaa hh:mm`, `autor`, `tipo`, `texto`), `observed_at` e `fresh_until`.
@@ -88,9 +102,24 @@
   - Origem cruzada: 403, como as outras leituras de `/api/*`.
   - Tipos: `fato`, `decisao`, `pendencia`, `nota` e `diario` (os cinco de `cache_conselho.TIPOS`). A aba filtra por tipo no próprio navegador, sobre as entradas já recebidas.
 
+- Importantes (11/11/2026). Tudo local, em `~/.cache/agata/painel-importantes.json` (escrito inteiro, por troca atômica). Registro de escritas em `painel-importantes.registro.jsonl`: hora, rota, id e status; sem texto. Só acréscimo.
+  - `GET /api/importantes` devolve `schema_version`, `estado` (`ok`, `vazio` ou `ilegivel`), `itens` (abertos primeiro; dentro de cada estado, o mais recente antes) e `contagem` (`aberto`, `feito`, `descartado`). Cada item tem `id` (12 hex), `texto`, `origem` (`humano`, `cache` ou `modelo`), `criado_em`, `estado` (`aberto`, `feito` ou `descartado`), `feito_em`, `nota` e `cache_n` (número da entrada do cache do Conselho; só quando `origem` é `cache`).
+  - `POST /api/importantes` com `{texto}` cria um item de origem `humano`. Texto de 1 a 4000 caracteres, sem caractere nulo. Lista com até 2000 itens; acima, 409. A rota grava só `humano`: a origem `modelo` existe no esquema e nenhuma rota a grava ainda.
+  - `POST /api/importantes/estado` com `{id, estado}`: `feito`, `descartado` ou `aberto` (reabrir). Sair de `feito` limpa `feito_em`.
+  - `POST /api/importantes/editar` com `{id, texto?, nota?}`: nota de até 500 caracteres; nota vazia limpa a nota. Campo fora do contrato, ou pedido sem `texto` nem `nota`: 400.
+  - `POST /api/importantes/trazer` (corpo `{}`): lê o cache do Conselho com `cache_conselho.ler`, sem escrever nele, e cria um item para cada entrada cujo texto começa com `IMPORTANTE`, com `origem` `cache` e `cache_n` igual ao número da entrada. Entrada já trazida, mesmo descartada depois, não entra de novo. O texto passa por `cache_conselho.filtrar`: segredo não é trazido (conta em `recusadas`); dado pessoal vira marca. Resposta: `trazidas`, `ja_estavam`, `recusadas`, `lidas`.
+  - Escritas exigem origem do painel (`_escrita_permitida`): 403 sem cabeçalho ou com origem de outro site. Corpo acima de 4096 bytes: 413. JSON inválido: 400. Item inexistente: 404. Arquivo ilegível: 409, sem gravar. Falha de gravação: 500, sem alterar. Cada pedido, inclusive o recusado, acrescenta uma linha no registro.
+  - Arquivo fora do formato (JSON quebrado, `schema_version` diferente ou item fora do esquema) vale `ilegivel`: a leitura diz `ilegivel` e nenhuma escrita o sobrescreve.
+
+- História (11/11/2026). Tudo lido de `historia/` do checkout; nada é gravado nele.
+  - `GET /api/historia` devolve `schema_version`, `estado` (`ok` ou `vazio`) e `tomos`. Cada tomo traz `tomo`, `numeral`, `titulo` e `textos`; cada texto traz `id`, `numero`, `titulo`, `periodo`, `autor`, `estado` e `protocolo`, sem o corpo. Pasta ausente ou sem texto: `vazio`, 200.
+  - `GET /api/historia/texto?tomo=<tomo-NN>&texto=<NN-titulo>` devolve `frontmatter` (pares `chave: valor` do bloco inicial, sem as aspas externas) e `corpo` (o texto sem o bloco). Fora do formato, 400: o cliente não escolhe caminho. Inexistente ou link para fora de `historia/`, 404. Acima de 65536 bytes, 413.
+  - `POST /api/historia/ouvir` com `{tomo, texto}` (até 512 bytes) lê o corpo com `scripts/agata_falar.py --arquivo`, sem o frontmatter, e responde `falou` (verdadeiro só com código de saída 0) e `motivo`. Uma fala por vez: com outra em curso, 429. Só aceita JSON da própria origem: outra origem ou outro tipo, 403.
+  - As leituras da História recusam origem cruzada com 403, como as demais de `/api/*`.
+
 ### Ativos servidos
 
-- Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`.
+- Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`, `/historia.js`.
 - Saem (404 na versão nova): `/app.js`, `/styles.css`, `/frentes.js`, `/nova_versao.css`, `/conselho-rede/style.css`, `/operator_console/style.css`.
 - Viram redirect: `/index.html`, `/frentes`, `/operator_console/index.html`, `/conselho-rede/index.html` (os arquivos saem do disco na aplicação).
 - CSP: sem mudança. `default-src 'none'; script-src 'self'; style-src 'self'; frame-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'`.
@@ -98,7 +127,7 @@
 ### Seções e navegação
 
 - Cada seção é `<section id="<seção>">` dentro de `/prototipo`. Dentro dela há subpainéis `<div id="sub-<nome antigo>">`, com o nome da tela antiga da tabela. Abas internas (`data-sub`) trocam subpainéis dentro da seção.
-- Menu lateral: sete botões com `data-secao`. O botão da seção aberta tem `aria-current="page"`.
+- Menu lateral: oito botões com `data-secao`. O botão da seção aberta tem `aria-current="page"`.
 - Breadcrumb mostra `Agata / <nome da seção>`.
 - Atalhos `data-open-page` passam a apontar para uma seção e, se for o caso, um subpainel.
 - Submenus recolhíveis (`nav-group`) saem.
@@ -114,11 +143,12 @@
 
 ### APIs usadas por seção (sem rota nova)
 
-- panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`; POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
+- panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`, `/api/importantes` (aba Importantes e cartão, 11/11/2026; POST `/api/importantes`, `/api/importantes/estado`, `/editar` e `/trazer`); POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
 - conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`; GET `/api/seth/lixeira`; POST `/api/seth/lixeira/restaurar` e `/api/seth/lixeira/purgar`.
 - conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
 - sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
 - conhecimento: GET `/api/grafo`, `/api/vault/item`, `/api/nova-versao/estado`; POST `/api/wiki/search`, `/api/nova-versao/executar` (`consultar`, `skills`, `indexar`, `iniciar`, `acervo_*`, `acervo_externa_*`), POST `/api/nova-versao/upload`.
+- historia: GET `/api/historia`, `/api/historia/texto`; POST `/api/historia/ouvir`.
 - custos: GET `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`salvar_orcamento`, `ajustar_conexao`).
 - qualidade: GET `/api/qualidade-llm`, `/api/medicoes/estado`, `/api/sdd/estado`, `/api/lacunas`, `/api/nova-versao/estado`; POST `/api/medicoes/executar`, `/api/sdd/executar`, `/api/nova-versao/executar` (`avaliar`, `cancelar_avaliacao`, `medir_recuperacao`, `medir_ouvido`, `salvar_politica`, `ver_reservado`, `revisar_reservado`, `ver_execucao`).
 
@@ -162,6 +192,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · O que posso fazer | Marca de lacuna nos cartões sem medição | panorama | sub-capacidades (`marcarLacunasNosCartoes`) |
 | prototipo · Plano de trabalho | Propostas para examinar, só leitura de origem local | panorama | sub-plano (`/api/proposals/verify`) |
 | prototipo · Plano de trabalho | Atalhos Estado do sistema e Início do vault | panorama | sub-plano |
+| prototipo · Importantes (11/11/2026) | Lista local: guardar, marcar feito, descartar, reabrir, editar e trazer do Conselho | panorama | sub-importantes (`importantes-lista`, `importantes-form`, `importantes-trazer`) |
 | /frentes | Lista de frentes, somente leitura (`config/frentes.json`) | panorama | sub-frentes (`frentes-lista`, `frentes-estado`, `frentes-cabecalho`) |
 | /index.html | Serviços e Git do painel antigo | panorama | sub-panorama (já coberto; sem card duplicado) |
 | /index.html | Wiki da Agata: busca, pela busca única de Conhecimento (escopo "documentação") | conhecimento | busca única (`conhecimento-busca`, `conhecimento-consulta`, `conhecimento-escopo`, `wiki-mode`, `wiki-source`, `wiki-results`) |
@@ -174,6 +205,14 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Conversa com a Seth (lote 3) | Exportar a conversa salva em JSON e Markdown (download pelo navegador) | conversa | sub-conversa (`seth-export-json`, `seth-export-md`) |
 | prototipo · Conversa com a Seth (lote 3) | Importar JSON exportado (valida; não duplica) | conversa | sub-conversa (`seth-importar-arquivo`) |
 | prototipo · Conversa com a Seth (lote 3) | Conversa temporária: não é salva, com aviso visível | conversa | sub-conversa (`seth-temporaria`, `seth-temporaria-aviso`) |
+| prototipo · Conversa com a Seth (lote 4, 09/11/2026) | Editar e reenviar, regenerar, trocar de versão ("< 1/2 >") | conversa | sub-conversa (`seth-transcript`, `seth-input`) |
+| prototipo · Conversa com a Seth (lote 4) | Ramificar a partir de uma mensagem; mostra a origem da conversa ramificada | conversa | sub-conversa (`seth-origem`) |
+| prototipo · Conversa com a Seth (lote 4) | Parar a resposta (botão e Esc); texto parcial marcado como interrompida | conversa | sub-conversa (`seth-parar`) |
+| prototipo · Conversa com a Seth (lote 4) | Continuar a última resposta, na mesma mensagem, com marca de continuação | conversa | sub-conversa (`seth-transcript`) |
+| prototipo · Conversa com a Seth (lote 4) | Feedback de boa e de ruim resposta, com motivo opcional, salvo na conversa | conversa | sub-conversa (`seth-transcript`) |
+| prototipo · Conversa com a Seth (lote 4) | Barra de contexto: caracteres e KB da próxima pergunta contra o limite do painel | conversa | sub-conversa (`seth-contexto`, `seth-contexto-barra`) |
+| prototipo · Conversa com a Seth (lote 4) | Copiar a última resposta, pelo botão ou por Ctrl+Shift+C | conversa | sub-conversa (`seth-copiar-ultima`, `seth-copiado`) |
+| prototipo · Atalhos de teclado e tema (lote 4) | Lista de atalhos (?), tema claro, escuro ou do sistema, salvo em localStorage | panorama | topo (`atalhos-abrir`, `atalhos-painel`, `tema`) |
 | prototipo · Conversa com a Seth | Envio com stream e fallback para o chat inteiro; Enter envia | conversa | sub-conversa (`seth-form`, `seth-input`) |
 | prototipo · Conversa com a Seth | Copiar, regerar, exemplos e salvamento automático | conversa | sub-conversa |
 | prototipo · Conselho e /conselho-rede | Novo turno: aba, prompt e solicitação de aprovação de envio | conselho | sub-conselho (`promptForm`, `site`, `pergunta`, `btnEnviar`) |
@@ -221,7 +260,10 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Nova versão · Orçamento e eventos | Categorias e tetos (local, gratuito, assinatura, pago; chamadas, tokens, timeout, R$); salvar | custos | sub-nv-orcamento (`nv-orc-salvar`, `nv-orc-reais`) |
 | prototipo · Nova versão · Orçamento e eventos | Últimos eventos do ledger | custos | sub-nv-orcamento (`nv-eventos-titulo`) |
 | prototipo · Nova versão · Conexões | Tarifas e modelo por provedor (US$/M tokens de entrada e saída, câmbio, data, fonte); salvar modelo e tarifa | custos | sub-nv-tarifas (`nv-api-provedor`, `nv-api-modelo`, `nv-tar-entrada`, `nv-api-ajustar`) |
-| casca | Barra lateral com as sete entradas e botão de recolher | casca | não é seção |
+| canon (História, 11/11/2026) | Índice de tomos e textos de `historia/`, com o estado de cada texto | historia | sub-historia (`historia-indice`, `historia-meta`) |
+| canon (História) | Leitura de um texto: marcas de origem, frontmatter e corpo | historia | sub-historia (`historia-corpo`, `historia-estado`) |
+| canon (História) | Botão Ouvir: lê o corpo com a voz do sistema e diz se falou ou não | historia | sub-historia (`historia-ouvir`, `historia-ouvir-estado`) |
+| casca | Barra lateral com as oito entradas e botão de recolher | casca | não é seção |
 | casca | Breadcrumb, chip LOCAL, nota "O Humano no centro" e rodapé | casca | não é seção |
 | casca | Busca "Buscar neste mapa…" (filtra os cartões da seção aberta) | casca | não é seção |
 | casca | Diálogo de evidência (`evidence-dialog`) | casca | usado por Panorama e Sistema |
@@ -235,7 +277,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] todos os caminhos `/api/*` chamados pelo JS existem no servidor; a rota nova `/api/conselho/memoria` é somente leitura do cache e está documentada
 - [ ] a conversa salva é validada e devolvida com `schema_version` e `id`, e regrava com o mesmo id sem duplicar arquivo; conteúdo de mensagem até 65536 caracteres passa na validação, respeitado o teto total de 262144 bytes por requisição
 - [ ] a CSP das respostas continua com `script-src 'self'` e `style-src 'self'`
-- [ ] o `/prototipo` tem sete seções (panorama, conversa, conselho, sistema, conhecimento, custos e qualidade) e um botão de menu para cada uma
+- [ ] o `/prototipo` tem oito seções (panorama, conversa, conselho, sistema, conhecimento, historia, custos e qualidade) e um botão de menu para cada uma
 - [ ] cada tela antiga tem um subpainel `sub-<nome>` dentro da seção de destino do mapeamento
 - [ ] cada função do mapeamento existe na tela, pelo id, em `prototipo.html` ou `prototipo.js`
 - [ ] o `/prototipo` escolhe a seção pelo hash, troca ao mudar o hash e cai em panorama com hash desconhecido
@@ -258,6 +300,21 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] a execução do SDD recusa ação e componente fora da lista
 - [ ] a execução do SDD recusa comando fora do padrão pytest
 - [ ] a aba SDD lista e roda projetos externos de config/sdd e recusa o que não está lá
+- [ ] `GET /api/historia` lista os tomos e os textos de `historia/` com o frontmatter (tomo, título, período, autor, estado e protocolo), sem o corpo do texto
+- [ ] `GET /api/historia/texto` devolve o frontmatter separado e o corpo do texto; `tomo` e `texto` têm formato fixo e o cliente não escolhe caminho: fora do formato, 400; inexistente ou link para fora de `historia/`, 404
+- [ ] `historia/` ausente ou sem texto dá estado `vazio` com 200, e não erro
+- [ ] as leituras da História e o Ouvir recusam origem cruzada com 403; o Ouvir aceita só JSON da própria origem e corpo até 512 bytes
+- [ ] `historia.js` é arquivo externo servido em `/historia.js`, e a seção História não tem script nem estilo inline
+- [ ] o Ouvir manda só o corpo do texto, sem o frontmatter, para `scripts/agata_falar.py --arquivo`, e responde `falou` verdadeiro só com código de saída 0
+- [ ] com a voz do sistema sem resposta, o Ouvir responde `falou` falso com motivo que diz `não falei`
+- [ ] uma fala por vez: com outra em curso, o Ouvir responde 429 e não chama a voz; texto inexistente não chama a voz
+- [ ] o botão Ouvir chama `POST /api/historia/ouvir` com `tomo` e `texto` do texto aberto, fica desligado sem texto aberto e mostra se falou ou não
+- [ ] o texto da História vira nós com createElement e createTextNode: `historia.js` não usa innerHTML, outerHTML, insertAdjacentHTML, document.write nem eval, e tag HTML no texto sai como texto
+- [ ] as marcas `[medido]`, `[relato]` e `[inferência]` viram etiquetas com classe própria e cor por token do `:root`
+- [ ] o `/prototipo` tem a seção `historia` depois de `conhecimento`, escondida até ser escolhida, com estados carregando, vazio e erro
+- [ ] o texto 1 do Tomo I, em `historia/` do checkout, aparece na lista e tem as marcas de origem
+- [ ] `scripts/perimetro/p08_quarentena.sh` põe `historia/` na quarentena do P-8, e a História não muda sem assinatura
+- [ ] os arquivos da História não têm emoji
 - [ ] a medição recusa ação e modelo fora da lista e roda com argumentos fixos
 - [ ] o indicador de recuperação usa a medição salva e volta a não medido sem ela
 - [ ] a nova versão recusa ação, consulta e orçamento fora do contrato e registra a mudança de orçamento
@@ -306,6 +363,32 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] enquanto a Seth responde, a tela não troca de conversa, não abre Nova conversa e não liga a temporária: avisa e espera; depois da resposta, volta a funcionar
 - [ ] salvar grava o id e o aviso na conversa de origem, e a tela só é repintada se ela ainda é a aberta
 - [ ] a lixeira fora do ar não derruba a lista de conversas, e a lixeira vazia diz que está vazia
+- [ ] editar uma mensagem e reenviar, ou regenerar uma resposta, não apaga a resposta antiga: ela vira outra versão da conversa, navegável com "< 1/2 >", e as setas seguem o ramo escolhido
+- [ ] ramificar a partir de qualquer mensagem cria conversa nova com o histórico até ali, guarda de onde saiu e mostra a origem; em conversa temporária o botão não aparece
+- [ ] a árvore de ramos é validada (pai antes do filho, id no formato, papel conhecido, até 400 nós e 200 mensagens no caminho); árvore inválida responde 400 e nada é gravado
+- [ ] conversa sem ramo continua gravada no formato de sempre, conversa salva antes do lote 4 abre igual, e árvore ilegível na leitura cai no caminho de mensagens
+- [ ] renomear uma conversa com ramo grava a árvore inteira, sem perder as versões
+- [ ] o botão Parar e a tecla Esc cancelam o fetch do stream; o texto que já chegou fica na tela e na conversa salva, marcado como interrompida, sem repetir a pergunta
+- [ ] Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto devolve a pergunta ao campo
+- [ ] continuar pede à Seth com a mensagem "Continue de onde parou" e anexa o texto à mesma resposta, com marca de continuação; sem texto na resposta, o botão não aparece
+- [ ] o feedback de boa resposta e de resposta ruim, com motivo opcional, fica salvo na conversa e não sai do navegador; em conversa temporária não grava
+- [ ] a barra de contexto mostra, em português simples, quantos caracteres e KB a próxima pergunta leva, o limite do painel e quantas mensagens vão
+- [ ] atalhos de teclado: ? mostra a lista (Esc fecha), Ctrl+Shift+O começa conversa nova, Ctrl+Shift+C copia a última resposta, / foca a busca; atalhos de uma tecla não disparam dentro de campo de texto
+- [ ] o tema escuro é o padrão; claro e sistema trocam a paleta pelos tokens do :root; a escolha fica em localStorage com try/catch, e sem armazenamento a tela segue
+- [ ] a exportação JSON leva os ramos e a origem; o Markdown traz só o caminho e avisa; a importação preserva os ramos sem duplicar; a busca e a contagem da lista veem só o caminho ativo
+- [ ] os controles novos têm id em `prototipo.html`; a Conversa continua sem `style=` nem atributo `on*`, e o JS da Conversa não usa innerHTML
+- [ ] a paleta clara é gerada dentro do mesmo `:root`: nenhuma cor literal fora dele, nenhum `var()` sem definição, e toda classe do HTML tem regra de estilo
+- [ ] apagar uma conversa com ramos leva a árvore para a Lixeira junto com o resto, e restaurar devolve as versões de outros ramos com a conversa
+- [ ] `GET /api/importantes` devolve `itens` com abertos primeiro, `contagem` e `estado`; arquivo ausente vale `vazio` e arquivo fora do formato vale `ilegivel`
+- [ ] criar, marcar feito, descartar, reabrir e editar gravam o arquivo local por troca atômica; descartado fica guardado e nenhum item é apagado de fato
+- [ ] texto recusado (vazio, acima de 4000 caracteres, com caractere nulo) ou campo fora do contrato responde 400 e não grava nada
+- [ ] `Trazer do Conselho` lê o cache sem escrever nele, traz só as entradas `IMPORTANTE`, não duplica nem traz de novo a entrada descartada, e não traz entrada com segredo
+- [ ] as escritas de importantes respondem 403 sem origem do painel ou com origem de outro site, 413 acima de 4096 bytes, e cada pedido, inclusive o recusado, gera uma linha no registro sem texto
+- [ ] a aba Importantes e o cartão do Panorama mostram estados carregando, vazio e erro, e não mostram lista antiga como atual quando a leitura falha ou o arquivo é ilegível
+- [ ] a aba envia criar, marcar, reabrir, descartar, editar e trazer pelas rotas de importantes, e mostra o motivo da recusa (403, 404, 409 e 500)
+- [ ] o texto de um item sai como texto puro, sem innerHTML, e o bloco novo não tem `style=`, `on*` nem cor literal fora de `:root`
+- [ ] a tela de Importantes chama só rotas que existem no servidor, e as quatro rotas estão em `IMPORTANTES_ROTAS`
+- [ ] os arquivos da entrega de importantes (tela, módulo, testes e spec) não têm emoji
 
 ## Desenho e alternativas
 
@@ -315,6 +398,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - Operator Console sem iframe: o iframe tem documento, CSS e JS próprios, e não compartilha tokens. O JS da console (`operator_console/app.js`) é isolado antes de entrar na página (ver Implementação). Se o isolamento falhar na verificação, a alternativa é manter o iframe com `operator_console/index.html` servido; isso fica registrado como risco.
 - Globais: cada script de tela fica em IIFE ou usa nomes únicos. O teste de globais impede a repetição.
 - Hash no lugar de rota nova: o redirect já usa hash (`/prototipo#conselho`). A mudança é só fazer o JS ler o hash.
+- Lote 4: a conversa é uma árvore de nós com `pai` (um nó por mensagem; versão nova é irmão da antiga). Alternativa descartada: listas de versões por posição, com a cauda de cada versão guardada à parte. A cauda de uma versão teria ramos aninhados, e a navegação entre eles ficaria difícil de conferir.
 
 ## Implementação e testes
 
@@ -346,6 +430,8 @@ Comando da suíte: `python3 -m pytest -q redesign/painel_operacional`, com pytes
 
 Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: lixeira, escrita com origem, registro, origem preservada ao salvar e arquivos ilegíveis, com servidor numa porta livre) e `test_chat_ui.py::ConversaProtecao` (tela: apagar, bloqueio durante a resposta, salvar na conversa de origem, lixeira e contagem de ilegíveis, em node com DOM mínimo). O harness de `test_chat_ui.py` ganhou a lixeira; `sethSalvar` é exposta só na cópia em memória do arquivo, durante o teste (uma linha antes do fim da IIFE), sem hook no código de produção.
 
+Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem navegador; o arquivo e o registro vão para um diretório temporário). `test_importantes_ui.py` roda `prototipo.js` em node, com um DOM mínimo montado no próprio teste e um fetch roteirizado, e confere em texto o bloco novo (sem innerHTML, style nem on*). A lista de subpainéis do Panorama em `test_painel_unificado.py` ganhou `importantes` (única mudança nesse teste).
+
 ## Migração e reversão
 
 - Sem migração de dados. O painel não guarda estado além do cache em `~/.cache/agata/painel/`.
@@ -354,6 +440,8 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
 - Ordem de reversão: se a aplicação tiver ido em mais de um passo, reverter do último para o primeiro.
 - Lote 3 (09/11/2026): `organizacao.json` nasce só quando alguém fixa, arquiva, marca ou põe em pasta uma conversa. Sem ele, as conversas valem o padrão. Reverter o código deixa o arquivo ignorado; apagá-lo desfaz a organização sem tocar nas conversas.
 - Proteção (09/11/2026): a pasta `.lixeira/` e o `.registro.jsonl` nascem no primeiro uso. Reverter o código deixa a lixeira fora da lista; as conversas que estiverem nela voltam à mão (mover `.lixeira/<id>-<data>.json` para `<id>.json`). A chave `lixeira` de `organizacao.json` é ignorada pelo código antigo.
+- Lote 4 (09/11/2026): sem migração. Conversa antiga abre igual. Uma conversa ganha `arvore` só quando tem ramo; enquanto não tem, grava como antes. Reverter o código deixa de mostrar as versões de outros ramos; o caminho continua aberto em versão anterior (ver Riscos).
+- Importantes (11/11/2026): o arquivo `~/.cache/agata/painel-importantes.json` e o registro nascem no primeiro uso. Reverter o código deixa o arquivo sem uso; apagá-lo perde a lista (não há outra cópia). Reverter a aba deixa a lista só no arquivo, sem tela.
 
 ## Riscos e dependências
 
@@ -365,7 +453,14 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
 - Decidido pelo Humano em 07/11/2026: a barra lateral, o cabeçalho e o chip LOCAL ficam fora das sete seções, como casca registrada.
 - A verificação no navegador foi feita em 07/11/2026 (critério 35), com o que está medido e o que não foi medido listado ali. Não é aceite visual do Humano.
 - `pytest` precisa estar disponível. Sem ele, a execução devolve não medido, não falha em silêncio.
+- Importantes (11/11/2026): o texto digitado pelo Humano fica local, sem filtro de segredo (como as conversas); só o texto trazido do cache passa por `filtrar`. "Trazer do Conselho" depende de a entrada começar com `IMPORTANTE`: é convenção de texto do cache, não campo do esquema.
 - Proteção (09/11/2026): cliente local que escreve sem cabeçalho (curl, script) passa a receber 403 em toda escrita de conversa. O chat (`/api/seth/chat` e `/api/seth/chat/stream`) não mudou. Salvar uma conversa com um `id` que está na lixeira recria o arquivo com esse id; a restauração depois responde 409 (nada se perde).
+- Lote 4 (09/11/2026), Parar e o verificador: o gateway (`redesign/router/seth_gateway.py`) não mudou, e o verificador ainda segura o stream das rotas `seth-*` até o fim. Com a cadeia real, Parar pode não cortar nada visível. Os testes de Parar usam stream falso que espera. Não medido no navegador com a cadeia real neste lote.
+- Lote 4, estado `interrompida`: hoje é o campo `interrompida: true` na resposta. A proposta `chat-stream-verificar-depois-09-11` (sem assinatura) usa `verificacao.estado = interrompida` (seção 3.4). Hoje só este lote está no código; a proposta não foi aplicada. Quando ela for aplicada, uma das duas formas precisa ser convertida na outra. Pendência para o Humano decidir a ordem.
+- Lote 4, reversão: a conversa com ramo grava também `mensagens` (o caminho). Uma versão anterior abre o caminho, mas não vê os ramos; se ela gravar a conversa de novo, os ramos saem. Antes de reverter, exportar em JSON (o JSON leva `arvore`).
+- Lote 4, feedback sem emoji: os botões são "Útil" e "Não útil", com rótulo acessível "Resposta útil" e "Resposta não útil" e o mesmo título. Decisão E-2 do Humano (16/10): o Agata não usa emoji. A nota gravada continua "bom" (útil) e "ruim" (não útil); o teste de emoji cobre HTML, CSS e JS da tela.
+- Lote 4, atalhos: o navegador pode reservar algum atalho (por exemplo, Ctrl+Shift+C em alguns navegadores). Medido só em teste de DOM e em Chromium headless, sem janela de navegador.
+- Lote 4, tema claro: a paleta clara é gerada por inversão de luminosidade das cores escuras (pares `--luz-*` no `:root`; a geração foi feita por um script local, fora do repositório). Não há medição de contraste por ferramenta; as capturas mostram o estado, não aprovam.
 
 ## Código
 
@@ -399,8 +494,15 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
 - `test_painel_unificado.py`
 - `test_conversas_lote3.py`
 - `test_conversas_protege.py`
+- `test_conversas_lote4.py`
 - `test_chat_ui.py`
 - `test_frentes.py`
+- `importantes.py`
+- `test_importantes.py`
+- `test_importantes_ui.py`
+- `historia_painel.py`
+- `historia.js`
+- `test_historia.py`
 - `conselho-rede/`
 - `relay-extension-v2/`
 - `operator_console/`

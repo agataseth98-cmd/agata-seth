@@ -4,7 +4,7 @@
 (function () {
 const byId = (id) => document.getElementById(id);
 const AgataPainel = (window.AgataPainel = window.AgataPainel || {});
-const SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"];
+const SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"];
 const navSecoes = [...document.querySelectorAll(".nav button[data-secao]")];
 const shell = document.querySelector(".shell");
 const sidebarToggle = byId("sidebar-toggle");
@@ -79,7 +79,10 @@ const CARREGAR_SUB = {
   qualidade: () => { carregarQualidade(); carregarMedicoes(); },
   sdd: () => carregarSdd(),
   frentes: () => carregarFrentes(),
+  importantes: () => carregarImportantes(),
   "conselho-memoria": () => carregarMemoriaConselho(),
+  // História (11/11/2026): historia.js registra AgataPainel.carregarHistoria ao carregar; antes disso, não faz nada.
+  historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
 };
 
 function mostrarSub(secao, sub) {
@@ -594,7 +597,10 @@ function ligarCartoesClicaveis() {
 
 /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
 const SETH_MODELO_PADRAO = "seth-livre";
-let sethAtual = {id: null, titulo: "", mensagens: [], modelo: SETH_MODELO_PADRAO};
+let sethAtual = {id: null, titulo: "", modelo: SETH_MODELO_PADRAO, temporaria: false, nos: [], folha: null, ramificada_de: null};
+// Resposta em curso (AbortController, para o botão Parar) e mensagem do usuário em edição (id).
+let sethControle = null;
+let sethEditandoId = null;
 // Lista do seletor. Vem de GET /api/seth/modelos (lista fixa no servidor); sem ela, fica só o padrão.
 let sethModelos = [{id: SETH_MODELO_PADRAO, rotulo: "Seth (padrão)", descricao: ""}];
 const SETH_EXEMPLOS = ["Quais propostas aguardam assinatura?", "O que o decisor Jev faz?", "Como o canon protege as decisões?"];
@@ -607,14 +613,19 @@ const SETH_LIMITE_PEDIDO_BYTES = 131072;
 const SETH_LIMITE_CONVERSA_BYTES = 262144;
 const SETH_LIMITE_IMPORTACAO_BYTES = 263168;
 const SETH_BUSCA_MAX_CARACTERES = 120;
+// Lote 4 (09/11/2026): motivo do feedback (espelho de armazem.FEEDBACK_MOTIVO_LIMITE) e textos das respostas.
+const SETH_FEEDBACK_MOTIVO_LIMITE = 200;
+const SETH_CONTINUAR = "Continue de onde parou, sem repetir o que já foi dito.";
+const SETH_INTERROMPIDA = "Resposta interrompida. O texto recebido ficou salvo.";
+const SETH_INTERROMPIDA_VAZIA = "Resposta interrompida antes do primeiro texto. Nada foi recebido.";
 // Organização (lote 3, 09/11/2026): estado da lista vindo de GET /api/seth/conversas; filtros e busca só na tela.
 let sethLista = {items: [], pastas: [], marcadores: [], total: 0, organizacao: "ok"};
 let sethFiltro = {pasta: "", marcador: ""};
 let sethBuscaSeq = 0;
-// Lixeira (09/11/2026): conversas apagadas, de GET /api/seth/lixeira. `respondendo` vale enquanto a Seth responde e o salvar termina.
+// Lixeira (09/11/2026): conversas apagadas, de GET /api/seth/lixeira. `sethRespondendo` vale enquanto a Seth responde e o salvar termina.
 let sethLixeira = {items: [], total: 0, ilegiveis: 0, indisponivel: false};
 let sethRespondendo = false;
-function sethNova(temporaria = false) { return {id: null, titulo: "", mensagens: [], modelo: sethAtual.modelo, temporaria}; }
+function sethNova(temporaria = false) { return {id: null, titulo: "", modelo: sethAtual.modelo, temporaria, nos: [], folha: null, ramificada_de: null}; }
 function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
 function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
 function sethTitulo(texto) { byId("seth-titulo").textContent = texto || (sethAtual.temporaria ? "Conversa temporária" : "Nova conversa"); }
@@ -670,43 +681,42 @@ function sethMarkdown(texto, destino) {
 }
 function sethMensagem(m, indice) {
   const log = byId("seth-transcript");
-  const msg = document.createElement("article"); msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant");
+  const msg = document.createElement("article");
+  msg.className = "msg msg-" + (m.role === "user" ? "user" : "assistant") + (m.interrompida ? " msg-interrompida" : "");
   msg.dataset.indice = String(indice);
   const cab = document.createElement("div"); cab.className = "msg-head";
   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
   const hora = document.createElement("span"); hora.textContent = m.hora || "";
   cab.append(quem, hora);
   if (m.role === "assistant") { const modelo = document.createElement("span"); modelo.className = "msg-modelo"; modelo.textContent = sethTextoModelo(m); cab.append(modelo); }
+  if (m.interrompida) cab.append(sethSelo("interrompida", "seth-selo-interrompida"));
   const corpo = document.createElement("div"); corpo.className = "msg-body";
-  if (m.role === "user") corpo.textContent = m.content; else sethMarkdown(m.content, corpo);
+  if (m.role === "user") { if (sethEditandoId === m.id) sethFormEdicao(m, corpo); else corpo.textContent = m.content; }
+  else sethCorpo(m, corpo);
   msg.append(cab, corpo);
   if (m.aviso) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.aviso; msg.append(aviso); }
-  if (m.role === "assistant") {
-    const acoes = document.createElement("div"); acoes.className = "msg-acoes";
-    const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
-    copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
-    acoes.append(copiar);
-    if (indice === sethAtual.mensagens.length - 1) {
-      const regerar = document.createElement("button"); regerar.type = "button"; regerar.className = "text-link"; regerar.textContent = "Regenerar";
-      regerar.addEventListener("click", () => sethRegerar());
-      acoes.append(regerar);
-    }
-    msg.append(acoes);
-  }
+  if (m.interrompida) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.content ? SETH_INTERROMPIDA : SETH_INTERROMPIDA_VAZIA; msg.append(aviso); }
+  const irmaos = sethIrmaos(m);
+  if (irmaos.length > 1) msg.append(sethRamo(m, irmaos));
+  if (sethEditandoId !== m.id) msg.append(sethAcoesMensagem(m, indice));
   log.append(msg);
 }
 function sethDesenhar() {
   const log = byId("seth-transcript"); log.replaceChildren();
-  if (!sethAtual.mensagens.length) {
+  const caminho = sethCaminho();
+  if (!caminho.length) {
     const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
     log.append(vazio);
   }
-  sethAtual.mensagens.forEach((m, i) => sethMensagem(m, i));
+  caminho.forEach((no, i) => sethMensagem(no, i));
   log.scrollTop = log.scrollHeight;
   sethTitulo(sethAtual.titulo);
   sethPintarAvisoSalvar();
   sethPintarTemporaria();
   sethPintarExportar();
+  sethPintarOrigem();
+  sethPintarContexto(caminho);
+  sethPintarParar();
 }
 function sethExemplos() {
   const box = byId("seth-exemplos"); if (!box) return;
@@ -1010,7 +1020,8 @@ async function sethAbrir(id, indice = null) {
   try {
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
     if (sethTrocaBloqueada()) return; // uma resposta começou enquanto a conversa carregava
-    sethAtual = {id: dados.id, titulo: dados.titulo, mensagens: dados.mensagens, modelo: dados.modelo || SETH_MODELO_PADRAO, temporaria: false};
+    sethAtual = sethDeDados(dados);
+    sethEditandoId = null;
     sethDesenhar(); sethListar(); sethMostrarModelo();
     if (indice !== null) sethDestacar(indice);
   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
@@ -1034,7 +1045,7 @@ function sethPintarTemporaria() {
 function sethAlternarTemporaria() {
   if (sethTrocaBloqueada()) return;
   const ligar = !sethAtual.temporaria;
-  sethAtual = sethNova(ligar);
+  sethAtual = sethNova(ligar); sethEditandoId = null;
   sethDesenhar(); sethListar();
   sethStatus(ligar ? "TEMPORÁRIA" : "PRONTA", ligar ? "partial" : "planned");
   byId("seth-input").focus();
@@ -1077,18 +1088,31 @@ function sethErroImportacao(status, motivo) {
 // Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
 function sethParaSalvar(m) {
   const item = {role: m.role, content: m.content};
-  if (m.role === "assistant") { if (m.modelo) item.modelo = m.modelo; if (m.modelo_real) item.modelo_real = m.modelo_real; }
+  if (m.role === "assistant") {
+    if (m.modelo) item.modelo = m.modelo;
+    if (m.modelo_real) item.modelo_real = m.modelo_real;
+    if (m.interrompida) item.interrompida = true;
+    if (m.feedback) item.feedback = {...m.feedback};
+    if (m.cortes && m.cortes.length) item.cortes = [...m.cortes];
+  }
   return item;
 }
 // Grava a conversa `alvo` (por padrão, a aberta). O id e o aviso são gravados nela, não na tela: se a tela trocou
 // durante o await, só a conversa de origem muda e a tela não é repintada com ela (09/11/2026).
 async function sethSalvar(alvo = sethAtual) {
-  if (alvo.temporaria || !alvo.mensagens.length) return false; // conversa temporária nunca é gravada
-  if (!alvo.titulo) alvo.titulo = alvo.mensagens[0].content.slice(0, 60);
-  const corpo = JSON.stringify({id: alvo.id, titulo: alvo.titulo, modelo: alvo.modelo, mensagens: alvo.mensagens.map(sethParaSalvar)});
-  if (new TextEncoder().encode(corpo).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true, alvo); return false; }
+  if (alvo.temporaria || !alvo.nos.length) return false; // conversa temporária nunca é gravada
+  const caminho = sethCaminhoDe(alvo.folha, alvo);
+  if (!caminho.length) return false;
+  if (!alvo.titulo) alvo.titulo = caminho[0].content.slice(0, 60);
+  const corpo = {id: alvo.id, titulo: alvo.titulo, modelo: alvo.modelo};
+  // Com ramo, vai a árvore (o caminho sai dela); sem ramo, a lista de sempre.
+  if (alvo.nos.length > caminho.length) corpo.arvore = {nos: alvo.nos.map(sethNoParaSalvar), folha: alvo.folha};
+  else corpo.mensagens = caminho.map(sethParaSalvar);
+  if (alvo.ramificada_de) corpo.ramificada_de = alvo.ramificada_de;
+  const texto = JSON.stringify(corpo);
+  if (new TextEncoder().encode(texto).length > SETH_LIMITE_CONVERSA_BYTES) { sethNaoSalvou(sethMotivoRecusa(413), true, alvo); return false; }
   try {
-    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: corpo});
+    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: texto});
     if (!r.ok) { sethNaoSalvou(sethMotivoRecusa(r.status, await sethMotivo(r)), r.status === 413 || r.status === 400, alvo); return false; }
     const dados = await r.json(); alvo.id = dados.id; alvo.naoSalva = "";
     if (alvo === sethAtual) { sethPintarAvisoSalvar(); sethTitulo(alvo.titulo); }
@@ -1145,7 +1169,10 @@ function sethRenomear(c, linha) {
     if (c.id === sethAtual.id) { sethAtual.titulo = novo; sethSalvar(); return; }
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(c.id), {headers: {Accept: "application/json"}});
     try {
-      const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id: c.id, titulo: novo, modelo: dados.modelo, mensagens: dados.mensagens})});
+      // Renomear grava a conversa inteira: com ramo, manda a árvore (senão os ramos sumiriam).
+      const corpo = dados.arvore ? {id: c.id, titulo: novo, modelo: dados.modelo, arvore: dados.arvore} : {id: c.id, titulo: novo, modelo: dados.modelo, mensagens: dados.mensagens};
+      if (dados.ramificada_de) corpo.ramificada_de = dados.ramificada_de;
+      const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
       if (!r.ok) sethMostrarAviso("Não foi possível salvar o novo nome da conversa \"" + c.titulo + "\": " + sethMotivoRecusa(r.status, await sethMotivo(r)) + ".");
     } catch (_) { sethMostrarAviso("Não foi possível salvar o novo nome da conversa: sem resposta do painel."); }
     sethListar();
@@ -1192,8 +1219,8 @@ function sethAvisoJanela(janela) {
    Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
    Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
 function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
-async function sethLerStream(mensagens, modelo, parcial, aoTexto) {
-  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store",
+async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal) {
+  const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store", signal: sinal,
     headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo})});
   if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
   parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
@@ -1222,71 +1249,30 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto) {
     if (!fim) throw sethErroStream("stream interrompido");
     return parcial.texto;
   } finally {
-    try { await leitor.cancel(); } catch (_) { /* stream já fechado */ }
+    try { await leitor.cancel(); } catch (_) { /* stream já fechado ou cancelado pelo Parar */ }
   }
 }
-async function sethChatInteiro(mensagens, modelo, parcial) {
-  const r = await fetch("/api/seth/chat", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+async function sethChatInteiro(mensagens, modelo, parcial, sinal) {
+  const r = await fetch("/api/seth/chat", {method: "POST", signal: sinal, headers: {"Content-Type": "application/json", Accept: "application/json"},
     body: JSON.stringify({messages: mensagens, modelo})});
   if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
   parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
   return r.json();
 }
-async function sethEnviar(textoUsuario, reaproveitar) {
-  const estado = byId("seth-status"); const botao = byId("seth-send"); const campo = byId("seth-input"); const log = byId("seth-transcript");
+async function sethEnviar(texto) {
+  if (sethEmCurso()) return;
   // A conversa de origem é capturada antes de qualquer await: a pergunta, a resposta e o salvar são dela (09/11/2026).
   const alvo = sethAtual;
-  sethRespondendo = true;
-  if (!reaproveitar) alvo.mensagens.push({role: "user", content: textoUsuario, hora: sethHora()});
+  const usuario = sethAdicionar({role: "user", content: texto, pai: alvo.folha, hora: sethHora()}, alvo);
+  alvo.folha = usuario.id;
   sethDesenhar();
-  botao.disabled = true; sethStatus("PENSANDO", "partial");
-  const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
-  log.append(pensando);
-  const janela = sethJanela(alvo.mensagens);
-  const mensagens = janela.mensagens;
-  const avisoJanela = sethAvisoJanela(janela);
-  const modelo = alvo.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
-  const parcial = {texto: ""};
-  let textoNo = null;
-  const aoTexto = (delta) => {
-    if (!textoNo) {
-      pensando.remove();
-      const bolha = document.createElement("article"); bolha.className = "msg msg-assistant";
-      const corpo = document.createElement("div"); corpo.className = "msg-body";
-      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo);
-      log.append(bolha);
-    }
-    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
-  };
-  try {
-    let conteudo;
-    try {
-      conteudo = await sethLerStream(mensagens, modelo, parcial, aoTexto);
-    } catch (erro) {
-      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
-      if (!transporte) throw erro;
-      const dados = await sethChatInteiro(mensagens, modelo, parcial);
-      conteudo = dados.content;
-    }
-    alvo.mensagens.push({role: "assistant", content: conteudo, hora: sethHora(), modelo, modelo_real: parcial.modelo_real || "", aviso: avisoJanela});
-    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); }
-    await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
-  } catch (erro) {
-    if (!reaproveitar) alvo.mensagens.pop();
-    if (alvo === sethAtual) {
-      sethDesenhar();
-      const aviso = document.createElement("p"); aviso.className = "seth-vazio"; aviso.textContent = "Não consegui responder agora: " + (erro.message || "falha desconhecida") + ".";
-      log.append(aviso);
-      sethStatus("INDISPONÍVEL", "horizon");
-    }
-  } finally { sethRespondendo = false; botao.disabled = false; campo.focus(); }
+  await sethResponder({modo: "nova", alvo, paiId: usuario.id, novoUsuarioId: usuario.id, textoDoUsuario: texto});
 }
+// Regenerar: a resposta nova é irmã da última; a antiga não some, vira outra versão ("< 1/2 >").
 function sethRegerar() {
-  const ultimo = sethAtual.mensagens[sethAtual.mensagens.length - 1];
-  if (!ultimo || ultimo.role !== "assistant") return;
-  sethAtual.mensagens.pop();
-  const pergunta = sethAtual.mensagens[sethAtual.mensagens.length - 1];
-  if (pergunta && pergunta.role === "user") sethEnviar(pergunta.content, true);
+  const folha = sethNoPorId(sethAtual.folha);
+  if (sethEmCurso() || !folha || folha.role !== "assistant" || !folha.pai) return;
+  sethResponder({modo: "nova", paiId: folha.pai});
 }
 function ligarConversaSeth() {
   const form = byId("seth-form");
@@ -1296,13 +1282,15 @@ function ligarConversaSeth() {
   byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
   const campo = byId("seth-input");
   campo.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  byId("seth-nova").addEventListener("click", () => { if (sethTrocaBloqueada()) return; sethAtual = sethNova(false); sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned"); campo.focus(); });
+  byId("seth-nova").addEventListener("click", sethComecarNova);
+  byId("seth-parar").addEventListener("click", sethParar);
+  byId("seth-copiar-ultima").addEventListener("click", sethCopiarUltima);
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const texto = campo.value.trim();
     if (!texto || byId("seth-send").disabled) return;
     campo.value = "";
-    sethEnviar(texto, false);
+    sethEnviar(texto);
   });
   // Organização (lote 3, 09/11/2026): temporária, busca, filtros, pastas e importação.
   byId("seth-temporaria").addEventListener("click", sethAlternarTemporaria);
@@ -1322,6 +1310,334 @@ function ligarConversaSeth() {
     e.target.value = "";
     await sethImportar(arquivo);
   });
+}
+function sethNoParaSalvar(no) { return {id: no.id, pai: no.pai || null, ...sethParaSalvar(no)}; }
+
+function sethNoPorId(id, c = sethAtual) { return c.nos.find((n) => n.id === id) || null; }
+
+function sethCaminhoDe(id, c = sethAtual) {
+  const caminho = []; const visto = new Set(); let no = sethNoPorId(id, c);
+  while (no && !visto.has(no.id)) { visto.add(no.id); caminho.unshift(no); no = no.pai ? sethNoPorId(no.pai, c) : null; }
+  return caminho;
+}
+
+function sethCaminho() { return sethCaminhoDe(sethAtual.folha); }
+
+function sethFilhos(paiId, c = sethAtual) { return c.nos.filter((n) => (n.pai || null) === (paiId || null)); }
+
+function sethIrmaos(no, c = sethAtual) { return sethFilhos(no.pai, c); }
+
+function sethUltimaFolha(no, c = sethAtual) {
+  let atual = no;
+  for (;;) { const filhos = sethFilhos(atual.id, c); if (!filhos.length) return atual; atual = filhos[filhos.length - 1]; }
+}
+
+function sethNovoId(c = sethAtual) {
+  let id;
+  do { id = "k" + Math.random().toString(16).slice(2, 10); } while (sethNoPorId(id, c));
+  return id;
+}
+
+function sethAdicionar(campos, c = sethAtual) {
+  const no = {...campos, id: sethNovoId(c), pai: campos.pai || null};
+  c.nos.push(no);
+  return no;
+}
+
+function sethNosDeMensagens(lista) {
+  return lista.map((m, i) => ({...m, id: "c" + i, pai: i ? "c" + (i - 1) : null}));
+}
+
+function sethDeDados(dados) {
+  const arvore = dados.arvore && Array.isArray(dados.arvore.nos) ? dados.arvore : null;
+  const nos = arvore ? arvore.nos.map((n) => ({...n, pai: n.pai || null})) : sethNosDeMensagens(dados.mensagens || []);
+  const folha = arvore ? arvore.folha : (nos.length ? nos[nos.length - 1].id : null);
+  return {id: dados.id, titulo: dados.titulo, modelo: dados.modelo || SETH_MODELO_PADRAO, temporaria: false, nos, folha,
+    ramificada_de: dados.ramificada_de || null};
+}
+
+function sethKb(bytes) { return (bytes / 1024).toLocaleString("pt-BR", {maximumFractionDigits: 1}) + " KB"; }
+
+function sethMensagensParaEnvio(caminho) {
+  // Resposta interrompida antes do primeiro texto fica na conversa, mas não vai ao gateway (conteúdo vazio).
+  return caminho.filter((m) => m.role === "user" || m.content);
+}
+
+function sethPintarContexto(caminho) {
+  const texto = byId("seth-contexto"); const barra = byId("seth-contexto-barra");
+  if (!texto || !barra) return;
+  if (!caminho.length) { texto.textContent = "Contexto: a conversa está vazia. A Seth só recebe o que você escrever agora."; barra.value = 0; return; }
+  const janela = sethJanela(sethMensagensParaEnvio(caminho));
+  const bytes = new TextEncoder().encode(JSON.stringify({mensagens: janela.mensagens, modelo: sethAtual.modelo})).length;
+  const caracteres = janela.mensagens.reduce((total, m) => total + Array.from(m.content).length, 0);
+  const pct = Math.min(100, Math.round((bytes / SETH_LIMITE_PEDIDO_BYTES) * 1000) / 10); // uma casa decimal
+  barra.value = pct;
+  texto.textContent = "Contexto da próxima pergunta: " + caracteres.toLocaleString("pt-BR") + " caracteres, " + sethKb(bytes)
+    + " de " + sethKb(SETH_LIMITE_PEDIDO_BYTES) + " (" + pct.toLocaleString("pt-BR", {maximumFractionDigits: 1}) + "%). Vão " + janela.mensagens.length + " de " + caminho.length
+    + " mensagens. Se passar do limite, as mais antigas ficam de fora; a conversa salva continua completa.";
+}
+
+function sethPintarOrigem() {
+  const p = byId("seth-origem"); if (!p) return;
+  const rd = sethAtual.ramificada_de;
+  if (!rd) { p.hidden = true; p.replaceChildren(); return; }
+  const origem = sethLista.items.find((c) => c.id === rd.id);
+  const partes = [document.createTextNode("Conversa ramificada " + (origem ? "da conversa «" + origem.titulo + "»" : "de outra conversa (que não está mais na lista)") + ", a partir da mensagem " + (rd.mensagem + 1) + ". ")];
+  if (origem) partes.push(sethTexto("Abrir a original", () => sethAbrir(origem.id)));
+  p.replaceChildren(...partes);
+  p.hidden = false;
+}
+
+function sethPintarParar() { const botao = byId("seth-parar"); if (botao) botao.hidden = !sethEmCurso(); }
+
+function sethEmCurso() { return sethRespondendo; } // uma só trava: a mesma da troca de conversa (sethTrocaBloqueada)
+
+function sethParar() { if (sethControle) sethControle.abort(); }
+
+function sethCorpo(no, destino) {
+  const pontos = Array.from(String(no.content || ""));
+  const cortes = [...new Set(no.cortes || [])].filter((c) => c > 0 && c < pontos.length).sort((a, b) => a - b);
+  let inicio = 0;
+  [...cortes, pontos.length].forEach((fim, i) => {
+    if (i > 0) { const marca = document.createElement("p"); marca.className = "seth-continuacao"; marca.textContent = "Continuação"; destino.append(marca); }
+    sethMarkdown(pontos.slice(inicio, fim).join(""), destino);
+    inicio = fim;
+  });
+}
+
+function sethRamo(no, irmaos) {
+  const k = irmaos.findIndex((n) => n.id === no.id);
+  const nav = document.createElement("div"); nav.className = "seth-ramo";
+  const anterior = sethTexto("<", () => sethTrocarVersao(irmaos[k - 1]));
+  anterior.disabled = k === 0; anterior.setAttribute("aria-label", "Versão anterior");
+  const contagem = document.createElement("span"); contagem.textContent = (k + 1) + "/" + irmaos.length;
+  const seguinte = sethTexto(">", () => sethTrocarVersao(irmaos[k + 1]));
+  seguinte.disabled = k === irmaos.length - 1; seguinte.setAttribute("aria-label", "Versão seguinte");
+  nav.append(anterior, contagem, seguinte);
+  return nav;
+}
+
+function sethTrocarVersao(irmao) {
+  if (!irmao || sethEmCurso()) return;
+  sethEditandoId = null;
+  sethAtual.folha = sethUltimaFolha(irmao).id;
+  sethDesenhar();
+  if (!sethAtual.temporaria) sethSalvar();
+}
+
+function sethAcoesMensagem(m, indice) {
+  const bloco = document.createElement("div"); bloco.className = "msg-rodape";
+  const acoes = document.createElement("div"); acoes.className = "msg-acoes";
+  if (m.role === "user") {
+    acoes.append(sethTexto("Editar", () => { if (sethEmCurso()) return; sethEditandoId = m.id; sethDesenhar(); }));
+  } else {
+    const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
+    copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
+    acoes.append(copiar);
+    if (m.id === sethAtual.folha) {
+      acoes.append(sethTexto("Regenerar", () => sethRegerar()));
+      if (m.content) acoes.append(sethTexto("Continuar", () => sethContinuar()));
+    }
+  }
+  if (!sethAtual.temporaria) acoes.append(sethTexto("Ramificar aqui", () => sethRamificar(indice)));
+  bloco.append(acoes);
+  if (m.role === "assistant") bloco.append(sethFeedback(m));
+  return bloco;
+}
+
+function sethFeedback(m) {
+  const bloco = document.createElement("div"); bloco.className = "seth-feedback";
+  const botoes = document.createElement("div"); botoes.className = "seth-feedback-botoes";
+  const nota = m.feedback ? m.feedback.nota : "";
+  // Sem emoji (decisão E-2, 16/10): texto curto. A nota gravada continua "bom" (útil) e "ruim" (não útil).
+  const util = sethTexto("Útil", () => sethMarcarFeedback(m, "bom"));
+  util.setAttribute("aria-label", "Resposta útil"); util.setAttribute("aria-pressed", String(nota === "bom")); util.title = "Resposta útil";
+  const naoUtil = sethTexto("Não útil", () => sethMarcarFeedback(m, "ruim"));
+  naoUtil.setAttribute("aria-label", "Resposta não útil"); naoUtil.setAttribute("aria-pressed", String(nota === "ruim")); naoUtil.title = "Resposta não útil";
+  botoes.append(util, naoUtil);
+  bloco.append(botoes);
+  if (m.feedback) {
+    const campo = document.createElement("input"); campo.type = "text"; campo.maxLength = SETH_FEEDBACK_MOTIVO_LIMITE; campo.className = "seth-motivo";
+    campo.placeholder = "Motivo (opcional)"; campo.value = m.feedback.motivo || ""; campo.setAttribute("aria-label", "Motivo do feedback, opcional");
+    campo.addEventListener("change", () => sethDefinirMotivo(m, campo.value));
+    bloco.append(campo);
+  }
+  return bloco;
+}
+
+function sethMarcarFeedback(m, nota) {
+  // Mesmo botão de novo tira o feedback; trocar de útil para não útil (ou o contrário) mantém o motivo já escrito.
+  if (m.feedback && m.feedback.nota === nota) delete m.feedback;
+  else m.feedback = {nota, ...(m.feedback && m.feedback.motivo ? {motivo: m.feedback.motivo} : {})};
+  sethDesenhar();
+  if (!sethAtual.temporaria) sethSalvar();
+}
+
+function sethDefinirMotivo(m, texto) {
+  if (!m.feedback) return;
+  const limpo = Array.from(String(texto || "").split(/\s+/).filter(Boolean).join(" ")).slice(0, SETH_FEEDBACK_MOTIVO_LIMITE).join("");
+  if (limpo) m.feedback.motivo = limpo; else delete m.feedback.motivo;
+  sethDesenhar();
+  if (!sethAtual.temporaria) sethSalvar();
+}
+
+function sethFormEdicao(m, corpo) {
+  const campo = document.createElement("textarea"); campo.className = "msg-editar"; campo.maxLength = 4000; campo.value = m.content;
+  campo.setAttribute("aria-label", "Texto da mensagem em edição");
+  const acoes = document.createElement("div"); acoes.className = "msg-acoes";
+  acoes.append(sethTexto("Enviar", () => {
+    const texto = campo.value.trim();
+    if (!texto || sethEmCurso()) return;
+    sethEditandoId = null;
+    sethEditar(m, texto);
+  }), sethTexto("Cancelar", () => { sethEditandoId = null; sethDesenhar(); }));
+  corpo.append(campo, acoes);
+}
+
+function sethAplicarResposta(modo, paiId, alvoId, info, c = sethAtual) {
+  const texto = info.texto || "";
+  if (modo === "continuar") {
+    // A continuação entra na mesma resposta, a partir do fim do texto que já estava lá; a posição vira um corte.
+    const no = sethNoPorId(alvoId, c);
+    if (!no) return;
+    if (texto) { const antes = Array.from(no.content).length; no.content += texto; no.cortes = [...(no.cortes || []), antes]; }
+    if (info.parcial.modelo_real) no.modelo_real = info.parcial.modelo_real;
+    if (info.interrompida) no.interrompida = true; else delete no.interrompida;
+    return;
+  }
+  const no = sethAdicionar({role: "assistant", content: texto, pai: paiId, modelo: info.modelo, modelo_real: info.parcial.modelo_real || "",
+    aviso: info.aviso, hora: sethHora()}, c);
+  if (info.interrompida) no.interrompida = true;
+  c.folha = no.id;
+}
+
+function sethRemover(id, c = sethAtual) {
+  const no = sethNoPorId(id, c);
+  if (!no || sethFilhos(id, c).length) return;
+  c.nos = c.nos.filter((n) => n.id !== id);
+  if (c.folha === id) c.folha = no.pai || null;
+}
+
+// Motor da resposta. A conversa é `alvo` (capturada antes de qualquer await): a resposta vai para ela e o salvar grava
+// ela, mesmo que a tela tenha trocado. A trava (sethRespondendo) vale até o salvar terminar.
+// Envia a janela do caminho até `paiId` (nova resposta) ou até a resposta de `alvoId` mais a mensagem "continue de onde
+// parou" (continuação). Parar aborta o fetch; o texto que chegou fica marcado interrompida.
+async function sethResponder(op) {
+  const {modo, alvo = sethAtual, paiId = null, alvoId = null, novoUsuarioId = null, textoDoUsuario = ""} = op;
+  const campo = byId("seth-input"); const log = byId("seth-transcript"); const botao = byId("seth-send");
+  const controle = new AbortController(); sethControle = controle; sethRespondendo = true;
+  botao.disabled = true; sethPintarParar(); sethStatus("PENSANDO", "partial");
+  const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+  log.append(pensando);
+  const pedido = modo === "continuar"
+    ? [...sethMensagensParaEnvio(sethCaminhoDe(alvoId, alvo)), {role: "user", content: SETH_CONTINUAR}]
+    : sethMensagensParaEnvio(sethCaminhoDe(paiId, alvo));
+  const janela = sethJanela(pedido);
+  const aviso = sethAvisoJanela(janela);
+  const modelo = alvo.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
+  const parcial = {texto: ""};
+  let textoNo = null;
+  const aoTexto = (delta) => {
+    if (!textoNo) {
+      pensando.remove();
+      const bolha = document.createElement("article"); bolha.className = "msg msg-assistant" + (modo === "continuar" ? " msg-continuacao" : "");
+      const corpo = document.createElement("div"); corpo.className = "msg-body";
+      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo); log.append(bolha);
+    }
+    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
+  };
+  let conteudo = null, falha = null, parada = false;
+  try {
+    try {
+      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal);
+    } catch (erro) {
+      if (controle.signal.aborted) throw erro;
+      const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
+      if (!transporte) throw erro;
+      const dados = await sethChatInteiro(janela.mensagens, modelo, parcial, controle.signal);
+      conteudo = dados.content;
+    }
+  } catch (erro) {
+    if (controle.signal.aborted) parada = true;
+    else { falha = erro; if (parcial.texto) parada = true; }
+  }
+  sethControle = null;
+  pensando.remove();
+  const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
+  if (conteudo !== null) {
+    sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
+    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); }
+    await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
+  } else if (parada) {
+    if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
+    if (alvo === sethAtual) {
+      sethDesenhar();
+      if (falha) log.append(sethVazio("Não consegui terminar a resposta: " + (falha.message || "falha desconhecida") + "."));
+      else if (modo === "continuar" && !parcial.texto) log.append(sethVazio("Continuação parada antes do primeiro texto. A resposta ficou como estava."));
+      sethStatus("INTERROMPIDA", "partial");
+    }
+    if (modo === "nova" || parcial.texto) await sethSalvar(alvo);
+  } else {
+    // Falha sem texto: a pergunta sai da conversa e volta ao campo, para não se perder.
+    if (novoUsuarioId) { sethRemover(novoUsuarioId, alvo); if (alvo === sethAtual && campo && !campo.value) campo.value = textoDoUsuario; }
+    if (alvo === sethAtual) {
+      sethDesenhar();
+      log.append(sethVazio("Não consegui responder agora: " + (falha && falha.message || "falha desconhecida") + "."));
+      sethStatus("INDISPONÍVEL", "horizon");
+    }
+  }
+  sethRespondendo = false;
+  botao.disabled = false; sethPintarParar(); campo.focus();
+}
+
+function sethComecarNova() {
+  if (sethTrocaBloqueada()) return;
+  sethAtual = sethNova(false); sethEditandoId = null;
+  sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned");
+  byId("seth-input").focus();
+}
+
+// Editar e reenviar: a mensagem nova é irmã da antiga; a resposta antiga continua na conversa, como outro ramo.
+async function sethEditar(m, texto) {
+  if (sethEmCurso()) return;
+  const usuario = sethAdicionar({role: "user", content: texto, pai: m.pai, hora: sethHora()});
+  sethAtual.folha = usuario.id;
+  sethDesenhar();
+  await sethResponder({modo: "nova", paiId: usuario.id, novoUsuarioId: usuario.id, textoDoUsuario: texto});
+}
+
+function sethContinuar() {
+  const folha = sethNoPorId(sethAtual.folha);
+  if (sethEmCurso() || !folha || folha.role !== "assistant") return;
+  if (!folha.content) { byId("seth-transcript").append(sethVazio("Nada para continuar: esta resposta ainda não tem texto. Use Regenerar.")); return; }
+  sethResponder({modo: "continuar", alvoId: folha.id});
+}
+
+// Ramificar: cria conversa nova com o caminho até a mensagem `indice` (inclusive) e guarda de onde saiu.
+async function sethRamificar(indice) {
+  if (sethAtual.temporaria || sethEmCurso()) return;
+  const caminho = sethCaminho();
+  if (!caminho[indice]) return;
+  if (!sethAtual.id) await sethSalvar();
+  if (!sethAtual.id) { sethMostrarOrg("Não foi possível ramificar: a conversa ainda não foi salva. Tente de novo em instantes."); return; }
+  const corpo = {titulo: sethAtual.titulo || caminho[0].content.slice(0, 60), modelo: sethAtual.modelo,
+    mensagens: caminho.slice(0, indice + 1).map(sethParaSalvar), ramificada_de: {id: sethAtual.id, mensagem: indice}};
+  try {
+    const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
+    if (!r.ok) { sethMostrarOrg("Não foi possível ramificar: " + sethMotivoRecusa(r.status, await sethMotivo(r)) + "."); return; }
+    const dados = await r.json();
+    await sethListar();
+    sethMostrarOrg("Conversa ramificada criada.");
+    await sethAbrir(dados.id);
+  } catch (_) { sethMostrarOrg("Não foi possível ramificar: sem resposta do painel."); }
+}
+
+async function sethCopiarUltima() {
+  const aviso = byId("seth-copiado"); if (!aviso) return;
+  const ultima = sethCaminho().filter((m) => m.role === "assistant" && m.content).pop();
+  if (!ultima) { aviso.textContent = "Ainda não há resposta da Seth para copiar."; return; }
+  try { await navigator.clipboard.writeText(ultima.content); aviso.textContent = "Última resposta copiada."; }
+  catch (_) { aviso.textContent = "Não foi possível copiar."; }
 }
 window.addEventListener("load", ligarConversaSeth);
 
@@ -1734,6 +2050,257 @@ async function carregarMemoriaConselho() {
 }
 byId("memoria-tipo").addEventListener("change", renderizarMemoria);
 byId("memoria-atualizar").addEventListener("click", () => carregarMemoriaConselho());
+
+/* (09/11/2026) Tema (escuro, claro ou do sistema) e atalhos de teclado. Fica fora do bloco da Conversa: o tema usa localStorage, com try/catch. */
+const TEMAS = ["escuro", "claro", "sistema"];
+let temaEscolhido = "escuro";
+function temaEfetivo(escolha) {
+  if (escolha !== "sistema") return escolha;
+  try { return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "claro" : "escuro"; } catch (_) { return "escuro"; }
+}
+function aplicarTema(escolha, guardar) {
+  temaEscolhido = TEMAS.includes(escolha) ? escolha : "escuro";
+  if (document.documentElement) document.documentElement.dataset.tema = temaEfetivo(temaEscolhido);
+  const seletor = byId("tema"); if (seletor) seletor.value = temaEscolhido;
+  if (guardar) { try { localStorage.setItem("agata-tema", temaEscolhido); } catch (_) { /* sem persistência: vale só nesta aba */ } }
+}
+function lerTema() { try { return localStorage.getItem("agata-tema") || "escuro"; } catch (_) { return "escuro"; } }
+function alternarAtalhos(abrir) {
+  const painel = byId("atalhos-painel"); if (!painel) return;
+  painel.hidden = abrir === undefined ? !painel.hidden : !abrir;
+  if (!painel.hidden) byId("atalhos-fechar").focus();
+}
+function atalhosAbertos() { const painel = byId("atalhos-painel"); return Boolean(painel && !painel.hidden); }
+function campoDeTexto(alvo) { return Boolean(alvo && (alvo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(alvo.tagName || ""))); }
+// Ctrl+Shift+O: nova conversa. Ctrl+Shift+C: copia a última resposta. Esc: para a resposta (ou fecha esta lista).
+// /: busca (das conversas, na Conversa; do mapa, nas outras telas). ?: mostra ou esconde a lista de atalhos.
+document.addEventListener("keydown", (e) => {
+  const comCtrl = (e.ctrlKey || e.metaKey) && e.shiftKey;
+  const tecla = String(e.key || "").toLowerCase();
+  if (comCtrl && tecla === "o") { e.preventDefault(); irPara("conversa"); sethComecarNova(); return; }
+  if (comCtrl && tecla === "c") { e.preventDefault(); sethCopiarUltima(); return; }
+  if (e.key === "Escape") { if (atalhosAbertos()) alternarAtalhos(false); else if (sethEmCurso()) sethParar(); return; }
+  if (campoDeTexto(e.target)) return;
+  if (e.key === "?") { e.preventDefault(); alternarAtalhos(); return; }
+  if (e.key === "/") { e.preventDefault(); const conversa = byId("conversa"); (conversa && !conversa.hidden ? byId("seth-busca") : search).focus(); }
+});
+byId("atalhos-abrir").addEventListener("click", () => alternarAtalhos());
+byId("atalhos-fechar").addEventListener("click", () => alternarAtalhos(false));
+byId("tema").addEventListener("change", (e) => aplicarTema(e.target.value, true));
+try { if (window.matchMedia) window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => { if (temaEscolhido === "sistema") aplicarTema("sistema", false); }); } catch (_) { /* navegador sem aviso de mudança do sistema */ }
+aplicarTema(lerTema(), false);
+
+// Importantes (11/11/2026, pedido do Humano): ideias e pendências guardadas para depois. Aba Importantes do Panorama
+// e cartão no Panorama. Leitura: GET /api/importantes. Ações: POST /api/importantes, /estado, /editar e /trazer.
+// O texto do item entra só com textContent. Erro esvazia a lista: nada antigo aparece como atual.
+const IMPORTANTES_ESTADOS = {aberto: ["Aberto", ""], feito: ["Feito", "active"], descartado: ["Descartado", "horizon"]};
+const IMPORTANTES_ORIGENS = {humano: "Anotado por você", cache: "Do Conselho", modelo: "De um modelo"};
+const IMPORTANTES_FILTROS = {abertos: "aberto", feitos: "feito", descartados: "descartado"};
+const IMPORTANTES_ACOES = {
+  aberto: [["Marcar feito", "feito"], ["Descartar", "descartado"]],
+  feito: [["Reabrir", "aberto"], ["Descartar", "descartado"]],
+  descartado: [["Reabrir", "aberto"]],
+};
+let importantesDados = null;
+let importantesBusy = false;
+let importantesPendente = false;
+let importantesEnviando = false;
+
+function importantesAviso(texto) {
+  const aviso = byId("importantes-aviso");
+  if (!aviso) return;
+  aviso.textContent = texto || "";
+  aviso.hidden = !texto;
+}
+function importantesData(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso || ""));
+  return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : "data não conhecida";
+}
+// Pedido de escrita. Erro sai com status e o motivo curto que o servidor devolve; nunca com o texto do item.
+async function importantesPedir(rota, corpo) {
+  let resposta;
+  try {
+    resposta = await fetch(rota, {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"},
+      credentials: "same-origin", cache: "no-store", body: JSON.stringify(corpo)});
+  } catch (_) {
+    throw Object.assign(new Error("sem resposta"), {status: 0, motivo: ""});
+  }
+  if (!resposta.ok) {
+    let motivo = "";
+    try { motivo = (await resposta.text()).trim().slice(0, 200); } catch (_) { motivo = ""; }
+    throw Object.assign(new Error("recusado"), {status: resposta.status, motivo});
+  }
+  return resposta.json();
+}
+function importantesErro(status, motivo) {
+  if (status === 0) return "Sem resposta do painel. Nada foi alterado.";
+  if (status === 403) return "O painel recusou o pedido: abra esta tela pelo próprio painel.";
+  if (status === 404) return "Item não encontrado; a lista foi atualizada.";
+  if (motivo) return motivo.charAt(0).toUpperCase() + motivo.slice(1) + ".";
+  return "O painel respondeu com erro " + status + ".";
+}
+function importantesCartao(dados, falhou) {
+  const resumo = byId("importantes-cartao-resumo");
+  const estado = byId("importantes-cartao-estado");
+  if (!resumo || !estado) return;
+  if (falhou || !dados) {
+    resumo.textContent = "Importantes: não medido (a leitura falhou).";
+    estado.textContent = "NÃO MEDIDO"; estado.className = "chip partial";
+    return;
+  }
+  if (dados.estado === "ilegivel") {
+    resumo.textContent = "Importantes: lista ilegível; nada foi mostrado.";
+    estado.textContent = "ILEGÍVEL"; estado.className = "chip partial";
+    return;
+  }
+  const abertos = dados.contagem.aberto;
+  resumo.textContent = `Importantes: ${abertos} ${abertos === 1 ? "aberto" : "abertos"}`;
+  estado.textContent = "LIDO"; estado.className = "chip active";
+}
+function importantesBotao(rotulo, aoClicar, classe = "text-link") {
+  const botao = document.createElement("button");
+  botao.type = "button"; botao.className = classe; botao.textContent = rotulo;
+  botao.addEventListener("click", aoClicar);
+  return botao;
+}
+function importantesAcoes(item, li) {
+  const acoes = document.createElement("div");
+  acoes.className = "importantes-acoes-item";
+  for (const [rotulo, estado] of IMPORTANTES_ACOES[item.estado] || []) {
+    acoes.append(importantesBotao(rotulo, () => importantesMudar(item.id, estado)));
+  }
+  if (item.estado !== "descartado") acoes.append(importantesBotao("Editar", () => importantesEditar(item, li)));
+  return acoes;
+}
+function importantesItem(item) {
+  const li = document.createElement("li");
+  li.className = "importantes-item " + item.estado;
+  const topo = document.createElement("div");
+  topo.className = "importantes-topo";
+  const [rotulo, classe] = IMPORTANTES_ESTADOS[item.estado] || [String(item.estado), ""];
+  const chip = document.createElement("span");
+  chip.className = classe ? "chip " + classe : "chip";
+  chip.textContent = rotulo;
+  const origem = document.createElement("span");
+  origem.className = "importantes-origem";
+  origem.textContent = item.origem === "cache" ? `Do Conselho, entrada nº ${item.cache_n}` : (IMPORTANTES_ORIGENS[item.origem] || "Origem não conhecida");
+  topo.append(chip, origem);
+  const texto = document.createElement("p");
+  texto.className = "importantes-texto";
+  texto.textContent = item.texto;
+  li.append(topo, texto);
+  if (item.nota) {
+    const nota = document.createElement("p");
+    nota.className = "importantes-nota";
+    nota.textContent = "Nota: " + item.nota;
+    li.append(nota);
+  }
+  const quando = document.createElement("p");
+  quando.className = "importantes-quando";
+  quando.textContent = "Criado em " + importantesData(item.criado_em) + (item.feito_em ? " · feito em " + importantesData(item.feito_em) : "");
+  li.append(quando, importantesAcoes(item, li));
+  return li;
+}
+function renderizarImportantes() {
+  const lista = byId("importantes-lista");
+  const resumo = byId("importantes-resumo-lista");
+  if (!lista || !resumo || !importantesDados) return;
+  const filtro = byId("importantes-filtro").value;
+  const mostrados = importantesDados.itens.filter((item) => filtro === "todos" || item.estado === IMPORTANTES_FILTROS[filtro]);
+  lista.replaceChildren(...mostrados.map(importantesItem));
+  const c = importantesDados.contagem;
+  resumo.textContent = importantesDados.estado === "ilegivel"
+    ? "Lista ilegível: nada é mostrado nem alterado."
+    : `${c.aberto} abertos · ${c.feito} feitos · ${c.descartado} descartados · mostrando ${mostrados.length}` + (mostrados.length ? "" : " · nenhum item neste filtro");
+}
+async function carregarImportantes() {
+  const sub = byId("sub-importantes");
+  if (!sub) return;
+  if (importantesBusy) { importantesPendente = true; return; }
+  importantesBusy = true;
+  marcarEstado(sub, "carregando");
+  byId("importantes-resumo-lista").textContent = importantesDados ? "Atualizando…" : "Lendo os importantes…";
+  try {
+    const resposta = await fetch("/api/importantes", {cache: "no-store", credentials: "same-origin", headers: {Accept: "application/json"}});
+    if (!resposta.ok) throw new Error("HTTP " + resposta.status);
+    const dados = await resposta.json();
+    if (!dados || !Array.isArray(dados.itens) || !dados.contagem) throw new Error("resposta incompleta");
+    importantesDados = dados;
+    if (dados.estado === "ilegivel") marcarEstado(sub, "erro", "Lista de importantes ilegível no disco. Nada é mostrado nem alterado por este painel.");
+    else marcarEstado(sub, dados.estado === "vazio" ? "vazio" : null);
+    importantesCartao(dados, false);
+    renderizarImportantes();
+  } catch (_) {
+    importantesDados = null;
+    byId("importantes-lista").replaceChildren();
+    byId("importantes-resumo-lista").textContent = "Não medido: a leitura dos importantes falhou.";
+    importantesCartao(null, true);
+    marcarEstado(sub, "erro");
+  } finally {
+    importantesBusy = false;
+    if (importantesPendente) { importantesPendente = false; carregarImportantes(); }
+  }
+}
+async function importantesMudar(id, estado) {
+  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
+  importantesEnviando = true;
+  try { await importantesPedir("/api/importantes/estado", {id, estado}); importantesAviso(""); }
+  catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
+  finally { importantesEnviando = false; }
+  await carregarImportantes();
+}
+function importantesEditar(item, li) {
+  const campoTexto = document.createElement("textarea");
+  campoTexto.rows = 3; campoTexto.maxLength = 4000; campoTexto.value = item.texto;
+  campoTexto.setAttribute("aria-label", "Texto do importante");
+  const campoNota = document.createElement("input");
+  campoNota.type = "text"; campoNota.maxLength = 500; campoNota.value = item.nota || "";
+  campoNota.placeholder = "Nota (opcional)"; campoNota.setAttribute("aria-label", "Nota do importante");
+  const salvar = importantesBotao("Salvar", async () => {
+    const texto = campoTexto.value.trim();
+    if (!texto) { importantesAviso("O texto não pode ficar vazio."); return; }
+    try { await importantesPedir("/api/importantes/editar", {id: item.id, texto, nota: campoNota.value.trim()}); importantesAviso("Alteração guardada."); }
+    catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
+    await carregarImportantes();
+  }, "btn");
+  const cancelar = importantesBotao("Cancelar", () => renderizarImportantes(), "btn secondary");
+  const barra = document.createElement("div");
+  barra.className = "importantes-barra";
+  barra.append(salvar, cancelar);
+  const edicao = document.createElement("div");
+  edicao.className = "importantes-editar";
+  edicao.append(campoTexto, campoNota, barra);
+  li.replaceChildren(edicao);
+  campoTexto.focus();
+}
+async function importantesAdicionar(evento) {
+  evento.preventDefault();
+  const campo = byId("importantes-texto");
+  const texto = campo.value.trim();
+  if (!texto) { importantesAviso("Escreva o texto antes de guardar."); return; }
+  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
+  importantesEnviando = true;
+  try { await importantesPedir("/api/importantes", {texto}); campo.value = ""; importantesAviso("Guardado."); }
+  catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
+  finally { importantesEnviando = false; }
+  await carregarImportantes();
+}
+async function importantesTrazer() {
+  const botao = byId("importantes-trazer");
+  if (importantesEnviando) { importantesAviso("Aguarde a ação anterior terminar."); return; }
+  importantesEnviando = true;
+  botao.disabled = true;
+  try {
+    const dados = await importantesPedir("/api/importantes/trazer", {});
+    importantesAviso(`Trazidas do Conselho: ${dados.trazidas}. Já estavam aqui: ${dados.ja_estavam}. Recusadas por segredo ou tamanho: ${dados.recusadas}.`);
+  } catch (erro) { importantesAviso(importantesErro(erro.status, erro.motivo)); }
+  finally { importantesEnviando = false; botao.disabled = false; }
+  await carregarImportantes();
+}
+byId("importantes-form").addEventListener("submit", importantesAdicionar);
+byId("importantes-trazer").addEventListener("click", importantesTrazer);
+byId("importantes-filtro").addEventListener("change", renderizarImportantes);
+carregarImportantes();
 
 // Entrada: a seção vem do hash; sem hash ou com hash desconhecido, abre panorama.
 aoMudarHash();

@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "custos", "qualidade"]
+SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"]
 
 
 class Menu(HTMLParser):

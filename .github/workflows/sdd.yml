@@ -31,6 +31,7 @@ on:
       - ".agents/skills/**"
       - "scripts/medir_*.py"
       - "scripts/agata_falar.py"
+      - "scripts/gate_spec_sync.py"
       - ".github/workflows/sdd.yml"
   workflow_dispatch: {}
 
@@ -40,12 +41,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0, fixado por SHA como em perimetro.yml
+        with:
+          fetch-depth: 0  # o gate de sincronia compara datas de commit: precisa do histórico inteiro
 
       - name: pytest fixado
         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
 
       - name: Testes dos componentes SDD
         run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+
+      - name: Gate de sincronia das specs (antes dos ciclos, que regeneram o drift)
+        run: |
+          python3 -I scripts/gate_spec_sync.py --selftest
+          python3 -I scripts/gate_spec_sync.py
 
       - name: Ciclo SDD sobre o próprio sdd_flow
         run: python3 redesign/sdd_flow/runner.py "$RUNNER_TEMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow

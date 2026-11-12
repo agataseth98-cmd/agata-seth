@@ -7,6 +7,8 @@ Tudo local, em ~/.cache/agata/painel-conversas. Conversa antiga (sem organizaç�
 Proteção (09/11/2026, chat-protege-conversas-09-11): apagar move a conversa para `.lixeira/` (com a organização dela);
 purga só por pedido manual; cada escrita ganha uma linha em `.registro.jsonl` (sem conteúdo); salvar uma conversa
 importada mantém a origem dela.
+Lote 4 (09/11/2026): árvore de ramos (`arvore`, com `mensagens` do caminho ativo), feedback e resposta interrompida
+nas respostas, cortes de continuação e origem da ramificação (`ramificada_de`). Conversa sem ramo segue em `mensagens`.
 """
 from __future__ import annotations
 
@@ -106,6 +108,15 @@ REGISTRO_ARQUIVO = ".registro.jsonl"
 _REGISTRO_TRAVA = threading.Lock()
 # Campos de origem de uma conversa importada (migrar.py, LibreChat). O salvar do painel não os reescreve.
 ORIGEM_CAMPOS = ("origem", "origem_id", "titulo_original", "data_original", "importado_em")
+# Lote 4 (09/11/2026): ramos (edição, regeneração e ramificação), feedback, resposta interrompida e continuação.
+# Sem ramo, a conversa segue no formato de sempre (`mensagens`). Com ramo, grava `arvore` (nós com `id` e `pai`),
+# sem repetir o caminho. Pai sempre vem antes do filho no arquivo: a leitura não entra em laço.
+CONVERSA_NOS_LIMITE = 400
+CONVERSA_CAMINHO_LIMITE = 200
+NO_ID = re.compile(r"[A-Za-z0-9]{1,16}")
+FEEDBACK_NOTAS = ("bom", "ruim")
+FEEDBACK_MOTIVO_LIMITE = 200
+CONTINUACOES_LIMITE = 20
 
 
 class ErroConversa(Exception):
@@ -353,9 +364,9 @@ def _conversas_listar() -> dict:
     itens = []
     for arq, dados in lidas[:CONVERSAS_LISTA_LIMITE]:
         meta = {**_entrada_padrao(), **org["conversas"].get(arq.stem, {})}
-        mensagens = dados.get("mensagens")
+        caminho = _mensagens_brutas(dados)
         itens.append({"id": arq.stem, "titulo": dados.get("titulo") or "Sem título", "atualizada": _atualizada(arq),
-                      "mensagens": len(mensagens) if isinstance(mensagens, list) else 0,
+                      "mensagens": len(caminho),
                       "fixada": meta["fixada"], "arquivada": meta["arquivada"],
                       "marcadores": list(meta["marcadores"]), "pasta": meta["pasta"]})
     itens.sort(key=lambda c: not c["fixada"])  # estável: dentro de cada grupo, a mais recente primeiro
@@ -369,21 +380,148 @@ def _conversas_listar() -> dict:
 
 def motivo_conversa_recusada(dados) -> str:
     """Motivo, em português simples, de a conversa não ser gravada. Diz só a regra e a contagem, nunca o texto."""
-    mensagens = dados.get("mensagens") if isinstance(dados, dict) else None
-    if isinstance(mensagens, list) and len(mensagens) > 200:
+    if not isinstance(dados, dict):
+        return "formato da conversa inválido"
+    arvore = dados.get("arvore")
+    nos = arvore.get("nos") if isinstance(arvore, dict) and isinstance(arvore.get("nos"), list) else None
+    if nos is not None and len(nos) > CONVERSA_NOS_LIMITE:
+        return f"mais de {CONVERSA_NOS_LIMITE} mensagens contando as versões"
+    caminho = _mensagens_brutas(dados)
+    if len(caminho) > CONVERSA_CAMINHO_LIMITE:
         return "mais de 200 mensagens"
-    if isinstance(mensagens, list) and any(
-            isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > CONVERSA_MENSAGEM_LIMITE
-            for m in mensagens):
+    todas = nos if nos is not None else caminho
+    if any(isinstance(m, dict) and isinstance(m.get("content"), str) and len(m["content"]) > CONVERSA_MENSAGEM_LIMITE
+           for m in todas):
         return f"uma mensagem passa de {CONVERSA_MENSAGEM_LIMITE} caracteres"
-    modelo = dados.get("modelo") if isinstance(dados, dict) else None
-    if (modelo is not None and not modelo_permitido(modelo)) or (isinstance(mensagens, list) and any(
+    modelo = dados.get("modelo")
+    if (modelo is not None and not modelo_permitido(modelo)) or any(
             isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
-            and not modelo_permitido(m.get("modelo")) for m in mensagens)):
+            and not modelo_permitido(m.get("modelo")) for m in todas):
         return "modelo fora da lista"
-    if isinstance(dados, dict) and dados.get("id") and _conversa_caminho(dados.get("id")) is None:
+    if dados.get("id") and _conversa_caminho(dados.get("id")) is None:
         return "identificador da conversa inválido"
     return "formato da conversa inválido"
+
+
+def _feedback_limpo(valor):
+    """Feedback de uma resposta: nota `bom` ou `ruim`, motivo opcional. Fora do formato, sai sem recusar a conversa."""
+    if not isinstance(valor, dict) or valor.get("nota") not in FEEDBACK_NOTAS:
+        return None
+    limpo = {"nota": valor["nota"]}
+    motivo = " ".join(valor["motivo"].split()) if isinstance(valor.get("motivo"), str) else ""
+    if motivo:
+        limpo["motivo"] = motivo[:FEEDBACK_MOTIVO_LIMITE]
+    return limpo
+
+
+def _cortes_limpos(valor, tamanho):
+    """Posições, no texto da resposta, onde começa uma continuação: inteiros sem repetir, dentro do texto."""
+    if not isinstance(valor, list) or not valor or len(valor) > CONTINUACOES_LIMITE:
+        return None
+    if not all(type(c) is int and 0 <= c <= tamanho for c in valor):
+        return None
+    return sorted(set(valor))
+
+
+def _ramo_limpo(valor):
+    """Origem de uma conversa ramificada: id da conversa de onde saiu e posição da mensagem no caminho (0 = primeira)."""
+    if not isinstance(valor, dict) or not isinstance(valor.get("id"), str) or not CONVERSA_ID.fullmatch(valor["id"]):
+        return None
+    posicao = valor.get("mensagem")
+    if type(posicao) is not int or not 0 <= posicao < CONVERSA_CAMINHO_LIMITE:
+        return None
+    return {"id": valor["id"], "mensagem": posicao}
+
+
+def _mensagem_limpa(m, leve: bool = False) -> dict | None:
+    """Mensagem (ou nó da árvore) no formato salvo. None se inválida. `leve`: modelo fora da lista some em vez de recusar."""
+    if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
+        return None
+    if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
+        return None
+    item = {"role": m["role"], "content": m["content"]}
+    if m["role"] == "assistant":
+        if m.get("modelo") is not None:
+            if modelo_permitido(m["modelo"]):
+                item["modelo"] = m["modelo"]
+            elif not leve:
+                return None
+        if modelo_real_valido(m.get("modelo_real")):
+            item["modelo_real"] = m["modelo_real"]
+        if m.get("interrompida") is True:
+            item["interrompida"] = True
+        feedback = _feedback_limpo(m.get("feedback"))
+        if feedback is not None:
+            item["feedback"] = feedback
+        cortes = _cortes_limpos(m.get("cortes"), len(m["content"]))
+        if cortes is not None:
+            item["cortes"] = cortes
+    return item
+
+
+def _caminho_de(nos: dict, folha) -> list | None:
+    """Nós da raiz até a folha, em ordem. `nos` é {id: nó}. Folha desconhecida ou laço: None."""
+    if not isinstance(folha, str):
+        return None
+    caminho, atual, visto = [], folha, set()
+    while atual is not None:
+        if not isinstance(atual, str) or atual in visto or atual not in nos:
+            return None
+        visto.add(atual)
+        caminho.append(nos[atual])
+        atual = nos[atual].get("pai")
+    return list(reversed(caminho))
+
+
+def _arvore_limpa(bruto, leve: bool = False):
+    """Árvore de uma conversa com ramos: (árvore limpa, caminho ativo em formato de mensagem) ou None."""
+    if not isinstance(bruto, dict) or not isinstance(bruto.get("nos"), list) or not 0 < len(bruto["nos"]) <= CONVERSA_NOS_LIMITE:
+        return None
+    nos, ids = [], {}
+    for bruto_no in bruto["nos"]:
+        if not isinstance(bruto_no, dict) or not isinstance(bruto_no.get("id"), str) \
+                or not NO_ID.fullmatch(bruto_no["id"]) or bruto_no["id"] in ids:
+            return None
+        pai = bruto_no.get("pai")
+        if pai is not None and (not isinstance(pai, str) or pai not in ids):
+            return None
+        item = _mensagem_limpa(bruto_no, leve)
+        if item is None:
+            return None
+        no = {"id": bruto_no["id"], "pai": pai, **item}
+        nos.append(no)
+        ids[no["id"]] = no
+    folha = bruto.get("folha")
+    caminho = _caminho_de(ids, folha)
+    if caminho is None or len(caminho) > CONVERSA_CAMINHO_LIMITE:
+        return None
+    return {"nos": nos, "folha": folha}, [{k: v for k, v in no.items() if k not in ("id", "pai")} for no in caminho]
+
+
+def _mensagens_brutas(dados: dict) -> list:
+    """Caminho ativo de uma conversa lida do arquivo, sem validar o texto (listas e busca). Com árvore: o caminho da folha."""
+    if isinstance(dados.get("mensagens"), list):
+        return dados["mensagens"]
+    arvore = dados.get("arvore")
+    if isinstance(arvore, dict) and isinstance(arvore.get("nos"), list):
+        nos = {n["id"]: n for n in arvore["nos"] if isinstance(n, dict) and isinstance(n.get("id"), str)}
+        return _caminho_de(nos, arvore.get("folha")) or []
+    return []
+
+
+def _formato_gravar(limpo: dict) -> dict:
+    """O que vai ao arquivo. Sem ramo: `mensagens`, como sempre. Com ramo: `arvore` e também `mensagens` (o caminho
+    ativo), para que uma versão anterior, que não lê árvore, abra a conversa pelo caminho. Quem lê árvore usa só ela."""
+    saida = {"titulo": limpo["titulo"], "modelo": limpo["modelo"], "mensagens": limpo["mensagens"]}
+    if "arvore" in limpo:
+        saida["arvore"] = limpo["arvore"]
+    if "ramificada_de" in limpo:
+        saida["ramificada_de"] = limpo["ramificada_de"]
+    # Proteção: arquivo com origem (importado) guarda o próprio id e os campos de origem; o salvar não os perde.
+    for chave in ("id", *ORIGEM_CAMPOS):
+        if chave in limpo:
+            saida[chave] = limpo[chave]
+    return saida
 
 
 def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
@@ -391,15 +529,16 @@ def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
 
     Modelo ausente vale MODELO_PADRAO (conversa antiga, sem o campo). Modelo fora da lista recusa a
     gravação (None). `leve` é para leitura de arquivo já salvo: modelo fora da lista vira o padrão, e a
-    conversa abre mesmo assim. `modelo_real` (nome que respondeu, cabeçalho do gateway) é só guardado
-    quando tem formato de nome; se não tem, sai da conversa sem recusar a gravação.
+    conversa abre mesmo assim; árvore ilegível cai no caminho `mensagens`, se houver. `modelo_real` (nome que
+    respondeu, cabeçalho do gateway) é só guardado quando tem formato de nome; se não tem, sai da conversa sem
+    recusar a gravação.
+
+    Lote 4: com `arvore` (ramos), o caminho vem da folha e `mensagens` é ignorado. Sem ramo (todo nó no
+    caminho), a árvore é descartada e a conversa segue como lista. `ramificada_de` inválido sai sem recusar.
     """
     if not isinstance(dados, dict):
         return None
     titulo = str(dados.get("titulo") or "").strip()[:80] or "Sem título"
-    mensagens = dados.get("mensagens")
-    if not isinstance(mensagens, list) or len(mensagens) > 200:
-        return None
     modelo = dados.get("modelo")
     if modelo is None:
         modelo = MODELO_PADRAO
@@ -407,22 +546,30 @@ def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
         if not leve:
             return None
         modelo = MODELO_PADRAO
-    limpas = []
-    for m in mensagens:
-        if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
+    arvore, limpas = None, None
+    if dados.get("arvore") is not None:
+        feita = _arvore_limpa(dados["arvore"], leve)
+        if feita is None and not leve:
             return None
-        if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
+        if feita is not None:
+            arvore, limpas = feita
+    if limpas is None:
+        mensagens = dados.get("mensagens")
+        if not isinstance(mensagens, list) or len(mensagens) > CONVERSA_CAMINHO_LIMITE:
             return None
-        item = {"role": m["role"], "content": m["content"]}
-        if m["role"] == "assistant" and m.get("modelo") is not None:
-            if modelo_permitido(m["modelo"]):
-                item["modelo"] = m["modelo"]
-            elif not leve:
+        limpas = []
+        for m in mensagens:
+            item = _mensagem_limpa(m, leve)
+            if item is None:
                 return None
-        if m["role"] == "assistant" and modelo_real_valido(m.get("modelo_real")):
-            item["modelo_real"] = m["modelo_real"]
-        limpas.append(item)
-    return {"titulo": titulo, "modelo": modelo, "mensagens": limpas}
+            limpas.append(item)
+    limpo = {"titulo": titulo, "modelo": modelo, "mensagens": limpas}
+    if arvore is not None and len(arvore["nos"]) > len(limpas):
+        limpo["arvore"] = arvore
+    ramo = _ramo_limpo(dados.get("ramificada_de"))
+    if ramo is not None:
+        limpo["ramificada_de"] = ramo
+    return limpo
 
 
 # Origem de conversa importada (09/11/2026, origem-preservada-07-11): o salvar do painel não a perde nem a duplica.
@@ -509,13 +656,14 @@ def _conversa_gravar(dados: dict) -> dict | None:
         limpo["id"] = conversa_id  # arquivo com origem guarda o próprio id, como o importador grava
     CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
     tmp = arq.with_suffix(".tmp")
-    tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
+    tmp.write_text(json.dumps(_formato_gravar(limpo), ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, arq)
     return {"id": conversa_id, **limpo}
 
 
 def _conversa_ler(conversa_id: str) -> dict | None:
-    """Lê e valida uma conversa no contrato que o cliente exige: versão, id e conteúdo."""
+    """Lê e valida uma conversa no contrato que o cliente exige: versão, id e conteúdo.
+    Com ramos, devolve também `arvore` (nós e folha); `mensagens` é sempre o caminho ativo."""
     arq = _conversa_caminho(conversa_id)
     if arq is None or not arq.is_file():
         return None
@@ -598,9 +746,9 @@ def _lixeira_listar() -> dict:
     lidas.sort(key=lambda par: par[0][13:], reverse=True)  # AAAAMMDD-HHMMSS ordena como texto
     itens = []
     for nome, dados in lidas[:LIXEIRA_LISTA_LIMITE]:
-        mensagens = dados.get("mensagens")
+        # Lote 4: a conta é do caminho ativo; uma conversa com ramos (arvore) apagada conta igual à de antes.
         itens.append({"nome": nome, "id": nome[:12], "titulo": str(dados.get("titulo") or "Sem título"),
-                      "apagada_em": _quando_apagada(nome), "mensagens": len(mensagens) if isinstance(mensagens, list) else 0})
+                      "apagada_em": _quando_apagada(nome), "mensagens": len(_mensagens_brutas(dados))})
     return {"schema_version": 1, "state": "ok", "items": itens, "total": len(lidas), "ilegiveis": len(nomes) - len(lidas)}
 
 
@@ -717,7 +865,7 @@ def _conversas_buscar(termo) -> dict:
         if not isinstance(dados, dict):
             continue
         titulo = str(dados.get("titulo") or "Sem título")
-        mensagens = dados.get("mensagens") if isinstance(dados.get("mensagens"), list) else []
+        mensagens = _mensagens_brutas(dados)  # busca no caminho ativo (as versões de outros ramos não entram)
         pos_titulo = _posicoes(_dobrar(titulo), alvo)
         ocorrencias = len(pos_titulo)
         primeira = None  # (índice da mensagem, texto, posição)
@@ -747,6 +895,8 @@ def _conversas_buscar(termo) -> dict:
 def _markdown(dados: dict, agora: datetime) -> str:
     titulo = " ".join(dados["titulo"].split()) or "Sem título"
     linhas = [f"# {titulo}", "", f"Modelo escolhido: {dados['modelo']}. Exportada em {agora.strftime('%d/%m/%Y %H:%M')}.", ""]
+    if "arvore" in dados:
+        linhas += ["Este arquivo traz só o caminho escolhido. As outras versões (ramos) estão no JSON.", ""]
     for m in dados["mensagens"]:
         if m["role"] == "user":
             cabeca = "## Você"
@@ -775,8 +925,11 @@ def _conversa_exportar(conversa_id, formato) -> tuple[bytes, str, str]:
     if formato == "md":
         return _markdown(dados, agora).encode("utf-8"), f"agata-conversa-{conversa_id}.md", "text/markdown; charset=utf-8"
     payload = {"formato": FORMATO_EXPORTACAO, "versao": VERSAO_EXPORTACAO, "id": conversa_id, "origem_id": origem,
-               "titulo": dados["titulo"], "modelo": dados["modelo"], "mensagens": dados["mensagens"],
-               "exportada_em": agora.isoformat(timespec="seconds")}
+               "titulo": dados["titulo"], "modelo": dados["modelo"], "mensagens": dados["mensagens"]}
+    for chave in ("arvore", "ramificada_de"):  # lote 4: as versões de outros ramos e a origem da ramificação também vão no JSON
+        if chave in dados:
+            payload[chave] = dados[chave]
+    payload["exportada_em"] = agora.isoformat(timespec="seconds")
     corpo = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     return corpo, f"agata-conversa-{conversa_id}.json", "application/json; charset=utf-8"
 
@@ -829,7 +982,7 @@ def _conversa_importar(dados) -> dict:
         CONVERSAS_DIR.mkdir(parents=True, exist_ok=True)
         arq = CONVERSAS_DIR / (novo + ".json")
         tmp = arq.with_suffix(".tmp")
-        tmp.write_text(json.dumps(limpo, ensure_ascii=False), encoding="utf-8")
+        tmp.write_text(json.dumps(_formato_gravar(limpo), ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, arq)
         org["conversas"][novo] = {**_entrada_padrao(), "origem_id": origem}
         return {"estado": "importada", "id": novo, "titulo": limpo["titulo"]}

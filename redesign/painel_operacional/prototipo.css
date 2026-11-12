@@ -1,5 +1,6 @@
 /* Tokens: tipografia e cores. Cores vieram de valores literais; cada um tem nome por valor. */
 :root{
+  color-scheme:dark;
   --paper:#080d18;
   --sheet:#101a2a;
   --ink:#edf4ff;
@@ -291,7 +292,584 @@
   --cn-ok:#69e0c1;
   --cn-border:#2b4058;
   --cn-card:rgba(15, 26, 42, .86);
+  --veu:rgba(3,6,12,.6);
+  /* paleta clara (lote 4, 09/11/2026): cada cor com a luminosidade invertida; o tema claro usa estes valores */
+  --luz-shadow:0 20px 58px rgba(40,60,90,.14);
+  --luz-paper:#e7ecf7;
+  --luz-sheet:#d5dfef;
+  --luz-ink:#000712;
+  --luz-muted:#35455c;
+  --luz-line:#afbfd8;
+  --luz-teal:#128a9e;
+  --luz-teal-soft:#bfe1ed;
+  --luz-gold:#894c00;
+  --luz-gold-soft:#dfd2c6;
+  --luz-rose:#73001c;
+  --luz-rose-soft:#dbc4d2;
+  --luz-violet:#1e0064;
+  --luz-violet-soft:#c2bcda;
+  --luz-blue:#00347c;
+  --luz-blue-soft:#b6c8e4;
+  --luz-cor-060a13:#ecf0f9;
+  --luz-cor-06121b:#e4f0f9;
+  --luz-cor-0a1110:#eef5f4;
+  --luz-cor-0b1422:#dde6f4;
+  --luz-cor-0e1815:#e7f1ee;
+  --luz-cor-101a2a:#d5dfef;
+  --luz-cor-102532:#cde2ef;
+  --luz-cor-102b38:#c7e2ef;
+  --luz-cor-102c39:#c6e2ef;
+  --luz-cor-111:#eeeeee;
+  --luz-cor-111a2a:#d5deee;
+  --luz-cor-121f32:#cddaed;
+  --luz-cor-123440:#bfe1ed;
+  --luz-cor-173c4e:#b1d6e8;
+  --luz-cor-174d46:#b2e8e1;
+  --luz-cor-1b1206:#f9f0e4;
+  --luz-cor-1b293c:#c3d1e4;
+  --luz-cor-1c5360:#9fd6e3;
+  --luz-cor-202a39:#c6d0df;
+  --luz-cor-20343a:#c5d9df;
+  --luz-cor-203b31:#c4dfd5;
+  --luz-cor-21645c:#9bded6;
+  --luz-cor-24485c:#a3c7db;
+  --luz-cor-24665e:#99dbd3;
+  --luz-cor-2a3b54:#abbcd5;
+  --luz-cor-2c394b:#b4c1d3;
+  --luz-cor-2c5263:#9cc2d3;
+  --luz-cor-30425b:#a4b6cf;
+  --luz-cor-304563:#9cb1cf;
+  --luz-cor-314a4e:#b1cace;
+  --luz-cor-315068:#97b6ce;
+  --luz-cor-33576b:#94b8cc;
+  --luz-cor-344963:#9cb1cb;
+  --luz-cor-36516e:#91acc9;
+  --luz-cor-382e57:#b2a8d1;
+  --luz-cor-405951:#a6bfb7;
+  --luz-cor-446979:#86abbb;
+  --luz-cor-46595c:#a3b6b9;
+  --luz-cor-473723:#dcccb8;
+  --luz-cor-47575a:#a5b5b8;
+  --luz-cor-47708a:#759eb8;
+  --luz-cor-4ab6ca:#35a1b5;
+  --luz-cor-516266:#99aaae;
+  --luz-cor-536568:#97a9ac;
+  --luz-cor-536966:#96aca9;
+  --luz-cor-5f5980:#857fa6;
+  --luz-cor-6ab4ff:#004a95;
+  --luz-cor-6c7068:#93978f;
+  --luz-cor-718ba8:#57718e;
+  --luz-cor-768ba7:#586d89;
+  --luz-cor-77817c:#7e8883;
+  --luz-cor-798681:#798681;
+  --luz-cor-7fa0c2:#3d5e80;
+  --luz-cor-7fa5bf:#406680;
+  --luz-cor-805c25:#dab67f;
+  --luz-cor-8198b3:#4c637e;
+  --luz-cor-8295ae:#51647d;
+  --luz-cor-829994:#667d78;
+  --luz-cor-87a0bd:#425b78;
+  --luz-cor-8e4b42:#bd7a71;
+  --luz-cor-8ea8c8:#375171;
+  --luz-cor-8edce9:#166471;
+  --luz-cor-8fa5c0:#3f5570;
+  --luz-cor-90cde1:#1e5b6f;
+  --luz-cor-91a5bd:#42566e;
+  --luz-cor-929a95:#656d68;
+  --luz-cor-93dff4:#0b576c;
+  --luz-cor-94a9c2:#3d526b;
+  --luz-cor-96aaa5:#556964;
+  --luz-cor-9a7234:#cba365;
+  --luz-cor-9cbaab:#456354;
+  --luz-cor-9cc9e6:#194663;
+  --luz-cor-9ceaf5:#0a5863;
+  --luz-cor-9cebf2:#0d5c63;
+  --luz-cor-9debf4:#0b5962;
+  --luz-cor-a0a7a0:#585f58;
+  --luz-cor-a5f0f7:#08535a;
+  --luz-cor-a6bad1:#2e4259;
+  --luz-cor-a7b8cf:#304158;
+  --luz-cor-a8b8ce:#314157;
+  --luz-cor-a8eaf4:#0b4d57;
+  --luz-cor-a9b8cc:#334256;
+  --luz-cor-a9b9ce:#314156;
+  --luz-cor-a9bdd3:#2c4056;
+  --luz-cor-a9bdd6:#293d56;
+  --luz-cor-a9bdd7:#283c56;
+  --luz-cor-a9ccff:#002356;
+  --luz-cor-a9f1fb:#044c56;
+  --luz-cor-aabbb5:#44554f;
+  --luz-cor-adbed3:#2c3d52;
+  --luz-cor-adc0d7:#283b52;
+  --luz-cor-aebed2:#2d3d51;
+  --luz-cor-aebfd4:#2b3c51;
+  --luz-cor-afc0d6:#293a50;
+  --luz-cor-b4c3d6:#29384b;
+  --luz-cor-b4c8d9:#263a4b;
+  --luz-cor-b5c5d9:#26364a;
+  --luz-cor-b7c5bf:#3a4842;
+  --luz-cor-b7c8dc:#233448;
+  --luz-cor-b8cec8:#314741;
+  --luz-cor-bad1c7:#2e453b;
+  --luz-cor-bfcee2:#1d2c40;
+  --luz-cor-bfd0e3:#1c2d40;
+  --luz-cor-c1d0e1:#1e2d3e;
+  --luz-cor-c2d6e8:#172b3d;
+  --luz-cor-c4d2e5:#1a283b;
+  --luz-cor-c4dcf3:#0c243b;
+  --luz-cor-c5d7c8:#283a2b;
+  --luz-cor-c6d0cb:#2f3934;
+  --luz-cor-c6d6ce:#293931;
+  --luz-cor-c8d8e8:#172737;
+  --luz-cor-c9d6d1:#293631;
+  --luz-cor-d2c1ff:#11003e;
+  --luz-cor-d3a552:#ad7f2c;
+  --luz-cor-d4dfd5:#202b21;
+  --luz-cor-d5e0d9:#1f2a23;
+  --luz-cor-d8e5f4:#0b1827;
+  --luz-cor-d9e9e1:#16261e;
+  --luz-cor-dbe9f8:#071524;
+  --luz-cor-e3edf9:#06101c;
+  --luz-cor-e5e3ef:#12101c;
+  --luz-cor-e5ece5:#131a13;
+  --luz-cor-e7f2ff:#000b18;
+  --luz-cor-e9eee7:#131811;
+  --luz-cor-e9eee8:#121711;
+  --luz-cor-e9efeb:#101612;
+  --luz-cor-eaf2ff:#000815;
+  --luz-cor-eaf4ff:#000a15;
+  --luz-cor-eafaff:#001015;
+  --luz-cor-ecebe4:#1b1a13;
+  --luz-cor-edf4ff:#000712;
+  --luz-cor-eee8d8:#272111;
+  --luz-cor-eeede6:#191811;
+  --luz-cor-efeee8:#171610;
+  --luz-cor-eff8ff:#000910;
+  --luz-cor-f0efe8:#17160f;
+  --luz-cor-f0efe9:#16150f;
+  --luz-cor-f0f6ff:#00060f;
+  --luz-cor-f1f0e9:#16150e;
+  --luz-cor-f1f6ff:#00050e;
+  --luz-cor-f1f7ff:#00060e;
+  --luz-cor-f1fbff:#000a0e;
+  --luz-cor-f2f7ff:#00050d;
+  --luz-cor-f2f8ff:#00060d;
+  --luz-cor-f4d6ae:#51330b;
+  --luz-cor-f4f3ec:#13120b;
+  --luz-cor-f4f8ff:#00040b;
+  --luz-cor-f5f8ff:#00030a;
+  --luz-cor-f6f5ef:#100f09;
+  --luz-cor-f8f7f1:#0e0d07;
+  --luz-cor-fbfaf6:#090804;
+  --luz-cor-ffabbc:#540011;
+  --luz-cor-fff:#000000;
+  --luz-cor-rgba-0-0-0-12:rgba(0,0,0,.12);
+  --luz-cor-rgba-0-0-0-13:rgba(0,0,0,.13);
+  --luz-cor-rgba-0-0-0-18:rgba(0,0,0,.18);
+  --luz-cor-rgba-0-0-0-2:rgba(0,0,0,.2);
+  --luz-cor-rgba-0-0-0-25:rgba(0,0,0,.25);
+  --luz-cor-rgba-0-0-0-28:rgba(0,0,0,.28);
+  --luz-cor-rgba-0-0-0-34:rgba(0,0,0,.34);
+  --luz-cor-rgba-1-5-12-76:rgba(243,247,254,.76);
+  --luz-cor-rgba-10-19-32-62:rgba(223,232,245,.62);
+  --luz-cor-rgba-10-20-34-65:rgba(221,231,245,.65);
+  --luz-cor-rgba-100-173-218-1:rgba(37,110,155,.1);
+  --luz-cor-rgba-102-178-218-18:rgba(37,113,153,.18);
+  --luz-cor-rgba-102-178-218-42:rgba(37,113,153,.42);
+  --luz-cor-rgba-102-181-227-18:rgba(28,107,153,.18);
+  --luz-cor-rgba-102-181-227-2:rgba(28,107,153,.2);
+  --luz-cor-rgba-102-181-227-28:rgba(28,107,153,.28);
+  --luz-cor-rgba-105-177-215-2:rgba(40,112,150,.2);
+  --luz-cor-rgba-112-190-226-2:rgba(29,107,143,.2);
+  --luz-cor-rgba-112-190-226-25:rgba(29,107,143,.25);
+  --luz-cor-rgba-126-157-191-15:rgba(64,95,129,.15);
+  --luz-cor-rgba-126-157-191-17:rgba(64,95,129,.17);
+  --luz-cor-rgba-126-157-191-18:rgba(64,95,129,.18);
+  --luz-cor-rgba-126-157-191-2:rgba(64,95,129,.2);
+  --luz-cor-rgba-135-111-230-1:rgba(49,25,144,.1);
+  --luz-cor-rgba-15-26-42-8:rgba(213,224,240,.8);
+  --luz-cor-rgba-16-26-42-42:rgba(213,223,239,.42);
+  --luz-cor-rgba-16-26-42-55:rgba(213,223,239,.55);
+  --luz-cor-rgba-16-26-42-6:rgba(213,223,239,.6);
+  --luz-cor-rgba-16-26-42-82:rgba(213,223,239,.82);
+  --luz-cor-rgba-163-179-202-1:rgba(53,69,92,.1);
+  --luz-cor-rgba-17-24-38-76:rgba(217,224,238,.76);
+  --luz-cor-rgba-17-28-45-96:rgba(210,221,238,.96);
+  --luz-cor-rgba-17-30-49-98:rgba(206,219,238,.98);
+  --luz-cor-rgba-18-29-46-78:rgba(209,220,237,.78);
+  --luz-cor-rgba-185-155-255-16:rgba(30,0,100,.16);
+  --luz-cor-rgba-19-36-40-45:rgba(215,232,236,.45);
+  --luz-cor-rgba-20-39-60-72:rgba(195,214,235,.72);
+  --luz-cor-rgba-21-35-56-62:rgba(199,213,234,.62);
+  --luz-cor-rgba-21-38-43-24:rgba(212,229,234,.24);
+  --luz-cor-rgba-22-37-59-92:rgba(196,211,233,.92);
+  --luz-cor-rgba-233-238-232-15:rgba(18,23,17,.15);
+  --luz-cor-rgba-233-238-232-16:rgba(18,23,17,.16);
+  --luz-cor-rgba-251-250-246-65:rgba(9,8,4,.65);
+  --luz-cor-rgba-255-194-118-1:rgba(137,76,0,.1);
+  --luz-cor-rgba-255-194-118-24:rgba(137,76,0,.24);
+  --luz-cor-rgba-255-194-118-35:rgba(137,76,0,.35);
+  --luz-cor-rgba-255-255-255-07:rgba(0,0,0,.07);
+  --luz-cor-rgba-27-55-75-5:rgba(180,208,228,.5);
+  --luz-cor-rgba-28-48-54-025:rgba(201,221,227,.025);
+  --luz-cor-rgba-35-83-130-18:rgba(125,173,220,.18);
+  --luz-cor-rgba-37-120-153-24:rgba(102,185,218,.24);
+  --luz-cor-rgba-37-121-111-14:rgba(134,218,208,.14);
+  --luz-cor-rgba-37-121-111-28:rgba(134,218,208,.28);
+  --luz-cor-rgba-37-121-111-35:rgba(134,218,208,.35);
+  --luz-cor-rgba-43-149-184-09:rgba(71,177,212,.09);
+  --luz-cor-rgba-48-104-135-35:rgba(120,176,207,.35);
+  --luz-cor-rgba-57-44-32-2:rgba(223,210,198,.2);
+  --luz-cor-rgba-57-44-32-3:rgba(223,210,198,.3);
+  --luz-cor-rgba-6-10-19-94:rgba(236,240,249,.94);
+  --luz-cor-rgba-6-11-22-35:rgba(233,238,249,.35);
+  --luz-cor-rgba-6-11-22-36:rgba(233,238,249,.36);
+  --luz-cor-rgba-6-11-22-4:rgba(233,238,249,.4);
+  --luz-cor-rgba-6-11-22-55:rgba(233,238,249,.55);
+  --luz-cor-rgba-6-11-22-75:rgba(233,238,249,.75);
+  --luz-cor-rgba-6-11-22-83:rgba(233,238,249,.83);
+  --luz-cor-rgba-6-11-22-91:rgba(233,238,249,.91);
+  --luz-cor-rgba-6-11-22-96:rgba(233,238,249,.96);
+  --luz-cor-rgba-6-11-22-98:rgba(233,238,249,.98);
+  --luz-cor-rgba-61-84-112-45:rgba(143,166,194,.45);
+  --luz-cor-rgba-63-195-226-12:rgba(29,161,192,.12);
+  --luz-cor-rgba-63-195-226-16:rgba(29,161,192,.16);
+  --luz-cor-rgba-63-195-226-32:rgba(29,161,192,.32);
+  --luz-cor-rgba-65-176-228-14:rgba(27,138,190,.14);
+  --luz-cor-rgba-7-13-25-72:rgba(230,236,248,.72);
+  --luz-cor-rgba-7-14-25-34:rgba(230,237,248,.34);
+  --luz-cor-rgba-7-14-25-38:rgba(230,237,248,.38);
+  --luz-cor-rgba-70-159-202-06:rgba(53,142,185,.06);
+  --luz-cor-rgba-75-46-125-12:rgba(159,130,209,.12);
+  --luz-cor-rgba-97-217-237-0:rgba(18,138,158,0);
+  --luz-cor-rgba-97-217-237-05:rgba(18,138,158,.05);
+  --luz-cor-rgba-97-217-237-06:rgba(18,138,158,.06);
+  --luz-cor-rgba-97-217-237-08:rgba(18,138,158,.08);
+  --luz-cor-rgba-97-217-237-1:rgba(18,138,158,.1);
+  --luz-cor-rgba-97-217-237-13:rgba(18,138,158,.13);
+  --luz-cor-rgba-97-217-237-15:rgba(18,138,158,.15);
+  --luz-cor-rgba-97-217-237-16:rgba(18,138,158,.16);
+  --luz-cor-rgba-97-217-237-18:rgba(18,138,158,.18);
+  --luz-cor-rgba-97-217-237-25:rgba(18,138,158,.25);
+  --luz-cor-rgba-97-217-237-27:rgba(18,138,158,.27);
+  --luz-cor-rgba-97-217-237-28:rgba(18,138,158,.28);
+  --luz-cor-rgba-97-217-237-3:rgba(18,138,158,.3);
+  --luz-cor-rgba-97-217-237-32:rgba(18,138,158,.32);
+  --luz-cor-rgba-97-217-237-35:rgba(18,138,158,.35);
+  --luz-cor-rgba-97-217-237-38:rgba(18,138,158,.38);
+  --luz-cor-rgba-97-217-237-45:rgba(18,138,158,.45);
+  --luz-cor-rgba-97-217-237-48:rgba(18,138,158,.48);
+  --luz-cor-rgba-97-217-237-5:rgba(18,138,158,.5);
+  --luz-cor-rgba-97-217-237-55:rgba(18,138,158,.55);
+  --luz-cor-rgba-97-217-237-65:rgba(18,138,158,.65);
+  --luz-cor-rgba-97-217-237-72:rgba(18,138,158,.72);
+  --luz-oc-ink:#0f1613;
+  --luz-oc-muted:#5d6e69;
+  --luz-oc-bg:#eef5f4;
+  --luz-oc-card:#e3eeeb;
+  --luz-oc-line:#bfd6d0;
+  --luz-oc-lime:#7b950c;
+  --luz-oc-orange:#a74300;
+  --luz-cn-bg:#e7ecf7;
+  --luz-cn-fg:#000815;
+  --luz-cn-muted:#45586e;
+  --luz-cn-accent:#128a9e;
+  --luz-cn-warn:#894c00;
+  --luz-cn-err:#6e0017;
+  --luz-cn-ok:#1f9677;
+  --luz-cn-border:#a7bcd4;
+  --luz-cn-card:rgba(213,224,240,.86);
+  --luz-veu:rgba(243,246,252,.6);
 }
+
+:root[data-tema="claro"]{
+  color-scheme:light;
+  --paper:var(--luz-paper);
+  --sheet:var(--luz-sheet);
+  --ink:var(--luz-ink);
+  --muted:var(--luz-muted);
+  --line:var(--luz-line);
+  --teal:var(--luz-teal);
+  --teal-soft:var(--luz-teal-soft);
+  --gold:var(--luz-gold);
+  --gold-soft:var(--luz-gold-soft);
+  --rose:var(--luz-rose);
+  --rose-soft:var(--luz-rose-soft);
+  --violet:var(--luz-violet);
+  --violet-soft:var(--luz-violet-soft);
+  --blue:var(--luz-blue);
+  --blue-soft:var(--luz-blue-soft);
+  --cor-060a13:var(--luz-cor-060a13);
+  --cor-06121b:var(--luz-cor-06121b);
+  --cor-0a1110:var(--luz-cor-0a1110);
+  --cor-0b1422:var(--luz-cor-0b1422);
+  --cor-0e1815:var(--luz-cor-0e1815);
+  --cor-101a2a:var(--luz-cor-101a2a);
+  --cor-102532:var(--luz-cor-102532);
+  --cor-102b38:var(--luz-cor-102b38);
+  --cor-102c39:var(--luz-cor-102c39);
+  --cor-111:var(--luz-cor-111);
+  --cor-111a2a:var(--luz-cor-111a2a);
+  --cor-121f32:var(--luz-cor-121f32);
+  --cor-123440:var(--luz-cor-123440);
+  --cor-173c4e:var(--luz-cor-173c4e);
+  --cor-174d46:var(--luz-cor-174d46);
+  --cor-1b1206:var(--luz-cor-1b1206);
+  --cor-1b293c:var(--luz-cor-1b293c);
+  --cor-1c5360:var(--luz-cor-1c5360);
+  --cor-202a39:var(--luz-cor-202a39);
+  --cor-20343a:var(--luz-cor-20343a);
+  --cor-203b31:var(--luz-cor-203b31);
+  --cor-21645c:var(--luz-cor-21645c);
+  --cor-24485c:var(--luz-cor-24485c);
+  --cor-24665e:var(--luz-cor-24665e);
+  --cor-2a3b54:var(--luz-cor-2a3b54);
+  --cor-2c394b:var(--luz-cor-2c394b);
+  --cor-2c5263:var(--luz-cor-2c5263);
+  --cor-30425b:var(--luz-cor-30425b);
+  --cor-304563:var(--luz-cor-304563);
+  --cor-314a4e:var(--luz-cor-314a4e);
+  --cor-315068:var(--luz-cor-315068);
+  --cor-33576b:var(--luz-cor-33576b);
+  --cor-344963:var(--luz-cor-344963);
+  --cor-36516e:var(--luz-cor-36516e);
+  --cor-382e57:var(--luz-cor-382e57);
+  --cor-405951:var(--luz-cor-405951);
+  --cor-446979:var(--luz-cor-446979);
+  --cor-46595c:var(--luz-cor-46595c);
+  --cor-473723:var(--luz-cor-473723);
+  --cor-47575a:var(--luz-cor-47575a);
+  --cor-47708a:var(--luz-cor-47708a);
+  --cor-4ab6ca:var(--luz-cor-4ab6ca);
+  --cor-516266:var(--luz-cor-516266);
+  --cor-536568:var(--luz-cor-536568);
+  --cor-536966:var(--luz-cor-536966);
+  --cor-5f5980:var(--luz-cor-5f5980);
+  --cor-6ab4ff:var(--luz-cor-6ab4ff);
+  --cor-6c7068:var(--luz-cor-6c7068);
+  --cor-718ba8:var(--luz-cor-718ba8);
+  --cor-768ba7:var(--luz-cor-768ba7);
+  --cor-77817c:var(--luz-cor-77817c);
+  --cor-798681:var(--luz-cor-798681);
+  --cor-7fa0c2:var(--luz-cor-7fa0c2);
+  --cor-7fa5bf:var(--luz-cor-7fa5bf);
+  --cor-805c25:var(--luz-cor-805c25);
+  --cor-8198b3:var(--luz-cor-8198b3);
+  --cor-8295ae:var(--luz-cor-8295ae);
+  --cor-829994:var(--luz-cor-829994);
+  --cor-87a0bd:var(--luz-cor-87a0bd);
+  --cor-8e4b42:var(--luz-cor-8e4b42);
+  --cor-8ea8c8:var(--luz-cor-8ea8c8);
+  --cor-8edce9:var(--luz-cor-8edce9);
+  --cor-8fa5c0:var(--luz-cor-8fa5c0);
+  --cor-90cde1:var(--luz-cor-90cde1);
+  --cor-91a5bd:var(--luz-cor-91a5bd);
+  --cor-929a95:var(--luz-cor-929a95);
+  --cor-93dff4:var(--luz-cor-93dff4);
+  --cor-94a9c2:var(--luz-cor-94a9c2);
+  --cor-96aaa5:var(--luz-cor-96aaa5);
+  --cor-9a7234:var(--luz-cor-9a7234);
+  --cor-9cbaab:var(--luz-cor-9cbaab);
+  --cor-9cc9e6:var(--luz-cor-9cc9e6);
+  --cor-9ceaf5:var(--luz-cor-9ceaf5);
+  --cor-9cebf2:var(--luz-cor-9cebf2);
+  --cor-9debf4:var(--luz-cor-9debf4);
+  --cor-a0a7a0:var(--luz-cor-a0a7a0);
+  --cor-a5f0f7:var(--luz-cor-a5f0f7);
+  --cor-a6bad1:var(--luz-cor-a6bad1);
+  --cor-a7b8cf:var(--luz-cor-a7b8cf);
+  --cor-a8b8ce:var(--luz-cor-a8b8ce);
+  --cor-a8eaf4:var(--luz-cor-a8eaf4);
+  --cor-a9b8cc:var(--luz-cor-a9b8cc);
+  --cor-a9b9ce:var(--luz-cor-a9b9ce);
+  --cor-a9bdd3:var(--luz-cor-a9bdd3);
+  --cor-a9bdd6:var(--luz-cor-a9bdd6);
+  --cor-a9bdd7:var(--luz-cor-a9bdd7);
+  --cor-a9ccff:var(--luz-cor-a9ccff);
+  --cor-a9f1fb:var(--luz-cor-a9f1fb);
+  --cor-aabbb5:var(--luz-cor-aabbb5);
+  --cor-adbed3:var(--luz-cor-adbed3);
+  --cor-adc0d7:var(--luz-cor-adc0d7);
+  --cor-aebed2:var(--luz-cor-aebed2);
+  --cor-aebfd4:var(--luz-cor-aebfd4);
+  --cor-afc0d6:var(--luz-cor-afc0d6);
+  --cor-b4c3d6:var(--luz-cor-b4c3d6);
+  --cor-b4c8d9:var(--luz-cor-b4c8d9);
+  --cor-b5c5d9:var(--luz-cor-b5c5d9);
+  --cor-b7c5bf:var(--luz-cor-b7c5bf);
+  --cor-b7c8dc:var(--luz-cor-b7c8dc);
+  --cor-b8cec8:var(--luz-cor-b8cec8);
+  --cor-bad1c7:var(--luz-cor-bad1c7);
+  --cor-bfcee2:var(--luz-cor-bfcee2);
+  --cor-bfd0e3:var(--luz-cor-bfd0e3);
+  --cor-c1d0e1:var(--luz-cor-c1d0e1);
+  --cor-c2d6e8:var(--luz-cor-c2d6e8);
+  --cor-c4d2e5:var(--luz-cor-c4d2e5);
+  --cor-c4dcf3:var(--luz-cor-c4dcf3);
+  --cor-c5d7c8:var(--luz-cor-c5d7c8);
+  --cor-c6d0cb:var(--luz-cor-c6d0cb);
+  --cor-c6d6ce:var(--luz-cor-c6d6ce);
+  --cor-c8d8e8:var(--luz-cor-c8d8e8);
+  --cor-c9d6d1:var(--luz-cor-c9d6d1);
+  --cor-d2c1ff:var(--luz-cor-d2c1ff);
+  --cor-d3a552:var(--luz-cor-d3a552);
+  --cor-d4dfd5:var(--luz-cor-d4dfd5);
+  --cor-d5e0d9:var(--luz-cor-d5e0d9);
+  --cor-d8e5f4:var(--luz-cor-d8e5f4);
+  --cor-d9e9e1:var(--luz-cor-d9e9e1);
+  --cor-dbe9f8:var(--luz-cor-dbe9f8);
+  --cor-e3edf9:var(--luz-cor-e3edf9);
+  --cor-e5e3ef:var(--luz-cor-e5e3ef);
+  --cor-e5ece5:var(--luz-cor-e5ece5);
+  --cor-e7f2ff:var(--luz-cor-e7f2ff);
+  --cor-e9eee7:var(--luz-cor-e9eee7);
+  --cor-e9eee8:var(--luz-cor-e9eee8);
+  --cor-e9efeb:var(--luz-cor-e9efeb);
+  --cor-eaf2ff:var(--luz-cor-eaf2ff);
+  --cor-eaf4ff:var(--luz-cor-eaf4ff);
+  --cor-eafaff:var(--luz-cor-eafaff);
+  --cor-ecebe4:var(--luz-cor-ecebe4);
+  --cor-edf4ff:var(--luz-cor-edf4ff);
+  --cor-eee8d8:var(--luz-cor-eee8d8);
+  --cor-eeede6:var(--luz-cor-eeede6);
+  --cor-efeee8:var(--luz-cor-efeee8);
+  --cor-eff8ff:var(--luz-cor-eff8ff);
+  --cor-f0efe8:var(--luz-cor-f0efe8);
+  --cor-f0efe9:var(--luz-cor-f0efe9);
+  --cor-f0f6ff:var(--luz-cor-f0f6ff);
+  --cor-f1f0e9:var(--luz-cor-f1f0e9);
+  --cor-f1f6ff:var(--luz-cor-f1f6ff);
+  --cor-f1f7ff:var(--luz-cor-f1f7ff);
+  --cor-f1fbff:var(--luz-cor-f1fbff);
+  --cor-f2f7ff:var(--luz-cor-f2f7ff);
+  --cor-f2f8ff:var(--luz-cor-f2f8ff);
+  --cor-f4d6ae:var(--luz-cor-f4d6ae);
+  --cor-f4f3ec:var(--luz-cor-f4f3ec);
+  --cor-f4f8ff:var(--luz-cor-f4f8ff);
+  --cor-f5f8ff:var(--luz-cor-f5f8ff);
+  --cor-f6f5ef:var(--luz-cor-f6f5ef);
+  --cor-f8f7f1:var(--luz-cor-f8f7f1);
+  --cor-fbfaf6:var(--luz-cor-fbfaf6);
+  --cor-ffabbc:var(--luz-cor-ffabbc);
+  --cor-fff:var(--luz-cor-fff);
+  --cor-rgba-0-0-0-12:var(--luz-cor-rgba-0-0-0-12);
+  --cor-rgba-0-0-0-13:var(--luz-cor-rgba-0-0-0-13);
+  --cor-rgba-0-0-0-18:var(--luz-cor-rgba-0-0-0-18);
+  --cor-rgba-0-0-0-2:var(--luz-cor-rgba-0-0-0-2);
+  --cor-rgba-0-0-0-25:var(--luz-cor-rgba-0-0-0-25);
+  --cor-rgba-0-0-0-28:var(--luz-cor-rgba-0-0-0-28);
+  --cor-rgba-0-0-0-34:var(--luz-cor-rgba-0-0-0-34);
+  --cor-rgba-1-5-12-76:var(--luz-cor-rgba-1-5-12-76);
+  --cor-rgba-10-19-32-62:var(--luz-cor-rgba-10-19-32-62);
+  --cor-rgba-10-20-34-65:var(--luz-cor-rgba-10-20-34-65);
+  --cor-rgba-100-173-218-1:var(--luz-cor-rgba-100-173-218-1);
+  --cor-rgba-102-178-218-18:var(--luz-cor-rgba-102-178-218-18);
+  --cor-rgba-102-178-218-42:var(--luz-cor-rgba-102-178-218-42);
+  --cor-rgba-102-181-227-18:var(--luz-cor-rgba-102-181-227-18);
+  --cor-rgba-102-181-227-2:var(--luz-cor-rgba-102-181-227-2);
+  --cor-rgba-102-181-227-28:var(--luz-cor-rgba-102-181-227-28);
+  --cor-rgba-105-177-215-2:var(--luz-cor-rgba-105-177-215-2);
+  --cor-rgba-112-190-226-2:var(--luz-cor-rgba-112-190-226-2);
+  --cor-rgba-112-190-226-25:var(--luz-cor-rgba-112-190-226-25);
+  --cor-rgba-126-157-191-15:var(--luz-cor-rgba-126-157-191-15);
+  --cor-rgba-126-157-191-17:var(--luz-cor-rgba-126-157-191-17);
+  --cor-rgba-126-157-191-18:var(--luz-cor-rgba-126-157-191-18);
+  --cor-rgba-126-157-191-2:var(--luz-cor-rgba-126-157-191-2);
+  --cor-rgba-135-111-230-1:var(--luz-cor-rgba-135-111-230-1);
+  --cor-rgba-15-26-42-8:var(--luz-cor-rgba-15-26-42-8);
+  --cor-rgba-16-26-42-42:var(--luz-cor-rgba-16-26-42-42);
+  --cor-rgba-16-26-42-55:var(--luz-cor-rgba-16-26-42-55);
+  --cor-rgba-16-26-42-6:var(--luz-cor-rgba-16-26-42-6);
+  --cor-rgba-16-26-42-82:var(--luz-cor-rgba-16-26-42-82);
+  --cor-rgba-163-179-202-1:var(--luz-cor-rgba-163-179-202-1);
+  --cor-rgba-17-24-38-76:var(--luz-cor-rgba-17-24-38-76);
+  --cor-rgba-17-28-45-96:var(--luz-cor-rgba-17-28-45-96);
+  --cor-rgba-17-30-49-98:var(--luz-cor-rgba-17-30-49-98);
+  --cor-rgba-18-29-46-78:var(--luz-cor-rgba-18-29-46-78);
+  --cor-rgba-185-155-255-16:var(--luz-cor-rgba-185-155-255-16);
+  --cor-rgba-19-36-40-45:var(--luz-cor-rgba-19-36-40-45);
+  --cor-rgba-20-39-60-72:var(--luz-cor-rgba-20-39-60-72);
+  --cor-rgba-21-35-56-62:var(--luz-cor-rgba-21-35-56-62);
+  --cor-rgba-21-38-43-24:var(--luz-cor-rgba-21-38-43-24);
+  --cor-rgba-22-37-59-92:var(--luz-cor-rgba-22-37-59-92);
+  --cor-rgba-233-238-232-15:var(--luz-cor-rgba-233-238-232-15);
+  --cor-rgba-233-238-232-16:var(--luz-cor-rgba-233-238-232-16);
+  --cor-rgba-251-250-246-65:var(--luz-cor-rgba-251-250-246-65);
+  --cor-rgba-255-194-118-1:var(--luz-cor-rgba-255-194-118-1);
+  --cor-rgba-255-194-118-24:var(--luz-cor-rgba-255-194-118-24);
+  --cor-rgba-255-194-118-35:var(--luz-cor-rgba-255-194-118-35);
+  --cor-rgba-255-255-255-07:var(--luz-cor-rgba-255-255-255-07);
+  --cor-rgba-27-55-75-5:var(--luz-cor-rgba-27-55-75-5);
+  --cor-rgba-28-48-54-025:var(--luz-cor-rgba-28-48-54-025);
+  --cor-rgba-35-83-130-18:var(--luz-cor-rgba-35-83-130-18);
+  --cor-rgba-37-120-153-24:var(--luz-cor-rgba-37-120-153-24);
+  --cor-rgba-37-121-111-14:var(--luz-cor-rgba-37-121-111-14);
+  --cor-rgba-37-121-111-28:var(--luz-cor-rgba-37-121-111-28);
+  --cor-rgba-37-121-111-35:var(--luz-cor-rgba-37-121-111-35);
+  --cor-rgba-43-149-184-09:var(--luz-cor-rgba-43-149-184-09);
+  --cor-rgba-48-104-135-35:var(--luz-cor-rgba-48-104-135-35);
+  --cor-rgba-57-44-32-2:var(--luz-cor-rgba-57-44-32-2);
+  --cor-rgba-57-44-32-3:var(--luz-cor-rgba-57-44-32-3);
+  --cor-rgba-6-10-19-94:var(--luz-cor-rgba-6-10-19-94);
+  --cor-rgba-6-11-22-35:var(--luz-cor-rgba-6-11-22-35);
+  --cor-rgba-6-11-22-36:var(--luz-cor-rgba-6-11-22-36);
+  --cor-rgba-6-11-22-4:var(--luz-cor-rgba-6-11-22-4);
+  --cor-rgba-6-11-22-55:var(--luz-cor-rgba-6-11-22-55);
+  --cor-rgba-6-11-22-75:var(--luz-cor-rgba-6-11-22-75);
+  --cor-rgba-6-11-22-83:var(--luz-cor-rgba-6-11-22-83);
+  --cor-rgba-6-11-22-91:var(--luz-cor-rgba-6-11-22-91);
+  --cor-rgba-6-11-22-96:var(--luz-cor-rgba-6-11-22-96);
+  --cor-rgba-6-11-22-98:var(--luz-cor-rgba-6-11-22-98);
+  --cor-rgba-61-84-112-45:var(--luz-cor-rgba-61-84-112-45);
+  --cor-rgba-63-195-226-12:var(--luz-cor-rgba-63-195-226-12);
+  --cor-rgba-63-195-226-16:var(--luz-cor-rgba-63-195-226-16);
+  --cor-rgba-63-195-226-32:var(--luz-cor-rgba-63-195-226-32);
+  --cor-rgba-65-176-228-14:var(--luz-cor-rgba-65-176-228-14);
+  --cor-rgba-7-13-25-72:var(--luz-cor-rgba-7-13-25-72);
+  --cor-rgba-7-14-25-34:var(--luz-cor-rgba-7-14-25-34);
+  --cor-rgba-7-14-25-38:var(--luz-cor-rgba-7-14-25-38);
+  --cor-rgba-70-159-202-06:var(--luz-cor-rgba-70-159-202-06);
+  --cor-rgba-75-46-125-12:var(--luz-cor-rgba-75-46-125-12);
+  --cor-rgba-97-217-237-0:var(--luz-cor-rgba-97-217-237-0);
+  --cor-rgba-97-217-237-05:var(--luz-cor-rgba-97-217-237-05);
+  --cor-rgba-97-217-237-06:var(--luz-cor-rgba-97-217-237-06);
+  --cor-rgba-97-217-237-08:var(--luz-cor-rgba-97-217-237-08);
+  --cor-rgba-97-217-237-1:var(--luz-cor-rgba-97-217-237-1);
+  --cor-rgba-97-217-237-13:var(--luz-cor-rgba-97-217-237-13);
+  --cor-rgba-97-217-237-15:var(--luz-cor-rgba-97-217-237-15);
+  --cor-rgba-97-217-237-16:var(--luz-cor-rgba-97-217-237-16);
+  --cor-rgba-97-217-237-18:var(--luz-cor-rgba-97-217-237-18);
+  --cor-rgba-97-217-237-25:var(--luz-cor-rgba-97-217-237-25);
+  --cor-rgba-97-217-237-27:var(--luz-cor-rgba-97-217-237-27);
+  --cor-rgba-97-217-237-28:var(--luz-cor-rgba-97-217-237-28);
+  --cor-rgba-97-217-237-3:var(--luz-cor-rgba-97-217-237-3);
+  --cor-rgba-97-217-237-32:var(--luz-cor-rgba-97-217-237-32);
+  --cor-rgba-97-217-237-35:var(--luz-cor-rgba-97-217-237-35);
+  --cor-rgba-97-217-237-38:var(--luz-cor-rgba-97-217-237-38);
+  --cor-rgba-97-217-237-45:var(--luz-cor-rgba-97-217-237-45);
+  --cor-rgba-97-217-237-48:var(--luz-cor-rgba-97-217-237-48);
+  --cor-rgba-97-217-237-5:var(--luz-cor-rgba-97-217-237-5);
+  --cor-rgba-97-217-237-55:var(--luz-cor-rgba-97-217-237-55);
+  --cor-rgba-97-217-237-65:var(--luz-cor-rgba-97-217-237-65);
+  --cor-rgba-97-217-237-72:var(--luz-cor-rgba-97-217-237-72);
+  --oc-ink:var(--luz-oc-ink);
+  --oc-muted:var(--luz-oc-muted);
+  --oc-bg:var(--luz-oc-bg);
+  --oc-card:var(--luz-oc-card);
+  --oc-line:var(--luz-oc-line);
+  --oc-lime:var(--luz-oc-lime);
+  --oc-orange:var(--luz-oc-orange);
+  --cn-bg:var(--luz-cn-bg);
+  --cn-fg:var(--luz-cn-fg);
+  --cn-muted:var(--luz-cn-muted);
+  --cn-accent:var(--luz-cn-accent);
+  --cn-warn:var(--luz-cn-warn);
+  --cn-err:var(--luz-cn-err);
+  --cn-ok:var(--luz-cn-ok);
+  --cn-border:var(--luz-cn-border);
+  --cn-card:var(--luz-cn-card);
+  --veu:var(--luz-veu);
+  --shadow:var(--luz-shadow);}
 
 
 
@@ -1152,7 +1730,7 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 
 /* Campos da conversa no mesmo tema escuro dos demais (tokens de :root: paper, line, ink, teal). Sem branco do navegador. */
 .seth-modelo select,.seth-form textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans)}
-.seth-modelo select{padding:4px 8px;color-scheme:dark}
+.seth-modelo select{padding:4px 8px}
 .seth-modelo select option{background:var(--sheet);color:var(--ink)}
 .seth-form textarea::placeholder{color:var(--muted);opacity:.75}
 .seth-modelo select:focus,.seth-form textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
@@ -1801,3 +2379,85 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .memoria-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
 .oc-cabecalho{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:0 0 18px}
 .oc-cabecalho .oc-lede{margin:6px 0 0}
+/* Importantes (11/11/2026): só tokens de :root (paper, sheet, line, ink, muted, teal, gold). */
+.importantes-cartao .chip{align-self:flex-start}
+.importantes-novo{display:grid;gap:8px;margin:0 0 12px}
+.importantes-novo label,.importantes-filtro label{color:var(--muted);font:12px var(--mono)}
+.importantes-novo textarea,.importantes-editar textarea{width:100%;min-height:58px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.5 var(--sans);resize:vertical}
+.importantes-editar input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.4 var(--sans)}
+.importantes-novo textarea:focus,.importantes-editar textarea:focus,.importantes-editar input:focus,.importantes-filtro select:focus{outline:2px solid var(--teal);outline-offset:1px}
+.importantes-barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.importantes-filtro{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+.importantes-filtro select{width:auto;min-width:170px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:13px/1.4 var(--sans)}
+.importantes-aviso{margin:0 0 12px;padding:8px 10px;border-radius:10px;border:1px solid var(--gold);color:var(--gold);font-size:13px;line-height:1.45}
+.importantes-lista{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.importantes-item{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--paper)}
+.importantes-item.feito{opacity:.78}
+.importantes-item.descartado{opacity:.6}
+.importantes-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.importantes-origem{font:11px var(--mono);color:var(--muted)}
+.importantes-texto{margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.importantes-nota{margin:6px 0 0;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.importantes-quando{margin:6px 0 0;font:10px var(--mono);color:var(--muted)}
+.importantes-acoes-item{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+.importantes-editar{display:grid;gap:8px}
+/* História (11/11/2026): índice de tomos à esquerda, texto à direita; marcas de origem com tokens do :root. */
+.historia-legenda{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 18px}
+.marca{display:inline-block;border-radius:6px;padding:0 6px;font-size:.92em;line-height:1.5;white-space:nowrap}
+.marca-medido{background:var(--teal-soft);color:var(--teal)}
+.marca-relato{background:var(--gold-soft);color:var(--gold)}
+.marca-inferencia{background:var(--violet-soft);color:var(--violet)}
+.historia-layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:24px;align-items:start}
+.historia-indice{position:sticky;top:16px;border:1px solid var(--line);border-radius:14px;background:var(--sheet);padding:16px;max-height:calc(100vh - 32px);overflow:auto}
+.historia-indice .panel-title{margin:0 0 10px}
+.historia-tomos,.historia-textos{list-style:none;margin:0;padding:0}
+.historia-tomo{margin:0 0 14px}
+.historia-tomo-titulo{color:var(--muted);font-size:13px;margin:0 0 6px}
+.historia-texto-item{width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;color:var(--ink);font:inherit;font-size:14px;padding:8px 10px;cursor:pointer}
+.historia-texto-item:hover{border-color:var(--line)}
+.historia-texto-item[aria-current="true"]{border-color:var(--teal);background:var(--teal-soft)}
+.historia-texto-item:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.historia-leitura{border:1px solid var(--line);border-radius:14px;background:var(--sheet);padding:20px 24px;min-width:0}
+.historia-barra{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.historia-meta{color:var(--muted);margin:0;font-size:14px}
+.historia-estado{color:var(--muted);font-size:13px;line-height:1.5;margin:4px 0 0}
+.historia-ouvir-estado{color:var(--gold);font-size:14px;min-height:1.5em;margin:8px 0 0}
+.historia-corpo{max-width:70ch;line-height:1.75;font-size:17px;margin-top:18px}
+.historia-corpo h2,.historia-corpo h3,.historia-corpo h4,.historia-corpo h5{font-family:var(--serif);font-weight:400;line-height:1.25;margin:1.4em 0 .5em}
+.historia-corpo h2{font-size:28px}
+.historia-corpo h3{font-size:23px}
+.historia-corpo h4{font-size:19px}
+.historia-corpo h5{font-size:17px;color:var(--muted)}
+.historia-corpo p,.historia-corpo ul,.historia-corpo ol{margin:0 0 1em}
+.historia-corpo code{font-family:var(--mono);font-size:.9em;background:var(--blue-soft);border-radius:5px;padding:1px 5px}
+.historia-corpo hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+@media (max-width: 860px){.historia-layout{grid-template-columns:minmax(0,1fr)}.historia-indice{position:static;max-height:none}}
+
+/* Lote 4 da Conversa (09/11/2026): ramos, parar, continuar, feedback, contexto, atalhos e tema. Só tokens do :root. */
+.seth-ramo{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:6px}
+.seth-ramo button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:1px 9px;cursor:pointer;font:inherit}
+.seth-ramo button:disabled{opacity:.4;cursor:default}
+.seth-continuacao{margin:10px 0 6px;font:10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
+.seth-selo-interrompida{border-color:var(--rose);color:var(--rose)}
+.msg-interrompida,.msg-continuacao{border-style:dashed}
+.msg-rodape{display:flex;flex-direction:column;gap:6px}
+.seth-feedback{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px}
+.seth-feedback-botoes{display:flex;gap:6px}
+.seth-feedback-botoes button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:1px 7px;cursor:pointer;font-size:13px}
+.seth-feedback-botoes button[aria-pressed="true"]{border-color:var(--teal);background:var(--teal-soft);color:var(--teal)}
+.seth-motivo{flex:1;min-width:160px;font:inherit;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+.msg-editar{width:100%;min-height:72px;font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);resize:vertical}
+.seth-contexto-bloco{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.seth-contexto{margin:0;line-height:1.45}
+.seth-contexto-barra{width:100%;height:6px;accent-color:var(--teal)}
+.seth-origem{margin:0;font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seth-copiado{font-size:12px;color:var(--teal)}
+.ajustes{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.tema-seletor{font-size:12px}
+.ajustes select{font:inherit;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--sheet);color:var(--ink)}
+.atalhos{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--veu)}
+.atalhos[hidden]{display:none}
+.atalhos-caixa{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:18px 20px;max-width:520px;width:calc(100% - 32px);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;color:var(--ink)}
+.atalhos-caixa h2{margin:0;font-size:18px}
+.atalhos-lista{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.45}
+kbd{font:12px var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--blue-soft);color:var(--ink)}
