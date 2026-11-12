@@ -21,6 +21,8 @@ A História é o relato do que o sistema fez, texto por texto, organizado em tom
 
 `estado` diz se o texto é canônico. Sem assinatura do Humano, o texto é rascunho.
 
+`registro-de-canonizacao.md`, na raiz de `historia/` (fora dos tomos): anota quando cada texto ficou canônico, com a assinatura e o commit. O painel não o lê. Como o `estado` do frontmatter não se edita, o registro é a fonte da canonização.
+
 ## Lente
 
 Até virar regra, a História é lida pela lente do Protocolo de Inclusão Humana contínua (brainstorm de 07/11/2026, guardado fora do repositório, na Área de trabalho do Humano).

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway, o LibreChat,
+# Liga a Seth (atalho "Seth"). Sobe a espinha inteira (agata.target), o gateway,
 # a voz, o painel, o Obsidian e as vigias da Equipe. Depois abre o navegador do sistema
 # (Chromium, perfil "Sistema Agata") só com as abas que faltam.
+# O LibreChat saiu deste atalho em 07/11/2026: o Humano excluiu os contêineres e os volumes.
+# Este atalho não sobe o LibreChat e não copia nada para ~/librechat.
 # Contraparte: `seth-parar`, que desliga tudo. O MoE :20129 continua sob demanda.
 # Fonte versionada: ~/agata/redesign/systemd/seth
 set -e
-LC=~/librechat/docker-compose.yml
 DIARIO=~/.cache/agata/sincronia/eventos.log
 mkdir -p "$(dirname "$DIARIO")" 2>/dev/null || true
 echo "$(TZ=America/Sao_Paulo date +%H:%M) SETH subindo (atalho seth)" >> "$DIARIO" 2>/dev/null || true
@@ -15,9 +16,8 @@ systemctl --user start seth-gateway.service seth-escriba.service seth-verificado
 systemctl --user start painel-operacional.service 2>/dev/null || true
 # Obsidian não sobe aqui: abre pelo painel, quando você pedir.
 # Skills novas (05/09/2026) -- MCP sob demanda: ponte Discord (:20135) e
-# navegador Playwright+Brave (:20136). Sobem junto pra estarem no ar quando o
-# LibreChat tentar se conectar; startup:false no librechat.yaml quer dizer que
-# o LibreChat nao falha se elas ainda nao responderam, so tenta de novo depois.
+# navegador Playwright+Brave (:20136). Sobem junto com a Seth. O LibreChat, que os
+# consumia, foi excluído em 07/11/2026.
 systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null || true
 # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
 # fica de pe pra ingles -- ver comentario no librechat.yaml.
@@ -27,33 +27,6 @@ systemctl --user start piper-tts.service 2>/dev/null || true
 _ausentes=~/agata/config/equipe-ausentes.txt
 for _m in claude codex; do
   grep -qx "$_m" "$_ausentes" 2>/dev/null || systemctl --user start "agata-vigia@$_m.service" 2>/dev/null || true
-done
-# Deploy da config versionada -> ~/librechat/ (H5, MEMÓRIAS (401)). Antes era
-# cp manual: editar redesign/librechat/ e esquecer o cp deixava o LibreChat
-# rodando a versao velha (achado em (389)/(392)). Agora o atalho sincroniza e
-# so reinicia o container se algo mudou.
-_lc_changed=0
-# docker-compose.yml entrou na lista em (532): antes o atalho sincronizava o
-# librechat.yaml mas NÃO o compose -- os dois podiam divergir (yaml falando com
-# 172.29.7.1, compose ainda em modo host), exatamente a quebra de (517). Os dois
-# andam juntos agora. `compose up -d` abaixo aplica a mudança de compose sozinho.
-for _pair in "librechat.yaml|$HOME/librechat/librechat.yaml" \
-             "docker-compose.yml|$HOME/librechat/docker-compose.yml" \
-             "canon-mcp.mjs|$HOME/librechat/data/mcp/canon-mcp.mjs" \
-             "agata-tema.css|$HOME/librechat/agata-tema.css"; do
-  # agata-tema.css entrou em (680): o compose monta o tema da Agata, mas o atalho
-  # não o copiava -- tema editado no repo ficaria velho no LibreChat sem aviso.
-  _src=~/agata/redesign/librechat/"${_pair%%|*}"; _dst="${_pair#*|}"
-  if [ -f "$_src" ] && ! cmp -s "$_src" "$_dst"; then
-    mkdir -p "$(dirname "$_dst")" && cp "$_src" "$_dst" && _lc_changed=1
-    echo "deploy: $_dst sincronizado da fonte versionada"
-  fi
-done
-docker compose -f "$LC" up -d >/dev/null 2>&1 || true
-[ "$_lc_changed" = 1 ] && docker restart librechat >/dev/null 2>&1 || true
-# espera o LibreChat responder (ate ~60s -- o primeiro boot e o mais lento)
-for i in $(seq 1 30); do
-  curl -sf -o /dev/null --max-time 2 http://127.0.0.1:3080/health && break || sleep 2
 done
 # Navegador do sistema: Chromium, perfil "Sistema Agata" (Profile 1 do Chromium).
 # Se ele já estiver aberto, só entram as abas que faltam (nada duplicado).
@@ -68,7 +41,7 @@ _chromium_aberto() {
   [ -n "$_p" ] && kill -0 "$_p" 2>/dev/null
 }
 # Modo programa: o painel abre como janela de aplicativo (sem barra de endereço).
-# As janelas dos modelos e o LibreChat não abrem aqui: abrem pelo painel, quando você clica.
+# As janelas dos modelos não abrem aqui: abrem pelo painel, quando você clica.
 if ! _chromium_aberto; then
   setsid "$AGATA_NAVEGADOR" --profile-directory="$AGATA_PERFIL" --no-first-run --app="$PAINEL/prototipo" >/dev/null 2>&1 &
   # Dá tempo para a janela do painel aparecer e para a extensão do Conselho avisar o painel.
@@ -84,6 +57,4 @@ _notifica_unidades() {
   done
 }
 _notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service
-_lc=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:3080/health 2>/dev/null || echo fora)
-notify-send -a Seth "LibreChat" "$_lc" 2>/dev/null || true
 notify-send -a Seth "Seth" "pronta: painel do Agata aberto" 2>/dev/null || true

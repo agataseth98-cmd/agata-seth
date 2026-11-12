@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Início de sessão na Equipe (skill agata-fluxo §0): uma leitura, saída curta. Qualquer membro do Conselho.
-# Uso: bash scripts/equipe/inicio.sh <membro>   (claude, codex, gemini, goose...)
+# Uso: bash scripts/equipe/inicio.sh <membro>   (claude, codex, gemini, opencode...)
 # Sem nada novo, não imprime texto (economia de tokens).
 set -euo pipefail
 agente="${1:?uso: inicio.sh <membro>}"

@@ -36,8 +36,8 @@ r = shell(base + 'ALVO=nenhum; ESTADO=failed; p9_servicos_declarados')
 assert r.returncode == 0 and not r.stdout, (r.stdout, r.stderr)
 n += 1
 r = shell(base + '''ALVO=nenhum; ESTADO=failed
-docker() { case "$*" in *librechat-ponte-host*) :;; *) printf '%s\\n' librechat librechat-mongodb librechat-meilisearch;; esac; }
+docker() { :; }
 p9_servicos_declarados''')
-assert r.returncode == 0 and 'librechat-ponte-host' in r.stdout, (r.stdout, r.stderr)
+assert r.returncode == 0 and 'librechat' not in r.stdout, (r.stdout, r.stderr)
 n += 1
 print(f'COBERTURA SERVICOS OK -- {n}/{n}')

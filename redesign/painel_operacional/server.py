@@ -38,6 +38,8 @@ import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
 import historia_painel  # noqa: E402
 import importantes  # noqa: E402
+import seth_voz  # noqa: E402
+import seth_ditado  # noqa: E402
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
@@ -1082,6 +1084,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(302, "text/plain; charset=utf-8", b"", (("Location", destino),))
         if self.path.startswith("/api/grafo"):
             return self._grafo()
+        if self.path == "/api/seth/ouvir":
+            return self._send(200, "application/json; charset=utf-8", json.dumps(seth_voz.estado(), ensure_ascii=False).encode("utf-8"))
         if self.path == "/api/seth/modelos":
             return self._send(200, "application/json; charset=utf-8", json.dumps(chat_stream.lista_modelos(), ensure_ascii=False).encode("utf-8"))
         if self.path == "/api/seth/conversas":
@@ -1220,6 +1224,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._abrir_programa()
         if self.path == "/api/historia/ouvir":
             return self._historia_ouvir()
+        if self.path == "/api/seth/ouvir":
+            return self._seth_ouvir()
+        if self.path == "/api/seth/ouvir/parar":
+            return self._seth_ouvir_parar()
+        if self.path == "/api/seth/ditado":
+            return self._seth_ditado()
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
@@ -1803,6 +1813,54 @@ class Handler(BaseHTTPRequestHandler):
         except historia_painel.ErroHistoria as erro:
             return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
         return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _json_voz(self, status: int, obj: dict) -> None:
+        """Resposta JSON das rotas de voz (fala e ditado). Sucesso e erro saem no mesmo formato: {falou, motivo} ou {erro}."""
+        self._send(status, "application/json; charset=utf-8", json.dumps(obj, ensure_ascii=False).encode("utf-8"))
+
+    def _seth_ouvir(self) -> None:
+        """Ler em voz alta (11/11/2026). Faz falar na Máquina, então é escrita: só da origem do painel.
+        Responde se falou ou NÃO falou. Demora o tempo da leitura: o Parar chega em outra conexão."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._json_voz(403, {"erro": "pedido de outra origem recusado"})
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal():
+            return self._json_voz(411, {"erro": "pedido sem tamanho (Content-Length)"})
+        if int(tamanho) > seth_voz.LIMITE_CORPO_BYTES:
+            return self._json_voz(413, {"erro": f"pedido acima de {seth_voz.LIMITE_CORPO_BYTES} bytes"})
+        try:
+            pedido = json.loads(self.rfile.read(int(tamanho)).decode("utf-8") or "{}")
+        except (ValueError, UnicodeDecodeError):
+            return self._json_voz(400, {"erro": "pedido com JSON inválido"})
+        texto = pedido.get("texto") if isinstance(pedido, dict) else None
+        try:
+            dados = seth_voz.iniciar(texto)
+        except seth_voz.ErroVoz as erro:
+            return self._json_voz(erro.status, {"erro": erro.motivo})
+        return self._json_voz(200, dados)
+
+    def _seth_ouvir_parar(self) -> None:
+        """Pede a parada da leitura. Vale entre trechos. Sem corpo; se não estiver lendo, diz isso."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._json_voz(403, {"erro": "pedido de outra origem recusado"})
+        return self._json_voz(200, seth_voz.parar())
+
+    def _seth_ditado(self) -> None:
+        """Ditado (11/11/2026): o áudio do microfone, em corpo cru, repassado ao ouvido local. Escrita: só da origem do painel.
+        O texto volta para o campo; nada é enviado à Seth daqui."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._json_voz(403, {"erro": "pedido de outra origem recusado"})
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal():
+            return self._json_voz(411, {"erro": "pedido sem tamanho (Content-Length)"})
+        if int(tamanho) > seth_ditado.LIMITE_AUDIO_BYTES:
+            return self._json_voz(413, {"erro": "gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos."})
+        corpo = self.rfile.read(int(tamanho))
+        try:
+            dados = seth_ditado.transcrever(corpo, self.headers.get("Content-Type", ""))
+        except seth_ditado.ErroDitado as erro:
+            return self._json_voz(erro.status, {"erro": erro.motivo})
+        return self._json_voz(200, dados)
 
     def _grafo(self) -> None:
         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""

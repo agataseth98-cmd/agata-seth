@@ -1719,6 +1719,14 @@ dialog .dialog-actions{padding-top:12px;justify-content:flex-end}
 .seth-main{min-width:0;display:flex;flex-direction:column;gap:8px}
 
 .seth-form{display:flex;gap:8px;margin-top:4px}
+/* Voz da Seth (11/11/2026): ditado, modo conversa e linha de estado. Só tokens do :root. */
+.seth-ditar[aria-pressed="true"]{border-color:var(--rose);color:var(--rose)}
+.seth-ditar:disabled{opacity:.5;cursor:default}
+.seth-voz{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:8px;font-size:12px;color:var(--muted)}
+.seth-voz-modo{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.seth-voz-estado{margin:0;flex:1 1 100%;font-size:12px;line-height:1.45;color:var(--muted)}
+.seth-voz-estado.erro{color:var(--rose)}
+.seth-voz-estado.ok{color:var(--teal)}
 
 .seth-modelo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--cor-a8b8ce)}
 

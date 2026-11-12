@@ -1,6 +1,6 @@
 ---
 name: agata-fluxo-equipe
-description: Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partida conjunta, fila, vigia sem timer, proposta → revisão cruzada → assinatura → aplicação → merge, fallback quando um cai e economia de cota. Use ao abrir ou retomar uma sessão conjunta, antes de publicar uma proposta, ao aplicar uma proposta assinada, ao entregar o comando de assinatura ao Humano, ou quando um membro some.
+description: Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, OpenCode, Seth...), dois ou mais ao mesmo tempo: partida conjunta, fila, vigia sem timer, proposta → revisão cruzada → assinatura → aplicação → merge, fallback quando um cai e economia de cota. Use ao abrir ou retomar uma sessão conjunta, antes de publicar uma proposta, ao aplicar uma proposta assinada, ao entregar o comando de assinatura ao Humano, ou quando um membro some.
 ---
 
 # Fluxo da Equipe (primeira Skill do sistema Agata)
@@ -9,7 +9,7 @@ Por quê: em 16/10/2026 a dupla Claude × Codex (nome antigo da Equipe, até 28/
 modelava (MEMÓRIAS (732): timer de 2 min, mensagens de estado, crase executada pelo shell, número (729) repetido 14 vezes,
 vigia vencido). Esta Skill é o que ficou de pé. As ferramentas moram em `scripts/equipe/` (estado fora do repo, em `~/.cache/agata/sincronia/equipe/`).
 
-Membro = nome curto em minúsculas (`claude`, `codex`, `gemini`, `goose`, `seth`...). Nenhum nome é fixo no código: quem chega entra com `--agente <nome>`; `iniciar --com a,b,c` diz quem a partida espera (sem a lista, quaisquer dois abrem). Linha nova na matriz só entra com o aceite de TODOS os outros presentes.
+Membro = nome curto em minúsculas (`claude`, `codex`, `gemini`, `opencode`, `seth`...). Nenhum nome é fixo no código: quem chega entra com `--agente <nome>`; `iniciar --com a,b,c` diz quem a partida espera (sem a lista, quaisquer dois abrem). Linha nova na matriz só entra com o aceite de TODOS os outros presentes.
 
 > Protocolo MSG, memória do Conselho e auditoria: ver `agata-conselho-memoria`. Painel: ver `agata-painel`.
 

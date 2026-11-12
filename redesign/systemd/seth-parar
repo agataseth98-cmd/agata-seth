@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Desliga a Seth INTEIRA (atalho "parar Seth"): vigias, Obsidian, navegador do sistema,
-# LibreChat, serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
+# serviços e a espinha (agata.target). Libera tudo, inclusive a VRAM da
 # RTX 4060 e os modelos carregados no Ollama.
 # O Chromium é só do sistema Agata, então fechá-lo inteiro não atinge outro uso.
+# O LibreChat saiu deste atalho em 07/11/2026 (contêineres excluídos pelo Humano).
 # Fonte versionada: ~/agata/redesign/systemd/seth-parar
-LC=~/librechat/docker-compose.yml
 DIARIO=~/.cache/agata/sincronia/eventos.log
 # Vigias primeiro: a parada da Seth não deve gerar alertas de "serviço caiu".
 systemctl --user stop agata-vigia@claude.service agata-vigia@codex.service 2>/dev/null || true
@@ -17,7 +17,6 @@ _pid=${_lock##*-}
 if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
   kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
 fi
-docker compose -f "$LC" stop >/dev/null 2>&1 || true
 systemctl --user stop piper-tts.service 2>/dev/null || true
 systemctl --user stop painel-operacional.service 2>/dev/null || true
 systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true

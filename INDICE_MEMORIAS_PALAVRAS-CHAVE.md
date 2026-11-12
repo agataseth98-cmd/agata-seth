@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(997) DIÁRIO — 12/11/2026 · **Aplicados chat-voz-11-11 e pacote-12-11 com a assinatura do Humano (assinaturas de 12/11, 09:16).**
+  palavras-chave: aplicados, chat, voz, pacote, assinatura, humano, assinaturas
 (996) DIÁRIO — 12/11/2026 · **Proposta pacote-12-11 publicada: seis propostas paradas (tira-librechat, canon-boot, agente-opencode, docs-opencode refeita, verificar-rastro refeita e skill-processo-lessons só com o que não repete a skill) mais a nota de canonização do Texto 1 da História, numa só assinatura; sombra-orcamento vai para superadas.**
   palavras-chave: proposta, pacote, publicada, seis, propostas, paradas, tira, librechat, canon, boot, agente, opencode, docs, refeita, verificar, rastro, skill, processo, lessons, repete, nota, canonização, texto, história, assinatura, sombra, orcamento, vai, superadas
 (995) DIÁRIO — 12/11/2026 · **Proposta chat-voz-11-11 publicada: ouvir em partes, ditado e modo conversa no chat do painel (paridade com o LibreChat), sem alterar o canon.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: rea, leitura, aplicado, herdr, integracao, skill, agata, engenharia, reversa, wrapper, scripts, allowlist, subcomandos, mantido
 (968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D3 em stderr antes da chamada, multicast bloqueado no egress, skill de processo corrigida, portões mecanizados.**
   palavras-chave: lote, aplicado, processo, aviso, stderr, chamada, multicast, bloqueado, egress, skill, corrigida, portões, mecanizados
-(967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros (MEMÓRIAS, ONDE_ESTAMOS, âncoras e a proposta v1) e não aplica no main. Substituída pela v3 `lote3-processo-20261106`, só código.** Proposta `lote3-processo-20261106`.
-  palavras-chave: lote, superada, diff, assinado, trazia, registros, memórias, estamos, âncoras, proposta, aplica, main, substituída, processo, código
+(967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros …
+  palavras-chave: lote, superada, diff, assinado, trazia, registros
 (966) DIÁRIO — 06/11/2026 · **Proposta lote2b (v2 do lote 2): substitui a v1 `lo …
   palavras-chave: proposta, lote, substitui
 (965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes …

@@ -30,6 +30,9 @@ NÃO confere afirmação falsa nova em prosa (não determinístico) -- quando um
 achada à mão, vira linha do catálogo.
 
 Log por turno em `~/.cache/agata/auditoria-turno.jsonl` (achados, nunca o texto).
+`--verificar [--cliente NOME]` (CLI, (849)) grava um registro de metadado (sem texto) no
+mesmo log e na mesma cadeia: `cli-NOME` com `n_achados` e `tipos` (prefixo de cada achado,
+nunca o literal). NOME fora de `[a-z0-9-]{1,32}` vira `desconhecido`. Falha ao gravar é silenciosa.
 
 Uso: python3 redesign/router/auditoria_turno.py --selftest
 """
@@ -1091,6 +1094,44 @@ def _registrar(cliente, achados, erro):
         pass
 
 
+_CLIENTE_CLI = re.compile(r"[a-z0-9-]{1,32}")
+
+
+def _cliente_cli(nome) -> str:
+    return nome if isinstance(nome, str) and _CLIENTE_CLI.fullmatch(nome) else "desconhecido"
+
+
+def _tipo_achado(achado: str) -> str:
+    """Prefixo de tipo: texto antes do primeiro ':', até 32 caracteres; corta também antes de
+    aspas, crase, parêntese ou travessão para nunca levar trecho citado do achado;
+    números viram N (o tipo não carrega valor)."""
+    t = re.split(r"[:'\"`(\u2014\u201c\u00ab]", achado, maxsplit=1)[0]
+    return re.sub(r"\d+", "N", t.strip())[:32].strip()
+
+
+def _registrar_cli(cliente, achados) -> None:
+    """Registro de metadado do --verificar: sem texto de entrada nem literal de achado."""
+    try:
+        LOG.parent.mkdir(parents=True, exist_ok=True)
+        registro = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "cliente": "cli-" + _cliente_cli(cliente),
+                    "n_achados": len(achados), "tipos": sorted({_tipo_achado(a) for a in achados}),
+                    "anterior": _ultimo_hash()}
+        registro["hash"] = _hash_registro(registro)
+        with open(LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(registro, ensure_ascii=False) + "\n")
+    except (OSError, ValueError):
+        pass
+
+
+def _args_verificar(args: list):
+    """Devolve o nome do cliente se args é `--verificar [--cliente NOME]`; None se não é."""
+    if args == ["--verificar"]:
+        return ""
+    if len(args) == 3 and args[0] == "--verificar" and args[1] == "--cliente":
+        return args[2]
+    return None
+
+
 def verificar_cadeia() -> dict:
     """Confere o encadeamento do log. Detecta alteração, reordenação e remoção de registros encadeados.
     Não detecta omissão de um turno que nunca foi gravado (limite declarado: cadeia não prova completude)."""
@@ -1119,6 +1160,100 @@ def verificar_cadeia() -> dict:
             anterior = r["hash"]
     resultado["ok"] = not resultado["quebras"]
     return resultado
+
+
+def _casos_cli() -> list:
+    """C1-C9 da spec verificar-rastro: subprocess com AGATA_AUDITORIA_LOG temporário."""
+    import hashlib
+    import stat
+    import tempfile
+    real = Path("~/.cache/agata/auditoria-turno.jsonl").expanduser()
+
+    def foto():
+        try:
+            b = real.read_bytes()
+            return (b.count(b"\n"), hashlib.sha256(b).hexdigest())
+        except OSError:
+            return None
+    antes = foto()
+    d = Path(tempfile.mkdtemp())
+    ro = d / "ro"
+    try:
+        return _casos_cli_em(d, ro, antes, foto, stat)
+    finally:
+        if ro.exists():
+            ro.chmod(stat.S_IRWXU)
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def _casos_cli_em(d, ro, antes, foto, stat) -> list:
+    log = d / "cli.jsonl"
+    env = {**os.environ, "AGATA_AUDITORIA_LOG": str(log)}
+
+    def rodar(texto, *extra, env_=None):
+        return subprocess.run([sys.executable, str(Path(__file__).resolve()), "--verificar", *extra],
+                              input=texto, capture_output=True, text=True, env=env_ or env, timeout=60)
+
+    def linhas():
+        return [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.is_file() else []
+
+    marca = "MARCADOR-UNICO-7f3a9c"
+    com = f"Ver P-40 e `scripts/{marca}.py`. {marca}"
+    r1 = rodar(com, "--cliente", "claude-code")
+    reg1 = linhas()[-1] if linhas() else {}
+    esperado = verificar_resposta_atual(com, [])
+    c1 = (len(linhas()) == 1 and reg1.get("cliente") == "cli-claude-code" and reg1.get("n_achados") == len(esperado) >= 2
+          and reg1.get("tipos") == sorted({_tipo_achado(a) for a in esperado})
+          and set(reg1) == {"ts", "cliente", "n_achados", "tipos", "anterior", "hash"})
+    r2 = rodar("texto limpo sem nada a apontar.")
+    reg2 = linhas()[-1] if linhas() else {}
+    c2 = reg2.get("cliente") == "cli-desconhecido" and reg2.get("n_achados") == 0 and reg2.get("tipos") == []
+    # C3: mesma saída e exit code que o cálculo direto (formato de hoje)
+    saida_esp = "".join(f"- {a}\n" for a in esperado) + f"verificação mecânica: {len(esperado)} achado(s)\n"
+    c3 = (r1.returncode == 1 and r1.stdout == saida_esp and r2.returncode == 0
+          and r2.stdout == "verificação mecânica: nada a apontar\n")
+    bruto = log.read_text(encoding="utf-8") if log.is_file() else ""
+    c4 = marca not in bruto
+    rodar("x", "--cliente", "Claude Code!")
+    c5 = linhas()[-1].get("cliente") == "cli-desconhecido" if linhas() else False
+    # C6: registro de turno do gateway intercalado com cli; cadeia íntegra
+    global LOG
+    antigo = LOG
+    LOG = log
+    _registrar("seth-x", ["algo"], None)
+    rodar("Ver P-40.", "--cliente", "codex")
+    cad = verificar_cadeia()
+    LOG = antigo
+    c6 = cad["ok"] and cad["encadeados"] == len(linhas()) == 5
+    # C7: log em diretório sem escrita -> exit code e saída iguais
+    if os.geteuid() == 0:
+        c7, nome7 = True, "C7 selftest: verificar com log somente leitura (SKIP: root ignora permissão)"
+    else:
+        ro.mkdir()
+        ro.chmod(stat.S_IRUSR | stat.S_IXUSR)
+        r7 = rodar(com, env_={**env, "AGATA_AUDITORIA_LOG": str(ro / "x.jsonl")})
+        c7 = r7.returncode == 1 and r7.stdout == saida_esp and not (ro / "x.jsonl").exists()
+        nome7 = "C7 selftest: verificar com log somente leitura"
+    # C8: trecho citado dentro do achado (Jev) não vai para o log
+    trecho = "Opinião do decisor local (Jev): ZETA-trecho-citado-91"
+    rodar(trecho, "--cliente", "gemini")
+    reg8 = linhas()[-1] if linhas() else {}
+    bruto = log.read_text(encoding="utf-8")
+    c8 = reg8.get("n_achados", 0) >= 1 and "ZETA-trecho-citado-91" not in bruto and "decisor local" not in bruto
+    # C9: log real com mesma contagem de linhas e mesmo sha256 antes/depois
+    c9 = foto() == antes
+    return [("C1 selftest: verificar grava registro cli com metadado", c1),
+            ("C2 selftest: verificar sem achado grava registro vazio", c2),
+            ("C3 selftest: verificar mantém saída e exit code", c3),
+            ("C4 selftest: verificar não grava o texto de entrada", c4),
+            ("C5 selftest: cliente inválido normalizado", c5),
+            ("C6 selftest: cadeia íntegra com registros cli", c6),
+            (nome7, c7),
+            ("C8b selftest: tipo normaliza número e corta trecho citado",
+             _tipo_achado("t=12 errado em 3 linhas: x") == "t=N errado em N linhas"
+             and _tipo_achado("opinião do Jev ('frase 9'): y") == "opinião do Jev"),
+            ("C8 selftest: registro cli não contém texto do achado", c8),
+            ("C9 selftest: log real intacto (linhas e sha256)", c9)]
 
 
 def _selftest() -> int:
@@ -1508,7 +1643,7 @@ def _selftest() -> int:
          len(_controle_inexistente("restrito a 127.0.0.1 (P-40)")) == 1
          and _controle_inexistente("o P-4 cobre o Ollama e o P-24 avisa") == []),
     ]
-    casos = casos + casos_citacao + casos_redea + casos_lacunas
+    casos = casos + casos_citacao + casos_redea + casos_lacunas + _casos_cli()
     for nome, ok in casos:
         print(f"{'PASS' if ok else 'FALHA'}  {nome}")
     falhas = sum(not ok for _, ok in casos)
@@ -1528,8 +1663,10 @@ if __name__ == "__main__":
             print(f"- linha {_n}: {_motivo}")
         print("cadeia íntegra" if _r["ok"] else f"cadeia com {len(_r['quebras'])} quebra(s)")
         sys.exit(0 if _r["ok"] else 1)
-    if sys.argv[1:] == ["--verificar"]:
+    _cli = _args_verificar(sys.argv[1:])
+    if _cli is not None:
         _achados = verificar_resposta_atual(sys.stdin.read(), [])
+        _registrar_cli(_cli, _achados)
         for _a in _achados:
             print(f"- {_a}")
         print("verificação mecânica: nada a apontar" if not _achados else f"verificação mecânica: {len(_achados)} achado(s)")

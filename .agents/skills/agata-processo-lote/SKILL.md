@@ -183,3 +183,31 @@ Passo mecânico (aplicação, commit, reindex, montagem de diff) não é do coor
 
 ## Para outro modelo que tocar o processo
 Leia a seção "Passo a passo" inteira antes de qualquer comando. Não avance sem o passo 3 verde. Quando algo pedir assinatura, permissão ou decisão do Humano, pare e escreva o comando exato e o motivo. Relate o que foi executado, com a saída, e o que não foi medido.
+
+## Lições medidas em 07/11/2026
+Cada lição tem a regra em uma frase e a fonte em uma linha. Quando a fonte é relato da rodada que não foi conferido, a linha diz "relato, não conferido". Medido e lido aparecem rotulados. As letras são as da proposta `skill-processo-lessons-07-11`; as lições que repetiam esta skill não entram.
+
+- **a. Medir antes de afirmar.** Ler código não é medição: risco só lido se escreve "lido", e só vira "confirmado" depois de teste ou comando.
+  Fonte: regra da rodada de 07/11, sem caso específico informado.
+- **b. Risco medido se resolve na mesma rodada, por proposta.** Defeito de código já medido se corrige numa proposta, sem pedir permissão antes; a assinatura continua sendo do Humano.
+  Fonte: regra da rodada de 07/11, sem caso específico informado.
+- **c. Teste com cópia dos dados.** Migração, importação e teste de escrita rodam sobre cópia, com manifesto de hashes antes de importar; nunca sobre o armazenamento real.
+  Fonte: a migração das conversas do LibreChat usou uma cópia e um manifesto de hashes antes de importar (relato, não conferido).
+- **d. Em teste de navegador e de HTTP, só GET.** Antes de rodar, confira a origem: um POST dispara ação real.
+  Fonte: um POST para /api/abrir, disparado por teste com origem errada, colocou conselheiros na fila; um clique na seção Conselho também disparou POST (relato, não conferido).
+- **f. Trabalho durável não fica em /tmp.** Use `/home/orusoua/agata/.claude/worktrees/` ou `~/agata-documentacao`; /tmp é memória e some num reinício sujo.
+  Fonte: 22 worktrees perdidas em 07/11, com causa apontada como journal, fsck e tmpfs (relato). Medido: `findmnt -T /tmp` mostra tmpfs, e `git worktree list` mostra 20 entradas prunable (não 22). Journal e fsck não medidos.
+- **i. Decisão do Humano fora do repo vira proposta ou registro.** Uma decisão que existe só em mensagem não é tratada como decidida: antes, vira proposta P-8 ou entrada de registro.
+  Fonte: a desativação do Ollama no boot e a substituição do LibreChat existiam só em mensagem (relato, não conferido). Medido: grep em MEMÓRIAS.md por Ollama com boot ou desativ, e por LibreChat com substitu ou troca, não achou nada; isso prova só "não encontrado nesta busca".
+- **j. Antes de remover serviço ou dado, verifique a cópia.** Faça inventário sem conteúdo, cópia de segurança com hash, importação idempotente e contagem igual nos dois lados; só então remova, com ordem explícita do Humano.
+  Fonte: a migração das conversas do LibreChat seguiu essa ordem (relato, não conferido).
+- **k. Limiar de corte pela quebra medida.** Escolha o limiar pela quebra observada na distribuição, não por chute, e anote a distribuição junto.
+  Fonte: limiar de 20 mensagens, com quebra entre 18 e 22 (relato, não conferido).
+- **l. Número com rótulo.** Todo número sai marcado como medido, inferido ou não medido; número sem rótulo é defeito.
+  Fonte: regra da rodada de 07/11, sem caso específico informado.
+- **m. Perguntas numeradas.** Perguntas ao Humano vão numeradas, na ordem em que aparecem na mensagem.
+  Fonte: preferência explícita do Humano (relato, não conferido).
+- **n. Sem sudo pelo modelo.** O modelo não usa sudo; comando de sistema que exige sudo vai ao Humano como comando pronto, com caminho absoluto, para colar no terminal dele, sem o prefixo `!`.
+  Fonte: o `!` do chat não mostrou o prompt de senha (registro de 23/10); `sudo -n` falha e a senha não é do modelo (registro de 17/10).
+- **o. Estado real antes de afirmar.** Antes de dizer que um serviço, container, branch ou PR está em certo estado, consulte com systemctl, docker inspect, git ls-remote ou gh pr view e cite a saída.
+  Fonte: divergências entre o relatório de um agente e o estado medido (relato, não conferido).

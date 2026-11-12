@@ -3229,7 +3229,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-conversar-com-seth/SKILL.md",
-  "resumo": "Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou escrever na conversa dele, de qualquer modelo (Claude Code, Codex, Gemini, G"
+  "resumo": "Falar com a Seth, ouvir a conversa que o Humano tem com ela, ou escrever na conversa dele, de qualquer modelo (Claude Code, Codex, Gemini, O"
  },
  {
   "nome": "agata-disciplina",
@@ -3277,7 +3277,7 @@
   "fonte": "agata",
   "tema": "agata",
   "caminho": ".agents/skills/agata-fluxo-equipe/SKILL.md",
-  "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, Goose, Seth...), dois ou mais ao mesmo tempo: partid"
+  "resumo": "Trabalhar em EQUIPE no Agata — qualquer membro do Conselho (Claude Code, Codex, Gemini, OpenCode, Seth...), dois ou mais ao mesmo tempo: par"
  },
  {
   "nome": "agata-llm-fundamentos",
