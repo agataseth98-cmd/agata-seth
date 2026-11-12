@@ -1,6 +1,6 @@
 # Onde estamos
 
-Atualizado em 11/11/2026.
+Atualizado em 12/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
@@ -8,29 +8,30 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Lotes em andamento (medido em 11/11/2026, 19h, base `origin/main` `98dd5839`)
+## Lotes em andamento (medido em 12/11/2026, 09h, base `origin/main` `3f1e9055`)
 
-Fonte: `propostas/*.diff` sem `APROVADO-`, `propostas/aplicadas/` e `gh pr list --state open` (nenhuma PR aberta). Última aplicação: `chat-protege-conversas-09-11`, 11/11 18:45. Limite R1 (2 propostas abertas por componente): o componente OpenCode está no limite, com duas.
+Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última aplicação: `pacote-11-11`, 12/11 08:29 (PR #973). Limite R1 (2 propostas abertas por componente): com o pacote-12-11, as duas propostas do OpenCode saem da fila.
 
 | componente | proposta | estado | desde |
 |---|---|---|---|
-| Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | proposta | 11/11 20:21 |
+| Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
+| Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | proposta | 12/11 09:01 |
 | Chat lote 4: editar, ramos, parar, feedback, atalhos, tema | chat-lote4-09-11 | incluída em pacote-11-11 | 11/11 18:54 |
 | Processo ágil da skill de lote (R1, R3, R5, R2) | processo-agil-11-11 | incluída em pacote-11-11 | 11/11 |
 | História canônica: Tomo I, Texto 1 e aba História no painel (somente leitura, botão Ouvir) | historia-tomo1-11-11 | incluída em pacote-11-11 | 11/11 19:56 |
 | Spec primeiro: entrevista, gate de sincronia, revisor contra a spec, classes de tarefa (P1 a P4) | spec-primeiro-11-11 | incluída em pacote-11-11 | 11/11 19:40 |
-| Troca Goose por OpenCode no terminal | agente-opencode-07-11 | proposta | 07/11 13:40 |
-| Docs canon e skills da troca OpenCode | docs-opencode-07-11 | proposta | 07/11 13:42 |
-| PROJETO.md: o que sobe no boot | canon-boot-07-11 | proposta | 07/11 13:07 |
+| Troca Goose por OpenCode no terminal | agente-opencode-07-11 | incluída em pacote-12-11 | 07/11 13:40 |
+| Docs canon e skills da troca OpenCode | docs-opencode-07-11 | incluída em pacote-12-11 (refeita) | 07/11 13:42 |
+| PROJETO.md: o que sobe no boot | canon-boot-07-11 | incluída em pacote-12-11 | 07/11 13:07 |
 | Núcleo de desenvolvimento (Ma'at, Ptah, Thoth) | nucleo-desenvolvimento-07-11 | proposta | 07/11 15:31 |
 | Origem preservada ao salvar conversas | origem-preservada-07-11 | superada (PR #965) | 07/11 13:39 |
-| Skill de processo: lições medidas | skill-processo-lessons-07-11 | proposta | 07/11 13:18 |
-| Tira o LibreChat dos atalhos e do P-9 | tira-librechat-07-11 | proposta | 07/11 13:39 |
+| Skill de processo: lições medidas | skill-processo-lessons-07-11 | incluída em pacote-12-11 (só as que não repetem a skill) | 07/11 13:18 |
+| Tira o LibreChat dos atalhos e do P-9 | tira-librechat-07-11 | incluída em pacote-12-11 | 07/11 13:39 |
 | Nova versão (lote 2) | nova-versao-lote2-20261106 | proposta | 06/11 21:21 |
-| Orçamento do turno em sombra (lote 9) | sombra-orcamento-20261106 | proposta | 06/11 09:35 |
-| `--verificar` deixa rastro no log da auditoria | verificar-rastro-20261106 | proposta | 06/11 23:54 |
+| Orçamento do turno em sombra (lote 9) | sombra-orcamento-20261106 | superada pela spec v2 | 06/11 09:35 |
+| `--verificar` deixa rastro no log da auditoria | verificar-rastro-20261106 | incluída em pacote-12-11 (refeita) | 06/11 23:54 |
 
-Sem assinatura: 10 propostas (sem contar a deste lote). Nenhuma assinada. Uma superada: `origem-preservada-07-11`, arquivada pela PR #965.
+Assinadas e aplicadas nesta rodada: `pacote-11-11` (12/11, PR #973). Superadas: `origem-preservada-07-11` (PR #965) e `sombra-orcamento-20261106` (spec v2). Fora desta tabela: `chat-voz-11-11` (PR #974, só proposta, aguarda assinatura do Humano).
 
 ## Hoje, 11/11 (proposta chat lote 4)
 

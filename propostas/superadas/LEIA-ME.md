@@ -31,6 +31,13 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | voz-compreender-11-11 | incluída em pacote-11-11 (11/11/2026) |
 | painel-importantes-11-11 | incluída em pacote-11-11 (11/11/2026) |
 | historia-tomo1-11-11 | incluída em pacote-11-11 (11/11/2026) |
+| sombra-orcamento-20261106 | superada pela spec v2 (`nova-versao-spec-v2-unificada-09-11`; a v2 tira o `orcamento_turno`), 12/11/2026 |
+| tira-librechat-07-11 | incluída em pacote-12-11 (12/11/2026) |
+| canon-boot-07-11 | incluída em pacote-12-11 (12/11/2026) |
+| agente-opencode-07-11 | incluída em pacote-12-11 (12/11/2026) |
+| docs-opencode-07-11 | incluída em pacote-12-11 (12/11/2026; refeita sobre o AGENTS.md atual) |
+| verificar-rastro-20261106 | incluída em pacote-12-11 (12/11/2026; refeita sobre o AGENTS.md atual) |
+| skill-processo-lessons-07-11 | incluída em pacote-12-11 (12/11/2026; só as lições que não repetem a skill) |
 
 Notas:
 - "incluída em pacote-11-11": a parte passa a valer dentro do pacote único `propostas/pacote-11-11.diff`, com uma só assinatura; o `.md` do pacote lista a ordem e os conflitos resolvidos (regra "Pacote de assinatura (Humano, 11/11)" da skill agata-processo-lote).

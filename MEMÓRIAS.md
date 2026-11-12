@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b
-  Escrito em: 12/11/2026 08:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96
+  Escrito em: 12/11/2026 09:03 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9b27c1b4d2476fcf120ac46e3bef96bcaf7c243b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3f1e905528e55b41ce3d7b6d9c189af8fd3aeb96/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(996) DIÁRIO — 12/11/2026 · **Proposta pacote-12-11 publicada: seis propostas paradas (tira-librechat, canon-boot, agente-opencode, docs-opencode refeita, verificar-rastro refeita e skill-processo-lessons só com o que não repete a skill) mais a nota de canonização do Texto 1 da História, numa só assinatura; sombra-orcamento vai para superadas.**
+- Base: `origin/main` `3f1e9055`, que já tem o PR #973 (pacote-11-11 aplicado) e o PR #974 (chat-voz-11-11, só proposta). Diff `propostas/pacote-12-11.diff`: 25 arquivos de código, sha256 `f7adcaa35cfdc53f497ce95485df6b22b13a1c04c6378568d551d76f9234df5e`. Aplica limpo sobre uma cópia limpa de `origin/main`.
+- Medido nesta worktree: unittest do painel com 454 testes OK; `scripts/ci_sdd_local.sh` com `CI LOCAL: TUDO OK` (35 passos OK); gate de spec com 12 componentes, 1 aviso, 0 falha; lint de skills com 21 skills e nenhum problema; `ferramentas` e `testar_tira_librechat` com 10 testes OK; `testar_sem_goose_ativo` com 6 de 6 OK; `testar_cobertura_servicos` com 11 de 11; `testar_p9` OK; `bash -n` nos shells alterados OK.
+- Não medido: run verde no GitHub no `headSha` do PR; revisão independente do `agata-revisor` (não feita nesta rodada); `scripts/testar_perimetro.sh`, que só roda no CI do GitHub.
+- Decisões que cabem ao Humano: aceitar as partes 1 e 3 sem `spec.md` (são de comportamento e a regra P4 é de 11/11); ligar ou não os testes de `tira-librechat` ao `perimetro.yml`; o `estado` da aba História continua o do frontmatter até um painel ler o registro.
+- Texto 1 da História: canonizado com o pacote-11-11 (PR #973, merge `9b27c1b4`, 12/11/2026). Registro em `historia/registro-de-canonizacao.md`; o texto não foi editado (append-only).
+- Nenhum APROVADO criado, nada aplicado no `main`, nenhum serviço reiniciado por este agente.
 (995) DIÁRIO — 12/11/2026 · **Proposta chat-voz-11-11 publicada: ouvir em partes, ditado e modo conversa no chat do painel (paridade com o LibreChat), sem alterar o canon.**
 - Diff `propostas/chat-voz-11-11.diff` (12 arquivos, todos em `redesign/painel_operacional/`, base `origin/main` `9b27c1b4`) e `propostas/chat-voz-11-11.md`: base, apetite, decisões para o Humano confirmar (dez itens), o que não foi medido. Não há arquivo de `propostas/` no diff.
 - Medido: o diff aplica com `git apply --check` e `git apply --cached --check` sobre `9b27c1b4`. Com a aplicação numa worktree com histórico git, `scripts/ci_sdd_local.sh` deu `CI LOCAL: TUDO OK` (35 passos OK), incluindo o gate de sincronia das specs e os testes SDD (pytest, com a rastreabilidade). A aplicação foi descartada depois; só os dois arquivos de `propostas/` seguem no PR. A suíte do painel (519 testes OK) é da rodada anterior, segundo o `.md`; não foi repetida aqui.
