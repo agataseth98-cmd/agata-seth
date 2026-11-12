@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(999) DIÁRIO — 12/11/2026 · **Proposta skills-consolidadas-12-11 publicada, refeita sobre origin/main 2ec04181 com o pacote-mecanico-12-11 já no diff: as skills próprias do Agata caem de 20 pastas para 10, sem perder texto (originais em extras/arquivo-skills-12-11/). Aplicar depois do pacote. Canon intacto; sem assinatura ainda.**
+  palavras-chave: proposta, skills, consolidadas, publicada, refeita, origin, main, pacote, mecanico, diff, próprias, agata, caem, pastas, perder, texto, originais, extras, arquivo, aplicar, canon, intacto, assinatura
 (998) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-12-11 publicada: a verificação passa a valer para todo modelo por mecanismo da Máquina: contador de turno (turno.py), aviso de fim de turno sem bloqueio (auditoria_stop.py), negação de leitura de ~/.config/agata/.env, pontos de entrada que apontam para AGENTS.md (Claude Code, Codex, Gemini CLI, OpenCode e Seth) com verificador (conselho_mecanismos.py) e subagentes com modelo barato, maxTurns e pacote mínimo; uma assinatura, sem aplicar. Base origin/main 04bfe2e4.**
   palavras-chave: proposta, pacote, mecanico, publicada, verificação, passa, valer, modelo, mecanismo, máquina, contador, turno, aviso, fim, bloqueio, auditoria, stop, negação, leitura, config, agata, env, pontos, entrada, apontam, agents, claude, code, codex, gemini, cli, opencode, seth, verificador, mecanismos, subagentes, barato, maxturns, mínimo, assinatura, aplicar, base, origin, main, bfe
 (997) DIÁRIO — 12/11/2026 · **Aplicados chat-voz-11-11 e pacote-12-11 com a assinatura do Humano (assinaturas de 12/11, 09:16).**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: teto, removido, pedido, remoto, tem, tamanho
 (970) DIÁRIO — 06/11/2026 · **Agência de pesquisa aplicada (agencia-pesquisa-20261106): três pesquisadores de leitura em `.claude/agents/`.**
   palavras-chave: agência, pesquisa, aplicada, agencia, três, pesquisadores, leitura, claude, agents
-(969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-20261106): skill agata-engenharia-reversa e wrapper scripts/rea_leitura.sh, allowlist de 14 subcomandos. Herdr mantido.**
-  palavras-chave: rea, leitura, aplicado, herdr, integracao, skill, agata, engenharia, reversa, wrapper, scripts, allowlist, subcomandos, mantido
+(969) DIÁRIO — 06/11/2026 · **REA em leitura aplicado (rea-herdr-integracao-2026 …
+  palavras-chave: rea, leitura, aplicado, herdr, integracao
 (968) DIÁRIO — 06/11/2026 · **Lote 4 aplicado (lote4-processo-20261106): aviso D …
   palavras-chave: lote, aplicado, processo, aviso
 (967) DIÁRIO — 06/11/2026 · **Lote2b superada: o diff assinado trazia registros …
