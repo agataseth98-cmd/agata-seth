@@ -1,0 +1,10 @@
+NOTA (12/11/2026): superadas por propostas/pacote-mecanico-skills-12-11.diff. Não aplicar nenhuma destas duas.
+
+- pacote-mecanico-12-11 (signed pelo Humano às 10:00, aplicação PR #980 fechada às 10:17): o .diff em si aplica limpo
+  (git apply --check RC 0 em 04bfe2e4 e em 8c13ed78) e não tem hunk de bloco ANCORA-SHA. A falha foi o número (999) do
+  registro ocupado duas vezes e a PR ficar atrás da base. Ver a entrada de MEMÓRIAS e o .md da proposta nova.
+- skills-consolidadas-12-11: só aplica depois do pacote (a pré-imagem de agata-dev.md, agata-pesq-processo.md,
+  scripts/conselho_mecanismos.py e scripts/testar_mecanismos.py é o resultado do pacote). Sozinha, git apply --check RC 1.
+  Juntas, na ordem pacote, depois skills, aplicam limpo (RC 0): a proposta nova é esse par composto e mais a correção do processo.
+
+Os arquivos originais ficam aqui sem alteração (o .diff tem o sha256 que consta no .md de cada um).

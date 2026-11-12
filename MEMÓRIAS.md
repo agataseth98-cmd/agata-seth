@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2ec04181ceb01dafea237912cfca9f735498af2b
-  Escrito em: 12/11/2026 10:06 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ac986c39f90babfb5876342d26ce9de5ae97e254
+  Escrito em: 12/11/2026 15:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ec04181ceb01dafea237912cfca9f735498af2b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac986c39f90babfb5876342d26ce9de5ae97e254/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1000) DIÁRIO — 12/11/2026 · **Proposta pacote-mecanico-skills-12-11 publicada: pacote mecânico e skills numa só proposta, com a fila de aplicação corrigida. Substitui pacote-mecanico-12-11 e skills-consolidadas-12-11 (movidas para propostas/superadas/).**
+Causa do 10:17 (PR #980 fechada): o .diff assinado não tinha bloco ANCORA-SHA (git apply --check RC 0 em 04bfe2e4 e em 8c13ed78); o pre-commit reescreve esse bloco na própria aplicação (d18f7a4d). A falha real foi o número (999) usado duas vezes: a aplicação e a proposta de skills (#979, mesclada às 10:09:51) foram calculadas sobre 2ec04181, e a PR ficou atrás da base. A proposta de skills só aplica depois do pacote (pré-imagem).
+Correção: (a) scripts/equipe/diff_limpo.py recusa .diff com hunk em bloco gerado (aprovar.sh, p8_verificar.sh, aplicar.py, fiscal de PR); (b) scripts/equipe/trava.py: com aplicação em curso (propostas/.aplicando-<nome> ou PR aplica/* aberta), PR de proposta que toca o registro falha; (c) scripts/equipe/numero_memorias.py renumera as entradas novas sobre origin/main no último instante antes do merge.
+Nada aplicado; nada assinado. Assinatura do Humano pendente, depois do merge desta PR de proposta.
+
 (999) DIÁRIO — 12/11/2026 · **Proposta skills-consolidadas-12-11 publicada, refeita sobre origin/main 2ec04181 com o pacote-mecanico-12-11 já no diff: as skills próprias do Agata caem de 20 pastas para 10, sem perder texto (originais em extras/arquivo-skills-12-11/). Aplicar depois do pacote. Canon intacto; sem assinatura ainda.**
 - Pedido do Humano em 12/11 (cache do Conselho, entrada 518): "MENOS skills e MAIS qualidade, formato UNIVERSAL para todos os LLMs", remover o óbvio, só o que resolve problema real.
 - Medido na base com o pacote: descrições carregadas sempre 5.969 → 3.626 caracteres (-39%); linhas dos SKILL.md 1.183 → 890 (-25%); bytes das pastas 150.733 → 123.737 (-18%); caixa de ferramentas 421 → 411 peças.
