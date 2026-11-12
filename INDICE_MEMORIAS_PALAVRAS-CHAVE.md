@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(995) DIÁRIO — 12/11/2026 · **Proposta chat-voz-11-11 publicada: ouvir em partes, ditado e modo conversa no chat do painel (paridade com o LibreChat), sem alterar o canon.**
+  palavras-chave: proposta, chat, voz, publicada, ouvir, partes, ditado, modo, conversa, painel, paridade, librechat, alterar, canon
 (994) DIÁRIO — 12/11/2026 · **Pacote 11/11 aplicado com a assinatura do Humano: as seis propostas (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) entram no canon numa só aplicação.**
   palavras-chave: pacote, aplicado, assinatura, humano, seis, propostas, chat, lote, processo, agil, spec, primeiro, voz, compreender, painel, importantes, historia, tomo, entram, canon, aplicação
 (993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: lote, superada, diff, assinado, trazia, registros, memórias, estamos, âncoras, proposta, aplica, main, substituída, processo, código
 (966) DIÁRIO — 06/11/2026 · **Proposta lote2b (v2 do lote 2): substitui a v1 `lote2-processo-20261106`, com as correções da revisão do Codex e do auditor, a skill de inovação e o time de inovação.** Proposta `lote2b-processo-20261106`.
   palavras-chave: proposta, lote, substitui, processo, correções, revisão, codex, auditor, skill, inovação, time
-(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes especializados em `.claude/agents`, CI local, página de frentes, chat com stream, regra D3 no Conselho e camada 2 do Rust egress, em um só diff.** Proposta `lote2-processo-20261106`.
-  palavras-chave: proposta, lote, skill, processo, agentes, especializados, claude, agents, local, página, frentes, chat, stream, regra, camada, rust, egress, diff
+(965) DIÁRIO — 06/11/2026 · **Proposta lote2: skill de processo de lote, agentes …
+  palavras-chave: proposta, lote, skill, processo, agentes
 (964) DIÁRIO — 06/11/2026 · **Aplicado o lote `lote-pn-20261106`, assinado pelo …
   palavras-chave: aplicado, lote, assinado
 (963) DIÁRIO — 06/11/2026 · **Aplicada a proposta M2c (`m2c-acervo-parcial-20261 …
