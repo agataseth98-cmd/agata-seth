@@ -95,7 +95,7 @@ Todos sobre `origin/main` `3f1e9055` com o pacote aplicado na worktree `worktree
 - [x] Sem emoji (E-2): conferido no diff, sem emoji nas linhas novas.
 - [x] `.md` com testes medidos, o que não foi medido e a reversão.
 - [x] Nenhuma falha "pré-existente" sem dono e data: a do `-I` no selftest tem data (12/11/2026); dono a definir pelo Humano (decisão 5).
-- [x] Texto de MEMÓRIAS sem citação `caminho:número`.
+- [ ] Texto de MEMÓRIAS sem citação `caminho:número`: o P-19 (só aviso) aponta a frase do diff citado na entrada (996) como citação `arquivo:linha`. É falso positivo: o caminho do diff seguido de dois-pontos e número. A tentativa de trocar a frase foi recusada pelo P-5, porque a entrada (996) já estava commitada e é append-only; por isso o aviso fica registrado.
 - [x] Texto 1 da História sem alteração, conferido por sha256 `fe79c529046075dcf03f713eec10b91d7f9b13936cd4c561122408d68eb9906a`.
 - [x] Apetite (R2) declarado: até 40 arquivos e 2 h de agente. Medido: 25 arquivos de código; o trabalho (de 08:47 até o fechamento deste `.md`) ficou dentro do apetite, com as duas rodadas de CI local incluídas.
 
