@@ -40,6 +40,7 @@ passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/
 passo "processo de aplicação: diff sem bloco gerado (selftest)" python3 -I scripts/equipe/diff_limpo.py --selftest
 passo "processo de aplicação: número de MEMÓRIAS (selftest)" python3 -I scripts/equipe/numero_memorias.py --selftest
 passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scripts/equipe/trava.py --selftest
+passo "ganchos do git: sintaxe do shell (bash -n)" bash -c 'for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h" || exit 1; done'
 passo "processo de aplicação: âncora staged devolvida ao HEAD (selftest, com o P-8 de verdade)" python3 -I scripts/equipe/ancora_indice.py --selftest
 # verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
 # passe PY_YAML=/usr/bin/python3 (ou outro python com PyYAML). Sem isso o passo falha fechado, de propósito.
