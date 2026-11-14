@@ -26,20 +26,28 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c8a7c2d7405d160bd774c40e13d3c9bf453647ff
-  Escrito em: 12/11/2026 15:34 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9981cbb846de2d23f5e1c93aabb084cdb9dd37e2
+  Escrito em: 12/11/2026 16:16 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c8a7c2d7405d160bd774c40e13d3c9bf453647ff/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9981cbb846de2d23f5e1c93aabb084cdb9dd37e2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9981cbb846de2d23f5e1c93aabb084cdb9dd37e2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9981cbb846de2d23f5e1c93aabb084cdb9dd37e2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9981cbb846de2d23f5e1c93aabb084cdb9dd37e2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9981cbb846de2d23f5e1c93aabb084cdb9dd37e2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1002) DIÁRIO — 12/11/2026 · **Proposta fiscal-yaml-12-11 publicada: o fiscal-p8 do main tem a chave `env:` repetida desde c4c71956; o GitHub recusa o workflow, o check obrigatório não roda e todo PR fica BLOCKED. Correção de uma linha e gate de YAML de workflow. Nada assinado, nada aplicado.**
+- Causa medida: `.github/workflows/fiscal-p8.yml` do main tem dois `env:` no passo "Fiscalizar" (linhas 44 e 47). A aplicação c4c71956 acrescentou o segundo; o `.diff` aprovado já trazia o erro. Execuções `fiscal-p8` com `failure` no evento `push` (main, 18:43:49Z; `proposta/sincronia-12-11`, 18:51:13Z); PR #983 `BLOCKED`. Lido com PyYAML, o passo perde `BASE_SHA` e `HEAD_SHA` sem erro (fica só `GH_TOKEN`).
+- Correção: um único `env:` com `BASE_SHA`, `HEAD_SHA` e `GH_TOKEN` (remoção de uma linha).
+- Mecanismo: `scripts/verificar_workflows.py` (falha em chave repetida em qualquer nível, YAML inválido, arquivo vazio) ligado em `scripts/ci_sdd_local.sh`, em `.githooks/pre-commit` (conteúdo staged, quando um workflow muda), no check 6 de `scripts/p8_verificar.sh` e no gate (3b) de `scripts/aprovar.sh`, antes de assinar. Lacuna declarada: o CI remoto (`sdd.yml`, fiscal de PR) não roda o verificador.
+- Medido na cópia com histórico (base `origin/main` 9981cbb8): verificador acusa o arquivo atual (exit 1) e passa na correção (exit 0); selftest 11 casos OK; `--diff` aceita o `.diff` e recusa o diff de controle que mantém a duplicata; bloco do pre-commit bloqueia o staged quebrado e passa o corrigido; `git apply --check` RC 0; `diff_limpo.py` OK. CI local: `uv run --offline --with pytest bash scripts/ci_sdd_local.sh`, sem `PY_YAML`, fica VERMELHO por `PyYAML ausente` (o venv do uv não tem o pacote e o cache offline não tem PyYAML); com `PY_YAML=/usr/bin/python3`, `CI LOCAL: TUDO OK`, 45 OK.
+- Não medido: assinatura e gates de `p8_verificar.sh` e `aprovar.sh` de ponta a ponta (exigem a chave do Humano); o GitHub aceitando o arquivo corrigido (só depois de juntar, com a proteção destravada).
+- Destravar (Humano): retirar `fiscal-p8` dos checks obrigatórios do main; juntar a PR de proposta; `aprovar.sh`; `p8_verificar.sh`; aplicar em `aplica/fiscal-yaml-12-11`; religar o check. Detalhe em `propostas/fiscal-yaml-12-11.md`.
+- Modelo: Claude Haiku 5.5 (Claude Code, subagente) · vetor: worktree `agent-ae26173ce9788f139`, branch `proposta/fiscal-yaml-12-11`.
 (1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
 - Verificação: `bash scripts/p8_verificar.sh pacote-mecanico-skills-12-11` deu `PODE APLICAR` sobre `origin/main` `c8a7c2d7` (sha256 do `.diff` `d14e079f40dd`; assinatura `agata-aprovacao-p8` de `agata-humano`, ED25519).
 - Aplicação: `git apply` do `pacote-mecanico-skills-12-11.diff` na branch `aplica/pacote-mecanico-skills-12-11`, feito à mão (o `aplicar.py` que vale é o antigo; o novo está no próprio diff). O par `.diff` e `APROVADO-` foi movido para `propostas/aplicadas/` no mesmo commit. As propostas superadas já estavam em `propostas/superadas/`.

@@ -14,6 +14,7 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 
 | componente | proposta | estado | desde |
 |---|---|---|---|
+| Workflow do fiscal com chave repetida (o GitHub recusa o fiscal-p8 desde o merge de #982; PR #983 bloqueado) e gate de YAML dos workflows | fiscal-yaml-12-11 | proposta em draft; antes de tudo, o Humano destrava a proteção do main | 12/11 16h |
 | Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
 | Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | aplicada (PR #976, 12/11) | 12/11 09:01 |
 | Skills do Agata: 20 pastas viram 10, sem perder texto (originais em extras/); aplicar depois do pacote mecânico | skills-consolidadas-12-11 | proposta | 12/11 10:30 |
