@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1003) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
+  palavras-chave: proposta, sincronia, publicada, doutrina, seth, passa, viver, protocolos, cópia, gateway, sai, porquês, verificados, mecanismo, gancho, início, sessão, maxturns, agata, dev, muda, aplicada, assinatura, humano
+(1003) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
+  palavras-chave: proposta, sincronia, publicada, doutrina, seth, passa, viver, protocolos, cópia, gateway, sai, porquês, verificados, mecanismo, gancho, início, sessão, maxturns, agata, dev, muda, aplicada, assinatura, humano
 (1002) DIÁRIO — 12/11/2026 · **Proposta fiscal-yaml-12-11 publicada: o fiscal-p8 do main tem a chave `env:` repetida desde c4c71956; o GitHub recusa o workflow, o check obrigatório não roda e todo PR fica BLOCKED. Correção de uma linha e gate de YAML de workflow. Nada assinado, nada aplicado.**
   palavras-chave: proposta, fiscal, yaml, publicada, main, tem, chave, env, repetida, desde, github, recusa, workflow, check, obrigatório, roda, fica, blocked, correção, linha, gate, nada, assinado, aplicado
 (1001) DIÁRIO — 12/11/2026 · **Aplicado pacote-mecanico-skills-12-11 com a assinatura do Humano (assinatura de 12/11, 15:25): pacote mecânico, skills consolidadas (20 viram 10, texto em extras/arquivo-skills-12-11/) e fila de aplicação corrigida.**
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, docs, opencode, atualizada, segunda, parte, diff, documental, skills, refeito, base, atual, remove, hunks, repetidos, memórias, estamos, pertencem, agente, patch, conferido, após, aplicar, primeira, local, tudo, assinatura, aplicação, diffs, pendentes, humano
 (975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre main.** Propõe trocar o atalho de terminal e o membro de equipe Goose por OpenCode, mantendo `redesign/goose/` e as exceções históricas fora do escopo. O patch de aplicação segue no arquivo `.diff`, não aplicado. CI local atualizada passou; PR #949 é a segunda parte declarada e vem depois desta. Registro sequencial após (974); assinatura e aplicação pendentes do Humano.
   palavras-chave: proposta, agente, opencode, atualizada, main, propõe, trocar, atalho, terminal, membro, equipe, goose, mantendo, redesign, exceções, históricas, fora, escopo, patch, aplicação, segue, arquivo, diff, aplicado, local, passou, segunda, parte, declarada, vem, desta, registro, sequencial, após, assinatura, pendentes, humano
-(974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobre a base atual.** O diff continua sem aplicação no código do repositório; inclui a correção C11b para remover o ponteiro PROCESSO antigo ao atualizar conversa já hidratada, respeitando `SETH_PROCESSO_HIDRATA=0` e evitando duplicação. Registrada nesta junção após (973). CI local executada nesta worktree; ver corpo da PR para resultados e limitações. Assinatura e aplicação continuam pendentes do Humano.
-  palavras-chave: proposta, nucleo, desenvolvimento, refeita, base, atual, diff, continua, aplicação, código, repositório, inclui, correção, remover, ponteiro, processo, antigo, atualizar, conversa, hidratada, respeitando, seth, hidrata, evitando, duplicação, registrada, junção, após, local, executada, worktree, corpo, resultados, limitações, assinatura, continuam, pendentes, humano
-(973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada localmente.** A assinatura ED25519 foi aceita, o diff foi aplicado em worktree própria, o diff reverso passou e o CI local terminou TUDO OK.
-  palavras-chave: aplicação, assinada, painel, unificado, validada, localmente, assinatura, aceita, diff, aplicado, worktree, própria, reverso, passou, local, terminou, tudo
+(974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobr …
+  palavras-chave: proposta, nucleo, desenvolvimento, refeita, sobr
+(973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada …
+  palavras-chave: aplicação, assinada, painel, unificado, validada
 (972) DIÁRIO — 07/11/2026 · **CSP do protótipo do painel aplicado (csp-prototipo …
   palavras-chave: csp, protótipo, painel, aplicado, prototipo
 (971) DIÁRIO — 06/11/2026 · **Teto do Conselho removido (sem-teto-conselho-20261 …
