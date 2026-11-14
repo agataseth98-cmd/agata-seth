@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
+  palavras-chave: proposta, teste, comparativo, publicada, desenho, agata, chat, processo, spec, leve, refeito, guardado, redesign, decisão, humano, documento, rodada, pede, aprovação, parte
 (1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
   palavras-chave: aplicado, nucleo, desenvolvimento, assinatura, humano, núcleo, ptah, thoth, entra, agata, fluxo, consolidado, linha, processo, gateway, spec, testes
 (1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, chat, protege, conversas, aplicada, assinada, humano, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
   palavras-chave: proposta, chat, protege, conversas, publicada, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
-(984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
-  palavras-chave: lote, chat, aplicado, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, conversa, temporária
+(984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas …
+  palavras-chave: lote, chat, aplicado, conversas
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-un …
   palavras-chave: spec, unificada, aplicada, nova, versao
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (bu …
