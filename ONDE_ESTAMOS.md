@@ -14,6 +14,7 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 
 | componente | proposta | estado | desde |
 |---|---|---|---|
+| Pacote de assinatura único de 14/11: sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão. A fiscal-yaml-12-11 já foi aplicada (#986); falta recolocar o `fiscal-p8` como obrigatório no `main` | pacote-14-11 | proposta; a assinatura é do Humano | 14/11 11:45 |
 | Workflow do fiscal com chave repetida (o GitHub recusa o fiscal-p8 desde o merge de #982; PR #983 bloqueado) e gate de YAML dos workflows | fiscal-yaml-12-11 | proposta em draft; antes de tudo, o Humano destrava a proteção do main | 12/11 16h |
 | Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
 | Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | aplicada (PR #976, 12/11) | 12/11 09:01 |
