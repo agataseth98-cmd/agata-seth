@@ -1,0 +1,71 @@
+diff --git a/redesign/teste_comparativo/DESENHO.md b/redesign/teste_comparativo/DESENHO.md
+new file mode 100644
+index 00000000..560601a1
+--- /dev/null
++++ b/redesign/teste_comparativo/DESENHO.md
+@@ -0,0 +1,65 @@
++# Teste comparativo: o processo do Agata contra a alternativa simples
++
++**Estado:** desenho. Nada foi rodado. A rodada só começa depois de o Humano aprovar este arquivo e as seções 3, 5 e 6.
++**Origem:** compromisso "somos os melhores?" (Importantes, 11/11). O primeiro desenho foi feito em 12/11, e o arquivo se perdeu com a pasta temporária daquela sessão. Este redesenho é de 14/11, a pedido do Humano ("redesenhar e guardar no repo"), feito pelo Claude Opus 5.5.
++
++## 1. Pergunta
++
++Com o mesmo modelo, a mesma tarefa e o mesmo ponto de partida, o fluxo do Agata entrega trabalho mais correto e mais verificável do que um chat sem processo ou uma spec leve? Quanto isso custa a mais?
++
++## 2. Limite declarado antes
++
++Com 2 ou 3 tarefas, o resultado só **descreve** estes casos. Não prova superioridade em geral, nem "somos os melhores". Qualquer frase do relatório final que generalize além disso é erro.
++
++## 3. Braços (para o Humano confirmar)
++
++| Braço | O que o agente recebe |
++|---|---|
++| A, Agata | o repositório com AGENTS.md, as skills, o CI local, a proposta P-8 e a revisão independente |
++| B1, chat | o repositório sem AGENTS.md e sem as skills; só o texto da tarefa |
++| B2, spec leve | igual ao B1, mais uma spec de uma página (objetivo, critérios e testes), sem governança |
++
++O Spec Kit fica de fora: o Humano decidiu não instalá-lo. Os três braços usam o mesmo modelo, o mesmo esforço e o mesmo `origin/main` de partida, cada um em uma worktree descartável.
++
++## 4. Tarefas (abertas em 14/11, medido)
++
++| # | Tarefa | Por que ainda está aberta |
++|---|---|---|
++| T1 | Pôr no CI um teste da saída do LibreChat | `grep -i librechat` em `scripts/ci_sdd_local.sh` e `.github/workflows/*.yml`: 0 ocorrências |
++| T2 | Normalizar o rótulo de autor do cache do Conselho (INV-002) | `cache_conselho.py` filtra o autor por igualdade exata; o backlog mediu 23 rótulos para poucas famílias |
++| T3 (opcional) | Medir o recall do `auditoria_turno.py` fora da invenção de fonte (INV-003) | só há a medição do diário, sem conjunto rotulado |
++
++A tarefa de 12/11 "tirar a cópia das regras do gateway" saiu, porque foi aplicada em 14/11 (pacote-14-11).
++
++## 5. Critérios de "pronto", escritos antes da rodada (para o Humano aprovar)
++
++- **T1:** um teste falha quando a saída do LibreChat muda de forma e passa com a saída atual. Ele roda no `ci_sdd_local.sh` e no `sdd.yml`.
++- **T2:** `ler --autor <família>` recupera mais de 95% das entradas da família, contra a linha de base medida antes. A cadeia de hash do cache não quebra (o selftest passa). Nenhuma entrada antiga é reescrita.
++- **T3:** um conjunto de pelo menos 30 respostas rotuladas por alguém que não seja o braço, com o recall e a precisão relatados e o intervalo declarado.
++
++Os testes de aceite de cada tarefa ficam numa pasta selada antes da rodada. Os braços não os veem.
++
++## 6. Métricas e avaliação
++
++- **Correção:** critérios da seção 5 cumpridos (sim ou não, por critério).
++- **Verificabilidade:** a entrega traz evidência que outra pessoa consegue reproduzir (comando, teste ou medição).
++- **Regressão:** o CI local e o perímetro continuam verdes.
++- **Custo:** tokens, tempo de parede e número de intervenções humanas.
++- **Avaliação às cegas:** o Humano, e um modelo de outra família (D12, 06/11), recebem as três entregas sem saber o braço. A ordem é sorteada.
++
++## 7. Custo estimado (do desenho de 12/11, não remedido)
++
++De 11 a 27 horas de agente e de 3 a 4,5 horas do Humano avaliando. A cota é a gratuita compartilhada com a Seth (D3, 06/11: sem teto, com avisos). A rodada não começa sem o Humano autorizar o uso.
++
++## 8. Parada
++
++A rodada para quando ocorrer qualquer um destes casos:
++- uma tarefa estoura 3 vezes o tempo mediano dos outros braços;
++- um braço tenta escrever fora da worktree;
++- um braço tenta enviar algo para fora da Máquina.
++
++O braço A não aplica nada: a proposta P-8 dele vai só até o PR em draft.
++
++## 9. Registro
++
++O registro segue o schema v2 do Experimento 2 (D11). As saídas brutas são preservadas, e as conclusões entram como entradas novas, nunca como edição.
