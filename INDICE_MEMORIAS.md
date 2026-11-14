@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
 (1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura do Humano (14/11): o ESTADO.md deixa de contar as aplicadas.**
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas com busca, pastas, fixar, arquivar, marcadores, exportar e importar, e conversa temporária.**
-(983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
+(983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-un …
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (bu …
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas si …
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-ag …

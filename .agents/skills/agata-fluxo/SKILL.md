@@ -10,6 +10,35 @@ description: >-
 
 Vale para qualquer modelo da Confederação. Cabeçalho, formatos e voz estão no canon (`AGENTS.md`, `PROTOCOLOS.md`, "Carregar e formatos"). Esta skill guarda só o procedimento e as correções que já custaram tempo.
 
+Ma'at é o nome deste guia universal: ordem e verdade. Ptah e Thoth são os outros dois nomes do núcleo (abaixo).
+
+## Nomes e papéis (decisão do Humano, 07/11/2026)
+- Ma'at: este guia universal (ordem e verdade).
+- Ptah: núcleo de construção (artífice).
+- Thoth: canal da equipe, para escrita e registro. Hoje é o que a skill `agata-equipe` e `scripts/equipe/equipe.py` fazem; a decisão não renomeia código.
+- Dono deste guia: agata-spec (escreve e mantém a especificação do processo). Revisor: agata-revisor (somente leitura, independente de quem escreveu). Quem escreve não revisa (D4).
+
+## Regras de lote (resumo; completo em `.agents/skills/agata-aplicar-proposta/SKILL.md`)
+- Um lote, uma proposta, uma assinatura. Só o Humano assina, com `scripts/aprovar.sh`. (regra 1 do lote)
+- Trabalho em worktree em `.claude/worktrees/<nome>`, a partir de origin/main; não no checkout vivo, não em /tmp. (lição f)
+- Antes de propor: `bash scripts/ci_sdd_local.sh`, e só siga com "CI LOCAL: TUDO OK". (passo 3 do lote)
+- PR de proposta traz só o `.diff` e o registro; código entra só dentro do `.diff`, conferido com `grep '^diff --git'`. (passos 4 e 5 do lote)
+- Não use rm, nem -f nem -r; para tirar algo do caminho, use mv. Remover só com ordem do Humano, por nome. (lição e)
+- Não restaure nem descarte alteração sem ordem explícita do Humano, por nome. (regra 5 do lote)
+- Delegue operação a agentes quando a sessão permitir; sem isso, faça com a mesma disciplina. Confira o resultado, não o relatório. (papéis e coordenação do lote)
+- Memória comum: `python3 redesign/router/cache_conselho.py ler --n 20` ao começar; anote ao fechar trabalho relevante (seção 8). (AGENTS.md)
+- Decisão do Humano que só existe em conversa vira registro ou proposta antes de código; no cache é `decisao` provisória. (lição i)
+- Perguntas ao Humano numeradas, na ordem da mensagem, cada número com rótulo: medido, inferido ou não medido. (lições l e m)
+- Antes de entregar afirmação verificável: `python3 redesign/router/auditoria_turno.py --verificar < arquivo`. (AGENTS.md)
+
+## Lições citadas acima (ids)
+Detalhe e fonte: `.agents/skills/agata-aplicar-proposta/SKILL.md`, seção "Lições medidas em 07/11/2026".
+- **e.** Nunca rm (nem -f, -r); usar mv; remover só com ordem do Humano, por nome. Fonte: agentes rodaram rm em scratch (relato).
+- **f.** Trabalho durável não fica em /tmp (tmpfs; `findmnt -T /tmp`, medido). Worktrees perdidas em 07/11 (relato).
+- **i.** Decisão do Humano só em mensagem não é decidida; vira registro ou proposta. Fonte: decisões de 07/11 (relato).
+- **l.** Número sai com rótulo: medido, inferido ou não medido.
+- **m.** Perguntas numeradas, na ordem da mensagem. Fonte: preferência do Humano (relato).
+
 ## 0. Antes de qualquer ação: medir o estado
 
 Nunca suponha o estado. Sem medição, escreva "não medido".
@@ -58,7 +87,7 @@ Carregar não autoriza nem aplica mudança.
 
 - Mudança em arquivo protegido (lista em `propostas/README.md`; `.agents/` tratado como protegido) só entra no `main` por proposta P-8 assinada pelo Humano. Use `agata-aplicar-proposta`. Nunca use `write` ou `edit` em canon.
 - Trabalho em worktree própria a partir de `origin/main`. Não toque no checkout compartilhado. Não use `git stash` nele (é compartilhado entre worktrees): guarde trabalho com commit WIP ou `git stash push -u -m <tag>`, conforme o ambiente. Se for indispensável preservar alteração local, faça backup fora do repositório e confira o hash antes de qualquer atualização. Nunca descarte arquivo local sem decisão do Humano.
-- A Seth recebe as skills pela hidratação quando a tarefa envolve mudança no sistema. Ela não assina, não aplica e não envia nada para fora.
+- A Seth não assina, não aplica e não envia nada para fora. O que ela recebe deste guia está na seção 6.
 - Quem propõe redige `propostas/<nome>.diff`. Quem audita executa os comandos citados e reporta a saída literal; não aprova.
 - Dois modelos não editam o mesmo arquivo ao mesmo tempo (matriz de propriedade do `equipe.py`).
 - Trabalho caro em tokens (suíte completa, varredura longa) vai para o modelo com mais folga. O relato volta pelo canal, sem colar o relatório inteiro.
@@ -94,18 +123,33 @@ O sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussol
 - Conversa com outro modelo não é fonte. Só entra o que tiver PR, commit ou medição (M7, entrada 791).
 - Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada). Corrija o que apontar. Se um número de entrada não existe, escreva "não encontrei".
 - Memória comum do Conselho: ao começar, `python3 redesign/router/cache_conselho.py ler --n 20`. Ao fechar trabalho relevante, `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"`. Não é canon. Segredo é recusado; dado pessoal vira marca. Fato medido leva comando e hora; pendência leva quem deve agir.
-- Resultado vai para `MEMÓRIAS.md` só por PR, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`. Nunca edite entrada antiga (P-5). Correção é entrada nova.
+- Resultado vai para `MEMÓRIAS.md` por PR, em entrada nova logo abaixo de `ENTRADAS-NOVAS:AQUI`. Nunca edite entrada antiga (P-5). Correção é entrada nova. Quando MEMÓRIAS recebe entrada por outro caminho, a regra está na seção 8.
 
-## 6. Quando parar
+## 6. Seth
+
+- Pelo código lido (`redesign/router/seth_gateway.py`, `_injeta`), a Seth não recebe o corpo desta skill: a sugestão de skills (`SETH_SKILLS_SUGERE`) vem desligada por padrão (`SETH_SKILLS_SUGERE=1` liga) e traz só nome e descrição. Se ela lê o arquivo por alguma ferramenta: não medido.
+- Pela decisão D2, o bloco de estado traz a linha `PROCESSO:` com o caminho deste guia; `SETH_PROCESSO_HIDRATA=0` a desliga. Ler a skill é ação dela.
+- Ela não assina, não aplica e não envia nada para fora.
+
+## 7. Quando parar
 
 - O Humano decide quando parar. Modelo que não se julga apto (erro de medição recorrente, afirmação sem prova, perda de contexto) diz isso e pede substituição (entrada 789).
 
-## 7. Comandos padrão (para o Humano colar)
+## 8. Memória do Conselho e MEMÓRIAS.md (decisão D7, 07/11/2026)
 
-Atualizar o checkout principal sem perder nada. Guarda qualquer arquivo rastreado modificado antes de devolvê-lo ao repositório:
+- Cache do Conselho, registro não canônico. Fato e pendência:
+  `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato "<texto>"`
+  `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo pendencia "<texto>"`
+  Segredo é recusado (saída 2). Autor: o modelo real, medido.
+- MEMÓRIAS.md entra só de duas formas: (a) pelo timer do cache, que destila fatos e pendências já verificados (é como D7 chama; o mecanismo medido é `scripts/memoria_semanal.py`, numa tarefa semanal da janela de `config/janela-tarefas.txt`, e ele só propõe: não há timer medido); (b) em momento extremamente importante, e só com assinatura do Humano.
+- Os critérios de destilação vêm da medição do sistema, não de opinião.
+
+## 9. Comandos padrão (para o Humano colar)
+
+Atualiza o checkout principal. Copia para backup o que estiver modificado e não restaura nada: restaurar só com ordem do Humano, por nome.
 
 ```bash
-bash -c 'R=$HOME/agata; B=$HOME/.agata-backup-staging/alteracoes-$(date +%Y%m%d-%H%M); M=$(git -C "$R" diff --name-only); if [ -n "$M" ]; then mkdir -p "$B" && for f in $M; do mkdir -p "$B/$(dirname "$f")" && cp "$R/$f" "$B/$f"; done && echo "Alterações guardadas em: $B"; git -C "$R" checkout -- $M; fi && git -C "$R" pull --ff-only && echo "Pronto: main atualizado"'
+bash -c 'R=$HOME/agata; B=$HOME/.agata-backup-staging/alteracoes-$(date +%Y%m%d-%H%M); M=$(git -C "$R" diff --name-only); if [ -n "$M" ]; then mkdir -p "$B" && for f in $M; do mkdir -p "$B/$(dirname "$f")" && cp "$R/$f" "$B/$f"; done && echo "Alterações guardadas em: $B"; fi && git -C "$R" pull --ff-only && echo "Pronto: main atualizado"'
 ```
 
 Assinar uma proposta (o Humano cola no próprio terminal, uma vez por proposta):

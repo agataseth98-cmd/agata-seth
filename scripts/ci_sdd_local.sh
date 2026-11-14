@@ -15,12 +15,13 @@ if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/cam
 # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
 export PATH="$(dirname "$PYTEST"):$PATH"
 
-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
 passo "gate de sincronia das specs (selftest)" python3 -I scripts/gate_spec_sync.py --selftest
 passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" python3 -I scripts/gate_spec_sync.py
 passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
 passo "ciclo SDD sobre a nova versão" python3 redesign/sdd_flow/runner.py "$TMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
-passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
+passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos redesign/nucleo-desenvolvimento
+passo "gate de spec (núcleo de desenvolvimento)" python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec
 for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos sincronia; do
   passo "critérios e drift: $c" python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$TMP/$c-evidence.json"
   passo "drift por critério: $c" python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$TMP/$c-evidence.json" "$TMP/$c-drift.md"

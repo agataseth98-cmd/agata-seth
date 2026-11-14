@@ -23,6 +23,7 @@ on:
       - "redesign/conexoes/**"
       - "redesign/avaliacao/**"
       - "redesign/sentidos/**"
+      - "redesign/nucleo-desenvolvimento/**"
       - "redesign/router/sombra_nova_versao.py"
       - "ferramentas/**"
       - "scripts/busca_texto.py"
@@ -72,7 +73,7 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.3
 
       - name: Testes dos componentes SDD
-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/projeto_indice/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/projeto_indice/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
 
       - name: Gate de sincronia das specs (antes dos ciclos, que regeneram o drift)
         run: |
@@ -87,7 +88,8 @@ jobs:
 
       - name: Âncora e critérios dos componentes existentes
         run: |
-          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
+          python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos redesign/nucleo-desenvolvimento
+          python3 redesign/sdd_flow/spec_gate.py check redesign/nucleo-desenvolvimento/spec
           for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos sincronia; do
             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"

@@ -4,6 +4,8 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para 
 
 **Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
 
+**Antes de propor ou aplicar mudança no sistema:** leia `.agents/skills/agata-fluxo/SKILL.md` (fluxo e regras de lote, Ma'at, 07/11/2026).
+
 **Sempre:**
 - **Regra 1:** abra a resposta com o cabeçalho — na 1ª, o bloco de prontidão; nas outras, `agata · <modelo> · t=<n> (contador mecânico) · <hora + selo>` (`agata-seth` só pelo gateway da Seth; `PROTOCOLOS.md`, "Carregar e formatos"). O `t=` vem do contador `scripts/turno.py`: com gancho (Claude Code), a linha chega pronta no contexto como "Cabeçalho deste turno"; sem gancho (Codex, Gemini CLI, OpenCode e outras), rode `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta, com o mesmo `<id>` em toda a conversa, e copie a linha. Subagente: `t=<n>.sub`. Sem contador, `t=<n> (contado no contexto)`.
 - **Não minta; meça antes de afirmar** (Regra 2). Não afirme ter lido, medido ou testado o que não aconteceu. Antes de dizer que algo FALTA, procure: `INDICE_MEMORIAS.md` e `INDICE_MEMORIAS_PALAVRAS-CHAVE.md` (entradas por data e tema) e a "Fronteira de recusas" (`PROJETO_REFERENCIA.md`).
