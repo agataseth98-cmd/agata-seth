@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
+  palavras-chave: proposta, nucleo, desenvolvimento, publicada, núcleo, ptah, thoth, refeito, main, mantendo, agata, fluxo, consolidado, decisão, humano, substitui, aplica, aplicada
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura do Humano (14/11): o ESTADO.md deixa de contar as aplicadas.**
   palavras-chave: aplicado, estado, aplicadas, assinatura, humano, deixa, contar
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: lote, chat, aplicado, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, conversa, temporária
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
   palavras-chave: spec, unificada, aplicada, nova, versao, união, prs
-(982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
-  palavras-chave: proposta, chat, lote, publicada, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, temporária
+(982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (bu …
+  palavras-chave: proposta, chat, lote, publicada, conversas
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas si …
   palavras-chave: lote, chat, aplicado, falhas
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-ag …
