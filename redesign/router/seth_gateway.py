@@ -280,6 +280,19 @@ def _diretrizes_agents() -> str:
     return "**Diretrizes de todo modelo (AGENTS.md, lido pela Máquina):**\n" + _CACHE_AGENTS["texto"] + "\n"
 
 
+# (07/11/2026, núcleo de desenvolvimento, D2) ponteiro de uma linha para o guia universal (Ma'at), no canal de
+# estado de _injeta, só nas faixas internas (a faixa pública não passa por _injeta). Fica FORA da doutrina (seção SETH-GATEWAY do
+# PROTOCOLOS.md), para não mudar o marcador. SETH_PROCESSO_HIDRATA=0 desliga.
+_LINHA_PROCESSO = ("PROCESSO: regras de lote e fluxo em .agents/skills/agata-fluxo/SKILL.md (Ma'at); "
+                   "leia antes de propor ou aplicar mudança.")
+
+
+def _linha_processo() -> str:
+    if os.environ.get("SETH_PROCESSO_HIDRATA") == "0":
+        return ""
+    return _LINHA_PROCESSO
+
+
 def _hidratacao(extra: str = "") -> str:
     """Modo compacto (default): cabeçalho + estado atual. Modo full: o arquivo inteiro.
     `extra`: linhas do turno anterior (ex.: AUDITORIA-TURNO-ANTERIOR) que vão no estado."""
@@ -317,6 +330,23 @@ def _bloco_estado_atual(extra: str = "") -> str:
     return (f"{MARCADOR_ESTADO}\n**Estado agora (Máquina, medido neste turno — "
             f"vale MAIS que qualquer bloco de estado anterior nesta conversa; "
             f"o cabeçalho é escrito pela Máquina):**\n{corpo}\n")
+
+
+def _retirar_ponteiro_processo_antigo(msgs: list) -> list:
+    """Remove o PROCESSO anterior da mensagem hidratada antes de atualizar o estado.
+
+    O ponteiro é estado de turno, não doutrina. Ao refrescar uma conversa já
+    hidratada, ele precisa acompanhar SETH_PROCESSO_HIDRATA e não acumular.
+    """
+    saida = []
+    for msg in msgs:
+        if (isinstance(msg, dict) and msg.get("role") == "system"
+                and isinstance(msg.get("content"), str) and MARCADOR in msg["content"]):
+            conteudo = re.sub(r"(?m)^PROCESSO:[^\r\n]*(?:\r?\n|$)", "", msg["content"])
+            if conteudo != msg["content"]:
+                msg = {**msg, "content": conteudo}
+        saida.append(msg)
+    return saida
 
 
 def _lembrar_modelo_real(nome: str) -> None:
@@ -1088,6 +1118,10 @@ def _injeta(payload: dict) -> dict:
         _cc = ""
     if _cc and os.environ.get("SETH_CACHE_CONSELHO_HIDRATA") != "0":
         auditoria = (auditoria + "\n" if auditoria else "") + _cc
+    # (07/11/2026, núcleo de desenvolvimento, D2) ponteiro PROCESSO: para o guia universal; não entra na doutrina.
+    _proc = _linha_processo()
+    if _proc:
+        auditoria = (auditoria + "\n" if auditoria else "") + _proc
     # (05/11/2026, nova versão lote 4 item 3) evidência da Alexandria para a pergunta da vez, com as notas da
     # curadoria; DESLIGADA por padrão (SETH_ALEXANDRIA_HIDRATA=1 liga). Só no 1º passo da resposta (não em
     # continuação de ferramenta); sem índice ou com erro, segue sem o bloco.
@@ -1114,15 +1148,26 @@ def _injeta(payload: dict) -> dict:
         for m in msgs)
     if ja_hidratado:
         # não repete a doutrina, mas REFRESCA o estado (MEMÓRIAS (417)): tira o
-        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora.
+        # ESTADO-ATUAL do turno anterior e põe um com a hora/sync de agora. O
+        # ponteiro PROCESSO também é estado de turno: remove a cópia anterior
+        # para respeitar SETH_PROCESSO_HIDRATA e evitar duplicação. Se a medição
+        # falhar, conserva o ponteiro anterior quando ainda estiver ligado.
         msgs = [m for m in msgs if not (
             isinstance(m, dict) and m.get("role") == "system"
             and isinstance(m.get("content"), str) and MARCADOR_ESTADO in m["content"])]
         bloco = _bloco_estado_atual(auditoria)
+        if not _proc or bloco:
+            msgs = _retirar_ponteiro_processo_antigo(msgs)
         payload["messages"] = ([{"role": "system", "content": bloco}] + msgs
                                if bloco else msgs)
         return payload
-    sys_msg = {"role": "system", "content": _hidratacao(auditoria)}
+    hidratacao = _hidratacao(auditoria)
+    # No modo full, _hidratacao usa o arquivo completo e não consome `extra`.
+    # Mantém o ponteiro como estado variável após o conteúdo hidratado, fora da
+    # doutrina fixa e só neste caminho interno.
+    if _proc and MODO != "compacto":
+        hidratacao = f"{hidratacao.rstrip()}\n{_proc}\n"
+    sys_msg = {"role": "system", "content": hidratacao}
     # se o frontend já mandou um system próprio, o nosso entra ANTES dele
     payload["messages"] = [sys_msg] + msgs
     return payload

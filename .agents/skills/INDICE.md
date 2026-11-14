@@ -8,7 +8,7 @@ Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`): de 21 pastas p
 
 | Skill | Use quando | Dono de fato |
 |---|---|---|
-| `agata-fluxo` | entrada de qualquer tarefa: medir o estado, conduta, escolha da skill, mudança no runtime da Máquina, afirmar com prova | Claude (doutrina) |
+| `agata-fluxo` | entrada de qualquer tarefa (guia Ma'at): medir o estado, conduta, escolha da skill, regras de lote, mudança no runtime da Máquina, afirmar com prova | agata-spec (dono); revisor agata-revisor (D4, 07/11/2026) |
 | `agata-aplicar-proposta` | criar, verificar, propor e aplicar uma proposta P-8 ou um lote (CI local, âncora, assinatura, registro) | Claude |
 | `agata-equipe` | trabalhar em Equipe, qualquer membro do Conselho (papéis, canal MSG, vigia, fila, fallback, cota) | Claude |
 | `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
@@ -26,6 +26,6 @@ Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`): de 21 pastas p
 ## Regras de manutenção
 1. Cada skill cita só caminhos que existem. Antes de salvar, confira com `python3 redesign/painel_operacional/qualidade_llm.py` (aviso "caminho citado inexistente").
 2. Uma skill por assunto. Se um assunto já tem skill, acrescente à skill, não crie outra.
-3. Formato universal: Markdown simples, frontmatter só com `name` e `description`, sem arquivo específico de um modelo (por exemplo, `agents/openai.yaml`).
+3. Formato universal: Markdown simples, frontmatter só com `name` e `description`, sem arquivo específico de um modelo (por exemplo, um `openai.yaml` específico de um modelo).
 4. Mudança em skill do repositório passa por proposta P-8 (é arquivo versionado).
 5. Medido vai com comando e data. Sem medição, a frase começa com "não medido".

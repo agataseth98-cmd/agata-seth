@@ -1,0 +1,110 @@
+[
+  {
+    "criterion": "C1: AGENTS.md aponta para o fluxo universal e o caminho existe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_agents_aponta_para_o_fluxo_universal"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C2: o índice de skills tem uma linha para cada pasta de .agents/skills com SKILL.md",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_indice_lista_toda_pasta_de_skill"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C6: os caminhos relativos citados no fluxo, no AGENTS.md e no índice existem",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_entrada_universal.py::test_caminhos_citados_existem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C3: o resumo de regras de lote do fluxo tem os 11 pontos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_resume_as_regras_de_lote"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C4: nenhum bloco de comando do fluxo remove ou restaura sem ordem",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_sem_restauracao_ou_remocao_sem_ordem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C5: o fluxo não afirma que a Seth carrega a skill sem medição",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_fluxo_nao_afirma_o_que_a_seth_nao_mostrou"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C8: as skills de processo passam no lint de skill, sem problema",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_skills_de_processo_passam_no_lint"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C9: cada id de lição citado no resumo existe na skill de processo (sem depender do PR #944, D8)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_fluxo_regras.py::test_ids_do_resumo_existem_na_skill"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C7: nas linhas acrescentadas, nenhum valor de segredo e nenhum caminho de memória restrita",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_texto_seguro.py::test_linhas_novas_sem_segredo_nem_memoria_restrita"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C10: o comando de cache documentado no fluxo grava um fato e uma pendência, e o ler mostra os dois",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_cache_documentado.py::test_cache_fato_e_pendencia_pelo_comando_documentado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C11a (condicional a D2): o ponteiro de estado aparece em faixa interna e não aparece na faixa pública",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_so_nas_faixas_internas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "C11b (condicional a D2): o ponteiro é desligado por SETH_PROCESSO_HIDRATA=0 e não muda o MARCADOR",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nucleo-desenvolvimento/tests/test_ponteiro_gateway.py::test_ponteiro_desligavel_por_ambiente"
+    ],
+    "cwd": null
+  }
+]
