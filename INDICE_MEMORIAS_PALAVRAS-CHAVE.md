@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura do Humano (14/11): o ESTADO.md deixa de contar as aplicadas.**
+  palavras-chave: aplicado, estado, aplicadas, assinatura, humano, deixa, contar
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
   palavras-chave: proposta, estado, aplicadas, publicada, pedido, humano, deixa, contar, ficavam, número, atrás, aplicação, aplicada
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano (14/11, 18h20): o pre-commit volta a ter o `fi`, e o CI passa a rodar `bash -n` nos ganchos.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: spec, unificada, aplicada, nova, versao, união, prs
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
   palavras-chave: proposta, chat, lote, publicada, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, temporária
-(981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
-  palavras-chave: lote, chat, aplicado, falhas, silenciosas, seletor, modelo, real
+(981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas si …
+  palavras-chave: lote, chat, aplicado, falhas
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-ag …
   palavras-chave: aplicada, equipe
 (979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenc …

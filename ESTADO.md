@@ -72,7 +72,7 @@ Abertas (sem APROVADO-): 4.
 - `nova-versao-lote2-20261106`
 - `nucleo-desenvolvimento-07-11`
 - `sincronia-12-11`
-Aplicadas (propostas/aplicadas/): 578.
+Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
 
