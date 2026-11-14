@@ -1,0 +1,37 @@
+diff --git a/.githooks/pre-commit b/.githooks/pre-commit
+index 48aed173..0cede8ef 100755
+--- a/.githooks/pre-commit
++++ b/.githooks/pre-commit
+@@ -42,6 +42,8 @@ if [ -n "$_wf_mudou" ]; then
+     exit 1
+   fi
+   rm -rf "$_wf_tmp"
++fi
++
+ # Teto do PROJETO.md (12/11/2026, componente projeto-indice): BLOQUEIO mecânico, não aviso
+ # (decisão do Humano, cache do Conselho, entrada 522). Confere o conteúdo em staging.
+ if git diff --cached --name-only | grep -qx 'PROJETO.md'; then
+diff --git a/.github/workflows/sdd.yml b/.github/workflows/sdd.yml
+index bdbdb03a..138026af 100644
+--- a/.github/workflows/sdd.yml
++++ b/.github/workflows/sdd.yml
+@@ -121,6 +121,7 @@ jobs:
+           python3 -I scripts/equipe/diff_limpo.py --selftest
+           python3 -I scripts/equipe/numero_memorias.py --selftest
+           python3 -I scripts/equipe/trava.py --selftest
++          for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h"; done
+           python3 scripts/testar_sincronia.py
+           python3 -I scripts/sessao_contexto.py --selftest
+           python3 -I scripts/porques.py --selftest
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index f55f8940..498cd820 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -40,6 +40,7 @@ passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/
+ passo "processo de aplicação: diff sem bloco gerado (selftest)" python3 -I scripts/equipe/diff_limpo.py --selftest
+ passo "processo de aplicação: número de MEMÓRIAS (selftest)" python3 -I scripts/equipe/numero_memorias.py --selftest
+ passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scripts/equipe/trava.py --selftest
++passo "ganchos do git: sintaxe do shell (bash -n)" bash -c 'for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h" || exit 1; done'
+ passo "processo de aplicação: âncora staged devolvida ao HEAD (selftest, com o P-8 de verdade)" python3 -I scripts/equipe/ancora_indice.py --selftest
+ # verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
+ # passe PY_YAML=/usr/bin/python3 (ou outro python com PyYAML). Sem isso o passo falha fechado, de propósito.

@@ -67,11 +67,12 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 3.
+Abertas (sem APROVADO-): 4.
+- `hook-fi-14-11`
 - `nova-versao-lote2-20261106`
 - `nucleo-desenvolvimento-07-11`
 - `sincronia-12-11`
-Aplicadas (propostas/aplicadas/): 576.
+Aplicadas (propostas/aplicadas/): 577.
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
 

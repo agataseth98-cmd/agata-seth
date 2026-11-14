@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-commit ficou sem um `fi` e bloqueia todo commit. Proposta hook-fi-14-11 publicada com a correção e um teste `bash -n` dos ganchos no CI.**
+  palavras-chave: erro, meu, composição, pacote, pre, commit, ficou, bloqueia, proposta, hook, publicada, correção, teste, bash, ganchos
 (1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
   palavras-chave: aplicado, pacote, assinatura, humano, sincronia, projeto, índice, correções, reversão, nova, versão, diff, único
 (1005) DIÁRIO — 14/11/2026 · **Proposta pacote-14-11 publicada: as quatro propostas de 12/11 ainda sem assinatura (sincronia, projeto-indice, correcoes, nova-versao-lote2) num diff único, para uma assinatura só, como o Humano pediu em 14/11. Não aplicada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, equipe, agata, skill, regras, delegação
 (979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenciosas do chat, seletor de modelo e modelo real.** O patch segue só em `propostas/chat-lote2-09-11.diff` (SHA-256 `2feb00dcf985b221e1455dc4bb1e027cbeffa4cbae7aa015ae41462f2c409d40`), contra `origin/main` `1bce7d59`, só em `redesign/painel_operacional/`. `git apply --check` passou nesta base. Testes: 215 com 1 falha pré-existente em `test_sdd_painel`, medidos no lote de origem e não repetidos nesta publicação. Não medido: resposta real do gateway com `X-Modelo-Real`; os testes usam gateway falso. Nada aplicado; assinatura pendente do Humano.
   palavras-chave: proposta, chat, lote, publicada, falhas, silenciosas, seletor, modelo, real, patch, segue, propostas, diff, sha, feb, dcf, cbeffa, cbae, contra, origin, main, bce, redesign, painel, operacional, git, apply, check, passou, base, testes, falha, pré, existente, test, sdd, medidos, origem, repetidos, publicação, medido, resposta, gateway, usam, falso, nada, aplicado, assinatura, pendente, humano
-(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
-  palavras-chave: proposta, tira, librechat, refeita, main, patch, retirar, atalhos, seth, parar, lista, segue, propostas, diff, aplicação, revalidação, cobertura, cinco, testes, unitários, local, tudo, contêineres, volumes, excluídos, foram, recriados, assinatura, pendentes, humano
+(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.* …
+  palavras-chave: proposta, tira, librechat, refeita, main
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre mai …
   palavras-chave: proposta, origem, preservada, refeita, mai
 (976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segun …
