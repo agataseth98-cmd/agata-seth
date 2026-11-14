@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
 (1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
 (1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
 (987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
-(985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
+(985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: a …
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas …
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-un …
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (bu …

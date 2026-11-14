@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 66581677968c7c88ac3168a573b26b75cffb9180
-  Escrito em: 14/11/2026 20:40 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c10e43f16fefb67ef6e3f80312884e89c45edbf1
+  Escrito em: 14/11/2026 20:50 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66581677968c7c88ac3168a573b26b75cffb9180/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66581677968c7c88ac3168a573b26b75cffb9180/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66581677968c7c88ac3168a573b26b75cffb9180/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66581677968c7c88ac3168a573b26b75cffb9180/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/66581677968c7c88ac3168a573b26b75cffb9180/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c10e43f16fefb67ef6e3f80312884e89c45edbf1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c10e43f16fefb67ef6e3f80312884e89c45edbf1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c10e43f16fefb67ef6e3f80312884e89c45edbf1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c10e43f16fefb67ef6e3f80312884e89c45edbf1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c10e43f16fefb67ef6e3f80312884e89c45edbf1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
+- Verificação: `bash scripts/p8_verificar.sh teste-comparativo-14-11` deu `PODE APLICAR`.
+- Correção: nos cabeçalhos de 14/11, escrevi horas sem medir (20:08, 20:41 e 21:05). O relógio da Máquina marcava menos que isso; o contador do gancho mostrava a hora certa.
+- Modelo: Claude Opus 5.5 (Claude Code).
+
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
 - O desenho de 12/11 se perdeu com a pasta temporária da sessão. A tarefa "tirar a cópia das regras do gateway" saiu, porque foi feita no pacote-14-11. Entram T1 (teste da saída do LibreChat no CI) e T2 (rótulo de autor do cache, INV-002), e T3 é opcional (INV-003).
 - Ouvir/Ditar: o teste real fica para outro dia, por decisão do Humano de 14/11. Ele precisa do Humano no microfone e nos fones; o sistema é ligado pelo atalho `seth`.
