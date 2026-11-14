@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-commit ficou sem um `fi` e bloqueia todo commit. Proposta hook-fi-14-11 publicada com a correção e um teste `bash -n` dos ganchos no CI.**
 (1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
 (1005) DIÁRIO — 14/11/2026 · **Proposta pacote-14-11 publicada: as quatro propostas de 12/11 ainda sem assinatura (sincronia, projeto-indice, correcoes, nova-versao-lote2) num diff único, para uma assinatura só, como o Humano pediu em 14/11. Não aplicada.**
 (1004) DIÁRIO — 14/11/2026 · **Aplicado fiscal-yaml-12-11 com a assinatura do Humano (14/11): o fiscal-p8 volta a ter um único `env:` e o `verificar_workflows.py` passa a barrar YAML de workflow inválido.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
 (979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenciosas do chat, seletor de modelo e modelo real.** O patch segue só em `propostas/chat-lote2-09-11.diff` (SHA-256 `2feb00dcf985b221e1455dc4bb1e027cbeffa4cbae7aa015ae41462f2c409d40`), contra `origin/main` `1bce7d59`, só em `redesign/painel_operacional/`. `git apply --check` passou nesta base. Testes: 215 com 1 falha pré-existente em `test_sdd_painel`, medidos no lote de origem e não repetidos nesta publicação. Não medido: resposta real do gateway com `X-Modelo-Real`; os testes usam gateway falso. Nada aplicado; assinatura pendente do Humano.
-(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
+(978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.* …
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre mai …
 (976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segun …
 (975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre ma …
