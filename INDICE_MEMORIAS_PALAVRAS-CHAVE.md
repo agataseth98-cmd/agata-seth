@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
+  palavras-chave: aplicado, teste, comparativo, assinatura, humano, desenho, redesign, rodada, autorizada, ela, pede, aprovação, parte
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
   palavras-chave: proposta, teste, comparativo, publicada, desenho, agata, chat, processo, spec, leve, refeito, guardado, redesign, decisão, humano, documento, rodada, pede, aprovação, parte
 (1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, chat, lote, publicada, editar, reenviar, ramos, parar, continuar, feedback, contexto, atalhos, tema
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
   palavras-chave: proposta, chat, protege, conversas, aplicada, assinada, humano, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
-(985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
-  palavras-chave: proposta, chat, protege, conversas, publicada, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
+(985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: a …
+  palavras-chave: proposta, chat, protege, conversas, publicada
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas …
   palavras-chave: lote, chat, aplicado, conversas
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-un …
