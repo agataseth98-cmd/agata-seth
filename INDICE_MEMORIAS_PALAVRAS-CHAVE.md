@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1004) DIÁRIO — 14/11/2026 · **Aplicado fiscal-yaml-12-11 com a assinatura do Humano (14/11): o fiscal-p8 volta a ter um único `env:` e o `verificar_workflows.py` passa a barrar YAML de workflow inválido.**
+  palavras-chave: aplicado, fiscal, yaml, assinatura, humano, volta, ter, único, env, verificar, workflows, passa, barrar, workflow, inválido
 (1003) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
   palavras-chave: proposta, sincronia, publicada, doutrina, seth, passa, viver, protocolos, cópia, gateway, sai, porquês, verificados, mecanismo, gancho, início, sessão, maxturns, agata, dev, muda, aplicada, assinatura, humano
 (1003) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, origem, preservada, refeita, main, patch, armazem, testes, segue, apenas, propostas, diff, aplicação, código, repositório, revalidação, suíte, painel, passed, subtests, local, tudo, colisão, conteúdo, longo, estado, armazenamento, real, continuam, fora, escopo, conforme, registro, assinatura, pendentes, humano
 (976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segunda parte de OpenCode.** O diff documental e de skills foi refeito para a base atual e remove os hunks repetidos de MEMÓRIAS/ONDE_ESTAMOS, que pertencem à proposta agente-opencode-07-11. Patch conferido após aplicar a primeira proposta; CI local `TUDO OK`. Assinatura e aplicação dos diffs pendentes do Humano.
   palavras-chave: proposta, docs, opencode, atualizada, segunda, parte, diff, documental, skills, refeito, base, atual, remove, hunks, repetidos, memórias, estamos, pertencem, agente, patch, conferido, após, aplicar, primeira, local, tudo, assinatura, aplicação, diffs, pendentes, humano
-(975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre main.** Propõe trocar o atalho de terminal e o membro de equipe Goose por OpenCode, mantendo `redesign/goose/` e as exceções históricas fora do escopo. O patch de aplicação segue no arquivo `.diff`, não aplicado. CI local atualizada passou; PR #949 é a segunda parte declarada e vem depois desta. Registro sequencial após (974); assinatura e aplicação pendentes do Humano.
-  palavras-chave: proposta, agente, opencode, atualizada, main, propõe, trocar, atalho, terminal, membro, equipe, goose, mantendo, redesign, exceções, históricas, fora, escopo, patch, aplicação, segue, arquivo, diff, aplicado, local, passou, segunda, parte, declarada, vem, desta, registro, sequencial, após, assinatura, pendentes, humano
+(975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre ma …
+  palavras-chave: proposta, agente, opencode, atualizada
 (974) DIÁRIO — 09/11/2026 · **Proposta nucleo-desenvolvimento-07-11 refeita sobr …
   palavras-chave: proposta, nucleo, desenvolvimento, refeita, sobr
 (973) DIÁRIO — 09/11/2026 · **Aplicação assinada painel-unificado-07-11 validada …
