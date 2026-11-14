@@ -189,11 +189,14 @@ def renderizar(raiz: Path = RAIZ) -> str:
     partes.append("A nota é a da própria tabela, cortada. A tabela escreve a data de cada medição; esta linha não confirma nada hoje.\n")
     partes.extend(f"- `{mid}` — {nota}" if nota else f"- `{mid}`" for mid, nota in modelos_confirmados(raiz))
     partes.append("")
-    abertas, aplicadas = propostas(raiz)
+    abertas, _ = propostas(raiz)
     partes.append("## Propostas (propostas/)\n")
     partes.append(f"Abertas (sem APROVADO-): {len(abertas)}.")
     partes.extend(f"- `{nome}`" for nome in abertas)
-    partes.append(f"Aplicadas (propostas/aplicadas/): {aplicadas}.")
+    # Sem contagem de aplicadas (estado-aplicadas-14-11): o aplicar.py move a proposta para aplicadas/
+    # DEPOIS de o pre-commit gerar este arquivo, e o fiscal-p8 exige o head idêntico ao diff assinado;
+    # a contagem ficava um atrás em toda aplicação e o `gerar_estado.py --verificar` do sdd falhava.
+    partes.append("Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).")
     partes.append("")
     partes.append("## Bugs e testes abertos (ONDE_ESTAMOS.md)\n")
     partes.append(bugs(raiz))
