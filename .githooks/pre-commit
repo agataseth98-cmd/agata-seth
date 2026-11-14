@@ -42,6 +42,8 @@ if [ -n "$_wf_mudou" ]; then
     exit 1
   fi
   rm -rf "$_wf_tmp"
+fi
+
 # Teto do PROJETO.md (12/11/2026, componente projeto-indice): BLOQUEIO mecânico, não aviso
 # (decisão do Humano, cache do Conselho, entrada 522). Confere o conteúdo em staging.
 if git diff --cached --name-only | grep -qx 'PROJETO.md'; then

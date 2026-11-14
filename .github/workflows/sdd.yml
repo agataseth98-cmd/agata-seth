@@ -121,6 +121,7 @@ jobs:
           python3 -I scripts/equipe/diff_limpo.py --selftest
           python3 -I scripts/equipe/numero_memorias.py --selftest
           python3 -I scripts/equipe/trava.py --selftest
+          for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h"; done
           python3 scripts/testar_sincronia.py
           python3 -I scripts/sessao_contexto.py --selftest
           python3 -I scripts/porques.py --selftest

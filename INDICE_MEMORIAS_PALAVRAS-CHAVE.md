@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano (14/11, 18h20): o pre-commit volta a ter o `fi`, e o CI passa a rodar `bash -n` nos ganchos.**
+  palavras-chave: aplicado, hook, assinatura, humano, pre, commit, volta, ter, passa, rodar, bash, ganchos
 (1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-commit ficou sem um `fi` e bloqueia todo commit. Proposta hook-fi-14-11 publicada com a correção e um teste `bash -n` dos ganchos no CI.**
   palavras-chave: erro, meu, composição, pacote, pre, commit, ficou, bloqueia, proposta, hook, publicada, correção, teste, bash, ganchos
 (1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: lote, chat, aplicado, falhas, silenciosas, seletor, modelo, real
 (980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
   palavras-chave: aplicada, equipe, agata, skill, regras, delegação
-(979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenciosas do chat, seletor de modelo e modelo real.** O patch segue só em `propostas/chat-lote2-09-11.diff` (SHA-256 `2feb00dcf985b221e1455dc4bb1e027cbeffa4cbae7aa015ae41462f2c409d40`), contra `origin/main` `1bce7d59`, só em `redesign/painel_operacional/`. `git apply --check` passou nesta base. Testes: 215 com 1 falha pré-existente em `test_sdd_painel`, medidos no lote de origem e não repetidos nesta publicação. Não medido: resposta real do gateway com `X-Modelo-Real`; os testes usam gateway falso. Nada aplicado; assinatura pendente do Humano.
-  palavras-chave: proposta, chat, lote, publicada, falhas, silenciosas, seletor, modelo, real, patch, segue, propostas, diff, sha, feb, dcf, cbeffa, cbae, contra, origin, main, bce, redesign, painel, operacional, git, apply, check, passou, base, testes, falha, pré, existente, test, sdd, medidos, origem, repetidos, publicação, medido, resposta, gateway, usam, falso, nada, aplicado, assinatura, pendente, humano
+(979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenc …
+  palavras-chave: proposta, chat, lote, publicada, falhas, silenc
 (978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.* …
   palavras-chave: proposta, tira, librechat, refeita, main
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre mai …
