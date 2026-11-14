@@ -146,7 +146,7 @@ Q4_K_M, medido) foi **descartado** — não cabe com folga nos 38GB de RAM desta
   - **`seth-rapido`** (trivial: <400 chars, sem `tools`, ≤2 msgs user)
   - **`seth-livre`** (normal — tudo que não é trivial nem pesado)
   - **`seth-pesado`** (>6000 chars OU cerca de código OU >10 msgs)
-  - ~~**Desde 13/10/2026, roteador-sombra** (PROJETO.md, "Decisor local"): o decisor
+  - ~~**Desde 13/10/2026, roteador-sombra** (PROTOCOLOS.md, "Decisor local"): o decisor
     local (`winnow:e4b`, CPU) escolhe também entre rapido/livre/pesado/**codigo** pelo
     significado e só registra em `~/.cache/agata/decisor/roteador.jsonl`; a rota de
     verdade segue a heurística acima até o Humano aprovar o relatório de divergência.~~
@@ -226,7 +226,7 @@ O fundo LOCAL usa a connection `ollama-local` já existente (`baseUrl`
 `http://127.0.0.1:11434`). O OmniRoute repassa a string do `model` depois do prefixo
 direto pro Ollama — testado ao vivo em (403): `ollama-local/qwen3.5-9b-64k:latest`
 roteia e responde (não-stream e stream). A tag `-64k` (com `PARAMETER num_ctx 65536`
-no Modelfile — PROJETO.md "Cérebro") tem que vir explícita no `model`; nunca
+no Modelfile — extras/projeto-detalhe/estado-de-fundo-12-11.md "Cérebro") tem que vir explícita no `model`; nunca
 `qwen3.5:9b` crua, que reproduz (121)/#16814. **Não há shim:** o `seth_local_shim` de
 (402) foi retirado em (403) — o OmniRoute já alcançava o modelo local, o shim era
 cano a mais.

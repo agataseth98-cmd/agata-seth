@@ -2,7 +2,7 @@
 """Servidor FastMCP — ponte de leitura/escrita com Discord (skill nova, 05/09/2026).
 
 Desenho: MEMÓRIAS (339)-ish (ver entrada real no commit). Cobre "integração com
-chats Discord" do desenho da arquitetura da Seth (PROJETO.md, "Interface").
+chats Discord" do desenho da arquitetura da Seth (extras/projeto-detalhe/estado-de-fundo-12-11.md, "Interface").
 
 Invariantes, na mesma linha do servidor read-only (redesign/mcp/servidor.py):
 - Wrapper fino sobre a API REST do Discord (`urllib.request`, sem lib nova — mesmo

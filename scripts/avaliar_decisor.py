@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Avaliação em produção do decisor local (PROJETO.md, "Decisor local").
+"""Avaliação em produção do decisor local (PROTOCOLOS.md, "Decisor local").
 
 Decisão do Humano, 13/10/2026 (MEMÓRIAS (655)): os 4 usos entram com o risco
 assumido por escrito, e o sistema avisa se valeu a pena até ele mandar aprovar

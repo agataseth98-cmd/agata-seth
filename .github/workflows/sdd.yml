@@ -37,9 +37,21 @@ on:
       - "scripts/auditoria_stop.py"
       - "scripts/conselho_mecanismos.py"
       - "scripts/testar_mecanismos.py"
+      - "scripts/verificar_workflows.py"
+      - "scripts/equipe/**"
+      - ".github/workflows/**"
       - "redesign/router/auditoria_turno.py"
       - "redesign/router/spec/**"
       - "redesign/router/seth_gateway.py"
+      - "scripts/porques.py"
+      - "scripts/sessao_contexto.py"
+      - "scripts/sessao_claude_contexto.sh"
+      - "scripts/testar_sincronia.py"
+      - "config/porques.json"
+      - "config/cli/**"
+      - "redesign/sincronia/**"
+      - "PROTOCOLOS.md"
+      - "AGENTS.md"
       - ".claude/**"
       - ".github/workflows/sdd.yml"
   workflow_dispatch: {}
@@ -56,8 +68,11 @@ jobs:
       - name: pytest fixado
         run: python3 -m pip install --disable-pip-version-check pytest==9.2.0
 
+      - name: PyYAML fixado (scripts/verificar_workflows.py lê os workflows; sem ele o passo falha fechado)
+        run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.3
+
       - name: Testes dos componentes SDD
-        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
+        run: python3 -m pytest -q redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/projeto_indice/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests ferramentas/test_ferramentas.py
 
       - name: Gate de sincronia das specs (antes dos ciclos, que regeneram o drift)
         run: |
@@ -73,7 +88,7 @@ jobs:
       - name: Âncora e critérios dos componentes existentes
         run: |
           python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
-          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+          for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos sincronia; do
             python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$RUNNER_TEMP/$c-evidence.json"
             python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$RUNNER_TEMP/$c-evidence.json" "$RUNNER_TEMP/$c-drift.md"
           done
@@ -106,3 +121,15 @@ jobs:
           python3 -I scripts/equipe/diff_limpo.py --selftest
           python3 -I scripts/equipe/numero_memorias.py --selftest
           python3 -I scripts/equipe/trava.py --selftest
+          python3 scripts/testar_sincronia.py
+          python3 -I scripts/sessao_contexto.py --selftest
+          python3 -I scripts/porques.py --selftest
+          python3 scripts/porques.py --verificar
+          python3 -I scripts/equipe/ancora_indice.py --selftest
+          python3 -I scripts/verificar_workflows.py --selftest
+          python3 -I scripts/verificar_workflows.py
+      - name: Projeto índice (destinos, teto, ESTADO em dia)
+        run: |
+          python3 redesign/projeto_indice/verificar_destinos.py
+          python3 redesign/projeto_indice/teto.py
+          python3 scripts/gerar_estado.py --verificar

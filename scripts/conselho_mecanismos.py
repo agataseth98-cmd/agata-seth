@@ -25,6 +25,7 @@ Saída: uma linha por controle: `modelo | controle | estado | evidência`. Códi
 from __future__ import annotations
 
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -127,9 +128,20 @@ def verificar(raiz: Path = RAIZ_PADRAO) -> list[Achado]:
     add("Seth", "entrada -> AGENTS.md (hidratação do gateway)", "ok-mecanico" if ok else "FALHA",
         "seth_gateway.py inclui AGENTS.md na hidratação compacta" if ok else
         "seth_gateway.py não lê AGENTS.md na hidratação")
-    add("Seth", "cópia da doutrina no código", "disciplina" if "_DOUTRINA_FIXA" in gw else "ok-mecanico",
-        "seth_gateway.py mantém a constante _DOUTRINA_FIXA: cópia de regras, não comparada com AGENTS.md "
-        "(pendência do Humano)" if "_DOUTRINA_FIXA" in gw else "sem constante de doutrina no gateway")
+    # Fonte única (sincronia-12-11): o gateway não tem cópia de regras. O texto próprio da Seth e a rota
+    # pública são lidos de PROTOCOLOS.md, entre os marcadores SETH-GATEWAY e SETH-PUBLICA; o AGENTS.md
+    # entra inteiro na hidratação compacta.
+    prot = _ler(raiz, "PROTOCOLOS.md") or ""
+    marcadores = all(m in prot for m in ("<!-- SETH-GATEWAY:INICIO -->", "<!-- SETH-GATEWAY:FIM -->",
+                                         "<!-- SETH-PUBLICA:INICIO -->", "<!-- SETH-PUBLICA:FIM -->"))
+    sem_copia = all(c not in gw for c in ("_DOUTRINA_FIXA", "_DOUTRINA_PUBLICA ="))
+    leitor = all(f in gw for f in ('_ler_secao("seth")', "_doutrina_seth()", "_doutrina_publica()"))
+    fonte_unica = sem_copia and leitor and marcadores
+    add("Seth", "fonte única: sem cópia de regras no gateway (doutrina em PROTOCOLOS.md)",
+        "ok-mecanico" if fonte_unica else "FALHA",
+        "seth_gateway.py sem _DOUTRINA_FIXA nem _DOUTRINA_PUBLICA; lê as seções SETH-GATEWAY e SETH-PUBLICA de PROTOCOLOS.md"
+        if fonte_unica else
+        "gateway com cópia de regras, sem o leitor de seção, ou PROTOCOLOS.md sem os quatro marcadores")
 
     # 2. Decisões: AGENTS.md aponta para o canon e para o cache do Conselho; o verificador confere os ponteiros.
     prompt = _ler(raiz, "PROMPT_CARREGAMENTO.md") or ""
@@ -148,6 +160,52 @@ def verificar(raiz: Path = RAIZ_PADRAO) -> list[Achado]:
         "ok-mecanico" if ("resumo_hidratacao" in gw and "query_canon" in gw) else "FALHA",
         "gateway injeta o resumo do cache do Conselho e expõe query_canon" if
         ("resumo_hidratacao" in gw and "query_canon" in gw) else "gateway sem o resumo do cache ou sem query_canon")
+
+    # 2b. Início de sessão (sincronia-12-11, decisão do Humano, entrada (521)): a leitura do canon e do cache
+    # sai do modelo e vira gancho. O mesmo conteúdo (scripts/sessao_contexto.py) em cada CLI.
+    sessao_py = _ler(raiz, "scripts/sessao_contexto.py") or ""
+    secoes_ok = all(s in sessao_py for s in ("Estado da Máquina", "Memória comum do Conselho", "Lotes abertos",
+                                             "Regras ativas", "Sessão conjunta"))
+    sh_claude = _ler(raiz, "scripts/sessao_claude_contexto.sh") or ""
+    ss_claude = json.dumps(((_json(raiz, ".claude/settings.json") or {}).get("hooks", {}) or {})
+                           .get("SessionStart", []), ensure_ascii=False)
+    claude_ok = secoes_ok and "sessao_claude_contexto.sh" in ss_claude and "sessao_contexto.py" in sh_claude
+    add("Claude Code", "início de sessão: regras ativas, decisões do cache e lotes (gancho SessionStart)",
+        "ok-mecanico" if claude_ok else "FALHA",
+        "SessionStart em .claude/settings.json chama sessao_claude_contexto.sh -> sessao_contexto.py "
+        f"({DOC['claude_hooks']})" if claude_ok else "SessionStart ausente ou sem as cinco seções de sessao_contexto.py")
+    gem_ss = json.dumps(((_json(raiz, "config/cli/gemini/settings.json.exemplo") or {}).get("hooks", {}) or {})
+                        .get("SessionStart", []), ensure_ascii=False)
+    add("Gemini CLI", "início de sessão (SessionStart)",
+        "passo-humano" if (secoes_ok and "sessao_contexto.py" in gem_ss) else "FALHA",
+        f"config/cli/gemini/settings.json.exemplo, copiar para ~/.gemini/settings.json; SessionStart é evento "
+        f"da doc pública (saída hookSpecificOutput.additionalContext) ({DOC['gemini_hooks']}); rodar na CLI instalada: não medido")
+    cdx = _toml(raiz, "config/cli/codex/config.toml.exemplo")
+    cdx_ss = (cdx or {}).get("hooks", {}).get("SessionStart") if isinstance(cdx, dict) else None
+    add("Codex", "início de sessão (SessionStart)",
+        "passo-humano" if (secoes_ok and cdx_ss and "sessao_contexto.py" in json.dumps(cdx_ss)) else
+        ("nao-medido" if cdx == "sem-tomllib" else "FALHA"),
+        f"config/cli/codex/config.toml.exemplo, copiar para ~/.codex/config.toml e rodar /hooks para confiar; "
+        f"SessionStart com additionalContext, limite padrão de 2500 tokens ({DOC['codex_hooks']})")
+    add("OpenCode", "início de sessão (SessionStart)", "nao-medido",
+        "a doc pública do OpenCode não foi consultada para evento de início de sessão; sem gancho, fica como disciplina")
+    add("Seth", "início de sessão: lotes e decisões do cache na hidratação",
+        "ok-mecanico" if ("_linha_propostas" in gw and "resumo_hidratacao" in gw) else "FALHA",
+        "a hidratação do gateway inclui PROPOSTAS-PENDENTES (lotes) e o resumo do cache a cada turno"
+        if ("_linha_propostas" in gw and "resumo_hidratacao" in gw) else "gateway sem a linha de lotes ou sem o resumo do cache")
+    # Porquês (sincronia-12-11): todo bullet "Sempre" e toda skill precisa de origem rastreável. Primeira versão: aviso.
+    try:
+        sys.path.insert(0, str(raiz / "scripts"))
+        import porques  # noqa: E402  (scripts/porques.py)
+        unidades, orfaos = porques.verificar(raiz)
+        sem = [u.id for u in unidades if not (u.inline or u.registro)]
+        pq_ok = bool(unidades) and not orfaos
+        pq_estado = "ok-mecanico" if pq_ok else "FALHA"
+        pq_ev = (f"{len(unidades)} unidades (regras e skills); sem porquê {len(sem)} (aviso na 1ª versão, "
+                 f"lista em scripts/porques.py --verificar); registro sem unidade: {len(orfaos)}")
+    except Exception as exc:  # noqa: BLE001 — o verificador não pode derrubar o do Conselho
+        pq_estado, pq_ev = "FALHA", f"scripts/porques.py não rodou: {type(exc).__name__}"
+    add("Todos", "porquê de cada regra do AGENTS.md e de cada skill", pq_estado, pq_ev)
 
     # 3. Contador de turno e auditoria de fim de turno.
     settings = _json(raiz, ".claude/settings.json") or {}
@@ -199,7 +257,9 @@ def verificar(raiz: Path = RAIZ_PADRAO) -> list[Achado]:
     falhas_ag = []
     for arq in arquivos:
         t = arq.read_text(encoding="utf-8")
-        if "model: haiku" not in t or "maxTurns:" not in t or "omitClaudeMd: true" in t or "## Pacote mínimo" not in t:
+        limite = re.search(r"^maxTurns: (\d+)$", t, re.M)  # sincronia-12-11: limite numérico, de 10 a 300 (medição: 19 a 232)
+        if ("model: haiku" not in t or limite is None or not 10 <= int(limite.group(1)) <= 300
+                or "omitClaudeMd: true" in t or "## Pacote mínimo" not in t):
             falhas_ag.append(arq.name)
     add("Claude Code", "subagentes: haiku, maxTurns e pacote mínimo",
         "ok-mecanico" if arquivos and not falhas_ag else "FALHA",
@@ -207,7 +267,7 @@ def verificar(raiz: Path = RAIZ_PADRAO) -> list[Achado]:
     skill = _ler(raiz, ".agents/skills/agata-equipe/SKILL.md") or ""
     add("Todos (subagentes)", "pacote mínimo na skill de equipe",
         "disciplina" if "## 9. Pacote mínimo para subagente" in skill else "FALHA",
-        "a regra está na skill agata-equipe; cumprir é disciplina fora do Claude Code")
+        "a regra está na skill agata-equipe (seção 9); cumprir é disciplina fora do Claude Code")
     return out
 
 

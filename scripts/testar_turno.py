@@ -273,6 +273,48 @@ class TestHook(_Base):
         self.assertEqual(verificar_cabecalho.verificar(turno.subagente("vc1", "claude-haiku-5-5")), [])
 
 
+    def _prompt(self, sessao: str, texto: str) -> str:
+        return self._contexto(self._gancho({"session_id": sessao, "transcript_path": "/nao/existe", "prompt": texto}))
+
+    def test_notificacao_nao_avanca_o_t(self):
+        self._prompt("nf1", "oi")
+        for marca in turno.MARCAS_NOTIFICACAO:
+            with self.subTest(marca=marca):
+                ctx = self._prompt("nf1", f"{marca} aviso de teste")
+                self.assertIn("t=1 (contador mecânico; notificação do sistema, sem avanço)", ctx)
+        self.assertEqual(_t(turno.atual("nf1", "claude-haiku-5-5")), 1)
+        self.assertIn("t=2 (contador mecânico)", self._prompt("nf1", "agora sim, mensagem do Humano"))
+
+    def test_mensagem_do_humano_que_cita_a_marca_no_meio_conta(self):
+        self._prompt("nf2", "oi")
+        self.assertIn("t=2 (contador mecânico)",
+                      self._prompt("nf2", "veja o texto [SYSTEM NOTIFICATION no meio, sou eu falando"))
+
+    def test_notificacao_antes_do_primeiro_turno_nao_injeta_linha(self):
+        r = self._gancho({"session_id": "nf3", "transcript_path": "/nao/existe", "prompt": "[SYSTEM NOTIFICATION x"})
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(r.stdout, "")
+        self.assertIn("1ª resposta desta sessão", self._prompt("nf3", "oi"))
+
+    def test_payload_sem_prompt_conta_como_antes(self):
+        self._gancho({"session_id": "nf4"})
+        self.assertIn("t=2 (contador mecânico)", self._contexto(self._gancho({"session_id": "nf4"})))
+
+    def test_so_o_comeco_do_texto_conta_como_notificacao(self):
+        self.assertTrue(turno.e_notificacao("   <task-notification>\n<status>x</status>"))
+        self.assertTrue(turno.e_notificacao("Goal check-in: revisar o plano"))
+        self.assertFalse(turno.e_notificacao("oi"))
+        self.assertFalse(turno.e_notificacao(""))
+        self.assertFalse(turno.e_notificacao(None))
+        self.assertFalse(turno.e_notificacao(7))
+
+    def test_cabecalho_de_notificacao_passa_no_verificador(self):
+        self._prompt("nf5", "oi")
+        ctx = self._prompt("nf5", "Goal check-in: revisar")
+        linha = ctx.split("Cabeçalho deste turno: ", 1)[1].split("\n", 1)[0]
+        self.assertEqual(verificar_cabecalho.verificar(linha), [], linha)
+
+
 class TestAuditoria(_Base):
     def setUp(self):
         super().setUp()

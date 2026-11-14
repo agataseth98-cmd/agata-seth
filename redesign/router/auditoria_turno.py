@@ -77,7 +77,7 @@ _LIGA_CONCISO = re.compile(r"modo conciso", re.IGNORECASE)
 _NARRACAO = re.compile(r"^\s*(?:[-*>]\s*)?(?:\*\*)?(vou |agora vou|deixe-me|deixa eu|primeiro,? vou|em seguida,? vou|"
                        r"vamos (?:verificar|ver|checar|conferir|olhar)|estou (?:verificando|checando|lendo|rodando|analisando))",
                        re.IGNORECASE)
-# (685) Estilo da personalidade (PROJETO, "Personalidade da Seth"): só padrão de texto,
+# (685) Estilo da personalidade (PROTOCOLOS.md, "Personalidade da Seth"): só padrão de texto,
 # sem modelo julgando. Fora de bloco de código e da linha de cabeçalho.
 _SAUDACAO = re.compile(r"^\W*(ol[áa]|oi|e a[íi]|bom dia|boa tarde|boa noite|bem[- ]vind[oa]s?)\b", re.IGNORECASE)
 _OFERTA = re.compile(r"como posso (?:te |lhe )?ajudar|espero ter ajudado|fico [àa] disposi[çc][ãa]o|"
@@ -285,7 +285,7 @@ def _estilo(texto: str) -> list[str]:
         achados.append(f"{prosa.count('!')} exclamações")
     if not achados:
         return []
-    return ["estilo: " + "; ".join(achados) + " — PROJETO, \"Personalidade da Seth\" (685)"]
+    return ["estilo: " + "; ".join(achados) + " — PROTOCOLOS.md, \"Personalidade da Seth\" (685)"]
 
 
 _TITULO = re.compile(r"^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*:?\s*$|[^\s].{0,80}:\s*$)")
@@ -342,7 +342,7 @@ def modo(msgs: list) -> str:
 # (685) Reforço da personalidade a cada turno: a instrução inicial perde peso conforme a
 # conversa cresce (deriva de persona); uma linha curta junto da MODO custa pouco.
 LINHA_PERSONA = ("PERSONA: operadora técnica do sistema — resultado, evidência, próximo passo; "
-                 "frases curtas; sem muleta, emoji ou saudação (PROJETO, \"Personalidade da Seth\").")
+                 "frases curtas; sem muleta, emoji ou saudação (PROTOCOLOS.md, \"Personalidade da Seth\").")
 
 
 def linha_modo(msgs: list) -> str:
@@ -779,7 +779,11 @@ _NUMEROS_CACHE: dict = {}
 def _numeros_existentes(raiz: Path | None = None) -> set[int]:
     raiz = raiz or RAIZ
     historia = [raiz / "MEMÓRIAS.md", raiz / "MEMORIAS-MORNO.md"] + sorted((raiz / "memoria" / "frio").glob("*.md"))
-    canon = [raiz / "REGRAS.md", raiz / "PROTOCOLOS.md", raiz / "PROJETO.md"]
+    # (12/11/2026, projeto-indice) o PROJETO virou índice; o histórico e a prosa que saíram dele
+    # seguem contando como canon para o número de entrada, para o conjunto não encolher.
+    canon = [raiz / "REGRAS.md", raiz / "PROTOCOLOS.md", raiz / "PROJETO.md",
+             raiz / "extras" / "arquivo" / "projeto-ate-2026-11-12.md",
+             raiz / "extras" / "projeto-detalhe" / "estado-de-fundo-12-11.md"]
     chave = tuple((str(f), f.stat().st_mtime) for f in historia + canon if f.exists())
     if _NUMEROS_CACHE.get("chave") != chave:
         nums: set[int] = set()

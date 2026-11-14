@@ -8,9 +8,11 @@
 #
 # Fonte mexida (index ou árvore) = regeneração legítima em andamento: silêncio.
 
-P22_DERIVADOS=(".hidrata.md" "INDICE_MEMORIAS.md" "INDICE_MEMORIAS_PALAVRAS-CHAVE.md")
+P22_DERIVADOS=(".hidrata.md" "INDICE_MEMORIAS.md" "INDICE_MEMORIAS_PALAVRAS-CHAVE.md" "ESTADO.md")
 P22_FONTES=("MEMÓRIAS.md" "MEMORIAS-MORNO.md" "memoria/frio" "PROJETO.md" "REGRAS.md"
-            "PROTOCOLOS.md" "FALHAS.md" "PROMPT_CARREGAMENTO.md" ".githooks/gerar-hidratacao.sh")
+            "PROTOCOLOS.md" "FALHAS.md" "PROMPT_CARREGAMENTO.md" ".githooks/gerar-hidratacao.sh"
+            "config/servicos-agata.txt" "config/portas-agata.txt" "config/modelos-gratuitos.md"
+            "redesign/systemd" "scripts/gerar_estado.py" "ONDE_ESTAMOS.md" "propostas")
 
 p22_derivados_drift() {
   if ! git diff --quiet HEAD -- "${P22_FONTES[@]}" 2>/dev/null; then

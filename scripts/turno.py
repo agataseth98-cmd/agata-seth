@@ -15,6 +15,10 @@ Uso:
   python3 scripts/turno.py hook                              gancho UserPromptSubmit (JSON na entrada)
   python3 scripts/turno.py --selftest
 
+Notificação, não Humano (12/11/2026): se o `prompt` do gancho começa com uma das MARCAS_NOTIFICACAO (aviso
+do sistema, retorno de agente, feedback de hook), o t não avança; o gancho só injeta a linha do turno atual.
+Medido pelo Humano no mesmo dia: o t saltou de 4 para 7 em minutos, sem mensagem dele.
+
 Estado: $AGATA_TURNOS_DIR ou ~/.cache/agata/turnos/<sessao>.json (modo 0600), com
 trava <sessao>.lock (flock) e escrita atômica (arquivo temporário + os.replace).
 Arquivo corrompido: `proximo` recomeça em 1 com a marca "contador reiniciado".
@@ -41,6 +45,10 @@ MODELO_PADRAO = "modelo não verificado"
 BASE = "contador mecânico"
 BASE_REINICIADO = "contador mecânico; contador reiniciado"
 PRAZO_TRAVA = 5.0
+# Textos que chegam ao gancho como mensagem de usuário sem o Humano digitar nada. Só o começo conta.
+MARCAS_NOTIFICACAO = ("[SYSTEM NOTIFICATION", "<task-notification>", "Another Claude session sent a message",
+                      "Stop hook feedback", "Goal check-in")
+BASE_NOTIFICACAO = "contador mecânico; notificação do sistema, sem avanço"
 _ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 _BYTES_TRANSCRIPT = 262144  # só o fim do transcrito: o último modelo do assistente está ali
 
@@ -212,8 +220,35 @@ def _modelo_do_transcript(caminho) -> str | None:
     return None
 
 
+def e_notificacao(texto) -> bool:
+    """O `prompt` do gancho é notificação (aviso do sistema, retorno de agente, feedback de hook), e não o Humano?
+    Só o começo conta (sem espaço à esquerda, 200 primeiros caracteres): mensagem do Humano que cita a marca
+    no meio continua contando. Sem `prompt` no payload, devolve False: conta como antes."""
+    if not isinstance(texto, str):
+        return False
+    return texto.lstrip()[:200].startswith(MARCAS_NOTIFICACAO)
+
+
+def _saida(contexto: str) -> str:
+    return json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
+                                              "additionalContext": contexto}}, ensure_ascii=False)
+
+
+def _gancho_notificacao(sessao: str, modelo) -> str:
+    """Notificação não avança o t. Injeta a linha do turno atual para o modelo copiar; sem turno ainda, nada."""
+    t = atual_da_sessao(sessao)
+    if t is None:
+        return ""
+    cab = linha(modelo, t, BASE_NOTIFICACAO)
+    contexto = (f"Cabeçalho deste turno: {cab}\n"
+                "Esta mensagem é notificação do sistema ou de agente, não do Humano: o t não avança. "
+                "Copie a linha como abertura da resposta.\n"
+                f"Sessão para turno.py e auditoria_turno.py --verificar --sessao: {sessao}")
+    return _saida(contexto)
+
+
 def hook(entrada: str, ambiente=None) -> str:
-    """Gancho UserPromptSubmit. Entrada: JSON do Claude Code (session_id; model ou transcript_path).
+    """Gancho UserPromptSubmit. Entrada: JSON do Claude Code (session_id; prompt; model ou transcript_path).
     Saída: JSON com hookSpecificOutput.additionalContext, ou "" (sem sessão, erro, entrada inválida).
     Nunca levanta exceção: o gancho não pode travar o prompt."""
     ambiente = os.environ if ambiente is None else ambiente
@@ -229,6 +264,8 @@ def hook(entrada: str, ambiente=None) -> str:
             modelo = _modelo(modelo_payload)
         else:
             modelo = _modelo(_modelo_do_transcript(dados.get("transcript_path")))
+        if e_notificacao(dados.get("prompt")):
+            return _gancho_notificacao(sessao, modelo)
         t, base, cab = _avancar(sessao, modelo)
     except Exception as e:  # noqa: BLE001 -- o gancho nunca derruba o prompt
         print(f"turno: gancho sem linha de turno ({type(e).__name__}: {e})", file=sys.stderr)
@@ -242,8 +279,7 @@ def hook(entrada: str, ambiente=None) -> str:
                      "Copie a linha como abertura da resposta (REGRAS.md, Regra 1); não recalcule o t. "
                      f"Subagente: t=<n>.sub com `python3 scripts/turno.py sub --sessao {sessao}`.")
     contexto = (f"{principal}\nSessão para turno.py e auditoria_turno.py --verificar --sessao: {sessao}")
-    return json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
-                                              "additionalContext": contexto}}, ensure_ascii=False)
+    return _saida(contexto)
 
 
 def _selftest() -> int:
@@ -274,6 +310,12 @@ def _selftest() -> int:
             saida = hook(json.dumps({"session_id": "st-d", "transcript_path": "/nao/existe"}))
             res.append(("gancho injeta Cabeçalho deste turno", "Cabeçalho deste turno:" in saida))
             res.append(("gancho com entrada inválida sai sem saída", hook("{ruim") == ""))
+            hook(json.dumps({"session_id": "st-e", "transcript_path": "/nao/existe", "prompt": "oi"}))
+            aviso = hook(json.dumps({"session_id": "st-e", "transcript_path": "/nao/existe",
+                                     "prompt": "[SYSTEM NOTIFICATION - NOT USER INPUT] x"}))
+            res.append(("notificação não avança o contador",
+                        "t=1 (contador mecânico; notificação do sistema, sem avanço)" in aviso
+                        and "t=1 (contador mecânico)" in atual("st-e")))
             res.append(("hora regional com fuso -03 e selo", bool(re.search(
                 r"\d{2}/\d{2}/\d{4} \d{2}:\d{2} -03 \(relógio da Máquina\)", proximo("st-a")))))
         finally:

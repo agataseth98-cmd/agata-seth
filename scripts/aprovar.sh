@@ -2,7 +2,7 @@
 # scripts/aprovar.sh <nome> ["motivo em uma frase"]
 #
 # Cria propostas/APROVADO-<nome> ASSINADO com a chave ssh do Humano -- o ato
-# deliberado que P-8 exige (PROJETO.md, "Quarentena estrutural"). A assinatura
+# deliberado que P-8 exige (PROTOCOLOS.md, "Quarentena estrutural"). A assinatura
 # amarra a aprovação AQUELE propostas/<nome>.diff: editar o diff depois quebra
 # a verificação em scripts/perimetro.sh (P-8).
 #

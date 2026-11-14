@@ -1,0 +1,227 @@
+[
+  {
+    "criterion": "o gateway não tem _DOUTRINA_FIXA nem _DOUTRINA_PUBLICA e chama _doutrina_seth() e _doutrina_publica()",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_gateway_sem_doutrina_copiada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a seção 'Seth no gateway' é lida de PROTOCOLOS.md sem os marcadores",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_secao_seth_lida_do_canon"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hidratação traz a seção e o AGENTS.md, e o marcador de hidratação",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_hidratacao_traz_secao_e_agents"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem a seção, a hidratação diz lacuna e não cai em silêncio",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_sem_secao_vira_lacuna_e_nao_cai_em_silencio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "mudar a seção muda o marcador de hidratação",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_marcador_muda_quando_o_canon_muda"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "PROTOCOLOS.md tem a seção 'Seth no gateway' marcada uma vez",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_protocolos_tem_secao_marcada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a seção 'Seth no gateway' diz que o gateway abre a resposta da Seth com o cabeçalho medido, e que ela não escreve cabeçalho",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_seth_nao_escreve_cabecalho_o_gateway_escreve"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o verificador de mecanismos marca a fonte única como ok-mecanico",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_mecanismos_checam_fonte_unica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o verificador de porquês passa no selftest",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestPorques.test_selftest_do_verificador"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o repositório tem 15 regras do AGENTS.md e uma unidade por SKILL.md",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestPorques.test_repositorio_tem_regras_e_skills"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "regra sem origem não aparece como OK",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestPorques.test_toda_regra_tem_origem_ou_esta_listada_como_sem_porque"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com --estrito, sem porquê sai 1; sem --estrito, sai 0",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestPorques.test_estrito_falha_com_sem_porque"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as regras curtas listam os títulos das regras ativas",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestPorques.test_regras_curtas_lista_os_titulos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o contexto de início de sessão passa no selftest offline",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_selftest_offline"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as decisões do cache entram só quando são decisão, as últimas três",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_decisoes_do_cache_so_pega_decisoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os lotes abertos vêm da coluna de estado de ONDE_ESTAMOS",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_lotes_abertos_le_a_coluna_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o contexto tem cinco seções e cabe no limite de caracteres",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_montar_tem_cinco_secoes_e_limite"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a saída tem o formato SessionStart com additionalContext",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_saida_json_no_formato_sessionstart"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o invólucro do Claude chama o conteúdo comum e não tem cópia de regras",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestSessaoContexto.test_involucro_claude_chama_o_conteudo_comum"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o .claude/settings.json tem SessionStart com o invólucro",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestGatilhosDasCLIs.test_claude_settings_tem_sessionstart"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o exemplo do Gemini tem SessionStart e mantém AfterAgent",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestGatilhosDasCLIs.test_gemini_exemplo_tem_sessionstart"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o exemplo do Codex tem SessionStart e mantém Stop e a negação do .env",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestGatilhosDasCLIs.test_codex_exemplo_tem_sessionstart_e_mantem_o_resto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada agente em .claude/agents tem maxTurns entre 10 e 300",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestMaxTurns.test_todo_agente_tem_limite_numerico_entre_10_e_300"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o agente de desenvolvimento tem maxTurns de pelo menos 232 (maior uso medido)",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestMaxTurns.test_desenvolvedor_cabe_no_maior_uso_medido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota pública tem a doutrina em PROTOCOLOS.md (SETH-PUBLICA), sem cópia no gateway",
+    "command": [
+      "python3",
+      "scripts/testar_sincronia.py",
+      "TestFonteUnica.test_publica_sem_copia_e_com_marcadores"
+    ],
+    "cwd": null
+  }
+]

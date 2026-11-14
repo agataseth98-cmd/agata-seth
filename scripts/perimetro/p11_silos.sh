@@ -15,7 +15,7 @@
 # Só `.hidrata.md` (o comum, sem bloco MOD que declare `modelo-alvo:`) é
 # artefato público. FALHA o commit -- mesma severidade de P-8.
 # Fonte: REGRAS.md, "Princípios" (Segurança) · REGRAS.md, "O Conselho"
-# item 3 · PROJETO.md, "Memória e hidratação" (silos Fase 2).
+# item 3 · PROTOCOLOS.md, "Memória e hidratação" (silos Fase 2).
 _p11_eh_silo() {
   # `.hidrata-<algo>.md` casa; `.hidrata.md` (o comum, versionado) NÃO --
   # não há `-` depois de `.hidrata`.

@@ -3,7 +3,7 @@
 
 UMA tarefa: enviar um pedido de parecer ja escrito pelo Humano a UM modelo
 remoto, guardar a resposta crua. Nada alem disso -- ver REGRAS "Segunda
-opiniao" e PROJETO "Conselho Remoto".
+opiniao" e PROTOCOLOS.md "Conselho Remoto".
 
 Desde P1-04 (branch redesign, 2026-09-02): a chamada externa vai pelo OmniRoute,
 ATRAVES do proxy de sanitizacao em 127.0.0.1:20127 (P1-02). Este script NAO le
@@ -323,7 +323,7 @@ PRECO_SAIDA_POR_TOKEN_USD = 0.0     # o custo real agora sai de `omniroute cost`
 
 # Condicao 1 (MEMÓRIAS (206)): so material ja no repositorio PUBLICO pode sair
 # daqui. memoria/missoes/ e a camada privada, local, sem remote por desenho
-# (PROJETO, "Memoria e hidratacao") -- nunca deve aparecer no texto de um pedido
+# (PROTOCOLOS.md, "Memoria e hidratacao") -- nunca deve aparecer no texto de um pedido
 # que vai pra fora. Checagem mecanica, generosa nas variacoes de caminho,
 # travando o envio se achar.
 PADRAO_CONTEUDO_PRIVADO = re.compile(r"memoria[/\\]missoes", re.IGNORECASE)
@@ -366,7 +366,7 @@ def checar_formato_parecer(texto):
     return faltando
 
 
-# (686) Voz comum do sistema (AGENTS.md; PROJETO, "Personalidade da Seth"): a FORMA é a mesma
+# (686) Voz comum do sistema (AGENTS.md; PROTOCOLOS.md, "Personalidade da Seth"): a FORMA é a mesma
 # para todo modelo; o JUÍZO é de cada membro. Persona única num conselho de modelos tende à
 # convergência prematura (pesquisa de 2026) -- e o Conselho existe para discordar (P-13).
 # Vai como mensagem de sistema; o pedido do Humano segue intacto (o sha256 do pedido não muda).

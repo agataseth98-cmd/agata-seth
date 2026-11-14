@@ -15,7 +15,7 @@ do repo principal):
                     Parte 1: REGRAS.md na íntegra
                     Parte 1b/1c: PROTOCOLOS.md e FALHAS.md na íntegra (desde a
                              reorganização das REGRAS em três camadas, 01/10/2026)
-                    Parte 2: PROJETO.md na íntegra
+                    Parte 2: PROJETO.md na íntegra (desde 12/11/2026 é o índice curto; ESTADO.md e a prosa de estado em extras/projeto-detalhe/ ficam fora do derivado)
                     Parte 3: só as linhas de título das entradas de MEMÓRIAS --
                              quente + morno + frio (Fase 4) -- (nº + tipo +
                              data + título), mais recente primeiro (camada por

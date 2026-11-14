@@ -40,7 +40,7 @@ INBOX = REPO / "memoria" / "obsidian-inbox"
 # (22/10/2026, P-8 fila-inbox) Notas aprovadas pelo Humano entram em MEMÓRIAS por PR, nunca por este script.
 FILA = REPO / "memoria" / "obsidian-fila-revisao"
 
-# Nota pronta = "decide e confere" (PROJETO.md, "Decisor local"). O Obsidian
+# Nota pronta = "decide e confere" (PROTOCOLOS.md, "Decisor local"). O Obsidian
 # salva sozinho a cada poucos segundos enquanto se digita, e MEMÓRIAS é
 # append-only: importar no meio da digitação gravaria entrada parcial para
 # sempre. Trava exata: a nota está parada há QUIETO_MIN minutos. Por cima, o

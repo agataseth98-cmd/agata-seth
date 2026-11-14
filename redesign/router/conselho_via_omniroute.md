@@ -18,7 +18,7 @@ direto a z.ai / Google. **A política não muda — só a camada de rede.**
 
 UMA tarefa: mandar um pedido de parecer já escrito pelo Humano a UM modelo remoto, guardar
 a resposta crua. Não interpreta, não resume, não julga, não encadeia, não escreve canon,
-não decide. (`MEMÓRIAS (206)/(207)`, REGRAS "Segunda opinião", PROJETO "Conselho Remoto".)
+não decide. (`MEMÓRIAS (206)/(207)`, REGRAS "Segunda opinião", PROTOCOLOS.md "Conselho Remoto".)
 
 ## Garantias que TÊM que sobreviver à mudança
 

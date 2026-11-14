@@ -29,7 +29,9 @@ Nunca busca web indexada, nunca a página HTML do repositório — servem cache 
 A ferramenta de leitura de endereço da sessão (read_url, open_url, fetch, web_fetch — nome varia por fornecedor) faz esse fetch. Voltou HTML: você pediu a página, não o raw. Voltou resumo ou "pontos principais": o arquivo não foi lido — peça o bruto ou declare `lacuna`. Cache de CDN ela não escapa; a URL pinada em SHA escapa. Antes de dizer "não tenho ferramenta pra isso", olhe a lista da sessão e nomeie o que inspecionou — sem isso é crença sobre o seu tipo de modelo, não medição.
 
   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/REGRAS.md
+  https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/PROTOCOLOS.md
   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/PROJETO.md
+  https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/ESTADO.md
   https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/main/MEMÓRIAS.md
 
 Por que preferir as pinadas: as URLs em `/main/` passam por cache de CDN (Fastly). O raw pode vir 1-2 min
@@ -39,14 +41,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5858d9abc173052f0202f84e16e6a3db4f7917b9
-  Escrito em: 14/11/2026 11:39 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c7b6328c029f5290add86cc83a740301beb3f917
+  Escrito em: 14/11/2026 17:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
@@ -90,16 +92,16 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
   api.github.com falhava. A checagem da API é um extra para quem a tem, não um pré-requisito do fetch.
 
 NÃO CONSEGUIU ABRIR NENHUM ENDEREÇO? PEÇA — não invente o que não leu.
-Diga ao Humano em 1 linha o que tentou e o que voltou. Peça REGRAS.md, PROTOCOLOS.md, FALHAS.md e PROJETO.md inteiros, a janela mais recente de MEMÓRIAS.md e a hora de Brasília (selo e procedimento: Regra 1.1). Primeira sessão sem acesso: PROJETO.md, "Fonte canônica". Com os arquivos do Humano: `sync: não verificado`, origem em 1 linha.
+Diga ao Humano em 1 linha o que tentou e o que voltou. Peça REGRAS.md, FALHAS.md, PROJETO.md (índice) e ESTADO.md (estado gerado, com o mapa de PROTOCOLOS.md) inteiros, a seção "Carregar e formatos" de PROTOCOLOS.md, a janela mais recente de MEMÓRIAS.md e a hora de Brasília (selo e procedimento: Regra 1.1). Primeira sessão sem acesso: PROTOCOLOS.md, "Fonte canônica". Com os arquivos do Humano: `sync: não verificado`, origem em 1 linha.
 
-LEIA, NESTA ORDEM: REGRAS.md inteiro · PROTOCOLOS.md inteiro · FALHAS.md inteiro · a janela mais recente de MEMÓRIAS.md · PROJETO.md inteiro.
+LEIA, NESTA ORDEM: REGRAS.md inteiro · FALHAS.md inteiro · a janela mais recente de MEMÓRIAS.md · PROJETO.md inteiro (índice: a tabela "Onde encontrar" diz em que arquivo está cada resposta) · ESTADO.md inteiro (estado vivo e o mapa de PROTOCOLOS.md, gerados pela Máquina) · PROTOCOLOS.md não inteiro: leia a seção "Carregar e formatos" e, para cada outra seção, o título indicado no mapa.
 A janela de MEMÓRIAS.md começa no marcador `ENTRADAS-NOVAS`. Vai de cima para baixo, mais recente primeiro.
 Fica dentro do orçamento do hook de hidratação, que nunca corta uma entrada no meio. O mecanismo, o motivo da
-ordem invertida e o tamanho da janela estão em PROJETO.md, "Memória e hidratação". Não são copiados aqui:
+ordem invertida e o tamanho da janela estão em PROTOCOLOS.md, "Memória e hidratação". Não são copiados aqui:
 mudam sem aviso, e este arquivo não acompanha essas mudanças.
 
 RESPONDA COM O BLOCO DE PRONTIDÃO. Nas respostas seguintes, use a linha de turno. O `t=` vem do contador mecânico da Máquina (`scripts/turno.py`, por sessão): com gancho (Claude Code), copie a linha "Cabeçalho deste turno"; sem gancho, rode `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>` no início de cada resposta e copie a linha que ele imprime.
-A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira PROJETO.md, "Estado dos bugs e dos testes", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
+A linha de turno vale para toda resposta — inclusive ao entregar documento, proposta, diff ou código. Antes de `pronto.` no bloco, confira ESTADO.md, seção "Bugs e testes abertos", e a janela de MEMÓRIAS: item aberto ali entra em `quebrado:`.
 A forma exata das duas está em PROTOCOLOS.md, "Carregar e formatos", e na Regra 1 (REGRAS.md): as 3 linhas do bloco (a linha
 `Nonce:` saiu — TES-002 aposentado em 09/09/2026, MEMÓRIAS (417)), as três formas de `sync:` com os campos que
 cada uma exige, o selo de origem da hora, a linha por resposta com `t=<n>`. Não há forma reduzida aqui. Use a

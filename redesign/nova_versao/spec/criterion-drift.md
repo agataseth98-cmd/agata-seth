@@ -12,3 +12,4 @@
 - `o ensaio de retorno usa a rota alternativa quando a principal cai` — **pass** — verified
 - `o orçamento do turno esgota por rodadas, chamadas ou prazo` — **pass** — verified
 - `as sete palavras andam só pelos passos previstos e não repetem o registro` — **pass** — verified
+- `a reversão não apaga `AGATA_NV_DIR`; só remove o cache` — **pass** — verified

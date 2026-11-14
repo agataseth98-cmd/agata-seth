@@ -17,6 +17,13 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
+# Âncora de SHA que um commit ABORTADO deixou no índice (12/11/2026): o bloco regravado pelo passo 2 abaixo ficava
+# staged, e o P-8 do commit seguinte lia isso como mudança de comportamento em REGRAS/PROJETO (SUSPEITO). Antes do
+# perímetro, o bloco staged volta ao do HEAD; o passo 2 regrava a âncora e ela entra neste commit. Só mexe no bloco
+# ANCORA-SHA, nunca no resto do staged. Ver scripts/equipe/ancora_indice.py (selftest com o P-8 de verdade).
+python3 -I scripts/equipe/ancora_indice.py REGRAS.md PROJETO.md MEMÓRIAS.md PROMPT_CARREGAMENTO.md \
+  || echo "pre-commit: AVISO -- não consegui conferir a âncora staged; o P-8 decide." >&2
+
 if ! bash scripts/perimetro.sh; then
   echo "pre-commit: perimetro.sh falhou -- commit bloqueado. Veja a saída acima." >&2
   exit 1
@@ -35,6 +42,13 @@ if [ -n "$_wf_mudou" ]; then
     exit 1
   fi
   rm -rf "$_wf_tmp"
+# Teto do PROJETO.md (12/11/2026, componente projeto-indice): BLOQUEIO mecânico, não aviso
+# (decisão do Humano, cache do Conselho, entrada 522). Confere o conteúdo em staging.
+if git diff --cached --name-only | grep -qx 'PROJETO.md'; then
+  if ! git show :PROJETO.md | python3 redesign/projeto_indice/teto.py - >&2; then
+    echo "pre-commit: commit bloqueado pelo teto do PROJETO.md. Ele é índice: estado vai para ESTADO.md (gerado), prosa de estado para extras/projeto-detalhe/, o como para PROTOCOLOS.md e histórico para extras/arquivo/." >&2
+    exit 1
+  fi
 fi
 
 # Âncora de SHA em PROMPT_CARREGAMENTO.md (item 2, 20/08/2026, ordem do
@@ -104,11 +118,20 @@ if [ -f PROMPT_CARREGAMENTO.md ]; then
   fi
 fi
 
-# Regenera .hidrata.md/INDICE_MEMORIAS.md se REGRAS/PROJETO/MEMÓRIAS.md mudaram
+# ESTADO.md (12/11/2026, componente projeto-indice): estado vivo gerado pela Máquina a partir de
+# fontes reais (scripts/gerar_estado.py). Regenerado e incluído em todo commit ANTES da hidratação,
+# que o lê. Falha aqui só avisa: o CI roda `gerar_estado.py --verificar` e bloqueia o desvio.
+if python3 scripts/gerar_estado.py >/dev/null; then
+  git add ESTADO.md
+else
+  echo "pre-commit: AVISO -- não consegui regenerar ESTADO.md (scripts/gerar_estado.py)" >&2
+fi
+
+# Regenera .hidrata.md/INDICE_MEMORIAS.md se REGRAS/PROJETO/MEMÓRIAS.md/ESTADO.md mudaram
 # NESTE commit -- checado AQUI, depois da âncora acima, de propósito (ver nota
 # no topo do arquivo): a âncora muda os três em todo commit, e isso TEM que
 # contar como "mudou" pra .hidrata.md não ficar defasado sem nenhum commit falhar.
-if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROTOCOLOS\.md|FALHAS\.md|PROJETO\.md|MEMÓRIAS\.md)$'; then
+if git diff --cached --name-only -z | grep -zqE '^(REGRAS\.md|PROTOCOLOS\.md|FALHAS\.md|PROJETO\.md|MEMÓRIAS\.md|ESTADO\.md)$'; then
   bash .githooks/gerar-hidratacao.sh
   # INDICE_MEMORIAS_PALAVRAS-CHAVE.md ficava de fora deste `git add` --
   # gerar-hidratacao.sh regenera os três, mas só os dois primeiros entravam

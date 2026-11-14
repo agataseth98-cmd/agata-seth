@@ -15,8 +15,8 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 REPO = RAIZ.parent
+# ECC saiu da caixa em 12/11/2026 (arquivo: extras/arquivo-ecc-12-11/). Só o que está aqui é indexado.
 FONTES = {
-    "ecc": RAIZ / "fontes" / "ecc",
     "superpowers": RAIZ / "fontes" / "superpowers",
 }
 PROPRIAS = [REPO / ".agents" / "skills"]

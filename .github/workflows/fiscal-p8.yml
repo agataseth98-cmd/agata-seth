@@ -40,6 +40,9 @@ jobs:
           test "$(git rev-parse refs/remotes/pr/head)" = "$HEAD_SHA" \
             || { echo "o head do PR mudou durante a execução; reexecute"; exit 1; }
 
+      - name: PyYAML fixado (o fiscal confere o YAML dos workflows do head, scripts/p8_verificar_pr.sh 2c)
+        run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.3
+
       - name: Fiscalizar (par assinado, consumo integral, raiz da base)
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}

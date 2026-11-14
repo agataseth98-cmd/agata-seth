@@ -16,6 +16,7 @@ O código do contador fica em `scripts/turno.py` e os testes em `scripts/testar_
 - O estado fica em `~/.cache/agata/turnos/<ID>.json` (ou em `$AGATA_TURNOS_DIR`), modo 0600, sob trava `flock` e com escrita atômica. O ID aceita letras, números, `.`, `_` e `-`, até 128 caracteres, começando por letra ou número.
 - Arquivo corrompido: `proximo` recomeça em 1 com a marca `contador reiniciado`. `atual` e `sub` recusam com saída 1. Nada disso quebra o gancho.
 - `scripts/turno.py hook` lê o JSON do gancho UserPromptSubmit: `session_id` do stdin (ou `CLAUDE_SESSION_ID`, como último recurso); modelo de `model` ou, na falta, do último `message.model` do `transcript_path`, ignorando `<synthetic>`. Devolve `additionalContext` com `Cabeçalho deste turno: …`. Na 1ª resposta da sessão, pede o bloco de prontidão e não injeta linha `t=`. Sem sessão, com entrada inválida ou com erro, sai 0 e não imprime nada.
+- Notificação não é o Humano (12/11/2026): se o `prompt` do gancho começa com `[SYSTEM NOTIFICATION`, `<task-notification>`, `Another Claude session sent a message`, `Stop hook feedback` ou `Goal check-in`, o t não avança. O gancho injeta a linha do turno atual com o rótulo `contador mecânico; notificação do sistema, sem avanço`. Sem `prompt` no payload, conta como antes.
 - `redesign/router/auditoria_turno.py --verificar --sessao ID` compara o `t=` do cabeçalho com o contador da sessão. Divergência sai como `aviso (não bloqueia)`. O código de saída não muda por causa do aviso.
 - O gateway da Seth (`redesign/router/seth_gateway.py`) já calcula `t=<n> (contador mecânico)` pela contagem de turnos da conversa, com o mesmo rótulo. Nada muda nele nesta proposta.
 - Hora: formato regional com fuso e selo, `DD/MM/AAAA HH:MM -03 (relógio da Máquina)` (`PROTOCOLOS.md`, "Regra 1.1").
@@ -41,6 +42,9 @@ O código do contador fica em `scripts/turno.py` e os testes em `scripts/testar_
 - [ ] <synthetic> não entra no cabeçalho: vira modelo não verificado
 - [ ] o modelo do payload tem prioridade sobre o transcrito
 - [ ] a linha do gancho passa no verificador de cabeçalho
+- [ ] notificação (prompt que começa com marca de aviso) não avança o t e injeta a linha atual
+- [ ] mensagem do Humano que cita a marca no meio segue contando
+- [ ] payload sem prompt conta como antes
 - [ ] a auditoria acusa t= divergente do contador como aviso, sem mudar o código de saída
 - [ ] a auditoria compara t=<n>.sub pelo número
 - [ ] sem --sessao, sem contador ou sem t= no cabeçalho, a auditoria não acusa

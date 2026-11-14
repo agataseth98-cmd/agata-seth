@@ -194,7 +194,7 @@ _p8_assinatura_ok() {
     sig="$(mktemp)"
     awk '/-----BEGIN SSH SIGNATURE-----/,/-----END SSH SIGNATURE-----/' "$aprovado" > "$sig"
     if ! [ -s "$sig" ]; then
-      echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROJETO.md, \"Quarentena estrutural\")"
+      echo "P-8: $aprovado sem bloco de assinatura ssh -- gere com scripts/aprovar.sh (PROTOCOLOS.md, \"Quarentena estrutural\")"
     elif printf '%s' "$msg" | ssh-keygen -Y verify -f "$signers" -I agata-humano \
            -n agata-aprovacao-p8 -s "$sig" >/dev/null 2>&1; then
       rc=0

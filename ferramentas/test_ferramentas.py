@@ -27,12 +27,20 @@ class FerramentasTests(unittest.TestCase):
             self.assertTrue(str(skill.relative_to(ferramentas.REPO)) in r.stdout.splitlines())
 
     def test_quarentena_nao_vaza_para_outros_temas(self):
+        sys.path.insert(0, str(RAIZ))
+        import ferramentas
+        for nome in ("continuous-learning-v2", "unified-memory", "agentic-os"):
+            self.assertEqual(ferramentas.tema_de(nome), "quarentena")
+
+    def test_ecc_fora_da_caixa(self):
+        # ECC saiu para extras/arquivo-ecc-12-11/ (12/11/2026): nada dele entra no índice nem em fontes/
         for p in json.loads((RAIZ / "indice.json").read_text(encoding="utf-8")):
-            if p["nome"] in ("continuous-learning-v2", "unified-memory", "agentic-os"):
-                self.assertEqual(p["tema"], "quarentena")
+            self.assertNotEqual(p["fonte"], "ecc")
+            self.assertFalse(p["caminho"].startswith("ferramentas/fontes/ecc/"), p["caminho"])
+        self.assertFalse((RAIZ / "fontes" / "ecc").exists())
 
     def test_fontes_presas_a_commit_com_licenca(self):
-        for fonte in ("ecc", "superpowers"):
+        for fonte in ("superpowers",):
             self.assertEqual(len((RAIZ / "fontes" / fonte / "COMMIT").read_text().strip()), 40)
             self.assertTrue((RAIZ / "fontes" / fonte / "LICENSE").is_file())
 

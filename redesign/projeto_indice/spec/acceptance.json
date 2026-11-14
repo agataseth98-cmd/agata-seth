@@ -1,0 +1,201 @@
+[
+  {
+    "criterion": "o índice tem até 6.000 bytes (teto)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::TetoTests::test_projeto_cabe_no_teto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "acima do teto, o pre-commit recusa o commit e diz para onde vai o conteúdo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::TetoTests::test_acima_do_teto_recusa_e_diz_para_onde_vai",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::TetoTests::test_pre_commit_bloqueia_pelo_teto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todo caminho citado em 'Onde encontrar' existe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::OndeTests::test_todo_caminho_do_onde_encontrar_existe"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todo parágrafo que saiu do índice existe no destino declarado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::DestinosTests::test_todo_paragrafo_que_saiu_existe_no_destino"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o arquivo de histórico tem o sha256 do PROJETO.md anterior",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::DestinosTests::test_arquivo_de_historico_tem_o_sha_registrado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "toda seção do PROJETO anterior tem destino, e nenhum destino aponta para seção inexistente",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::DestinosTests::test_toda_secao_tem_destino_e_nenhuma_sobra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada título movido existe como seção no destino (ponteiros resolvem)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::DestinosTests::test_titulo_movido_continua_existindo_no_destino"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o gerador do ESTADO é determinístico: duas execuções dão o mesmo arquivo, e ESTADO.md está em dia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_gerador_e_deterministico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ESTADO não tem data de geração nem SHA de commit",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_estado_sem_data_nem_sha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ESTADO traz as portas do manifesto e os modelos da seção Confirmado funcionando, com a nota da tabela",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_portas_e_modelos_vivos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ESTADO lista cada serviço do manifesto com a porta, na seção Serviços (boot)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_servicos_com_porta_na_secao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "unidade do repo com agata.target fora do manifesto é acusada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_unidade_fora_do_manifesto_e_acusada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ESTADO traz bugs abertos da ONDE_ESTAMOS ou aponta para a prosa que os guarda",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::EstadoTests::test_gerador_le_bugs_ou_aponta_a_prosa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o P-9 carrega as listas de unidades do config/servicos-agata.txt",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_p9_carrega_o_manifesto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o painel lê os serviços declarados do ESTADO.md, não do PROJETO.md, e oneshot não vira lacuna",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_painel_le_servicos_do_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o prompt de nuvem manda ler o índice e o ESTADO, não o PROJETO inteiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_prompt_de_nuvem_manda_indice_e_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "REGRAS.md não cita critério de reabilitação inexistente como se existisse",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_regras_sem_ponteiro_para_criterio_inexistente"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hidratação inclui o ESTADO.md",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_hidratacao_inclui_o_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o SessionStart mostra o ESTADO.md",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_sessao_mostra_o_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a auditoria de turno conta como entrada conhecida o número citado no histórico movido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_auditoria_reconhece_numeros_do_historico_movido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "nenhum ponteiro vivo cita seção que saiu do índice",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_nenhum_ponteiro_vivo_para_secao_que_saiu"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hidratação traz o mapa de PROTOCOLOS (dentro do ESTADO), não o texto inteiro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/projeto_indice/tests/test_projeto_indice.py::IntegracaoTests::test_hidratacao_traz_mapa_de_protocolos_nao_o_texto"
+    ],
+    "cwd": null
+  }
+]

@@ -22,14 +22,14 @@ SEMPRE: português direto · frases curtas · o Humano decide, você propõe.
 -->
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5858d9abc173052f0202f84e16e6a3db4f7917b9
-  Escrito em: 14/11/2026 11:39 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c7b6328c029f5290add86cc83a740301beb3f917
+  Escrito em: 14/11/2026 17:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente (arquivos de commits diferentes). Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado (auto-referência); mais se o hook falhar. -->
 
@@ -151,7 +151,7 @@ Não é linha vermelha — é portão de verificação, não regra que nunca ced
 3. **Silo:** uma família (fornecedor) nunca recebe o MOD de outra família; dois modelos da mesma família compartilham silo. Cabeçalho `modelo-alvo:` obrigatório. Recebeu MOD de outra família: **diga em 1 linha que recebeu, não use o conteúdo, não ecoe o nonce** — nem como prova de hidratação.
 4. Discordância entre modelos é documentada em MEMÓRIAS (posições + veredito do Humano). Fricção é esperada; conflito registrado é aprendizado. Sem discordância real em 4 semanas → provocar uma `sintética`, marcada como tal (formato: `PROTOCOLOS.md`, "Discordância sintética").
 5. Humano arbitra valores; Máquina arbitra fatos.
-6. Modelo com padrão de alucinação documentado não tem MOD até cumprir o critério de reabilitação (PROJETO).
+6. Modelo com padrão de alucinação documentado não tem MOD até cumprir o critério de reabilitação. Lacuna declarada em 12/11/2026: o critério ainda não está escrito em nenhum arquivo do canon nem no histórico (busca em MEMÓRIAS, INDICE_MEMORIAS, FALHAS, PROTOCOLOS e PROJETO_REFERENCIA). Até ele existir, nenhum modelo sai da regra por reabilitação.
 
 **MOD em MEMÓRIAS, com os silos construídos** (MEMÓRIAS (430)):
 - MOD operacional ou técnico — rascunho, raciocínio interno, sem credenciais nem dado pessoal identificável — pode entrar em MEMÓRIAS.

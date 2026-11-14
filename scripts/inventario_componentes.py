@@ -8,7 +8,7 @@ O que existe espalhado e este script junta, sem criar um segundo manifesto de mo
     `config/componentes-externos.txt` (sha256), Obsidian (Flatpak).
 
 Só LEITURA do sistema: `docker inspect`, API local do Ollama, `sha256sum`, `flatpak info`. Não baixa nada, não
-atualiza nada, não chama rede externa. Atualizar componente é decisão do Humano (PROJETO, "Decisor local").
+atualiza nada, não chama rede externa. Atualizar componente é decisão do Humano (PROTOCOLOS.md, "Decisor local").
 
 Uso:
   scripts/inventario_componentes.py --gerar [--manifesto models/manifest.json] [--saida ARQ|-]   escreve a chave nova

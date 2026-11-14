@@ -1,0 +1,55 @@
+{
+  "versao": 2,
+  "decisao": "Humano, 12/11/2026 (cache do Conselho, entradas 521 e 522): PROJETO.md vira índice; estado vira ESTADO.md gerado e prosa de estado em extras/projeto-detalhe/; o como vai para PROTOCOLOS.md; histórico vai para extras/arquivo/.",
+  "historico": {
+    "arquivo": "extras/arquivo/projeto-ate-2026-11-12.md",
+    "sha256": "adbf50e1c2b9be4fac1b67c3e82b3dca7fb48d1ee60c31324ed4253f47d783d1",
+    "bytes": 49326,
+    "origem": "PROJETO.md em HEAD c8a7c2d7 (main), byte a byte"
+  },
+  "estado_de_fundo": "extras/projeto-detalhe/estado-de-fundo-12-11.md",
+  "secoes": {
+    "__preambulo__": {
+      "indice": "intro",
+      "padrao": "extras/arquivo/projeto-ate-2026-11-12.md",
+      "manter": [],
+      "excecoes": {}
+    },
+    "O que é": {
+      "indice": "O que é",
+      "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md",
+      "manter": ["Nome do sistema:", "Assistente pessoal do Orusoua", "- **Executor do loop:**", "Grafia canônica do nome"],
+      "excecoes": {"Fonte única do nome falado": "PROTOCOLOS.md"}
+    },
+    "Máquinas": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Ambiente Operacional": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Cérebro": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Serviços (boot)": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Memória e hidratação": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Interface": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Personalidade da Seth": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Atualização segura de componentes": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Segurança": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Conselho Remoto — Fase 1 (transporte, não decisão)": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Sudo e interação humana": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Quarentena estrutural (P-8)": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Doutrina de defesa proporcional": {
+      "indice": "Princípios",
+      "padrao": "PROTOCOLOS.md",
+      "manter": ["Adotada pelo Humano, 17/08/2026", "- Incidente é", "- Defesa só entra", "- Risco residual declarado", "- Fecha a classe", "- Nenhuma checagem entra"],
+      "excecoes": {}
+    },
+    "Estado dos bugs e dos testes": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Decisor local": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Plano vigente (v1.1 — Fases 0–2 são compromisso; 3+ é bússola)": {"indice": null, "padrao": "extras/projeto-detalhe/estado-de-fundo-12-11.md", "manter": [], "excecoes": {}},
+    "Estado de publicação": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Ferramenta embutida: selar.sh (Fase 4)": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Memória em duas camadas": {"indice": null, "padrao": "PROTOCOLOS.md", "manter": [], "excecoes": {}},
+    "Referência": {
+      "indice": "Referência",
+      "padrao": "PROJETO_REFERENCIA.md",
+      "manter": ["Seções de consulta"],
+      "excecoes": {}
+    }
+  }
+}

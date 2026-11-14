@@ -7,7 +7,7 @@ tamanho do corpo (`Content-Length` mentiroso ou gigante -> tenta alocar
 tudo em memória antes de validar nada) nem o número de conexões simultâneas
 (`ThreadingHTTPServer` sobe uma thread por conexão, sem teto -- uma rajada
 de conexões lentas/paradas esgota threads/memória). Todos escutam só em
-127.0.0.1 (contenção de rede já existe, PROJETO.md "Segurança") -- isto é
+127.0.0.1 (contenção de rede já existe, PROTOCOLOS.md "Segurança") -- isto é
 defesa em profundidade pra quando o processo que fala com eles for outro
 processo local comprometido/quebrado, não um desconhecido de fora.
 

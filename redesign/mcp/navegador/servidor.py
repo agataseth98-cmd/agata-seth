@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Servidor FastMCP — controle de navegador via Playwright + Brave (skill nova,
 05/09/2026). Cobre "controle do navegador" do desenho da arquitetura da Seth
-(PROJETO.md, "Interface").
+(extras/projeto-detalhe/estado-de-fundo-12-11.md, "Interface").
 
 Decisão de desenho, registrada sem suavizar: o pedido original citava
 "browser-use". `browser-use==0.13.10` (a versão real disponível hoje, testada

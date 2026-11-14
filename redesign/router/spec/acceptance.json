@@ -171,6 +171,33 @@
     "cwd": null
   },
   {
+    "criterion": "notificação (prompt que começa com marca de aviso) não avança o t e injeta a linha atual",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_notificacao_nao_avanca_o_t"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "mensagem do Humano que cita a marca no meio segue contando",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_mensagem_do_humano_que_cita_a_marca_no_meio_conta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "payload sem prompt conta como antes",
+    "command": [
+      "python3",
+      "scripts/testar_turno.py",
+      "TestHook.test_payload_sem_prompt_conta_como_antes"
+    ],
+    "cwd": null
+  },
+  {
     "criterion": "a auditoria acusa t= divergente do contador como aviso, sem mudar o código de saída",
     "command": [
       "python3",
