@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano (14/11, 18h20): o pre-commit volta a ter o `fi`, e o CI passa a rodar `bash -n` nos ganchos.**
 (1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-commit ficou sem um `fi` e bloqueia todo commit. Proposta hook-fi-14-11 publicada com a correção e um teste `bash -n` dos ganchos no CI.**
 (1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (983) DIÁRIO — 09/11/2026 · **Spec v2 unificada aplicada (nova-versao-spec-v2-unificada-09-11): união dos PRs #923 e #941.**
 (982) DIÁRIO — 09/11/2026 · **Proposta chat-lote3-09-11 publicada: conversas (busca, pastas, fixar, arquivar, marcadores, exportar e importar, temporária).**
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
-(980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
+(980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-ag …
 (979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenc …
 (978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.* …
 (977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre mai …

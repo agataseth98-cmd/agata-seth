@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
+  palavras-chave: proposta, estado, aplicadas, publicada, pedido, humano, deixa, contar, ficavam, número, atrás, aplicação, aplicada
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano (14/11, 18h20): o pre-commit volta a ter o `fi`, e o CI passa a rodar `bash -n` nos ganchos.**
   palavras-chave: aplicado, hook, assinatura, humano, pre, commit, volta, ter, passa, rodar, bash, ganchos
 (1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-commit ficou sem um `fi` e bloqueia todo commit. Proposta hook-fi-14-11 publicada com a correção e um teste `bash -n` dos ganchos no CI.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, chat, lote, publicada, conversas, busca, pastas, fixar, arquivar, marcadores, exportar, importar, temporária
 (981) DIÁRIO — 09/11/2026 · **Lote chat 2 aplicado (chat-lote2-09-11): falhas silenciosas do chat, seletor de modelo e modelo real.**
   palavras-chave: lote, chat, aplicado, falhas, silenciosas, seletor, modelo, real
-(980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-agata-20261106): skill agata-equipe e regras de delegação.**
-  palavras-chave: aplicada, equipe, agata, skill, regras, delegação
+(980) DIÁRIO — 07/11/2026; aplicada em 09/11/2026 · **Equipe aplicada (equipe-ag …
+  palavras-chave: aplicada, equipe
 (979) DIÁRIO — 09/11/2026 · **Proposta chat-lote2-09-11 publicada: falhas silenc …
   palavras-chave: proposta, chat, lote, publicada, falhas, silenc
 (978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.* …
