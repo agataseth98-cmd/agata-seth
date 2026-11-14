@@ -22,6 +22,21 @@ if ! bash scripts/perimetro.sh; then
   exit 1
 fi
 
+# Workflows do GitHub (.github/workflows/*.yml): chave repetida ou YAML inválido faz o GitHub recusar o
+# arquivo inteiro, e o check obrigatório some (fiscal-p8, 12/11/2026). Confere o conteúdo STAGED, o que
+# vai no commit: exporta do índice para um diretório temporário e confere ali.
+_wf_mudou="$(git diff --cached --name-only -- .github/workflows | grep -E '\.ya?ml$' || true)"
+if [ -n "$_wf_mudou" ]; then
+  _wf_tmp="$(mktemp -d)"
+  git ls-files -z -- .github/workflows | xargs -0 -r git checkout-index --prefix="$_wf_tmp/" --
+  if ! python3 -I scripts/verificar_workflows.py --raiz "$_wf_tmp"; then
+    rm -rf "$_wf_tmp"
+    echo "pre-commit: workflow do GitHub inválido (chave repetida ou YAML) -- commit bloqueado. Veja a saída acima." >&2
+    exit 1
+  fi
+  rm -rf "$_wf_tmp"
+fi
+
 # Âncora de SHA em PROMPT_CARREGAMENTO.md (item 2, 20/08/2026, ordem do
 # Humano). Sempre o SHA do HEAD ANTES deste commit -- um commit não pode
 # embutir o próprio SHA (auto-referência), então fica até 1 commit

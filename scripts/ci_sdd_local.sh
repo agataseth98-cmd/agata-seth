@@ -40,6 +40,10 @@ passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/
 passo "processo de aplicação: diff sem bloco gerado (selftest)" python3 -I scripts/equipe/diff_limpo.py --selftest
 passo "processo de aplicação: número de MEMÓRIAS (selftest)" python3 -I scripts/equipe/numero_memorias.py --selftest
 passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scripts/equipe/trava.py --selftest
+# verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
+# passe PY_YAML=/usr/bin/python3 (ou outro python com PyYAML). Sem isso o passo falha fechado, de propósito.
+passo "workflows: YAML válido e sem chave repetida (selftest)" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py --selftest
+passo "workflows: .github/workflows do repositório" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py
 
 if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
 echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1

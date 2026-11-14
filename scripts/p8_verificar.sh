@@ -38,4 +38,8 @@ else echo "FALHA 4: não aplica na árvore atual -- $out"; exit 1; fi
 # 5. (3a) o .diff não tem hunk em bloco ANCORA-SHA (o pre-commit reescreve esse bloco em todo commit)
 if out="$(python3 -I "$raiz/scripts/equipe/diff_limpo.py" "$diff_path" 2>&1)"; then echo "OK 5: diff sem bloco gerado"
 else echo "FALHA 5: $out"; exit 1; fi
+# 6. (3b, 12/11/2026) o .diff toca .github/workflows: o resultado (HEAD + .diff) tem YAML válido e sem chave repetida.
+#    O GitHub recusou o fiscal-p8 inteiro por uma chave repetida; sem esses caminhos no .diff, o check passa sem ler nada.
+if out="$(python3 -I "$raiz/scripts/verificar_workflows.py" --diff "$diff_path" 2>&1)"; then echo "OK 6: $out"
+else echo "FALHA 6: $out"; exit 1; fi
 echo "PODE APLICAR: $nome"
