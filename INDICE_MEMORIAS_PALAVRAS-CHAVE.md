@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
+  palavras-chave: aplicado, pacote, assinatura, humano, sincronia, projeto, índice, correções, reversão, nova, versão, diff, único
 (1005) DIÁRIO — 14/11/2026 · **Proposta pacote-14-11 publicada: as quatro propostas de 12/11 ainda sem assinatura (sincronia, projeto-indice, correcoes, nova-versao-lote2) num diff único, para uma assinatura só, como o Humano pediu em 14/11. Não aplicada.**
   palavras-chave: proposta, pacote, publicada, quatro, propostas, assinatura, sincronia, projeto, indice, correcoes, nova, versao, lote, diff, único, humano, pediu, aplicada
 (1004) DIÁRIO — 14/11/2026 · **Aplicado fiscal-yaml-12-11 com a assinatura do Humano (14/11): o fiscal-p8 volta a ter um único `env:` e o `verificar_workflows.py` passa a barrar YAML de workflow inválido.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, chat, lote, publicada, falhas, silenciosas, seletor, modelo, real, patch, segue, propostas, diff, sha, feb, dcf, cbeffa, cbae, contra, origin, main, bce, redesign, painel, operacional, git, apply, check, passou, base, testes, falha, pré, existente, test, sdd, medidos, origem, repetidos, publicação, medido, resposta, gateway, usam, falso, nada, aplicado, assinatura, pendente, humano
 (978) DIÁRIO — 09/11/2026 · **Proposta tira-librechat-07-11 refeita sobre main.** O patch para retirar LibreChat dos atalhos `seth`/`seth-parar` e da lista P-9 segue só em `propostas/tira-librechat-07-11.diff`, sem aplicação. Revalidação sobre `38df3322`: cobertura 11/11, P-9 OK, cinco testes unitários e CI local `TUDO OK`. Os contêineres/volumes já excluídos não foram recriados. Assinatura e aplicação pendentes do Humano.
   palavras-chave: proposta, tira, librechat, refeita, main, patch, retirar, atalhos, seth, parar, lista, segue, propostas, diff, aplicação, revalidação, cobertura, cinco, testes, unitários, local, tudo, contêineres, volumes, excluídos, foram, recriados, assinatura, pendentes, humano
-(977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre main.** O patch para `armazem.py` e seus testes segue apenas em `propostas/origem-preservada-07-11.diff`, sem aplicação ao código do repositório. Revalidação sobre `ed28bd2c`: suíte do painel 162 passed e 118 subtests; CI local `TUDO OK`. Colisão de conteúdo longo e estado do armazenamento real continuam fora do escopo, conforme o registro da proposta. Assinatura e aplicação pendentes do Humano.
-  palavras-chave: proposta, origem, preservada, refeita, main, patch, armazem, testes, segue, apenas, propostas, diff, aplicação, código, repositório, revalidação, suíte, painel, passed, subtests, local, tudo, colisão, conteúdo, longo, estado, armazenamento, real, continuam, fora, escopo, conforme, registro, assinatura, pendentes, humano
+(977) DIÁRIO — 09/11/2026 · **Proposta origem-preservada-07-11 refeita sobre mai …
+  palavras-chave: proposta, origem, preservada, refeita, mai
 (976) DIÁRIO — 09/11/2026 · **Proposta docs-opencode-07-11 atualizada como segun …
   palavras-chave: proposta, docs, opencode, atualizada, segun
 (975) DIÁRIO — 09/11/2026 · **Proposta agente-opencode-07-11 atualizada sobre ma …

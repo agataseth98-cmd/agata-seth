@@ -1,0 +1,127 @@
+{
+  "_sobre": "Registro de origem (porquê) das regras do AGENTS.md e das skills. Lido por scripts/porques.py. Origem aceita: \"MEMÓRIAS (N)\" (entrada que existe em MEMÓRIAS.md, MEMORIAS-MORNO.md ou memoria/frio/), \"Humano DD/MM/AAAA\" e \"cache (N)\" (forma apenas). 'base' diz como a origem foi achada: 'decisão' = a entrada decide a regra; 'primeira citação' = a primeira entrada que cita o nome da skill (a conferir pelo Humano). Unidade sem origem fica fora de 'unidades' e aparece como SEM-PORQUE. Correção de origem é entrada nova no registro, com a data (Regra 4 vale aqui também).",
+  "unidades": {
+    "AGENTS:regra-1": {
+      "origens": [
+        "MEMÓRIAS (705)",
+        "MEMÓRIAS (417)"
+      ],
+      "base": "decisão",
+      "obs": "705: cabeçalho escrito pela Máquina no gateway. 417: bloco de prontidão sem Nonce."
+    },
+    "AGENTS:nao-minta-meca-antes-de-afirmar": {
+      "origens": [
+        "MEMÓRIAS (309)"
+      ],
+      "base": "primeira citação",
+      "obs": "309 é a primeira entrada com o texto 'Não minta' (anti-fabricação no carregamento). Regra 2 do REGRAS.md é o canon; origem da regra em si a conferir."
+    },
+    "AGENTS:nada-de-sudo": {
+      "origens": [
+        "MEMÓRIAS (986)"
+      ],
+      "base": "primeira citação",
+      "obs": "986 lista 'nada de sudo' entre as travas. Não achei a decisão original do Humano no repositório; a origem mais antiga do texto é a 648, que trata de outro assunto (Groq), então 648 não entra."
+    },
+    "AGENTS:segredo-nunca-sai": {
+      "origens": [
+        "MEMÓRIAS (631)"
+      ],
+      "base": "decisão",
+      "obs": "631 corrige (629): a causa do vazamento de segredo foi _token_interno(); o gateway não abre mais o .env."
+    },
+    "AGENTS:origem-dos-fatos-f0": {
+      "origens": [
+        "MEMÓRIAS (729)"
+      ],
+      "base": "decisão",
+      "obs": "729: 'Regra de fontes (F0) aplicada (fontes-f0-20261016)'."
+    },
+    "AGENTS:correcao-e-entrada-nova": {
+      "origens": [
+        "MEMÓRIAS (271)",
+        "MEMÓRIAS (612)"
+      ],
+      "base": "decisão",
+      "obs": "271: MEMÓRIAS cresce pelo topo, entrada nova, nada se edita. 612: registro de Regra 4 aplicado."
+    },
+    "AGENTS:modo-conciso-e-o-padrao": {
+      "origens": [
+        "MEMÓRIAS (667)"
+      ],
+      "base": "decisão",
+      "obs": "667: modo conciso como padrão, explicativo só quando o Humano pedir."
+    },
+    "skill:agata-aplicar-proposta": {
+      "origens": [
+        "MEMÓRIAS (543)"
+      ],
+      "base": "primeira citação"
+    },
+    "skill:agata-conversar-com-seth": {
+      "origens": [
+        "MEMÓRIAS (746)"
+      ],
+      "base": "decisão",
+      "obs": "746: pedido do Humano para tornar universal a capacidade de falar com a Seth."
+    },
+    "skill:agata-engenharia-reversa": {
+      "origens": [
+        "MEMÓRIAS (969)"
+      ],
+      "base": "decisão",
+      "obs": "969: skill agata-engenharia-reversa aplicada."
+    },
+    "skill:agata-equipe": {
+      "origens": [
+        "MEMÓRIAS (980)"
+      ],
+      "base": "decisão",
+      "obs": "980: skill agata-equipe aplicada."
+    },
+    "skill:agata-fluxo": {
+      "origens": [
+        "MEMÓRIAS (794)"
+      ],
+      "base": "decisão",
+      "obs": "794: skill agata-fluxo aplicada, universal."
+    },
+    "skill:agata-llm-fundamentos": {
+      "origens": [
+        "MEMÓRIAS (932)"
+      ],
+      "base": "primeira citação"
+    },
+    "skill:agata-painel": {
+      "origens": [
+        "MEMÓRIAS (903)"
+      ],
+      "base": "primeira citação",
+      "obs": "903: duas skills novas, agata-painel e agata-conselho-memoria."
+    },
+    "skill:agata-relay-provedores": {
+      "origens": [
+        "MEMÓRIAS (925)"
+      ],
+      "base": "decisão",
+      "obs": "925: adaptadores de chats web do Conselho."
+    },
+    "skill:agata-voz": {
+      "origens": [
+        "MEMÓRIAS (932)"
+      ],
+      "base": "decisão",
+      "obs": "932: decisões do Humano de 03/11 entram no canon (voz do sistema)."
+    },
+    "skill:agata-time-inovacao": {
+      "origens": [],
+      "base": "sem origem",
+      "obs": "MEMÓRIAS (966) fala de 'a skill de inovação' sem o nome. Candidata a origem; o Humano confirma."
+    },
+    "skill:design-taste-frontend": {
+      "origens": [],
+      "base": "sem origem",
+      "obs": "frontmatter declara 'tasteskill v2' (fonte externa). Nenhuma decisão do Humano registrada no repositório."
+    }
+  }
+}

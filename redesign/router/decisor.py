@@ -97,7 +97,7 @@ def nota(respostas: dict | None, pergunta: str) -> float | None:
 
 
 def registrar_avaliacao(uso: str, dados: dict) -> None:
-    """Eventos da avaliação em produção (PROJETO.md, "Decisor local"): o que
+    """Eventos da avaliação em produção (PROTOCOLOS.md, "Decisor local"): o que
     aconteceu depois da decisão, para medir se ela acertou. Única exceção à
     regra "texto fora do log": o roteador guarda 200 caracteres das
     divergências, para o Humano julgar -- as da heurística contra o Jev

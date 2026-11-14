@@ -61,11 +61,11 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 - [ ] o ensaio de retorno usa a rota alternativa quando a principal cai
 - [ ] o orçamento do turno esgota por rodadas, chamadas ou prazo
 - [ ] as sete palavras andam só pelos passos previstos e não repetem o registro
+- [ ] a reversão não apaga `AGATA_NV_DIR`; só remove o cache
 
 ### Sem teste ainda (texto preservado; vira checkbox quando tiver comando em `acceptance.json`)
 
 - o painel de chaves grava a chave sem devolvê-la, e o valor não aparece em resposta HTTP, log ou ledger
-- a reversão não apaga `AGATA_NV_DIR`; só remove o cache
 
 ## Lote 5 (05/11/2026)
 

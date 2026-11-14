@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$GEMINI_PROJECT_DIR/scripts/sessao_contexto.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "AfterAgent": [
       {
         "hooks": [

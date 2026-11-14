@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5858d9abc173052f0202f84e16e6a3db4f7917b9
-  Escrito em: 14/11/2026 11:39 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c7b6328c029f5290add86cc83a740301beb3f917
+  Escrito em: 14/11/2026 17:52 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5858d9abc173052f0202f84e16e6a3db4f7917b9/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7b6328c029f5290add86cc83a740301beb3f917/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1006) DIÁRIO — 14/11/2026 · **Aplicado pacote-14-11 com a assinatura do Humano (14/11): sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão, num diff único.**
+- Verificação: `bash scripts/p8_verificar.sh pacote-14-11` deu `PODE APLICAR` (sha256 do `.diff` `53ac63824e78`).
+- Antes, na árvore composta: CI local e perímetro local verdes; no GitHub, `fiscal-p8`, `suite-adversarial` e `CodeQL` verdes no #987. O `fiscal-p8` voltou a ser obrigatório no `main` em 14/11.
+- Supera `sincronia-12-11`, `projeto-indice-12-11`, `correcoes-12-11`, `nova-versao-lote2-12-11` e `nova-versao-lote2-20261106`.
+- Modelo: Claude Opus 5.5 (Claude Code).
+
 (1005) DIÁRIO — 14/11/2026 · **Proposta pacote-14-11 publicada: as quatro propostas de 12/11 ainda sem assinatura (sincronia, projeto-indice, correcoes, nova-versao-lote2) num diff único, para uma assinatura só, como o Humano pediu em 14/11. Não aplicada.**
 - Base: `origin/main` `5858d9ab`, com `fiscal-yaml-12-11` aplicada (#986). `git apply --check` limpo. `diff_limpo.py` OK. sha256 do `.diff` `53ac63824e78`.
 - Composição e conflitos resolvidos: seção "Composição" do `.md`. A sincronia fica com a versão do gateway sem `_DOUTRINA_FIXA`. O ESTADO.md entra no contexto de início como ponteiro, não inteiro (20 KB contra o limite de 3.500 caracteres).

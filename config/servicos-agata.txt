@@ -1,0 +1,38 @@
+# Manifesto de serviços do Agata -- fonte real da lista do P-9 e do ESTADO.md (componente projeto-indice, 12/11/2026).
+#
+# Formato: unidade|escopo|porta|p9|origem   (um por linha, `#` comenta)
+#   unidade  nome da unidade systemd (ou do contêiner, com escopo docker)
+#   escopo   usuario = systemd --user | sistema = systemd | docker = contêiner
+#   porta    porta TCP declarada em config/portas-agata.txt, ou `-`
+#   p9       sim = scripts/perimetro/p09_servicos_declarados.sh avisa se cair | nao = listado, sem aviso
+#   origem   arquivo do repositório que define a unidade, ou "fora do repo" com o motivo
+#
+# Quem lê este arquivo: scripts/perimetro.sh (P-9, carregado na fonte), scripts/gerar_estado.py
+# (ESTADO.md, seção Serviços (boot)) e redesign/painel_operacional/server.py (via ESTADO.md).
+# Teste: redesign/projeto_indice/tests/test_projeto_indice.py confere que toda unidade do repo com
+# WantedBy/PartOf de agata.target aparece aqui. Mudar p9 de nao para sim muda o comportamento do
+# perímetro: é mudança protegida (P-8), não ajuste de texto.
+#
+# Ordem das linhas com p9=sim: a mesma das listas que estavam escritas à mão em perimetro.sh.
+
+agata-manutencao.timer|usuario|-|sim|config/systemd/agata-manutencao.timer
+agata-manutencao.service|usuario|-|sim|config/systemd/agata-manutencao.service
+laya-roteador.service|usuario|11436|sim|fora do repo (unidade do usuário; citada em redesign/systemd/seth)
+omniroute.service|usuario|20128|sim|fora do repo (unidade do OmniRoute; drop-ins em redesign/systemd/dropin-omniroute*.conf)
+omniroute-sanitizer.service|usuario|20127|sim|fora do repo (unidade do usuário; citada em redesign/systemd/README.md)
+openvino-whisper.service|usuario|20130|sim|redesign/systemd/openvino-whisper.service
+openvino-embeddings.service|usuario|20134|sim|redesign/systemd/openvino-embeddings.service
+obsidian-ro-proxy.service|usuario|27125|sim|redesign/systemd/obsidian-ro-proxy.service
+seth-gateway.service|usuario|20126|sim|redesign/systemd/seth-gateway.service
+seth-escriba.service|usuario|20140|sim|redesign/systemd/seth-escriba.service
+seth-verificador.service|usuario|20141|sim|redesign/systemd/seth-verificador.service
+piper-tts.service|usuario|8890|sim|redesign/systemd/piper-tts.service
+ollaya.service|usuario|11435|sim|config/ollaya.service
+agata-vault-inbox.timer|usuario|-|sim|fora do repo (unidade do usuário)
+
+# Unidades com WantedBy/PartOf de agata.target fora do P-9. Listadas para o ESTADO conferir; sem aviso.
+agata-drain.service|usuario|-|nao|redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
+obsidian-app.service|usuario|-|nao|redesign/systemd/obsidian-app.service (app Flatpak; fora do P-9 antes deste manifesto)
+ouvido-agata.service|usuario|20137|nao|redesign/systemd/ouvido-agata.service (entrada de voz; fora do P-9 antes deste manifesto)
+discord-mcp.service|usuario|20135|nao|redesign/systemd/discord-mcp.service (sem [Install]; sobe e desce com seth/seth-parar; porta citada no texto antigo do PROJETO, Serviços)
+navegador-mcp.service|usuario|20136|nao|redesign/systemd/navegador-mcp.service (sem [Install]; sobe e desce com seth/seth-parar; porta citada no texto antigo do PROJETO, Serviços)

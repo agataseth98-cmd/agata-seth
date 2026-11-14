@@ -1,5 +1,5 @@
 [Unit]
-Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROJETO.md "Decisor local")
+Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROTOCOLOS.md "Decisor local")
 # Só loopback. Quem usa (seth_gateway em sombra, inbox do vault, P-20,
 # consolidação) segue pela regra determinística se isto estiver fora do ar.
 After=docker.service

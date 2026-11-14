@@ -8,6 +8,7 @@ corpo (fotografia e saúde), orçamento e eventos.
   nv.py iniciar          cria as pastas de trabalho, tira snapshot do HEAD e indexa
   nv.py estado           estado de todos os componentes (JSON)
   nv.py verificar        confere o ledger encadeado e o índice
+  nv.py reverter [dest]  remove só o cache e arquiva os dados num .tar.gz datado (nunca apaga os dados)
   nv.py --selftest       teste offline, em pasta temporária
 """
 from __future__ import annotations
@@ -136,7 +137,63 @@ def sincronizar(repo: Path | None = None, limite_aplicadas: int = LIMITE_APLICAD
     return {"propostas": len(alvos), "aplicadas_consideradas": min(len(aplicadas), limite_aplicadas), "movidas": feitos}
 
 
+CACHE_PADRAO = Path.home() / ".cache" / "agata" / "nova-versao"
+
+
+def _cache() -> Path:
+    # vazio conta como ausente: Path("") é o diretório atual, e o rmtree apagaria o cwd
+    return Path(os.environ.get("AGATA_NV_CACHE") or CACHE_PADRAO)
+
+
+def _dentro_ou_igual(a: Path, b: Path) -> bool:
+    """a == b ou a dentro de b."""
+    return a == b or b in a.parents
+
+
+def reverter(destino: Path | None = None) -> dict:
+    """(lote 2, reversão; spec, "Migração e reversão") Arquiva `AGATA_NV_DIR` (ledger, eventos, execuções) num
+    .tar.gz datado em `destino` e só então remove o cache (derivado). Os dados NUNCA são apagados: apagar dado é
+    decisão do Humano. O revert do commit é passo à parte.
+    Recusa (ValueError) antes de tocar em qualquer coisa: variável vazia; cache que não seja pasta derivada isolada
+    (dentro de ~/.cache, com 'nova-versao' no nome); cache que contenha o repositório ou o diretório atual; destino
+    dentro dos dados, do cache ou do repositório."""
+    import shutil
+    import tarfile
+    import time
+    if os.environ.get("AGATA_NV_DIR") == "":
+        raise ValueError("AGATA_NV_DIR vazio: recusado (resolveria para o diretório atual)")
+    dados, cache = eventos.dados().resolve(), _cache().resolve()
+    destino = Path(destino or (dados.parent / "nova-versao-arquivo")).resolve()
+    home = Path.home().resolve()
+    repo = Path(__file__).resolve().parents[2]
+    if cache in (Path("/"), home) or _dentro_ou_igual(dados, cache) or _dentro_ou_igual(cache, dados):
+        raise ValueError(f"cache recusado (não é pasta derivada isolada dos dados): {cache}")
+    if _dentro_ou_igual(repo, cache) or _dentro_ou_igual(Path.cwd().resolve(), cache):
+        raise ValueError(f"cache recusado (contém o repositório ou o diretório atual): {cache}")
+    # estritamente dentro de ~/.cache E com "nova-versao" no nome: recusa ~/.cache, ~/.cache/agata, /usr/x/nova-versao
+    if not ((home / ".cache") in cache.parents and "nova-versao" in cache.name):
+        raise ValueError(f"cache recusado (precisa estar dentro de ~/.cache e ter 'nova-versao' no nome): {cache}")
+    if _dentro_ou_igual(destino, dados) or _dentro_ou_igual(destino, cache):
+        raise ValueError(f"destino recusado (dentro dos dados ou do cache): {destino}")
+    if _dentro_ou_igual(destino, repo):
+        raise ValueError(f"destino recusado (dentro do repositório; o pacote fica fora do repo): {destino}")
+    pacote, motivo = None, "sem dados para arquivar"
+    if dados.exists():
+        destino.mkdir(parents=True, exist_ok=True)
+        pacote = destino / f"nova-versao-dados-{time.strftime('%Y%m%d-%H%M%S')}.tar.gz"
+        with tarfile.open(pacote, "x:gz") as tar:          # x: nunca sobrescreve pacote existente
+            tar.add(dados, arcname=dados.name)
+        motivo = "arquivado"
+    removido = cache.exists()
+    if removido:
+        shutil.rmtree(cache)
+    return {"cache_removido": str(cache) if removido else None, "dados_mantidos": str(dados),
+            "pacote": str(pacote) if pacote else None, "pacote_estado": motivo}
+
+
 def main(argv: list[str]) -> int:
+    if argv[:1] == ["reverter"]:
+        print(json.dumps(reverter(*(argv[1:2] or [None])), ensure_ascii=False, indent=1)); return 0
     if argv == ["--selftest"]:
         return _selftest()
     if argv[:1] == ["iniciar"]:

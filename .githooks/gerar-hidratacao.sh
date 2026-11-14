@@ -396,26 +396,8 @@ janela_memorias() {
   fi
 }
 
-# Teto do PROJETO.md (02/10/2026). Substitui a antiga "checagem de
-# reconciliação", que avisava quando uma entrada recente de MEMÓRIAS não era
-# citada em PROJETO.md -- e com isso premiava historiar o arquivo do "agora"
-# (causa raiz de ele ter chegado a 97,9 KB). PROJETO diz o que vale hoje; o que
-# aconteceu fica em MEMÓRIAS. Não bloqueia o commit; só avisa no output do hook.
-PROJETO_TETO_BYTES="${PROJETO_TETO_BYTES:-48000}"
-# AC-18 (18/10/2026, decisão B4 do Humano): perto do teto, toda inclusão no PROJETO vem com
-# uma retirada para extras/projeto-detalhe/. O aviso sai quando o arquivo CRESCEU em relação
-# ao HEAD e ficou a menos de PROJETO_FOLGA_BYTES do teto.
-PROJETO_FOLGA_BYTES="${PROJETO_FOLGA_BYTES:-500}"
-checar_teto_projeto() {
-  local tam antes
-  tam="$(wc -c < PROJETO.md 2>/dev/null || echo 0)"
-  antes="$(git show HEAD:PROJETO.md 2>/dev/null | wc -c)"
-  if [ "$tam" -gt "$PROJETO_TETO_BYTES" ]; then
-    echo "aviso: PROJETO.md tem $tam B (teto $PROJETO_TETO_BYTES B) -- história vai para MEMÓRIAS, não para o PROJETO" >&2
-  elif [ "$tam" -gt "$antes" ] && [ $((PROJETO_TETO_BYTES - tam)) -lt "$PROJETO_FOLGA_BYTES" ]; then
-    echo "aviso: PROJETO.md cresceu $((tam - antes)) B e está a $((PROJETO_TETO_BYTES - tam)) B do teto -- toda inclusão vem com uma retirada para extras/projeto-detalhe/ (AC-18)" >&2
-  fi
-}
+# Teto do PROJETO.md: bloqueio mecânico no pre-commit (redesign/projeto_indice/teto.py,
+# 12/11/2026). O antigo aviso de 48.000 B saiu daqui: o PROJETO é índice, não sai com história.
 
 gerar_indice_palavras_chave() {
   {
@@ -466,7 +448,7 @@ montar_hermes() {
   {
     echo "<!--"
     echo "ARQUIVO GERADO AUTOMATICAMENTE — NÃO EDITE DIRETAMENTE."
-    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + PROTOCOLOS.md + FALHAS.md + mapa de PROJETO.md + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
+    echo "Gerado por .githooks/gerar-hidratacao.sh a partir de REGRAS.md + FALHAS.md + mapa de PROJETO.md + ESTADO.md (que traz o mapa de PROTOCOLOS.md) + janela de MEMÓRIAS.md + INDICE_MEMORIAS.md."
     echo "O mapa de PROJETO.md é gerado por scripts/gerar_mapa_projeto.py; mude o estado em PROJETO.md."
     echo "Para mudar o conteúdo, edite REGRAS.md, PROTOCOLOS.md, FALHAS.md, PROJETO.md ou MEMÓRIAS.md e faça commit —"
     echo "o hook pre-commit regenera este arquivo sozinho."
@@ -497,13 +479,12 @@ montar_hermes() {
     # leitura -- achado testando esta mudança, ver MEMÓRIAS da Fase 2/opção C).
     sed "s/{{NOME_SISTEMA}}/$NOME_SISTEMA_SED/g" REGRAS.md
     echo ""
-    # Reorganização das REGRAS em três camadas (01/10/2026): o COMO (PROTOCOLOS.md)
-    # e o catálogo por causa raiz (FALHAS.md) entram logo depois do PORQUÊ, na
-    # mesma hidratação -- o modelo continua recebendo os formatos obrigatórios e
-    # o catálogo, só que em camadas separadas. Mesmo tratamento do token que
-    # REGRAS.md (são texto normativo vivo, não história). Ausentes (clone antigo,
-    # antes da reorganização): pulados, nunca erro.
-    for _camada in PROTOCOLOS.md FALHAS.md; do
+    # Reorganização das REGRAS em três camadas (01/10/2026): o catálogo por causa raiz
+    # (FALHAS.md) entra logo depois do PORQUÊ. Desde 12/11/2026 o COMO (PROTOCOLOS.md)
+    # NÃO entra inteiro: entra o mapa das seções dentro do ESTADO.md (decisão do Humano,
+    # 12/11 16h00); o texto de cada seção se busca pelo título. Mesmo tratamento do token
+    # que REGRAS.md (texto normativo vivo, não história). Ausente: pulado, nunca erro.
+    for _camada in FALHAS.md; do
       [ -f "$_camada" ] || continue
       echo "# $_camada"
       echo ""
@@ -512,6 +493,14 @@ montar_hermes() {
     done
     python3 scripts/gerar_mapa_projeto.py
     echo ""
+    # ESTADO.md (12/11/2026, projeto-indice): estado vivo gerado pela Máquina, hidratado aos modelos
+    # (decisão do Humano, cache do Conselho, entradas 521 e 522). Ausente (clone antigo): pulado.
+    if [ -f ESTADO.md ]; then
+      echo "# ESTADO.md (gerado por scripts/gerar_estado.py)"
+      echo ""
+      cat ESTADO.md
+      echo ""
+    fi
     echo "# Índice de MEMÓRIAS.md"
     echo ""
     echo "Não embutido aqui — mesmo motivo do índice de palavras-chave (ver INDICE_CHAVES"
@@ -541,7 +530,6 @@ for _m in "${ALVOS_SILO[@]}"; do
   SILO_FILES+=(".hidrata-${_m}.md")
 done
 
-checar_teto_projeto || true
 
 _silos_txt=""
 for _f in "${SILO_FILES[@]}"; do

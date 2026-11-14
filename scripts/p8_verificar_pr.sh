@@ -81,6 +81,21 @@ if git cat-file -e "$base:scripts/equipe/diff_limpo.py" 2>/dev/null; then
   done < "$tmp/mudou.z"
 fi
 
+# -- 2c. (3c, 12/11/2026) workflows do head: YAML válido e sem chave repetida. O GitHub recusa o arquivo inteiro com
+#        chave repetida, e o check obrigatório some (foi o que aconteceu com fiscal-p8). O verificador vem da BASE; o head
+#        é lido como dado (git show), nunca em checkout. Precisa de PyYAML no runner (fiscal-p8.yml instala a versão fixa).
+#        Só vale com verificar_workflows.py na base (depois da aplicação que o trouxer).
+if git cat-file -e "$base:scripts/verificar_workflows.py" 2>/dev/null; then
+  git show "$base:scripts/verificar_workflows.py" > "$tmp/verificar_workflows.py" \
+    || falha "não consegui ler scripts/verificar_workflows.py da base"
+  rm -rf "$tmp/wf" && mkdir -p "$tmp/wf/.github/workflows"
+  while IFS= read -r -d '' f; do
+    git show "$head:$f" > "$tmp/wf/$f" 2>/dev/null || falha "não consegui ler $f do head"
+  done < <(git ls-tree -r --name-only -z "$head" -- .github/workflows)
+  python3 -I "$tmp/verificar_workflows.py" --raiz "$tmp/wf" > "$tmp/workflows.txt" 2>&1 \
+    || falha "workflow do head inválido (o GitHub recusa o arquivo inteiro): $(tr '\n' ' ' < "$tmp/workflows.txt")"
+fi
+
 # -- 3. pares que o PR consome (presentes em aplicadas/ no head, ausentes la na base) --------
 verificados=(); ignorados=()
 while IFS= read -r -d '' caminho; do

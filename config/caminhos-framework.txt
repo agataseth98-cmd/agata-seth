@@ -50,6 +50,7 @@ framework|.agents/
 framework|.claude/skills/
 
 instancia|PROJETO.md
+instancia|ESTADO.md
 instancia|PROJETO_REFERENCIA.md
 instancia|MEMÓRIAS.md
 instancia|MEMORIAS-MORNO.md

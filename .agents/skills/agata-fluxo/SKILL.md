@@ -51,7 +51,7 @@ Carregar não autoriza nem aplica mudança.
 | Prática específica (testes, segurança, revisão, banco, frontend) | `python3 -I ferramentas/ferramentas.py tema <tema>`, depois `ver <nome>` |
 
 - Se a tarefa mistura runtime e P-8, use as duas skills.
-- Caixa de ferramentas: tema `quarentena` só se lê, nunca se carrega sem decisão do Humano. Hooks do ECC ficam em `ferramentas/fontes/ecc/hooks-inativos/`, desligados; ligar um exige decreto assinado. Nada em `ferramentas/fontes/` é executado daqui. Se uma peça repetir skill `agata-*`, vale a do Agata. Atualizar uma fonte: novo `COMMIT`, `reindexar`, decreto.
+- Caixa de ferramentas: tema `quarentena` só se lê, nunca se carrega sem decisão do Humano. Hooks do ECC ficam em `extras/arquivo-ecc-12-11/hooks-inativos/`, desligados, fora da caixa desde 12/11/2026; ligar um exige decreto assinado. Nada em `ferramentas/fontes/` é executado daqui. Se uma peça repetir skill `agata-*`, vale a do Agata. Atualizar uma fonte: novo `COMMIT`, `reindexar`, decreto.
 - Auditoria ou melhoria das skills Agata: inventarie `.agents/skills/`, ache duplicação e conflito, proponha `.diff` P-8 com revisão cruzada (`agata-equipe`). Não altere a skill instalada antes da assinatura.
 
 ## 3. Mudança protegida e divisão entre modelos

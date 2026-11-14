@@ -52,7 +52,7 @@ import decisor                                   # noqa: E402  (redesign/router/
 
 # Terceira trava, DEPOIS das duas mecânicas (371)/(549): o decisor local dá
 # nota de utilidade e só pode REPROVAR -- nunca aprova o que elas barraram.
-# Fora do ar -> valem só as mecânicas (PROJETO.md, "Decisor local").
+# Fora do ar -> valem só as mecânicas (PROTOCOLOS.md, "Decisor local").
 LIMIAR_UTIL = 1.5
 _PERGUNTA_UTIL = {"util": {
     "type": "score",

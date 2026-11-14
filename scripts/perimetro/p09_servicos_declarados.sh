@@ -4,12 +4,31 @@
 # de antes, nao e reescrita de logica. Acrescimo posterior: _p9_ollama_na_gpu
 # (03/10/2026), abaixo.
 
+# (12/11/2026, componente projeto-indice) Fonte real das listas do P-9: config/servicos-agata.txt,
+# formato unidade|escopo|porta|p9|origem. Só entra o que tem p9=sim. Antes as listas estavam escritas
+# à mão em perimetro.sh e no PROJETO.md. Quem chama: perimetro.sh, no carregamento.
+p9_carregar_fonte() {
+  local arq="${P9_FONTE:-${_PERIMETRO_DIR:-$(dirname "${BASH_SOURCE[0]}")/..}/../config/servicos-agata.txt}"
+  local u esc porta p9 origem
+  P9_UNIDADES_SISTEMA=(); P9_UNIDADES_USUARIO=(); P9_CONTAINERS_DOCKER=()
+  [ -f "$arq" ] || return 0
+  while IFS='|' read -r u esc porta p9 origem; do
+    case "$u" in ''|\#*) continue ;; esac
+    [ "$p9" = "sim" ] || continue
+    case "$esc" in
+      usuario) P9_UNIDADES_USUARIO+=("$u") ;;
+      sistema) P9_UNIDADES_SISTEMA+=("$u") ;;
+      docker) P9_CONTAINERS_DOCKER+=("$u") ;;
+    esac
+  done < "$arq"
+}
+
 p9_servicos_declarados() {
   local avisos=0 u estado habilitada rodando
   for u in "${P9_UNIDADES_SISTEMA[@]}"; do
     estado="$(systemctl is-active "$u" 2>/dev/null)"
     if [ "$estado" = "failed" ] || [ "$estado" = "inactive" ]; then
-      echo "AVISO (P-9): unidade de sistema '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl status $u' e reinicie se preciso."
+      echo "AVISO (P-9): unidade de sistema '$u', declarada em config/servicos-agata.txt, está '$estado' -- o que fazer: 'systemctl status $u' e reinicie se preciso."
       avisos=1
     fi
     habilitada="$(systemctl is-enabled "$u" 2>/dev/null)"
@@ -37,7 +56,7 @@ p9_servicos_declarados() {
     if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
         || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
              && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
-      echo "AVISO (P-9): unidade de usuário '$u', declarada em PROJETO.md, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+      echo "AVISO (P-9): unidade de usuário '$u', declarada em config/servicos-agata.txt, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
       avisos=1
     fi
     habilitada="$(systemctl --user is-enabled "$u" 2>/dev/null)"
@@ -50,7 +69,7 @@ p9_servicos_declarados() {
     for u in "${P9_CONTAINERS_DOCKER[@]}"; do
       rodando="$(docker ps --filter "name=^${u}\$" --format '{{.Names}}' 2>/dev/null)"
       if [ -z "$rodando" ]; then
-        echo "AVISO (P-9): container '$u', declarado em PROJETO.md, não aparece rodando em 'docker ps' -- o que fazer: 'docker ps -a | grep $u' pra ver se caiu ou nunca subiu."
+        echo "AVISO (P-9): container '$u', declarado em config/servicos-agata.txt, não aparece rodando em 'docker ps' -- o que fazer: 'docker ps -a | grep $u' pra ver se caiu ou nunca subiu."
         avisos=1
       fi
     done

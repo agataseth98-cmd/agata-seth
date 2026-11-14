@@ -106,5 +106,14 @@
       "redesign/nova_versao/tests/test_sincronizar.py::SincronizarTests::test_propostas_andam_pelos_passos_e_a_segunda_rodada_nao_repete"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a reversão não apaga `AGATA_NV_DIR`; só remove o cache",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/nova_versao/tests/test_nova_versao.py::ReversaoTests::test_reversao_nao_apaga_dados_so_remove_cache"
+    ],
+    "cwd": null
   }
 ]

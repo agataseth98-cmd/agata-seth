@@ -21,7 +21,7 @@ passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" py
 passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
 passo "ciclo SDD sobre a nova versão" python3 redesign/sdd_flow/runner.py "$TMP/state-nv.json" cycle redesign/nova_versao/spec redesign/nova_versao/spec/acceptance.json --scope redesign/nova_versao
 passo "âncora dos componentes" python3 redesign/sdd_flow/anchor.py . redesign/sdd_flow redesign/project_kit redesign/review_mesh redesign/evidence_ledger redesign/painel_operacional redesign/nova_versao redesign/alexandria redesign/metacognicao redesign/corpo redesign/conexoes redesign/avaliacao redesign/sentidos
-for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos; do
+for c in project_kit review_mesh evidence_ledger painel_operacional nova_versao alexandria metacognicao corpo conexoes avaliacao sentidos sincronia; do
   passo "critérios e drift: $c" python3 redesign/sdd_flow/acceptance_runner.py "redesign/$c/spec/acceptance.json" "$TMP/$c-evidence.json"
   passo "drift por critério: $c" python3 redesign/sdd_flow/criterion_drift.py "redesign/$c/spec/spec.md" "$TMP/$c-evidence.json" "$TMP/$c-drift.md"
 done
@@ -40,10 +40,19 @@ passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/
 passo "processo de aplicação: diff sem bloco gerado (selftest)" python3 -I scripts/equipe/diff_limpo.py --selftest
 passo "processo de aplicação: número de MEMÓRIAS (selftest)" python3 -I scripts/equipe/numero_memorias.py --selftest
 passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scripts/equipe/trava.py --selftest
+passo "processo de aplicação: âncora staged devolvida ao HEAD (selftest, com o P-8 de verdade)" python3 -I scripts/equipe/ancora_indice.py --selftest
 # verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
 # passe PY_YAML=/usr/bin/python3 (ou outro python com PyYAML). Sem isso o passo falha fechado, de propósito.
 passo "workflows: YAML válido e sem chave repetida (selftest)" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py --selftest
 passo "workflows: .github/workflows do repositório" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py
+passo "sincronia: testes (fonte única, porquês, início de sessão, maxTurns)" python3 scripts/testar_sincronia.py
+passo "sincronia: contexto de início de sessão (selftest)" python3 -I scripts/sessao_contexto.py --selftest
+passo "sincronia: porquês (selftest)" python3 -I scripts/porques.py --selftest
+passo "sincronia: verificador de porquês (aviso na 1ª versão, sai 0)" python3 scripts/porques.py --verificar
+passo "projeto índice: testes (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/projeto_indice/tests
+passo "projeto índice: destinos do PROJETO (verificar_destinos)" python3 redesign/projeto_indice/verificar_destinos.py
+passo "projeto índice: teto do PROJETO (teto.py)" python3 redesign/projeto_indice/teto.py
+passo "projeto índice: ESTADO.md em dia (gerar_estado --verificar)" python3 scripts/gerar_estado.py --verificar
 
 if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
 echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1

@@ -3,7 +3,7 @@ name: agata-dev
 description: Desenvolvedor do Agata. Implementa um componente ou correção numa worktree de lote, com arquivos próprios e testes. Use para mudança de código e teste dentro do processo de lote (skill agata-aplicar-proposta). Não commita, não aplica, não assina.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: haiku
-maxTurns: 80
+maxTurns: 300
 ---
 
 Você é desenvolvedor do sistema Agata. Trabalhe SOMENTE na worktree e nos arquivos que a tarefa indicar.

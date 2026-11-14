@@ -687,43 +687,53 @@ def _porta_responde(porta: int) -> bool:
         return False
 
 
+def _tipo_unidade_usuario(unit: str) -> str | None:
+    """Type da unidade de usuário (`oneshot`, `simple`...), para a mesma regra do P-9: oneshot não é lacuna."""
+    try:
+        proc = subprocess.run(["/usr/bin/systemctl", "--user", "show", "--no-pager", "--property=Type", "--", unit],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return _parse_pairs(proc.stdout).get("Type")
+
+
 def _lacunas_snapshot() -> dict:
-    """Lacunas declaradas no canon (PROJETO.md, Serviços (boot)), conferidas agora:
-    - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna;
+    """Lacunas declaradas no canon (ESTADO.md, Serviços (boot); gerado de config/servicos-agata.txt), conferidas agora:
+    - unidade systemd citada (`nome.service` / `nome.timer`): sem leitura ou inativa vira lacuna; oneshot não;
     - item com porta declarada (`:NNNN`) que não responde em 127.0.0.1 vira lacuna."""
     observed_at, fresh_until = _reading_window()
     try:
-        texto = (ROOT / "PROJETO.md").read_text(encoding="utf-8", errors="replace")
+        texto = (ROOT / "ESTADO.md").read_text(encoding="utf-8", errors="replace")
     except OSError:
         return {"schema_version": 1, "state": "unknown", "observed_at": observed_at, "fresh_until": fresh_until,
-                "total_declaradas": 0, "items": [{"nome": "PROJETO.md", "motivo": "fonte do canon indisponível", "fonte": "PROJETO.md"}]}
+                "total_declaradas": 0, "items": [{"nome": "ESTADO.md", "motivo": "fonte do estado indisponível", "fonte": "ESTADO.md"}]}
     inicio = texto.find("## Serviços (boot)")
-    fim = texto.find("**Não recriar", inicio)
-    secao = texto[inicio:fim] if (inicio >= 0 and fim > inicio) else ""
+    fim = texto.find("\n## ", inicio + 1) if inicio >= 0 else -1
+    secao = (texto[inicio:fim] if fim > inicio else texto[inicio:]) if inicio >= 0 else ""
     itens = []
     if not secao:
-        itens.append({"nome": "seção Serviços (boot)", "motivo": "seção não encontrada em PROJETO.md", "fonte": "PROJETO.md"})
+        itens.append({"nome": "seção Serviços (boot)", "motivo": "seção não encontrada em ESTADO.md", "fonte": "ESTADO.md"})
     vistas = set(); declaradas = 0
     for linha in secao.splitlines():
-        if linha.startswith("**Manuais") or linha.startswith("**Consolidação") or linha.startswith("**Não recriar"):
-            continue
         for unit in re.findall(r"`([a-z0-9@._-]+\.(?:service|timer))`", linha):
             if unit in vistas: continue
             vistas.add(unit); declaradas += 1
+            if _tipo_unidade_usuario(unit) == "oneshot":
+                continue
             ativo = _unidade_ativa(unit)
             if ativo is None:
                 ativo = _unidade_de_sistema_ativa(unit)
             if ativo is None:
-                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (ausente ou não consultada)", "fonte": "PROJETO.md · Serviços (boot)"})
+                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (ausente ou não consultada)", "fonte": "ESTADO.md · Serviços (boot)"})
             elif ativo is False:
-                itens.append({"nome": unit, "motivo": "declarada no boot e inativa agora", "fonte": "PROJETO.md · Serviços (boot)"})
+                itens.append({"nome": unit, "motivo": "declarada no boot e inativa agora", "fonte": "ESTADO.md · Serviços (boot)"})
         if not linha.lstrip().startswith("- "):
             continue
         m = re.search(r"`([a-z][a-z0-9-]+)`.{0,40}?:(\d{4,5})\b", linha)
         if m and not re.search(r"\.(service|timer)$", m.group(1)):
             declaradas += 1
             if not _porta_responde(int(m.group(2))):
-                itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "PROJETO.md · Serviços (boot)"})
+                itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "ESTADO.md · Serviços (boot)"})
     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until,
             "total_declaradas": declaradas, "items": itens}
 

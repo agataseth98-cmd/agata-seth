@@ -53,7 +53,7 @@ MODEL = os.environ.get("PIPER_MODEL") or _modelo_padrao()
 PYTHON = os.environ.get("PIPER_PYTHON", os.path.join(AQUI, "tts-piper", ".venv", "bin", "python"))
 FFMPEG = shutil.which("ffmpeg")
 
-# Tratamento "sistema" (timbre `agata-sistema-tratado` do PROJETO, "Personalidade da Seth", com o eco
+# Tratamento "sistema" (timbre `agata-sistema-tratado` do PROTOCOLOS.md, "Personalidade da Seth", com o eco
 # "jarvis" escolhido pelo Humano em 16/10/2026: dobra metálica leve + 3 ecos curtos de 25, 50 e 90 ms).
 # Custo medido: ~0,05 s para 3 s de áudio e 0,10 s para 12,8 s (RTF 0,008), perto de nada diante do RTF
 # 0,13 do Piper. O `rubberband=tempo=0.95` alonga a fala em ~6%.

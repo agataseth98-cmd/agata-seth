@@ -23,3 +23,15 @@ default_permissions = "agata"
 type = "command"
 command = '/usr/bin/python3 "$(git rev-parse --show-toplevel)/scripts/auditoria_stop.py"'
 timeout = 30
+
+# Início de sessão (sincronia-12-11): contexto curto com as regras ativas do AGENTS.md, as últimas decisões
+# do cache do Conselho e os lotes abertos (scripts/sessao_contexto.py, mesmo conteúdo do Claude Code).
+# O hook devolve hookSpecificOutput.additionalContext; o Codex limita esse contexto a 2500 tokens por padrão
+# (doc: https://learn.chatgpt.com/docs/hooks). Não medido na versão instalada.
+[[hooks.SessionStart]]
+matcher = "startup|resume"
+
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$(git rev-parse --show-toplevel)/scripts/sessao_contexto.py"'
+timeout = 30

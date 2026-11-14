@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera um mapa curto e reproduzível de PROJETO.md para hidratação.
+"""Gera um mapa curto e reproduzível de um arquivo de canon (PROJETO.md, PROTOCOLOS.md) para hidratação.
 
 O mapa é mecânico: mantém o título, os headings e o primeiro parágrafo de
 cada seção/subseção. Não substitui PROJETO.md nem edita qualquer arquivo.
@@ -70,15 +70,15 @@ def slug(titulo: str) -> str:
     return re.sub(r"\s+", "-", texto.strip())
 
 
-def gerar(texto: str, limite: int = LIMITE_CHARS) -> str:
+def gerar(texto: str, limite: int = LIMITE_CHARS, nome: str = "PROJETO.md") -> str:
     linhas = sem_comentarios(texto)
-    h1 = next((l.strip() for l in linhas if l.startswith("# ")), "# PROJETO.md")
+    h1 = next((l.strip() for l in linhas if l.startswith("# ")), f"# {nome}")
     eventos = []
     for numero, linha in enumerate(linhas, 1):
         m = HEADING.match(linha)
         if m and m.group(1) != "#":
             eventos.append((numero, len(m.group(1)), m.group(2).strip()))
-    saida = [h1, "", "Mapa gerado dos títulos e parágrafos iniciais; a fonte completa é PROJETO.md.", ""]
+    saida = [h1, "", f"Mapa gerado dos títulos e parágrafos iniciais; a fonte completa é {nome}.", ""]
     for i, (linha_num, nivel, titulo) in enumerate(eventos):
         proximo = len(linhas)
         for n2, nivel2, _ in eventos[i + 1:]:
@@ -88,7 +88,7 @@ def gerar(texto: str, limite: int = LIMITE_CHARS) -> str:
         trecho = linhas[linha_num:proximo]
         resumo = paragrafo_inicial(trecho)
         prefixo = "##" if nivel == 2 else "###"
-        saida.append(f"{prefixo} {titulo} — PROJETO.md:{linha_num} (#{slug(titulo)})")
+        saida.append(f"{prefixo} {titulo} — {nome}:{linha_num} (#{slug(titulo)})")
         if resumo:
             saida.append(resumo)
         saida.append("")
@@ -107,7 +107,7 @@ def main() -> int:
         caminho = RAIZ / caminho
     try:
         texto = caminho.read_text(encoding="utf-8")
-        sys.stdout.write(gerar(texto))
+        sys.stdout.write(gerar(texto, nome=caminho.name))
     except (OSError, UnicodeError, ValueError) as exc:
         print(f"FALHA mapa PROJETO: {exc}", file=sys.stderr)
         return 1

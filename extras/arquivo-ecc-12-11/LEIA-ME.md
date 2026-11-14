@@ -1,0 +1,3 @@
+Arquivo da fonte ECC (Everything Claude Code, MIT), tirada de `ferramentas/fontes/` em 12/11/2026 pela proposta `correcoes-12-11`, faxina de skills (decisão do Humano, cache do Conselho, entrada 518). Conteúdo integral: 314 skills, 71 agentes, hooks desligados em `hooks-inativos/`, `COMMIT` e `LICENSE` da fonte, e `ALTERACOES.md` (linhas alteradas em relação ao commit; os caminhos são relativos a esta pasta).
+
+Não é carregado: `ferramentas/ferramentas.py` não indexa mais esta pasta, e nenhum hook está ligado. Ligar um hook é mudança de comportamento e exige aprovação assinada (P-8). Voltar à caixa também: uma proposta, não um `git mv` por conta própria.

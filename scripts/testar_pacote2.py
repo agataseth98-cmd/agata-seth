@@ -49,7 +49,7 @@ def main() -> int:
     resultados["mapa reproduzível, menor que 25.000 chars e sem âncora de máquina"] = (
         mapa1.returncode == 0 and mapa2.returncode == 0 and texto == mapa2.stdout
         and len(texto) <= 25_000 and "## O que é — PROJETO.md:" in texto
-        and "## Estado dos bugs e dos testes — PROJETO.md:" in texto
+        and "## Princípios — PROJETO.md:" in texto and "## Onde encontrar — PROJETO.md:" in texto
         and "ANCORA-SHA" not in texto
     )
     for nome, ok in resultados.items():

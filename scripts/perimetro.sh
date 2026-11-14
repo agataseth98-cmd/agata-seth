@@ -167,8 +167,8 @@ P12_CACHE="$HOME/.agata-backup-staging/p12-cobertura.json"
 # avisa quando falha é pior que controle nenhum.
 #
 # Escopo fechado, mesma doutrina de P-3/P-4: unidades e containers
-# citados em PROJETO.md, "Serviços (boot)", enumerados à mão -- atualizar
-# esta lista quando aquela linha do PROJETO mudar. AVISA, nunca falha --
+# declarados em config/servicos-agata.txt (fonte real, 12/11/2026; antes eram listas escritas à
+# mão aqui e no PROJETO.md). Para mudar a lista, edite o manifesto. AVISA, nunca falha --
 # serviço caído não é motivo pra travar a escrita do canon (mesma lógica
 # de P-6).
 #
@@ -188,10 +188,14 @@ P9_UNIDADES_SISTEMA=()
 # (LibreChat/Seth em uso desde (313)), mas não estavam na lista -- P-9 nunca
 # apitaria se caíssem, embora sejam a hidratação e o único caminho de escrita
 # dela. Achado, não teórico: confirmado com `ss -ltnp` que os dois escutam.
-P9_UNIDADES_USUARIO=("agata-manutencao.timer" "agata-manutencao.service" "laya-roteador.service" "omniroute.service" "omniroute-sanitizer.service" "openvino-whisper.service" "openvino-embeddings.service" "obsidian-ro-proxy.service" "seth-gateway.service" "seth-escriba.service" "seth-verificador.service" "piper-tts.service" "ollaya.service" "agata-vault-inbox.timer")
+P9_UNIDADES_USUARIO=()  # preenchida por p9_carregar_fonte (abaixo), a partir de config/servicos-agata.txt
 # (07/11/2026) LibreChat excluído pelo Humano (contêineres e volumes): os quatro nomes saíram.
-# Lista vazia: p9_servicos_declarados não consulta o docker. Para declarar outro contêiner, põe o nome aqui.
+# Lista vazia: p9_servicos_declarados não consulta o docker. Para declarar outro contêiner, põe o nome no manifesto (escopo docker).
 P9_CONTAINERS_DOCKER=()
+# (12/11/2026, componente projeto-indice) As três listas acima vêm do manifesto config/servicos-agata.txt
+# (linhas com p9=sim). Carregadas aqui, ao carregar o perímetro, para que um teste que sobrescreve as
+# listas depois de sourcear continue valendo.
+p9_carregar_fonte
 
 
 

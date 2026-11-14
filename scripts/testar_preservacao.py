@@ -263,7 +263,7 @@ def testar_projeto(projeto_path: Path, memorias_path: Path) -> tuple[bool, list[
     # captura grupos tipo (n), (n)-(m), (n)/(m), (n)-(m)-(o) etc: um grupo com mais de
     # um número (faixa/lista de MEMÓRIAS) é considerado ancorado se PELO MENOS UM dos
     # números resolve pra entrada real -- faixas como "(1)-(62)" citam um marco
-    # fundacional/histórico (ver PROJETO.md "Âncora de integridade"); o extremo baixo
+    # fundacional/histórico (ver PROTOCOLOS.md "Âncora de integridade"); o extremo baixo
     # pode não ter cabeçalho próprio sem que a citação esteja quebrada.
     PAT_GRUPO = re.compile(r'\([0-9]+\)(?:[-/]\([0-9]+\))*')
     invalidos_reais = []

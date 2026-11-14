@@ -7,7 +7,7 @@
 # exatamente isso que este hook cobre daqui pra frente).
 #
 # NÃO cobre edição manual por `visudo` -- isso não passa pelo pacman.
-# Cobertura runbook: PROJETO.md, "Sudo e interação humana".
+# Cobertura runbook: PROTOCOLOS.md, "Sudo e interação humana".
 #
 # Instalado pelo Humano, com sudo, em:
 #   /etc/pacman.d/hooks/agata-sudoers.hook
