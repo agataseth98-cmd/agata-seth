@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f4f225c9c31ba108476baa52526be1da74e24001
-  Escrito em: 14/11/2026 10:48 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e
+  Escrito em: 14/11/2026 11:30 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f4f225c9c31ba108476baa52526be1da74e24001/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f4f225c9c31ba108476baa52526be1da74e24001/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f4f225c9c31ba108476baa52526be1da74e24001/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f4f225c9c31ba108476baa52526be1da74e24001/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f4f225c9c31ba108476baa52526be1da74e24001/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eb8c9eab5c290174ce0799e58a46bec1d0bfa0e/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1004) DIÁRIO — 14/11/2026 · **Aplicado fiscal-yaml-12-11 com a assinatura do Humano (14/11): o fiscal-p8 volta a ter um único `env:` e o `verificar_workflows.py` passa a barrar YAML de workflow inválido.**
+- Verificação: `bash scripts/p8_verificar.sh fiscal-yaml-12-11` deu `PODE APLICAR` sobre `origin/main` `13a73843` (sha256 do `.diff` `620ac726bf24`).
+- Contexto: o Humano tirou `fiscal-p8` dos checks obrigatórios do `main` em 14/11 para o merge da proposta (#984). O check precisa voltar a ser obrigatório depois desta aplicação.
+- Modelo: Claude Opus 5.5 (Claude Code).
+
 (1003) DIÁRIO — 12/11/2026 · **Proposta sincronia-12-11 publicada: a doutrina da Seth passa a viver só no PROTOCOLOS (a cópia no gateway sai), com porquês verificados por mecanismo, gancho de início de sessão e maxTurns (só agata-dev muda). Não aplicada; a assinatura é do Humano.**
 - Base: `origin/main` `9981cbb8` (árvore `dfcf086c`), com `pacote-mecanico-skills-12-11` aplicado (commit `c4c71956`, PR #982). `git apply --check` do `.diff` sobre essa base: RC 0. `scripts/equipe/diff_limpo.py`: OK, nenhum hunk toca bloco gerado.
 - Medido numa cópia com histórico (worktree destacada em `9981cbb8`, com o `.diff` aplicado): `uv run --offline --with pytest bash scripts/ci_sdd_local.sh` deu `CI LOCAL: TUDO OK`, 49 OK e 0 FALHA. `test_indice_em_dia` passa nessa base; a falha relatada antes vinha de o pacote estar fora do commit.

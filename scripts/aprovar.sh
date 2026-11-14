@@ -57,6 +57,12 @@ if ! python3 -I "$raiz/scripts/equipe/diff_limpo.py" "$diff_path"; then
   echo "ERRO: $nome.diff tem hunk em bloco gerado pelo pre-commit (ANCORA-SHA). Não assino; refaça o .diff sem esse trecho." >&2
   exit 1
 fi
+# (3b, 12/11/2026) o .diff toca .github/workflows: o resultado tem YAML válido e sem chave repetida. Não se assina workflow que o GitHub recusa.
+if ! out="$(python3 -I "$raiz/scripts/verificar_workflows.py" --diff "$diff_path" 2>&1)"; then
+  echo "ERRO: $out" >&2
+  echo "ERRO: $nome.diff deixa um workflow inválido. Não assino; refaça o .diff." >&2
+  exit 1
+fi
 alvo="$raiz/propostas/APROVADO-$nome"
 [ -e "$alvo" ] && { echo "ERRO: $alvo já existe -- nada a fazer." >&2; exit 1; }
 
