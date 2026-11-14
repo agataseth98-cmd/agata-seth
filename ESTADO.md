@@ -67,8 +67,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 4.
-- `estado-aplicadas-14-11`
+Abertas (sem APROVADO-): 3.
 - `nova-versao-lote2-20261106`
 - `nucleo-desenvolvimento-07-11`
 - `sincronia-12-11`
