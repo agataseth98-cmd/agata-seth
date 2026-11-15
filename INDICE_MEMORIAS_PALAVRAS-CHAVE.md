@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1015) DIÁRIO — 15/11/2026 · **Proposta d6-rust-15-11: decisões do D6.** O Humano decidiu as três perguntas do D6: a camada 1 de Rust de egress ganha uso (segunda opinião em scripts/politica_egress.py via AGATA_EGRESS_RUST, nunca afrouxa) e CI (workflow rust-egress com cargo test e paridade Python x Rust); redesign/rust/* e redesign/painel_operacional/* entram na quarentena do P-8; o proxy SOCKS5 do navegador é a próxima camada em Rust, em proposta própria. A paridade achou divergência real: o Python 3.14 deixa passar o multicast 224.0.0.1, o Rust bloqueia. Claude Opus 5.5, Claude Code.
+  palavras-chave: proposta, rust, decisões, humano, decidiu, três, perguntas, camada, egress, ganha, uso, segunda, opinião, scripts, politica, agata, nunca, afrouxa, workflow, cargo, test, paridade, python, redesign, painel, operacional, entram, quarentena, proxy, socks, navegador, próxima, própria, achou, divergência, real, deixa, passar, multicast, bloqueia, claude, opus, code
 (1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
   palavras-chave: aplicado, teste, comparativo, assinatura, humano, desenho, redesign, rodada, autorizada, ela, pede, aprovação, parte
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, processo, agil, publicada, limite, propostas, abertas, componente, pronto, lote, retrospectiva, linhas, apetite, medição
 (987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
   palavras-chave: proposta, chat, lote, publicada, editar, reenviar, ramos, parar, continuar, feedback, contexto, atalhos, tema
-(986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (assinada pelo Humano): apagar vira lixeira, escrita de conversa só do painel, registro sem conteúdo, origem preservada e ilegíveis contados.**
-  palavras-chave: proposta, chat, protege, conversas, aplicada, assinada, humano, apagar, vira, lixeira, escrita, conversa, painel, registro, conteúdo, origem, preservada, ilegíveis, contados
+(986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (as …
+  palavras-chave: proposta, chat, protege, conversas, aplicada
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: a …
   palavras-chave: proposta, chat, protege, conversas, publicada
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas …

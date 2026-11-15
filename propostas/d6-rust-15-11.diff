@@ -1,0 +1,156 @@
+diff --git a/.github/workflows/rust-egress.yml b/.github/workflows/rust-egress.yml
+new file mode 100644
+index 00000000..ec98d445
+--- /dev/null
++++ b/.github/workflows/rust-egress.yml
+@@ -0,0 +1,26 @@
++# Camada Rust de egress (D6, decisão do Humano, 15/11/2026): testes do crate e
++# paridade com scripts/politica_egress.py. Só lê o repositório.
++name: rust-egress
++
++permissions:
++  contents: read
++
++on:
++  pull_request:
++    branches: [main]
++    paths:
++      - "redesign/rust/**"
++      - "scripts/politica_egress.py"
++      - "scripts/testar_egress_rust.py"
++      - ".github/workflows/rust-egress.yml"
++
++jobs:
++  rust-egress:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - name: cargo test
++        working-directory: redesign/rust/egress
++        run: cargo test --locked
++      - name: paridade Python x Rust
++        run: python3 scripts/testar_egress_rust.py
+diff --git a/redesign/rust/egress/.gitignore b/redesign/rust/egress/.gitignore
+new file mode 100644
+index 00000000..ea8c4bf7
+--- /dev/null
++++ b/redesign/rust/egress/.gitignore
+@@ -0,0 +1 @@
++/target
+diff --git a/scripts/perimetro/p08_quarentena.sh b/scripts/perimetro/p08_quarentena.sh
+index 4ab5bc8e..a61243d7 100644
+--- a/scripts/perimetro/p08_quarentena.sh
++++ b/scripts/perimetro/p08_quarentena.sh
+@@ -148,6 +148,9 @@ _p8_eh_comportamento() {
+     # da História é canon, não código; entra na quarentena para que nenhum modelo o mude sem assinatura.
+     # O painel só lê este diretório (redesign/painel_operacional/historia_painel.py).
+     historia/*) return 0 ;;
++    # D6 (decisão do Humano, 15/11/2026): a camada Rust de egress e o painel operacional
++    # são código de controle e de execução; achado da pesquisa D6, confirmado por grep em 14/11.
++    redesign/rust/*|redesign/painel_operacional/*) return 0 ;;
+     *) return 1 ;;
+   esac
+ }
+diff --git a/scripts/politica_egress.py b/scripts/politica_egress.py
+index 5088c854..35ba9327 100644
+--- a/scripts/politica_egress.py
++++ b/scripts/politica_egress.py
+@@ -34,8 +34,37 @@ _ESQUEMAS_PERMITIDOS = ("http", "https")
+ _MAX_REDIRECTS = 10
+ 
+ 
++def _ip_bloqueado_rust(ip_str: str) -> str | None:
++    """Segunda opinião da camada Rust (D6, 15/11/2026), só se AGATA_EGRESS_RUST
++    aponta para o binário `egress` de redesign/rust/egress. Nunca afrouxa: o
++    chamador bloqueia se qualquer uma das camadas bloquear. Binário ausente ou
++    com erro = sem segunda opinião (a camada Python continua valendo sozinha)."""
++    binario = os.environ.get("AGATA_EGRESS_RUST", "")
++    if not binario or not os.path.isfile(binario):
++        return None
++    try:
++        r = subprocess.run([binario, "ip", ip_str], capture_output=True, text=True, timeout=5)
++    except (OSError, subprocess.SubprocessError):
++        return None
++    if r.returncode == 1 and r.stdout.startswith("bloqueado: "):
++        return r.stdout[len("bloqueado: "):].strip()
++    return None
++
++
+ def _ip_bloqueado(ip_str: str) -> str | None:
+     """Motivo do bloqueio, ou None se o IP for público comum."""
++    motivo = _ip_bloqueado_py(ip_str)
++    if motivo is None:
++        motivo_rust = _ip_bloqueado_rust(ip_str)
++        if motivo_rust:
++            print(f"egress: divergência Python/Rust em {ip_str}; vale o bloqueio ({motivo_rust})",
++                  file=sys.stderr)
++            return f"camada Rust: {motivo_rust}"
++    return motivo
++
++
++def _ip_bloqueado_py(ip_str: str) -> str | None:
++    """Classificação de referência (Python)."""
+     ip = ipaddress.ip_address(ip_str)
+     if ip.is_global:
+         return None
+diff --git a/scripts/testar_egress_rust.py b/scripts/testar_egress_rust.py
+new file mode 100644
+index 00000000..15e84aec
+--- /dev/null
++++ b/scripts/testar_egress_rust.py
+@@ -0,0 +1,55 @@
++#!/usr/bin/env python3
++"""Paridade Python x Rust da política de egress (D6, decisão do Humano, 15/11/2026).
++
++Compila redesign/rust/egress (cargo build --release), roda `egress ip` em cada
++caso e compara o veredito (bloqueia ou não) com politica_egress._ip_bloqueado_py.
++Também prova que, com AGATA_EGRESS_RUST, _ip_bloqueado nunca afrouxa.
++Sem cargo: SKIP com código 0 só se AGATA_EGRESS_RUST_OPCIONAL=1; senão falha.
++"""
++import os, shutil, subprocess, sys
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(RAIZ / "scripts"))
++import politica_egress as pe  # noqa: E402
++
++CASOS = ["1.1.1.1", "8.8.8.8", "127.0.0.1", "10.0.0.5", "172.16.0.1", "192.168.1.1",
++         "169.254.169.254", "0.0.0.0", "100.64.0.1", "224.0.0.1", "255.255.255.255",
++         "::1", "fe80::1", "fc00::1", "2606:4700:4700::1111", "::ffff:127.0.0.1"]
++# Divergência medida em 15/11/2026: o ipaddress do Python 3.14 trata multicast
++# 224.0.0.1 como global (passa); o Rust bloqueia. Com AGATA_EGRESS_RUST vale o bloqueio.
++RUST_MAIS_ESTRITO = {"224.0.0.1"}
++
++
++def main() -> int:
++    if not shutil.which("cargo"):
++        if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
++            print("SKIP  cargo ausente"); return 0
++        print("FALHA cargo ausente"); return 1
++    crate = RAIZ / "redesign/rust/egress"
++    subprocess.run(["cargo", "build", "--release", "--quiet"], cwd=crate, check=True)
++    binario = str(crate / "target/release/egress")
++    ok = True
++    for ip in CASOS:
++        py = pe._ip_bloqueado_py(ip) is not None
++        r = subprocess.run([binario, "ip", ip], capture_output=True, text=True)
++        rs = r.returncode == 1
++        esperado_ok = (py == rs) or (ip in RUST_MAIS_ESTRITO and rs and not py)
++        nota = " (divergência conhecida: Rust mais estrito)" if py != rs and esperado_ok else ""
++        print(f"{'PASS' if esperado_ok else 'FALHA'}  {ip}: python={'bloq' if py else 'livre'} rust={'bloq' if rs else 'livre'}{nota}")
++        ok = ok and esperado_ok
++    os.environ["AGATA_EGRESS_RUST"] = binario
++    for ip in CASOS:
++        if pe._ip_bloqueado_py(ip) is not None and pe._ip_bloqueado(ip) is None:
++            print(f"FALHA {ip}: segunda opinião afrouxou"); ok = False
++    for ip in RUST_MAIS_ESTRITO:
++        if pe._ip_bloqueado(ip) is None:
++            print(f"FALHA {ip}: com a camada Rust ligada deveria bloquear"); ok = False
++    os.environ["AGATA_EGRESS_RUST"] = "/inexistente/egress"
++    ok = ok and pe._ip_bloqueado("1.1.1.1") is None
++    print("PARIDADE OK" if ok else "PARIDADE FALHOU")
++    return 0 if ok else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
