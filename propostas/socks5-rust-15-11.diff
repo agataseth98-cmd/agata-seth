@@ -1,0 +1,405 @@
+diff --git a/.github/workflows/rust-egress.yml b/.github/workflows/rust-egress.yml
+index ec98d445..48deaabf 100644
+--- a/.github/workflows/rust-egress.yml
++++ b/.github/workflows/rust-egress.yml
+@@ -12,6 +12,7 @@ on:
+       - "redesign/rust/**"
+       - "scripts/politica_egress.py"
+       - "scripts/testar_egress_rust.py"
++      - "redesign/mcp/navegador/egress_proxy.py"
+       - ".github/workflows/rust-egress.yml"
+ 
+ jobs:
+diff --git a/redesign/mcp/navegador/egress_proxy.py b/redesign/mcp/navegador/egress_proxy.py
+index e91023db..558ec682 100644
+--- a/redesign/mcp/navegador/egress_proxy.py
++++ b/redesign/mcp/navegador/egress_proxy.py
+@@ -2,9 +2,12 @@
+ from __future__ import annotations
+ 
+ import ipaddress
++import os
+ import socket
+ import socketserver
+ import struct
++import subprocess
++import sys
+ import threading
+ 
+ 
+@@ -111,7 +114,40 @@ class _Handler(socketserver.BaseRequestHandler):
+                 (b if origem is a else a).sendall(bloco)
+ 
+ 
+-class EgressProxy:
++class _EgressProxyRust:
++    """SOCKS5 da camada Rust (D6, 15/11/2026): binário egress-socks5 em loopback."""
++    def __init__(self, binario: str):
++        self._proc = subprocess.Popen([binario, "0"], stdout=subprocess.PIPE, text=True)
++        linha = self._proc.stdout.readline().strip()
++        if not linha.startswith("socks5://127.0.0.1:"):
++            self._proc.kill()
++            raise OSError(f"egress-socks5 não anunciou endereço: {linha!r}")
++        self.url = linha
++
++    def start(self) -> "_EgressProxyRust":
++        return self
++
++    def close(self):
++        self._proc.terminate()
++        try:
++            self._proc.wait(timeout=2)
++        except subprocess.TimeoutExpired:
++            self._proc.kill()
++
++
++def EgressProxy():
++    """Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para o binário; senão Python.
++    Binário ausente ou que falha ao subir: volta ao Python e avisa no stderr."""
++    binario = os.environ.get("AGATA_EGRESS_RUST_SOCKS5", "")
++    if binario and os.path.isfile(binario):
++        try:
++            return _EgressProxyRust(binario)
++        except OSError as e:
++            print(f"egress: SOCKS5 Rust falhou ({e}); usando o Python", file=sys.stderr)
++    return _EgressProxyPython()
++
++
++class _EgressProxyPython:
+     """Servidor SOCKS5 em loopback, gerido pelo ciclo de vida do navegador."""
+     def __init__(self):
+         self._server = _Servidor(("127.0.0.1", 0), _Handler)
+@@ -123,7 +159,7 @@ class EgressProxy:
+         host, port = self._server.server_address
+         return f"socks5://{host}:{port}"
+ 
+-    def start(self) -> "EgressProxy":
++    def start(self) -> "_EgressProxyPython":
+         self._thread.start()
+         return self
+ 
+diff --git a/redesign/rust/egress/src/bin/egress-socks5.rs b/redesign/rust/egress/src/bin/egress-socks5.rs
+new file mode 100644
+index 00000000..0fa17686
+--- /dev/null
++++ b/redesign/rust/egress/src/bin/egress-socks5.rs
+@@ -0,0 +1,18 @@
++//! SOCKS5 local de saída em loopback. Imprime `socks5://127.0.0.1:<porta>` na
++//! primeira linha e atende até ser encerrado. Uso: egress-socks5 [porta] (0 = livre).
++use egress::socks5::{atender, conectar_validado};
++use std::io::Write;
++use std::net::TcpListener;
++use std::thread;
++
++fn main() {
++    let porta: u16 = std::env::args().nth(1).and_then(|p| p.parse().ok()).unwrap_or(0);
++    let ouvinte = TcpListener::bind(("127.0.0.1", porta)).expect("bind 127.0.0.1");
++    println!("socks5://{}", ouvinte.local_addr().expect("endereço local"));
++    let _ = std::io::stdout().flush();
++    for c in ouvinte.incoming().flatten() {
++        thread::spawn(move || {
++            let _ = atender(c, conectar_validado);
++        });
++    }
++}
+diff --git a/redesign/rust/egress/src/lib.rs b/redesign/rust/egress/src/lib.rs
+index bdcfc578..42293fad 100644
+--- a/redesign/rust/egress/src/lib.rs
++++ b/redesign/rust/egress/src/lib.rs
+@@ -277,3 +277,4 @@ fn host_e_porta(netloc: &str) -> (&str, Option<&str>) {
+ }
+ 
+ pub mod camada2;
++pub mod socks5;
+diff --git a/redesign/rust/egress/src/socks5.rs b/redesign/rust/egress/src/socks5.rs
+new file mode 100644
+index 00000000..e938fd46
+--- /dev/null
++++ b/redesign/rust/egress/src/socks5.rs
+@@ -0,0 +1,118 @@
++//! SOCKS5 local de saída (D6, decisão do Humano, 15/11/2026): espelho de
++//! `redesign/mcp/navegador/egress_proxy.py`. Só CONNECT, sem autenticação.
++//! Resolve o destino uma vez, recusa se QUALQUER IP não for global
++//! (`classificar_ip`) e conecta ao literal validado, sem nova resolução.
++
++use crate::classificar_ip;
++use std::io::{self, Read, Write};
++use std::net::{Ipv4Addr, Ipv6Addr, Shutdown, SocketAddr, TcpStream, ToSocketAddrs};
++use std::thread;
++use std::time::Duration;
++
++/// Falha ao conectar: `Bloqueado` vira status SOCKS 2; `Rede`, status 5.
++#[derive(Debug)]
++pub enum Falha {
++    Bloqueado(String),
++    Rede(String),
++}
++
++/// Endereços do destino, todos validados; erro se algum não for global.
++pub fn enderecos_publicos(host: &str, porta: u16) -> Result<Vec<SocketAddr>, Falha> {
++    let addrs: Vec<SocketAddr> = (host, porta)
++        .to_socket_addrs()
++        .map_err(|e| Falha::Rede(format!("DNS: {e}")))?
++        .collect();
++    if addrs.is_empty() {
++        return Err(Falha::Rede("DNS não devolveu endereços".into()));
++    }
++    for a in &addrs {
++        if let Some(motivo) = classificar_ip(&a.ip().to_string()) {
++            return Err(Falha::Bloqueado(format!("destino bloqueado: {} ({motivo})", a.ip())));
++        }
++    }
++    Ok(addrs)
++}
++
++/// Conexão de produção: valida e conecta ao IP literal validado.
++pub fn conectar_validado(host: &str, porta: u16) -> Result<TcpStream, Falha> {
++    let mut erro = String::new();
++    for a in enderecos_publicos(host, porta)? {
++        match TcpStream::connect_timeout(&a, Duration::from_secs(15)) {
++            Ok(s) => return Ok(s),
++            Err(e) => erro = e.to_string(),
++        }
++    }
++    Err(Falha::Rede(format!("nenhum IP validado aceitou conexão: {erro}")))
++}
++
++fn ler(s: &mut TcpStream, n: usize) -> io::Result<Vec<u8>> {
++    let mut b = vec![0u8; n];
++    s.read_exact(&mut b)?;
++    Ok(b)
++}
++
++fn responder(s: &mut TcpStream, status: u8) -> io::Result<()> {
++    s.write_all(&[5, status, 0, 1, 0, 0, 0, 0, 0, 0])
++}
++
++/// Atende um cliente. `conectar` é injetável para teste.
++pub fn atender<F>(mut cliente: TcpStream, conectar: F) -> io::Result<()>
++where
++    F: Fn(&str, u16) -> Result<TcpStream, Falha>,
++{
++    cliente.set_read_timeout(Some(Duration::from_secs(30)))?;
++    let cab = ler(&mut cliente, 2)?;
++    let metodos = ler(&mut cliente, cab[1] as usize)?;
++    if cab[0] != 5 || !metodos.contains(&0) {
++        return cliente.write_all(&[5, 0xff]);
++    }
++    cliente.write_all(&[5, 0])?;
++    let req = ler(&mut cliente, 4)?;
++    if req[0] != 5 || req[1] != 1 {
++        return responder(&mut cliente, 7);
++    }
++    let host = match req[3] {
++        1 => {
++            let b = ler(&mut cliente, 4)?;
++            Ipv4Addr::new(b[0], b[1], b[2], b[3]).to_string()
++        }
++        4 => {
++            let b = ler(&mut cliente, 16)?;
++            let mut a = [0u8; 16];
++            a.copy_from_slice(&b);
++            Ipv6Addr::from(a).to_string()
++        }
++        3 => {
++            let n = ler(&mut cliente, 1)?[0] as usize;
++            match String::from_utf8(ler(&mut cliente, n)?) {
++                Ok(h) if h.is_ascii() => h,
++                _ => return responder(&mut cliente, 1),
++            }
++        }
++        _ => return responder(&mut cliente, 8),
++    };
++    let p = ler(&mut cliente, 2)?;
++    let porta = u16::from_be_bytes([p[0], p[1]]);
++    let remoto = match conectar(&host, porta) {
++        Ok(r) => r,
++        Err(Falha::Bloqueado(_)) => return responder(&mut cliente, 2),
++        Err(Falha::Rede(_)) => return responder(&mut cliente, 5),
++    };
++    responder(&mut cliente, 0)?;
++    cliente.set_read_timeout(None)?;
++    retransmitir(cliente, remoto)
++}
++
++fn retransmitir(a: TcpStream, b: TcpStream) -> io::Result<()> {
++    let (mut a2, mut b2) = (a.try_clone()?, b.try_clone()?);
++    let ida = thread::spawn(move || {
++        let mut a = a;
++        let mut b = b;
++        let _ = io::copy(&mut a, &mut b);
++        let _ = b.shutdown(Shutdown::Write);
++    });
++    let _ = io::copy(&mut b2, &mut a2);
++    let _ = a2.shutdown(Shutdown::Write);
++    let _ = ida.join();
++    Ok(())
++}
+diff --git a/redesign/rust/egress/tests/socks5.rs b/redesign/rust/egress/tests/socks5.rs
+new file mode 100644
+index 00000000..918c9dbf
+--- /dev/null
++++ b/redesign/rust/egress/tests/socks5.rs
+@@ -0,0 +1,80 @@
++//! Paridade com scripts/testar_egress_proxy.py (casos do SOCKS5 em Python).
++use egress::socks5::{atender, enderecos_publicos, Falha};
++use std::io::{Read, Write};
++use std::net::{TcpListener, TcpStream};
++use std::thread;
++
++#[test]
++fn recusa_loopback_literal() {
++    assert!(matches!(enderecos_publicos("127.0.0.1", 443), Err(Falha::Bloqueado(_))));
++}
++
++#[test]
++fn recusa_nat_de_operadora() {
++    assert!(matches!(enderecos_publicos("100.64.0.1", 443), Err(Falha::Bloqueado(_))));
++}
++
++#[test]
++fn aceita_ip_global_literal() {
++    let v = enderecos_publicos("1.1.1.1", 443).map_err(|_| ()).unwrap();
++    assert_eq!(v[0].to_string(), "1.1.1.1:443");
++}
++
++fn par() -> (TcpStream, TcpStream) {
++    let l = TcpListener::bind("127.0.0.1:0").unwrap();
++    let c = TcpStream::connect(l.local_addr().unwrap()).unwrap();
++    (c, l.accept().unwrap().0)
++}
++
++#[test]
++fn tunela_so_depois_de_validar() {
++    let eco = TcpListener::bind("127.0.0.1:0").unwrap();
++    let porta_eco = eco.local_addr().unwrap().port();
++    thread::spawn(move || {
++        let (mut s, _) = eco.accept().unwrap();
++        let mut b = [0u8; 4];
++        s.read_exact(&mut b).unwrap();
++        s.write_all(&b).unwrap();
++    });
++    let (mut cliente, servidor) = par();
++    let h = thread::spawn(move || {
++        atender(servidor, move |host, p| {
++            assert_eq!((host, p), ("allowed.example", porta_eco));
++            TcpStream::connect(("127.0.0.1", porta_eco)).map_err(|e| Falha::Rede(e.to_string()))
++        })
++    });
++    cliente.write_all(&[5, 1, 0]).unwrap();
++    let mut r = [0u8; 2];
++    cliente.read_exact(&mut r).unwrap();
++    assert_eq!(r, [5, 0]);
++    let host = b"allowed.example";
++    let mut req = vec![5, 1, 0, 3, host.len() as u8];
++    req.extend_from_slice(host);
++    req.extend_from_slice(&porta_eco.to_be_bytes());
++    cliente.write_all(&req).unwrap();
++    let mut resp = [0u8; 10];
++    cliente.read_exact(&mut resp).unwrap();
++    assert_eq!(&resp[..2], &[5, 0]);
++    cliente.write_all(b"test").unwrap();
++    let mut eco_b = [0u8; 4];
++    cliente.read_exact(&mut eco_b).unwrap();
++    assert_eq!(&eco_b, b"test");
++    drop(cliente);
++    h.join().unwrap().unwrap();
++}
++
++#[test]
++fn bloqueio_vira_status_2_sem_conectar() {
++    let (mut cliente, servidor) = par();
++    let h = thread::spawn(move || {
++        atender(servidor, |_, _| Err(Falha::Bloqueado("teste".into())))
++    });
++    cliente.write_all(&[5, 1, 0]).unwrap();
++    let mut r = [0u8; 2];
++    cliente.read_exact(&mut r).unwrap();
++    cliente.write_all(&[5, 1, 0, 1, 127, 0, 0, 1, 0, 80]).unwrap();
++    let mut resp = [0u8; 10];
++    cliente.read_exact(&mut resp).unwrap();
++    assert_eq!(resp[1], 2);
++    h.join().unwrap().unwrap();
++}
+diff --git a/redesign/systemd/navegador-mcp.service b/redesign/systemd/navegador-mcp.service
+index c17a257e..2324ac56 100644
+--- a/redesign/systemd/navegador-mcp.service
++++ b/redesign/systemd/navegador-mcp.service
+@@ -6,6 +6,11 @@ After=network-online.target
+ Type=simple
+ ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/navegador/servidor.py --http 20136
+ Restart=on-failure
++# Camada Rust de egress (D6, 15/11/2026): segunda opinião na política e SOCKS5
++# do navegador. Binários instalados por scripts/instalar_egress_rust.sh; se
++# faltarem, o código volta ao Python sozinho (nunca afrouxa).
++Environment=AGATA_EGRESS_RUST=%h/.local/bin/agata-egress
++Environment=AGATA_EGRESS_RUST_SOCKS5=%h/.local/bin/agata-egress-socks5
+ RestartSec=3
+ # Baseline de hardening (item 6 do plano de mitigação da auditoria do
+ # Marcos, MEMÓRIAS (437)) -- testado ao vivo com Playwright+Brave real sob
+diff --git a/scripts/instalar_egress_rust.sh b/scripts/instalar_egress_rust.sh
+new file mode 100755
+index 00000000..5b0c2dba
+--- /dev/null
++++ b/scripts/instalar_egress_rust.sh
+@@ -0,0 +1,11 @@
++#!/usr/bin/env bash
++# Compila a camada Rust de egress e instala em ~/.local/bin (D6, 15/11/2026).
++# Depois: systemctl --user daemon-reload && systemctl --user restart navegador-mcp
++set -euo pipefail
++raiz="$(cd "$(dirname "$0")/.." && pwd)"
++cd "$raiz/redesign/rust/egress"
++cargo build --release --locked
++mkdir -p "$HOME/.local/bin"
++install -m 0755 target/release/egress "$HOME/.local/bin/agata-egress"
++install -m 0755 target/release/egress-socks5 "$HOME/.local/bin/agata-egress-socks5"
++echo "instalado: ~/.local/bin/agata-egress e ~/.local/bin/agata-egress-socks5"
+diff --git a/scripts/testar_egress_rust.py b/scripts/testar_egress_rust.py
+index 15e84aec..202efce1 100644
+--- a/scripts/testar_egress_rust.py
++++ b/scripts/testar_egress_rust.py
+@@ -21,6 +21,36 @@ CASOS = ["1.1.1.1", "8.8.8.8", "127.0.0.1", "10.0.0.5", "172.16.0.1", "192.168.1
+ RUST_MAIS_ESTRITO = {"224.0.0.1"}
+ 
+ 
++def _pedir(url: str, ip: bytes, porta: int) -> int:
++    import socket
++    host, p = url.rsplit("/", 1)[1].split(":")
++    with socket.create_connection((host, int(p)), timeout=5) as c:
++        c.sendall(b"\x05\x01\x00"); c.recv(2)
++        c.sendall(b"\x05\x01\x00\x01" + ip + porta.to_bytes(2, "big"))
++        return c.recv(10)[1]
++
++
++def _testar_socks5(binario: Path) -> bool:
++    """O binário real recusa loopback e rede privada com status 2, via EgressProxy."""
++    import importlib.util
++    spec = importlib.util.spec_from_file_location("ep", RAIZ / "redesign/mcp/navegador/egress_proxy.py")
++    ep = importlib.util.module_from_spec(spec); spec.loader.exec_module(ep)
++    os.environ["AGATA_EGRESS_RUST_SOCKS5"] = str(binario)
++    proxy = ep.EgressProxy().start()
++    ok = type(proxy).__name__ == "_EgressProxyRust"
++    try:
++        for ip in (b"\x7f\x00\x00\x01", b"\x0a\x00\x00\x05", b"\xa9\xfe\xa9\xfe"):
++            st = _pedir(proxy.url, ip, 80)
++            print(f"{'PASS' if st == 2 else 'FALHA'}  socks5 rust recusa {'.'.join(map(str, ip))} (status {st})")
++            ok = ok and st == 2
++    finally:
++        proxy.close()
++    os.environ["AGATA_EGRESS_RUST_SOCKS5"] = "/inexistente"
++    py = ep.EgressProxy(); ok = ok and type(py).__name__ == "_EgressProxyPython"; py.start(); py.close()
++    print(f"{'PASS' if ok else 'FALHA'}  socks5: Rust quando há binário, Python quando não há")
++    return ok
++
++
+ def main() -> int:
+     if not shutil.which("cargo"):
+         if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
+@@ -47,6 +77,7 @@ def main() -> int:
+             print(f"FALHA {ip}: com a camada Rust ligada deveria bloquear"); ok = False
+     os.environ["AGATA_EGRESS_RUST"] = "/inexistente/egress"
+     ok = ok and pe._ip_bloqueado("1.1.1.1") is None
++    ok = _testar_socks5(crate / "target/release/egress-socks5") and ok
+     print("PARIDADE OK" if ok else "PARIDADE FALHOU")
+     return 0 if ok else 1
+ 
