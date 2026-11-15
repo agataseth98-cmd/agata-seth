@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1017) DIÁRIO — 15/11/2026 · **Proposta socks5-rust-15-11: SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O Humano escolheu ligar a segunda opinião do Rust nos serviços, fazer o SOCKS5 em Rust agora e encerrar o T2 sem avaliação às cegas (fica só o teste selado, em que os três braços passaram). O binário egress-socks5 espelha egress_proxy.py; EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para ele e volta ao Python sem ele; navegador-mcp.service liga as duas variáveis. Medido: 5 testes novos do SOCKS5 em Rust passando; curl pelo SOCKS5 Rust recebeu 200 de example.com e foi recusado em localhost. Não medido: o navegador real pelo SOCKS5 Rust. Claude Opus 5.5, Claude Code.
+  palavras-chave: proposta, socks, rust, navegador, camada, ligada, humano, escolheu, ligar, segunda, opinião, serviços, fazer, agora, encerrar, avaliação, cegas, fica, teste, selado, três, braços, passaram, binário, egress, espelha, proxy, egressproxy, usa, agata, aponta, ele, volta, python, mcp, service, liga, variáveis, medido, testes, novos, passando, curl, recebeu, example, recusado, localhost, real, claude, opus, code
 (1016) DIÁRIO — 15/11/2026 · **Aplicada d6-rust-15-11 (assinada pelo Humano).** Camada Rust de egress como segunda opinião em scripts/politica_egress.py (AGATA_EGRESS_RUST, nunca afrouxa), workflow rust-egress com cargo test e paridade, e redesign/rust/* e redesign/painel_operacional/* na quarentena do P-8. Ligar a variável nos serviços fica para depois. Claude Opus 5.5, Claude Code.
   palavras-chave: aplicada, rust, assinada, humano, camada, egress, segunda, opinião, scripts, politica, agata, nunca, afrouxa, workflow, cargo, test, paridade, redesign, painel, operacional, quarentena, ligar, variável, serviços, fica, claude, opus, code
 (1015) DIÁRIO — 15/11/2026 · **Proposta d6-rust-15-11: decisões do D6.** O Humano decidiu as três perguntas do D6: a camada 1 de Rust de egress ganha uso (segunda opinião em scripts/politica_egress.py via AGATA_EGRESS_RUST, nunca afrouxa) e CI (workflow rust-egress com cargo test e paridade Python x Rust); redesign/rust/* e redesign/painel_operacional/* entram na quarentena do P-8; o proxy SOCKS5 do navegador é a próxima camada em Rust, em proposta própria. A paridade achou divergência real: o Python 3.14 deixa passar o multicast 224.0.0.1, o Rust bloqueia. Claude Opus 5.5, Claude Code.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, spec, primeiro, publicada, entrevista, gate, sincronia, specs, revisor, contra, três, classes, tarefa
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
   palavras-chave: correção, entrada, testes, navegador, falham, node
-(988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
-  palavras-chave: proposta, processo, agil, publicada, limite, propostas, abertas, componente, pronto, lote, retrospectiva, linhas, apetite, medição
+(988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de …
+  palavras-chave: proposta, processo, agil, publicada, limite
 (987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reen …
   palavras-chave: proposta, chat, lote, publicada, editar, reen
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (as …
