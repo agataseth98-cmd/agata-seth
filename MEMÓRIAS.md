@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b
-  Escrito em: 15/11/2026 16:16 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e0113f22f63abf3a4091eefac6679d7d8c0c12fb
+  Escrito em: 15/11/2026 16:25 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/bbbbb6d34f0dff4e94f0ada9f0960f8fa2d7d81b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0113f22f63abf3a4091eefac6679d7d8c0c12fb/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0113f22f63abf3a4091eefac6679d7d8c0c12fb/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0113f22f63abf3a4091eefac6679d7d8c0c12fb/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0113f22f63abf3a4091eefac6679d7d8c0c12fb/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e0113f22f63abf3a4091eefac6679d7d8c0c12fb/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1016) DIÁRIO — 15/11/2026 · **Aplicada d6-rust-15-11 (assinada pelo Humano).** Camada Rust de egress como segunda opinião em scripts/politica_egress.py (AGATA_EGRESS_RUST, nunca afrouxa), workflow rust-egress com cargo test e paridade, e redesign/rust/* e redesign/painel_operacional/* na quarentena do P-8. Ligar a variável nos serviços fica para depois. Claude Opus 5.5, Claude Code.
+
 (1015) DIÁRIO — 15/11/2026 · **Proposta d6-rust-15-11: decisões do D6.** O Humano decidiu as três perguntas do D6: a camada 1 de Rust de egress ganha uso (segunda opinião em scripts/politica_egress.py via AGATA_EGRESS_RUST, nunca afrouxa) e CI (workflow rust-egress com cargo test e paridade Python x Rust); redesign/rust/* e redesign/painel_operacional/* entram na quarentena do P-8; o proxy SOCKS5 do navegador é a próxima camada em Rust, em proposta própria. A paridade achou divergência real: o Python 3.14 deixa passar o multicast 224.0.0.1, o Rust bloqueia. Claude Opus 5.5, Claude Code.
 
 (1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
