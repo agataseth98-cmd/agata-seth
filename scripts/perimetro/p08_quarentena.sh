@@ -148,6 +148,9 @@ _p8_eh_comportamento() {
     # da História é canon, não código; entra na quarentena para que nenhum modelo o mude sem assinatura.
     # O painel só lê este diretório (redesign/painel_operacional/historia_painel.py).
     historia/*) return 0 ;;
+    # D6 (decisão do Humano, 15/11/2026): a camada Rust de egress e o painel operacional
+    # são código de controle e de execução; achado da pesquisa D6, confirmado por grep em 14/11.
+    redesign/rust/*|redesign/painel_operacional/*) return 0 ;;
     *) return 1 ;;
   esac
 }

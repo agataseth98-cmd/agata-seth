@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1016) DIÁRIO — 15/11/2026 · **Aplicada d6-rust-15-11 (assinada pelo Humano).** Camada Rust de egress como segunda opinião em scripts/politica_egress.py (AGATA_EGRESS_RUST, nunca afrouxa), workflow rust-egress com cargo test e paridade, e redesign/rust/* e redesign/painel_operacional/* na quarentena do P-8. Ligar a variável nos serviços fica para depois. Claude Opus 5.5, Claude Code.
 (1015) DIÁRIO — 15/11/2026 · **Proposta d6-rust-15-11: decisões do D6.** O Humano decidiu as três perguntas do D6: a camada 1 de Rust de egress ganha uso (segunda opinião em scripts/politica_egress.py via AGATA_EGRESS_RUST, nunca afrouxa) e CI (workflow rust-egress com cargo test e paridade Python x Rust); redesign/rust/* e redesign/painel_operacional/* entram na quarentena do P-8; o proxy SOCKS5 do navegador é a próxima camada em Rust, em proposta própria. A paridade achou divergência real: o Python 3.14 deixa passar o multicast 224.0.0.1, o Rust bloqueia. Claude Opus 5.5, Claude Code.
 (1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navegador que falham sem node, não 60.**
 (988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de 2 propostas abertas por componente, pronto do lote, retrospectiva de 3 linhas e apetite em medição.**
-(987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reenviar, ramos, Parar, Continuar, feedback, contexto, atalhos e tema.**
+(987) DIÁRIO — 11/11/2026 · **Proposta chat-lote4-09-11 publicada: editar e reen …
 (986) DIÁRIO — 11/11/2026 · **Proposta chat-protege-conversas-09-11 aplicada (as …
 (985) DIÁRIO — 09/11/2026 · **Proposta chat-protege-conversas-09-11 publicada: a …
 (984) DIÁRIO — 09/11/2026 · **Lote chat 3 aplicado (chat-lote3-09-11): conversas …

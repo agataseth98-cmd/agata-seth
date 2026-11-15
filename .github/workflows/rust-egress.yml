@@ -1,0 +1,26 @@
+# Camada Rust de egress (D6, decisão do Humano, 15/11/2026): testes do crate e
+# paridade com scripts/politica_egress.py. Só lê o repositório.
+name: rust-egress
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "redesign/rust/**"
+      - "scripts/politica_egress.py"
+      - "scripts/testar_egress_rust.py"
+      - ".github/workflows/rust-egress.yml"
+
+jobs:
+  rust-egress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cargo test
+        working-directory: redesign/rust/egress
+        run: cargo test --locked
+      - name: paridade Python x Rust
+        run: python3 scripts/testar_egress_rust.py

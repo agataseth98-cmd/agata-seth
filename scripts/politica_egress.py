@@ -34,8 +34,37 @@ _ESQUEMAS_PERMITIDOS = ("http", "https")
 _MAX_REDIRECTS = 10
 
 
+def _ip_bloqueado_rust(ip_str: str) -> str | None:
+    """Segunda opinião da camada Rust (D6, 15/11/2026), só se AGATA_EGRESS_RUST
+    aponta para o binário `egress` de redesign/rust/egress. Nunca afrouxa: o
+    chamador bloqueia se qualquer uma das camadas bloquear. Binário ausente ou
+    com erro = sem segunda opinião (a camada Python continua valendo sozinha)."""
+    binario = os.environ.get("AGATA_EGRESS_RUST", "")
+    if not binario or not os.path.isfile(binario):
+        return None
+    try:
+        r = subprocess.run([binario, "ip", ip_str], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if r.returncode == 1 and r.stdout.startswith("bloqueado: "):
+        return r.stdout[len("bloqueado: "):].strip()
+    return None
+
+
 def _ip_bloqueado(ip_str: str) -> str | None:
     """Motivo do bloqueio, ou None se o IP for público comum."""
+    motivo = _ip_bloqueado_py(ip_str)
+    if motivo is None:
+        motivo_rust = _ip_bloqueado_rust(ip_str)
+        if motivo_rust:
+            print(f"egress: divergência Python/Rust em {ip_str}; vale o bloqueio ({motivo_rust})",
+                  file=sys.stderr)
+            return f"camada Rust: {motivo_rust}"
+    return motivo
+
+
+def _ip_bloqueado_py(ip_str: str) -> str | None:
+    """Classificação de referência (Python)."""
     ip = ipaddress.ip_address(ip_str)
     if ip.is_global:
         return None
