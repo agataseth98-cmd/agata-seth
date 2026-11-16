@@ -4,9 +4,9 @@
 # traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
 # Conselho -- cache_conselho) ou importa o AGENTS.md.
 # Plataforma nova = linha nova aqui. Formato: caminho|quem lê
-AGENTS.md|Codex, Cursor, Goose e outras ferramentas que leem AGENTS.md
+AGENTS.md|Codex, Cursor e outras ferramentas que leem AGENTS.md
 GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
 CLAUDE.md|Claude Code (importa o AGENTS.md)
 PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
-redesign/router/seth_gateway.py|Seth e Goose (doutrina injetada pelo gateway)
-redesign/goose/AGENTS.md|Goose (instruções globais, ~/.config/goose/AGENTS.md)
+redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)
+redesign/goose/AGENTS.md|instruções globais do Goose (~/.config/goose/AGENTS.md), que saiu do sistema em 07/11/2026; o arquivo fica até a decisão de remoção
