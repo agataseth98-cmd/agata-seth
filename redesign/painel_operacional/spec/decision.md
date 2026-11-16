@@ -2,7 +2,11 @@
 
 DECISAO: aceita
 
-Decidido pelo Humano em 07/11/2026.
+Decidido pelo Humano em 16/11/2026, 10:46.
+
+Escopo decidido pelo Humano (16/11/2026): "eleve o painel ao estado 100% funcional e estado da arte de design". Isso fixa o escopo do lote painel-funcional-16-11.
+
+Registro de 07/11/2026, painel unificado: decidido pelo Humano em 07/11/2026.
 
 Escopo decidido pelo Humano (relatado pelo coordenador em 07/11/2026): "quero deixar perfeito hj, com o painel já unificado e funcional". Isso fixa o escopo da versão.
 

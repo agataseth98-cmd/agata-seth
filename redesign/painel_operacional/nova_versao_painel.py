@@ -61,9 +61,9 @@ def _estado_sentidos() -> dict:
     import urllib.request
     try:
         urllib.request.urlopen("http://127.0.0.1:20137/health", timeout=1).read()
-        servidor = "no ar (porta 20137, LibreChat)"
+        servidor = "no ar · ouvido (porta 20137)"
     except Exception:  # noqa: BLE001
-        servidor = "parado (sobe com o sistema)"
+        servidor = "parado (sobe pelo atalho de ligar o sistema)"
     import seth_voz  # noqa: E402
     try:
         voz = seth_voz.resumo_voz()  # só lê o /health do piper e o último uso; não liga o serviço

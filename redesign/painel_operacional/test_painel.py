@@ -4,6 +4,7 @@ import collections
 import http.client
 import importlib.util
 import json
+import re
 import tempfile
 import threading
 import time
@@ -114,11 +115,83 @@ class PainelTests(unittest.TestCase):
     def test_chat_http_200_nao_afirma_funcionalidade_completa(self):
         connection = mock.Mock()
         connection.getresponse.return_value.status = 200
-        with mock.patch.object(panel.http.client, "HTTPConnection", return_value=connection):
+        with mock.patch.object(panel.http.client, "HTTPConnection", return_value=connection) as conexao:
             result = panel._chat_snapshot()
         self.assertEqual((result["state"], result["http_status"]), ("ok", 200))
-        self.assertEqual(result["source_ref"], "127.0.0.1:3080/health")
+        self.assertEqual((result["source"], result["source_ref"]), ("seth-gateway", "127.0.0.1:20126/"))
+        conexao.assert_called_once_with("127.0.0.1", 20126, timeout=3)
+        connection.request.assert_called_once_with("GET", "/")
         connection.close.assert_called_once()
+
+    def test_sem_leitura_lista_so_fontes_desconhecidas_ou_ausentes(self):
+        ok = {"state": "ok"}
+        services = [{"unit": "a.service", "state": "ok"}, {"unit": "b.service", "state": "ausente"}]
+        timers = [{"unit": "c.timer", "state": "unknown"}]
+        self.assertEqual(panel._fontes_sem_leitura(services, timers, ok, ok, ok, ok, ok), ["b.service", "c.timer"])
+        self.assertEqual(panel._fontes_sem_leitura([{"unit": "a.service", "state": "ok"}], [], ok,
+                                                   {"state": "unknown"}, ok, ok, ok),
+                         ["Conversa com a Seth (gateway)"])
+        self.assertEqual(panel._fontes_sem_leitura([], [], ok, ok, ok, ok, ok), [])
+
+    def test_unidade_inexistente_vira_ausente_e_nao_inactive_nem_unknown(self):
+        nao_existe = "$ unidade (exit=0)\n\nId=laya-roteador.service\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
+        with mock.patch.object(panel, "_verify", return_value=nao_existe):
+            servico = panel._service_snapshot("laya-roteador.service")
+        texto = "unidade não existe no escopo do usuário desta Máquina"  # C5 (16/11/2026): systemctl --user, não o sistema todo
+        self.assertEqual((servico["state"], servico["error"]), ("ausente", texto))
+        timer_nao = "Id=agata-vault-inbox.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
+        with mock.patch.object(panel.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=timer_nao)):
+            timer = panel._timer_snapshot("agata-vault-inbox.timer")
+        self.assertEqual((timer["state"], timer["error"], timer["execution"]["state"]),
+                         ("ausente", texto, "ausente"))
+        self.assertEqual(panel._overall_state(["ok", "ausente"]), "warning")
+
+    def test_lacunas_separam_unidade_ausente_de_inativa(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "ESTADO.md").write_text("## Serviços (boot)\n- `laya-roteador.service` (declarada)\n"
+                                            "- `seth-escriba.service` (declarada)\n- `ollama.service` (declarada)\n\n## Outra\n",
+                                            encoding="utf-8")
+
+            def systemctl(argv, **_kwargs):
+                unit, sistema = argv[-1], "--user" not in argv
+                if unit == "seth-escriba.service" and not sistema:
+                    return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=inactive\n")
+                if unit == "ollama.service" and sistema:
+                    return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=active\n")
+                return SimpleNamespace(returncode=0, stdout="LoadState=not-found\nActiveState=inactive\n")
+
+            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl):
+                data = panel._lacunas_snapshot()
+        por_nome = {item["nome"]: item for item in data["items"]}
+        self.assertEqual((por_nome["laya-roteador.service"]["state"], por_nome["laya-roteador.service"]["motivo"]),
+                         ("ausente", "unidade não existe no escopo do usuário desta Máquina"))
+        self.assertEqual(por_nome["seth-escriba.service"]["motivo"], "declarada no boot e inativa agora")
+        self.assertNotIn("ollama.service", por_nome)
+
+    def test_integracoes_incluem_painel_e_vigia_com_rotulo_e_nome_valido(self):
+        self.assertIn("painel-operacional.service", panel.INTEGRATION_ALLOWLIST)
+        self.assertIn("agata-vigia@claude.service", panel.INTEGRATION_ALLOWLIST)
+        self.assertEqual(panel.INTEGRATION_ROTULOS["painel-operacional.service"], "Painel operacional")
+        self.assertEqual(panel.INTEGRATION_ROTULOS["agata-vigia@claude.service"], "Vigia do Claude")
+        # Mesmo formato que o verificador aceita para unidade de usuário (inclui `@` de instância).
+        formato = re.compile(r"[a-z0-9][a-z0-9_.@-]{0,80}\.(?:service|timer|socket|target)")
+        self.assertTrue(all(formato.fullmatch(unit) for unit in panel.INTEGRATION_ALLOWLIST))
+        with mock.patch.object(panel, "_verify", return_value="$ unidade (exit=0)\n\nLoadState=loaded\nActiveState=active\nSubState=running\n") as verify:
+            panel._service_snapshot("agata-vigia@claude.service")
+        self.assertEqual(verify.call_args.kwargs, {"consulta": "agata-vigia@claude.service"})
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)), \
+                mock.patch.object(panel, "_service_snapshot", side_effect=lambda unit: {"unit": unit, "state": "ok"}):
+            detalhes = panel._details_snapshot()
+        por_unidade = {item["unit"]: item for item in detalhes["integrations"]}
+        self.assertEqual(por_unidade["agata-vigia@claude.service"]["rotulo"], "Vigia do Claude")
+        self.assertNotIn("rotulo", por_unidade["piper-tts.service"])
+
+    def test_painel_nao_cita_o_chat_antigo_e_rotula_a_porta_do_ouvido(self):
+        fonte = (HERE / "server.py").read_text(encoding="utf-8") + (HERE / "nova_versao_painel.py").read_text(encoding="utf-8")
+        for proibido in ("librechat", "3080"):
+            self.assertNotIn(proibido, fonte.lower())
+        self.assertIn("ouvido (porta 20137)", (HERE / "nova_versao_painel.py").read_text(encoding="utf-8"))
 
     def test_modelos_mantem_origem_e_amostra(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -248,6 +321,92 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/prototipo", headers={"Host": "exemplo.invalid"})[0], 421)
         self.assertEqual(self.request("GET", "/nao-existe")[0], 404)
 
+    def test_status_e_capacidades_nao_citam_o_chat_antigo(self):
+        def fake_verify(command, **_arguments):
+            if command == "unidade":
+                body = "LoadState=loaded\nActiveState=active\nSubState=running\n"
+            elif command == "git_status":
+                body = "## main...origin/main\n"
+            elif command == "git_log":
+                body = "abc123def456 mensagem de exemplo\n"
+            else:
+                raise AssertionError("comando inesperado no teste")
+            return f"$ {command} (exit=0)\n\n" + body
+
+        gateway = {"state": "ok", "http_status": 200, "source": "seth-gateway", "source_ref": "127.0.0.1:20126/"}
+        with tempfile.TemporaryDirectory() as tmp:
+            patches = [mock.patch.object(panel, "ROOT", Path(tmp)),
+                       mock.patch.object(panel, "MAINTENANCE_STATE", Path(tmp) / "estado.json"),
+                       mock.patch.object(panel, "_verify", side_effect=fake_verify),
+                       mock.patch.object(panel, "_timer_snapshot", side_effect=lambda unit: {"unit": unit, "state": "ausente"}),
+                       mock.patch.object(panel, "_chat_snapshot", return_value=gateway),
+                       mock.patch.object(panel, "_unidade_ativa", return_value=True),
+                       mock.patch.object(panel, "_http_ok", return_value=True)]
+            panel._STATUS_CACHE = panel._STATUS_CACHE_AT = None
+            panel._CACHE_CURTO.clear()
+            for patch in patches:
+                patch.start()
+            try:
+                status, corpo_status, _ = self.request("GET", "/api/status")
+                status_cap, corpo_cap, _ = self.request("GET", "/api/capacidades")
+            finally:
+                for patch in reversed(patches):
+                    patch.stop()
+                panel._STATUS_CACHE = panel._STATUS_CACHE_AT = None
+                panel._CACHE_CURTO.clear()
+        self.assertEqual((status, status_cap), (200, 200))
+        for corpo in (corpo_status, corpo_cap):
+            texto = corpo.decode("utf-8").lower()
+            self.assertNotIn("3080", texto)
+            self.assertNotIn("librechat", texto)
+        self.assertEqual(json.loads(corpo_status)["chat"]["source_ref"], "127.0.0.1:20126/")
+        conversar = next(item for item in json.loads(corpo_cap)["items"] if item["id"] == "conversar")
+        self.assertEqual(conversar["source"], "seth-gateway · 127.0.0.1:20126")
+        self.assertIn("127.0.0.1:20126", corpo_cap.decode("utf-8"))
+        self.assertIn("agata-manutencao.timer", json.loads(corpo_status)["sem_leitura"])
+
+    def test_capacidades_e_lacunas_nao_repetem_a_consulta_em_seguida(self):
+        vazio = {"schema_version": 1, "state": "ok", "items": []}
+        panel._CACHE_CURTO.clear()
+        try:
+            with mock.patch.object(panel, "_capacidades_snapshot", return_value=vazio) as capacidades, \
+                    mock.patch.object(panel, "_lacunas_snapshot", return_value=vazio) as lacunas:
+                for _ in range(2):
+                    self.assertEqual(self.request("GET", "/api/capacidades")[0], 200)
+                    self.assertEqual(self.request("GET", "/api/lacunas")[0], 200)
+            self.assertEqual((capacidades.call_count, lacunas.call_count), (1, 1))
+        finally:
+            panel._CACHE_CURTO.clear()
+
+    def test_cache_curto_tem_lock_por_nome_e_rota_lenta_nao_segura_a_outra(self):
+        # C6 (16/11/2026): cada nome de cache tem o seu lock; a produção lenta de um nome não prende o outro.
+        self.assertIsNot(panel._lock_do_cache_curto("teste-a"), panel._lock_do_cache_curto("teste-b"))
+        self.assertIs(panel._lock_do_cache_curto("teste-a"), panel._lock_do_cache_curto("teste-a"))
+        entrou, sai, rapida = threading.Event(), threading.Event(), {}
+
+        def lenta():
+            entrou.set()
+            sai.wait(5)
+            return {"lenta": True}
+
+        def outra_rota():
+            rapida["valor"] = panel._cached_curto("teste-rapida", lambda: {"rapida": True})
+
+        fio_lenta = threading.Thread(target=panel._cached_curto, args=("teste-lenta", lenta), daemon=True)
+        fio_lenta.start()
+        try:
+            self.assertTrue(entrou.wait(5))
+            fio_rapida = threading.Thread(target=outra_rota, daemon=True)
+            fio_rapida.start()
+            fio_rapida.join(2)
+            self.assertFalse(fio_rapida.is_alive(), "a rota rápida ficou presa atrás da lenta")
+            self.assertEqual(rapida.get("valor"), {"rapida": True})
+        finally:
+            sai.set()
+            fio_lenta.join(5)
+            for chave in ("teste-lenta", "teste-rapida"):
+                panel._CACHE_CURTO.pop(chave, None)
+
     def test_get_conversa_salva_devolve_schema_e_id_e_recusa_ausente(self):
         with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
             conversa_id = "0123456789ab"
@@ -290,6 +449,18 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 202)
             self.assertEqual(self.request("POST", "/api/abrir", json.dumps({"alvo": "obsidian"}), base)[0], 429)
             self.assertEqual(popen.call_count, 1)
+
+    def test_abrir_librechat_responde_400_e_nao_enfileira_foco(self):
+        # LibreChat saiu do painel (07/11/2026, atalho de ligar o sistema): o alvo fica fora da lista.
+        base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}
+        panel.FOCOS_PENDENTES.clear()
+        try:
+            code, body, _ = self.request("POST", "/api/abrir", json.dumps({"alvo": "librechat"}), base)
+            self.assertEqual(code, 400)
+            self.assertIn(b"destino fora da lista", body)
+            self.assertEqual(list(panel.FOCOS_PENDENTES), [])
+        finally:
+            panel.FOCOS_PENDENTES.clear()
 
     def test_abrir_conselho_pede_so_os_conselheiros_que_faltam(self):
         base = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "application/json"}

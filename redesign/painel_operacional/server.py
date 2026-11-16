@@ -98,7 +98,20 @@ INTEGRATION_ALLOWLIST = (
     "piper-tts.service", "openvino-whisper.service", "openvino-embeddings.service",
     "obsidian-ro-proxy.service", "discord-mcp.service", "navegador-mcp.service",
     "laya-roteador.service", "seth-escriba.service",
+    "painel-operacional.service", "agata-vigia@claude.service",
 )
+# Rótulos legíveis de unidades da allowlist que o front ainda não nomeia (S5, 16/11/2026).
+INTEGRATION_ROTULOS = {"painel-operacional.service": "Painel operacional", "agata-vigia@claude.service": "Vigia do Claude"}
+# Estado "ausente" (LoadState not-found): a unidade não existe no escopo do usuário (systemctl --user). Distinto de inactive e de unknown.
+TEXTO_UNIDADE_AUSENTE = "unidade não existe no escopo do usuário desta Máquina"
+# Cache curto de /api/capacidades e /api/lacunas (S6): não roda systemctl a cada chamada.
+CACHE_CURTO_SECONDS = 10
+_CACHE_CURTO: dict = {}
+# Um lock por nome de cache (C6, 16/11/2026): uma rota lenta não segura a outra. O mestre só protege o dicionário de locks.
+_CACHE_CURTO_LOCKS: dict = {}
+_CACHE_CURTO_MESTRE = threading.Lock()
+# Gateway da Seth (S1): a conversa do painel é o gateway em 127.0.0.1:20126; o chat antigo saiu do sistema em 07/11/2026.
+GATEWAY_SETH_BASE = ("127.0.0.1", 20126)
 _STATUS_LOCK = threading.Lock()
 _WIKI_LOCK = threading.BoundedSemaphore(1)
 _RELAY_LOCK = threading.BoundedSemaphore(1)
@@ -461,6 +474,12 @@ def _service_snapshot(unit: str) -> dict:
 
     active = values["ActiveState"]
     load = values["LoadState"]
+    if load == "not-found":
+        return {
+            "unit": unit, "state": "ausente", "load_state": load, "active_state": active,
+            "sub_state": values["SubState"], "source": "seth-verificador", "source_ref": "unidade:" + unit,
+            "observed_at": observed_at, "fresh_until": fresh_until, "error": TEXTO_UNIDADE_AUSENTE,
+        }
     state = "ok" if load == "loaded" and active == "active" else "warning"
     return {
         "unit": unit,
@@ -478,7 +497,8 @@ def _service_snapshot(unit: str) -> dict:
 def _overall_state(states: list[str]) -> str:
     if any(state == "unknown" for state in states):
         return "unknown"
-    if any(state == "warning" for state in states):
+    # "ausente" conta como warning: antes desta mudança, unidade não encontrada já caía em warning.
+    if any(state in ("warning", "ausente") for state in states):
         return "warning"
     return "ok"
 
@@ -497,17 +517,22 @@ def _timer_snapshot(unit: str) -> dict:
              "--property=Id,LoadState,ActiveState,SubState,NextElapseUSecRealtime,LastTriggerUSec",
              "--", unit], capture_output=True, text=True, timeout=5, check=False,
         )
-        if proc.returncode != 0 or len(proc.stdout) > 8192:
+        if len(proc.stdout) > 8192:
             raise ValueError("consulta ao timer indisponível")
         values = _parse_pairs(proc.stdout)
-        if values.get("Id") != unit or values.get("LoadState") != "loaded" or not values.get("ActiveState"):
-            raise ValueError("timer ausente ou resposta incompleta")
-        result.update({
-            "state": "ok" if values["ActiveState"] == "active" else "warning",
-            "active_state": values["ActiveState"], "sub_state": values.get("SubState", ""),
-            "next_trigger": values.get("NextElapseUSecRealtime") or None,
-            "last_trigger": values.get("LastTriggerUSec") or None,
-        })
+        if values.get("LoadState") == "not-found":
+            result.update({"state": "ausente", "error": TEXTO_UNIDADE_AUSENTE})
+        else:
+            if proc.returncode != 0:
+                raise ValueError("consulta ao timer indisponível")
+            if values.get("Id") != unit or values.get("LoadState") != "loaded" or not values.get("ActiveState"):
+                raise ValueError("timer ausente ou resposta incompleta")
+            result.update({
+                "state": "ok" if values["ActiveState"] == "active" else "warning",
+                "active_state": values["ActiveState"], "sub_state": values.get("SubState", ""),
+                "next_trigger": values.get("NextElapseUSecRealtime") or None,
+                "last_trigger": values.get("LastTriggerUSec") or None,
+            })
     except (OSError, subprocess.TimeoutExpired, ValueError):
         result["error"] = "estado do timer indisponível"
     service = TIMER_SERVICES[unit]
@@ -519,16 +544,19 @@ def _timer_snapshot(unit: str) -> dict:
              "--", service], capture_output=True, text=True, timeout=5, check=False,
         )
         values = _parse_pairs(proc.stdout)
-        if proc.returncode != 0 or len(proc.stdout) > 8192 or values.get("Id") != service or values.get("LoadState") != "loaded":
-            raise ValueError("estado da execução indisponível")
-        result_code = values.get("Result")
-        ended_at = values.get("ExecMainExitTimestamp") or None
-        if result_code == "exec-condition":
-            execution["state"] = "skipped"
-        elif result_code and ended_at:
-            execution["state"] = "observed"
-        execution.update({"result": result_code or None, "ended_at": ended_at,
-                          "active_state": values.get("ActiveState") or None})
+        if values.get("LoadState") == "not-found":
+            execution.update({"state": "ausente", "error": TEXTO_UNIDADE_AUSENTE})
+        else:
+            if proc.returncode != 0 or len(proc.stdout) > 8192 or values.get("Id") != service or values.get("LoadState") != "loaded":
+                raise ValueError("estado da execução indisponível")
+            result_code = values.get("Result")
+            ended_at = values.get("ExecMainExitTimestamp") or None
+            if result_code == "exec-condition":
+                execution["state"] = "skipped"
+            elif result_code and ended_at:
+                execution["state"] = "observed"
+            execution.update({"result": result_code or None, "ended_at": ended_at,
+                              "active_state": values.get("ActiveState") or None})
     except (OSError, subprocess.TimeoutExpired, ValueError):
         execution["error"] = "resultado da unidade indisponível"
     result["execution"] = execution
@@ -580,10 +608,12 @@ def _maintenance_tasks() -> dict:
 
 
 def _chat_snapshot() -> dict:
-    result = {"state": "unknown", "source": "LibreChat /health", "source_ref": "127.0.0.1:3080/health"}
-    connection = http.client.HTTPConnection("127.0.0.1", 3080, timeout=3)
+    """Conversa com a Seth: GET na raiz do gateway (127.0.0.1:20126). Só mede que responde; não prova a conversa inteira."""
+    host, porta = GATEWAY_SETH_BASE
+    result = {"state": "unknown", "source": "seth-gateway", "source_ref": f"{host}:{porta}/"}
+    connection = http.client.HTTPConnection(host, porta, timeout=3)
     try:
-        connection.request("GET", "/health")
+        connection.request("GET", "/")
         response = connection.getresponse()
         result.update({"state": "ok" if response.status == 200 else "warning", "http_status": response.status})
     except (OSError, TimeoutError, http.client.HTTPException):
@@ -612,7 +642,8 @@ def _substituidas(directory: Path) -> dict:
 # (27/10/2026) Capacidades do painel com leitura real. Só sondas de leitura: estado de unidades e HTTP local.
 # Capacidade sem sonda (documento) não tem estado, e não é listada aqui.
 CAPACIDADES = {
-    "conversar": {"units": ["seth-gateway.service"], "http": ["http://127.0.0.1:3080/"]},
+    "conversar": {"units": ["seth-gateway.service"], "http": ["http://127.0.0.1:20126/"],
+                  "fonte": "seth-gateway · 127.0.0.1:20126"},
     "ouvir": {"units": ["piper-tts.service"], "http": []},
     "buscar": {"units": ["seth-verificador.service"], "http": []},
     "verificar": {"units": ["seth-verificador.service"], "http": ["http://127.0.0.1:20141/"]},
@@ -623,16 +654,26 @@ CAPACIDADES = {
 }
 
 
-def _unidade_ativa(unit: str) -> bool | None:
+def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
+    """'ativa' ou 'inativa' se a unidade existe; 'ausente' se o systemd diz not-found; None se não deu para ler.
+    `sistema=True` consulta a unidade de sistema (sem --user)."""
+    comando = ["/usr/bin/systemctl"] + ([] if sistema else ["--user"])
     try:
-        proc = subprocess.run(["/usr/bin/systemctl", "--user", "show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
+        proc = subprocess.run(comando + ["show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
                               capture_output=True, text=True, timeout=5, check=False)
     except (OSError, subprocess.TimeoutExpired):
         return None
     valores = _parse_pairs(proc.stdout)
+    if valores.get("LoadState") == "not-found":
+        return "ausente"
     if valores.get("LoadState") != "loaded":
         return None
-    return valores.get("ActiveState") == "active"
+    return "ativa" if valores.get("ActiveState") == "active" else "inativa"
+
+
+def _unidade_ativa(unit: str) -> bool | None:
+    estado = _estado_systemd(unit)
+    return None if estado in (None, "ausente") else estado == "ativa"
 
 
 def _http_ok(url: str) -> bool:
@@ -659,24 +700,11 @@ def _capacidades_snapshot() -> dict:
             partes.append(f"{u} {'ativo' if e else ('inativo ou ausente' if e is False else 'sem leitura')}")
         for h, e in zip(sondas["http"], estados[len(sondas["units"]):]):
             partes.append(f"{h} {'responde 200' if e else 'sem resposta 200'}")
-        itens.append({"id": nome, "state": estado, "source": "systemctl --user show; HTTP local",
+        itens.append({"id": nome, "state": estado, "source": sondas.get("fonte", "systemctl --user show; HTTP local"),
                       "source_ref": ", ".join(sondas["units"] + sondas["http"]),
                       "evidencia": "Medido agora (" + observed_at + "): " + "; ".join(partes) + ".",
                       "observed_at": observed_at, "fresh_until": fresh_until})
     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until, "items": itens}
-
-
-def _unidade_de_sistema_ativa(unit: str) -> bool | None:
-    """Unidade de sistema (sem --user), para units como ollama.service que o canon declara no boot."""
-    try:
-        proc = subprocess.run(["/usr/bin/systemctl", "show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
-                              capture_output=True, text=True, timeout=5, check=False)
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    valores = _parse_pairs(proc.stdout)
-    if valores.get("LoadState") != "loaded":
-        return None
-    return valores.get("ActiveState") == "active"
 
 
 def _porta_responde(porta: int) -> bool:
@@ -720,12 +748,14 @@ def _lacunas_snapshot() -> dict:
             vistas.add(unit); declaradas += 1
             if _tipo_unidade_usuario(unit) == "oneshot":
                 continue
-            ativo = _unidade_ativa(unit)
-            if ativo is None:
-                ativo = _unidade_de_sistema_ativa(unit)
-            if ativo is None:
-                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (ausente ou não consultada)", "fonte": "ESTADO.md · Serviços (boot)"})
-            elif ativo is False:
+            estado = _estado_systemd(unit)
+            if estado in (None, "ausente"):
+                estado = _estado_systemd(unit, sistema=True)
+            if estado == "ausente":
+                itens.append({"nome": unit, "state": "ausente", "motivo": TEXTO_UNIDADE_AUSENTE, "fonte": "ESTADO.md · Serviços (boot)"})
+            elif estado is None:
+                itens.append({"nome": unit, "motivo": "sem leitura do systemd agora (não consultada)", "fonte": "ESTADO.md · Serviços (boot)"})
+            elif estado == "inativa":
                 itens.append({"nome": unit, "motivo": "declarada no boot e inativa agora", "fonte": "ESTADO.md · Serviços (boot)"})
         if not linha.lstrip().startswith("- "):
             continue
@@ -855,6 +885,9 @@ def _details_snapshot() -> dict:
     """Dados menos frequentes, coletados apenas quando uma tela os solicita."""
     with ThreadPoolExecutor(max_workers=3) as pool:
         integrations = list(pool.map(_service_snapshot, INTEGRATION_ALLOWLIST))
+    for item in integrations:
+        if item["unit"] in INTEGRATION_ROTULOS:
+            item["rotulo"] = INTEGRATION_ROTULOS[item["unit"]]
     observed_at, fresh_until = _reading_window()
     memory = {"state": "unknown", "source": "memoria/obsidian/",
               "observed_at": observed_at, "fresh_until": fresh_until}
@@ -882,6 +915,16 @@ def _cached_details() -> dict:
         return _DETAILS_CACHE
 
 
+def _fontes_sem_leitura(services: list, timers: list, git: dict, chat: dict,
+                        maintenance: dict, proposals: dict, models: dict) -> list[str]:
+    """Nomes legíveis das fontes cujo estado é unknown ou ausente (S2). Lista vazia = todas lidas."""
+    fontes = [(item["unit"], item) for item in services]
+    fontes += [(item["unit"], item) for item in timers]
+    fontes += [("Git local", git), ("Conversa com a Seth (gateway)", chat), ("Tarefas de manutenção", maintenance),
+               ("Propostas", proposals), ("Modelos (registro de capacidades)", models)]
+    return [nome for nome, leitura in fontes if leitura.get("state") in ("unknown", "ausente")]
+
+
 def collect() -> dict:
     # Consultas fixas e limitadas em paralelo; uma fonte lenta não serializa as demais.
     with ThreadPoolExecutor(max_workers=3) as pool:
@@ -895,6 +938,9 @@ def collect() -> dict:
         chat = chat_future.result()
     observed_at, fresh_until = _reading_window()
     overall = _overall_state([item["state"] for item in services])
+    maintenance = _maintenance_tasks()
+    proposals = _proposal_snapshot()
+    models = _model_snapshot()
     return {
         "schema_version": 1,
         "state": overall,
@@ -907,9 +953,10 @@ def collect() -> dict:
         "git": git,
         "timers": timers,
         "chat": chat,
-        "maintenance": _maintenance_tasks(),
-        "proposals": _proposal_snapshot(),
-        "models": _model_snapshot(),
+        "maintenance": maintenance,
+        "proposals": proposals,
+        "models": models,
+        "sem_leitura": _fontes_sem_leitura(services, timers, git, chat, maintenance, proposals, models),
     }
 
 
@@ -924,6 +971,27 @@ def _cached_status() -> dict:
         _STATUS_CACHE = collect()
         _STATUS_CACHE_AT = time.monotonic()
         return _STATUS_CACHE
+
+
+def _lock_do_cache_curto(nome: str):
+    """Lock próprio de cada nome de cache (C6): criado sob o lock mestre, na primeira vez que o nome aparece."""
+    with _CACHE_CURTO_MESTRE:
+        lock = _CACHE_CURTO_LOCKS.get(nome)
+        if lock is None:
+            lock = _CACHE_CURTO_LOCKS[nome] = threading.Lock()
+        return lock
+
+
+def _cached_curto(nome: str, produzir) -> dict:
+    """Mesmo padrão de _cached_status, por nome, com CACHE_CURTO_SECONDS (S6): não roda systemctl a cada GET."""
+    with _lock_do_cache_curto(nome):
+        agora = time.monotonic()
+        salvo = _CACHE_CURTO.get(nome)
+        if salvo is not None and agora - salvo[0] < CACHE_CURTO_SECONDS:
+            return salvo[1]
+        valor = produzir()
+        _CACHE_CURTO[nome] = (time.monotonic(), valor)
+        return valor
 
 
 def _wiki_search(query: str, mode: str) -> dict:
@@ -979,7 +1047,6 @@ ABRIR_PROVEDORES = {
     "qwen": "https://chat.qwen.ai/",
     "mistral": "https://chat.mistral.ai/",
     "kimi": "https://www.kimi.ai/en",
-    "librechat": "http://127.0.0.1:3080/",
     "omniroute": "http://127.0.0.1:20128/",
 }
 # Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
@@ -1137,10 +1204,10 @@ class Handler(BaseHTTPRequestHandler):
             body = json.dumps(dados_frentes, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/lacunas":
-            body = json.dumps(_lacunas_snapshot(), ensure_ascii=False).encode("utf-8")
+            body = json.dumps(_cached_curto("lacunas", _lacunas_snapshot), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/capacidades":
-            body = json.dumps(_capacidades_snapshot(), ensure_ascii=False).encode("utf-8")
+            body = json.dumps(_cached_curto("capacidades", _capacidades_snapshot), ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/medicoes/estado":
             observed_at, fresh_until = _reading_window()
@@ -2022,7 +2089,7 @@ def _selftest() -> int:
         return f"$ {command} (exit=0)\n\n" + body
 
     _verify = fake_verify
-    _chat_snapshot = lambda: {"state": "unknown"}
+    _chat_snapshot = lambda: {"state": "unknown", "source": "seth-gateway", "source_ref": "127.0.0.1:20126/"}
     _timer_snapshot = lambda unit: {"unit": unit, "state": "unknown"}
     try:
         snapshot = collect()
@@ -2054,6 +2121,9 @@ def _selftest() -> int:
     assert snapshot["state"] == "ok"
     assert snapshot["git"]["state"] == "warning"
     assert snapshot["commit"] == "abc123def456"
+    assert snapshot["chat"]["source"] == "seth-gateway" and "127.0.0.1:20126" in snapshot["chat"]["source_ref"]
+    assert "Conversa com a Seth (gateway)" in snapshot["sem_leitura"]
+    assert _overall_state(["ok", "ausente"]) == "warning"
     for reading in [*snapshot["services"], snapshot["git"]]:
         observed = datetime.fromisoformat(reading["observed_at"])
         valid_until = datetime.fromisoformat(reading["fresh_until"])

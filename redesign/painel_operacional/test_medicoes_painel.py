@@ -97,6 +97,33 @@ class MedicoesTests(unittest.TestCase):
         d = json.loads(corpo)
         self.assertEqual((status, d["modelos"], d["recuperacao"]["n"]), (200, ["m:1"], 3))
 
+    def test_modelos_sem_leitura_devolvem_lista_vazia_e_motivo_sem_detalhe_da_rede(self):
+        with mock.patch.object(med.urllib.request, "urlopen", side_effect=OSError("conexão recusada na porta 11434")):
+            d = med.estado()
+        self.assertEqual(d["modelos"], [])
+        self.assertEqual(d["modelos_estado"], "sem_leitura")
+        self.assertTrue(d["modelos_motivo"])
+        # C4 (16/11/2026): o motivo não traz host nem porta da conexão, só o que aconteceu.
+        self.assertNotIn("127.0.0.1", d["modelos_motivo"])
+        self.assertNotIn("11434", d["modelos_motivo"])
+        self.assertNotIn("recusada", json.dumps(d))
+        self.assertNotIn("11434", json.dumps(d))
+
+    def test_modelos_lidos_marcam_ok_e_motivo_vazio(self):
+        resposta = mock.MagicMock()
+        resposta.__enter__.return_value.read.return_value = json.dumps({"models": [{"name": "qwen3:4b"}, {"name": "nomic-embed:v1"}]}).encode()
+        with mock.patch.object(med.urllib.request, "urlopen", return_value=resposta):
+            d = med.estado()
+        self.assertEqual(d["modelos"], ["qwen3:4b"])
+        self.assertEqual((d["modelos_estado"], d["modelos_motivo"]), ("ok", None))
+
+    def test_estado_http_mostra_modelos_sem_leitura(self):
+        with mock.patch.object(med.urllib.request, "urlopen", side_effect=OSError("indisponível")):
+            status, corpo = self.pedir("GET", "/api/medicoes/estado", None, {"Sec-Fetch-Site": "same-origin"})
+        d = json.loads(corpo)
+        self.assertEqual((status, d["modelos"], d["modelos_estado"]), (200, [], "sem_leitura"))
+        self.assertTrue(d["modelos_motivo"])
+
     def test_indicador_de_recuperacao_usa_a_medicao_salva(self):
         qual = panel.qualidade_llm
         Path(self.dir.name, "recuperacao.json").write_text(json.dumps({"n": 3, "recall": {"1": 1.0, "5": 1.0}, "mrr": 1.0}), encoding="utf-8")
