@@ -5,6 +5,10 @@ Compila redesign/rust/egress (cargo build --release), roda `egress ip` em cada
 caso e compara o veredito (bloqueia ou não) com politica_egress._ip_bloqueado_py.
 Também prova que, com AGATA_EGRESS_RUST, _ip_bloqueado nunca afrouxa.
 Sem cargo: SKIP com código 0 só se AGATA_EGRESS_RUST_OPCIONAL=1; senão falha.
+
+Robustez (16/11/2026): a compilação roda com `nice -n 15` e CARGO_BUILD_JOBS (padrão 2, sobrescrevível pela variável).
+Pula a compilação quando os binários de target/release estão em dia (scripts/egress_em_dia.py).
+`--sem-compilar` nunca compila: usa o binário que já existe (falha se faltar).
 """
 import os, shutil, subprocess, sys
 from pathlib import Path
@@ -12,6 +16,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
 import politica_egress as pe  # noqa: E402
+import egress_em_dia as ed  # noqa: E402
 
 CASOS = ["1.1.1.1", "8.8.8.8", "127.0.0.1", "10.0.0.5", "172.16.0.1", "192.168.1.1",
          "169.254.169.254", "0.0.0.0", "100.64.0.1", "224.0.0.1", "255.255.255.255",
@@ -51,13 +56,29 @@ def _testar_socks5(binario: Path) -> bool:
     return ok
 
 
+def _compilar(crate: Path) -> None:
+    """cargo build --release com nice -n 15 e CARGO_BUILD_JOBS (padrão 2; a variável sobrescreve)."""
+    env = dict(os.environ, CARGO_BUILD_JOBS=os.environ.get("CARGO_BUILD_JOBS", "2"))
+    subprocess.run(["nice", "-n", "15", "cargo", "build", "--release", "--quiet"], cwd=crate, check=True, env=env)
+
+
 def main() -> int:
-    if not shutil.which("cargo"):
-        if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
-            print("SKIP  cargo ausente"); return 0
-        print("FALHA cargo ausente"); return 1
     crate = RAIZ / "redesign/rust/egress"
-    subprocess.run(["cargo", "build", "--release", "--quiet"], cwd=crate, check=True)
+    if "--sem-compilar" in sys.argv[1:]:
+        faltam = [b.name for b in ed.binarios(crate) if not b.is_file()]
+        if faltam:
+            if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
+                print(f"SKIP  --sem-compilar sem binário ({', '.join(faltam)})"); return 0
+            print(f"FALHA --sem-compilar sem binário ({', '.join(faltam)}); rode scripts/instalar_egress_rust.sh"); return 1
+        print("PULA  compilação (--sem-compilar): usando os binários de target/release")
+    elif ed.motivo(crate) == "":
+        print("PULA  compilação: binários de target/release em dia")
+    else:
+        if not shutil.which("cargo"):
+            if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
+                print("SKIP  cargo ausente"); return 0
+            print("FALHA cargo ausente"); return 1
+        _compilar(crate)
     binario = str(crate / "target/release/egress")
     ok = True
     for ip in CASOS:

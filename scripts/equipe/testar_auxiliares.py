@@ -19,6 +19,59 @@ def carregar(nome):
     return m
 
 
+def _gh_falso(ap, respostas, fn):
+    """Troca ap.sh por um falso: cada chamada devolve a próxima saída (a última se repete). Sem rede, sem gh real."""
+    fila, chamadas = list(respostas), []
+    def falso(cwd, *a, ok=True, **k):
+        chamadas.append(a)
+        out = fila.pop(0) if len(fila) > 1 else fila[0]
+        return subprocess.CompletedProcess(a, 0, stdout=out, stderr="")
+    orig = ap.sh; ap.sh = falso
+    try:
+        return fn(), len(chamadas)
+    finally:
+        ap.sh = orig
+
+
+def casos_ci(ap):
+    """aplicar.py: espera e veredito dos checks do PR. Caso de 16/11/2026 (PR #1004): CodeQL 'skipping' e Analyze (rust) 'pending'
+    fizeram o aplicar sair com exit 1 sem juntar. Relógio falso: a espera não dorme de verdade."""
+    base = {"Analyze (actions)": "pass", "fiscal-p8": "pass", "suite-adversarial": "pass",
+            "Analyze (javascript-typescript)": "pass", "Analyze (python)": "pass"}
+    def j(d): return json.dumps([{"name": n, "bucket": b} for n, b in d.items()])
+    def espera(respostas):
+        t = [0.0]
+        return _gh_falso(ap, respostas, lambda: ap.esperar_ci("/x", "1", dormir=lambda s: t.__setitem__(0, t[0] + s), relogio=lambda: t[0]))
+    out = []
+    (r, n) = espera([j({**base, "CodeQL": "skipping", "Analyze (rust)": "pending"}), j({**base, "CodeQL": "skipping", "Analyze (rust)": "pass"})])
+    out.append(("aplicar: #1004 (rust pendente, CodeQL skipping): espera e junta quando tudo passa", r[0] is True and n == 2))
+    (r, n) = espera([j({**base, "CodeQL": "fail", "Analyze (rust)": "pending"}), j({**base, "CodeQL": "fail", "Analyze (rust)": "fail"})])
+    out.append(("aplicar: falha com check ainda pendente espera o fim e só então recusa", r[0] is False and n == 2))
+    (r, n) = espera([j({**base, "CodeQL": "skipping", "Analyze (rust)": "fail"})])
+    out.append(("aplicar: qualquer check em fail recusa (rust)", r[0] is False and n == 1))
+    (r, n) = espera([j({**base, "CodeQL": "fail"})])
+    out.append(("aplicar: CodeQL em fail recusa mesmo com obrigatórios em pass", r[0] is False))
+    (r, n) = espera([j({**base, "CodeQL": "skipping"})])
+    out.append(("aplicar: skipping fora dos obrigatórios não impede juntar", r[0] is True and n == 1))
+    (r, n) = espera([j({**base, "fiscal-p8": "skipping", "CodeQL": "skipping"})])
+    out.append(("aplicar: obrigatório em skipping não junta", r[0] is False and n == 1))
+    (r, n) = espera([j({**base, "Analyze (rust)": "action_required"})])
+    out.append(("aplicar: bucket desconhecido recusa (falha fechada)", r[0] is False and n == 1))
+    (r, n) = espera([j({k: v for k, v in base.items() if k != "suite-adversarial"})])
+    out.append(("aplicar: obrigatório ausente espera até o prazo e não junta", r[0] is False and "timeout" in r[1].get("erro", "")))
+    (r, n) = espera(["erro de rede no gh"])
+    out.append(("aplicar: saída ilegível do gh não junta", r[0] is False and "timeout" in r[1].get("erro", "")))
+    (r, n) = espera(["[]"])
+    out.append(("aplicar: nenhum check não junta", r[0] is False))
+    (cs, n) = _gh_falso(ap, [j({"fiscal-p8": "pass", "CodeQL": "skipping"})], lambda: ap.ler_checks("/x", "1"))
+    out.append(("aplicar: ler_checks converte o JSON do gh em nome -> bucket", cs == {"fiscal-p8": "pass", "CodeQL": "skipping"}))
+    out.append(("aplicar: ler_checks de saída ilegível devolve {} (sem decisão)", _gh_falso(ap, ["lixo"], lambda: ap.ler_checks("/x", "1"))[0] == {}))
+    out.append(("aplicar: veredito só com skipping (nenhum pass) recusa", ap.veredito_checks({"fiscal-p8": "skipping", "suite-adversarial": "skipping"}) == "recusar"))
+    out.append(("aplicar: veredito com obrigatórios em pass e CodeQL ausente junta", ap.veredito_checks({"fiscal-p8": "pass", "suite-adversarial": "pass"}) == "juntar"))
+    out.append(("aplicar: veredito com check pendente espera", ap.veredito_checks({**base, "Analyze (rust)": "pending"}) == "esperar"))
+    return out
+
+
 def bloco(autor, minutos, prox):
     t = (datetime.datetime.now().astimezone() - datetime.timedelta(minutes=minutos)).isoformat(timespec="seconds")
     return f"## {autor}-2026-10-28-x\n- Hora: {t}\n- Assunto: a\n\ntexto\n\nPróximo responsável: {prox}\n"
@@ -101,6 +154,7 @@ def main():
     amb2 = dict(os.environ, EQUIPE_CANAL=os.path.join(iso2, "canal.md"), EQUIPE_REPO=iso2, EQUIPE_PARAR=os.path.join(iso2, "parar"))
     r2 = subprocess.run(["bash", vg, "claude", "1", "--uma", "3"], capture_output=True, text=True, timeout=30, env=amb2)
     casos.append(("vigia.sh: canal só com blocos meus não quebra a conta", r2.returncode == 0 and "SEM EVENTO" in r2.stdout and "erro" not in r2.stderr.lower()))
+    casos += casos_ci(ap)
     for n, ok in casos:
         print(("PASS  " if ok else "FALHA ") + n)
     ruins = [n for n, ok in casos if not ok]
