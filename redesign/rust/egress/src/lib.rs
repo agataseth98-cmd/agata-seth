@@ -277,3 +277,4 @@ fn host_e_porta(netloc: &str) -> (&str, Option<&str>) {
 }
 
 pub mod camada2;
+pub mod socks5;
