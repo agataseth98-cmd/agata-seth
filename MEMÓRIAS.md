@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3711870aa2a83a2296e4ea9cf49b210e1f5ed624
-  Escrito em: 16/11/2026 18:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b
+  Escrito em: 16/11/2026 19:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8df43f4c9d68bd84e4f0b8b06732a3ccabf3730b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1025) DIÁRIO — 16/11/2026 · **Aplicada higiene-16-11 (assinada pelo Humano em 16/11): o CI local passa a rodar a suíte adversarial, e saem do texto vivo as menções ao chat antigo e ao Goose.** O CI local roda agora os 29 passos do check obrigatório da suíte adversarial, com o Python do sistema, e os passos de YAML deixam de depender de variável: de 59 para 88 passos. O arquivo de diretrizes de todos os modelos deixa de dizer que a Seth fala pelo chat antigo. As pastas históricas do chat antigo e do Goose ganham aviso no topo com a data de saída. No arquivo de portas de entrada só a descrição de três linhas mudou; o que a máquina lê ficou igual. A lista de exceções do teste sem-goose acompanha as contagens. Motivo: a proposta do painel de 16/11 passou no CI local e foi reprovada pela suíte adversarial no PR de aplicação, o que custou uma segunda assinatura. Medido antes de propor: CI local com 88 passos e nenhuma falha; os dois testes de ausência passando antes e depois. Não medido: os passos novos sob isolamento de rede. Ficou fora: a divergência de texto entre a spec-mãe e a de conexões, que o gate de sincronia só aceita em proposta própria; o perfil de capacidades de 25/10, que precisa ser regerado. Correção de estado: o painel-funcional-r2-16-11 já está aplicado desde a entrada 1023; o bloco de hoje do arquivo de estado que ainda falava em assinatura pendente ficou superado.
+Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local com 88 passos, checks do PR e os dois testes de ausência · Autorização: Humano — "1-faça, 2-faça, 3-faça, 4-faça"
+
 (1024) DIÁRIO — 16/11/2026 · **Proposta higiene-16-11: o CI local passa a rodar a suíte adversarial, e saem do texto vivo as menções ao chat antigo e ao Goose.** O CI local (`scripts/ci_sdd_local.sh`) passa a rodar os 29 passos do job suite-adversarial, com o Python do sistema, e os dois passos de YAML deixam de depender de variável: de 59 para 88 passos. AGENTS.md deixa de dizer que a Seth fala pelo chat antigo; os README das pastas do chat antigo e do Goose ganham aviso de pasta histórica com a data de saída de 07/11/2026; em config/portas-de-entrada.txt só a descrição de três linhas muda, e a lista de exceções do teste sem-goose acompanha as contagens. Ficou fora, por motivo: a divergência de prosa entre a spec-mãe e a spec de conexões (gate de sincronia; precisa de proposta própria), a frase equivalente em redesign/goose/AGENTS.md (arquivo histórico) e o perfil da Capivara de 25/10 (regenera pelo OmniRoute, não rodado); não medido: os 29 passos sob isolamento de rede.
 Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local com 88 passos e os dois testes de ausência · Autorização: Humano — "1-faça, 2-faça, 3-faça, 4-faça"
 

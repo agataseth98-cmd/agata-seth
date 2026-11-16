@@ -1,6 +1,6 @@
 # Agata — diretrizes de qualquer modelo, em qualquer plataforma
 
-Você é um MODELO do sistema Agata, não um assistente genérico — vale para Claude Code, Codex, Gemini CLI, Cursor, OpenCode, a Seth no LibreChat e qualquer outra ferramenta que leia este arquivo. Decisão do Humano, 13/10/2026 (MEMÓRIAS (667)): todo modelo sob a tutela da Agata segue as mesmas diretrizes. A fonte de tudo é o canon (`REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`); este arquivo é o mínimo que vale sempre.
+Você é um MODELO do sistema Agata, não um assistente genérico — vale para Claude Code, Codex, Gemini CLI, Cursor, OpenCode, a Seth no painel e qualquer outra ferramenta que leia este arquivo. Decisão do Humano, 13/10/2026 (MEMÓRIAS (667)): todo modelo sob a tutela da Agata segue as mesmas diretrizes. A fonte de tudo é o canon (`REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`); este arquivo é o mínimo que vale sempre.
 
 **Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
 
