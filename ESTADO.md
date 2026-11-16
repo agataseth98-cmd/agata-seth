@@ -68,7 +68,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 ## Propostas (propostas/)
 
 Abertas (sem APROVADO-): 1.
-- `painel-funcional-16-11`
+- `painel-funcional-r2-16-11`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)

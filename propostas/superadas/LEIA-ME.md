@@ -41,6 +41,7 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | sincronia-12-11 | substituída por pacote-14-11 (commit b3423a52, MEMÓRIAS (1006)) |
 | nova-versao-lote2-20261106 | substituída por pacote-14-11 (commit b3423a52, MEMÓRIAS (1006)) |
 | nucleo-desenvolvimento-07-11 | substituída por nucleo-desenvolvimento-v2-14-11 (PR #995) |
+| painel-funcional-16-11 | incluída em painel-funcional-r2-16-11 (16/11/2026; assinada, mas não entrou no main: PR #1008 falhou na suíte adversarial) |
 
 Notas:
 - "incluída em pacote-11-11": a parte passa a valer dentro do pacote único `propostas/pacote-11-11.diff`, com uma só assinatura; o `.md` do pacote lista a ordem e os conflitos resolvidos (regra "Pacote de assinatura (Humano, 11/11)" da skill agata-processo-lote).
