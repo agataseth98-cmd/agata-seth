@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1021) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-16-11: painel sem o chat antigo, com estados honestos e estilo consolidado.**
 (1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
 (1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinada pelo Humano em 16/11, 09:03): o teste de ponteiros lê só os arquivos rastreados pelo git.** O teste `test_nenhum_ponteiro_vivo_para_secao_que_saiu` deixa de percorrer o disco com `os.walk` quando há git: a lista vem de `git ls-files`, e arquivo solto fora do git (log, patch, cache) fica de fora. Sem git, volta ao percurso antigo. Só o arquivo `redesign/projeto_indice/tests/test_projeto_indice.py` muda.
 (1018) DIÁRIO — 16/11/2026 · **Aplicada socks5-rust-15-11 (assinada pelo Humano em 16/11, 08:22): SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O binário egress-socks5 (só biblioteca padrão) espelha egress_proxy.py: só CONNECT, sem autenticação, e recusa com status 2 destino cujo IP não é global. EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para o binário; se o binário faltar ou não subir, volta ao Python e avisa no stderr. A unit navegador-mcp.service liga AGATA_EGRESS_RUST e AGATA_EGRESS_RUST_SOCKS5 para ~/.local/bin. O CI rust-egress passa a cobrir egress_proxy.py.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (995) DIÁRIO — 12/11/2026 · **Proposta chat-voz-11-11 publicada: ouvir em partes, ditado e modo conversa no chat do painel (paridade com o LibreChat), sem alterar o canon.**
 (994) DIÁRIO — 12/11/2026 · **Pacote 11/11 aplicado com a assinatura do Humano: as seis propostas (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) entram no canon numa só aplicação.**
 (993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
-(992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção História no painel (somente leitura, com o botão Ouvir), pasta historia/ com o Texto 1 do Tomo I e quarentena P-8 para historia/.**
+(992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção His …
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista …
 (990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista …
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navega …

@@ -1,12 +1,16 @@
 # Onde estamos
 
-Atualizado em 12/11/2026.
+Atualizado em 16/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 16/11 (proposta painel-funcional-16-11)
+
+Proposta `painel-funcional-16-11`, com registro (1021), esperando a sua assinatura. O painel perde o chat antigo: a porta antiga passa a ser só leitura do gateway da Seth, e o endereço antigo de abrir é recusado. Cada fonte mostra o próprio estado (parada, sem leitura ou inexistente no seu escopo), e o estilo passa a usar um só conjunto de cores e tamanhos por tema. Assinatura só depois do merge deste PR: `bash scripts/aprovar.sh painel-funcional-16-11`, no terminal, sem `!`.
 
 ## Lotes em andamento (medido em 12/11/2026, 09h, base `origin/main` `3f1e9055`)
 
