@@ -6,6 +6,11 @@ After=network-online.target
 Type=simple
 ExecStart=%h/agata/redesign/mcp/navegador/.venv/bin/python %h/agata/redesign/mcp/navegador/servidor.py --http 20136
 Restart=on-failure
+# Camada Rust de egress (D6, 15/11/2026): segunda opinião na política e SOCKS5
+# do navegador. Binários instalados por scripts/instalar_egress_rust.sh; se
+# faltarem, o código volta ao Python sozinho (nunca afrouxa).
+Environment=AGATA_EGRESS_RUST=%h/.local/bin/agata-egress
+Environment=AGATA_EGRESS_RUST_SOCKS5=%h/.local/bin/agata-egress-socks5
 RestartSec=3
 # Baseline de hardening (item 6 do plano de mitigação da auditoria do
 # Marcos, MEMÓRIAS (437)) -- testado ao vivo com Playwright+Brave real sob

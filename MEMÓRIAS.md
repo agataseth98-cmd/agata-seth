@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c90c841b0100bfd39ef8de99141d71afed083294
-  Escrito em: 15/11/2026 16:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f7ed691d4be0c68ce11f47b51c7e685971cff5ac
+  Escrito em: 16/11/2026 08:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c90c841b0100bfd39ef8de99141d71afed083294/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c90c841b0100bfd39ef8de99141d71afed083294/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c90c841b0100bfd39ef8de99141d71afed083294/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c90c841b0100bfd39ef8de99141d71afed083294/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c90c841b0100bfd39ef8de99141d71afed083294/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f7ed691d4be0c68ce11f47b51c7e685971cff5ac/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f7ed691d4be0c68ce11f47b51c7e685971cff5ac/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f7ed691d4be0c68ce11f47b51c7e685971cff5ac/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f7ed691d4be0c68ce11f47b51c7e685971cff5ac/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f7ed691d4be0c68ce11f47b51c7e685971cff5ac/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1018) DIÁRIO — 16/11/2026 · **Aplicada socks5-rust-15-11 (assinada pelo Humano em 16/11, 08:22): SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O binário egress-socks5 (só biblioteca padrão) espelha egress_proxy.py: só CONNECT, sem autenticação, e recusa com status 2 destino cujo IP não é global. EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para o binário; se o binário faltar ou não subir, volta ao Python e avisa no stderr. A unit navegador-mcp.service liga AGATA_EGRESS_RUST e AGATA_EGRESS_RUST_SOCKS5 para ~/.local/bin. O CI rust-egress passa a cobrir egress_proxy.py.
+Medido na proposta (15/11): cargo test com 5 testes novos do SOCKS5 (39 no total); testar_egress_rust.py e testar_egress_proxy.py OK; curl pelo SOCKS5 Rust: example.com 200 e localhost recusado.
+Não medido na aplicação: o navegador real (Playwright + Brave) pelo SOCKS5 Rust. Exige scripts/instalar_egress_rust.sh, copiar a unit para ~/.config/systemd/user/ e reiniciar navegador-mcp.
+Reversão: git revert do commit de aplicação; sem os binários, o navegador já volta ao Python.
+Modelo: Claude Haiku 5.5 (Claude Code, subagente, na Máquina) · vetor: leitura do diff e da proposta; aplicar.py com verificador p8 (PODE APLICAR) e os três checks exigidos no head · Autorização: Humano — APROVADO-socks5-rust-15-11 (08:22, -0300); "Propor ligar" e "Agora" (15/11, na proposta).
+
 (1017) DIÁRIO — 15/11/2026 · **Proposta socks5-rust-15-11: SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O Humano escolheu ligar a segunda opinião do Rust nos serviços, fazer o SOCKS5 em Rust agora e encerrar o T2 sem avaliação às cegas (fica só o teste selado, em que os três braços passaram). O binário egress-socks5 espelha egress_proxy.py; EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para ele e volta ao Python sem ele; navegador-mcp.service liga as duas variáveis. Medido: 5 testes novos do SOCKS5 em Rust passando; curl pelo SOCKS5 Rust recebeu 200 de example.com e foi recusado em localhost. Não medido: o navegador real pelo SOCKS5 Rust. Claude Opus 5.5, Claude Code.
 
 (1016) DIÁRIO — 15/11/2026 · **Aplicada d6-rust-15-11 (assinada pelo Humano).** Camada Rust de egress como segunda opinião em scripts/politica_egress.py (AGATA_EGRESS_RUST, nunca afrouxa), workflow rust-egress com cargo test e paridade, e redesign/rust/* e redesign/painel_operacional/* na quarentena do P-8. Ligar a variável nos serviços fica para depois. Claude Opus 5.5, Claude Code.

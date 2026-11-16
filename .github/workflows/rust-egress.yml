@@ -12,6 +12,7 @@ on:
       - "redesign/rust/**"
       - "scripts/politica_egress.py"
       - "scripts/testar_egress_rust.py"
+      - "redesign/mcp/navegador/egress_proxy.py"
       - ".github/workflows/rust-egress.yml"
 
 jobs:

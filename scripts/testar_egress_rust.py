@@ -21,6 +21,36 @@ CASOS = ["1.1.1.1", "8.8.8.8", "127.0.0.1", "10.0.0.5", "172.16.0.1", "192.168.1
 RUST_MAIS_ESTRITO = {"224.0.0.1"}
 
 
+def _pedir(url: str, ip: bytes, porta: int) -> int:
+    import socket
+    host, p = url.rsplit("/", 1)[1].split(":")
+    with socket.create_connection((host, int(p)), timeout=5) as c:
+        c.sendall(b"\x05\x01\x00"); c.recv(2)
+        c.sendall(b"\x05\x01\x00\x01" + ip + porta.to_bytes(2, "big"))
+        return c.recv(10)[1]
+
+
+def _testar_socks5(binario: Path) -> bool:
+    """O binário real recusa loopback e rede privada com status 2, via EgressProxy."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ep", RAIZ / "redesign/mcp/navegador/egress_proxy.py")
+    ep = importlib.util.module_from_spec(spec); spec.loader.exec_module(ep)
+    os.environ["AGATA_EGRESS_RUST_SOCKS5"] = str(binario)
+    proxy = ep.EgressProxy().start()
+    ok = type(proxy).__name__ == "_EgressProxyRust"
+    try:
+        for ip in (b"\x7f\x00\x00\x01", b"\x0a\x00\x00\x05", b"\xa9\xfe\xa9\xfe"):
+            st = _pedir(proxy.url, ip, 80)
+            print(f"{'PASS' if st == 2 else 'FALHA'}  socks5 rust recusa {'.'.join(map(str, ip))} (status {st})")
+            ok = ok and st == 2
+    finally:
+        proxy.close()
+    os.environ["AGATA_EGRESS_RUST_SOCKS5"] = "/inexistente"
+    py = ep.EgressProxy(); ok = ok and type(py).__name__ == "_EgressProxyPython"; py.start(); py.close()
+    print(f"{'PASS' if ok else 'FALHA'}  socks5: Rust quando há binário, Python quando não há")
+    return ok
+
+
 def main() -> int:
     if not shutil.which("cargo"):
         if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
@@ -47,6 +77,7 @@ def main() -> int:
             print(f"FALHA {ip}: com a camada Rust ligada deveria bloquear"); ok = False
     os.environ["AGATA_EGRESS_RUST"] = "/inexistente/egress"
     ok = ok and pe._ip_bloqueado("1.1.1.1") is None
+    ok = _testar_socks5(crate / "target/release/egress-socks5") and ok
     print("PARIDADE OK" if ok else "PARIDADE FALHOU")
     return 0 if ok else 1
 
