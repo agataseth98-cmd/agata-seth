@@ -1,0 +1,157 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 596be1d7..9ff01b52 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,6 +1,6 @@
+ # Agata — diretrizes de qualquer modelo, em qualquer plataforma
+ 
+-Você é um MODELO do sistema Agata, não um assistente genérico — vale para Claude Code, Codex, Gemini CLI, Cursor, OpenCode, a Seth no LibreChat e qualquer outra ferramenta que leia este arquivo. Decisão do Humano, 13/10/2026 (MEMÓRIAS (667)): todo modelo sob a tutela da Agata segue as mesmas diretrizes. A fonte de tudo é o canon (`REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`); este arquivo é o mínimo que vale sempre.
++Você é um MODELO do sistema Agata, não um assistente genérico — vale para Claude Code, Codex, Gemini CLI, Cursor, OpenCode, a Seth no painel e qualquer outra ferramenta que leia este arquivo. Decisão do Humano, 13/10/2026 (MEMÓRIAS (667)): todo modelo sob a tutela da Agata segue as mesmas diretrizes. A fonte de tudo é o canon (`REGRAS.md`, `PROTOCOLOS.md`, `FALHAS.md`, `PROJETO.md`, `MEMÓRIAS.md`); este arquivo é o mínimo que vale sempre.
+ 
+ **Antes de propor, registrar ou auditar algo que toque o canon:** siga `PROMPT_CARREGAMENTO.md` inteiro (sincronize, leia o canon, abra com o bloco de prontidão). Tarefa só operacional e local dispensa a carga inteira; os limites abaixo valem sempre.
+ 
+diff --git a/config/portas-de-entrada.txt b/config/portas-de-entrada.txt
+index 43dd07f1..da31a7a0 100644
+--- a/config/portas-de-entrada.txt
++++ b/config/portas-de-entrada.txt
+@@ -4,9 +4,9 @@
+ # traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
+ # Conselho -- cache_conselho) ou importa o AGENTS.md.
+ # Plataforma nova = linha nova aqui. Formato: caminho|quem lê
+-AGENTS.md|Codex, Cursor, Goose e outras ferramentas que leem AGENTS.md
++AGENTS.md|Codex, Cursor e outras ferramentas que leem AGENTS.md
+ GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
+ CLAUDE.md|Claude Code (importa o AGENTS.md)
+ PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
+-redesign/router/seth_gateway.py|Seth e Goose (doutrina injetada pelo gateway)
+-redesign/goose/AGENTS.md|Goose (instruções globais, ~/.config/goose/AGENTS.md)
++redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)
++redesign/goose/AGENTS.md|instruções globais do Goose (~/.config/goose/AGENTS.md), que saiu do sistema em 07/11/2026; o arquivo fica até a decisão de remoção
+diff --git a/redesign/goose/README.md b/redesign/goose/README.md
+index c5000e08..c41ece33 100644
+--- a/redesign/goose/README.md
++++ b/redesign/goose/README.md
+@@ -1,5 +1,8 @@
+ # Goose — fallback do Claude Code no Agata (MEMÓRIAS (543))
+ 
++> Aviso (16/11/2026): pasta histórica. O Goose saiu do sistema em 07/11/2026 (`config/modelos-gratuitos.md`, linha 159).
++> O agente de terminal é o OpenCode (`redesign/systemd/seth-agente`, que usa `command -v opencode`).
++
+ Fonte versionada da configuração do Goose que muda comportamento. Runtime: `~/.config/goose/`.
+ Instalar/atualizar (depois de aplicada a proposta P-8):
+ 
+diff --git a/redesign/librechat/README.md b/redesign/librechat/README.md
+index f932c6cf..c7d3bbaa 100644
+--- a/redesign/librechat/README.md
++++ b/redesign/librechat/README.md
+@@ -1,5 +1,8 @@
+ # LibreChat -- lane de conversa da Seth
+ 
++> Aviso (16/11/2026): pasta histórica. O LibreChat saiu do sistema em 07/11/2026 (o atalho `seth` não o sobe; `redesign/systemd/seth`, linha 5).
++> A conversa com a Seth é pelo painel operacional (porta 20146; o atalho `seth` abre `$PAINEL/prototipo`). O gateway escuta em 127.0.0.1:20126.
++
+ Substituiu o Open WebUI em 03/09/2026 (MEMORIAS (313)). Frontend de conversa
+ informal, "estilo ChatGPT/Claude", apontado no `seth_gateway` (`:20126`).
+ Para agente/codigo é o OpenCode (`seth-agente`), no lugar do Goose desde a decisão de 07/11/2026.
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index ca75f5ce..89059f28 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -1,5 +1,6 @@
+ #!/usr/bin/env bash
+-# Roda localmente os mesmos passos do job `sdd` (.github/workflows/sdd.yml), na ordem, sem parar no primeiro erro.
++# Roda localmente os mesmos passos dos jobs `sdd` (.github/workflows/sdd.yml) e `suite-adversarial`
++# (.github/workflows/perimetro.yml, seção no fim), na ordem, sem parar no primeiro erro.
+ # Uso: bash scripts/ci_sdd_local.sh            (a partir da raiz do repositório)
+ # pytest: usa $PYTEST se definido; senão, o `pytest` do PATH. Não instala nada.
+ set -u
+@@ -13,6 +14,7 @@ passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK
+ 
+ if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
+ # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
++PATH_ORIGINAL="$PATH"
+ export PATH="$(dirname "$PYTEST"):$PATH"
+ 
+ passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
+@@ -44,10 +46,15 @@ passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scri
+ passo "egress: critério de em dia da compilação (testes, sem compilar)" python3 -I scripts/testar_egress_em_dia.py
+ passo "ganchos do git: sintaxe do shell (bash -n)" bash -c 'for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h" || exit 1; done'
+ passo "processo de aplicação: âncora staged devolvida ao HEAD (selftest, com o P-8 de verdade)" python3 -I scripts/equipe/ancora_indice.py --selftest
+-# verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
+-# passe PY_YAML=/usr/bin/python3 (ou outro python com PyYAML). Sem isso o passo falha fechado, de propósito.
+-passo "workflows: YAML válido e sem chave repetida (selftest)" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py --selftest
+-passo "workflows: .github/workflows do repositório" "${PY_YAML:-python3}" -I scripts/verificar_workflows.py
++# verificar_workflows.py usa PyYAML. O python3 do PATH pode ser o venv do uv, sem PyYAML (medido em 16/11/2026:
++# os dois passos de workflows falhavam com "PyYAML ausente"). Sem PY_YAML definido, usa /usr/bin/python3 quando
++# ele existe e importa yaml; senão, python3. Se nenhum tiver PyYAML, o passo falha fechado, de propósito.
++if [ -z "${PY_YAML:-}" ]; then
++  PY_YAML=python3
++  if [ -x /usr/bin/python3 ] && /usr/bin/python3 -c 'import yaml' >/dev/null 2>&1; then PY_YAML=/usr/bin/python3; fi
++fi
++passo "workflows: YAML válido e sem chave repetida (selftest)" "$PY_YAML" -I scripts/verificar_workflows.py --selftest
++passo "workflows: .github/workflows do repositório" "$PY_YAML" -I scripts/verificar_workflows.py
+ passo "sincronia: testes (fonte única, porquês, início de sessão, maxTurns)" python3 scripts/testar_sincronia.py
+ passo "sincronia: contexto de início de sessão (selftest)" python3 -I scripts/sessao_contexto.py --selftest
+ passo "sincronia: porquês (selftest)" python3 -I scripts/porques.py --selftest
+@@ -57,5 +64,44 @@ passo "projeto índice: destinos do PROJETO (verificar_destinos)" python3 redesi
+ passo "projeto índice: teto do PROJETO (teto.py)" python3 redesign/projeto_indice/teto.py
+ passo "projeto índice: ESTADO.md em dia (gerar_estado --verificar)" python3 scripts/gerar_estado.py --verificar
+ 
++# --- Job suite-adversarial (.github/workflows/perimetro.yml): os mesmos comandos, na mesma ordem, com os mesmos flags.
++# Sem sudo, sem rede e sem serviço. Usa o python do sistema (PY_SISTEMA), não o do venv do uv (sem os pacotes do sistema).
++# Sem segredo: o token interno aponta para um arquivo que não existe dentro de $TMP, como no runner do GitHub, para
++# que nenhum passo desta seção leia o token real do Humano.
++if [ -x /usr/bin/python3 ]; then PY_SISTEMA=/usr/bin/python3; else PY_SISTEMA="$(command -v python3)"; fi
++export AGATA_TOKEN_INTERNO_PATH="$TMP/token-ausente"
++# O perímetro chama "python3" pelo nome. Medido em 16/11/2026: com o PATH do venv do uv na frente, o agregado falha
++# (ImportError de cryptography e yaml, 60 ok e 1 falha). Por isso o diretório do python do sistema vai na frente do PATH
++# só para este passo; o PATH original (sem o venv do uv) fica como segundo critério.
++passo "suite adversarial: controles (testar_perimetro.sh)" env PATH="$(dirname "$PY_SISTEMA"):$PATH_ORIGINAL" bash scripts/testar_perimetro.sh
++passo "suite adversarial: selftest auditoria do turno (Seth)" env SETH_REPO="$RAIZ" "$PY_SISTEMA" redesign/router/auditoria_turno.py --selftest
++passo "suite adversarial: selftest gateway da Seth" env SETH_REPO="$RAIZ" "$PY_SISTEMA" redesign/router/seth_gateway.py --selftest
++passo "suite adversarial: selftest Conselho remoto" env SETH_REPO="$RAIZ" "$PY_SISTEMA" scripts/conselho_remoto.py --selftest
++passo "suite adversarial: selftest registro de pedidos" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/registro_pedidos.py --selftest
++passo "suite adversarial: selftest benchmark de roteamento" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/benchmark_roteamento.py --selftest
++passo "suite adversarial: selftest queda por elo" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/queda_por_elo.py --selftest
++passo "suite adversarial: selftest sombra de capacidade" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_capacidade.py --selftest
++passo "suite adversarial: selftest sombra nova versão" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_nova_versao.py --selftest
++passo "suite adversarial: selftest nv (nova versão)" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/nova_versao/nv.py --selftest
++passo "suite adversarial: selftest busca de texto" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/busca_texto.py --selftest
++passo "suite adversarial: selftest integralidade P-8" "$PY_SISTEMA" -I scripts/p8_integral.py --selftest
++passo "suite adversarial: testes verificar P-8 em PR" "$PY_SISTEMA" -I scripts/testar_p8_verificar_pr.py
++passo "suite adversarial: selftest painel de estado" "$PY_SISTEMA" -I scripts/painel_estado.py --selftest
++passo "suite adversarial: selftest limpa emoji" "$PY_SISTEMA" -I redesign/router/limpa_emoji.py --selftest
++passo "suite adversarial: selftest capivara de capacidades" "$PY_SISTEMA" -I scripts/capivara_capacidades.py --selftest
++passo "suite adversarial: selftest pesquisa de modelos gratuitos" "$PY_SISTEMA" -I scripts/pesquisar_modelos_gratuitos.py --selftest
++passo "suite adversarial: selftest verificar cofre" "$PY_SISTEMA" -I scripts/verificar_cofre.py --selftest
++passo "suite adversarial: selftest cifrar recuperação" "$PY_SISTEMA" -I scripts/cifrar_recuperacao.py --selftest
++passo "suite adversarial: selftest verificar expurgo" "$PY_SISTEMA" -I scripts/verificar_expurgo.py --selftest
++passo "suite adversarial: selftest seth golden" "$PY_SISTEMA" -I scripts/seth_golden.py --selftest
++passo "suite adversarial: selftest seth autodev" "$PY_SISTEMA" -I scripts/seth_autodev.py --selftest
++passo "suite adversarial: selftest janela de manutenção" "$PY_SISTEMA" -I scripts/janela_manutencao.py --selftest
++passo "suite adversarial: testes da janela de recuperação" "$PY_SISTEMA" -I scripts/testar_janela_recuperacao.py
++passo "suite adversarial: selftest equipe" "$PY_SISTEMA" -I scripts/equipe/equipe.py --selftest
++passo "suite adversarial: testes dos auxiliares da equipe" "$PY_SISTEMA" -I scripts/equipe/testar_auxiliares.py
++passo "suite adversarial: contrato de leitura de memória" "$PY_SISTEMA" -I scripts/testar_memoria_leitura.py
++passo "suite adversarial: contrato da trava do escriba" "$PY_SISTEMA" -I scripts/testar_trava_escriba.py
++passo "suite adversarial: contrato sem Goose ativo" "$PY_SISTEMA" -I scripts/testar_sem_goose_ativo.py
++
+ if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
+ echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
+diff --git a/scripts/testar_sem_goose_ativo.py b/scripts/testar_sem_goose_ativo.py
+index fe6ef911..d49c16a7 100644
+--- a/scripts/testar_sem_goose_ativo.py
++++ b/scripts/testar_sem_goose_ativo.py
+@@ -34,10 +34,11 @@ EXCECOES = {
+     "redesign/router/auditoria_turno.py": (2, "docstring com a medição do Goose (MEMÓRIAS 662 e 664); OpenCode ainda não medido"),
+     "scripts/estado_para_eco.sh": (1, "comentário histórico do incidente da ferramenta write do Goose (MEMÓRIAS 516 e 517)"),
+     "redesign/mcp/servidor.py": (1, "lista de executores do MCP; OpenCode ainda não foi medido contra o servidor"),
+-    "config/portas-de-entrada.txt": (3, "rotas para redesign/goose/AGENTS.md, que fica até a decisão de remoção; lista de ferramentas que leem AGENTS.md"),
++    "config/portas-de-entrada.txt": (1, "caminho redesign/goose/AGENTS.md (P-23 confere o arquivo), que fica até a decisão de remoção; a coluna de texto já não cita o Goose (higiene-16-11)"),
+     "config/agata-identidade.json": (1, "proveniência histórica da paleta (tema do Goose); texto de origem, não referência ativa"),
+     "redesign/painel_operacional/spec/acceptance.json": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),
+     "redesign/painel_operacional/test_painel_unificado.py": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),
++    "scripts/ci_sdd_local.sh": (1, "chamada do contrato testar_sem_goose_ativo.py, que confere as referências ativas; o nome do arquivo de teste contém a palavra (higiene-16-11)"),
+ }
+ 
+ 

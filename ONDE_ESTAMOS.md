@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 16/11 (proposta higiene-16-11)
+
+Há uma proposta pequena de higiene esperando sua assinatura (`higiene-16-11`). Ela faz o teste local do sistema rodar também a suíte que barrou a painel-funcional-16-11 no GitHub; e tira do texto vivo as menções ao chat antigo e ao Goose, que saíram do sistema em 07/11. Comando: `bash scripts/aprovar.sh higiene-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. O registro é a entrada (1024) de `MEMÓRIAS.md`.
+
 ## Hoje, 16/11 (proposta painel-funcional-r2-16-11)
 
 A primeira proposta do painel (`painel-funcional-16-11`) foi assinada por você, mas não entrou no sistema: o GitHub barrou a aplicação, porque um teste dos controles exigia que a lista de palavras proibidas mudasse junto com o painel. O código do painel é o mesmo; só essa lista muda. Por isso a proposta nova, `painel-funcional-r2-16-11`, precisa de uma assinatura sua: a da primeira não serve. Comando: `bash scripts/aprovar.sh painel-funcional-r2-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. A primeira foi para `propostas/superadas/`; o registro é a entrada (1022) de `MEMÓRIAS.md`.

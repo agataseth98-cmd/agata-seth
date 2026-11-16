@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1c8bba46d7027ba0e8e295feedfc88d4df152d8e
-  Escrito em: 16/11/2026 14:32 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 3711870aa2a83a2296e4ea9cf49b210e1f5ed624
+  Escrito em: 16/11/2026 18:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c8bba46d7027ba0e8e295feedfc88d4df152d8e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c8bba46d7027ba0e8e295feedfc88d4df152d8e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c8bba46d7027ba0e8e295feedfc88d4df152d8e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c8bba46d7027ba0e8e295feedfc88d4df152d8e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1c8bba46d7027ba0e8e295feedfc88d4df152d8e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/3711870aa2a83a2296e4ea9cf49b210e1f5ed624/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1024) DIÁRIO — 16/11/2026 · **Proposta higiene-16-11: o CI local passa a rodar a suíte adversarial, e saem do texto vivo as menções ao chat antigo e ao Goose.** O CI local (`scripts/ci_sdd_local.sh`) passa a rodar os 29 passos do job suite-adversarial, com o Python do sistema, e os dois passos de YAML deixam de depender de variável: de 59 para 88 passos. AGENTS.md deixa de dizer que a Seth fala pelo chat antigo; os README das pastas do chat antigo e do Goose ganham aviso de pasta histórica com a data de saída de 07/11/2026; em config/portas-de-entrada.txt só a descrição de três linhas muda, e a lista de exceções do teste sem-goose acompanha as contagens. Ficou fora, por motivo: a divergência de prosa entre a spec-mãe e a spec de conexões (gate de sincronia; precisa de proposta própria), a frase equivalente em redesign/goose/AGENTS.md (arquivo histórico) e o perfil da Capivara de 25/10 (regenera pelo OmniRoute, não rodado); não medido: os 29 passos sob isolamento de rede.
+Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local com 88 passos e os dois testes de ausência · Autorização: Humano — "1-faça, 2-faça, 3-faça, 4-faça"
+
 (1023) DIÁRIO — 16/11/2026 · **Aplicada painel-funcional-r2-16-11 (assinada pelo Humano em 16/11): painel sem o chat antigo, com estados honestos e estilo consolidado; supera a painel-funcional-16-11, que foi assinada às 14:02 e não entrou porque a suíte adversarial exigia ajustar junto a lista do teste sem-goose.** O painel deixa de sondar o chat que saiu do sistema e passa a ler o gateway da Seth; o alvo antigo de abrir é recusado. O estado traz as fontes sem leitura; unidade que não existe no escopo do usuário vira estado próprio, distinto de parada e de sem leitura; falha na leitura dos modelos locais deixa de virar lista vazia. O painel observa a si mesmo e a vigia do Claude; capacidades e lacunas ganham cache curto com trava por rota. Na página: nenhum texto fixo que afirme estado, Panorama sem repetição, Integrações com leitura por unidade, estados vazios, cabeçalho no Conselho. No estilo: tokens de cor semânticos no lugar dos nomeados por valor, nove tamanhos de fonte, cinco raios, conteúdo alinhado no topo, Operator Console e celular na mesma linguagem. Spec com oito seções e 149 critérios de aceite. Medido antes de propor: CI local com TUDO OK e 539 testes do painel passando; fotos de antes e depois guardadas fora do repositório. Não medido na proposta: tema claro em tela, cliques, e a página real na porta do painel. Fica para lote seguinte: fundir listas repetidas e criar as telas de equipe, perímetro, CI, backup e saída de rede em Rust.
 Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local, checks do PR e fotos de antes e depois · Autorização: Humano — "eleve o painel ao estado 100% funcional e estado da arte de design"
 
