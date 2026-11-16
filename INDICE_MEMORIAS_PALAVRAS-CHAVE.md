@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinada pelo Humano em 16/11, 09:03): o teste de ponteiros lê só os arquivos rastreados pelo git.** O teste `test_nenhum_ponteiro_vivo_para_secao_que_saiu` deixa de percorrer o disco com `os.walk` quando há git: a lista vem de `git ls-files`, e arquivo solto fora do git (log, patch, cache) fica de fora. Sem git, volta ao percurso antigo. Só o arquivo `redesign/projeto_indice/tests/test_projeto_indice.py` muda.
+  palavras-chave: aplicada, teste, ponteiro, rastreados, assinada, humano, ponteiros, arquivos, git, test, vivo, secao, saiu, deixa, percorrer, disco, walk, lista, vem, files, arquivo, solto, fora, log, patch, cache, fica, volta, percurso, antigo, redesign, projeto, indice, tests, muda
 (1018) DIÁRIO — 16/11/2026 · **Aplicada socks5-rust-15-11 (assinada pelo Humano em 16/11, 08:22): SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O binário egress-socks5 (só biblioteca padrão) espelha egress_proxy.py: só CONNECT, sem autenticação, e recusa com status 2 destino cujo IP não é global. EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para o binário; se o binário faltar ou não subir, volta ao Python e avisa no stderr. A unit navegador-mcp.service liga AGATA_EGRESS_RUST e AGATA_EGRESS_RUST_SOCKS5 para ~/.local/bin. O CI rust-egress passa a cobrir egress_proxy.py.
   palavras-chave: aplicada, socks, rust, assinada, humano, navegador, camada, ligada, binário, egress, biblioteca, padrão, espelha, proxy, connect, autenticação, recusa, status, destino, cujo, global, egressproxy, usa, agata, aponta, faltar, subir, volta, python, avisa, stderr, unit, mcp, service, liga, local, bin, passa, cobrir
 (1017) DIÁRIO — 15/11/2026 · **Proposta socks5-rust-15-11: SOCKS5 do navegador em Rust e camada Rust ligada no navegador.** O Humano escolheu ligar a segunda opinião do Rust nos serviços, fazer o SOCKS5 em Rust agora e encerrar o T2 sem avaliação às cegas (fica só o teste selado, em que os três braços passaram). O binário egress-socks5 espelha egress_proxy.py; EgressProxy usa o Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para ele e volta ao Python sem ele; navegador-mcp.service liga as duas variáveis. Medido: 5 testes novos do SOCKS5 em Rust passando; curl pelo SOCKS5 Rust recebeu 200 de example.com e foi recusado em localhost. Não medido: o navegador real pelo SOCKS5 Rust. Claude Opus 5.5, Claude Code.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, historia, tomo, publicada, seção, história, painel, somente, leitura, botão, ouvir, pasta, texto, quarentena
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista de Importantes no painel (aba em Panorama, cartão, cache fora do repositório e trazer do Conselho).**
   palavras-chave: proposta, painel, importantes, publicada, lista, aba, panorama, cartão, cache, fora, repositório, trazer
-(990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista antes da spec (P1), gate de sincronia das specs (P2), revisor contra a spec (P3) e três classes de tarefa (P4).**
-  palavras-chave: proposta, spec, primeiro, publicada, entrevista, gate, sincronia, specs, revisor, contra, três, classes, tarefa
+(990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista …
+  palavras-chave: proposta, spec, primeiro, publicada, entrevista
 (989) DIÁRIO — 11/11/2026 · **Correção da entrada (986): são 59 testes de navega …
   palavras-chave: correção, entrada, testes, navega
 (988) DIÁRIO — 11/11/2026 · **Proposta processo-agil-11-11 publicada: limite de …
