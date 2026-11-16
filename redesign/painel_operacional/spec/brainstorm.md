@@ -9,7 +9,7 @@
 ## Estado que muda
 
 - Servidor: tabela de redirects e `_ASSETS` em `server.py`. Nenhum estado de dados muda.
-- Página: `prototipo.html` vira sete seções com subpainéis. `prototipo.js` ganha roteamento por hash e estados. `prototipo.css` absorve as folhas antigas.
+- Página: `prototipo.html` vira oito seções com subpainéis. `prototipo.js` ganha roteamento por hash e estados. `prototipo.css` absorve as folhas antigas.
 - Scripts `conselho-rede/app.js` e `operator_console/app.js` deixam de declarar globais de topo.
 - Arquivos retirados: `index.html`, `app.js`, `styles.css`, `frentes.html`, `frentes.js`, `nova_versao.css`, `conselho-rede/index.html`, `conselho-rede/style.css`, `operator_console/index.html`, `operator_console/style.css`.
 - Cache do painel em `~/.cache/agata/painel/` não muda de formato.

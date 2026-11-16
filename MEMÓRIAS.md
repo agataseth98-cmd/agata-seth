@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7
-  Escrito em: 16/11/2026 13:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d9239cd4f5eeabef85b0eede9cd36281259caa1d
+  Escrito em: 16/11/2026 14:05 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d7f27ccf7ffb52938cfd14a6e8af4c415ee962a7/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9239cd4f5eeabef85b0eede9cd36281259caa1d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9239cd4f5eeabef85b0eede9cd36281259caa1d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9239cd4f5eeabef85b0eede9cd36281259caa1d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9239cd4f5eeabef85b0eede9cd36281259caa1d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d9239cd4f5eeabef85b0eede9cd36281259caa1d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1022) DIÁRIO — 16/11/2026 · **Aplicada painel-funcional-16-11 (assinada pelo Humano em 16/11, 14:02): painel sem o chat antigo, com estados honestos e estilo consolidado.** O painel deixa de sondar o chat que saiu do sistema e passa a ler o gateway da Seth; o alvo antigo de abrir é recusado. O estado traz as fontes sem leitura; unidade que não existe no escopo do usuário vira estado próprio, distinto de parada e de sem leitura; falha na leitura dos modelos locais deixa de virar lista vazia. O painel observa a si mesmo e a vigia do Claude; capacidades e lacunas ganham cache curto com trava por rota. Na página: nenhum texto fixo que afirme estado, Panorama sem repetição, Integrações com leitura por unidade, estados vazios, cabeçalho no Conselho. No estilo: tokens de cor semânticos no lugar dos nomeados por valor, nove tamanhos de fonte, cinco raios, conteúdo alinhado no topo, Operator Console e celular na mesma linguagem. Spec com oito seções e 149 critérios de aceite. Medido antes de propor: CI local com TUDO OK e 539 testes do painel passando; fotos de antes e depois guardadas fora do repositório. Não medido na proposta: tema claro em tela, cliques, e a página real na porta do painel. Fica para lote seguinte: fundir listas repetidas e criar as telas de equipe, perímetro, CI, backup e saída de rede em Rust.
+Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local, checks do PR e fotos de antes e depois · Autorização: Humano — "eleve o painel ao estado 100% funcional e estado da arte de design"
+
 (1021) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-16-11: painel sem o chat antigo, com estados honestos e estilo consolidado.**
 O chat antigo sai do painel: a sonda da porta antiga vira leitura do gateway da Seth, e o alvo antigo de /api/abrir é recusado. /api/status traz as fontes sem leitura; unidade inexistente no escopo vira estado próprio, distinto de parada e de sem leitura; falha na leitura dos modelos locais deixa de virar lista vazia. O painel passa a observar a si mesmo e a vigia do Claude; cache curto com trava por rota em capacidades e lacunas. A página perde o texto fixo de estado, o Panorama deixa de repetir, Integrações lê por unidade, e há estados vazios, cabeçalho no Conselho e atalhos de vault num lugar. O estilo passa a usar 40 tokens de cor semânticos por tema, 9 tamanhos de fonte e 5 raios; o celular ganha busca inteira e navegação em faixa; a spec tem oito seções e 20 critérios novos (129 para 149).
 CI local: `CI LOCAL: TUDO OK` (59 passos OK, pytest 9.2.0; log em /home/orusoua/agata-arquivo/auditoria-conceito-16-11/painel/ci-local-2.log). Suíte do painel: 539 passed.

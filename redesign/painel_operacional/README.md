@@ -10,7 +10,7 @@ Na raiz do repositório:
 python3 redesign/painel_operacional/server.py
 ```
 
-Abra `http://127.0.0.1:20146/prototipo`. A tela tem sete seções, escolhidas pelo menu lateral ou pelo hash: `#panorama`, `#conversa`, `#conselho`, `#sistema`, `#conhecimento`, `#custos` e `#qualidade`. Hash desconhecido abre o Panorama. Links antigos (`/`, `/index.html`, `/frentes`, `/operator_console`, `/conselho-rede`) redirecionam para a seção certa. Instale/atualize `redesign/painel_operacional/relay-extension-v2/` como extensão não empacotada no Chromium e habilite-a. O painel e a extensão devem pertencer à mesma versão da entrega. Para encerrar uma execução manual, use Ctrl-C no terminal em que ela foi iniciada.
+Abra `http://127.0.0.1:20146/prototipo`. A tela tem oito seções, escolhidas pelo menu lateral ou pelo hash: `#panorama`, `#conversa`, `#conselho`, `#sistema`, `#conhecimento`, `#historia`, `#custos` e `#qualidade`. Hash desconhecido abre o Panorama. Links antigos (`/`, `/index.html`, `/frentes`, `/operator_console`, `/conselho-rede`) redirecionam para a seção certa. Instale/atualize `redesign/painel_operacional/relay-extension-v2/` como extensão não empacotada no Chromium e habilite-a. O painel e a extensão devem pertencer à mesma versão da entrega. Para encerrar uma execução manual, use Ctrl-C no terminal em que ela foi iniciada.
 
 ## Telas do /prototipo
 

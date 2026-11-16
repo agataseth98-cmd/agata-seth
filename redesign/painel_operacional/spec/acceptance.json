@@ -1361,5 +1361,185 @@
       "redesign/painel_operacional/test_voz_ui.py::VozEstaticaTests::test_preferencia_do_modo_fica_fora_do_bloco_da_conversa"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o HTTP 200 do gateway da Seth vira estado `ok` em `/api/status` (campo `chat`), com `source` `seth-gateway` e `source_ref` `127.0.0.1:20126/`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_chat_http_200_nao_afirma_funcionalidade_completa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/status` e `/api/capacidades` não citam `3080` nem `LibreChat`, e a capacidade `conversar` tem `source` `seth-gateway · 127.0.0.1:20126`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_status_e_capacidades_nao_citam_o_chat_antigo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`server.py` e `nova_versao_painel.py` não citam `LibreChat` nem a porta `3080` (checagem do texto do código, não de resposta HTTP)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_painel_nao_cita_o_chat_antigo_e_rotula_a_porta_do_ouvido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/status` traz `sem_leitura` com as fontes desconhecidas ou ausentes, e a conversa com a Seth quando o estado do gateway é `unknown`; sem fonte nessa situação, a lista sai vazia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_sem_leitura_lista_so_fontes_desconhecidas_ou_ausentes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "unidade com `LoadState` not-found vira estado `ausente` com o texto \"unidade não existe no escopo do usuário desta Máquina\", em serviço e em timer, e `ausente` não conta como `ok` no estado geral (sai `warning`)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_unidade_inexistente_vira_ausente_e_nao_inactive_nem_unknown"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "nas lacunas, unidade não existente sai como `ausente` com o mesmo motivo, e unidade declarada no boot e inativa sai como \"declarada no boot e inativa agora\"",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_lacunas_separam_unidade_ausente_de_inativa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/medicoes/estado` com a lista de modelos do Ollama sem leitura devolve `modelos` vazio, `modelos_estado` `sem_leitura` e `modelos_motivo` preenchido, sem `127.0.0.1` nem `11434`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_modelos_sem_leitura_devolvem_lista_vazia_e_motivo_sem_detalhe_da_rede"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com a lista de modelos lida, `/api/medicoes/estado` devolve `modelos_estado` `ok` e `modelos_motivo` nulo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_modelos_lidos_marcam_ok_e_motivo_vazio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`GET /api/medicoes/estado` responde 200 com `modelos` vazio, `modelos_estado` `sem_leitura` e `modelos_motivo` quando o Ollama está fora",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_medicoes_painel.py::MedicoesTests::test_estado_http_mostra_modelos_sem_leitura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/details` observa `painel-operacional.service` e `agata-vigia@claude.service`; o vigia sai com `rotulo` \"Vigia do Claude\", e uma unidade sem rótulo (`piper-tts.service`) não traz o campo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::PainelTests::test_integracoes_incluem_painel_e_vigia_com_rotulo_e_nome_valido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "duas consultas seguidas a `/api/capacidades` e a `/api/lacunas` rodam a leitura uma vez só (cache curto de 10 s; a expiração do cache não é testada)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_capacidades_e_lacunas_nao_repetem_a_consulta_em_seguida"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`POST /api/abrir` com alvo `librechat` responde 400 (\"destino fora da lista\") e não enfileira foco (LibreChat fora do painel, 07/11/2026)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_abrir_librechat_responde_400_e_nao_enfileira_foco"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a página (`prototipo.html`) e os scripts não contêm `3080`, `Goose` nem `LibreChat`, fora da única linha do prefixo histórico de título importado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::AcabamentoTests::test_pagina_e_scripts_sem_3080_goose_nem_librechat"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o HTML da página não tem texto fixo que afirme estado (`consta como pausado`, `ESTADOS: ATIVO`, `sem sonda nesta tela`, `Tudo Disponível`, `Quatro unidades`), fora dos rótulos de filtro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::AcabamentoTests::test_html_sem_texto_fixo_que_afirma_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o CSS tem no máximo 9 tokens `--fs-`, 5 de raio e nenhum token `--cor-`; a regra de `main` tem `align-self:start` e nenhuma margem `auto` no eixo vertical (`margin`, `margin-top`, `margin-bottom`, `margin-block`)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::AcabamentoTests::test_css_tem_no_maximo_9_fs_5_raios_sem_cor_nominal_e_main_sem_margem_auto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o contraste WCAG de `--ink` e `--muted` sobre `--paper` e `--sheet` é de pelo menos 4,5 nos temas escuro e claro, calculado pelos tokens",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::AcabamentoTests::test_contraste_de_ink_e_muted_passa_4_5_nos_dois_temas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tabela de eventos do Ledger mostra \"Nenhum evento registrado.\" quando não há eventos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::ComportamentoDoPainelTests::test_tabela_de_eventos_vazia_mostra_nenhum_evento_registrado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a linha do herói separa \"unidade não existe (escopo do usuário)\" de \"fonte sem leitura\" (lista de ausentes excluída das sem leitura)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::ComportamentoDoPainelTests::test_linha_do_heroi_separa_nao_existe_de_sem_leitura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Panorama tem um botão \"Abrir Estado operacional\" com `data-open-page=\"sistema\"` e `data-open-sub=\"operacao\"` no bloco de status do herói, ao lado de \"Atualizar\"; o JS que trata `data-open-page` continua existindo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelaUnicaTests::test_panorama_tem_botao_que_abre_estado_operacional"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada nome de cache de `/api/capacidades` e `/api/lacunas` tem o seu lock: a produção lenta de um nome não prende a leitura do outro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::HttpTests::test_cache_curto_tem_lock_por_nome_e_rota_lenta_nao_segura_a_outra"
+    ],
+    "cwd": null
   }
 ]

@@ -103,7 +103,7 @@ function renderQueue(items) {
 function renderGroups(groups) {
   const root = $("rodadasLista");
   root.replaceChildren();
-  if (!groups.length) { root.append(node("li", "nenhuma rodada registrada.", "hint")); return; }
+  if (!groups.length) { root.append(node("li", "nenhuma rodada registrada.", "hint vazio")); return; }
   for (const group of groups) {
     const item = node("li", null, "approval-card");
     const kind = { debate: "debate", chain: "cadeia", evaluation: "bateria" }[group.kind] || group.kind;

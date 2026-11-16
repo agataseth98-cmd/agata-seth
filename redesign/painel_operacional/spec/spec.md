@@ -29,7 +29,7 @@
 - Estados carregando, vazio e erro em cada seção que consome API.
 - Nenhuma rota nova de API. As rotas `/api/*` ficam como estão. Exceção pedida pelo Humano em 07/11/2026: `GET /api/conselho/memoria`, só leitura, para a aba Memória compartilhada (ver Contrato).
 - Conhecimento tem uma busca única, que serve à Alexandria (escopo "dentro"), ao Acervo (escopo "fora", busca externa) e à Wiki, a documentação do `/index.html` (escopo "documentação"). Decidido pelo Humano em 07/11/2026.
-- Casca registrada, fora das sete seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
+- Casca registrada, fora das oito seções: barra lateral, cabeçalho e chip LOCAL (decidido pelo Humano em 07/11/2026, quando eram sete seções); breadcrumb, busca "Buscar neste mapa…", nota, rodapé e diálogo de evidência, como na tabela de mapeamento.
 - Lote 3 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): busca nas conversas, fixar, arquivar, marcadores, pastas, exportação em JSON e Markdown, importação de JSON exportado e conversa temporária. Contrato em Rotas de API e critérios no fim desta seção.
 - Proteção das conversas (09/11/2026, pedido do Humano depois do sumiço de duas conversas importadas, confirmado por ele em 09/11/2026 às 16:20 como apagadas pela própria tela): apagar vai para a Lixeira, escritas exigem origem do painel e ficam registradas, salvar preserva a origem de conversa importada, e arquivo ilegível é contado e não é apagado. Contrato em Rotas de API (bloco de proteção) e critérios no fim da seção de Critérios.
 - Lote 4 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): editar e reenviar, regenerar e ramificar, com ramos navegáveis ("< 1/2 >"); Parar; Continuar; feedback de boa e de ruim resposta; barra de contexto; atalhos de teclado; tema claro, escuro ou do sistema. Contrato em Rotas de API e critérios no fim desta seção. Nenhuma rota nova de API; o gateway não muda.
@@ -41,7 +41,7 @@
 
 - B1, chat com streaming novo: a Conversa continua como está (stream atual, com fallback para `/api/seth/chat`). Motivo: é funcionalidade nova, com risco próprio; o pedido desta versão é a tela unificada.
 - B2, ferramentas com aprovação: a aba Ferramentas do Conselho e o fluxo de pedidos ficam como estão. Motivo: mexe em execução de ferramenta; tem spec própria.
-- Remoção do LibreChat: o botão "LibreChat" continua em Sistema e a rota de abertura continua. Motivo: decisão separada.
+- Chat antigo (LibreChat): não fica fora desta versão. Sai do painel neste lote, em 16/11/2026 (ver Contrato, "Painel funcional (contrato de 16/11/2026)"). Antes, o botão "LibreChat" estava em Sistema e `/api/abrir` aceitava o alvo `librechat`.
 - Ajuste fino de design: sem novo layout e sem mudar as cores escuras. A paleta clara do lote 4 é gerada a partir das cores atuais (Escopo). Motivo: a verificação visual depende do navegador; as capturas do lote 4 mostram o estado, não são aceite visual do Humano.
 - Mudança em `/api/*`, em CSP, em propostas, assinatura, PR ou merge. Continuam fora do painel.
 - Link público de compartilhamento de conversa: fora deste lote. Pendência: precisa decisão de segurança do Humano (quem vê, por quanto tempo, como revoga).
@@ -155,7 +155,7 @@
 - panorama: GET `/api/status`, `/api/details`, `/api/capacidades`, `/api/frentes`, `/api/importantes` (aba Importantes e cartão, 11/11/2026; POST `/api/importantes`, `/api/importantes/estado`, `/editar` e `/trazer`); POST `/api/proposals/verify` (só por ação do Humano); GET `/api/vault/item` (diálogo).
 - conversa: GET `/api/seth/conversas`, `/api/seth/conversa?id=`; POST `/api/seth/chat/stream` (com fallback `/api/seth/chat`), `/api/seth/conversa`, `/api/seth/conversa/apagar`; GET `/api/seth/lixeira`; POST `/api/seth/lixeira/restaurar` e `/api/seth/lixeira/purgar`.
 - conselho: GET `/api/relay-council/state`, `/api/relay-council/catalog`, e (aba Memória compartilhada, 07/11/2026) `/api/conselho/memoria`; POST `/api/relay-council/actions`, `/groups`, `/decision`; POST `/api/abrir` (alvo `conselho` ou nome de conselheiro).
-- sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, LibreChat, OmniRoute).
+- sistema: GET `/api/status`, `/api/details`, `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`fotografar`, `classificar`, `gravar_chave`, `remover_chave`, `adicionar_provedor`, `testar_rotas`, `cancelar_teste`); POST `/api/abrir` (Obsidian, OmniRoute).
 - conhecimento: GET `/api/grafo`, `/api/vault/item`, `/api/nova-versao/estado`; POST `/api/wiki/search`, `/api/nova-versao/executar` (`consultar`, `skills`, `indexar`, `iniciar`, `acervo_*`, `acervo_externa_*`), POST `/api/nova-versao/upload`.
 - historia: GET `/api/historia`, `/api/historia/texto`; POST `/api/historia/ouvir`.
 - custos: GET `/api/nova-versao/estado`; POST `/api/nova-versao/executar` (`salvar_orcamento`, `ajustar_conexao`).
@@ -179,9 +179,24 @@
 
 ### Substituído (contrato de 03/11/2026)
 
-- "A navegação lateral agrupa as 24 páginas em Panorama, Conselho e quatro submenus recolhíveis" sai. Substituído por sete seções e abas internas.
+- "A navegação lateral agrupa as 24 páginas em Panorama, Conselho e quatro submenus recolhíveis" sai. Substituído por oito seções e abas internas.
 - "As páginas da nova versão usam só classes de `nova_versao.css`" sai. Substituído por um arquivo de estilo só (`prototipo.css`).
 - "Página Acervo e fontes" (lote 5) vira o subpainel `sub-nv-acervo` dentro de Conhecimento. A rota de upload não muda.
+
+### Painel funcional (contrato de 16/11/2026)
+
+Lote `painel-funcional-16-11`. Os critérios com teste estão no fim de "Critérios de aceite" (subseção "Painel funcional (16/11/2026)"); os sem teste estão marcados como não medido.
+
+- Chat antigo fora. O LibreChat (porta 3080) saiu do atalho de ligar o sistema em 07/11/2026: o comentário desse atalho diz que o Humano excluiu os contêineres e os volumes nesse dia. O `config/modelos-gratuitos.md` registra a saída do Goose em 07/11/2026 e ainda descreve o LibreChat como consumidor (texto anterior à retirada; não é fonte da data). Na base medida (HEAD da worktree), o código do painel ainda citava o LibreChat (`server.py`: 4 ocorrências de LibreChat ou 3080; `prototipo.html`: 8 de LibreChat). Este lote, 16/11/2026, tira essas citações do painel; a data da saída do chat antigo é 07/11/2026.
+- Gateway no lugar do chat antigo: `/api/status` descreve o chat como o gateway da Seth (`chat.source` `seth-gateway`, `chat.source_ref` `127.0.0.1:20126/`). A capacidade `conversar` de `/api/capacidades` aponta para o gateway. Nenhuma resposta de `/api/status` ou `/api/capacidades` contém `3080` nem `LibreChat`.
+- `/api/abrir` não aceita o alvo `librechat`: recusa com 400 "destino fora da lista" e não enfileira foco (teste `HttpTests.test_abrir_librechat_responde_400_e_nao_enfileira_foco` em `test_painel.py`).
+- `/api/status` traz `sem_leitura`: a lista das fontes sem leitura (unidade desconhecida ou ausente, timer desconhecido ou ausente) e a conversa com a Seth quando o estado do gateway é `unknown`. Sem nenhuma fonte nessa situação, a lista sai vazia.
+- Unidade inexistente: `LoadState` not-found vira estado `ausente`, com o texto "unidade não existe no escopo do usuário desta Máquina" (o `systemctl --user` só enxerga o escopo do usuário; na página, o chip diz "NÃO EXISTE (ESCOPO DO USUÁRIO)" e a linha do herói diz "unidade não existe (escopo do usuário)"). Vale para serviços e timers, e para as lacunas. `ausente` é diferente de `inactive` (declarada e parada) e de `unknown` (sem leitura). No estado geral, `ausente` não conta como `ok`. Integrações usam a mesma função de serviço; isso é inferido pelo teste, não medido à parte.
+- `/api/medicoes/estado` traz `modelos_estado`: `ok` quando a lista de modelos do Ollama foi lida (`modelos_motivo` nulo); `sem_leitura` quando não foi, com `modelos` vazio e `modelos_motivo` em português, sem host nem porta (`127.0.0.1`, `11434`). Falha de leitura não vira lista vazia muda.
+- `/api/details` observa `painel-operacional.service` e `agata-vigia@claude.service`. Cada unidade com rótulo traz `rotulo` ("Painel operacional" e "Vigia do Claude"); as demais não trazem o campo.
+- `/api/capacidades` e `/api/lacunas` têm cache curto de 10 s (`CACHE_CURTO_SECONDS`): consultas seguidas dentro do prazo não rodam a leitura de novo.
+- Página (item 7; parte com teste): com teste, nenhum texto fixo afirma estado, a linha do herói separa unidade inexistente de fonte sem leitura, a tabela de eventos vazia diz "Nenhum evento registrado." e o Panorama tem o botão para Estado operacional (critérios da subseção abaixo). Sem teste automático, verificar no navegador: a contagem de unidades no Panorama em um só texto, a ausência de cartão que só remete a outra tela, os títulos importados sem o prefixo histórico (o teste só confere a linha do prefixo) e Custos carregar o orçamento quando aberto direto pelo endereço.
+- Estilo (item 8; parte com teste): com teste, no máximo 9 tamanhos de fonte e 5 raios, nenhum token `--cor-`, a regra de `main` com `align-self:start` e sem margem vertical `auto`, e contraste de pelo menos 4,5:1 para `--ink` e `--muted` nos dois temas. Sem teste automático, verificar em tela: o conteúdo alinhado no topo e os tokens de cor semânticos.
 
 ## Mapeamento de funções
 
@@ -189,7 +204,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 
 | Tela atual | Função | Seção | Subpainel e ids |
 |---|---|---|---|
-| prototipo · Panorama | Serviços, Git e agenda, com fonte e hora | panorama | sub-panorama (`overview-alert`) |
+| prototipo · Panorama | Linha do herói com a contagem de unidades ativas, as que não existem (escopo do usuário) e as fontes sem leitura; cartões Git local e agenda, com fonte e hora | panorama | sub-panorama (`overview-alert`, `hero-status`) |
 | prototipo · Panorama | Atualizar leitura; atualização automática a cada 60 s; pausa com a aba oculta | panorama | sub-panorama (`refresh-main`) |
 | prototipo · Panorama | Cartão de conversa com o estado do chat | panorama | sub-panorama (`chat-state`) |
 | prototipo · Panorama | Atalhos "Abrir" para Estado operacional, Visão, Conselho e conversa da Seth | panorama | sub-panorama (`data-open-page`, vira `data-secao`) |
@@ -237,10 +252,10 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Conselho | Estado do conselho e atualização | conselho | sub-conselho (`status`) |
 | prototipo · Conselho (nova, pedida pelo Humano em 07/11/2026) | Memória compartilhada do Conselho, só leitura do cache: número, data e hora, autor, tipo e texto; filtro por tipo; atualizar | conselho | sub-conselho-memoria (`memoria-lista`, `memoria-tipo`, `memoria-atualizar`, `memoria-resumo`) |
 | prototipo · Estado operacional | Unidades, repositório, agenda observada, tarefas da janela e atualizar leitura | sistema | sub-operacao (`refresh-status`) |
-| prototipo · Integrações | Estado das unidades de integração, fronteiras e fontes (FONTE) | sistema | sub-integracoes |
+| prototipo · Integrações | Cartões de integração com leitura por unidade: `/api/details` para os cartões com `data-unit`; `/api/status` para o gateway da Seth, OmniRoute e as rotinas (timers); fronteiras e fontes (FONTE) | sistema | sub-integracoes (`integration-list`) |
 | prototipo · Modelos & rota | Capacidades registradas, decisão e ficha do modelo | sistema | sub-modelos |
 | prototipo · Manutenção | Próximos e últimos disparos; tarefas | sistema | sub-manutencao |
-| casca · barra lateral | Abrir Obsidian, LibreChat e OmniRoute (`/api/abrir`, lista fixa) | sistema | servicos-locais |
+| casca · barra lateral | Abrir Obsidian e OmniRoute (`/api/abrir`, lista fixa) | sistema | servicos-locais |
 | prototipo · Nova versão · Corpo operacional | Fotografia de serviços e fotografar agora | sistema | sub-nv-corpo (`nv-fotografar`, `nv-corpo-lista`) |
 | prototipo · Nova versão · Metacognição | Classificar um pedido; último registro da sombra do gateway | sistema | sub-nv-metacognicao (`nv-classificar`, `nv-sombra`) |
 | prototipo · Nova versão · Conexões | Estado por caminho | sistema | sub-nv-conexoes |
@@ -276,7 +291,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | casca | Breadcrumb, chip LOCAL, nota "O Humano no centro" e rodapé | casca | não é seção |
 | casca | Busca "Buscar neste mapa…" (filtra os cartões da seção aberta) | casca | não é seção |
 | casca | Diálogo de evidência (`evidence-dialog`) | casca | usado por Panorama e Sistema |
-| retirado | Submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão) | retirado | substituídos pelas sete seções e pelas abas internas |
+| retirado | Submenus recolhíveis (Sistema, Memória e conhecimento, Qualidade, Nova versão) | retirado | substituídos pelas oito seções e pelas abas internas |
 | retirado | Páginas próprias de `/index.html`, `/frentes`, `/operator_console` e `/conselho-rede` | redirect | cobertas pelas linhas acima |
 | retirado | Iframe da Operator Console | retirado | o conteúdo vai para `sub-operator-console` |
 
@@ -413,10 +428,37 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] a CSP do painel segue igual (sem `media-src`); o JS e o HTML da voz são externos ou de texto, sem HTML dinâmico, sem atributo inline e sem emoji
 - [ ] a preferência do modo conversa fica fora do bloco da Conversa, e o bloco da Conversa não guarda nada em localStorage
 
+### Painel funcional (16/11/2026)
+
+- [ ] o HTTP 200 do gateway da Seth vira estado `ok` em `/api/status` (campo `chat`), com `source` `seth-gateway` e `source_ref` `127.0.0.1:20126/`
+- [ ] `/api/status` e `/api/capacidades` não citam `3080` nem `LibreChat`, e a capacidade `conversar` tem `source` `seth-gateway · 127.0.0.1:20126`
+- [ ] `server.py` e `nova_versao_painel.py` não citam `LibreChat` nem a porta `3080` (checagem do texto do código, não de resposta HTTP)
+- [ ] `/api/status` traz `sem_leitura` com as fontes desconhecidas ou ausentes, e a conversa com a Seth quando o estado do gateway é `unknown`; sem fonte nessa situação, a lista sai vazia
+- [ ] unidade com `LoadState` not-found vira estado `ausente` com o texto "unidade não existe no escopo do usuário desta Máquina", em serviço e em timer, e `ausente` não conta como `ok` no estado geral (sai `warning`)
+- [ ] nas lacunas, unidade não existente sai como `ausente` com o mesmo motivo, e unidade declarada no boot e inativa sai como "declarada no boot e inativa agora"
+- [ ] `/api/medicoes/estado` com a lista de modelos do Ollama sem leitura devolve `modelos` vazio, `modelos_estado` `sem_leitura` e `modelos_motivo` preenchido, sem `127.0.0.1` nem `11434`
+- [ ] com a lista de modelos lida, `/api/medicoes/estado` devolve `modelos_estado` `ok` e `modelos_motivo` nulo
+- [ ] `GET /api/medicoes/estado` responde 200 com `modelos` vazio, `modelos_estado` `sem_leitura` e `modelos_motivo` quando o Ollama está fora
+- [ ] `/api/details` observa `painel-operacional.service` e `agata-vigia@claude.service`; o vigia sai com `rotulo` "Vigia do Claude", e uma unidade sem rótulo (`piper-tts.service`) não traz o campo
+- [ ] duas consultas seguidas a `/api/capacidades` e a `/api/lacunas` rodam a leitura uma vez só (cache curto de 10 s; a expiração do cache não é testada)
+- [ ] `POST /api/abrir` com alvo `librechat` responde 400 ("destino fora da lista") e não enfileira foco (LibreChat fora do painel, 07/11/2026)
+- [ ] a página (`prototipo.html`) e os scripts não contêm `3080`, `Goose` nem `LibreChat`, fora da única linha do prefixo histórico de título importado
+- [ ] o HTML da página não tem texto fixo que afirme estado (`consta como pausado`, `ESTADOS: ATIVO`, `sem sonda nesta tela`, `Tudo Disponível`, `Quatro unidades`), fora dos rótulos de filtro
+- [ ] o CSS tem no máximo 9 tokens `--fs-`, 5 de raio e nenhum token `--cor-`; a regra de `main` tem `align-self:start` e nenhuma margem `auto` no eixo vertical (`margin`, `margin-top`, `margin-bottom`, `margin-block`)
+- [ ] o contraste WCAG de `--ink` e `--muted` sobre `--paper` e `--sheet` é de pelo menos 4,5 nos temas escuro e claro, calculado pelos tokens
+- [ ] a tabela de eventos do Ledger mostra "Nenhum evento registrado." quando não há eventos
+- [ ] a linha do herói separa "unidade não existe (escopo do usuário)" de "fonte sem leitura" (lista de ausentes excluída das sem leitura)
+- [ ] o Panorama tem um botão "Abrir Estado operacional" com `data-open-page="sistema"` e `data-open-sub="operacao"` no bloco de status do herói, ao lado de "Atualizar"; o JS que trata `data-open-page` continua existindo
+- [ ] cada nome de cache de `/api/capacidades` e `/api/lacunas` tem o seu lock: a produção lenta de um nome não prende a leitura do outro
+
+- NÃO MEDIDO, sem teste ainda: integrações com unidade inexistente. Passam pela mesma função de serviço do teste de unidade inexistente; isso é inferido, não medido por integração.
+- NÃO MEDIDO, manual (sem comando; o drift automático só conta caixas `- [ ]`): item 7 da página sem teste automático: contagem de unidades no Panorama em um só texto, ausência de cartão que só remete a outra tela, títulos importados sem o prefixo histórico e Custos ao abrir direto pelo endereço. Exige verificação no navegador.
+- NÃO MEDIDO, manual (sem comando): item 8 sem teste automático: conteúdo alinhado no topo visto em tela, tokens semânticos e tema claro em tela. `test_tokens_em_root_e_sem_cor_literal_fora` cobre só cor hexadecimal e rgb fora de `:root`; o contraste e a margem de `main` têm teste (critérios acima).
+
 ## Desenho e alternativas
 
 - Mesmo servidor, `http.server` da biblioteca padrão, e os mesmos módulos. Sem framework.
-- Uma tela com sete seções e subpainéis. Alternativa descartada: manter as 25 páginas e mudar só o menu. Não atende "uma tela só" e mantém 25 pontos de estado.
+- Uma tela com oito seções e subpainéis. Alternativa descartada: manter as 25 páginas e mudar só o menu. Não atende "uma tela só" e mantém 25 pontos de estado.
 - Uma folha de estilo. Alternativa descartada: manter `nova_versao.css` separado. Dois conjuntos de tokens, e a CSP trata cada arquivo como fonte separada.
 - Operator Console sem iframe: o iframe tem documento, CSS e JS próprios, e não compartilha tokens. O JS da console (`operator_console/app.js`) é isolado antes de entrar na página (ver Implementação). Se o isolamento falhar na verificação, a alternativa é manter o iframe com `operator_console/index.html` servido; isso fica registrado como risco.
 - Globais: cada script de tela fica em IIFE ou usa nomes únicos. O teste de globais impede a repetição.
@@ -429,7 +471,7 @@ Ordem de aplicação (cada passo é uma proposta com par `.diff` e `APROVADO`, p
 
 0. A PR 940 entra antes (base d1b6b4f7).
 1. `server.py`: redirects das telas antigas e tabela `_ASSETS` sem os ativos retirados.
-2. `prototipo.html`: sete seções, subpainéis `sub-<nome>`, menu de sete botões, sem iframe. Os ids de `test_csp_prototipo.py::IDS_PRESERVADOS` continuam.
+2. `prototipo.html`: oito seções, subpainéis `sub-<nome>`, menu de oito botões, sem iframe. Os ids de `test_csp_prototipo.py::IDS_PRESERVADOS` continuam.
 3. `prototipo.js`: roteamento por hash (`location.hash` e `hashchange`), seção padrão `panorama`, abas internas, estados `carregando`, `vazio` e `erro`, e nomes únicos no escopo global (`refresh` de Panorama passa a ter nome próprio).
 4. `conselho-rede/app.js` e `operator_console/app.js`: sem declarações de topo (IIFE), mesmas chamadas de API.
 5. `prototipo.css`: tokens em `:root`; absorve `nova_versao.css`, `styles.css`, `conselho-rede/style.css` e `operator_console/style.css`; sem cor literal fora de `:root`.
@@ -473,7 +515,7 @@ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem
 - Operator Console sem iframe pode quebrar se o JS depender do documento próprio. Risco aceito, com a alternativa descrita em Desenho.
 - Os alvos de `spec/acceptance.json` que apontam para `test_painel_unificado.py` falham até a aplicação. Isso é o estado esperado de uma spec antes da implementação.
 - Decidido pelo Humano em 07/11/2026: a busca da documentação (wiki) entra na busca única de Conhecimento (Alexandria, Acervo e Wiki).
-- Decidido pelo Humano em 07/11/2026: a barra lateral, o cabeçalho e o chip LOCAL ficam fora das sete seções, como casca registrada.
+- Decidido pelo Humano em 07/11/2026: a barra lateral, o cabeçalho e o chip LOCAL ficam fora das oito seções (eram sete em 07/11/2026), como casca registrada.
 - A verificação no navegador foi feita em 07/11/2026 (critério 35), com o que está medido e o que não foi medido listado ali. Não é aceite visual do Humano.
 - `pytest` precisa estar disponível. Sem ele, a execução devolve não medido, não falha em silêncio.
 - Importantes (11/11/2026): o texto digitado pelo Humano fica local, sem filtro de segredo (como as conversas); só o texto trazido do cache passa por `filtrar`. "Trazer do Conselho" depende de a entrada começar com `IMPORTANTE`: é convenção de texto do cache, não campo do esquema.

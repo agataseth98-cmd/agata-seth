@@ -30,7 +30,7 @@ class MenuTests(unittest.TestCase):
         cls.menu = Menu()
         cls.menu.feed((HERE / "prototipo.html").read_text(encoding="utf-8"))
 
-    def test_menu_tem_um_botao_para_cada_uma_das_sete_secoes(self):
+    def test_menu_tem_um_botao_para_cada_uma_das_oito_secoes(self):
         self.assertEqual(self.menu.botoes, SECOES)
 
     def test_toda_secao_do_menu_existe_na_pagina(self):
