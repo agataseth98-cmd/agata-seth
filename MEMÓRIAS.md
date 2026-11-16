@@ -26,20 +26,27 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 9e4f40e0550bc57904392376951ccf2a227406c1
-  Escrito em: 16/11/2026 10:05 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): fc8107df9da56cca0777e7921b7171bd97f36972
+  Escrito em: 16/11/2026 10:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e4f40e0550bc57904392376951ccf2a227406c1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e4f40e0550bc57904392376951ccf2a227406c1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e4f40e0550bc57904392376951ccf2a227406c1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e4f40e0550bc57904392376951ccf2a227406c1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/9e4f40e0550bc57904392376951ccf2a227406c1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc8107df9da56cca0777e7921b7171bd97f36972/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc8107df9da56cca0777e7921b7171bd97f36972/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc8107df9da56cca0777e7921b7171bd97f36972/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc8107df9da56cca0777e7921b7171bd97f36972/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/fc8107df9da56cca0777e7921b7171bd97f36972/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
+O aplicar.py deixa de decidir com check pendente: espera até o veredito. Junta só com fiscal-p8 e suite-adversarial em pass e pelo menos um pass; skipping e neutral não bloqueiam e não contam como sucesso; qualquer outro bucket recusa (falha fechada). CodeQL sai da lista de obrigatórios. A compilação Rust roda com nice -n 15 e CARGO_BUILD_JOBS (padrão 2) e é pulada quando scripts/egress_em_dia.py diz que os binários estão em dia (mtime maior que src/ e Cargo.*). Entram scripts/egress_em_dia.py e scripts/testar_egress_em_dia.py.
+Medido na proposta (16/11, propostas/robustez-16-11.md): testar_auxiliares.py 40/40; testar_egress_em_dia.py 11/11; ci_sdd_local.sh com CI LOCAL: TUDO OK; cópia descartável com git apply OK. Nenhum cargo rodou (a Máquina caiu às 08:28 compilando Rust).
+Não medido: a compilação real com cargo; a aplicação contra o GitHub com a nova espera; se o CodeQL aparece como skipping ou fail no GitHub. Risco residual: CodeQL em skipping não barra a aplicação; dono: Humano, para decidir se volta a exigir o CodeQL.
+Reversão: git revert do commit de aplicação.
+Modelo: Claude Haiku 5.5 (subagente do Claude Code, na Máquina) · vetor: sha256 do .diff confere com o diff-sha256 do APROVADO-robustez-16-11 (7e219c8b…, medido em 16/11); aplicação por scripts/equipe/aplicar.py · Autorização: Humano — "Aprovado pelo Humano em 2026-11-16 10:15 -0300." (APROVADO-robustez-16-11)
+
 (1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinada pelo Humano em 16/11, 09:03): o teste de ponteiros lê só os arquivos rastreados pelo git.** O teste `test_nenhum_ponteiro_vivo_para_secao_que_saiu` deixa de percorrer o disco com `os.walk` quando há git: a lista vem de `git ls-files`, e arquivo solto fora do git (log, patch, cache) fica de fora. Sem git, volta ao percurso antigo. Só o arquivo `redesign/projeto_indice/tests/test_projeto_indice.py` muda.
 Medido pelo autor da proposta (16/11, `propostas/teste-ponteiro-rastreados-16-11.md`): `pytest` da pasta de testes do projeto_indice com 24 passed antes e depois; arquivo solto fora do git não entra na lista e o teste passa com ele presente; sem git, o fallback inclui o arquivo solto; `scripts/ci_sdd_local.sh` com `CI LOCAL: TUDO OK`.
 Não medido: a falha do teste no `~/agata` vivo, antes e depois da mudança.

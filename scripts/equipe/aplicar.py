@@ -92,6 +92,39 @@ def aplicacoes_remotas():
   return trava.aplicacoes_abertas([d.get("headRefName", "") for d in json.loads(p.stdout or "[]")])
 
 
+# Checks que TÊM de passar: ausente ou diferente de 'pass' = não junta. CodeQL saiu desta lista: no #1004 (16/11/2026)
+# ele veio 'skipping' e isso derrubou a aplicação. Se o CodeQL falhar, o bucket 'fail' recusa do mesmo jeito.
+EXIGIDOS = ("fiscal-p8", "suite-adversarial")
+NEUTROS = ("skipping", "neutral")  # nem falha nem sucesso: não bloqueiam e não contam como passou
+
+
+def veredito_checks(cs):
+  """cs: {nome do check: bucket de 'gh pr checks'}. Devolve 'esperar', 'juntar' ou 'recusar'.
+  'esperar' enquanto houver check 'pending', obrigatório ausente ou nenhum check. Junta só sem falha, com os
+  obrigatórios em 'pass' e pelo menos um 'pass'. Bucket fora de pass/pending/NEUTROS é falha (falha fechada)."""
+  if not cs or any(b == "pending" for b in cs.values()) or any(n not in cs for n in EXIGIDOS): return "esperar"
+  if any(b not in ("pass",) + NEUTROS for b in cs.values()): return "recusar"
+  if any(cs[n] != "pass" for n in EXIGIDOS) or "pass" not in cs.values(): return "recusar"
+  return "juntar"
+
+
+def ler_checks(wt, num):
+  """Nome -> bucket de cada check do PR. Saída ilegível do gh vira {} (= ainda esperar; nunca junta por isso)."""
+  j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
+  try: return {c["name"]: c["bucket"] for c in json.loads(j)}
+  except Exception: return {}
+
+
+def esperar_ci(wt, num, dormir=time.sleep, relogio=time.time, limite_s=1500, pausa=10):
+  """(True, checks) só se veredito_checks der 'juntar' antes do limite. 25 min: check ausente ou API ruim não prende para sempre."""
+  dormir(20); fim = relogio() + limite_s
+  while True:
+      cs = ler_checks(wt, num); v = veredito_checks(cs)
+      if v != "esperar": return v == "juntar", cs
+      if relogio() > fim: return False, dict(cs, erro="timeout esperando os checks")
+      dormir(pausa)
+
+
 def _aplicar(a, coautor, tag, wt, br):
   sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
   montar(wt, a, coautor)
@@ -99,17 +132,9 @@ def _aplicar(a, coautor, tag, wt, br):
   pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
   num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
-  EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
   def ci():
-      """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
-      time.sleep(20); limite = time.time() + 1500  # 25 min: check ausente ou API ruim não prende para sempre
-      while True:
-          if time.time() > limite: return False, {"erro": "timeout esperando os checks"}
-          j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
-          try: cs = {c["name"]: c["bucket"] for c in json.loads(j)}
-          except Exception: cs = {}
-          if all(n in cs and cs[n] not in ("pending",) for n in EXIGIDOS): return all(cs[n] == "pass" for n in EXIGIDOS), cs
-          time.sleep(10)
+      """Espera até nenhum check ficar pendente; True só se veredito_checks disser 'juntar' (ver esperar_ci)."""
+      return esperar_ci(wt, num)
   def head_oid():
       return json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "headRefOid").stdout)["headRefOid"]
   def ci_pinado():
