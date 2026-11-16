@@ -83,7 +83,7 @@
     - Conversa importada (LibreChat): o arquivo guarda `origem`, `origem_id`, `titulo_original`, `data_original`, `importado_em` e `id`. O salvar não reescreve essa origem; quem envia sem `id`, mas com origem já gravada, cai no mesmo arquivo. Campo de origem fora do formato sai sem recusar o salvar. Mensagem mantém `criada` e `origem_id` só se continua no mesmo lugar, com o mesmo papel e texto.
     - Importação: item que está na lixeira conta como existente: responde `ja_existe` com `lixeira: true`, sem gravar.
     - Listagem: `total` passa a contar só as conversas legíveis; `ilegiveis` conta os arquivos de conversa que não puderam ser lidos. Eles não aparecem na lista e não são apagados nem mexidos.
-    - Tela: a aba Conversa tem a seção Lixeira (restaurar; apagar de vez em dois cliques). Enquanto a Seth responde, trocar de conversa, Nova conversa e temporária ficam bloqueados, com aviso. Apagar só sai da tela depois da confirmação do painel. Salvar grava na conversa de origem. A contagem de arquivos ilegíveis aparece na lista.
+    - Tela (16/11/2026): a Lixeira fica no rodapé do menu único (restaurar; apagar de vez em dois cliques). Enquanto a Seth responde, trocar de conversa, Nova conversa e temporária ficam bloqueados, com aviso. Apagar só sai da tela depois da confirmação do painel. Salvar grava na conversa de origem. A contagem de arquivos ilegíveis aparece na lista.
 - Conversa, lote 4 (09/11/2026). Sem rota nova. `POST /api/seth/conversa` e `GET /api/seth/conversa?id=` aceitam e devolvem a árvore de ramos; `mensagens` continua sendo o caminho ativo.
   - Sem ramo, a conversa grava `mensagens` como antes. Com ramo, grava `arvore` (`nos`: cada nó com `id` de 1 a 16 letras e números, `pai` (id de um nó que vem antes no arquivo, ou `null`), `role`, `content` e os campos de resposta; e `folha`, o último nó do caminho ativo) e também `mensagens`, o caminho, para que uma versão anterior abra a conversa. O caminho sai da folha subindo pelos pais. Com `arvore` no pedido, `mensagens` é ignorado. O painel manda só a árvore quando há ramo.
   - Limites: até 400 nós; até 200 mensagens no caminho; 65536 caracteres por mensagem; 262144 bytes por gravação. Árvore fora do formato responde 400 com motivo e nada é gravado. Na leitura, árvore ilegível cai no caminho `mensagens`, se houver.
@@ -135,7 +135,7 @@
 
 ### Seções e navegação
 
-- Cada seção é `<section id="<seção>">` dentro de `/prototipo`. Dentro dela há subpainéis `<div id="sub-<nome antigo>">`, com o nome da tela antiga da tabela. Abas internas (`data-sub`) trocam subpainéis dentro da seção.
+- Cada seção é `<section id="<seção>">` dentro de `/prototipo`. Dentro dela há subpainéis `<div id="sub-<nome antigo>">`, com o nome da tela antiga da tabela. Abas internas (`data-sub`) trocam subpainéis dentro da seção. Exceção (16/11/2026): o Conhecimento não tem abas; mostra os cinco blocos numa tela só, com âncoras.
 - Menu lateral: oito botões com `data-secao`. O botão da seção aberta tem `aria-current="page"`.
 - Breadcrumb mostra `Agata / <nome da seção>`.
 - Atalhos `data-open-page` passam a apontar para uma seção e, se for o caso, um subpainel.
@@ -198,13 +198,34 @@ Lote `painel-funcional-16-11`. Os critérios com teste estão no fim de "Critér
 - Página (item 7; parte com teste): com teste, nenhum texto fixo afirma estado, a linha do herói separa unidade inexistente de fonte sem leitura, a tabela de eventos vazia diz "Nenhum evento registrado." e o Panorama tem o botão para Estado operacional (critérios da subseção abaixo). Sem teste automático, verificar no navegador: a contagem de unidades no Panorama em um só texto, a ausência de cartão que só remete a outra tela, os títulos importados sem o prefixo histórico (o teste só confere a linha do prefixo) e Custos carregar o orçamento quando aberto direto pelo endereço.
 - Estilo (item 8; parte com teste): com teste, no máximo 9 tamanhos de fonte e 5 raios, nenhum token `--cor-`, a regra de `main` com `align-self:start` e sem margem vertical `auto`, e contraste de pelo menos 4,5:1 para `--ink` e `--muted` nos dois temas. Sem teste automático, verificar em tela: o conteúdo alinhado no topo e os tokens de cor semânticos.
 
+### Conversa, menu único e Conhecimento numa tela (16/11/2026)
+
+Lote `painel-conversa-16-11`. Descreve o contrato da tela (não o histórico). Os critérios com teste estão em "Critérios de aceite", subseção "Conversa, menu único e Conhecimento numa tela (16/11/2026)"; o que só se viu em foto está como medição manual.
+
+- Menu único. O menu lateral é a única lista de conversas. Em ordem: "Nova conversa", a busca, as oito seções, a lista de conversas (fixadas e depois por data: Hoje, Ontem, Últimos 7 dias, Mais antigas), e o rodapé fixo com Arquivadas, Lixeira, "Organizar conversas" e Serviços. Cada item tem um menu de ações (Renomear, Fixar, Arquivar, Apagar, Exportar JSON, Exportar Markdown, Pasta e marcadores). A janela "Organizar conversas" reúne pastas, marcadores e importação. A lista não se repete dentro da Conversa.
+- Tela da conversa. Cabeçalho com título, status, seletor de modelo, "Temporária" (interruptor curto com aria-pressed; o texto explicativo vai para o title e para o aviso do rodapé), e "Mais" (Copiar última resposta, Instruções desta conversa, exportar; no celular também a Temporária). A coluna de leitura tem até 76 caracteres. Estado vazio: a saudação "O que você quer saber ou decidir?" com sugestões; some ao haver mensagem. O compositor fica na base: Ditar, Anexar, Enviar, e Parar resposta enquanto a Seth responde. "Ir para o fim" só aparece quando a transcrição não está no fim. A tela ocupa a altura da janela: o menu e a transcrição rolam por dentro; a página não rola.
+- Faixa de baixo do compositor. Uma linha: "Contexto: X% · N de M mensagens", com barra fina. "Detalhes" guarda o texto completo (caracteres, limite de 256 KB, uso informado pelo gateway, ou "Medida: estimativa em caracteres") e o aviso do modelo (o padrão passa por filtro de segredos e dados pessoais). O modo conversa (ler cada resposta em voz alta) fica à direita. No celular, a faixa inteira ocupa no máximo duas linhas.
+- Mensagens. Hora curta, com a data completa no title; mensagem sem hora gravada não mostra hora. Ações: na pergunta, Editar e Copiar; na resposta, Copiar, Ouvir, Regenerar e Continuar (só na última), Ramificar aqui, e Útil ou Não útil. A transcrição é role="log", tem nome e entra na ordem de Tab (menu, cabeçalho, mensagens, compositor). Menus de ação fecham com Esc e devolvem o foco ao botão que os abriu.
+- Markdown suportado: títulos (# em h3, ## em h4, ### em h5), listas com marcador ou número, listas aninhadas por dois espaços, citação, tabela em moldura com rolagem própria, linha horizontal, código com linguagem e botão Copiar, ênfase, negrito e código em linha. Um número inicial vira o atributo start; itens separados por linha em branco ou por sublista seguem na mesma lista. Texto entra só por textContent e sem HTML.
+- Links. Endereço http ou https vira texto com o endereço visível e um botão Copiar link. Nada sai do painel por link: não há elemento a nem navegação externa. Outros esquemas (javascript:, etc.) viram texto puro.
+- Anexos de texto. Até 3 por pedido; nome até 120 caracteres; até 20000 caracteres por anexo e 40000 no total. Texto colado longo vira o anexo colado.txt. Só o nome e a quantidade de caracteres ficam na conversa; o texto segue no pedido. Recusa diz o motivo. Arquivo fora dos tipos aceitos não entra no seletor.
+- Instruções desta conversa. Até 2000 caracteres, gravados na conversa; vazias não gravam o campo. Valem como mensagem de sistema na frente do pedido e passam pelo mesmo filtro de segredos. O aviso da tela diz que, na via pública (seth-public), o gateway descarta as instruções; isso é do gateway e não foi medido aqui.
+- Uso do contexto. Com uso informado pelo gateway no último pedido da conversa, o Detalhes mostra os tokens de entrada e de saída; sem ele, a estimativa em caracteres.
+- Tentar de novo. Reenvia a última pergunta sem duplicá-la. Erro no meio do stream mantém o texto recebido, marcado como interrompida; erro sem texto mantém a pergunta.
+- Rascunho. Só em memória: volta ao trocar de conversa; Nova conversa tem rascunho próprio; enviar limpa o da conversa; recarregar a página começa vazio.
+- Conhecimento numa tela. Cinco blocos visíveis, sem abas: Memória e mapas, Grafo do vault, Documentação viva, Alexandria e Acervo e fontes. As âncoras no topo (`data-ancora`) levam a cada bloco. Erro na memória marca o Conhecimento; erro nas integrações marca o Sistema.
+- Gaveta e pontos de quebra. Pontos de quebra: 480, 768, 1024 e 1440 px. Até 1023 px, o menu sai da coluna e abre pelo botão Menu; fecha com Esc, com clique fora, com o botão Fechar (no lugar da seta) ou com a escolha de uma seção ou conversa. Dentro da gaveta, Arquivadas, Lixeira, Organizar conversas e Serviços ficam no rodapé fixo, e a lista de conversas recebe a altura que sobra, com rolagem própria. Na gaveta, as oito seções ficam em duas colunas (até 1023 px). Mosaicos ficam dois por linha até 360 px quando o texto cabe (auto-fit, mínimo de 140 px).
+- Panorama. O herói não tem retrato; o retrato (`/assets/agata-portrait.png`) fica só na marca da casca. Os três cartões (Orientação, Conversa, Importantes) começam no mesmo topo, com cabeçalho de mesma altura. O botão "Abrir conversa da Seth" do cartão Conversa foi retirado de propósito: o menu lateral já abre a Conversa (botão de seção `data-secao="conversa"`).
+- Filtro de estilo. Toda tela segue o ESTILO.md da skill `agata-painel` (decisão do Humano, 16/11/2026, 18:27): plano, um acento, estado com marca e palavra, sem sombra nem gradiente, e conferido em 360, 768, 1440 e 2560 px sem rolagem horizontal da página.
+- Não existe nesta versão: imagem na conversa (o anexo aceita só texto), compartilhar conversa (link público segue como pendência de decisão do Humano), e mais modelos no seletor (só `seth-livre` e `seth-public`).
+
 ## Mapeamento de funções
 
 Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operator_console` e `/conselho-rede`. A coluna "Subpainel e ids" traz o id do subpainel ou dos controles. "Casca" são elementos de moldura; estão listados para não sumirem, e a decisão de não mapeá-los a uma seção é pedida ao Humano.
 
 | Tela atual | Função | Seção | Subpainel e ids |
 |---|---|---|---|
-| prototipo · Panorama | Linha do herói com a contagem de unidades ativas, as que não existem (escopo do usuário) e as fontes sem leitura; cartões Git local e agenda, com fonte e hora | panorama | sub-panorama (`overview-alert`, `hero-status`) |
+| prototipo · Panorama | Linha do herói (sem retrato desde 16/11/2026) com a contagem de unidades ativas, as que não existem (escopo do usuário) e as fontes sem leitura; cartões Git local e agenda, com fonte e hora | panorama | sub-panorama (`overview-alert`, `hero-status`) |
 | prototipo · Panorama | Atualizar leitura; atualização automática a cada 60 s; pausa com a aba oculta | panorama | sub-panorama (`refresh-main`) |
 | prototipo · Panorama | Cartão de conversa com o estado do chat | panorama | sub-panorama (`chat-state`) |
 | prototipo · Panorama | Atalhos "Abrir" para Estado operacional, Visão, Conselho e conversa da Seth | panorama | sub-panorama (`data-open-page`, vira `data-secao`) |
@@ -220,21 +241,21 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | /frentes | Lista de frentes, somente leitura (`config/frentes.json`) | panorama | sub-frentes (`frentes-lista`, `frentes-estado`, `frentes-cabecalho`) |
 | /index.html | Serviços e Git do painel antigo | panorama | sub-panorama (já coberto; sem card duplicado) |
 | /index.html | Wiki da Agata: busca, pela busca única de Conhecimento (escopo "documentação") | conhecimento | busca única (`conhecimento-busca`, `conhecimento-consulta`, `conhecimento-escopo`, `wiki-mode`, `wiki-source`, `wiki-results`) |
-| prototipo · Conversa com a Seth | Lista de conversas; nova, abrir, renomear e apagar | conversa | sub-conversa (`seth-conversas`, `seth-nova`) |
-| prototipo · Conversa com a Seth (lote 3, 09/11/2026) | Busca nas conversas salvas (título e mensagens), com trecho e link para a mensagem | conversa | sub-conversa (`seth-busca`, `seth-busca-resultados`) |
-| prototipo · Conversa com a Seth (lote 3) | Fixar e desfixar; fixadas no topo da lista | conversa | sub-conversa (`seth-conversas`) |
-| prototipo · Conversa com a Seth (lote 3) | Arquivar e desarquivar; seção Arquivadas | conversa | sub-conversa (`seth-arquivadas-bloco`, `seth-arquivadas`) |
+| prototipo · Menu único (16/11/2026) | Lista de conversas (grupos por data), nova, abrir, renomear e apagar pelo menu de ações do item | conversa | menu lateral (`seth-conversas`, `seth-nova`) |
+| prototipo · Menu único (lote 3, 09/11/2026) | Busca nas conversas salvas (título e mensagens), com trecho e link para a mensagem | conversa | menu lateral (`seth-busca`, `seth-busca-resultados`) |
+| prototipo · Menu único (lote 3) | Fixar e desfixar; fixadas no topo da lista | conversa | menu lateral (`seth-conversas`) |
+| prototipo · Menu único (lote 3) | Arquivar e desarquivar; Arquivadas no rodapé do menu | conversa | menu lateral, rodapé (`seth-arquivadas-bloco`, `seth-arquivadas`) |
 | prototipo · Conversa com a Seth (lote 3) | Marcadores (tags livres) por conversa e filtro por marcador | conversa | sub-conversa (`seth-filtro-marcador`) |
 | prototipo · Conversa com a Seth (lote 3) | Pastas (projetos): criar, renomear, apagar (as conversas ficam), mover conversa e filtrar por pasta | conversa | sub-conversa (`seth-pasta-form`, `seth-pastas`, `seth-filtro-pasta`) |
 | prototipo · Conversa com a Seth (lote 3) | Exportar a conversa salva em JSON e Markdown (download pelo navegador) | conversa | sub-conversa (`seth-export-json`, `seth-export-md`) |
 | prototipo · Conversa com a Seth (lote 3) | Importar JSON exportado (valida; não duplica) | conversa | sub-conversa (`seth-importar-arquivo`) |
-| prototipo · Conversa com a Seth (lote 3) | Conversa temporária: não é salva, com aviso visível | conversa | sub-conversa (`seth-temporaria`, `seth-temporaria-aviso`) |
+| prototipo · Conversa com a Seth (lote 3) | Temporária (interruptor curto): não é salva, com aviso visível | conversa | sub-conversa (`seth-temporaria`, `seth-temporaria-aviso`) |
 | prototipo · Conversa com a Seth (lote 4, 09/11/2026) | Editar e reenviar, regenerar, trocar de versão ("< 1/2 >") | conversa | sub-conversa (`seth-transcript`, `seth-input`) |
 | prototipo · Conversa com a Seth (lote 4) | Ramificar a partir de uma mensagem; mostra a origem da conversa ramificada | conversa | sub-conversa (`seth-origem`) |
 | prototipo · Conversa com a Seth (lote 4) | Parar a resposta (botão e Esc); texto parcial marcado como interrompida | conversa | sub-conversa (`seth-parar`) |
 | prototipo · Conversa com a Seth (lote 4) | Continuar a última resposta, na mesma mensagem, com marca de continuação | conversa | sub-conversa (`seth-transcript`) |
 | prototipo · Conversa com a Seth (lote 4) | Feedback de boa e de ruim resposta, com motivo opcional, salvo na conversa | conversa | sub-conversa (`seth-transcript`) |
-| prototipo · Conversa com a Seth (lote 4) | Barra de contexto: caracteres e KB da próxima pergunta contra o limite do painel | conversa | sub-conversa (`seth-contexto`, `seth-contexto-barra`) |
+| prototipo · Conversa com a Seth (lote 4) | Barra de contexto: linha curta com a porcentagem e as mensagens; caracteres e KB em Detalhes | conversa | sub-conversa (`seth-contexto`, `seth-contexto-barra`, `seth-contexto-detalhe`) |
 | prototipo · Conversa com a Seth (lote 4) | Copiar a última resposta, pelo botão ou por Ctrl+Shift+C | conversa | sub-conversa (`seth-copiar-ultima`, `seth-copiado`) |
 | prototipo · Atalhos de teclado e tema (lote 4) | Lista de atalhos (?), tema claro, escuro ou do sistema, salvo em localStorage | panorama | topo (`atalhos-abrir`, `atalhos-painel`, `tema`) |
 | prototipo · Conversa com a Seth | Envio com stream e fallback para o chat inteiro; Enter envia | conversa | sub-conversa (`seth-form`, `seth-input`) |
@@ -393,7 +414,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] conversa sem ramo continua gravada no formato de sempre, conversa salva antes do lote 4 abre igual, e árvore ilegível na leitura cai no caminho de mensagens
 - [ ] renomear uma conversa com ramo grava a árvore inteira, sem perder as versões
 - [ ] o botão Parar e a tecla Esc cancelam o fetch do stream; o texto que já chegou fica na tela e na conversa salva, marcado como interrompida, sem repetir a pergunta
-- [ ] Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto devolve a pergunta ao campo
+- [ ] Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto mantém a pergunta na conversa e oferece Tentar de novo (C7, 16/11/2026: a pergunta não volta ao campo)
 - [ ] continuar pede à Seth com a mensagem "Continue de onde parou" e anexa o texto à mesma resposta, com marca de continuação; sem texto na resposta, o botão não aparece
 - [ ] o feedback de boa resposta e de resposta ruim, com motivo opcional, fica salvo na conversa e não sai do navegador; em conversa temporária não grava
 - [ ] a barra de contexto mostra, em português simples, quantos caracteres e KB a próxima pergunta leva, o limite do painel e quantas mensagens vão
@@ -454,6 +475,121 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - NÃO MEDIDO, sem teste ainda: integrações com unidade inexistente. Passam pela mesma função de serviço do teste de unidade inexistente; isso é inferido, não medido por integração.
 - NÃO MEDIDO, manual (sem comando; o drift automático só conta caixas `- [ ]`): item 7 da página sem teste automático: contagem de unidades no Panorama em um só texto, ausência de cartão que só remete a outra tela, títulos importados sem o prefixo histórico e Custos ao abrir direto pelo endereço. Exige verificação no navegador.
 - NÃO MEDIDO, manual (sem comando): item 8 sem teste automático: conteúdo alinhado no topo visto em tela, tokens semânticos e tema claro em tela. `test_tokens_em_root_e_sem_cor_literal_fora` cobre só cor hexadecimal e rgb fora de `:root`; o contraste e a margem de `main` têm teste (critérios acima).
+
+### Conversa, menu único e Conhecimento numa tela (16/11/2026)
+
+- [ ] o menu tem, nessa ordem, Nova conversa, a busca, as oito seções, a lista de conversas e o rodapé
+- [ ] o menu não repete nota e tem um rodapé só
+- [ ] a Conversa não repete a lista de conversas nem tem busca de conversas própria
+- [ ] a busca do mapa some na Conversa
+- [ ] o cabeçalho da Conversa tem título, status, modelo, Temporária e Mais
+- [ ] o compositor fica na base, com Ditar, Enviar e Parar, e o contexto vem depois dele
+- [ ] o estado vazio começa com a saudação e o botão Ir para o fim começa escondido
+- [ ] o Conhecimento mostra os cinco blocos numa tela só, sem abas
+- [ ] as âncoras do Conhecimento apontam para os cinco blocos
+- [ ] cada rota carrega uma vez por abertura da seção
+- [ ] erro na memória marca o Conhecimento, e erro nas integrações marca o Sistema
+- [ ] a Nova versão compartilha a leitura do estado com o painel
+- [ ] o menu de ações tem papel de menu, rótulo próprio e fecha com Esc
+- [ ] a barra do item de conversa tem as ações do menu, e nenhuma some
+- [ ] a barra de conversa mostra o título completo no title
+- [ ] a tecla / foca a busca de conversas na Conversa e a busca do mapa nas outras seções
+- [ ] a gaveta tem botão com aria-expanded e fecha com Esc e com a escolha
+- [ ] a gaveta só aparece em tela estreita
+- [ ] o CSS do lote é plano, sem sombra, gradiente nem acento extra
+- [ ] o Markdown mostra títulos em três níveis, listas aninhadas, citação, tabela e ênfase
+- [ ] um link vira texto com o endereço visível e sem elemento a; Copiar link copia o endereço
+- [ ] o bloco de código mostra a linguagem e copia só o código, com confirmação na região ao vivo
+- [ ] o indicador aparece enquanto a Seth responde e some ao parar
+- [ ] a hora da mensagem aparece curta, com a data no title; mensagem sem hora não mostra nada
+- [ ] mensagem nova grava a hora em ISO 8601 com o fuso do usuário e o da Seth
+- [ ] anexo aparece como etiqueta com nome e tamanho, e entra na conta do contexto
+- [ ] remover um anexo tira a etiqueta
+- [ ] o envio leva o texto do anexo no pedido, e a conversa guarda só o metadado
+- [ ] a recusa de anexo diz o motivo
+- [ ] arquivo acima de 80000 bytes (4 vezes o limite por arquivo) é recusado antes de ser lido
+- [ ] texto colado longo vira o anexo colado.txt; texto curto fica no campo
+- [ ] arrastar e soltar um arquivo anexa no compositor
+- [ ] o uso informado pelo gateway aparece no Detalhes do contexto; sem uso, fica a estimativa em caracteres
+- [ ] um pedido de vinte mensagens com acentos passa do teto antigo sem cortar
+- [ ] o rascunho volta ao trocar de conversa
+- [ ] Nova conversa tem rascunho próprio, e enviar limpa o rascunho da conversa
+- [ ] o rascunho só existe em memória: recarregar a página começa vazio
+- [ ] Tentar de novo reenvia sem duplicar a pergunta
+- [ ] o pedido leva as instruções da conversa, e o chip com instruções aparece
+- [ ] a resposta de contingência (fallback) também leva as instruções
+- [ ] salvar as instruções grava na conversa, e limpar as tira
+- [ ] instruções acima de 2000 caracteres não são gravadas e a tela avisa
+- [ ] o contador de instruções mostra os caracteres de 2000
+- [ ] o dialog de instruções tem limite e aviso em texto simples
+- [ ] o item Instruções e o espelho da Temporária ficam no menu Mais
+- [ ] Anexar tem input oculto com os tipos de arquivo aceitos
+- [ ] os avisos de organização têm espelho no menu
+- [ ] no celular a faixa do cabeçalho cabe em duas linhas e a Temporária vai para o menu
+- [ ] compartilhar não existe na tela e não foi inventado
+- [ ] o código novo da tela não usa innerHTML nem link externo
+- [ ] Parar mantém o texto recebido, marcado como interrompida
+- [ ] parar antes do primeiro texto deixa a resposta vazia e marcada
+- [ ] Esc para a resposta em curso
+- [ ] erro no meio do stream mantém o texto recebido, marcado como interrompida
+- [ ] item numerado com sublista ou linha em branco segue na mesma lista ol, e o número inicial vira start
+- [ ] uma lista que começa em outro número usa o atributo start
+- [ ] um parágrafo entre duas listas numeradas recomeça a contagem
+- [ ] a faixa de baixo do compositor é uma linha, com Detalhes e o modo conversa à direita
+- [ ] o botão Temporária é um interruptor curto com aria-pressed e o texto explicativo no title
+- [ ] Esc no menu Mais devolve o foco ao botão Mais
+- [ ] a transcrição entra no Tab, tem nome e a ordem é menu, cabeçalho, mensagens e compositor
+- [ ] a gaveta tem Fechar no lugar da seta, e Arquivadas, Lixeira, Organizar e Serviços ficam no rodapé
+- [ ] os mosaicos ficam dois por linha até 360 px quando cabem, pelo CSS de auto-fit
+- [ ] os três cartões do Panorama começam no topo, com cabeçalho de mesma altura
+- [ ] a transcrição tem respiro no fim para a última mensagem e as ações caberem inteiras
+- [ ] a hora da mensagem é gravada e lida de volta
+- [ ] hora inválida sai sem derrubar a conversa
+- [ ] conversa antiga sem hora continua sendo lida
+- [ ] a exportação leva a hora no JSON e no Markdown
+- [ ] importar devolve a hora da mensagem
+- [ ] as instruções gravam e são lidas sem os espaços das pontas
+- [ ] instruções vazias não gravam o campo
+- [ ] instruções acima do limite ou fora do tipo recusam a gravação com motivo
+- [ ] um arquivo com instruções inválidas abre sem elas
+- [ ] exportar e importar preservam as instruções
+- [ ] os anexos gravam só o nome e a quantidade de caracteres
+- [ ] anexos fora do formato saem sem recusar a conversa
+- [ ] no máximo três anexos ficam gravados
+- [ ] o uso do gateway sai antes do fim do stream
+- [ ] sem usage no gateway não existe evento de uso
+- [ ] usage inválido é ignorado
+- [ ] vale o último usage visto, e sem o fim do stream o uso não sai
+- [ ] o uso válido aceita só inteiros não negativos
+- [ ] a rota do stream repassa o uso do gateway antes do fim
+- [ ] a rota do stream sem usage do gateway não inventa evento
+- [ ] a contingência repassa o uso quando o gateway manda
+- [ ] a contingência sem usage não manda o campo, e usage inválido sai
+- [ ] as instruções viram system na frente do pedido
+- [ ] instruções vazias ou só com espaço não mandam system
+- [ ] o filtro passa pelas instruções
+- [ ] instruções com segredo não saem, e o motivo não ecoa o texto
+- [ ] o limite das instruções é de 2000 caracteres
+- [ ] instruções fora do tipo são recusadas
+- [ ] o cliente não manda system dentro de mensagens
+- [ ] o filtro padrão recusa segredo real nas instruções
+- [ ] o bloco de anexos vai no fim da última mensagem do usuário
+- [ ] a cerca do bloco de anexo passa a maior sequência de crases
+- [ ] o limite de 4000 caracteres vale só para o texto digitado
+- [ ] anexos acima dos limites são recusados
+- [ ] nome de anexo com caminho ou caractere de controle é recusado
+- [ ] nome válido sai sem espaço nas pontas
+- [ ] anexo sem mensagem do usuário é recusado
+- [ ] o filtro passa pelo nome e pelo texto do anexo
+- [ ] anexo com segredo não sai, e o motivo não ecoa o conteúdo
+- [ ] o filtro padrão recusa segredo real no anexo
+- [ ] sem anexos, o pedido fica igual ao de antes
+
+- MEDIDO, manual (sem comando; 16/11/2026, Chromium headless pelo protocolo CDP, só GET): fotos em 360, 768, 1440 e 2560 px da tela da Conversa e da gaveta; a linha de contexto cabe em uma linha no desktop e em duas no celular, o respiro do fim da transcrição deixa inteiras as ações da última mensagem, e a gaveta de 360 px mostra as oito seções em duas colunas e a lista com rolagem própria. Medição de rolagem horizontal da página nas oito larguras e nas oito seções: 0 de 64 combinações com rolagem horizontal (scrollWidth maior que innerWidth).
+- MEDIDO, manual (sem comando; 16/11/2026): o Panorama de 1440 px mostra os três cartões alinhados no topo, e os mosaicos de 360 px ficam dois por linha, com o valor "Atenção" inteiro dentro do cartão.
+- NÃO MEDIDO, manual: leitor de tela (role log e aria-live) não foi testado com leitor real; o foco que volta ao botão Mais ao escolher um item do menu não foi medido em navegador (só o Esc tem teste de comportamento).
+- NÃO MEDIDO, manual: o modo conversa por voz e o ditado não foram medidos nesta rodada; a voz é a do sistema e depende da máquina.
+- NÃO MEDIDO, manual: o que a via pública (seth-public) faz com as instruções da conversa. A tela diz que o gateway as descarta; isso vem do gateway e não foi medido aqui.
 
 ## Desenho e alternativas
 

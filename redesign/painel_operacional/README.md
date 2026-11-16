@@ -17,6 +17,9 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem oito seções, escolhidas pe
 - Cada tela antiga virou um subpainel (`sub-<nome>`) dentro de uma seção. A tabela de funções está em `spec/spec.md` (seção Mapeamento de funções).
 - A busca única de Conhecimento serve à Alexandria (escopo `dentro`), ao Acervo com busca externa (escopo `fora`) e à documentação da Agata (escopo `documentacao`).
 - Estado carregando, vazio e erro aparecem em cada seção que consome API. Erro é "não medido"; valor antigo, se houver, sai com a hora dele.
+- Conversa com a Seth (16/11/2026): o menu lateral é a única lista de conversas, em grupos por data, com um menu de ações por item. Arquivadas, Lixeira, Organizar conversas e Serviços ficam no rodapé do menu. A tela da conversa não repete a lista; o cabeçalho tem o seletor de modelo, a Temporária e o menu Mais.
+- Conhecimento numa tela só (16/11/2026): os cinco blocos (Memória e mapas, Grafo do vault, Documentação viva, Alexandria e Acervo e fontes) aparecem juntos, sem abas; as âncoras no topo levam a cada um.
+- Gaveta em tela estreita (até 1023 px): o botão Menu abre; Fechar, Esc, clique fora ou a escolha de uma seção ou conversa fecham. Dentro da gaveta, a lista de conversas tem rolagem própria e o rodapé fica fixo.
 - O estilo é um arquivo só, `prototipo.css`, com tokens em `:root`. Cada cor hexadecimal ou rgb virou token nomeado pelo valor (`--cor-...`); não há cor literal fora de `:root`.
 - Os scripts ficam em IIFE. O único nome global é `window.AgataPainel`, usado por `nova_versao.js` para falar com o `prototipo.js`.
 

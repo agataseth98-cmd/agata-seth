@@ -33,29 +33,45 @@ function setSidebarCollapsed(collapsed) {
   navSecoes.forEach((button) => { button.title = button.textContent.trim(); });
   try { localStorage.setItem("agata-sidebar-collapsed", String(collapsed)); } catch (_) { /* sem persistência */ }
 }
+// Gaveta (tela estreita): o menu vira painel que abre pelo botão Menu. Esc e a escolha de uma seção ou conversa fecham.
+function gavetaAberta() { return shell.classList.contains("menu-aberto"); }
+function setGaveta(aberta) {
+  shell.classList.toggle("menu-aberto", aberta);
+  byId("menu-abrir").setAttribute("aria-expanded", String(aberta));
+}
+byId("menu-abrir").addEventListener("click", () => setGaveta(!gavetaAberta()));
+byId("menu-fechar").addEventListener("click", () => { setGaveta(false); byId("menu-abrir").focus(); });
+document.addEventListener("click", (e) => {
+  if (gavetaAberta() && !dentroDe(byId("sidebar-principal"), e.target) && !dentroDe(byId("menu-abrir"), e.target)) setGaveta(false);
+});
 let sidebarCollapsed = false;
 try { sidebarCollapsed = localStorage.getItem("agata-sidebar-collapsed") === "true"; } catch (_) { /* sem persistência */ }
 setSidebarCollapsed(sidebarCollapsed);
 sidebarToggle.addEventListener("click", () => setSidebarCollapsed(!shell.classList.contains("sidebar-collapsed")));
 
-// Subpainel visível da seção aberta (filho direto da seção, sem atributo hidden).
-function subAtivo() {
-  return document.querySelector(".secao:not([hidden]) > .sub:not([hidden])");
+// Subs visíveis da seção aberta (filhos diretos da seção, sem atributo hidden). Seções "juntos" (Conhecimento) têm vários.
+const DETALHES_SUB = ["integracoes", "memoria"];
+function subsAtivos() {
+  return [...document.querySelectorAll(".secao:not([hidden]) > .sub:not([hidden])")];
 }
 function filterSearch(value) {
-  const ativo = subAtivo();
-  if (!ativo) return;
-  const cards = [...ativo.querySelectorAll(".cap-card")];
+  const ativos = subsAtivos();
+  if (!ativos.length) return;
   const query = value.toLocaleLowerCase("pt-BR");
-  let visible = 0;
-  cards.forEach((card) => {
-    const matchesText = !query || card.innerText.toLocaleLowerCase("pt-BR").includes(query);
-    const matchesState = ativo.dataset.sub !== "capacidades" || capFilter === "all" || card.dataset.state === capFilter;
-    card.hidden = !(matchesText && matchesState);
-    if (!card.hidden) visible++;
+  let cards = 0; let visible = 0; let capacidadesAbertas = false;
+  ativos.forEach((ativo) => {
+    const capacidades = ativo.dataset.sub === "capacidades";
+    if (capacidades) capacidadesAbertas = true;
+    [...ativo.querySelectorAll(".cap-card")].forEach((card) => {
+      cards++;
+      const matchesText = !query || card.innerText.toLocaleLowerCase("pt-BR").includes(query);
+      const matchesState = !capacidades || capFilter === "all" || card.dataset.state === capFilter;
+      card.hidden = !(matchesText && matchesState);
+      if (!card.hidden) visible++;
+    });
   });
   const empty = byId("no-results");
-  if (empty) empty.classList.toggle("show", ativo.dataset.sub === "capacidades" && cards.length > 0 && visible === 0);
+  if (empty) empty.classList.toggle("show", capacidadesAbertas && cards > 0 && visible === 0);
 }
 
 // Estados de uma seção: carregando, vazio ou erro. Ficam ocultos no HTML; aqui só um aparece por vez.
@@ -88,21 +104,37 @@ const CARREGAR_SUB = {
   historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
 };
 
+// Memória e integrações são a mesma leitura de detalhes: a rota carrega uma vez por abertura.
+const ROTA_DE_SUB = {integracoes: "detalhes", memoria: "detalhes"};
+function carregarSubs(nomes) {
+  const feitas = new Set();
+  nomes.forEach((nome) => {
+    const rota = ROTA_DE_SUB[nome] || nome;
+    if (feitas.has(rota)) return;
+    feitas.add(rota);
+    if (CARREGAR_SUB[nome]) CARREGAR_SUB[nome]();
+    else if (nome.startsWith("nv-") && typeof AgataPainel.carregarNovaVersao === "function") AgataPainel.carregarNovaVersao(nome);
+  });
+}
 function mostrarSub(secao, sub) {
   const alvo = byId(secao);
   if (!alvo) return;
   const subs = [...alvo.querySelectorAll(":scope > .sub")];
   const escolhido = subs.find((item) => item.dataset.sub === sub) || subs[0];
   if (!escolhido) return;
-  subs.forEach((item) => { item.hidden = item !== escolhido; });
-  alvo.querySelectorAll(":scope > .abas > button[data-sub]").forEach((botao) => {
-    const ativa = botao.dataset.sub === escolhido.dataset.sub;
-    botao.setAttribute("aria-selected", String(ativa));
-    botao.classList.toggle("ativa", ativa);
-  });
-  const nome = escolhido.dataset.sub;
-  if (CARREGAR_SUB[nome]) CARREGAR_SUB[nome]();
-  else if (nome.startsWith("nv-") && typeof AgataPainel.carregarNovaVersao === "function") AgataPainel.carregarNovaVersao(nome);
+  if (alvo.dataset.subs === "juntos") {
+    // Conhecimento: todos os blocos à vista; cada um carrega ao abrir a seção.
+    subs.forEach((item) => { item.hidden = false; });
+    carregarSubs(subs.map((item) => item.dataset.sub));
+  } else {
+    subs.forEach((item) => { item.hidden = item !== escolhido; });
+    alvo.querySelectorAll(":scope > .abas > button[data-sub]").forEach((botao) => {
+      const ativa = botao.dataset.sub === escolhido.dataset.sub;
+      botao.setAttribute("aria-selected", String(ativa));
+      botao.classList.toggle("ativa", ativa);
+    });
+    carregarSubs([escolhido.dataset.sub]);
+  }
   filterSearch(search.value.trim());
 }
 function mostrarSecao(secao, sub, topo = true) {
@@ -113,6 +145,9 @@ function mostrarSecao(secao, sub, topo = true) {
     else botao.removeAttribute("aria-current");
   });
   byId("crumb").textContent = "Agata / " + (alvo.dataset.titulo || "Panorama");
+  // Na Conversa a busca do mapa some: a busca de conversas está no menu (painel-conversa-16-11).
+  byId("mapa-busca").hidden = alvo.id === "conversa";
+  setGaveta(false);
   search.value = "";
   mostrarSub(alvo.id, sub);
   // F7 (16/11): trocar de seção começa no topo; o navegador rolaria até a âncora #secao (~70px). Hash de item interno fica onde está.
@@ -136,6 +171,10 @@ function aoMudarHash() { mostrarSecao(secaoDoHash(), undefined, !hashDeItemInter
 window.addEventListener("hashchange", aoMudarHash);
 window.addEventListener("popstate", aoMudarHash);
 navSecoes.forEach((botao) => botao.addEventListener("click", () => irPara(botao.dataset.secao)));
+document.querySelectorAll("[data-ancora]").forEach((botao) => botao.addEventListener("click", () => {
+  const alvo = byId(botao.dataset.ancora);
+  if (alvo && alvo.scrollIntoView) alvo.scrollIntoView({block: "start"});
+}));
 document.querySelectorAll(".abas > button[data-sub]").forEach((botao) => botao.addEventListener("click", () => {
   mostrarSub(botao.closest(".secao").id, botao.dataset.sub);
 }));
@@ -506,10 +545,14 @@ async function loadDetails() {
     if (!Array.isArray(data.integrations) || !data.memory) throw new Error("resposta incompleta");
     if (lastDetails) data.integrations = preserveList(lastDetails.integrations, data.integrations, "unit");
     if (lastDetails) data.memory = preserveReading(lastDetails.memory, data.memory);
-    lastDetails = data; detailsFailed = false; marcarEstado("sistema", null); renderDetails(data);
+    const teveErro = detailsFailed;
+    lastDetails = data; detailsFailed = false; marcarEstado("sistema", null); if (teveErro) marcarEstado("conhecimento", null); renderDetails(data);
   } catch (_) {
     detailsFailed = true;
-    marcarEstado("sistema", "erro", "Não medido: consulta de integrações indisponível." + (lastDetails ? " Última leitura preservada como vencida." : ""));
+    const sufixo = lastDetails ? " Última leitura preservada como vencida." : "";
+    // Integrações ficam em Sistema; a memória fica em Conhecimento (defeito corrigido em 16/11/2026).
+    marcarEstado("sistema", "erro", "Não medido: consulta de integrações indisponível." + sufixo);
+    marcarEstado("conhecimento", "erro", "Não medido: consulta da memória indisponível." + sufixo);
     if (lastDetails) renderDetails(lastDetails, true);
     else { set("integration-source", "Consulta indisponível."); set("memory-source", "Consulta indisponível."); renderIntegrationCards([], false); }
   } finally { detailsBusy = false; }
@@ -584,15 +627,13 @@ byId("refresh-status").addEventListener("click", () => atualizarPanorama(true));
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     atualizarPanorama();
-    const ativo = subAtivo();
-    if (ativo && ["integracoes", "memoria"].includes(ativo.dataset.sub)) loadDetails();
+    if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
   }
 });
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
   atualizarPanorama();
-  const ativo = subAtivo();
-  if (ativo && ["integracoes", "memoria"].includes(ativo.dataset.sub)) loadDetails();
+  if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
 }, 60000);
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
@@ -687,7 +728,11 @@ function ligarCartoesClicaveis() {
 
 /* (27/10/2026) Conversa com a Seth pelo gateway local (/api/seth/chat/stream, com fallback para /api/seth/chat). Só texto; histórico só na memória desta aba. */
 const SETH_MODELO_PADRAO = "seth-livre";
-let sethAtual = {id: null, titulo: "", modelo: SETH_MODELO_PADRAO, temporaria: false, nos: [], folha: null, ramificada_de: null};
+let sethAtual = {id: null, titulo: "", modelo: SETH_MODELO_PADRAO, temporaria: false, nos: [], folha: null, ramificada_de: null, instrucoes: "", rascunho: "nova-inicial", erro: null};
+// Uso informado pelo gateway no último pedido (C11): {alvo, entrada, saida}. Vale só para a conversa que pediu.
+let sethUso = null;
+let sethSeqRascunho = 0;
+// Rascunhos (C6): texto e anexos pendentes, por conversa. Só em memória (um Map): sem armazenamento do navegador (R9, 16/11/2026).
 // Resposta em curso (AbortController, para o botão Parar) e mensagem do usuário em edição (id).
 let sethControle = null;
 let sethEditandoId = null;
@@ -699,10 +744,22 @@ const SETH_NOTAS = ["Correção do turno anterior", "Verificação da Máquina"]
 // e armazem.py (CONVERSA_LIMITE_BYTES). test_chat_ui.py confere que os números são os mesmos.
 const SETH_MAX_MENSAGENS = 20;
 const SETH_MAX_CARACTERES = 4000;
-const SETH_LIMITE_PEDIDO_BYTES = 131072;
+const SETH_LIMITE_PEDIDO_BYTES = 262144; // C10 (16/11/2026): 20 mensagens com acentos mais anexos; igual a CHAT_STREAM_LIMITE_BYTES
 const SETH_LIMITE_CONVERSA_BYTES = 262144;
 const SETH_LIMITE_IMPORTACAO_BYTES = 263168;
 const SETH_BUSCA_MAX_CARACTERES = 120;
+// C8/C9 (16/11/2026): instruções da conversa e anexos de texto (espelho de chat_stream.py: MAX_INSTRUCOES, MAX_ANEXOS,
+// MAX_ANEXO_NOME, MAX_ANEXO_TEXTO, MAX_ANEXOS_TOTAL). SETH_COLAR_LIMITE: texto colado acima disso vira anexo colado.txt.
+const SETH_INSTRUCOES_LIMITE = 2000;
+const SETH_ANEXOS_MAX = 3;
+const SETH_ANEXO_NOME_MAX = 120;
+const SETH_ANEXO_TEXTO_MAX = 20000;
+const SETH_ANEXOS_TOTAL_MAX = 40000;
+const SETH_ANEXO_BYTES_MAX = 4 * SETH_ANEXO_TEXTO_MAX; // X1 (16/11/2026): teto do arquivo em bytes (File.size), conferido antes da leitura; o servidor confere caracteres.
+const SETH_COLAR_LIMITE = 4000;
+const SETH_ANEXO_EXTENSOES = [".txt", ".md", ".json", ".csv", ".log", ".py", ".js", ".ts", ".html", ".css", ".yaml", ".yml", ".toml", ".sh"];
+const SETH_IMAGEM_EXTENSOES = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+const sethRascunhos = new Map(); // R9: rascunhos por chave de conversa; somem ao recarregar a página (nunca vão para o navegador)
 // Lote 4 (09/11/2026): motivo do feedback (espelho de armazem.FEEDBACK_MOTIVO_LIMITE) e textos das respostas.
 const SETH_FEEDBACK_MOTIVO_LIMITE = 200;
 const SETH_CONTINUAR = "Continue de onde parou, sem repetir o que já foi dito.";
@@ -715,8 +772,17 @@ let sethBuscaSeq = 0;
 // Lixeira (09/11/2026): conversas apagadas, de GET /api/seth/lixeira. `sethRespondendo` vale enquanto a Seth responde e o salvar termina.
 let sethLixeira = {items: [], total: 0, ilegiveis: 0, indisponivel: false};
 let sethRespondendo = false;
-function sethNova(temporaria = false) { return {id: null, titulo: "", modelo: sethAtual.modelo, temporaria, nos: [], folha: null, ramificada_de: null}; }
-function sethHora(data = new Date()) { return data.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+function sethNova(temporaria = false) { return {id: null, titulo: "", modelo: sethAtual.modelo, temporaria, nos: [], folha: null, ramificada_de: null, instrucoes: "", rascunho: sethChaveNova(), erro: null}; }
+// Hora da mensagem (C5): ISO 8601 com o fuso local (ex.: 2026-11-16T18:05:00-03:00), a mesma forma que armazem.py aceita.
+function sethHora(data = new Date()) {
+  const p = (n) => String(n).padStart(2, "0");
+  const minutos = -data.getTimezoneOffset(); const sinal = minutos >= 0 ? "+" : "-"; const abs = Math.abs(minutos);
+  return data.getFullYear() + "-" + p(data.getMonth() + 1) + "-" + p(data.getDate()) + "T" + p(data.getHours()) + ":" + p(data.getMinutes())
+    + ":" + p(data.getSeconds()) + sinal + p(Math.floor(abs / 60)) + ":" + p(abs % 60);
+}
+// Mostrado na transcrição: hora curta e, no title, a data completa. Hora ausente ou inválida não mostra nada.
+function sethHoraCurta(iso) { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}); }
+function sethHoraCompleta(iso) { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleString("pt-BR", {day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"}); }
 function sethStatus(texto, classe) { const e = byId("seth-status"); e.textContent = texto; e.className = "chip " + classe; }
 function sethTitulo(texto) { byId("seth-titulo").textContent = texto || (sethAtual.temporaria ? "Conversa temporária" : "Nova conversa"); }
 function sethMostrarModelo() {
@@ -742,32 +808,128 @@ function sethTextoModelo(m) {
   if (m.modelo) return "modelo: " + m.modelo + " (escolhido)";
   return "modelo: não registrado";
 }
+// Inline (C1, C2): código, negrito, tachado, itálico, [texto](url) e URL solta. Só elementos e textNode; nunca `a`.
+// No split com grupo de captura, os trechos casados caem nos índices ímpares; o resto é texto puro.
+const SETH_INLINE_RE = /(`[^`\n]+`|\[[^\]\n]+\]\([^)\s]+\)|https?:\/\/[^\s<>()]+|\*\*[^*\n]+\*\*|~~[^~\n]+~~|(?<![\w*])\*(?![\s*])[^*\n]+?\*(?![\w*])|(?<![\w_])_(?![\s_])[^_\n]+?_(?![\w_]))/;
 function sethInline(container, texto) {
-  const partes = String(texto).split(/(\*\*[^*]+\*\*|`[^`]+`)/);
-  for (const p of partes) {
-    if (!p) continue;
-    if (p.startsWith("**") && p.endsWith("**")) { const b = document.createElement("strong"); b.textContent = p.slice(2, -2); container.append(b); }
-    else if (p.startsWith("`") && p.endsWith("`")) { const c = document.createElement("code"); c.textContent = p.slice(1, -1); container.append(c); }
-    else container.append(document.createTextNode(p));
-  }
+  String(texto).split(SETH_INLINE_RE).forEach((p, i) => {
+    if (!p) return;
+    if (i % 2 === 0) { container.append(document.createTextNode(p)); return; }
+    if (p.startsWith("`")) { const c = document.createElement("code"); c.textContent = p.slice(1, -1); container.append(c); }
+    else if (p.startsWith("**")) { const b = document.createElement("strong"); b.textContent = p.slice(2, -2); container.append(b); }
+    else if (p.startsWith("~~")) { const d = document.createElement("del"); d.textContent = p.slice(2, -2); container.append(d); }
+    else if (p.startsWith("[")) sethLinkMarkdown(container, p);
+    else if (p.startsWith("http")) {
+      // A pontuação colada logo depois da URL (ponto, vírgula) fica como texto, fora do link.
+      const [, url, fim] = p.match(/^(.*?)([.,;:!?]*)$/);
+      sethLinkCopiavel(container, "", url);
+      if (fim) container.append(document.createTextNode(fim));
+    }
+    else { const e = document.createElement("em"); e.textContent = p.slice(1, -1); container.append(e); }
+  });
+}
+// Só http e https viram link (com o endereço visível e botão Copiar link). Outro esquema fica como texto puro.
+function sethLinkMarkdown(container, trecho) {
+  const m = trecho.match(/^\[([^\]\n]+)\]\(([^)\s]+)\)$/);
+  if (!m || !/^https?:\/\//i.test(m[2])) { container.append(document.createTextNode(trecho)); return; }
+  sethLinkCopiavel(container, m[1], m[2]);
+}
+function sethLinkCopiavel(container, rotulo, endereco) {
+  const bloco = document.createElement("span"); bloco.className = "md-link";
+  if (rotulo) { const nome = document.createElement("span"); nome.className = "md-link-rotulo"; nome.textContent = rotulo; bloco.append(nome, document.createTextNode(" ")); }
+  const url = document.createElement("code"); url.className = "md-link-url"; url.textContent = endereco;
+  const copiar = sethTexto("Copiar link", async () => {
+    try { await navigator.clipboard.writeText(endereco); copiar.textContent = "Link copiado"; }
+    catch (_) { copiar.textContent = "Não foi possível copiar"; }
+    setTimeout(() => { copiar.textContent = "Copiar link"; }, 1600);
+  });
+  bloco.append(url, document.createTextNode(" "), copiar);
+  container.append(bloco);
+}
+// Bloco de código (C3): cabeçalho com a linguagem, botão Copiar e região aria-live para o "Copiado" (2 s).
+function sethBlocoCodigo(lingua, destino) {
+  const bloco = document.createElement("div"); bloco.className = "md-codigo";
+  const cab = document.createElement("div"); cab.className = "md-codigo-cab";
+  const nome = document.createElement("span"); nome.className = "md-codigo-lingua"; nome.textContent = lingua || "código";
+  const aviso = document.createElement("span"); aviso.className = "md-codigo-aviso"; aviso.setAttribute("role", "status"); aviso.setAttribute("aria-live", "polite");
+  const pre = document.createElement("pre"); const code = document.createElement("code"); pre.append(code);
+  const copiar = sethTexto("Copiar", async () => {
+    try { await navigator.clipboard.writeText(code.textContent.replace(/\n$/, "")); aviso.textContent = "Copiado"; }
+    catch (_) { aviso.textContent = "Não foi possível copiar"; }
+    setTimeout(() => { aviso.textContent = ""; }, 2000);
+  });
+  cab.append(nome, aviso, copiar);
+  bloco.append(cab, pre); destino.append(bloco);
+  return code;
+}
+// Tabela (C1): cabeçalho com |, linha de traços e linhas; dentro de moldura com rolagem horizontal.
+const SETH_SEPARADOR_TABELA = /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/;
+function sethCelulas(linha) { return linha.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim()); }
+function sethTabela(cabecalho, linhas, destino) {
+  const moldura = document.createElement("div"); moldura.className = "md-tabela"; moldura.setAttribute("role", "region");
+  moldura.setAttribute("aria-label", "Tabela"); moldura.tabIndex = 0;
+  const tabela = document.createElement("table");
+  const thead = document.createElement("thead"); const cabeca = document.createElement("tr");
+  sethCelulas(cabecalho).forEach((c) => { const th = document.createElement("th"); th.setAttribute("scope", "col"); sethInline(th, c); cabeca.append(th); });
+  thead.append(cabeca);
+  const tbody = document.createElement("tbody");
+  linhas.forEach((l) => { const tr = document.createElement("tr"); sethCelulas(l).forEach((c) => { const td = document.createElement("td"); sethInline(td, c); tr.append(td); }); tbody.append(tr); });
+  tabela.append(thead, tbody); moldura.append(tabela); destino.append(moldura);
+}
+// Markdown por elementos do DOM (C1): títulos #/##/### em h3/h4/h5, listas (aninhadas por dois espaços), citação, tabela,
+// linha horizontal, bloco de código com linguagem. Texto vem só por textContent ou por sethInline.
+// J1 (16/11/2026): a próxima linha não vazia, depois de linhas em branco, é item de lista?
+function sethItemDepois(linhas, i) {
+  let j = i + 1;
+  while (j < linhas.length && !linhas[j].trim()) j++;
+  return j < linhas.length && /^\s*([-*+]|\d+[.)])\s+/.test(linhas[j]);
 }
 function sethMarkdown(texto, destino) {
   const linhas = String(texto).split("\n");
-  let lista = null, codigo = null;
-  for (const linha of linhas) {
-    if (linha.trim().startsWith("```")) {
-      if (codigo) { codigo = null; continue; }
-      codigo = document.createElement("pre"); const c = document.createElement("code"); codigo.append(c); destino.append(codigo); lista = null; continue;
+  let codigo = null, cit = null, pilha = [];
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i];
+    if (codigo) {
+      if (/^\s*```/.test(linha)) { codigo.textContent = codigo.textContent.replace(/\n$/, ""); codigo = null; }
+      else codigo.textContent += linha + "\n";
+      continue;
     }
-    if (codigo) { codigo.firstChild.textContent += linha + "\n"; continue; }
-    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = linha.trim(); destino.append(aside); lista = null; continue; }
+    if (/^\s*```/.test(linha)) { codigo = sethBlocoCodigo(linha.trim().slice(3).trim().split(/\s+/)[0], destino); cit = null; pilha = []; continue; }
+    if (!/^\s*>/.test(linha)) cit = null;
+    if (SETH_NOTAS.some((p) => linha.trim().startsWith(p))) { const aside = document.createElement("aside"); aside.className = "nota"; aside.textContent = linha.trim(); destino.append(aside); pilha = []; continue; }
+    // Linha em branco não quebra a lista: se o próximo texto é item, a lista segue (J1, 16/11/2026).
+    if (!linha.trim()) { if (!sethItemDepois(linhas, i)) pilha = []; continue; }
+    if (/^\s*([-*_])(?:\s*\1){2,}\s*$/.test(linha)) { destino.append(document.createElement("hr")); pilha = []; continue; }
     const cabeca = linha.match(/^(#{1,3})\s+(.*)$/);
-    if (cabeca) { const h = document.createElement("h4"); sethInline(h, cabeca[2]); destino.append(h); lista = null; continue; }
-    const item = linha.match(/^\s*[-*]\s+(.*)$/);
-    if (item) { if (!lista) { lista = document.createElement("ul"); destino.append(lista); } const li = document.createElement("li"); sethInline(li, item[1]); lista.append(li); continue; }
-    if (!linha.trim()) { lista = null; continue; }
-    const p = document.createElement("p"); sethInline(p, linha); destino.append(p); lista = null;
+    if (cabeca) { const h = document.createElement(["h3", "h4", "h5"][cabeca[1].length - 1]); sethInline(h, cabeca[2]); destino.append(h); pilha = []; continue; }
+    if (linha.includes("|") && i + 1 < linhas.length && SETH_SEPARADOR_TABELA.test(linhas[i + 1])) {
+      const corpo = []; let j = i + 2;
+      while (j < linhas.length && linhas[j].includes("|") && linhas[j].trim()) corpo.push(linhas[j++]);
+      sethTabela(linha, corpo, destino); pilha = []; i = j - 1; continue;
+    }
+    if (/^\s*>/.test(linha)) {
+      if (!cit) { cit = document.createElement("blockquote"); destino.append(cit); }
+      const p = document.createElement("p"); sethInline(p, linha.replace(/^\s*>\s?/, "")); cit.append(p); pilha = []; continue;
+    }
+    const item = linha.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+    if (item) {
+      // Nível pelo recuo (dois espaços por nível). Lista de outro tipo no mesmo nível começa uma lista nova.
+      const nivel = Math.floor(item[1].replace(/\t/g, "  ").length / 2); const ordenada = /\d/.test(item[2]);
+      while (pilha.length && (pilha[pilha.length - 1].nivel > nivel || (pilha[pilha.length - 1].nivel === nivel && pilha[pilha.length - 1].ordenada !== ordenada))) pilha.pop();
+      let topo = pilha[pilha.length - 1];
+      if (!topo || topo.nivel < nivel) {
+        const lista = document.createElement(ordenada ? "ol" : "ul");
+        // Número inicial do texto (J1): "3." começa em 3; "1." segue o padrão do navegador.
+        if (ordenada && parseInt(item[2], 10) !== 1 && Number.isFinite(parseInt(item[2], 10))) lista.setAttribute("start", String(parseInt(item[2], 10)));
+        (topo ? (topo.li || topo.lista) : destino).append(lista);
+        topo = {nivel, ordenada, lista, li: null}; pilha.push(topo);
+      }
+      const li = document.createElement("li"); sethInline(li, item[3]); topo.lista.append(li); topo.li = li;
+      continue;
+    }
+    const p = document.createElement("p"); sethInline(p, linha); destino.append(p); pilha = [];
   }
+  if (codigo) codigo.textContent = codigo.textContent.replace(/\n$/, "");
 }
 function sethMensagem(m, indice) {
   const log = byId("seth-transcript");
@@ -776,7 +938,9 @@ function sethMensagem(m, indice) {
   msg.dataset.indice = String(indice);
   const cab = document.createElement("div"); cab.className = "msg-head";
   const quem = document.createElement("strong"); quem.textContent = m.role === "user" ? "Você" : "Seth";
-  const hora = document.createElement("span"); hora.textContent = m.hora || "";
+  // Hora (C5): só com hora gravada; mensagem antiga sem hora não mostra nada.
+  const hora = document.createElement("time");
+  if (m.hora) { hora.setAttribute("datetime", m.hora); hora.textContent = sethHoraCurta(m.hora); hora.title = sethHoraCompleta(m.hora); }
   cab.append(quem, hora);
   if (m.role === "assistant") { const modelo = document.createElement("span"); modelo.className = "msg-modelo"; modelo.textContent = sethTextoModelo(m); cab.append(modelo); }
   if (m.interrompida) cab.append(sethSelo("interrompida", "seth-selo-interrompida"));
@@ -784,6 +948,8 @@ function sethMensagem(m, indice) {
   if (m.role === "user") { if (sethEditandoId === m.id) sethFormEdicao(m, corpo); else corpo.textContent = m.content; }
   else sethCorpo(m, corpo);
   msg.append(cab, corpo);
+  // Anexos da mensagem do usuário (C9): só o metadado gravado (nome e caracteres); o texto do anexo não fica na conversa.
+  if (m.role === "user" && m.anexos && m.anexos.length && sethEditandoId !== m.id) msg.append(sethEtiquetasAnexos(m.anexos));
   if (m.aviso) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.aviso; msg.append(aviso); }
   if (m.interrompida) { const aviso = document.createElement("p"); aviso.className = "seth-aviso"; aviso.textContent = m.content ? SETH_INTERROMPIDA : SETH_INTERROMPIDA_VAZIA; msg.append(aviso); }
   const irmaos = sethIrmaos(m);
@@ -794,19 +960,21 @@ function sethMensagem(m, indice) {
 function sethDesenhar() {
   const log = byId("seth-transcript"); log.replaceChildren();
   const caminho = sethCaminho();
-  if (!caminho.length) {
-    const vazio = document.createElement("p"); vazio.className = "seth-vazio vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
-    log.append(vazio);
-  }
   caminho.forEach((no, i) => sethMensagem(no, i));
+  // Falha da última resposta (C7): fica no fim da transcrição até "Tentar de novo" ou uma nova pergunta.
+  if (sethAtual.erro) log.append(sethBlocoErro(sethAtual.erro));
+  // Estado vazio central (saudação e sugestões) só enquanto a conversa não tem mensagem.
+  const central = byId("seth-vazio-central"); if (central) central.hidden = caminho.length > 0;
   log.scrollTop = log.scrollHeight;
   sethTitulo(sethAtual.titulo);
   sethPintarAvisoSalvar();
   sethPintarTemporaria();
+  sethPintarInstrucoes();
   sethPintarExportar();
   sethPintarOrigem();
   sethPintarContexto(caminho);
   sethPintarParar();
+  sethAtualizarFim();
 }
 function sethExemplos() {
   const box = byId("seth-exemplos"); if (!box) return;
@@ -821,7 +989,9 @@ function sethOpcao(valor, rotulo) { const o = document.createElement("option"); 
 function sethTexto(rotulo, aoClicar) { const b = document.createElement("button"); b.type = "button"; b.className = "text-link"; b.textContent = rotulo; b.addEventListener("click", aoClicar); return b; }
 function sethSelo(texto, classe) { const s = document.createElement("span"); s.className = "seth-selo " + classe; s.textContent = texto; return s; }
 function sethVazio(texto) { const p = document.createElement("p"); p.className = "seth-vazio"; p.textContent = texto; return p; }
-function sethMostrarOrg(texto) { const aviso = byId("seth-org-aviso"); if (!aviso) return; aviso.textContent = texto || ""; aviso.hidden = !texto; }
+// C12b (16/11/2026): o aviso de organização aparece no diálogo e também no menu, junto da lista de conversas.
+function sethEspelhos(id) { return [byId(id), byId(id + "-menu")].filter(Boolean); }
+function sethMostrarOrg(texto) { sethEspelhos("seth-org-aviso").forEach((aviso) => { aviso.textContent = texto || ""; aviso.hidden = !texto; }); }
 // Motivo de recusa do painel em português, sem o conteúdo da conversa (o servidor só devolve a regra).
 function sethErroOrg(status, motivo) {
   if (status === 404) return "Conversa ou pasta não encontrada; a lista foi atualizada.";
@@ -849,13 +1019,11 @@ async function sethListar() {
 }
 // Arquivos de conversa que não puderam ser lidos (na lista ou na lixeira): o servidor só conta, não apaga nada.
 function sethPintarIlegiveis() {
-  const aviso = byId("seth-ilegiveis-aviso"); if (!aviso) return;
   const n = sethLista.ilegiveis + sethLixeira.ilegiveis;
-  if (!n) { aviso.textContent = ""; aviso.hidden = true; return; }
-  aviso.textContent = n === 1
+  const texto = !n ? "" : n === 1
     ? "1 arquivo de conversa não pôde ser lido e não aparece aqui. Nada foi apagado; confira a pasta de conversas."
     : n + " arquivos de conversa não puderam ser lidos e não aparecem aqui. Nada foi apagado; confira a pasta de conversas.";
-  aviso.hidden = false;
+  sethEspelhos("seth-ilegiveis-aviso").forEach((aviso) => { aviso.textContent = texto; aviso.hidden = !texto; });
 }
 // Lixeira: restaurar devolve a conversa com a organização dela; apagar de vez pede confirmação (purga manual).
 function sethPintarLixeira() {
@@ -914,12 +1082,29 @@ function sethPintarFiltros() {
   marcador.value = sethFiltro.marcador;
 }
 function sethGrupo(texto) { const h = document.createElement("p"); h.className = "seth-grupo"; h.textContent = texto; return h; }
+// Grupos da lista: Fixadas e depois pela data real (campo atualizada). Vazio não aparece.
+const SETH_GRUPOS = ["Fixadas", "Hoje", "Ontem", "Últimos 7 dias", "Mais antigas"];
+function sethGrupoDaData(c, agora = new Date()) {
+  const data = new Date(c.atualizada || "");
+  if (!Number.isFinite(data.getTime())) return "Mais antigas";
+  const dia = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const dias = Math.round((dia(agora) - dia(data)) / 86400000);
+  if (dias <= 0) return "Hoje";
+  if (dias === 1) return "Ontem";
+  if (dias <= 7) return "Últimos 7 dias";
+  return "Mais antigas";
+}
 function sethPreencher(box, itens, vazio) {
   box.replaceChildren();
   if (!itens.length) { box.append(sethVazio(vazio)); return; }
-  const fixadas = itens.filter((c) => c.fixada); const outras = itens.filter((c) => !c.fixada);
-  if (fixadas.length) { box.append(sethGrupo("Fixadas")); fixadas.forEach((c) => box.append(sethLinha(c))); }
-  if (outras.length) { if (fixadas.length) box.append(sethGrupo("Recentes")); outras.forEach((c) => box.append(sethLinha(c))); }
+  const grupos = new Map(SETH_GRUPOS.map((nome) => [nome, []]));
+  itens.forEach((c) => grupos.get(c.fixada ? "Fixadas" : sethGrupoDaData(c)).push(c));
+  SETH_GRUPOS.forEach((nome) => {
+    const lista = grupos.get(nome);
+    if (!lista.length) return;
+    box.append(sethGrupo(nome));
+    lista.forEach((c) => box.append(sethLinha(c)));
+  });
 }
 function sethPintarLista() {
   if (!byId("seth-conversas")) return;
@@ -935,11 +1120,70 @@ function sethPintarLista() {
   sethPreencher(byId("seth-arquivadas"), visiveis.filter((c) => c.arquivada), arquivadas.length ? "Nenhuma conversa arquivada com este filtro." : "Nenhuma conversa arquivada.");
   if (sethLista.organizacao === "ilegivel") sethMostrarOrg("A organização das conversas (fixadas, arquivadas, marcadores e pastas) está ilegível. Nada será alterado até o arquivo ser conferido.");
 }
+// Menus de ação: um aberto por vez; Esc e clique fora fecham; setas andam entre os itens (painel-conversa-16-11).
+let menuAberto = null;
+// J8 (16/11/2026): ao fechar por Esc ou escolha, o foco volta ao botão "Mais" (se a ação não levou o foco a outro lugar).
+function fecharMenuAberto(devolverFoco = false) {
+  if (!menuAberto) return;
+  const {gatilho, menu} = menuAberto;
+  const ativo = document.activeElement;
+  const foco = !ativo || ativo === document.body || dentroDe(menu, ativo);
+  menu.hidden = true;
+  gatilho.setAttribute("aria-expanded", "false");
+  menuAberto = null;
+  if (devolverFoco && foco) gatilho.focus();
+}
+function dentroDe(no, alvo) { for (let n = alvo; n; n = n.parentNode) if (n === no) return true; return false; }
+document.addEventListener("click", (e) => {
+  if (!menuAberto) return;
+  if (dentroDe(menuAberto.menu, e.target) || dentroDe(menuAberto.gatilho, e.target)) return;
+  fecharMenuAberto();
+});
+function ligarMenu(gatilho, menu, fecharAoEscolher = false) {
+  gatilho.addEventListener("click", () => {
+    const abrir = menu.hidden;
+    fecharMenuAberto();
+    if (!abrir) return;
+    menu.hidden = false;
+    gatilho.setAttribute("aria-expanded", "true");
+    menuAberto = {gatilho, menu};
+    const primeiro = menu.querySelector('[role="menuitem"]');
+    if (primeiro) primeiro.focus();
+  });
+  menu.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); fecharMenuAberto(true); return; }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const itens = [...menu.querySelectorAll('[role="menuitem"]')];
+    const atual = itens.indexOf(document.activeElement);
+    const proximo = (atual + (e.key === "ArrowDown" ? 1 : -1) + itens.length) % itens.length;
+    if (itens[proximo]) itens[proximo].focus();
+  });
+  if (fecharAoEscolher) menu.addEventListener("click", (e) => {
+    if (e.target && e.target.getAttribute && e.target.getAttribute("role") === "menuitem") fecharMenuAberto(true);
+  });
+}
+function sethItemMenu(texto, aoClicar, fecha = true) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "seth-menu-item"; b.textContent = texto;
+  b.setAttribute("role", "menuitem");
+  b.addEventListener("click", () => { if (fecha) fecharMenuAberto(); aoClicar(); });
+  return b;
+}
+function sethLinkExportar(c, formato, rotulo) {
+  const a = document.createElement("a"); a.className = "seth-menu-item"; a.setAttribute("role", "menuitem");
+  a.href = "/api/seth/conversa/exportar?id=" + encodeURIComponent(c.id) + "&formato=" + formato;
+  a.download = ""; a.textContent = rotulo;
+  a.addEventListener("click", () => fecharMenuAberto());
+  return a;
+}
+// Uma linha por conversa: título (com reticências), selos e o menu "Mais ações de <título>".
 function sethLinha(c) {
   const linha = document.createElement("div");
   linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "") + (c.fixada ? " fixada" : "");
-  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = tituloDaLista(c.titulo);
-  abrir.title = tituloDaLista(c.titulo) + " · " + c.mensagens + " mensagens · " + c.atualizada;
+  const tituloLido = tituloDaLista(c.titulo) || "sem título";
+  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = tituloLido;
+  abrir.title = tituloLido + " · " + c.mensagens + " mensagens · " + c.atualizada;
+  if (c.id === sethAtual.id) abrir.setAttribute("aria-current", "true");
   abrir.addEventListener("click", () => sethAbrir(c.id));
   const meta = document.createElement("div"); meta.className = "seth-item-meta";
   if (c.fixada) meta.append(sethSelo("Fixada", "seth-selo-fixada"));
@@ -947,26 +1191,65 @@ function sethLinha(c) {
   const pasta = sethLista.pastas.find((p) => p.id === c.pasta);
   if (pasta) meta.append(sethSelo("Pasta: " + pasta.nome, "seth-selo-pasta"));
   (c.marcadores || []).forEach((m) => meta.append(sethSelo("#" + m, "seth-selo-marcador")));
-  const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
-  // Título lido pelo nome: o foco no item mostra as ações (CSS); o leitor de tela anuncia de qual conversa são.
-  const tituloLido = tituloDaLista(c.titulo) || "sem título";
-  acoes.setAttribute("role", "group"); acoes.setAttribute("aria-label", "Ações da conversa " + tituloLido);
-  const renomear = sethTexto("Renomear", () => sethRenomear(c, linha));
-  const fixar = sethTexto(c.fixada ? "Desfixar" : "Fixar", () => sethOrganizar(c.id, {fixada: !c.fixada}));
-  const arquivar = sethTexto(c.arquivada ? "Desarquivar" : "Arquivar", () => sethOrganizar(c.id, {arquivada: !c.arquivada}));
+  const mais = document.createElement("div"); mais.className = "seth-item-mais";
+  const gatilho = document.createElement("button"); gatilho.type = "button"; gatilho.className = "seth-mais-gatilho";
+  gatilho.textContent = "Mais";
+  gatilho.setAttribute("aria-haspopup", "menu"); gatilho.setAttribute("aria-expanded", "false");
+  gatilho.setAttribute("aria-label", "Mais ações de " + tituloLido);
+  const menu = document.createElement("div"); menu.className = "seth-menu"; menu.setAttribute("role", "menu"); menu.hidden = true;
+  const renomear = sethItemMenu("Renomear", () => sethRenomear(c, linha));
+  const fixar = sethItemMenu(c.fixada ? "Desfixar" : "Fixar", () => sethOrganizar(c.id, {fixada: !c.fixada}));
+  const arquivar = sethItemMenu(c.arquivada ? "Desarquivar" : "Arquivar", () => sethOrganizar(c.id, {arquivada: !c.arquivada}));
   // Apagar leva a conversa para a Lixeira (09/11/2026); a purga definitiva fica só na própria Lixeira.
-  const apagar = sethTexto("Apagar", () => {
+  const apagar = sethItemMenu("Apagar", () => {
     if (apagar.dataset.confirma !== "1") { apagar.dataset.confirma = "1"; apagar.textContent = "Confirmar: mover para a Lixeira"; return; }
-    sethApagar(c.id);
-  });
-  acoes.append(renomear, fixar, arquivar, apagar);
+    fecharMenuAberto(); sethApagar(c.id);
+  }, false);
   const org = document.createElement("details"); org.className = "seth-item-org";
   org.setAttribute("aria-label", "Pasta e marcadores da conversa " + tituloLido);
   const resumo = document.createElement("summary"); resumo.textContent = "Pasta e marcadores";
   org.append(resumo, sethCampoPasta(c), sethCampoMarcadores(c));
-  linha.append(abrir, meta, acoes, org);
+  menu.append(renomear, fixar, arquivar, apagar, sethLinkExportar(c, "json", "Exportar JSON"), sethLinkExportar(c, "md", "Exportar Markdown"), org);
+  mais.append(gatilho, menu);
+  ligarMenu(gatilho, menu);
+  linha.append(abrir, meta, mais);
   return linha;
 }
+// Cópia de uma mensagem (usuário ou Seth), com a mesma confirmação curta do botão de resposta.
+function sethCopiarMensagem(texto) {
+  const b = sethTexto("Copiar", async () => {
+    try { await navigator.clipboard.writeText(texto); b.textContent = "Copiado"; } catch (_) { b.textContent = "Não foi possível copiar"; }
+    setTimeout(() => { b.textContent = "Copiar"; }, 1600);
+  });
+  return b;
+}
+// Conversa: "Nova conversa" e a lista levam à Conversa; a gaveta fecha ao escolher.
+function abrirConversaNoPainel() {
+  const conversa = byId("conversa");
+  if (conversa && conversa.hidden) irPara("conversa");
+  setGaveta(false);
+}
+// Aviso de rolagem: "Ir para o fim" aparece quando a transcrição não está no fim.
+function sethNoFim(log) { return !(log.scrollHeight - log.scrollTop - log.clientHeight > 48); }
+function sethAtualizarFim() {
+  const log = byId("seth-transcript"); const botao = byId("seth-ir-fim");
+  if (!log || !botao) return;
+  botao.hidden = sethNoFim(log);
+}
+// Ligação dos menus e da rolagem da Conversa (uma vez, com o formulário).
+function ligarCompositorEMenus() {
+  ligarMenu(byId("seth-mais-abrir"), byId("seth-mais-menu"), true);
+  byId("seth-export-json").setAttribute("role", "menuitem");
+  byId("seth-export-md").setAttribute("role", "menuitem");
+  const log = byId("seth-transcript");
+  log.addEventListener("scroll", sethAtualizarFim);
+  byId("seth-ir-fim").addEventListener("click", () => { log.scrollTop = log.scrollHeight; sethAtualizarFim(); });
+}
+// Diálogo "Organizar conversas" (padrão de dialog do painel): abre pelo menu e fecha pelo botão ou pelo fundo.
+const dialogOrganizar = byId("organizar-dialog");
+byId("organizar-abrir").addEventListener("click", () => { if (dialogOrganizar.showModal) dialogOrganizar.showModal(); });
+dialogOrganizar.querySelectorAll(".close-organizar").forEach((b) => b.addEventListener("click", () => dialogOrganizar.close()));
+dialogOrganizar.addEventListener("click", (event) => { if (event.target === dialogOrganizar) dialogOrganizar.close(); });
 function sethCampoPasta(c) {
   const rotulo = document.createElement("label"); rotulo.className = "seth-org-campo";
   const select = document.createElement("select"); select.className = "seth-org-pasta";
@@ -1110,13 +1393,14 @@ function sethTrocaBloqueada() {
   return true;
 }
 async function sethAbrir(id, indice = null) {
+  abrirConversaNoPainel();
   if (sethTrocaBloqueada()) return;
   try {
     const dados = await fetchJson("/api/seth/conversa?id=" + encodeURIComponent(id), {headers: {Accept: "application/json"}});
     if (sethTrocaBloqueada()) return; // uma resposta começou enquanto a conversa carregava
     sethAtual = sethDeDados(dados);
     sethEditandoId = null;
-    sethDesenhar(); sethListar(); sethMostrarModelo();
+    sethDesenhar(); sethListar(); sethMostrarModelo(); sethRestaurarRascunho();
     if (indice !== null) sethDestacar(indice);
   } catch (erro) { sethStatus("INDISPONÍVEL", "horizon"); }
 }
@@ -1133,14 +1417,19 @@ function sethPintarTemporaria() {
   if (!botao || !aviso) return;
   const ligada = Boolean(sethAtual.temporaria);
   botao.setAttribute("aria-pressed", ligada ? "true" : "false");
-  botao.textContent = "Conversa temporária: " + (ligada ? "ligada" : "desligada");
+  // J5 (16/11/2026): interruptor curto; o texto longo vai para o title e para o aviso do rodapé.
+  botao.textContent = "Temporária";
+  botao.title = "Conversa temporária: " + (ligada ? "ligada" : "desligada") + ". Não é salva e não aparece na lista nem na busca.";
+  // C12c: no celular o mesmo controle fica no menu Mais (espelho com o mesmo estado).
+  const espelho = byId("seth-temporaria-menu");
+  if (espelho) { espelho.setAttribute("aria-pressed", ligada ? "true" : "false"); espelho.textContent = "Conversa temporária: " + (ligada ? "ligada" : "desligada"); }
   aviso.hidden = !ligada;
 }
 function sethAlternarTemporaria() {
   if (sethTrocaBloqueada()) return;
   const ligar = !sethAtual.temporaria;
   sethAtual = sethNova(ligar); sethEditandoId = null;
-  sethDesenhar(); sethListar();
+  sethDesenhar(); sethListar(); sethRestaurarRascunho();
   sethStatus(ligar ? "TEMPORÁRIA" : "PRONTA", ligar ? "partial" : "planned");
   byId("seth-input").focus();
 }
@@ -1182,6 +1471,8 @@ function sethErroImportacao(status, motivo) {
 // Só a resposta da Seth leva o modelo escolhido (modelo) e o real (modelo_real, cabeçalho do gateway). O servidor recusa modelo escolhido fora da lista.
 function sethParaSalvar(m) {
   const item = {role: m.role, content: m.content};
+  if (m.hora) item.hora = m.hora; // C5: a hora vai gravada (ISO 8601 com fuso)
+  if (m.role === "user" && m.anexos && m.anexos.length) item.anexos = m.anexos.map((a) => ({nome: a.nome, caracteres: a.caracteres})); // C9: só metadado
   if (m.role === "assistant") {
     if (m.modelo) item.modelo = m.modelo;
     if (m.modelo_real) item.modelo_real = m.modelo_real;
@@ -1198,7 +1489,8 @@ async function sethSalvar(alvo = sethAtual) {
   const caminho = sethCaminhoDe(alvo.folha, alvo);
   if (!caminho.length) return false;
   if (!alvo.titulo) alvo.titulo = caminho[0].content.slice(0, 60);
-  const corpo = {id: alvo.id, titulo: alvo.titulo, modelo: alvo.modelo};
+  // C8: as instruções da conversa vão em cada gravação ("" limpa); o servidor descarta o que estiver vazio.
+  const corpo = {id: alvo.id, titulo: alvo.titulo, modelo: alvo.modelo, instrucoes: alvo.instrucoes || ""};
   // Com ramo, vai a árvore (o caminho sai dela); sem ramo, a lista de sempre.
   if (alvo.nos.length > caminho.length) corpo.arvore = {nos: alvo.nos.map(sethNoParaSalvar), folha: alvo.folha};
   else corpo.mensagens = caminho.map(sethParaSalvar);
@@ -1244,7 +1536,7 @@ async function sethApagar(id) {
     const r = await fetch("/api/seth/conversa/apagar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify({id})});
     if (!r.ok) sethMostrarOrg(sethErroApagar(r.status, await sethMotivo(r)));
     else {
-      if (id === sethAtual.id) { sethAtual = sethNova(false); sethDesenhar(); }
+      if (id === sethAtual.id) { sethAtual = sethNova(false); sethDesenhar(); sethRestaurarRascunho(); }
       sethMostrarOrg("Conversa movida para a Lixeira. Restaure-a por lá, se precisar.");
     }
   } catch (_) { sethMostrarOrg("Não foi possível apagar a conversa: sem resposta do painel."); }
@@ -1285,9 +1577,10 @@ function sethErro(status, motivo) {
 async function sethMotivo(resposta) {
   try { return (await resposta.text()).trim().slice(0, 200); } catch (_) { return ""; }
 }
-/* Janela enviada ao gateway: as últimas 20 mensagens, cada uma com até 4000 caracteres, e o pedido inteiro até 131072 bytes.
+/* Janela enviada ao gateway: as últimas 20 mensagens, cada uma com até 4000 caracteres, e o pedido inteiro até 262144 bytes.
+   `pedido` (modelo, instruções e anexos) entra na conta do limite, como entra no corpo do pedido (C10).
    Corta o que passa do limite (a conversa salva não muda) e conta o que cortou ou deixou de fora, para o aviso. */
-function sethJanela(mensagens) {
+function sethJanela(mensagens, pedido = {}) {
   const marca = "\n[cortado pelo painel para caber no limite de " + SETH_MAX_CARACTERES + " caracteres]";
   const espaco = SETH_MAX_CARACTERES - Array.from(marca).length;
   let cortadas = 0;
@@ -1297,7 +1590,7 @@ function sethJanela(mensagens) {
     cortadas++;
     return {role: m.role, content: pontos.slice(0, espaco).join("") + marca};
   });
-  const bytes = (lista) => new TextEncoder().encode(JSON.stringify({mensagens: lista})).length;
+  const bytes = (lista) => new TextEncoder().encode(JSON.stringify({mensagens: lista, ...pedido})).length;
   let deixadas = 0;
   while (janela.length > 1 && bytes(janela) > SETH_LIMITE_PEDIDO_BYTES) { janela.shift(); deixadas++; }
   return {mensagens: janela, cortadas, deixadas};
@@ -1313,9 +1606,9 @@ function sethAvisoJanela(janela) {
    Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
    Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
 function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
-async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal) {
+async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instrucoes = "", anexos = []) {
   const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store", signal: sinal,
-    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo})});
+    headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo, instrucoes, anexos})});
   if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
   parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
   if (!r.body || typeof r.body.getReader !== "function" || typeof TextDecoder !== "function") throw Object.assign(new Error("navegador sem streaming"), {semStream: true});
@@ -1327,6 +1620,7 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal) {
     let evento;
     try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
     if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
+    else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
     else if (evento.tipo === "fim") fim = true;
     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
   };
@@ -1346,21 +1640,40 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal) {
     try { await leitor.cancel(); } catch (_) { /* stream já fechado ou cancelado pelo Parar */ }
   }
 }
-async function sethChatInteiro(mensagens, modelo, parcial, sinal) {
+async function sethChatInteiro(mensagens, modelo, parcial, sinal, instrucoes = "", anexos = []) {
   const r = await fetch("/api/seth/chat", {method: "POST", signal: sinal, headers: {"Content-Type": "application/json", Accept: "application/json"},
-    body: JSON.stringify({messages: mensagens, modelo})});
+    body: JSON.stringify({messages: mensagens, modelo, instrucoes, anexos})});
   if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
   parcial.modelo_real = r.headers.get("X-Modelo-Real") || "";
-  return r.json();
+  const dados = await r.json();
+  if (dados && dados.uso) parcial.uso = dados.uso; // C11: uso informado pelo gateway, quando houver
+  return dados;
 }
-async function sethEnviar(texto) {
+async function sethEnviar(texto, anexos = []) {
   if (sethEmCurso()) return;
   // A conversa de origem é capturada antes de qualquer await: a pergunta, a resposta e o salvar são dela (09/11/2026).
   const alvo = sethAtual;
-  const usuario = sethAdicionar({role: "user", content: texto, pai: alvo.folha, hora: sethHora()}, alvo);
+  alvo.erro = null;
+  // C9: a mensagem guarda só o metadado dos anexos (nome e caracteres); o texto vai no pedido desta vez.
+  const metadado = anexos.length ? {anexos: anexos.map((a) => ({nome: a.nome, caracteres: a.caracteres}))} : {};
+  const usuario = sethAdicionar({role: "user", content: texto, pai: alvo.folha, hora: sethHora(), ...metadado}, alvo);
   alvo.folha = usuario.id;
   sethDesenhar();
-  await sethResponder({modo: "nova", alvo, paiId: usuario.id, novoUsuarioId: usuario.id, textoDoUsuario: texto});
+  await sethResponder({modo: "nova", alvo, paiId: usuario.id, novoUsuarioId: usuario.id, textoDoUsuario: texto, anexos});
+}
+// "Tentar de novo" (C7): reenvia a mesma pergunta (o ramo já existe na conversa; nada é duplicado).
+function sethTentarDeNovo() {
+  const erro = sethAtual.erro;
+  if (!erro || !erro.paiId || sethEmCurso()) return;
+  sethAtual.erro = null;
+  sethDesenhar();
+  sethResponder({modo: "nova", paiId: erro.paiId, anexos: erro.anexos || []});
+}
+function sethBlocoErro(erro) {
+  const bloco = document.createElement("div"); bloco.className = "seth-erro-bloco";
+  bloco.append(sethVazio("Não consegui responder agora: " + (erro.motivo || "falha desconhecida") + "."));
+  if (erro.paiId) bloco.append(sethTexto("Tentar de novo", () => sethTentarDeNovo()));
+  return bloco;
 }
 // Regenerar: a resposta nova é irmã da última; a antiga não some, vira outra versão ("< 1/2 >").
 function sethRegerar() {
@@ -1484,10 +1797,149 @@ function vozLigarControles() {
   byId("seth-voz-parar").addEventListener("click", vozParar);
   byId("seth-ditado").addEventListener("click", ditarPeloMicrofone);
 }
+/* Rascunho por conversa (C6): o texto do campo e os anexos pendentes ficam em sethRascunhos, por chave da conversa
+   ("conversa-<id>", ou uma chave própria da conversa nova). Cada digitação grava; trocar de conversa restaura. */
+function sethChaveNova() { sethSeqRascunho++; return "nova-" + sethSeqRascunho + "-" + Date.now().toString(36); }
+function sethChaveRascunho(c = sethAtual) {
+  if (!c.rascunho) c.rascunho = sethChaveNova();
+  if (!c.id) return c.rascunho;
+  // Conversa que acabou de ser gravada: o rascunho que era da conversa nova passa para a chave dela.
+  const chave = "conversa-" + c.id;
+  if (sethRascunhos.has(c.rascunho) && !sethRascunhos.has(chave)) { sethRascunhos.set(chave, sethRascunhos.get(c.rascunho)); sethRascunhos.delete(c.rascunho); }
+  return chave;
+}
+function sethRascunhoDe(chave) { if (!sethRascunhos.has(chave)) sethRascunhos.set(chave, {texto: "", anexos: []}); return sethRascunhos.get(chave); }
+// Digitação: grava o texto do campo no rascunho da conversa aberta (e apaga o rascunho vazio, sem anexos).
+function sethGuardarTexto() {
+  const chave = sethChaveRascunho(); const campo = byId("seth-input");
+  const r = sethRascunhoDe(chave); r.texto = campo.value;
+  if (!r.texto && !r.anexos.length) sethRascunhos.delete(chave);
+}
+// Voltar à conversa (ou abrir uma nova): o campo mostra o rascunho dela, vazio se não há; os anexos pendentes aparecem.
+function sethRestaurarRascunho() {
+  const campo = byId("seth-input"); if (!campo) return;
+  const r = sethRascunhos.get(sethChaveRascunho());
+  campo.value = r && r.texto ? r.texto : "";
+  sethAtualizarComposicao();
+}
+// Enviado: o rascunho da conversa some (o texto e os anexos já foram para o pedido).
+function sethLimparRascunho() { sethRascunhos.delete(sethChaveRascunho()); }
+
+/* Anexos de texto (C9). Mesmas regras do servidor (chat_stream.py): até 3 por mensagem, nome sem barra nem "..",
+   até 20000 caracteres cada e 40000 no total; imagem é recusada com a frase própria; texto vazio é recusado;
+   arquivo acima de 80000 bytes é recusado antes de ser lido (X1). */
+function sethMostrarAnexo(texto) { const aviso = byId("seth-anexo-aviso"); if (!aviso) return; aviso.textContent = texto || ""; aviso.hidden = !texto; }
+function sethExtensao(nome) { const texto = String(nome); const i = texto.lastIndexOf("."); return i >= 0 ? texto.slice(i).toLowerCase() : ""; }
+// Devolve o motivo da recusa ou "". Com texto null, confere só o que dá para ver antes de ler o arquivo.
+function sethMotivoAnexo(nome, tipo, texto, atuais, tamanho) {
+  const ext = sethExtensao(nome);
+  if (String(tipo).startsWith("image/") || SETH_IMAGEM_EXTENSOES.includes(ext)) return "A conversa ainda não lê imagens.";
+  if (atuais.length >= SETH_ANEXOS_MAX) return "Arquivo recusado: no máximo " + SETH_ANEXOS_MAX + " anexos por mensagem. Tire um para anexar outro.";
+  const limpo = String(nome).trim();
+  if (!limpo || limpo.length > SETH_ANEXO_NOME_MAX || /[\\/]/.test(limpo) || limpo.includes(".."))
+    return "Arquivo recusado: nome inválido (sem barra, sem \"..\", até " + SETH_ANEXO_NOME_MAX + " caracteres).";
+  if (!String(tipo).startsWith("text/") && !SETH_ANEXO_EXTENSOES.includes(ext))
+    return "Arquivo recusado: a conversa lê só arquivos de texto (" + SETH_ANEXO_EXTENSOES.join(", ") + ").";
+  if (tamanho !== undefined && Number(tamanho) > SETH_ANEXO_BYTES_MAX) return "Arquivo recusado: tem mais de " + SETH_ANEXO_BYTES_MAX + " bytes; o limite por arquivo é " + SETH_ANEXO_TEXTO_MAX + " caracteres.";
+  if (texto === null) return "";
+  if (!texto.trim()) return "Arquivo recusado: está vazio.";
+  const n = Array.from(texto).length;
+  if (n > SETH_ANEXO_TEXTO_MAX) return "Arquivo recusado: tem " + n.toLocaleString("pt-BR") + " caracteres; o limite por arquivo é " + SETH_ANEXO_TEXTO_MAX + ".";
+  if (atuais.reduce((t, a) => t + a.caracteres, 0) + n > SETH_ANEXOS_TOTAL_MAX)
+    return "Arquivo recusado: junto com os anexos já escolhidos, passaria de " + SETH_ANEXOS_TOTAL_MAX + " caracteres.";
+  return "";
+}
+// Lê o arquivo como texto (FileReader, UTF-8). Vale para o botão Anexar, arrastar e soltar, e para o texto colado.
+function sethLerTexto(arquivo) {
+  return new Promise((ok, falha) => {
+    const leitor = new FileReader();
+    leitor.onload = () => ok(String(leitor.result || ""));
+    leitor.onerror = () => falha(leitor.error);
+    leitor.readAsText(arquivo, "utf-8");
+  });
+}
+function sethDoArquivo(f) { return {nome: f.name, tipo: f.type, tamanho: f.size, lerTexto: () => sethLerTexto(f)}; }
+// Anexa itens {nome, tipo, lerTexto} ao rascunho da conversa aberta; cada recusa vira um motivo na tela.
+async function sethAnexar(itens) {
+  const chave = sethChaveRascunho(); const motivos = [];
+  for (const item of itens) {
+    const nome = String(item.nome || ""); const tipo = String(item.tipo || "");
+    const atuais = sethRascunhoDe(chave).anexos;
+    // X1: o tamanho em bytes (File.size) é conferido antes da leitura; acima do teto o arquivo nem é lido.
+    const previo = sethMotivoAnexo(nome, tipo, null, atuais, item.tamanho);
+    if (previo) { motivos.push(previo); continue; }
+    let texto = "";
+    try { texto = await item.lerTexto(); }
+    catch (_) { motivos.push("Arquivo recusado: não consegui ler \"" + nome + "\"."); continue; }
+    const motivo = sethMotivoAnexo(nome, tipo, texto, sethRascunhoDe(chave).anexos);
+    if (motivo) { motivos.push(motivo); continue; }
+    sethRascunhoDe(chave).anexos.push({nome: nome.trim(), texto, caracteres: Array.from(texto).length});
+  }
+  if (sethChaveRascunho() === chave) { sethGuardarTexto(); sethAtualizarComposicao(); }
+  sethMostrarAnexo(motivos.join(" "));
+}
+function sethTamanhoAnexo(n) { return n.toLocaleString("pt-BR") + " caracteres"; }
+// Etiquetas removíveis acima do campo (nome e tamanho).
+// Repinta a composição (etiquetas e linha de contexto, que conta os anexos pendentes).
+function sethAtualizarComposicao() { sethPintarAnexos(); sethPintarContexto(sethCaminho()); }
+function sethPintarAnexos() {
+  const caixa = byId("seth-anexos"); if (!caixa) return;
+  const anexos = sethAnexosDoRascunho();
+  caixa.replaceChildren(...anexos.map((a, i) => {
+    const etiqueta = document.createElement("span"); etiqueta.className = "seth-anexo";
+    const nome = document.createElement("span"); nome.className = "seth-anexo-nome"; nome.textContent = a.nome;
+    const tamanho = document.createElement("span"); tamanho.className = "seth-anexo-tamanho"; tamanho.textContent = sethTamanhoAnexo(a.caracteres);
+    const remover = sethTexto("Remover", () => sethRemoverAnexo(i));
+    remover.setAttribute("aria-label", "Remover anexo " + a.nome);
+    etiqueta.append(nome, tamanho, remover);
+    return etiqueta;
+  }));
+  caixa.hidden = !anexos.length;
+}
+function sethRemoverAnexo(i) {
+  const r = sethRascunhos.get(sethChaveRascunho()); if (!r) return;
+  r.anexos.splice(i, 1);
+  sethGuardarTexto(); sethAtualizarComposicao(); sethMostrarAnexo("");
+}
+// Na mensagem desenhada do usuário: nome e caracteres, vindos do metadado gravado.
+function sethEtiquetasAnexos(lista) {
+  const caixa = document.createElement("div"); caixa.className = "msg-anexos";
+  lista.forEach((a) => { const e = document.createElement("span"); e.className = "seth-anexo-marca"; e.textContent = a.nome + " · " + sethTamanhoAnexo(a.caracteres); caixa.append(e); });
+  return caixa;
+}
+
+/* Instruções desta conversa (C8). Valem no modelo padrão da Seth; na via pública o gateway as descarta (aviso no diálogo). */
+function sethPintarInstrucoes() { const chip = byId("seth-chip-instrucoes"); if (chip) chip.hidden = !sethAtual.instrucoes; }
+function sethContarInstrucoes() {
+  const n = Array.from(byId("seth-instrucoes-texto").value).length;
+  byId("seth-instrucoes-contagem").textContent = n.toLocaleString("pt-BR") + " de " + SETH_INSTRUCOES_LIMITE + " caracteres";
+}
+function sethAbrirInstrucoes() {
+  const campo = byId("seth-instrucoes-texto");
+  campo.value = sethAtual.instrucoes || ""; sethContarInstrucoes(); byId("seth-instrucoes-erro").hidden = true;
+  const dialogo = byId("seth-instrucoes-dialog");
+  if (dialogo.showModal) dialogo.showModal();
+  campo.focus();
+}
+function sethFecharInstrucoes() { const dialogo = byId("seth-instrucoes-dialog"); if (dialogo.close) dialogo.close(); }
+// Salvar (sethSalvar): grava na conversa; conversa temporária fica só na aba.
+function sethGuardarInstrucoes(texto) {
+  const limpo = String(texto || "").trim();
+  if (Array.from(limpo).length > SETH_INSTRUCOES_LIMITE) {
+    const erro = byId("seth-instrucoes-erro"); erro.textContent = "As instruções passam de " + SETH_INSTRUCOES_LIMITE + " caracteres. Encurte o texto."; erro.hidden = false;
+    return false;
+  }
+  sethAtual.instrucoes = limpo;
+  sethPintarInstrucoes();
+  sethSalvar();
+  return true;
+}
+
 function ligarConversaSeth() {
   const form = byId("seth-form");
   if (!form || form.dataset.ligado) return;
   form.dataset.ligado = "1";
+  ligarCompositorEMenus();
   sethExemplos(); sethDesenhar(); sethListar(); sethCarregarModelos();
   byId("seth-modelo").addEventListener("change", (e) => { sethAtual.modelo = e.target.value; sethMostrarModelo(); });
   const campo = byId("seth-input");
@@ -1500,9 +1952,50 @@ function ligarConversaSeth() {
     e.preventDefault();
     const texto = campo.value.trim();
     if (!texto || byId("seth-send").disabled) return;
+    // Os anexos pendentes vão com esta pergunta; o rascunho da conversa é limpo ao enviar (C6, C9).
+    const anexos = sethAnexosDoRascunho().slice();
+    sethLimparRascunho();
     campo.value = "";
-    sethEnviar(texto);
+    sethAtualizarComposicao(); sethMostrarAnexo("");
+    sethEnviar(texto, anexos);
   });
+  // C6: cada digitação grava o rascunho da conversa aberta; a aba restaura o da conversa que abrir.
+  campo.addEventListener("input", sethGuardarTexto);
+  sethRestaurarRascunho();
+  // C9: anexar pelo botão, arrastar e soltar sobre o compositor, ou colar texto longo (vira colado.txt).
+  const entradaAnexo = byId("seth-anexo-arquivo");
+  byId("seth-anexar").addEventListener("click", () => entradaAnexo.click());
+  entradaAnexo.addEventListener("change", (e) => {
+    const arquivos = Array.from(e.target.files || []);
+    e.target.value = "";
+    sethAnexar(arquivos.map(sethDoArquivo));
+  });
+  form.addEventListener("dragover", (e) => { e.preventDefault(); });
+  form.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const arquivos = e.dataTransfer ? Array.from(e.dataTransfer.files || []) : [];
+    if (arquivos.length) sethAnexar(arquivos.map(sethDoArquivo));
+  });
+  campo.addEventListener("paste", (e) => {
+    const texto = e.clipboardData ? e.clipboardData.getData("text") : "";
+    if (Array.from(texto).length <= SETH_COLAR_LIMITE) return;
+    e.preventDefault();
+    sethAnexar([{nome: "colado.txt", tipo: "text/plain", lerTexto: async () => texto}]);
+  });
+  // C8: instruções da conversa, pelo item "Instruções desta conversa" do menu Mais.
+  byId("seth-instrucoes-abrir").addEventListener("click", sethAbrirInstrucoes);
+  const dialogoInstrucoes = byId("seth-instrucoes-dialog");
+  byId("seth-instrucoes-texto").addEventListener("input", sethContarInstrucoes);
+  byId("seth-instrucoes-salvar").addEventListener("click", () => { if (sethGuardarInstrucoes(byId("seth-instrucoes-texto").value)) sethFecharInstrucoes(); });
+  byId("seth-instrucoes-limpar").addEventListener("click", () => {
+    byId("seth-instrucoes-texto").value = ""; sethContarInstrucoes();
+    if (sethGuardarInstrucoes("")) sethFecharInstrucoes();
+  });
+  byId("seth-instrucoes-fechar").addEventListener("click", sethFecharInstrucoes);
+  byId("seth-instrucoes-x").addEventListener("click", sethFecharInstrucoes);
+  dialogoInstrucoes.addEventListener("click", (e) => { if (e.target === dialogoInstrucoes) sethFecharInstrucoes(); });
+  // C12c: no celular, o controle de conversa temporária também fica no menu Mais.
+  byId("seth-temporaria-menu").addEventListener("click", sethAlternarTemporaria);
   // Organização (lote 3, 09/11/2026): temporária, busca, filtros, pastas e importação.
   byId("seth-temporaria").addEventListener("click", sethAlternarTemporaria);
   const busca = byId("seth-busca");
@@ -1564,7 +2057,7 @@ function sethDeDados(dados) {
   const nos = arvore ? arvore.nos.map((n) => ({...n, pai: n.pai || null})) : sethNosDeMensagens(dados.mensagens || []);
   const folha = arvore ? arvore.folha : (nos.length ? nos[nos.length - 1].id : null);
   return {id: dados.id, titulo: dados.titulo, modelo: dados.modelo || SETH_MODELO_PADRAO, temporaria: false, nos, folha,
-    ramificada_de: dados.ramificada_de || null};
+    ramificada_de: dados.ramificada_de || null, instrucoes: typeof dados.instrucoes === "string" ? dados.instrucoes : "", erro: null};
 }
 
 function sethKb(bytes) { return (bytes / 1024).toLocaleString("pt-BR", {maximumFractionDigits: 1}) + " KB"; }
@@ -1574,18 +2067,40 @@ function sethMensagensParaEnvio(caminho) {
   return caminho.filter((m) => m.role === "user" || m.content);
 }
 
+// Anexos pendentes do rascunho desta conversa (C9), sem criar rascunho ao ler.
+function sethAnexosDoRascunho() { const r = sethRascunhos.get(sethChaveRascunho()); return r && Array.isArray(r.anexos) ? r.anexos : []; }
+// Parte do pedido que não é a janela: modelo, instruções da conversa e anexos (corpo de sethLerStream / sethChatInteiro).
+function sethPedidoBase(anexos, c = sethAtual) {
+  return {modelo: c.modelo, instrucoes: c.instrucoes || "", anexos: anexos.map((a) => ({nome: a.nome, texto: a.texto}))};
+}
+// Indicador de resposta em curso (C4): um cursor no fim do texto; some ao concluir (a transcrição é refeita).
+function sethCursor() { const c = document.createElement("span"); c.className = "seth-digitando"; c.setAttribute("aria-hidden", "true"); return c; }
 function sethPintarContexto(caminho) {
-  const texto = byId("seth-contexto"); const barra = byId("seth-contexto-barra");
+  const texto = byId("seth-contexto"); const barra = byId("seth-contexto-barra"); const detalhe = byId("seth-contexto-detalhe");
   if (!texto || !barra) return;
-  if (!caminho.length) { texto.textContent = "Contexto: a conversa está vazia. A Seth só recebe o que você escrever agora."; barra.value = 0; return; }
-  const janela = sethJanela(sethMensagensParaEnvio(caminho));
-  const bytes = new TextEncoder().encode(JSON.stringify({mensagens: janela.mensagens, modelo: sethAtual.modelo})).length;
-  const caracteres = janela.mensagens.reduce((total, m) => total + Array.from(m.content).length, 0);
+  const pendentes = sethAnexosDoRascunho();
+  if (!caminho.length && !pendentes.length) {
+    texto.textContent = "Contexto: vazio"; barra.value = 0;
+    if (detalhe) detalhe.textContent = "A conversa está vazia. A Seth só recebe o que você escrever agora.";
+    return;
+  }
+  const pedido = sethPedidoBase(pendentes);
+  const janela = sethJanela(sethMensagensParaEnvio(caminho), pedido);
+  const bytes = new TextEncoder().encode(JSON.stringify({mensagens: janela.mensagens, ...pedido})).length;
+  // A conta inclui os anexos pendentes (C10): entram nos caracteres e nos bytes da próxima pergunta.
+  const caracteres = janela.mensagens.reduce((total, m) => total + Array.from(m.content).length, 0)
+    + pendentes.reduce((total, a) => total + a.caracteres, 0);
   const pct = Math.min(100, Math.round((bytes / SETH_LIMITE_PEDIDO_BYTES) * 1000) / 10); // uma casa decimal
   barra.value = pct;
-  texto.textContent = "Contexto da próxima pergunta: " + caracteres.toLocaleString("pt-BR") + " caracteres, " + sethKb(bytes)
+  // C11: com uso informado pelo gateway no último pedido desta conversa, mostra os tokens; sem ele, a estimativa em caracteres.
+  const uso = sethUso && sethUso.alvo === sethAtual ? sethUso : null;
+  // Linha curta na faixa de baixo; o texto completo (caracteres, limite, uso) fica no details "Detalhes" (J3).
+  texto.textContent = "Contexto: " + pct.toLocaleString("pt-BR", {maximumFractionDigits: 1}) + "% · " + janela.mensagens.length + " de " + caminho.length + " mensagens";
+  if (detalhe) detalhe.textContent = "Contexto da próxima pergunta: " + caracteres.toLocaleString("pt-BR") + " caracteres, " + sethKb(bytes)
     + " de " + sethKb(SETH_LIMITE_PEDIDO_BYTES) + " (" + pct.toLocaleString("pt-BR", {maximumFractionDigits: 1}) + "%). Vão " + janela.mensagens.length + " de " + caminho.length
-    + " mensagens. Se passar do limite, as mais antigas ficam de fora; a conversa salva continua completa.";
+    + " mensagens. Se passar do limite, as mais antigas ficam de fora; a conversa salva continua completa."
+    + (uso ? " Último pedido: entrada " + uso.entrada.toLocaleString("pt-BR") + " · saída " + uso.saida.toLocaleString("pt-BR") + " tokens (informado pelo gateway)."
+      : " Medida: estimativa em caracteres.");
 }
 
 function sethPintarOrigem() {
@@ -1599,7 +2114,10 @@ function sethPintarOrigem() {
   p.hidden = false;
 }
 
-function sethPintarParar() { const botao = byId("seth-parar"); if (botao) botao.hidden = !sethEmCurso(); }
+function sethPintarParar() {
+  const botao = byId("seth-parar"); if (botao) botao.hidden = !sethEmCurso();
+  const envio = byId("seth-send"); if (envio) envio.hidden = sethEmCurso();
+}
 
 function sethEmCurso() { return sethRespondendo; } // uma só trava: a mesma da troca de conversa (sethTrocaBloqueada)
 
@@ -1641,6 +2159,7 @@ function sethAcoesMensagem(m, indice) {
   const acoes = document.createElement("div"); acoes.className = "msg-acoes";
   if (m.role === "user") {
     acoes.append(sethTexto("Editar", () => { if (sethEmCurso()) return; sethEditandoId = m.id; sethDesenhar(); }));
+    acoes.append(sethCopiarMensagem(m.content));
   } else {
     const copiar = document.createElement("button"); copiar.type = "button"; copiar.className = "text-link"; copiar.textContent = "Copiar";
     copiar.addEventListener("click", async () => { try { await navigator.clipboard.writeText(m.content); copiar.textContent = "Copiado"; } catch (_) { copiar.textContent = "Não foi possível copiar"; } setTimeout(() => copiar.textContent = "Copiar", 1600); });
@@ -1735,38 +2254,42 @@ function sethRemover(id, c = sethAtual) {
 // Envia a janela do caminho até `paiId` (nova resposta) ou até a resposta de `alvoId` mais a mensagem "continue de onde
 // parou" (continuação). Parar aborta o fetch; o texto que chegou fica marcado interrompida.
 async function sethResponder(op) {
-  const {modo, alvo = sethAtual, paiId = null, alvoId = null, novoUsuarioId = null, textoDoUsuario = ""} = op;
+  const {modo, alvo = sethAtual, paiId = null, alvoId = null, novoUsuarioId = null, textoDoUsuario = "", anexos = []} = op;
   const campo = byId("seth-input"); const log = byId("seth-transcript"); const botao = byId("seth-send");
   const controle = new AbortController(); sethControle = controle; sethRespondendo = true;
+  sethUso = null; alvo.erro = null; // um pedido novo zera o uso anterior e a falha que estava na tela
   botao.disabled = true; sethPintarParar(); sethStatus("PENSANDO", "partial");
   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+  const cursor = sethCursor(); pensando.append(cursor);
   log.append(pensando);
   const pedido = modo === "continuar"
     ? [...sethMensagensParaEnvio(sethCaminhoDe(alvoId, alvo)), {role: "user", content: SETH_CONTINUAR}]
     : sethMensagensParaEnvio(sethCaminhoDe(paiId, alvo));
-  const janela = sethJanela(pedido);
-  const aviso = sethAvisoJanela(janela);
   const modelo = alvo.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
+  const pedidoBase = sethPedidoBase(anexos, alvo); // instruções da conversa e anexos deste envio (C8, C9)
+  const janela = sethJanela(pedido, pedidoBase);
+  const aviso = sethAvisoJanela(janela);
   const parcial = {texto: ""};
   let textoNo = null;
   const aoTexto = (delta) => {
+    const perto = sethNoFim(log);
     if (!textoNo) {
       pensando.remove();
       const bolha = document.createElement("article"); bolha.className = "msg msg-assistant" + (modo === "continuar" ? " msg-continuacao" : "");
       const corpo = document.createElement("div"); corpo.className = "msg-body";
-      textoNo = document.createTextNode(""); corpo.append(textoNo); bolha.append(corpo); log.append(bolha);
+      textoNo = document.createTextNode(""); corpo.append(textoNo, cursor); bolha.append(corpo); log.append(bolha);
     }
-    textoNo.appendData(delta); log.scrollTop = log.scrollHeight;
+    textoNo.appendData(delta); if (perto) log.scrollTop = log.scrollHeight; sethAtualizarFim();
   };
   let conteudo = null, falha = null, parada = false;
   try {
     try {
-      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal);
+      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal, alvo.instrucoes || "", pedidoBase.anexos);
     } catch (erro) {
       if (controle.signal.aborted) throw erro;
       const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
       if (!transporte) throw erro;
-      const dados = await sethChatInteiro(janela.mensagens, modelo, parcial, controle.signal);
+      const dados = await sethChatInteiro(janela.mensagens, modelo, parcial, controle.signal, alvo.instrucoes || "", pedidoBase.anexos);
       conteudo = dados.content;
     }
   } catch (erro) {
@@ -1774,7 +2297,8 @@ async function sethResponder(op) {
     else { falha = erro; if (parcial.texto) parada = true; }
   }
   sethControle = null;
-  pensando.remove();
+  pensando.remove(); cursor.remove();
+  if (parcial.uso) sethUso = {alvo, entrada: parcial.uso.entrada, saida: parcial.uso.saida}; // C11
   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
   if (conteudo !== null) {
     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
@@ -1790,22 +2314,19 @@ async function sethResponder(op) {
     }
     if (modo === "nova" || parcial.texto) await sethSalvar(alvo);
   } else {
-    // Falha sem texto: a pergunta sai da conversa e volta ao campo, para não se perder.
-    if (novoUsuarioId) { sethRemover(novoUsuarioId, alvo); if (alvo === sethAtual && campo && !campo.value) campo.value = textoDoUsuario; }
-    if (alvo === sethAtual) {
-      sethDesenhar();
-      log.append(sethVazio("Não consegui responder agora: " + (falha && falha.message || "falha desconhecida") + "."));
-      sethStatus("INDISPONÍVEL", "horizon");
-    }
+    // Falha sem texto (C7): a pergunta fica na conversa; o erro traz "Tentar de novo", que reenvia sem duplicar a pergunta.
+    alvo.erro = {paiId: modo === "nova" ? paiId : null, anexos, motivo: (falha && falha.message) || "falha desconhecida"};
+    if (alvo === sethAtual) { sethDesenhar(); sethStatus("INDISPONÍVEL", "horizon"); }
   }
   sethRespondendo = false;
   botao.disabled = false; sethPintarParar(); campo.focus();
 }
 
 function sethComecarNova() {
+  abrirConversaNoPainel();
   if (sethTrocaBloqueada()) return;
   sethAtual = sethNova(false); sethEditandoId = null;
-  sethDesenhar(); sethListar(); sethStatus("PRONTA", "planned");
+  sethDesenhar(); sethListar(); sethRestaurarRascunho(); sethStatus("PRONTA", "planned");
   byId("seth-input").focus();
 }
 
@@ -1832,7 +2353,7 @@ async function sethRamificar(indice) {
   if (!caminho[indice]) return;
   if (!sethAtual.id) await sethSalvar();
   if (!sethAtual.id) { sethMostrarOrg("Não foi possível ramificar: a conversa ainda não foi salva. Tente de novo em instantes."); return; }
-  const corpo = {titulo: sethAtual.titulo || caminho[0].content.slice(0, 60), modelo: sethAtual.modelo,
+  const corpo = {titulo: sethAtual.titulo || caminho[0].content.slice(0, 60), modelo: sethAtual.modelo, instrucoes: sethAtual.instrucoes || "",
     mensagens: caminho.slice(0, indice + 1).map(sethParaSalvar), ramificada_de: {id: sethAtual.id, mensagem: indice}};
   try {
     const r = await fetch("/api/seth/conversa", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
@@ -2296,10 +2817,16 @@ document.addEventListener("keydown", (e) => {
   const tecla = String(e.key || "").toLowerCase();
   if (comCtrl && tecla === "o") { e.preventDefault(); irPara("conversa"); sethComecarNova(); return; }
   if (comCtrl && tecla === "c") { e.preventDefault(); sethCopiarUltima(); return; }
-  if (e.key === "Escape") { if (atalhosAbertos()) alternarAtalhos(false); else { if (sethEmCurso()) sethParar(); vozParar(); } return; }
+  if (e.key === "Escape") {
+    if (menuAberto) { fecharMenuAberto(); return; }
+    if (gavetaAberta()) { setGaveta(false); byId("menu-abrir").focus(); return; }
+    if (atalhosAbertos()) alternarAtalhos(false); else { if (sethEmCurso()) sethParar(); vozParar(); }
+    return;
+  }
   if (campoDeTexto(e.target)) return;
   if (e.key === "?") { e.preventDefault(); alternarAtalhos(); return; }
-  if (e.key === "/") { e.preventDefault(); const conversa = byId("conversa"); (conversa && !conversa.hidden ? byId("seth-busca") : search).focus(); }
+  // C12a (16/11/2026): na Conversa, "/" vai para a busca de conversas; nas outras seções, para a busca do mapa.
+  if (e.key === "/") { e.preventDefault(); if (byId("conversa").hidden) byId("search").focus(); else byId("seth-busca").focus(); }
 });
 byId("atalhos-abrir").addEventListener("click", () => alternarAtalhos());
 byId("atalhos-fechar").addEventListener("click", () => alternarAtalhos(false));

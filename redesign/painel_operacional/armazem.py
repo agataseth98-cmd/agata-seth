@@ -21,7 +21,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from chat_stream import MODELO_PADRAO, modelo_permitido, modelo_real_valido
+from chat_stream import (MAX_ANEXO_TEXTO, MAX_ANEXOS, MAX_INSTRUCOES, MODELO_PADRAO, anexo_nome_valido,
+                         modelo_permitido, modelo_real_valido, texto_instrucoes)
 from relogio import _reading_window
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -398,6 +399,9 @@ def motivo_conversa_recusada(dados) -> str:
             isinstance(m, dict) and m.get("role") == "assistant" and m.get("modelo") is not None
             and not modelo_permitido(m.get("modelo")) for m in todas):
         return "modelo fora da lista"
+    instrucoes = dados.get("instrucoes")
+    if isinstance(instrucoes, str) and len(instrucoes.strip()) > MAX_INSTRUCOES:
+        return f"instruções acima de {MAX_INSTRUCOES} caracteres"
     if dados.get("id") and _conversa_caminho(dados.get("id")) is None:
         return "identificador da conversa inválido"
     return "formato da conversa inválido"
@@ -433,6 +437,41 @@ def _ramo_limpo(valor):
     return {"id": valor["id"], "mensagem": posicao}
 
 
+# Hora de cada mensagem (16/11/2026): texto ISO 8601 com fuso, até 40 caracteres. Fora do formato, a mensagem fica sem hora.
+HORA_LIMITE = 40
+_HORA_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:\.[0-9]{1,6})?)?(?:Z|[+-][0-9]{2}:[0-9]{2})")
+
+
+def _hora_limpa(valor) -> str | None:
+    """Hora da mensagem se for ISO 8601 com fuso e data real; qualquer outra coisa vira None (sem recusar a conversa)."""
+    if not isinstance(valor, str) or len(valor) > HORA_LIMITE or not _HORA_RE.fullmatch(valor):
+        return None
+    try:
+        datetime.fromisoformat(valor)
+    except ValueError:
+        return None
+    return valor
+
+
+def _anexos_gravados(valor) -> list | None:
+    """Anexos de uma mensagem do usuário, só metadado: nome e quantidade de caracteres. O texto do anexo não é gravado.
+    Item fora do formato sai sem recusar a conversa; sem nenhum válido, None."""
+    if not isinstance(valor, list):
+        return None
+    limpos = []
+    for item in valor:
+        if not isinstance(item, dict):
+            continue
+        nome = anexo_nome_valido(item.get("nome"))
+        caracteres = item.get("caracteres")
+        if nome is None or type(caracteres) is not int or not 0 <= caracteres <= MAX_ANEXO_TEXTO:
+            continue
+        limpos.append({"nome": nome, "caracteres": caracteres})
+        if len(limpos) == MAX_ANEXOS:
+            break
+    return limpos or None
+
+
 def _mensagem_limpa(m, leve: bool = False) -> dict | None:
     """Mensagem (ou nó da árvore) no formato salvo. None se inválida. `leve`: modelo fora da lista some em vez de recusar."""
     if not isinstance(m, dict) or m.get("role") not in ("user", "assistant") or not isinstance(m.get("content"), str):
@@ -440,6 +479,13 @@ def _mensagem_limpa(m, leve: bool = False) -> dict | None:
     if len(m["content"]) > CONVERSA_MENSAGEM_LIMITE:
         return None
     item = {"role": m["role"], "content": m["content"]}
+    hora = _hora_limpa(m.get("hora"))
+    if hora is not None:
+        item["hora"] = hora
+    if m["role"] == "user":
+        anexos = _anexos_gravados(m.get("anexos"))
+        if anexos is not None:
+            item["anexos"] = anexos
     if m["role"] == "assistant":
         if m.get("modelo") is not None:
             if modelo_permitido(m["modelo"]):
@@ -517,6 +563,8 @@ def _formato_gravar(limpo: dict) -> dict:
         saida["arvore"] = limpo["arvore"]
     if "ramificada_de" in limpo:
         saida["ramificada_de"] = limpo["ramificada_de"]
+    if "instrucoes" in limpo:
+        saida["instrucoes"] = limpo["instrucoes"]
     # Proteção: arquivo com origem (importado) guarda o próprio id e os campos de origem; o salvar não os perde.
     for chave in ("id", *ORIGEM_CAMPOS):
         if chave in limpo:
@@ -569,6 +617,17 @@ def _conversa_validar(dados: dict, leve: bool = False) -> dict | None:
     ramo = _ramo_limpo(dados.get("ramificada_de"))
     if ramo is not None:
         limpo["ramificada_de"] = ramo
+    if dados.get("instrucoes") is not None:
+        # Instruções da conversa (16/11/2026): até 2000 caracteres. Na gravação, acima do limite recusa (motivo_conversa_recusada);
+        # na leitura de arquivo, sai sem derrubar a conversa.
+        try:
+            instrucoes = texto_instrucoes(dados["instrucoes"])
+        except ValueError:
+            if not leve:
+                return None
+            instrucoes = None
+        if instrucoes:
+            limpo["instrucoes"] = instrucoes
     return limpo
 
 
@@ -898,8 +957,11 @@ def _markdown(dados: dict, agora: datetime) -> str:
     if "arvore" in dados:
         linhas += ["Este arquivo traz só o caminho escolhido. As outras versões (ramos) estão no JSON.", ""]
     for m in dados["mensagens"]:
+        quando = ""
+        if m.get("hora"):  # hora da mensagem (16/11/2026), no formato dia/mês/ano hora:minuto, como vem da gravação
+            quando = " · " + datetime.fromisoformat(m["hora"]).strftime("%d/%m/%Y %H:%M")
         if m["role"] == "user":
-            cabeca = "## Você"
+            cabeca = "## Você" + quando
         else:
             if m.get("modelo_real"):
                 detalhe = "modelo: " + m["modelo_real"]
@@ -907,7 +969,7 @@ def _markdown(dados: dict, agora: datetime) -> str:
                 detalhe = "modelo escolhido: " + m["modelo"]
             else:
                 detalhe = "modelo não registrado"
-            cabeca = f"## Seth ({detalhe})"
+            cabeca = f"## Seth ({detalhe}){quando}"
         linhas += [cabeca, "", m["content"], ""]
     return "\n".join(linhas)
 
@@ -926,6 +988,8 @@ def _conversa_exportar(conversa_id, formato) -> tuple[bytes, str, str]:
         return _markdown(dados, agora).encode("utf-8"), f"agata-conversa-{conversa_id}.md", "text/markdown; charset=utf-8"
     payload = {"formato": FORMATO_EXPORTACAO, "versao": VERSAO_EXPORTACAO, "id": conversa_id, "origem_id": origem,
                "titulo": dados["titulo"], "modelo": dados["modelo"], "mensagens": dados["mensagens"]}
+    if "instrucoes" in dados:  # instruções da conversa (16/11/2026) também vão no JSON, para a importação devolvê-las
+        payload["instrucoes"] = dados["instrucoes"]
     for chave in ("arvore", "ramificada_de"):  # lote 4: as versões de outros ramos e a origem da ramificação também vão no JSON
         if chave in dados:
             payload[chave] = dados[chave]

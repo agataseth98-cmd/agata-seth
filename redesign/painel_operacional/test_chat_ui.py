@@ -42,28 +42,38 @@ class Elemento {
   setAttribute(nome, valor) { this.attrs[nome] = String(valor); }
   getAttribute(nome) { return Object.prototype.hasOwnProperty.call(this.attrs, nome) ? this.attrs[nome] : null; }
   addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
-  focus() { this.focado = true; } blur() {} remove() {} select() {}
+  focus() { this.focado = true; } blur() {} remove() { this.removido = true; } select() {} click() {}
   closest() { return null; }
   querySelector(sel) { return buscar(this, sel)[0] || null; }
   querySelectorAll(sel) { return buscar(this, sel); }
 }
-function descendentes(no, saida = []) { for (const c of (no.children || [])) { if (c instanceof Elemento) saida.push(c); descendentes(c, saida); } return saida; }
+function descendentes(no, saida = []) { for (const c of (no.children || [])) { if (c.removido) continue; if (c instanceof Elemento) saida.push(c); descendentes(c, saida); } return saida; }
 function buscar(raiz, sel) {
   const m = /^\[data-([a-z-]+)="([^"]*)"\]$/.exec(sel);
   if (!m) return [];
   const chave = m[1].replace(/-([a-z])/g, (_, l) => l.toUpperCase());
   return descendentes(raiz).filter((e) => e.dataset[chave] === m[2]);
 }
+function arvore(no) {
+  if (no instanceof Texto) return {t: '#texto', x: no.textContent};
+  const o = {t: no.tag};
+  if (no.className) o.c = no.className;
+  if (no.title) o.title = no.title;
+  if (no.attrs && Object.keys(no.attrs).length) o.a = Object.assign({}, no.attrs);
+  const filhos = (no.children || []).filter((c) => !c.removido).map(arvore);
+  if (filhos.length) o.f = filhos; else if (no.textContent) o.x = String(no.textContent);
+  return o;
+}
 function texto(no) {
   if (!no) return '';
   if (no instanceof Texto) return no.textContent;
   if (typeof no === 'string') return no;
-  return (no.textContent || '') + (no.children || []).map(texto).join('');
+  return (no.textContent || '') + (no.children || []).filter((c) => !c.removido).map(texto).join('');
 }
 const registro = new Map();
 const ouvintesDoc = {};
 // Elementos que começam escondidos no HTML (o atributo hidden): o mock precisa do mesmo estado inicial.
-const OCULTOS_NO_INICIO = ['atalhos-painel'];
+const OCULTOS_NO_INICIO = ['atalhos-painel', 'seth-mais-menu'];
 const documento = {
   visibilityState: 'visible',
   getElementById(id) {
@@ -114,6 +124,17 @@ ctx.localStorage = {
 ctx.navigator = {clipboard: {writeText: async (t) => { copiados.push(t); }}}; ctx.Node = function () {};
 if (cen.claroSistema !== undefined) ctx.matchMedia = () => ({matches: Boolean(cen.claroSistema), addEventListener() {}});
 ctx.TextEncoder = TextEncoder; ctx.TextDecoder = TextDecoder;
+const sessao = Object.assign({}, (cen.sessionStorage && cen.sessionStorage.inicial) || {}); const sessaoGravacoes = [];
+ctx.sessionStorage = {
+  getItem(k) { if (cen.sessionStorage && cen.sessionStorage.lerErro) throw new Error('bloqueado'); return Object.prototype.hasOwnProperty.call(sessao, k) ? sessao[k] : null; },
+  setItem(k, v) { if (cen.sessionStorage && cen.sessionStorage.gravarErro) throw new Error('cheio'); sessao[k] = String(v); sessaoGravacoes.push([k, String(v)]); }};
+// FileReader de teste: lê o texto do arquivo simulado (o painel usa readAsText, como no navegador).
+// leituras: um item por FileReader criado (null se não foi lido); X1 confere que o arquivo acima do teto nem é lido.
+const leituras = [];
+class LeitorFalso { constructor() { leituras.push(null); } readAsText(arquivo) { leituras[leituras.length - 1] = String(arquivo.name); arquivo.text().then((t) => { this.result = t; if (this.onload) this.onload({target: this}); }, (e) => { this.error = e; if (this.onerror) this.onerror({target: this}); }); } }
+ctx.FileReader = LeitorFalso;
+const marcas = {};
+ctx.__arvore = arvore;
 // AbortController de verdade para o teste: abort() marca o sinal e acorda quem estiver esperando.
 class ControleFalso { constructor() { this.signal = {aborted: false, ouvintes: [], addEventListener() {}};} abort() { if (this.signal.aborted) return; this.signal.aborted = true; this.signal.ouvintes.forEach((f) => f()); } }
 ctx.AbortController = ControleFalso;
@@ -149,7 +170,7 @@ ctx.fetch = async (url, opcoes = {}) => {
     if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
     return respostaJson(200, r.corpo || {schema_version: 1, state: 'ok', termo: '', total: 0, resultados: []});
   }
-  if (url.startsWith('/api/seth/conversa?id=')) return respostaJson(200, cen.conversa);
+  if (url.startsWith('/api/seth/conversa?id=')) return respostaJson(200, (cen.porId && cen.porId[decodeURIComponent(url.split('=')[1])]) || cen.conversa);
   if (url.startsWith('/api/seth/conversa/organizar') && metodo === 'POST') {
     const r = escolher(cen.organizar) || {};
     if (r.status && r.status !== 200) return respostaTexto(r.status, r.texto || '');
@@ -196,6 +217,8 @@ function coletar(no, saida) {
 }
 const esperar = async () => { for (let i = 0; i < 80; i++) await new Promise((r) => setImmediate(r)); };
 function acharTodos(raiz, pred) { return descendentes(raiz).filter(pred); }
+// Primeira linha da lista de conversas (lote painel-conversa-16-11): a lista agora abre com o cabeçalho do grupo (Hoje, Mais antigas...).
+function primeiroItem() { return descendentes(documento.getElementById('seth-conversas')).find((e) => typeof e.className === 'string' && e.className.split(' ').includes('seth-item')); }
 const resultados = [];  // valores devolvidos pelas ações 'js' (código rodado dentro da página, para testar funções internas)
 async function executar(a) {
   const em = () => documento.getElementById(a.em || 'seth-conversas');
@@ -226,6 +249,15 @@ async function executar(a) {
     const alvo = {tagName: a.tagName || 'BODY', isContentEditable: false};
     const ev = {key: a.tecla, ctrlKey: !!a.ctrl, metaKey: false, shiftKey: !!a.shift, target: alvo, preventDefault() { ev.prevented = true; }};
     (ouvintesDoc.keydown || []).forEach((f) => f(ev));
+  } else if (a.tipo === 'arquivos' || a.tipo === 'soltar') {
+    const el = documento.getElementById(a.id);
+    const arquivos = a.lista.map((x) => ({name: x.nome, type: x.tipo || '', size: x.tamanho !== undefined ? x.tamanho : x.texto.length, text: async () => x.texto}));
+    if (a.tipo === 'soltar') (el.ouvintes.drop || []).forEach((f) => f({target: el, preventDefault() {}, dataTransfer: {files: arquivos}}));
+    else { el.files = arquivos; el.ouvintes.change[0]({target: el}); }
+  } else if (a.tipo === 'colar') {
+    const el = documento.getElementById(a.id);
+    const ev = {target: el, clipboardData: {getData: () => a.texto}, preventDefault() { marcas.colarPrevenido = true; }};
+    (el.ouvintes.paste || []).forEach((f) => f(ev));
   } else if (a.tipo === 'arquivo') {
     const el = documento.getElementById(a.id);
     el.files = [{size: a.tamanho ?? a.texto.length, text: async () => a.texto}];
@@ -250,9 +282,10 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
   } catch (e) { console.log(JSON.stringify({erro: 'carga: ' + e.message})); return; }
   for (const f of cargas) { try { f(); } catch (e) { /* carga de outras seções: fora do teste */ } }
   await esperar();
-  if (cen.abrir) { documento.getElementById('seth-conversas').children[0].children[0].ouvintes.click[0](); await esperar(); }
+  if (cen.secao) { for (const id of ['panorama', 'conversa']) documento.getElementById(id).hidden = id !== cen.secao; }
+  if (cen.abrir) { primeiroItem().children[0].ouvintes.click[0](); await esperar(); }
   if (cen.renomear !== undefined) {
-    const linha = documento.getElementById('seth-conversas').children[0];
+    const linha = primeiroItem();
     acharTodos(linha, (e) => e.tag === 'button' && texto(e).trim() === 'Renomear')[0].ouvintes.click[0]({});  // botão Renomear da conversa (sem abrir)
     const campo = linha.children[0]; campo.value = cen.renomear;
     campo.ouvintes.keydown[0]({key: 'Enter'}); await esperar();
@@ -278,6 +311,7 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     buscaOculta: el('seth-busca-resultados').hidden, busca: texto(el('seth-busca-resultados')),
     tempOculta: el('seth-temporaria-aviso').hidden, tempTexto: el('seth-temporaria-aviso').textContent,
     temporariaBotao: el('seth-temporaria').textContent, temporariaPressionado: el('seth-temporaria').getAttribute('aria-pressed'),
+    temporariaTitulo: el('seth-temporaria').title,
     tituloConversa: el('seth-titulo').textContent,
     exportTexto: el('seth-exportar-texto').textContent, exportJsonOculto: el('seth-export-json').hidden,
     exportJsonHref: el('seth-export-json').href, exportMdHref: el('seth-export-md').href,
@@ -291,17 +325,25 @@ function opcoesDe(id) { return documento.getElementById(id).children.map((o) => 
     lixeiraItens: descendentes(el('seth-lixeira')).filter((c) => c.className === 'seth-item').map((c) => ({titulo: c.children[0].textContent, texto: texto(c)})),
     resultados};
   const extra = {
-    contexto: el('seth-contexto').textContent, barra: el('seth-contexto-barra').value,
+    contexto: el('seth-contexto').textContent, contextoDetalhe: el('seth-contexto-detalhe').textContent, barra: el('seth-contexto-barra').value,
     origem: texto(el('seth-origem')), origemOculta: el('seth-origem').hidden,
     paradaOculta: el('seth-parar').hidden, atalhosOculto: el('atalhos-painel').hidden,
     tema: documento.documentElement.dataset.tema, temaSelect: el('tema').value,
     gravacoes, copiados, copiadoAviso: el('seth-copiado').textContent,
     buscaFocada: Boolean(el('seth-busca').focado), pesquisaFocada: Boolean(el('search').focado),
+    maisFocado: Boolean(el('seth-mais-abrir').focado),
     transcricaoCompleta: texto(el('seth-transcript')), entrada: el('seth-input').value,
     ramos: descendentes(el('seth-transcript')).filter((e) => typeof e.className === 'string' && e.className.includes('seth-ramo')).map((e) => texto(e)),
     botoes: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button').map((e) => texto(e).trim()),
     pressionados: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button' && e.getAttribute('aria-pressed') === 'true').map((e) => texto(e).trim()),
     campos: descendentes(el('seth-transcript')).filter((e) => e.tag === 'input' || e.tag === 'textarea').map((e) => e.value),
+    anexos: texto(el('seth-anexos')), anexosOculto: el('seth-anexos').hidden,
+    anexoAviso: el('seth-anexo-aviso').textContent, anexoAvisoOculto: el('seth-anexo-aviso').hidden, leituras: leituras.slice(),
+    chipInstrucoesOculto: el('seth-chip-instrucoes').hidden, instrucoesContagem: el('seth-instrucoes-contagem').textContent,
+    instrucoesErro: el('seth-instrucoes-erro').textContent, instrucoesErroOculto: el('seth-instrucoes-erro').hidden,
+    orgMenu: el('seth-org-aviso-menu').textContent, orgMenuOculto: el('seth-org-aviso-menu').hidden,
+    ilegiveisMenu: el('seth-ilegiveis-aviso-menu').textContent,
+    temporariaMenu: el('seth-temporaria-menu').textContent, marcas, sessaoGravacoes, sessaoValor: sessao['agata-seth-rascunhos'] || null,
     rotulosFeedback: descendentes(el('seth-transcript')).filter((e) => e.tag === 'button' && String(e.getAttribute('aria-label') || '').startsWith('Resposta')).map((e) => ({texto: texto(e).trim(), aria: e.getAttribute('aria-label'), titulo: e.title})),
     status: el('seth-status').textContent};
   console.log(JSON.stringify({...base, ...extra}));
@@ -331,6 +373,9 @@ def corpo_de(chamada):
     return json.loads(chamada["corpo"])
 
 
+ISO_COM_FUSO = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$"
+
+
 CONVERSA_ID = "0123456789ab"
 LISTA = [{"id": CONVERSA_ID, "titulo": "Antiga", "atualizada": "2026-11-09T10:00:00-03:00", "mensagens": 2}]
 
@@ -347,6 +392,17 @@ def secao_conversa() -> str:
     inicio = HTML.index(INICIO_SECAO)
     fim = HTML.index("</section>", inicio + len(INICIO_SECAO))
     return HTML[inicio:fim]
+
+
+def menu_lateral() -> str:
+    """Menu único (aside.sidebar): lista de conversas, busca e a organização ficam aqui ou no dialog (lote painel-conversa-16-11)."""
+    inicio = HTML.index('<aside class="sidebar"')
+    return HTML[inicio:HTML.index("</aside>", inicio) + len("</aside>")]
+
+
+def organizar_dialog() -> str:
+    inicio = HTML.index('<dialog id="organizar-dialog"')
+    return HTML[inicio:HTML.index("</dialog>", inicio) + len("</dialog>")]
 
 
 def bloco_conversa_js() -> str:
@@ -383,12 +439,13 @@ class ConversaJs(unittest.TestCase):
 
     def test_envia_chave_mensagens_e_modelo_no_stream(self):
         # O corpo leva 'mensagens' e o 'modelo' escolhido (server.py, _seth_chat_stream).
-        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens,\s*modelo\}\)'
+        # C8/C9 (16/11/2026): o corpo leva também 'instrucoes' e 'anexos' (server.py, _seth_chat_stream).
+        padrao = r'"/api/seth/chat/stream".*?body:\s*JSON\.stringify\(\{mensagens,\s*modelo,\s*instrucoes,\s*anexos\}\)'
         self.assertIsNotNone(re.search(padrao, bloco_conversa_js(), flags=re.DOTALL),
-                             "o stream deve enviar os campos 'mensagens' e 'modelo' (server.py, _seth_chat_stream)")
+                             "o stream deve enviar os campos 'mensagens', 'modelo', 'instrucoes' e 'anexos' (server.py, _seth_chat_stream)")
 
     def test_fallback_tambem_envia_o_modelo(self):
-        self.assertIn("JSON.stringify({messages: mensagens, modelo})", bloco_conversa_js())
+        self.assertIn("JSON.stringify({messages: mensagens, modelo, instrucoes, anexos})", bloco_conversa_js())
 
     def test_seletor_busca_a_lista_no_servidor(self):
         self.assertIn('"/api/seth/modelos"', bloco_conversa_js())
@@ -455,7 +512,7 @@ class ConversaComportamento(unittest.TestCase):
         self.assertEqual(len(corpo_de(salvos[-1])["mensagens"][0]["content"]), 4500)
 
     def test_janela_respeita_o_teto_de_bytes_do_pedido(self):
-        antigas = [{"role": "user" if i % 2 == 0 else "assistant", "content": "\n" * 4000} for i in range(19)]
+        antigas = [{"role": "user" if i % 2 == 0 else "assistant", "content": "\x01" * 4000} for i in range(19)]  # C10: 6 bytes por caractere no JSON passam de 262144
         medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": ["oi"]})
         pedido = chamadas_para(medido, "/api/seth/chat/stream")[0]
         self.assertLessEqual(len(pedido["corpo"].encode("utf-8")), panel_limite_pedido())
@@ -513,8 +570,9 @@ class ConversaComportamento(unittest.TestCase):
         medido = rodar_painel({"stream": {"cabecalhos": {"x-modelo-real": "openai/gpt-oss-120b"}}, "enviar": ["oi"]})
         self.assertIn("modelo: openai/gpt-oss-120b", medido["transcricao"])
         salvos = chamadas_para(medido, "/api/seth/conversa")
-        self.assertEqual(corpo_de(salvos[-1])["mensagens"][-1],
-                         {"role": "assistant", "content": "resposta", "modelo": "seth-livre", "modelo_real": "openai/gpt-oss-120b"})
+        gravada = corpo_de(salvos[-1])["mensagens"][-1]
+        self.assertRegex(gravada.pop("hora"), ISO_COM_FUSO, "C5 (16/11/2026): a resposta grava a hora (ISO 8601 com fuso)")
+        self.assertEqual(gravada, {"role": "assistant", "content": "resposta", "modelo": "seth-livre", "modelo_real": "openai/gpt-oss-120b"})
 
     def test_sem_cabecalho_mostra_o_escolhido_marcado_e_nao_grava_modelo_real(self):
         medido = rodar_painel({"stream": {}, "modelo": "seth-public", "enviar": ["oi"]})
@@ -562,14 +620,33 @@ class ConversaOrganizacaoHtml(unittest.TestCase):
            "seth-importar-arquivo", "seth-exportar-texto", "seth-export-json", "seth-export-md",
            "seth-ilegiveis-aviso", "seth-lixeira-bloco", "seth-lixeira-total", "seth-lixeira"]
 
-    def test_ids_da_organizacao_existem_na_secao_conversa(self):
+    # Lote painel-conversa-16-11: a lista, a busca e as pastas saíram da seção Conversa. Cada id tem a região certa.
+    REGIOES = {
+        "menu": ["seth-busca", "seth-busca-resultados", "seth-arquivadas-bloco", "seth-arquivadas", "seth-arquivadas-total",
+                 "seth-lixeira-bloco", "seth-lixeira-total", "seth-lixeira", "seth-conversas"],
+        "dialog": ["seth-filtro-pasta", "seth-filtro-marcador", "seth-org-aviso", "seth-ilegiveis-aviso", "seth-pastas-bloco",
+                   "seth-pasta-form", "seth-pasta-nome", "seth-pasta-criar", "seth-pastas", "seth-importar-arquivo"],
+        "conversa": ["seth-temporaria", "seth-temporaria-aviso", "seth-exportar-texto", "seth-export-json", "seth-export-md"],
+    }
+
+    def test_ids_da_organizacao_existem_na_regiao_certa(self):
+        regiao = {"menu": menu_lateral(), "dialog": organizar_dialog(), "conversa": secao_conversa()}
+        for nome, ids in self.REGIOES.items():
+            for ident in ids:
+                with self.subTest(ident=ident, regiao=nome):
+                    self.assertIn(f'id="{ident}"', regiao[nome])
         for ident in self.IDS:
-            with self.subTest(ident=ident):
-                self.assertIn(f'id="{ident}"', secao_conversa())
+            with self.subTest(ident=ident, presente_uma_vez=True):
+                self.assertEqual(HTML.count(f'id="{ident}"'), 1)
+
+    def test_lista_de_conversas_esta_dentro_do_aside_sidebar_e_nao_na_conversa(self):
+        self.assertIn('id="seth-conversas"', menu_lateral())
+        self.assertNotIn('id="seth-conversas"', secao_conversa(), "lista duplicada na seção Conversa")
+        self.assertNotIn("seth-lista", secao_conversa())
 
     def test_campo_de_busca_e_nome_de_pasta_com_limite(self):
-        self.assertRegex(secao_conversa(), r'<input id="seth-busca" type="search" maxlength="120"')
-        self.assertRegex(secao_conversa(), r'<input id="seth-pasta-nome" type="text" maxlength="60"')
+        self.assertRegex(menu_lateral(), r'<input id="seth-busca" type="search" maxlength="120"')
+        self.assertRegex(organizar_dialog(), r'<input id="seth-pasta-nome" type="text" maxlength="60"')
 
     def test_exportacao_e_link_com_download_e_sem_script(self):
         self.assertRegex(secao_conversa(), r'<a class="text-link" id="seth-export-json" href="#" download hidden>')
@@ -589,9 +666,26 @@ class ConversaLista(unittest.TestCase):
         itens = [conversa_item("0000000000a2", "Fixada antiga", fixada=True), conversa_item("0000000000a1", "Recente")]
         medido = rodar_painel({"conversas": itens})
         self.assertEqual([i["titulo"] for i in medido["lista"]], ["Fixada antiga", "Recente"])
-        self.assertEqual(medido["grupos"], ["Fixadas", "Recentes"])
+        # Lote painel-conversa-16-11: os grupos vêm da data real (atualizada), não mais de "Recentes".
+        self.assertEqual(medido["grupos"][0], "Fixadas")
+        self.assertIn(medido["grupos"][1], ["Hoje", "Ontem", "Últimos 7 dias", "Mais antigas"])
         self.assertIn("Fixada", medido["lista"][0]["texto"])
         self.assertTrue(medido["lista"][0]["fixada"])
+
+    def test_grupos_pela_data_real_depois_das_fixadas(self):
+        # Lote painel-conversa-16-11 (E2): Fixadas, Hoje, Ontem, Últimos 7 dias, Mais antigas; datas relativas ao dia do teste.
+        from datetime import datetime, timedelta
+        agora = datetime.now().astimezone()
+        def dia(n):
+            return (agora - timedelta(days=n)).isoformat(timespec="seconds")
+        itens = [conversa_item("0000000000a5", "Antiga", atualizada=dia(40)),
+                 conversa_item("0000000000a4", "Semana", atualizada=dia(3)),
+                 conversa_item("0000000000a3", "Ontem", atualizada=dia(1)),
+                 conversa_item("0000000000a2", "Fixada", fixada=True, atualizada=dia(400)),
+                 conversa_item("0000000000a1", "Hoje", atualizada=dia(0))]
+        medido = rodar_painel({"conversas": itens})
+        self.assertEqual(medido["grupos"], ["Fixadas", "Hoje", "Ontem", "Últimos 7 dias", "Mais antigas"])
+        self.assertEqual([i["titulo"] for i in medido["lista"]], ["Fixada", "Hoje", "Ontem", "Semana", "Antiga"])
 
     def test_arquivadas_saem_da_lista_principal_e_ficam_na_secao(self):
         itens = [conversa_item("0000000000a1", "Ativa"), conversa_item("0000000000a2", "Guardada", arquivada=True)]
@@ -717,7 +811,9 @@ class ConversaLista(unittest.TestCase):
         self.assertFalse(medido["tempOculta"])
         self.assertIn("Conversa temporária: não é salva.", secao_conversa())  # o texto do aviso é estático (HTML)
         self.assertEqual(medido["temporariaPressionado"], "true")
-        self.assertEqual(medido["temporariaBotao"], "Conversa temporária: ligada")
+        self.assertEqual(medido["temporariaBotao"], "Temporária", "J5: o botão é um interruptor curto")
+        self.assertEqual(medido["temporariaPressionado"], "true")
+        self.assertTrue(medido["temporariaTitulo"].startswith("Conversa temporária: ligada"), "o texto longo vai para o title")
         self.assertEqual(medido["tituloConversa"], "Conversa temporária")
         self.assertEqual(medido["status"], "TEMPORÁRIA")
         self.assertTrue(medido["exportJsonOculto"])
@@ -1064,10 +1160,12 @@ class ConversaParar(unittest.TestCase):
         self.assertIn("Não consegui terminar a resposta: stream interrompido.", medido["transcricaoCompleta"])
         self.assertTrue(corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][-1]["interrompida"])
 
-    def test_erro_sem_texto_devolve_a_pergunta_ao_campo(self):
+    def test_erro_sem_texto_mantem_a_pergunta_e_oferece_tentar_de_novo(self):
+        # C7 (16/11/2026): a pergunta fica na conversa (não volta ao campo); o erro traz o botão "Tentar de novo".
         medido = rodar_painel({"stream": {"status": 400, "texto": "mensagem 1 acima de 4000 caracteres"}, "enviar": ["oi"]})
-        self.assertEqual(medido["entrada"], "oi", "a pergunta volta ao campo")
-        self.assertNotIn("Você", medido["transcricaoCompleta"], "a pergunta sai da conversa")
+        self.assertEqual(medido["entrada"], "", "a pergunta não volta ao campo: ela já está na conversa")
+        self.assertIn("Você", medido["transcricaoCompleta"], "a pergunta fica na conversa")
+        self.assertIn("Tentar de novo", medido["botoes"])
         self.assertIn("Não consegui responder agora: o painel recusou o pedido (mensagem 1 acima de 4000 caracteres).",
                       medido["transcricaoCompleta"])
 
@@ -1139,16 +1237,20 @@ class ConversaContextoAtalhosTema(unittest.TestCase):
     def test_barra_de_contexto_mostra_caracteres_e_mensagens_em_portugues(self):
         conv = conversa([{"role": "user", "content": "x" * 100}, {"role": "assistant", "content": "ok"}])
         medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True})
-        self.assertTrue(medido["contexto"].startswith("Contexto da próxima pergunta: 102 caracteres,"), medido["contexto"])
-        self.assertIn("de 128 KB", medido["contexto"])
-        self.assertIn("Vão 2 de 2 mensagens.", medido["contexto"])
+        # J3 (16/11/2026): a linha curta é "Contexto: 1,2% · 4 de 4 mensagens"; o texto longo fica no details.
+        self.assertRegex(medido["contexto"], r"^Contexto: \d+,\d% · 2 de 2 mensagens$")
+        self.assertTrue(medido["contextoDetalhe"].startswith("Contexto da próxima pergunta: 102 caracteres,"), medido["contextoDetalhe"])
+        self.assertIn("de 256 KB", medido["contextoDetalhe"])
+        self.assertIn("Medida: estimativa em caracteres.", medido["contextoDetalhe"])  # C11: sem uso do gateway
+        self.assertIn("Vão 2 de 2 mensagens.", medido["contextoDetalhe"])
         self.assertIsInstance(medido["barra"], (int, float))
         self.assertLessEqual(medido["barra"], 100)
-        self.assertRegex(medido["contexto"], r"\(\d+,\d%\)", "a porcentagem tem uma casa decimal, com vírgula")
+        self.assertRegex(medido["contextoDetalhe"], r"\(\d+,\d%\)", "a porcentagem tem uma casa decimal, com vírgula")
 
     def test_conversa_vazia_diz_que_so_vai_a_pergunta(self):
         medido = rodar_painel({"conversas": LISTA})
-        self.assertTrue(medido["contexto"].startswith("Contexto: a conversa está vazia"), medido["contexto"])
+        self.assertEqual(medido["contexto"], "Contexto: vazio")
+        self.assertTrue(medido["contextoDetalhe"].startswith("A conversa está vazia"), medido["contextoDetalhe"])
 
     def test_interrogacao_abre_a_lista_de_atalhos_e_esc_fecha(self):
         abre = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "tecla_doc", "tecla": "?"}]})
@@ -1202,6 +1304,498 @@ class ConversaContextoAtalhosTema(unittest.TestCase):
         self.assertIn("status", medido)
 
 
+MARKDOWN_RICO = """# Um
+## Dois
+### Tres
+
+1. primeiro
+2. segundo
+   - sub um
+   - sub dois
+
+> citado
+
+| a | b |
+| --- | --- |
+| 1 | 2 |
+
+---
+
+*it* ~~tach~~ **neg** `cod`"""
+CONTEUDO_LINK = "Veja [a doc](https://exemplo.org/doc), ou https://exemplo.org/x. E [mal](javascript:alert(1))."
+CODIGO_PY = "```py\nprint('oi')\n```"
+CLIQUE_ARVORE = {"tipo": "js", "codigo": "__arvore(document.getElementById('seth-transcript'))"}
+
+
+def achar_nos(raiz, tag=None, classe=None):
+    """Nós da árvore de __arvore (dicts com 't', 'c', 'a', 'f') com a tag e/ou a classe pedidas, em ordem de documento."""
+    saida = []
+
+    def andar(no):
+        if (tag is None or no.get("t") == tag) and (classe is None or classe in no.get("c", "").split()):
+            saida.append(no)
+        for filho in no.get("f", []):
+            andar(filho)
+
+    andar(raiz)
+    return saida
+
+
+def texto_no(no):
+    if no.get("t") == "#texto":
+        return no.get("x", "")
+    return no.get("x", "") + "".join(texto_no(f) for f in no.get("f", []))
+
+
+def conversa_com_id(id_, mensagens):
+    return {"schema_version": 1, "id": id_, "titulo": "Outra", "mensagens": mensagens}
+
+
+class ConversaFuncoesChat(unittest.TestCase):
+    """C1 a C5 (16/11/2026) e C9/C11 com o DOM falso: a árvore da transcrição e o que sai no pedido."""
+
+    def arvore_da_transcricao(self, cenario):
+        medido = rodar_painel(dict(cenario, depois=[*cenario.get("depois", []), CLIQUE_ARVORE]))
+        return medido, medido["resultados"][-1]
+
+    def test_titulos_em_tres_niveis_listas_aninhadas_citacao_tabela_e_enfase(self):
+        conv = conversa([{"role": "user", "content": "pergunta"}, {"role": "assistant", "content": MARKDOWN_RICO}])
+        _, arv = self.arvore_da_transcricao({"conversas": LISTA, "conversa": conv, "abrir": True})
+        arv = achar_nos(arv, "div", "msg-body")[1]  # corpo da resposta da Seth (o primeiro é o da pergunta)
+        titulos = [(n["t"], texto_no(n)) for n in achar_nos(arv) if n["t"] in ("h3", "h4", "h5")]
+        self.assertEqual(titulos, [("h3", "Um"), ("h4", "Dois"), ("h5", "Tres")])
+        ordenada = achar_nos(arv, "ol")
+        self.assertEqual(len(ordenada), 1, "a lista numerada vira ol")
+        itens = [li for li in ordenada[0]["f"] if li["t"] == "li"]
+        self.assertEqual(texto_no(itens[0]), "primeiro")
+        aninhada = achar_nos(itens[1], "ul")
+        self.assertEqual([texto_no(li) for li in aninhada[0]["f"]], ["sub um", "sub dois"], "recuo de dois espaços vira lista aninhada")
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "blockquote")], ["citado"])
+        tabela = achar_nos(arv, "div", "md-tabela")
+        self.assertEqual(len(tabela), 1, "a tabela fica numa moldura própria (rolagem horizontal)")
+        self.assertEqual([texto_no(th) for th in achar_nos(tabela[0], "th")], ["a", "b"])
+        self.assertEqual([texto_no(td) for td in achar_nos(tabela[0], "td")], ["1", "2"])
+        self.assertEqual(len(achar_nos(arv, "hr")), 1)
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "em")], ["it"])
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "del")], ["tach"])
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "strong")], ["neg"])
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "code")], ["cod"])
+
+    def test_link_vira_texto_com_endereco_visivel_e_botao_sem_elemento_a(self):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": CONTEUDO_LINK}])
+        medido, arv = self.arvore_da_transcricao({"conversas": LISTA, "conversa": conv, "abrir": True,
+                                                  "acoes_depois": [{"tipo": "clicar", "texto": "Copiar link", "em": "seth-transcript", "indice": 0}]})
+        self.assertEqual(achar_nos(arv, "a"), [], "nada de link <a> saindo do painel")
+        self.assertEqual([texto_no(n) for n in achar_nos(arv, "code", "md-link-url")], ["https://exemplo.org/doc", "https://exemplo.org/x"],
+                         "o endereço fica visível; a pontuação colada ao fim da URL sai do link")
+        self.assertIn("javascript:alert(1)", medido["transcricaoCompleta"], "esquema que não é http vira texto puro")
+        self.assertIn("a doc", medido["transcricaoCompleta"])
+        self.assertEqual(medido["copiados"], ["https://exemplo.org/doc"], "Copiar link copia o endereço")
+
+    def test_bloco_de_codigo_tem_linguagem_e_botao_copiar_com_confirmacao(self):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": CODIGO_PY}])
+        medido, arv = self.arvore_da_transcricao({"conversas": LISTA, "conversa": conv, "abrir": True,
+                                                  # 0 = Copiar da pergunta; 1 = Copiar do bloco de código (vem antes dos botões da resposta)
+                                                  "acoes_depois": [{"tipo": "clicar", "texto": "Copiar", "em": "seth-transcript", "indice": 1}]})
+        bloco = achar_nos(arv, "div", "md-codigo")
+        self.assertEqual(len(bloco), 1)
+        self.assertEqual(texto_no(achar_nos(bloco[0], "span", "md-codigo-lingua")[0]), "py", "a linguagem aparece no cabeçalho do bloco")
+        self.assertEqual(medido["copiados"], ["print('oi')"], "copia só o código, sem a cerca")
+        self.assertIn("Copiado", medido["transcricaoCompleta"], "a confirmação aparece na região aria-live")
+
+    def test_indicador_aparece_enquanto_a_seth_responde_e_some_ao_parar(self):
+        medido = rodar_painel({"conversas": LISTA, "stream": {"lento": True, "sse": 'data: {"tipo": "texto", "delta": "parcial"}\n\n'},
+                               "enviar": ["oi"], "depois": [CLIQUE_ARVORE],
+                               "acoes_depois": [{"tipo": "clicar", "id": "seth-parar"}, CLIQUE_ARVORE]})
+        durante, depois = medido["resultados"]
+        self.assertEqual(len(achar_nos(durante, "span", "seth-digitando")), 1, "cursor no fim do texto enquanto responde")
+        self.assertEqual(achar_nos(depois, "span", "seth-digitando"), [], "o cursor some quando a resposta termina")
+
+    def test_hora_curta_com_data_no_title_e_mensagem_sem_hora_nao_mostra_nada(self):
+        conv = conversa([{"role": "user", "content": "q", "hora": "2026-11-09T10:15:00-03:00"}, {"role": "assistant", "content": "ok"}])
+        _, arv = self.arvore_da_transcricao({"conversas": LISTA, "conversa": conv, "abrir": True})
+        horas = achar_nos(arv, "time")
+        self.assertRegex(texto_no(horas[0]), r"^\d{2}:\d{2}$", "hora curta local")
+        self.assertEqual(horas[0]["a"]["datetime"], "2026-11-09T10:15:00-03:00")
+        self.assertIn("2026", horas[0]["title"], "o title leva a data completa")
+        self.assertEqual(texto_no(horas[1]), "", "mensagem antiga sem hora não mostra nada")
+        self.assertNotIn("title", horas[1])
+
+    def test_mensagem_nova_grava_hora_iso_com_fuso_do_usuario_e_da_seth(self):
+        medido = rodar_painel({"conversas": LISTA, "enviar": ["oi"]})
+        mensagens = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"]
+        self.assertRegex(mensagens[0]["hora"], ISO_COM_FUSO)
+        self.assertRegex(mensagens[1]["hora"], ISO_COM_FUSO)
+
+    def test_anexo_aparece_como_etiqueta_com_nome_e_tamanho_e_conta_no_contexto(self):
+        conv = conversa([{"role": "user", "content": "x" * 100}, {"role": "assistant", "content": "ok"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True,
+                               "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo", "lista": [{"nome": "notas.txt", "tipo": "text/plain", "texto": "linha 1\nlinha 2"}]}]})
+        self.assertFalse(medido["anexosOculto"])
+        self.assertIn("notas.txt", medido["anexos"])
+        self.assertIn("15 caracteres", medido["anexos"])
+        self.assertIn("Remover", medido["anexos"])
+        self.assertTrue(medido["contextoDetalhe"].startswith("Contexto da próxima pergunta: 117 caracteres,"), medido["contextoDetalhe"])
+
+    def test_remover_anexo_tira_a_etiqueta(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [
+            {"tipo": "arquivos", "id": "seth-anexo-arquivo", "lista": [{"nome": "notas.txt", "tipo": "text/plain", "texto": "oi"}]},
+            {"tipo": "clicar", "texto": "Remover", "em": "seth-anexos"}]})
+        self.assertTrue(medido["anexosOculto"])
+        self.assertEqual(medido["anexos"], "")
+
+    def test_envio_leva_o_texto_do_anexo_no_pedido_e_so_o_metadado_na_conversa(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [
+            {"tipo": "arquivos", "id": "seth-anexo-arquivo", "lista": [{"nome": "notas.txt", "tipo": "text/plain", "texto": "linha 1\nlinha 2"}]}],
+            "enviar": ["resuma"]})
+        pedido = chamadas_para(medido, "/api/seth/chat/stream")[0]
+        self.assertEqual(corpo_de(pedido)["anexos"], [{"nome": "notas.txt", "texto": "linha 1\nlinha 2"}])
+        self.assertIn("notas.txt · 15 caracteres", medido["transcricaoCompleta"], "a mensagem desenhada mostra nome e caracteres")
+        self.assertTrue(medido["anexosOculto"], "as etiquetas somem depois do envio")
+        gravada = corpo_de(chamadas_para(medido, "/api/seth/conversa")[-1])["mensagens"][0]
+        self.assertEqual(gravada["anexos"], [{"nome": "notas.txt", "caracteres": 15}], "a conversa guarda só nome e caracteres")
+
+    def test_recusas_de_anexo_dizem_o_motivo(self):
+        grande = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo",
+                                                              "lista": [{"nome": "grande.txt", "tipo": "text/plain", "texto": "x" * 20001}]}]})
+        self.assertIn("o limite por arquivo é 20000", grande["anexoAviso"])
+        self.assertNotIn("grande.txt", grande["anexos"], "acima do limite não entra")
+        foto = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo",
+                                                            "lista": [{"nome": "foto.png", "tipo": "image/png", "texto": "bytes"}]}]})
+        self.assertEqual(foto["anexoAviso"], "A conversa ainda não lê imagens.", "imagem é recusada com a frase exata, sem prometer")
+        quatro = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo",
+                                                              "lista": [{"nome": f"a{i}.txt", "tipo": "text/plain", "texto": "x"} for i in range(4)]}]})
+        self.assertIn("no máximo 3 anexos por mensagem", quatro["anexoAviso"])
+        self.assertEqual(quatro["anexos"].count("Remover"), 3)
+
+    def test_arquivo_acima_de_4_vezes_o_limite_e_recusado_antes_de_ler(self):
+        # X1 (16/11/2026): File.size acima de 4 x 20000 (80000 bytes) é recusado antes do FileReader; o arquivo não é lido.
+        grande = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo",
+                                                              "lista": [{"nome": "enorme.txt", "tipo": "text/plain", "texto": "x", "tamanho": 80001}]}]})
+        self.assertEqual(grande["leituras"], [], "nenhum FileReader pode ser criado para arquivo acima do teto de bytes")
+        self.assertIn("80000 bytes", grande["anexoAviso"])
+        self.assertIn("o limite por arquivo é 20000", grande["anexoAviso"])
+        self.assertNotIn("enorme.txt", grande["anexos"])
+        no_teto = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "arquivos", "id": "seth-anexo-arquivo",
+                                                               "lista": [{"nome": "teto.txt", "tipo": "text/plain", "texto": "x", "tamanho": 80000}]}]})
+        self.assertEqual(no_teto["leituras"], ["teto.txt"], "no teto exato (80000) o arquivo é lido, porque a recusa é acima dele")
+        self.assertIn("teto.txt", no_teto["anexos"])
+
+    def test_texto_colado_longo_vira_colado_txt_e_curto_fica_no_campo(self):
+        longo = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "colar", "id": "seth-input", "texto": "p" * 4500}]})
+        self.assertTrue(longo["marcas"].get("colarPrevenido"), "o colar longo não entra no campo")
+        self.assertIn("colado.txt", longo["anexos"])
+        curto = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "colar", "id": "seth-input", "texto": "p" * 100}]})
+        self.assertFalse(curto["marcas"].get("colarPrevenido", False))
+        self.assertEqual(curto["anexos"], "")
+
+    def test_arrastar_e_soltar_anexa_no_compositor(self):
+        medido = rodar_painel({"conversas": LISTA, "acoes": [{"tipo": "soltar", "id": "seth-form",
+                                                              "lista": [{"nome": "log.log", "tipo": "text/plain", "texto": "erro 1"}]}]})
+        self.assertIn("log.log", medido["anexos"])
+
+    def test_uso_do_gateway_aparece_na_linha_de_contexto_e_sem_uso_fica_a_estimativa(self):
+        sse = 'data: {"tipo": "texto", "delta": "oi"}\n\ndata: {"tipo": "uso", "entrada": 120, "saida": 40}\n\ndata: {"tipo": "fim"}\n\n'
+        comuso = rodar_painel({"conversas": LISTA, "stream": {"sse": sse}, "enviar": ["pergunta"]})
+        self.assertIn("Último pedido: entrada 120 · saída 40 tokens (informado pelo gateway).", comuso["contextoDetalhe"])
+        semuso = rodar_painel({"conversas": LISTA, "enviar": ["pergunta"]})
+        self.assertIn("Medida: estimativa em caracteres.", semuso["contextoDetalhe"])
+        self.assertNotIn("informado pelo gateway", semuso["contextoDetalhe"])
+
+    def test_pedido_de_vinte_mensagens_com_acentos_passa_o_teto_antigo_sem_cortar(self):
+        # C10: 20 mensagens de 4000 "é" (2 bytes cada em UTF-8) passam de 131072 bytes e cabem no novo teto de 262144.
+        antigas = [{"role": "user" if i % 2 == 0 else "assistant", "content": "é" * 4000} for i in range(20)]
+        medido = rodar_painel({"conversas": LISTA, "conversa": conversa(antigas), "abrir": True, "enviar": ["oi"]})
+        pedido = chamadas_para(medido, "/api/seth/chat/stream")[0]
+        self.assertGreater(len(pedido["corpo"].encode("utf-8")), 131072)
+        self.assertLessEqual(len(pedido["corpo"].encode("utf-8")), panel_limite_pedido())
+        self.assertFalse(any("de fora" in t for t in medido["transcricao"]), medido["transcricao"])
+
+
+class ConversaRascunhoErroInstrucoes(unittest.TestCase):
+    """C6, C7 e C8 com o DOM falso: rascunho por conversa, "Tentar de novo" e instruções da conversa."""
+
+    def test_rascunho_volta_ao_trocar_de_conversa(self):
+        outra = conversa_com_id("bbbbbbbbbbbb", [])
+        cenario = {"conversas": [LISTA[0], conversa_item("bbbbbbbbbbbb", "Segunda")], "conversa": conversa([]),
+                   "porId": {"bbbbbbbbbbbb": outra}, "abrir": True}
+        digitou = rodar_painel(dict(cenario, acoes=[{"tipo": "digitar", "id": "seth-input", "valor": "rascunho da antiga"},
+                                                    {"tipo": "clicar", "texto": "Segunda", "em": "seth-conversas"}]))
+        self.assertEqual(digitou["entrada"], "", "a conversa segunda não tem rascunho da primeira")
+        voltou = rodar_painel(dict(cenario, acoes=[{"tipo": "digitar", "id": "seth-input", "valor": "rascunho da antiga"},
+                                                   {"tipo": "clicar", "texto": "Segunda", "em": "seth-conversas"},
+                                                   {"tipo": "clicar", "texto": "Antiga", "em": "seth-conversas"}]))
+        self.assertEqual(voltou["entrada"], "rascunho da antiga", "ao voltar, o rascunho da conversa reaparece")
+
+    def test_nova_conversa_tem_rascunho_proprio_e_enviar_limpa_o_da_conversa(self):
+        vazia = rodar_painel({"conversas": LISTA, "conversa": conversa([]), "abrir": True,
+                              "acoes": [{"tipo": "digitar", "id": "seth-input", "valor": "rascunho da antiga"},
+                                        {"tipo": "clicar", "id": "seth-nova"}]})
+        self.assertEqual(vazia["entrada"], "", "a conversa nova começa com o campo vazio")
+        enviou = rodar_painel({"conversas": LISTA, "conversa": conversa([]), "abrir": True,
+                               "acoes": [{"tipo": "digitar", "id": "seth-input", "valor": "rascunho da antiga"}],
+                               "enviar": ["pergunta final"]})
+        self.assertFalse(any("rascunho da antiga" in v for _, v in enviou["sessaoGravacoes"]), "o rascunho nunca vai para o armazenamento do navegador (R9)")
+        self.assertNotIn("rascunho da antiga", enviou["sessaoValor"] or "", "enviado, o rascunho da conversa some")
+
+    def test_rascunho_so_em_memoria_recarregar_comeca_vazio(self):
+        # R9 (16/11/2026): o rascunho é um Map em memória. Um valor deixado no armazenamento da aba não é lido de volta.
+        guardado = json.dumps({"nova-inicial": {"texto": "nao deve voltar", "anexos": []}})
+        medido = rodar_painel({"conversas": LISTA, "sessionStorage": {"inicial": {"agata-seth-rascunhos": guardado}}})
+        self.assertEqual(medido["entrada"], "", "recarregar começa com o campo vazio")
+
+    def test_tentar_de_novo_reenvia_sem_duplicar_a_pergunta(self):
+        medido = rodar_painel({"conversas": LISTA, "stream": [{"status": 400, "texto": "mensagem 1 acima de 4000 caracteres"}, {}],
+                               "enviar": ["pergunta X"],
+                               "acoes_depois": [{"tipo": "clicar", "texto": "Tentar de novo", "em": "seth-transcript"}]})
+        pedidos = chamadas_para(medido, "/api/seth/chat/stream")
+        self.assertEqual(len(pedidos), 2, "o segundo pedido é o 'Tentar de novo'")
+        for pedido in pedidos:
+            self.assertEqual(corpo_de(pedido)["mensagens"], [{"role": "user", "content": "pergunta X"}])
+        self.assertEqual(medido["transcricaoCompleta"].count("pergunta X"), 1, "a pergunta aparece uma vez só")
+        self.assertIn("resposta", medido["transcricaoCompleta"])
+        self.assertNotIn("Tentar de novo", medido["botoes"], "com a resposta, o botão some")
+
+    def test_pedido_leva_instrucoes_da_conversa_e_o_chip_aparece(self):
+        conv = {**conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}]), "instrucoes": "Responda em tópicos."}
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "enviar": ["oi"]})
+        pedido = corpo_de(chamadas_para(medido, "/api/seth/chat/stream")[0])
+        self.assertEqual(pedido["instrucoes"], "Responda em tópicos.")
+        self.assertEqual(pedido["anexos"], [])
+        self.assertFalse(medido["chipInstrucoesOculto"], "chip 'com instruções' no cabeçalho")
+
+    def test_fallback_tambem_leva_as_instrucoes(self):
+        conv = {**conversa([]), "instrucoes": "Seja breve."}
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "stream": {"status": 502, "texto": ""}, "enviar": ["oi"]})
+        pedido = corpo_de(chamadas_para(medido, "/api/seth/chat")[0])
+        self.assertEqual(pedido["instrucoes"], "Seja breve.")
+        self.assertEqual(pedido["anexos"], [])
+
+    def test_salvar_instrucoes_grava_na_conversa_e_limpar_tira(self):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}])
+        salvo = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "acoes": [
+            {"tipo": "clicar", "id": "seth-instrucoes-abrir"}, {"tipo": "digitar", "id": "seth-instrucoes-texto", "valor": "Use listas."},
+            {"tipo": "clicar", "id": "seth-instrucoes-salvar"}]})
+        self.assertEqual(corpo_de(chamadas_para(salvo, "/api/seth/conversa")[-1])["instrucoes"], "Use listas.")
+        self.assertFalse(salvo["chipInstrucoesOculto"])
+        limpo = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "acoes": [
+            {"tipo": "clicar", "id": "seth-instrucoes-abrir"}, {"tipo": "digitar", "id": "seth-instrucoes-texto", "valor": "Use listas."},
+            {"tipo": "clicar", "id": "seth-instrucoes-salvar"}, {"tipo": "clicar", "id": "seth-instrucoes-abrir"},
+            {"tipo": "clicar", "id": "seth-instrucoes-limpar"}]})
+        self.assertEqual(corpo_de(chamadas_para(limpo, "/api/seth/conversa")[-1])["instrucoes"], "")
+        self.assertTrue(limpo["chipInstrucoesOculto"])
+
+    def test_instrucoes_acima_de_2000_nao_gravam_e_avisam(self):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "acoes": [
+            {"tipo": "clicar", "id": "seth-instrucoes-abrir"}, {"tipo": "digitar", "id": "seth-instrucoes-texto", "valor": "a" * 2001},
+            {"tipo": "clicar", "id": "seth-instrucoes-salvar"}]})
+        self.assertFalse([c for c in chamadas_para(medido, "/api/seth/conversa") if corpo_de(c).get("instrucoes")], "nada de instrução acima do limite vai ao servidor")
+        self.assertFalse(medido["instrucoesErroOculto"])
+        self.assertIn("passam de 2000 caracteres", medido["instrucoesErro"])
+
+    def test_contador_de_instrucoes_mostra_caracteres_de_2000(self):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "acoes": [
+            {"tipo": "clicar", "id": "seth-instrucoes-abrir"}, {"tipo": "digitar", "id": "seth-instrucoes-texto", "valor": "Use listas."}]})
+        self.assertEqual(medido["instrucoesContagem"], "11 de 2000 caracteres")
+
+
+class LoteChatHtmlCss(unittest.TestCase):
+    """C4, C8, C9 e C12 (estática): ids, aviso do dialog, espelhos do menu, CSS do celular e ausência de "Compartilhar"."""
+
+    def test_dialog_de_instrucoes_tem_limite_e_aviso_em_texto_simples(self):
+        dialogo = HTML[HTML.index('<dialog id="seth-instrucoes-dialog"'):]
+        dialogo = dialogo[:dialogo.index("</dialog>")]
+        self.assertIn('id="seth-instrucoes-texto" maxlength="2000"', dialogo)
+        self.assertIn("As instruções valem no modelo padrão da Seth; na via pública o gateway as descarta.", dialogo)
+        self.assertNotIn("<a ", dialogo)
+        for botao in ('id="seth-instrucoes-salvar"', 'id="seth-instrucoes-limpar"', 'id="seth-instrucoes-fechar"'):
+            self.assertIn(botao, dialogo)
+
+    def test_item_instrucoes_e_espelho_da_conversa_temporaria_no_menu_mais(self):
+        menu = secao_conversa()[secao_conversa().index('id="seth-mais-menu"'):]
+        menu = menu[:menu.index("</div>")]
+        self.assertIn('id="seth-instrucoes-abrir"', menu)
+        self.assertRegex(menu, r'<button[^>]*class="text-link seth-so-celular"[^>]*id="seth-temporaria-menu"')
+
+    def test_anexar_tem_input_oculto_com_os_tipos_aceitos(self):
+        self.assertRegex(HTML, r'<input id="seth-anexo-arquivo" type="file" multiple hidden accept="\.txt,\.md,\.json,\.csv,\.log,\.py,\.js,\.ts,\.html,\.css,\.yaml,\.yml,\.toml,\.sh,text/\*">')
+        self.assertIn('id="seth-anexar"', secao_conversa())
+
+    def test_avisos_de_organizacao_tem_espelho_no_menu(self):
+        for id_ in ("seth-org-aviso-menu", "seth-ilegiveis-aviso-menu"):
+            self.assertIn(f'id="{id_}"', menu_lateral())
+            self.assertNotIn(f'id="{id_}"', organizar_dialog(), "o espelho fica no menu, separado do diálogo")
+
+    def test_celular_cabe_em_duas_linhas_e_tira_a_temporaria_para_o_menu(self):
+        css = (HERE / "prototipo.css").read_text(encoding="utf-8")
+        bloco = css[css.index("@media (max-width:480px){\n  .seth-so-celular"):]
+        bloco = bloco[:bloco.index("\n}")]
+        self.assertIn("#seth-temporaria{display:none}", bloco)
+        self.assertIn(".seth-cabecalho-acoes{flex-wrap:nowrap;justify-content:space-between", bloco)
+        self.assertIn("text-overflow:ellipsis", bloco)
+
+    def test_compartilhar_nao_existe_e_nao_foi_inventado(self):
+        self.assertNotIn("Compartilh", HTML)
+        self.assertNotIn("Compartilh", JS)
+
+    def test_codigo_novo_nao_usa_innerhtml_nem_link_externo(self):
+        self.assertNotRegex(JS, r"\.innerHTML\s*=")
+        self.assertNotIn("insertAdjacentHTML", JS)
+        self.assertNotIn("target=", HTML + JS)
+        self.assertNotIn('href="http', HTML + JS)
+
+
+LISTA_COM_SUBLISTA_E_BRANCO = """1. Ferramentas e fluxo
+   - ferramenta um
+   - ferramenta dois
+
+2. Objetivos
+
+   1. objetivo a
+   2. objetivo b
+
+3. Riscos"""
+
+
+class ListasNumeradasMarkdown(unittest.TestCase):
+    """J1 (16/11/2026): item numerado com sublista ou linha em branco segue na mesma ol; o número inicial vira start."""
+
+    def transcricao(self, texto):
+        conv = conversa([{"role": "user", "content": "q"}, {"role": "assistant", "content": texto}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True, "depois": [CLIQUE_ARVORE]})
+        return achar_nos(medido["resultados"][-1], "div", "msg-body")[1]
+
+    def test_lista_com_sublista_e_linha_em_branco_entre_itens_e_uma_ol_so(self):
+        corpo = self.transcricao(LISTA_COM_SUBLISTA_E_BRANCO)
+        oles = achar_nos(corpo, "ol")
+        self.assertEqual(len(oles), 2, "a lista de topo e a dos objetivos, nada mais")
+        topo = oles[0]
+        self.assertNotIn("a", topo, "começa em 1: sem atributo start")
+        itens = [li for li in topo["f"] if li["t"] == "li"]
+        self.assertEqual([li["f"][0]["x"] for li in itens], ["Ferramentas e fluxo", "Objetivos", "Riscos"],
+                         "o item 2 e o item 3 seguem a lista de 1, mesmo com sublista e linha em branco")
+        self.assertEqual([texto_no(li) for li in achar_nos(itens[0], "ul")[0]["f"]], ["ferramenta um", "ferramenta dois"])
+        self.assertEqual([texto_no(li) for li in achar_nos(itens[1], "ol")[0]["f"]], ["objetivo a", "objetivo b"])
+
+    def test_numero_inicial_do_texto_vira_start(self):
+        corpo = self.transcricao("3. Terceiro\n\n4. Quarto")
+        oles = achar_nos(corpo, "ol")
+        self.assertEqual(len(oles), 1)
+        self.assertEqual(oles[0].get("a"), {"start": "3"}, "a lista começa em 3, como no texto")
+        self.assertEqual(len([li for li in oles[0]["f"] if li["t"] == "li"]), 2)
+
+    def test_paragrafo_entre_listas_recomeca_a_contagem(self):
+        corpo = self.transcricao("1. Um\n2. Dois\n\nTexto no meio.\n\n1. Outro começo")
+        oles = achar_nos(corpo, "ol")
+        self.assertEqual(len(oles), 2, "texto sem marca quebra a lista: são duas")
+        self.assertNotIn("a", oles[1], "a segunda começa em 1 de novo")
+
+
+def ids_focaveis(trecho: str) -> list:
+    """Ids dos controles que recebem Tab, em ordem de documento (botão, campo, link com href ou elemento com tabindex)."""
+    from html.parser import HTMLParser
+
+    class Coletor(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.ids = []
+
+        def handle_starttag(self, tag, attrs):
+            d = dict(attrs)
+            focavel = tag in ("button", "input", "select", "textarea") or (tag == "a" and "href" in d) or "tabindex" in d
+            if focavel and d.get("type") != "hidden" and "hidden" not in d and d.get("id"):
+                self.ids.append(d["id"])
+
+    coletor = Coletor()
+    coletor.feed(trecho)
+    return coletor.ids
+
+
+class LoteAjustesFinais(unittest.TestCase):
+    """J2 a J8 (16/11/2026): ajustes vistos nas fotos. O que é visual (respiro, alinhamento, mosaico) tem medição em foto; aqui, a estrutura e o CSS."""
+
+    CSS = (HERE / "prototipo.css").read_text(encoding="utf-8")
+
+    def bloco_css(self, abertura: str) -> str:
+        inicio = self.CSS.index(abertura)
+        return self.CSS[inicio:self.CSS.index("\n}", inicio) + 2]
+
+    def test_faixa_de_baixo_e_uma_linha_com_detalhes_e_modo_conversa_a_direita(self):  # J3
+        faixa = secao_conversa()
+        bloco = faixa[faixa.index('<div class="seth-linha-baixo">'):faixa.index("</footer>")]
+        self.assertIn('<details class="seth-detalhes" id="seth-detalhes"><summary>Detalhes</summary>', bloco)
+        dentro = bloco[bloco.index('<details class="seth-detalhes"'):bloco.index("</details>")]
+        self.assertIn('id="seth-contexto-detalhe"', dentro, "o texto longo de contexto fica no Detalhes")
+        self.assertIn('id="seth-modelo-desc"', dentro, "o aviso de filtro (descrição do modelo) fica no Detalhes")
+        self.assertLess(bloco.index('id="seth-contexto"'), bloco.index("<details"), "contexto curto vem antes")
+        self.assertLess(bloco.index("<details"), bloco.index('id="seth-modo-conversa"'), "modo conversa vem depois, na mesma faixa")
+        self.assertIn("Modo conversa</label>", bloco)
+        self.assertNotIn("Modo conversa: ler cada resposta", bloco, "o texto longo do modo vai para o title")
+        self.assertIn(".seth-linha-baixo .seth-voz{margin:0 0 0 auto", self.CSS, "o modo conversa vai à direita")
+
+    def test_botao_temporaria_e_interruptor_curto_com_titulo(self):  # J5
+        secao = secao_conversa()
+        botao = re.search(r'<button[^>]*id="seth-temporaria"[^>]*>([^<]*)</button>', secao)
+        self.assertIsNotNone(botao)
+        self.assertEqual(botao.group(1), "Temporária")
+        self.assertIn('aria-pressed="false"', botao.group(0))
+        self.assertIn('title="Conversa temporária: desligada.', botao.group(0), "o texto explicativo vai para o title")
+        self.assertIn("Conversa temporária: não é salva.", secao, "o aviso do rodapé continua")
+
+    def test_menu_mais_devolve_o_foco_ao_botao_com_esc(self):  # J8, harness
+        conv = conversa([{"role": "user", "content": "q"}])
+        medido = rodar_painel({"conversas": LISTA, "conversa": conv, "abrir": True,
+                               "acoes": [{"tipo": "clicar", "id": "seth-mais-abrir"}, {"tipo": "tecla", "id": "seth-mais-menu", "tecla": "Escape"}]})
+        self.assertTrue(medido["maisFocado"], "Esc fecha o menu e o foco volta a Mais")
+
+    def test_transcricao_e_focavel_com_nome_e_ordem_de_tab_da_conversa(self):  # J8
+        aside = menu_lateral()
+        conversa_html = secao_conversa()
+        ids = ids_focaveis(aside) + ids_focaveis(conversa_html)
+        self.assertIn('aria-label="Mensagens da conversa" tabindex="0"', conversa_html, "a transcrição entra no Tab e tem nome")
+        self.assertIn('role="log"', conversa_html)
+        self.assertIn('aria-live="polite"', conversa_html)
+        self.assertRegex(conversa_html, r'<button class="seth-ir-fim" type="button" id="seth-ir-fim" hidden>Ir para o fim</button>',
+                         "Ir para o fim tem texto próprio (aparece só fora do fim)")
+        ordem = [ids.index(x) for x in ("seth-nova", "seth-temporaria", "seth-mais-abrir", "seth-transcript", "seth-input", "seth-send")]
+        self.assertEqual(ordem, sorted(ordem), "menu -> cabeçalho -> mensagens -> compositor")
+        self.assertLess(ids.index("seth-busca"), ids.index("seth-temporaria"), "o menu vem antes do cabeçalho")
+
+    def test_gaveta_tem_fechar_no_lugar_da_seta_e_rodape_fixo(self):  # J4
+        aside = menu_lateral()
+        self.assertIn('id="menu-fechar"', aside)
+        self.assertRegex(aside, r'<button class="text-link menu-fechar"[^>]*>Fechar</button>')
+        self.assertIn(".menu-fechar{display:none}", self.CSS, "fora da gaveta o Fechar não aparece")
+        conversas = aside.index('class="menu-conversas"')
+        rodape = aside.index('class="menu-rodape"')
+        self.assertLess(conversas, rodape)
+        for id_ in ("seth-arquivadas-bloco", "seth-lixeira-bloco", "organizar-abrir", "servicos-locais"):
+            self.assertGreater(aside.index(f'id="{id_}"'), rodape, f"{id_} fica no rodapé fixo da gaveta")
+        self.assertNotIn('id="seth-lixeira-bloco"', aside[conversas:rodape], "a lixeira não está mais na lista rolável")
+        gaveta = self.bloco_css("@media (max-width:1023px){")
+        self.assertIn(".sidebar{position:fixed", gaveta)
+        self.assertIn("overflow:hidden}", gaveta)
+        self.assertIn(".menu-fechar{display:inline-flex", gaveta)
+        self.assertIn(".sidebar .menu-conversas .seth-conversas{flex:1 1 0;min-height:96px}", gaveta)
+        self.assertIn(".sidebar-toggle{display:none}", gaveta, "a seta some na gaveta")
+
+    def test_mosaicos_ficam_dois_por_linha_ate_360_quando_cabem(self):  # J7
+        bloco = self.bloco_css("@media (max-width:480px){\n  .kpis{grid-template-columns:repeat(auto-fit")
+        self.assertIn("repeat(auto-fit,minmax(min(100%,140px),1fr))", bloco)
+        self.assertNotIn("grid-template-columns:minmax(0,1fr)}", bloco.split("}")[0] + "}")
+
+    def test_cartoes_do_panorama_alinhados_no_topo_com_cabecalho_de_mesma_altura(self):  # J6
+        self.assertIn(".nv-cartoes>.panel{margin:0}", self.CSS, "o irmão + irmão não empurra os cartões da direita")
+        self.assertIn(".nv-cartoes .panel-head{min-height:56px", self.CSS)
+        panorama = HTML[HTML.index('<div class="sub" id="sub-panorama"'):HTML.index('<div class="footer-note">')]
+        self.assertEqual(panorama.count('<article class="panel'), 3, "três cartões: memória, conversa e importantes")
+
+    def test_respiro_no_fim_da_transcricao(self):  # J2
+        self.assertIn("gap:18px;padding:12px 4px 36px;overflow:auto}", self.CSS)
+
+
 class LimitesDaUi(unittest.TestCase):
     def test_constantes_da_ui_sao_as_do_servidor(self):
         constantes = dict(re.findall(r"^const (SETH_[A-Z_]+) = ([\d_]+);", JS, flags=re.M))
@@ -1212,6 +1806,12 @@ class LimitesDaUi(unittest.TestCase):
         self.assertEqual(int(constantes["SETH_BUSCA_MAX_CARACTERES"]), armazem.BUSCA_TERMO_LIMITE)
         self.assertEqual(int(constantes["SETH_LIMITE_IMPORTACAO_BYTES"]), armazem.IMPORTACAO_LIMITE_BYTES)
         self.assertEqual(int(constantes["SETH_FEEDBACK_MOTIVO_LIMITE"]), armazem.FEEDBACK_MOTIVO_LIMITE)
+        # C8/C9 (16/11/2026): instruções e anexos com os mesmos números do servidor.
+        self.assertEqual(int(constantes["SETH_INSTRUCOES_LIMITE"]), chat_stream.MAX_INSTRUCOES)
+        self.assertEqual(int(constantes["SETH_ANEXOS_MAX"]), chat_stream.MAX_ANEXOS)
+        self.assertEqual(int(constantes["SETH_ANEXO_NOME_MAX"]), chat_stream.MAX_ANEXO_NOME)
+        self.assertEqual(int(constantes["SETH_ANEXO_TEXTO_MAX"]), chat_stream.MAX_ANEXO_TEXTO)
+        self.assertEqual(int(constantes["SETH_ANEXOS_TOTAL_MAX"]), chat_stream.MAX_ANEXOS_TOTAL)
 
 
 if __name__ == "__main__":
