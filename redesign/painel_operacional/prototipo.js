@@ -1,5 +1,5 @@
 "use strict";
-// Painel unificado (/prototipo): uma tela com sete seções, roteadas pelo hash (#panorama, #conversa, ...).
+// Painel unificado (/prototipo): uma tela com oito seções, roteadas pelo hash (#panorama, #conversa, ...).
 // O arquivo inteiro fica numa IIFE; o único nome exposto no escopo global é window.AgataPainel.
 (function () {
 const byId = (id) => document.getElementById(id);
@@ -21,6 +21,9 @@ let lastAnnouncement = "";
 let renderedSnapshotState = "";
 let renderedDetailsState = "";
 const proposalChecks = new Map();
+// Prefixo histórico de conversas importadas em 07/11/2026: a lista desenha o título sem ele. O dado guardado não muda.
+const PREFIXO_IMPORTADO = /^\[LibreChat\] +/;
+const tituloDaLista = (texto) => String(texto || "").replace(PREFIXO_IMPORTADO, "");
 
 function setSidebarCollapsed(collapsed) {
   shell.classList.toggle("sidebar-collapsed", collapsed);
@@ -102,7 +105,7 @@ function mostrarSub(secao, sub) {
   else if (nome.startsWith("nv-") && typeof AgataPainel.carregarNovaVersao === "function") AgataPainel.carregarNovaVersao(nome);
   filterSearch(search.value.trim());
 }
-function mostrarSecao(secao, sub) {
+function mostrarSecao(secao, sub, topo = true) {
   const alvo = byId(SECOES.includes(secao) ? secao : "panorama");
   document.querySelectorAll(".secao").forEach((item) => { item.hidden = item !== alvo; });
   navSecoes.forEach((botao) => {
@@ -112,6 +115,8 @@ function mostrarSecao(secao, sub) {
   byId("crumb").textContent = "Agata / " + (alvo.dataset.titulo || "Panorama");
   search.value = "";
   mostrarSub(alvo.id, sub);
+  // F7 (16/11): trocar de seção começa no topo; o navegador rolaria até a âncora #secao (~70px). Hash de item interno fica onde está.
+  if (topo && window.scrollTo) window.scrollTo(0, 0);
 }
 function secaoDoHash() {
   let nome = "";
@@ -122,7 +127,12 @@ function irPara(secao, sub) {
   mostrarSecao(secao, sub);
   if (location.hash !== "#" + secao) history.pushState(null, "", "#" + secao);
 }
-function aoMudarHash() { mostrarSecao(secaoDoHash()); }
+function hashDeItemInterno() {
+  let nome = "";
+  try { nome = decodeURIComponent(location.hash.replace(/^#/, "")); } catch (_) { nome = ""; }
+  return Boolean(nome) && !SECOES.includes(nome) && Boolean(byId(nome));
+}
+function aoMudarHash() { mostrarSecao(secaoDoHash(), undefined, !hashDeItemInterno()); }
 window.addEventListener("hashchange", aoMudarHash);
 window.addEventListener("popstate", aoMudarHash);
 navSecoes.forEach((botao) => botao.addEventListener("click", () => irPara(botao.dataset.secao)));
@@ -154,12 +164,14 @@ const niceTime = (value) => {
 };
 function stateOf(item, forcedStale = false) {
   if (!item || item.state === "unknown") return "unknown";
+  // Não existe no escopo do usuário (systemctl --user): não é inativa nem sem leitura.
+  if (item.state === "ausente") return "ausente";
   const until = Date.parse(item.fresh_until || "");
   if (forcedStale || item.state === "stale" || !Number.isFinite(until) || Date.now() > until) return "stale";
   return item.state === "ok" ? "ok" : "warning";
 }
 function stateLabel(state) {
-  return {ok: "ATIVO", warning: "ATENÇÃO", stale: "DESATUALIZADO", unknown: "SEM LEITURA"}[state] || "SEM LEITURA";
+  return {ok: "ATIVO", warning: "ATENÇÃO", stale: "DESATUALIZADO", unknown: "SEM LEITURA", ausente: "NÃO EXISTE (ESCOPO DO USUÁRIO)"}[state] || "SEM LEITURA";
 }
 function snapshotStateKey(snapshot, forced) {
   return JSON.stringify([
@@ -173,7 +185,7 @@ function detailsStateKey(data, forced) {
 }
 function chip(id, state, text) {
   const el = byId(id);
-  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon"}[state] || "horizon");
+  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: "ausente"}[state] ?? "horizon");
   el.textContent = text || stateLabel(state);
 }
 function preserveReading(oldValue, nextValue) {
@@ -201,14 +213,14 @@ function row(title, status, detail, labelText = null) {
   const item = document.createElement("div"); item.className = "live-row";
   const line = document.createElement("div"); line.className = "live-row-top";
   const label = document.createElement("strong"); label.textContent = title;
-  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon"}[status] || "horizon"); badge.textContent = labelText || stateLabel(status);
+  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: ""}[status] ?? "horizon"); badge.textContent = labelText || stateLabel(status);
   line.append(label, badge); item.append(line);
   if (detail) { const note = document.createElement("small"); note.textContent = detail; item.append(note); }
   return item;
 }
 function replaceRows(id, items, empty) {
   const root = byId(id); root.replaceChildren();
-  if (!items.length) { const p = document.createElement("p"); p.textContent = empty; root.append(p); return; }
+  if (!items.length) { const p = document.createElement("p"); p.className = "vazio"; p.textContent = empty; root.append(p); return; }
   root.append(...items);
 }
 function sourceLine(item) {
@@ -317,35 +329,49 @@ function renderProposals(value, forced) {
   const pendentes = (value && value.items || []).filter((p) => !p.marker_present && !p.substituida_por && p.versionada !== false).length;
   set("overview-proposals", state === "unknown" ? "—" : String(pendentes));
 }
+// Região viva do Panorama: vazia e oculta quando não há aviso real.
+function setAlerta(texto) {
+  const el = byId("overview-alert");
+  if (!el) return;
+  el.textContent = texto || "";
+  el.hidden = !texto;
+}
 function render(snapshot, forced = false) {
   renderedSnapshotState = snapshotStateKey(snapshot, forced);
   const services = snapshot.services || [];
   const states = services.map((item) => stateOf(item, forced));
-  const overall = !states.length || states.includes("unknown") ? "unknown" : states.includes("warning") ? "warning" : states.includes("stale") ? "stale" : "ok";
-  const active = services.filter((item) => stateOf(item, forced) === "ok").length;
+  // 'ausente' não entra no total nem na conta de ativas.
+  const presentes = states.filter((s) => s !== "ausente");
+  const overall = !presentes.length || presentes.includes("unknown") ? "unknown" : presentes.includes("warning") ? "warning" : presentes.includes("stale") ? "stale" : "ok";
+  const active = states.filter((s) => s === "ok").length;
   chip("units-panel-state", overall);
-  set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + services.length);
-  set("overview-units-note", services.length + " unidades observadas · seth-verificador");
-  set("overview-alert", overall === "ok" ? active + " de " + services.length + " unidades observadas ativas." : overall === "stale" ? "Última leitura das unidades está vencida." : "Há unidade sem leitura ou que requer atenção.");
+  set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + presentes.length);
   replaceRows("live-services", unitRows(services, forced), "Nenhum estado recebido.");
-  if (byId("overview-services")) replaceRows("overview-services", unitRows(services, forced), "Nenhum estado recebido.");
-  if (byId("overview-source")) set("overview-source", "Coleta concluída " + niceTime(snapshot.observed_at) + " · válida até " + niceTime(snapshot.fresh_until));
   set("overview-updated", collectionFailed ? "Coleta indisponível; última leitura preservada." : "Leitura local observada " + niceTime(snapshot.observed_at));
   const git = snapshot.git || {}; const gitState = stateOf(git, forced);
   chip("git-panel-state", gitState, gitState === "ok" ? "LEITURA VÁLIDA" : null);
   const pendentes = ((snapshot.proposals && snapshot.proposals.items) || []).filter((p) => !p.marker_present && !p.substituida_por && p.versionada !== false).length;
-  set("hero-status", "Serviços: " + active + " de " + services.length + " ativos · Git: " + ({ok: "leitura válida", warning: "atenção", stale: "leitura vencida", unknown: "sem leitura"}[gitState] || "sem leitura") + " · Propostas aguardando assinatura: " + pendentes + ".");
+  // /api/status põe ausentes e sem leitura juntos em sem_leitura: separa pelo state de cada item lido.
+  const lidos = [...services, ...(snapshot.timers || [])];
+  const nomeDe = (unidade) => { const item = lidos.find((i) => i.unit === unidade); return (item && item.rotulo) || serviceNames[unidade] || timerNames[unidade] || unidade; };
+  const ausentes = [...new Set(lidos.filter((i) => i.state === "ausente").map((i) => i.unit))];
+  const semLeitura = (Array.isArray(snapshot.sem_leitura) ? snapshot.sem_leitura : []).filter((u) => !ausentes.includes(u));
+  const aviso = ausentes.length ? " · " + ausentes.length + (ausentes.length === 1 ? " unidade não existe (escopo do usuário): " : " unidades não existem (escopo do usuário): ") + ausentes.map((u) => nomeDe(u)).join(", ") : "";
+  const lacunas = semLeitura.length ? " · " + semLeitura.length + (semLeitura.length === 1 ? " fonte sem leitura: " : " fontes sem leitura: ") + semLeitura.map((u) => nomeDe(u)).join(", ") : "";
+  setAlerta(collectionFailed ? "Leitura vencida: a coleta falhou agora; os valores são da última leitura válida." : "");
+  set("hero-status", "Unidades: " + active + " de " + presentes.length + " ativas" + aviso + " · Git: " + ({ok: "leitura válida", warning: "atenção", stale: "leitura vencida", unknown: "sem leitura"}[gitState] || "sem leitura") + " · Propostas aguardando assinatura: " + pendentes + lacunas + ".");
   set("git-branch", git.branch || "—"); set("git-head", git.head || "—");
   set("git-upstream", {tracking_up_to_date:"alinhada no último fetch",tracking_diverged:"divergente no último fetch",no_upstream:"sem referência"}[git.tracking] || "sem leitura");
   set("git-dirty", Number.isInteger(git.dirty_count) ? git.dirty_count + " item(ns)" : "—");
   set("git-age", sourceLine(git));
+  renderCartoesDeStatus(snapshot, forced);
   set("hero-sync-label", gitState === "unknown" ? "Git local · sem leitura" : gitState === "stale" ? "Git local · leitura vencida" : gitState === "ok" ? "Git local · leitura válida" : "Git local · atenção");
   set("hero-sync-head", git.head || "—"); set("hero-sync-note", sourceLine(git));
   set("overview-git", gitState === "unknown" ? "—" : gitState === "stale" ? "Vencido" : gitState === "ok" ? "Em dia" : "Atenção");
   const chat = snapshot.chat || {}; const chatState = stateOf(chat, forced);
   chip("chat-state", chatState, chatState === "ok" ? "HTTP 200" : null);
   set("chat-source", sourceLine(chat) + (chat.http_status ? " · HTTP " + chat.http_status : "") + ". A saúde do endpoint não garante cada função do chat.");
-  const timers = snapshot.timers || []; const timerStates = timers.map((item) => stateOf(item, forced));
+  const timers = snapshot.timers || []; const timerStates = timers.map((item) => stateOf(item, forced)).filter((s) => s !== "ausente");
   const timerState = !timerStates.length || timerStates.includes("unknown") ? "unknown" : timerStates.includes("stale") ? "stale" : timerStates.includes("warning") ? "warning" : "ok";
   chip("timer-panel-state", timerState, timerState === "ok" ? "LEITURA VÁLIDA" : null);
   set("overview-timers", timerState === "unknown" ? "—" : timerState === "stale" ? "Vencida" : timerStates.filter((x) => x === "ok").length + "/" + timerStates.length);
@@ -357,13 +383,77 @@ function render(snapshot, forced = false) {
   renderProposals(snapshot.proposals || {}, forced);
   renderModels(snapshot.models || {}, forced);
 }
+// Uma linha por unidade do cartão: estado do systemd, fonte e hora da leitura. Sem item, é sem leitura.
+function linhaDaUnidade(unidade, item, forced) {
+  if (!item) return unidade + ": sem leitura";
+  if (stateOf(item, forced) === "ausente") return unidade + ": não existe (escopo do usuário) · fonte " + (item.source || "não informada") + " · observado " + niceTime(item.observed_at);
+  return unidade + ": " + (item.active_state || "estado não informado") + " / " + (item.sub_state || "—") + " · fonte " + (item.source || "não informada") +
+    " · observado " + niceTime(item.observed_at) + " · válido até " + niceTime(item.fresh_until);
+}
+// Selo do cartão a partir das unidades que ele lê. Com uma unidade, diz inativo quando o systemd diz inactive.
+function rotuloDoCartao(itens, estados) {
+  if (estados.every((e) => e === "ok")) return ["chip active", "ATIVO"];
+  if (estados.every((e) => e === "ausente")) return ["chip ausente", "NÃO EXISTE (ESCOPO DO USUÁRIO)"];
+  if (estados.every((e) => e === "unknown")) return ["chip horizon", "SEM LEITURA"];
+  if (estados.length === 1 && estados[0] === "warning" && itens[0].active_state === "inactive") return ["chip partial", "INATIVO"];
+  if (estados.length === 1 && estados[0] === "stale") return ["chip partial", "DESATUALIZADO"];
+  return ["chip partial", "ATENÇÃO"];
+}
+// Cartões com data-unit (sem data-fonte) recebem o estado lido de /api/details. Os de data-fonte="status" leem /api/status (renderCartoesDeStatus).
+function renderIntegrationCards(items, forced = false) {
+  const porUnidade = new Map((items || []).map((item) => [item.unit, item]));
+  document.querySelectorAll("#integration-list .cap-card[data-unit]:not([data-fonte])").forEach((cartao) => {
+    const selo = cartao.querySelector(".chip");
+    const linha = cartao.querySelector("p.subnote");
+    if (!selo || !linha) return;
+    const unidades = cartao.dataset.unit.split(" ");
+    const itens = unidades.map((u) => porUnidade.get(u));
+    const estados = unidades.map((u) => stateOf(porUnidade.get(u), forced));
+    const [classe, rotulo] = rotuloDoCartao(itens, estados);
+    selo.className = classe; selo.textContent = rotulo;
+    const partes = unidades.map((u, i) => linhaDaUnidade(u, itens[i], forced));
+    linha.textContent = partes.join("; ");
+    evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/details. " + partes.join(". ") + ".", "/api/details · " + unidades.join(", "));
+  });
+}
+// F11 (16/11/2026): cartões que dependem de /api/status (gateway da Seth, OmniRoute e timers) leem o snapshot do Panorama.
+// "Sem leitura" só aparece quando nenhuma rota lê a unidade; o texto da linha diz de onde veio a leitura.
+function renderCartoesDeStatus(snapshot, forced = false) {
+  const lidos = [...(snapshot.services || []), ...(snapshot.timers || [])];
+  document.querySelectorAll("#integration-list .cap-card[data-fonte='status'][data-unit]").forEach((cartao) => {
+    const selo = cartao.querySelector(".chip"); const linha = cartao.querySelector("p.subnote");
+    if (!selo || !linha) return;
+    const unidades = cartao.dataset.unit.split(" ");
+    const itens = unidades.map((u) => lidos.find((i) => i.unit === u));
+    const estados = itens.map((item) => stateOf(item, forced));
+    const [classe, rotulo] = rotuloDoCartao(itens, estados);
+    selo.className = classe; selo.textContent = rotulo;
+    const partes = unidades.map((u, i) => linhaDaUnidade(u, itens[i], forced));
+    linha.textContent = partes.join("; ");
+    evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/status. " + partes.join(". ") + ".", "/api/status · " + unidades.join(", "));
+  });
+  const cartao = document.querySelector("#integration-list .cap-card[data-fonte='chat']");
+  if (!cartao) return;
+  const selo = cartao.querySelector(".chip"); const linha = cartao.querySelector("p.subnote");
+  if (!selo || !linha) return;
+  const chat = snapshot.chat || null;
+  const estado = stateOf(chat, forced);
+  const http = chat && Number.isInteger(chat.http_status) ? "HTTP " + chat.http_status : null;
+  const rotulos = {
+    ok: ["chip active", http || "ATIVO"],
+    warning: ["chip partial", http || "ATENÇÃO"],
+    stale: ["chip partial", "LEITURA VENCIDA"],
+    ausente: ["chip ausente", "NÃO EXISTE (ESCOPO DO USUÁRIO)"],
+    unknown: ["chip horizon", "SEM LEITURA"],
+  };
+  const [classe, rotulo] = rotulos[estado] || rotulos.unknown;
+  selo.className = classe; selo.textContent = rotulo;
+  linha.textContent = sourceLine(chat) + (chat && chat.error ? " · " + chat.error : "");
+  evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/status, gateway da Seth. " + linha.textContent, "/api/status · chat");
+}
 function renderDetails(data, forced = false) {
   renderedDetailsState = detailsStateKey(data, forced);
-  const integrations = data.integrations || [];
-  const states = integrations.map((item) => stateOf(item, forced));
-  const aggregate = !states.length || states.includes("unknown") ? "unknown" : states.includes("stale") ? "stale" : states.includes("warning") ? "warning" : "ok";
-  chip("integration-state", aggregate, aggregate === "ok" ? "LEITURA VÁLIDA" : null);
-  replaceRows("integration-list", unitRows(integrations, forced), "Unidades indisponíveis.");
+  renderIntegrationCards(data.integrations || [], forced);
   set("integration-source", "Consulta sob demanda · observada " + niceTime(data.observed_at) + ". Unidade ativa não comprova funcionamento da integração.");
   const memory = data.memory || {}; const state = stateOf(memory, forced);
   chip("memory-state", state, state === "ok" ? "VAULT LIDO" : null);
@@ -421,7 +511,7 @@ async function loadDetails() {
     detailsFailed = true;
     marcarEstado("sistema", "erro", "Não medido: consulta de integrações indisponível." + (lastDetails ? " Última leitura preservada como vencida." : ""));
     if (lastDetails) renderDetails(lastDetails, true);
-    else { set("integration-source", "Consulta indisponível."); set("memory-source", "Consulta indisponível."); }
+    else { set("integration-source", "Consulta indisponível."); set("memory-source", "Consulta indisponível."); renderIntegrationCards([], false); }
   } finally { detailsBusy = false; }
 }
 
@@ -705,7 +795,7 @@ function sethDesenhar() {
   const log = byId("seth-transcript"); log.replaceChildren();
   const caminho = sethCaminho();
   if (!caminho.length) {
-    const vazio = document.createElement("p"); vazio.className = "seth-vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
+    const vazio = document.createElement("p"); vazio.className = "seth-vazio vazio"; vazio.textContent = "Nenhuma conversa aberta. Pergunte sobre o estado, uma decisão ou uma proposta.";
     log.append(vazio);
   }
   caminho.forEach((no, i) => sethMensagem(no, i));
@@ -779,7 +869,7 @@ function sethPintarLixeira() {
 }
 function sethLinhaLixeira(c) {
   const linha = document.createElement("div"); linha.className = "seth-item";
-  const titulo = document.createElement("strong"); titulo.textContent = c.titulo;
+  const titulo = document.createElement("strong"); titulo.textContent = tituloDaLista(c.titulo);
   const meta = document.createElement("p"); meta.className = "seth-resultado-meta";
   meta.textContent = "Apagada em " + c.apagada_em + " · " + c.mensagens + (c.mensagens === 1 ? " mensagem" : " mensagens");
   const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
@@ -848,8 +938,8 @@ function sethPintarLista() {
 function sethLinha(c) {
   const linha = document.createElement("div");
   linha.className = "seth-item" + (c.id === sethAtual.id ? " ativa" : "") + (c.fixada ? " fixada" : "");
-  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = c.titulo;
-  abrir.title = c.mensagens + " mensagens · " + c.atualizada;
+  const abrir = document.createElement("button"); abrir.type = "button"; abrir.className = "seth-item-abrir"; abrir.textContent = tituloDaLista(c.titulo);
+  abrir.title = tituloDaLista(c.titulo) + " · " + c.mensagens + " mensagens · " + c.atualizada;
   abrir.addEventListener("click", () => sethAbrir(c.id));
   const meta = document.createElement("div"); meta.className = "seth-item-meta";
   if (c.fixada) meta.append(sethSelo("Fixada", "seth-selo-fixada"));
@@ -858,6 +948,9 @@ function sethLinha(c) {
   if (pasta) meta.append(sethSelo("Pasta: " + pasta.nome, "seth-selo-pasta"));
   (c.marcadores || []).forEach((m) => meta.append(sethSelo("#" + m, "seth-selo-marcador")));
   const acoes = document.createElement("div"); acoes.className = "seth-item-acoes";
+  // Título lido pelo nome: o foco no item mostra as ações (CSS); o leitor de tela anuncia de qual conversa são.
+  const tituloLido = tituloDaLista(c.titulo) || "sem título";
+  acoes.setAttribute("role", "group"); acoes.setAttribute("aria-label", "Ações da conversa " + tituloLido);
   const renomear = sethTexto("Renomear", () => sethRenomear(c, linha));
   const fixar = sethTexto(c.fixada ? "Desfixar" : "Fixar", () => sethOrganizar(c.id, {fixada: !c.fixada}));
   const arquivar = sethTexto(c.arquivada ? "Desarquivar" : "Arquivar", () => sethOrganizar(c.id, {arquivada: !c.arquivada}));
@@ -868,6 +961,7 @@ function sethLinha(c) {
   });
   acoes.append(renomear, fixar, arquivar, apagar);
   const org = document.createElement("details"); org.className = "seth-item-org";
+  org.setAttribute("aria-label", "Pasta e marcadores da conversa " + tituloLido);
   const resumo = document.createElement("summary"); resumo.textContent = "Pasta e marcadores";
   org.append(resumo, sethCampoPasta(c), sethCampoMarcadores(c));
   linha.append(abrir, meta, acoes, org);
@@ -995,7 +1089,7 @@ function sethPintarBusca(dados) {
 }
 function sethResultado(r) {
   const item = document.createElement("div"); item.className = "seth-resultado";
-  const titulo = document.createElement("strong"); titulo.textContent = r.titulo;
+  const titulo = document.createElement("strong"); titulo.textContent = tituloDaLista(r.titulo);
   const trecho = document.createElement("p"); trecho.className = "seth-trecho"; trecho.textContent = r.trecho;
   const meta = document.createElement("p"); meta.className = "seth-resultado-meta";
   meta.textContent = (r.ocorrencias === 1 ? "1 ocorrência" : r.ocorrencias + " ocorrências") + (r.arquivada ? " · arquivada" : "") + " · " + (r.mensagem === null ? "no título" : "na mensagem " + (r.mensagem + 1));
@@ -1274,7 +1368,7 @@ function sethRegerar() {
   if (sethEmCurso() || !folha || folha.role !== "assistant" || !folha.pai) return;
   sethResponder({modo: "nova", paiId: folha.pai});
 }
-// Voz da Seth (11/11/2026, pedido do Humano: paridade com o LibreChat). Tudo com a voz do sistema.
+// Voz da Seth (11/11/2026, pedido do Humano: paridade com o chat anterior). Tudo com a voz do sistema.
 // 1) Ouvir: o servidor fala a resposta em partes (POST /api/seth/ouvir) e diz se falou ou NÃO falou.
 // 2) Ditar: o navegador grava o microfone e manda o áudio só ao painel (POST /api/seth/ditado); o texto entra no
 //    campo para revisão. Nada vai à Seth sozinho.
@@ -1936,7 +2030,8 @@ async function carregarMedicoes() {
     if (!medicaoTimer) medicaoTimer = setInterval(carregarMedicoes, 4000);
   } else {
     if (medicaoTimer) { clearInterval(medicaoTimer); medicaoTimer = null; carregarQualidade(); }
-    if (j.estado === "ok" || j.estado === "falhou") nota.textContent = (j.estado === "ok" ? "Concluído" : "Falhou") + ": " + j.acao + (j.modelo ? " em " + j.modelo : "") + " (" + j.segundos + " s). " + (j.detalhe || "");
+    if (d.modelos_estado === "sem_leitura") nota.textContent = "Sem leitura dos modelos locais: " + (d.modelos_motivo || "motivo não informado");
+    else if (j.estado === "ok" || j.estado === "falhou") nota.textContent = (j.estado === "ok" ? "Concluído" : "Falhou") + ": " + j.acao + (j.modelo ? " em " + j.modelo : "") + " (" + j.segundos + " s). " + (j.detalhe || "");
   }
 }
 function ligarMedicao(botao, rotulo, pedido) {
@@ -1996,12 +2091,12 @@ async function carregarVisaoSistema() {
       fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}),
       fetchJson("/api/lacunas", {headers: {Accept: "application/json"}}),
     ]);
-    const servicos = status.services || [];
+    const servicos = (status.services || []).filter((x) => x.state !== "ausente");
     const ativos = servicos.filter((x) => x.state === "ok").length;
     cartao("Serviços ativos", ativos + " de " + servicos.length, "operacao");
     cartao("Timers", String((status.timers || []).filter((x) => x.state === "ok").length) + " ok", "operacao");
     cartao("Git", status.git ? status.git.head : "—", "operacao");
-    cartao("Conversa (LibreChat)", status.chat && status.chat.http_status === 200 ? "responde" : "sem resposta", "operacao");
+    cartao("Conversa (painel)", status.chat && status.chat.http_status === 200 ? "responde" : "sem resposta", "operacao");
     const modelos = (status.models && status.models.models) || [];
     cartao("Modelos registrados", String(modelos.length), "modelos");
     const cap = caps.items || [];
@@ -2425,5 +2520,7 @@ byId("importantes-filtro").addEventListener("change", renderizarImportantes);
 carregarImportantes();
 
 // Entrada: a seção vem do hash; sem hash ou com hash desconhecido, abre panorama.
+// F7 (16/11): a rolagem da carga também começa no topo; o navegador rola até #secao depois do script.
+window.addEventListener("load", () => { if (window.scrollTo && !hashDeItemInterno()) window.scrollTo(0, 0); }, {once: true});
 aoMudarHash();
 })();

@@ -31,12 +31,20 @@ def pasta() -> Path:
     return Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
 
 
-def modelos_locais() -> list[str]:
+MOTIVO_MODELOS_SEM_LEITURA = "servidor de modelos locais parado ou sem resposta; a lista não foi lida"
+
+
+def modelos_locais(leitura: dict | None = None) -> list[str]:
+    """Modelos do Ollama local. Se a consulta falhar, devolve [] e, quando `leitura` é dado, marca nele `erro`."""
     try:
         with urllib.request.urlopen(OLLAMA_TAGS, timeout=3) as r:
             tags = [m["name"] for m in json.loads(r.read()).get("models", [])]
-    except (urllib.error.URLError, OSError, ValueError, KeyError):
+    except (urllib.error.URLError, OSError, ValueError, KeyError, TypeError):
+        if leitura is not None:
+            leitura["erro"] = MOTIVO_MODELOS_SEM_LEITURA
         return []
+    if leitura is not None:
+        leitura["erro"] = None
     return sorted(t for t in tags if isinstance(t, str) and "embed" not in t.lower())
 
 
@@ -56,7 +64,13 @@ def resultados() -> dict:
 def estado() -> dict:
     with _LOCK:
         job = dict(_JOB)
-    return {"schema_version": 1, "job": job, "modelos": modelos_locais(), **resultados()}
+    leitura: dict = {}
+    modelos = modelos_locais(leitura)
+    falhou = bool(leitura.get("erro"))
+    return {"schema_version": 1, "job": job, "modelos": modelos,
+            "modelos_estado": "sem_leitura" if falhou else "ok",
+            "modelos_motivo": leitura.get("erro") if falhou else None,
+            **resultados()}
 
 
 def _rodar(acao: str, argv: list[str]) -> None:

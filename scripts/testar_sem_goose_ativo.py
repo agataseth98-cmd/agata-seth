@@ -36,7 +36,8 @@ EXCECOES = {
     "redesign/mcp/servidor.py": (1, "lista de executores do MCP; OpenCode ainda não foi medido contra o servidor"),
     "config/portas-de-entrada.txt": (3, "rotas para redesign/goose/AGENTS.md, que fica até a decisão de remoção; lista de ferramentas que leem AGENTS.md"),
     "config/agata-identidade.json": (1, "proveniência histórica da paleta (tema do Goose); texto de origem, não referência ativa"),
-    "redesign/painel_operacional/prototipo.html": (1, "palavra de busca do cartão 'Trabalhar com código'; o painel tem spec e âncora próprios, fora desta proposta"),
+    "redesign/painel_operacional/spec/acceptance.json": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),
+    "redesign/painel_operacional/test_painel_unificado.py": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),
 }
 
 

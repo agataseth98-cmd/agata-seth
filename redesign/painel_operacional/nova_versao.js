@@ -189,8 +189,9 @@
     }
     const ev = (estado && estado.eventos) || [];
     byId("nv-eventos-titulo").textContent = ev.length + " últimos eventos · ledger " + (estado && estado.ledger_ok === true ? "íntegro" : "não verificado");
-    por("nv-eventos", ev.slice().reverse().map((e) => h("tr", {}, h("td", {class: "mono", text: quando(e.timestamp)}), h("td", {text: e.componente}),
-      h("td", {text: e.kind}), h("td", {}, selo(e.status, ["ok", "concluida", "fixada", "revisado"].includes(e.status) ? "ok" : "neutro")), h("td", {class: "mono", text: e.source}))));
+    const linhas = ev.slice().reverse().map((e) => h("tr", {}, h("td", {class: "mono", text: quando(e.timestamp)}), h("td", {text: e.componente}),
+      h("td", {text: e.kind}), h("td", {}, selo(e.status, ["ok", "concluida", "fixada", "revisado"].includes(e.status) ? "ok" : "neutro")), h("td", {class: "mono", text: e.source})));
+    por("nv-eventos", linhas.length ? linhas : h("tr", {}, h("td", {colspan: "5", class: "vazio", text: "Nenhum evento registrado."})));
   }
 
   // ---------------------------------------------------------------- Avaliação
@@ -292,7 +293,7 @@
     const lfm = pm["lfm3|limpo"]; const wh = pm["whisper|limpo"];
     por("nv-sen-kpis", kpi("Ouvido principal", o.principal || "—", "teal"), kpi("Erro do principal", lfm ? pct(lfm.wer) : null, "teal", "frases limpas"),
       kpi("Erro da reserva", wh && wh.wer !== null ? pct(wh.wer) : null, "gold", "Whisper"), kpi("Voz", "agata-last", "violet", "inalterada"));
-    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["conversa no LibreChat", o.servidor || "—"], ["voz", o.voz || "—"],
+    por("nv-sen-dl", dl([["principal", o.principal || "—"], ["reserva", o.reserva || "—"], ["servidor do ouvido", o.servidor || "—"], ["voz", o.voz || "—"],
       ["última medição", u ? quando(u.inicio) + " · " + (u.estado || "") : "nenhuma"]]));
     const rodando = job.estado === "rodando" && job.tipo === "ouvido";
     byId("nv-sen-titulo").textContent = rodando ? "Medindo o ouvido…" : "Fala → texto";
@@ -316,6 +317,13 @@
     if (secao) AgataPainel.marcarEstado(secao, null);
     (telas[nome] || (() => {}))();
   };
+
+  // Carga inicial: prototipo.js abre a tela do hash antes deste arquivo existir. Se a tela aberta é de nova versão (ex.: Custos), carrega agora.
+  const abertaAgora = document.querySelector(".secao:not([hidden]) > .sub:not([hidden])");
+  if (abertaAgora && String(abertaAgora.dataset.sub || "").startsWith("nv-")) AgataPainel.carregarNovaVersao(abertaAgora.dataset.sub);
+  // Campo da chave fica num formulário só para o navegador não reclamar; o envio é pelo botão, nunca pelo submit.
+  const formChave = byId("nv-api-form");
+  if (formChave) formChave.addEventListener("submit", (e) => e.preventDefault());
 
   // ---------------------------------------------------------------- ações
   const val = (id) => byId(id).value.trim();
