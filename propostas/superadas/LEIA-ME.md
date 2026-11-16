@@ -38,6 +38,9 @@ Arquivadas em 07/11/2026 por `git mv` a partir de `propostas/`, pela classifica�
 | docs-opencode-07-11 | incluída em pacote-12-11 (12/11/2026; refeita sobre o AGENTS.md atual) |
 | verificar-rastro-20261106 | incluída em pacote-12-11 (12/11/2026; refeita sobre o AGENTS.md atual) |
 | skill-processo-lessons-07-11 | incluída em pacote-12-11 (12/11/2026; só as lições que não repetem a skill) |
+| sincronia-12-11 | substituída por pacote-14-11 (commit b3423a52, MEMÓRIAS (1006)) |
+| nova-versao-lote2-20261106 | substituída por pacote-14-11 (commit b3423a52, MEMÓRIAS (1006)) |
+| nucleo-desenvolvimento-07-11 | substituída por nucleo-desenvolvimento-v2-14-11 (PR #995) |
 
 Notas:
 - "incluída em pacote-11-11": a parte passa a valer dentro do pacote único `propostas/pacote-11-11.diff`, com uma só assinatura; o `.md` do pacote lista a ordem e os conflitos resolvidos (regra "Pacote de assinatura (Humano, 11/11)" da skill agata-processo-lote).
