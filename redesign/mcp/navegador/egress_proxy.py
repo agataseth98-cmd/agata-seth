@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import ipaddress
+import os
 import socket
 import socketserver
 import struct
+import subprocess
+import sys
 import threading
 
 
@@ -111,7 +114,40 @@ class _Handler(socketserver.BaseRequestHandler):
                 (b if origem is a else a).sendall(bloco)
 
 
-class EgressProxy:
+class _EgressProxyRust:
+    """SOCKS5 da camada Rust (D6, 15/11/2026): binário egress-socks5 em loopback."""
+    def __init__(self, binario: str):
+        self._proc = subprocess.Popen([binario, "0"], stdout=subprocess.PIPE, text=True)
+        linha = self._proc.stdout.readline().strip()
+        if not linha.startswith("socks5://127.0.0.1:"):
+            self._proc.kill()
+            raise OSError(f"egress-socks5 não anunciou endereço: {linha!r}")
+        self.url = linha
+
+    def start(self) -> "_EgressProxyRust":
+        return self
+
+    def close(self):
+        self._proc.terminate()
+        try:
+            self._proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            self._proc.kill()
+
+
+def EgressProxy():
+    """Rust quando AGATA_EGRESS_RUST_SOCKS5 aponta para o binário; senão Python.
+    Binário ausente ou que falha ao subir: volta ao Python e avisa no stderr."""
+    binario = os.environ.get("AGATA_EGRESS_RUST_SOCKS5", "")
+    if binario and os.path.isfile(binario):
+        try:
+            return _EgressProxyRust(binario)
+        except OSError as e:
+            print(f"egress: SOCKS5 Rust falhou ({e}); usando o Python", file=sys.stderr)
+    return _EgressProxyPython()
+
+
+class _EgressProxyPython:
     """Servidor SOCKS5 em loopback, gerido pelo ciclo de vida do navegador."""
     def __init__(self):
         self._server = _Servidor(("127.0.0.1", 0), _Handler)
@@ -123,7 +159,7 @@ class EgressProxy:
         host, port = self._server.server_address
         return f"socks5://{host}:{port}"
 
-    def start(self) -> "EgressProxy":
+    def start(self) -> "_EgressProxyPython":
         self._thread.start()
         return self
 
