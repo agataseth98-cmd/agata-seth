@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1021) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-16-11: painel sem o chat antigo, com estados honestos e estilo consolidado.**
+  palavras-chave: proposta, painel, funcional, chat, antigo, estados, honestos, estilo, consolidado
 (1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
   palavras-chave: aplicada, robustez, assinada, humano, aplicar, espera, checks, decidir, compilação, rust, nice, critério, dia
 (1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinada pelo Humano em 16/11, 09:03): o teste de ponteiros lê só os arquivos rastreados pelo git.** O teste `test_nenhum_ponteiro_vivo_para_secao_que_saiu` deixa de percorrer o disco com `os.walk` quando há git: a lista vem de `git ls-files`, e arquivo solto fora do git (log, patch, cache) fica de fora. Sem git, volta ao percurso antigo. Só o arquivo `redesign/projeto_indice/tests/test_projeto_indice.py` muda.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: pacote, aplicado, assinatura, humano, seis, propostas, chat, lote, processo, agil, spec, primeiro, voz, compreender, painel, importantes, historia, tomo, entram, canon, aplicação
 (993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
   palavras-chave: proposta, pacote, publicada, seis, propostas, tocavam, painel, skill, processo, chat, lote, agil, spec, primeiro, voz, compreender, importantes, historia, tomo, assinatura, parciais, vão, superadas
-(992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção História no painel (somente leitura, com o botão Ouvir), pasta historia/ com o Texto 1 do Tomo I e quarentena P-8 para historia/.**
-  palavras-chave: proposta, historia, tomo, publicada, seção, história, painel, somente, leitura, botão, ouvir, pasta, texto, quarentena
+(992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção His …
+  palavras-chave: proposta, historia, tomo, publicada, seção, his
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista …
   palavras-chave: proposta, painel, importantes, publicada, lista
 (990) DIÁRIO — 11/11/2026 · **Proposta spec-primeiro-11-11 publicada: entrevista …
