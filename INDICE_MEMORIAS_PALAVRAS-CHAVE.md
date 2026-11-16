@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1022) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-r2-16-11: supera a painel-funcional-16-11, que foi assinada e não entrou.**
+  palavras-chave: proposta, painel, funcional, supera, assinada, entrou
 (1021) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-16-11: painel sem o chat antigo, com estados honestos e estilo consolidado.**
   palavras-chave: proposta, painel, funcional, chat, antigo, estados, honestos, estilo, consolidado
 (1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, chat, voz, publicada, ouvir, partes, ditado, modo, conversa, painel, paridade, librechat, alterar, canon
 (994) DIÁRIO — 12/11/2026 · **Pacote 11/11 aplicado com a assinatura do Humano: as seis propostas (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) entram no canon numa só aplicação.**
   palavras-chave: pacote, aplicado, assinatura, humano, seis, propostas, chat, lote, processo, agil, spec, primeiro, voz, compreender, painel, importantes, historia, tomo, entram, canon, aplicação
-(993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas que tocavam o painel e a skill do processo (chat-lote4, processo-agil, spec-primeiro, voz-compreender, painel-importantes, historia-tomo1) numa só assinatura; as parciais vão para propostas/superadas/.**
-  palavras-chave: proposta, pacote, publicada, seis, propostas, tocavam, painel, skill, processo, chat, lote, agil, spec, primeiro, voz, compreender, importantes, historia, tomo, assinatura, parciais, vão, superadas
+(993) DIÁRIO — 11/11/2026 · **Proposta pacote-11-11 publicada: as seis propostas …
+  palavras-chave: proposta, pacote, publicada, seis, propostas
 (992) DIÁRIO — 11/11/2026 · **Proposta historia-tomo1-11-11 publicada: seção His …
   palavras-chave: proposta, historia, tomo, publicada, seção, his
 (991) DIÁRIO — 11/11/2026 · **Proposta painel-importantes-11-11 publicada: lista …

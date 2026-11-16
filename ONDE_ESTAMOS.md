@@ -8,9 +8,9 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Hoje, 16/11 (proposta painel-funcional-16-11)
+## Hoje, 16/11 (proposta painel-funcional-r2-16-11)
 
-Proposta `painel-funcional-16-11`, com registro (1021), esperando a sua assinatura. O painel perde o chat antigo: a porta antiga passa a ser só leitura do gateway da Seth, e o endereço antigo de abrir é recusado. Cada fonte mostra o próprio estado (parada, sem leitura ou inexistente no seu escopo), e o estilo passa a usar um só conjunto de cores e tamanhos por tema. Assinatura só depois do merge deste PR: `bash scripts/aprovar.sh painel-funcional-16-11`, no terminal, sem `!`.
+A primeira proposta do painel (`painel-funcional-16-11`) foi assinada por você, mas não entrou no sistema: o GitHub barrou a aplicação, porque um teste dos controles exigia que a lista de palavras proibidas mudasse junto com o painel. O código do painel é o mesmo; só essa lista muda. Por isso a proposta nova, `painel-funcional-r2-16-11`, precisa de uma assinatura sua: a da primeira não serve. Comando: `bash scripts/aprovar.sh painel-funcional-r2-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. A primeira foi para `propostas/superadas/`; o registro é a entrada (1022) de `MEMÓRIAS.md`.
 
 ## Lotes em andamento (medido em 12/11/2026, 09h, base `origin/main` `3f1e9055`)
 
