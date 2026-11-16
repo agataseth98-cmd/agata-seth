@@ -39,6 +39,28 @@ def _secao(texto: str, titulo: str) -> str:
     return partes[1].split("\n## ", 1)[0] if len(partes) == 2 else ""
 
 
+_PODADOS_NA_VARREDURA = {".git", "__pycache__", "worktrees", ".pytest_cache"}
+
+
+def _arquivos_do_repo() -> list[str]:
+    """Caminhos (posix, relativos à RAIZ) que a varredura lê: os rastreados pelo git (`git ls-files -z`).
+
+    Arquivo solto no disco (log, patch, cache) fora do git não é texto do canon e fica de fora. Sem git, ou fora
+    de um repositório, volta ao percurso do disco. Os mesmos diretórios são podados nos dois caminhos."""
+    try:
+        r = subprocess.run(["git", "-C", str(RAIZ), "ls-files", "-z"], capture_output=True, timeout=60)
+        if r.returncode == 0:
+            todos = r.stdout.decode("utf-8", "surrogateescape").split("\0")
+            return [rel for rel in todos if rel and not _PODADOS_NA_VARREDURA & set(rel.split("/")[:-1])]
+    except (OSError, subprocess.SubprocessError):
+        pass
+    achados = []
+    for raiz, pastas, arquivos in os.walk(RAIZ):
+        pastas[:] = [p for p in pastas if p not in _PODADOS_NA_VARREDURA]
+        achados.extend(Path(raiz, nome).relative_to(RAIZ).as_posix() for nome in arquivos)
+    return achados
+
+
 def _sem_acento(t: str) -> str:
     import unicodedata
     t = unicodedata.normalize("NFKD", t)
@@ -239,7 +261,8 @@ class IntegracaoTests(unittest.TestCase):
         """Ponteiro `PROJETO.md, "<seção>"` em arquivo vivo só pode citar seção que ainda está no índice.
 
         Pula histórico (MEMÓRIAS, morno, LOG, extras/, propostas/, memoria/), o texto movido (verbatim, marcado
-        em PROTOCOLOS.md e no estado de fundo) e as linhas do bloco ANCORA-SHA (texto gerado por máquina)."""
+        em PROTOCOLOS.md e no estado de fundo) e as linhas do bloco ANCORA-SHA (texto gerado por máquina).
+        Varre só os arquivos rastreados pelo git (ver _arquivos_do_repo); arquivo solto no disco fica de fora."""
         pular_exato = {"MEMÓRIAS.md", "MEMORIAS-MORNO.md", "SETH-DIARIO.md", "redesign/LOG.md",
                        "PROCEDIMENTO_LOGIN.md", "PROJETO.md", "PROTOCOLOS.md",
                        "scripts/perimetro-sombra-referencia.sh", "scripts/atualizar_ancora_prompt.py",
@@ -251,31 +274,28 @@ class IntegracaoTests(unittest.TestCase):
         padrao = re.compile(r'PROJETO(?:\.md)?(?:,| ·| )\s?\\?"([^"\\\n]{3,90})\\?"')
         padrao_verso = re.compile(r'\\?"([^"\\\n]{3,90})\\?"\s+(?:do|no)\s+PROJETO\.md')
         achados = []
-        for raiz, pastas, arquivos in os.walk(RAIZ):
-            pastas[:] = [p for p in pastas if p not in {".git", "__pycache__", "worktrees", ".pytest_cache"}]
-            for nome in arquivos:
-                caminho = Path(raiz) / nome
-                rel = caminho.relative_to(RAIZ).as_posix()
-                if rel in pular_exato or rel.startswith(pular_prefixo) or caminho.suffix in {".json", ".jsonl", ".png", ".pdf"}:
+        for rel in _arquivos_do_repo():
+            caminho = RAIZ / rel
+            if rel in pular_exato or rel.startswith(pular_prefixo) or caminho.suffix in {".json", ".jsonl", ".png", ".pdf"}:
+                continue
+            try:
+                linhas = caminho.read_text(encoding="utf-8").splitlines()
+            except (UnicodeDecodeError, OSError):
+                continue
+            for n, linha in enumerate(linhas, 1):
+                if "SHA do commit ANTERIOR" in linha or "ANCORA-SHA" in linha:
                     continue
-                try:
-                    linhas = caminho.read_text(encoding="utf-8").splitlines()
-                except (UnicodeDecodeError, OSError):
-                    continue
-                for n, linha in enumerate(linhas, 1):
-                    if "SHA do commit ANTERIOR" in linha or "ANCORA-SHA" in linha:
+                for m in list(padrao.finditer(linha)) + list(padrao_verso.finditer(linha)):
+                    titulo = _sem_acento(m.group(1))
+                    if any(titulo == t or titulo.startswith(t + " ") or titulo.startswith(t + "(")
+                           for t in titulos_indice):
                         continue
-                    for m in list(padrao.finditer(linha)) + list(padrao_verso.finditer(linha)):
-                        titulo = _sem_acento(m.group(1))
-                        if any(titulo == t or titulo.startswith(t + " ") or titulo.startswith(t + "(")
-                               for t in titulos_indice):
-                            continue
-                        if titulo.startswith(("ancora", "memoria e hidratacao", "personalidade", "sudo", "quarentena",
-                                              "decisor", "conselho", "interface", "cerebro", "maquinas", "servicos",
-                                              "estado dos bugs", "plano vigente", "seguranca", "atualizacao",
-                                              "memoria em duas", "ambiente", "fonte canonica",
-                                              "estado de publicacao", "ferramenta embutida")):
-                            achados.append(f"{rel}:{n}: {m.group(1)!r}")
+                    if titulo.startswith(("ancora", "memoria e hidratacao", "personalidade", "sudo", "quarentena",
+                                          "decisor", "conselho", "interface", "cerebro", "maquinas", "servicos",
+                                          "estado dos bugs", "plano vigente", "seguranca", "atualizacao",
+                                          "memoria em duas", "ambiente", "fonte canonica",
+                                          "estado de publicacao", "ferramenta embutida")):
+                        achados.append(f"{rel}:{n}: {m.group(1)!r}")
         self.assertEqual(achados, [], "ponteiros para seções que saíram do índice (reapontar para o destino)")
 
 
