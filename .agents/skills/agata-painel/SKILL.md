@@ -9,6 +9,9 @@ Fatos medidos, não impressões. Antes de mudar qualquer coisa, leia a seção d
 
 ## Onde mora
 - Código: `redesign/painel_operacional/` (`server.py`, `prototipo.html`, `prototipo.js`, `prototipo.css`, `test_painel.py`).
+- Lista de conversas: mora no menu lateral (`aside.sidebar`, com Arquivadas, Lixeira, Organizar conversas e Serviços no rodapé), desde 16/11/2026. A seção Conversa tem só a tela da conversa; não repete a lista.
+- Conhecimento: cinco blocos numa tela só, sem abas (âncoras `data-ancora` no topo). Não procure `data-sub` nessa seção.
+- Herói do Panorama: sem retrato desde 16/11/2026 (o retrato fica só na marca da casca).
 - Serviço: `painel-operacional.service` (usuário), porta **20146**, bind só em `127.0.0.1`. Depois de aplicar, reinicie: `systemctl --user restart painel-operacional.service`.
 - Página: `http://127.0.0.1:20146/prototipo`. Só o `main` vale: o serviço serve o arquivo do checkout principal.
 
@@ -20,12 +23,14 @@ Fatos medidos, não impressões. Antes de mudar qualquer coisa, leia a seção d
 - **Popup**: `dialog` com largura `min(680px, 100vw-32px)` e altura máxima `86vh`, cabeçalho e botões fixos, corpo com rolagem interna. Conteúdo longo rola dentro do popup; não corta.
 - **Rolagem**: barras finas no tom da identidade (`scrollbar-width: thin` e `::-webkit-scrollbar`). Não esconda a rolagem de conteúdo que precisa ser lido.
 - **Conversa com a Seth**: texto puro e Markdown montado com elementos do DOM. Nunca `innerHTML` com texto vindo da Seth.
+- **Filtro de estilo (decisão do Humano, 16/11/2026)**: antes de entregar qualquer mudança de tela, leia `ESTILO.md` desta pasta (cópia do guia de estilo Agata, sem a seção final de registro) e aplique o checklist dele. Confira em 360, 768, 1440 e 2560 px, sem rolagem horizontal da página. Frase do Humano, 18:27: "esse estilo é o último filtro de requinte a partir de agora, estabeleça."
 
 ## Como medir antes de propor (método que funcionou)
 1. **Pré-visualizar CSS sem tocar no arquivo**: busque o `prototipo.css` atual, transforme no navegador e aplique com folha construída (`new CSSStyleSheet(); sh.replaceSync(css); document.adoptedStyleSheets = [sh]`). Essa via não é bloqueada pela CSP. Confirme que as regras entraram (`getComputedStyle`).
 2. **Contraste**: percorra cada nó com texto visível nas páginas, calcule luminância relativa (WCAG) do texto e do fundo mais próximo com cor opaca, e exija 4,5:1 para texto normal. Meça a contagem de textos e a dos que falham; registre as duas.
 3. **Popups**: abra cada popup e meça `scrollHeight <= clientHeight` e `scrollWidth <= clientWidth` do `dialog`.
 4. **Tela real**: depois de aplicar, meça de novo na página servida. Conte só o que o HTML servido tem (`curl` em `/prototipo`) e o que o navegador mostra.
+5. **Navegador que aborta todo pedido que não é GET (medido em 16/11/2026)**: a medição de tela e de interação (abrir gaveta, abrir conversa, clicar em Mais) roda num navegador que aborta todo pedido que não é GET (no Playwright, `page.route`; no Chromium pelo protocolo CDP, `Fetch.failRequest`). Assim uma medição não escreve nada no painel. Registre quantos pedidos não-GET foram abortados (o número sai junto com a medição).
 
 Números de contraste mudam entre medições por causa da quantidade de elementos visíveis. Registre sempre o total junto com o resultado.
 
@@ -40,7 +45,8 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
 - Caminhos com espaço (`~/Área de trabalho`) quebram `python3 -c` sem aspas: use argumento com aspas ou um script.
 - `grep -o` com caracteres como `↗` pode falhar em alguns locais: use `python3` para contar.
 - Matriz congelada, `pkill -f` e `git stash`: regras de `agata-equipe` e `agata-fluxo`.
+- Playwright não estava instalado nesta máquina em 16/11/2026, e não se instala sem ordem do Humano. A medição de interação saiu pelo CDP do Chromium, com a biblioteca padrão do Python.
 
 ## Pendências conhecidas
-- Layout em celular não foi medido (o navegador não redimensiona a aba).
+- Medido em 16/11/2026 (deixa de ser pendência): fotos em oito larguras, de 360 a 2560 px (360, 480, 768, 1024, 1280, 1440, 1920 e 2560 px), com navegador sem janela e só GET, de panorama, conversa, conhecimento e sistema; e rolagem horizontal da página nas 64 combinações (8 larguras x 8 seções) pelo CDP, com 0 pedidos não-GET abertos. Resultado: nenhuma combinação com rolagem horizontal da página. Em celular, a gaveta e os mosaicos foram vistos em foto; o toque em alvo de 360 px não foi medido.
 - O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-fluxo` (memória comum) e `agata-equipe` (canal).

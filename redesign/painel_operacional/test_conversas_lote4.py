@@ -312,5 +312,125 @@ class RotasTests(unittest.TestCase):
         self.assertEqual(len(json.loads(resposta)["arvore"]["nos"]), 4)
 
 
+class HoraTests(ConversasBase):
+    """V1 (16/11/2026): cada mensagem pode trazer `hora` (ISO 8601 com fuso, até 40 caracteres)."""
+    HORA = "2026-11-16T14:05:00-03:00"
+
+    def test_hora_grava_e_le_de_volta(self):
+        armazem._conversa_gravar({"id": id_de(1), "titulo": "Horas", "mensagens": [
+            {"role": "user", "content": "oi", "hora": self.HORA},
+            {"role": "assistant", "content": "olá", "hora": "2026-11-16T14:05:07.250Z"}]})
+        lida = armazem._conversa_ler(id_de(1))
+        self.assertEqual([m.get("hora") for m in lida["mensagens"]], [self.HORA, "2026-11-16T14:05:07.250Z"])
+        self.assertEqual(self.arquivo(1)["mensagens"][0]["hora"], self.HORA)
+
+    def test_hora_invalida_sai_sem_derrubar_a_conversa(self):
+        ruins = ["ontem", "2026-11-16T14:05:00", "2026-13-40T99:00:00-03:00", "2026-11-16 14:05:00-03:00",
+                 "2026-11-16T14:05:00.1234567-03:00", "2026-11-16T14:05:00-03:00" + "0" * 30, 5, None]
+        mensagens = [{"role": "user", "content": f"msg {i}", "hora": ruim} for i, ruim in enumerate(ruins)]
+        self.assertIsNotNone(armazem._conversa_gravar({"id": id_de(2), "titulo": "Ruins", "mensagens": mensagens}))
+        lida = armazem._conversa_ler(id_de(2))
+        self.assertEqual([m["content"] for m in lida["mensagens"]], [f"msg {i}" for i in range(len(ruins))])
+        self.assertTrue(all("hora" not in m for m in lida["mensagens"]))
+
+    def test_conversa_antiga_sem_hora_continua_lendo(self):
+        (self.dir / (id_de(3) + ".json")).write_text(json.dumps({"titulo": "Antiga", "mensagens": [
+            {"role": "user", "content": "oi"}, {"role": "assistant", "content": "olá"}]}), encoding="utf-8")
+        lida = armazem._conversa_ler(id_de(3))
+        self.assertEqual([m["content"] for m in lida["mensagens"]], ["oi", "olá"])
+        self.assertFalse(any("hora" in m for m in lida["mensagens"]))
+
+    def test_exportacao_leva_a_hora_no_json_e_no_markdown(self):
+        armazem._conversa_gravar({"id": id_de(4), "titulo": "Com hora", "mensagens": [
+            {"role": "user", "content": "oi", "hora": self.HORA}, {"role": "assistant", "content": "olá"}]})
+        payload = json.loads(armazem._conversa_exportar(id_de(4), "json")[0])
+        self.assertEqual(payload["mensagens"][0]["hora"], self.HORA)
+        self.assertNotIn("hora", payload["mensagens"][1])
+        texto = armazem._conversa_exportar(id_de(4), "md")[0].decode("utf-8")
+        self.assertIn("## Você · 16/11/2026 14:05", texto)
+        self.assertIn("## Seth (modelo não registrado)", texto)  # sem hora, o cabeçalho é o de antes
+
+    def test_importar_devolve_a_hora(self):
+        armazem._conversa_gravar({"id": id_de(5), "titulo": "Ida e volta", "mensagens": [
+            {"role": "user", "content": "oi", "hora": self.HORA}]})
+        exportado = json.loads(armazem._conversa_exportar(id_de(5), "json")[0])
+        armazem._lixeira_purgar(armazem._conversa_apagar(id_de(5)))  # importar exige que a conversa saia da lixeira
+        resultado = armazem._conversa_importar(exportado)
+        self.assertEqual(resultado["estado"], "importada")
+        self.assertEqual(armazem._conversa_ler(resultado["id"])["mensagens"][0]["hora"], self.HORA)
+
+
+class InstrucoesTests(ConversasBase):
+    """V2 (16/11/2026): campo opcional `instrucoes` na conversa, até 2000 caracteres. Vazio = sem instruções."""
+
+    def test_instrucoes_gravam_e_leem_sem_os_espacos_das_pontas(self):
+        salvo = armazem._conversa_gravar({"id": id_de(6), "titulo": "Com instrução", "instrucoes": "  Responda em tópicos.  ",
+                                          "mensagens": [{"role": "user", "content": "oi"}]})
+        self.assertEqual(salvo["instrucoes"], "Responda em tópicos.")
+        self.assertEqual(armazem._conversa_ler(id_de(6))["instrucoes"], "Responda em tópicos.")
+
+    def test_vazias_nao_gravam_o_campo(self):
+        for vazio in ("", "   ", None):
+            with self.subTest(instrucoes=vazio):
+                armazem._conversa_gravar({"id": id_de(7), "titulo": "X", "instrucoes": vazio,
+                                          "mensagens": [{"role": "user", "content": "oi"}]})
+                self.assertNotIn("instrucoes", self.arquivo(7))
+
+    def test_acima_do_limite_ou_fora_do_tipo_recusa_a_gravacao_com_motivo(self):
+        longa = {"titulo": "X", "instrucoes": "a" * 2001, "mensagens": [{"role": "user", "content": "oi"}]}
+        self.assertIsNone(armazem._conversa_gravar({"id": id_de(8), **longa}))
+        self.assertEqual(armazem.motivo_conversa_recusada(longa), "instruções acima de 2000 caracteres")
+        self.assertIsNone(armazem._conversa_gravar({"id": id_de(8), "titulo": "X", "instrucoes": 5,
+                                                    "mensagens": [{"role": "user", "content": "oi"}]}))
+        self.assertFalse((self.dir / (id_de(8) + ".json")).exists())
+        no_limite = {"titulo": "X", "instrucoes": "a" * 2000, "mensagens": [{"role": "user", "content": "oi"}]}
+        self.assertIsNotNone(armazem._conversa_gravar({"id": id_de(8), **no_limite}))
+
+    def test_arquivo_com_instrucoes_invalidas_abre_sem_elas(self):
+        (self.dir / (id_de(9) + ".json")).write_text(json.dumps({"titulo": "Torta", "instrucoes": 5, "mensagens": [
+            {"role": "user", "content": "oi"}]}), encoding="utf-8")
+        lida = armazem._conversa_ler(id_de(9))
+        self.assertIsNotNone(lida)
+        self.assertNotIn("instrucoes", lida)
+
+    def test_exportar_e_importar_preservam_as_instrucoes(self):
+        armazem._conversa_gravar({"id": id_de(10), "titulo": "Ida e volta", "instrucoes": "Responda curto.",
+                                  "mensagens": [{"role": "user", "content": "oi"}]})
+        exportado = json.loads(armazem._conversa_exportar(id_de(10), "json")[0])
+        self.assertEqual(exportado["instrucoes"], "Responda curto.")
+        armazem._lixeira_purgar(armazem._conversa_apagar(id_de(10)))
+        resultado = armazem._conversa_importar(exportado)
+        self.assertEqual(resultado["estado"], "importada")
+        self.assertEqual(armazem._conversa_ler(resultado["id"])["instrucoes"], "Responda curto.")
+
+
+class AnexosMetadadoTests(ConversasBase):
+    """V3 (16/11/2026): a mensagem do usuário guarda `anexos: [{nome, caracteres}]`, só metadado, sem o texto."""
+
+    def test_anexos_gravam_so_nome_e_quantidade_de_caracteres(self):
+        armazem._conversa_gravar({"id": id_de(11), "titulo": "Anexos", "mensagens": [
+            {"role": "user", "content": "veja", "anexos": [{"nome": "notas.txt", "caracteres": 12, "texto": "NAO-GRAVAR"}]},
+            {"role": "assistant", "content": "ok", "anexos": [{"nome": "x.txt", "caracteres": 1}]}]})
+        arquivo = self.arquivo(11)
+        self.assertEqual(arquivo["mensagens"][0]["anexos"], [{"nome": "notas.txt", "caracteres": 12}])
+        self.assertNotIn("NAO-GRAVAR", json.dumps(arquivo))
+        self.assertNotIn("anexos", arquivo["mensagens"][1])  # só a mensagem do usuário guarda anexos
+
+    def test_anexos_fora_do_formato_saem_sem_recusar_a_conversa(self):
+        armazem._conversa_gravar({"id": id_de(12), "titulo": "X", "mensagens": [
+            {"role": "user", "content": "oi", "anexos": [
+                {"nome": "../fora.txt", "caracteres": 3},
+                {"nome": "ok.txt", "caracteres": 99999},
+                {"nome": "ok.txt", "caracteres": True},
+                {"nome": "bom.md", "caracteres": 40}]}]})
+        self.assertEqual(self.arquivo(12)["mensagens"][0]["anexos"], [{"nome": "bom.md", "caracteres": 40}])
+
+    def test_no_maximo_tres_anexos_ficam_gravados(self):
+        quatro = [{"nome": f"a{i}.txt", "caracteres": i + 1} for i in range(4)]
+        armazem._conversa_gravar({"id": id_de(13), "titulo": "X", "mensagens": [
+            {"role": "user", "content": "oi", "anexos": quatro}]})
+        self.assertEqual(self.arquivo(13)["mensagens"][0]["anexos"], quatro[:3])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -542,7 +542,7 @@
     "command": [
       "pytest",
       "-q",
-      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_ids_da_organizacao_existem_na_secao_conversa",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_ids_da_organizacao_existem_na_regiao_certa",
       "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_campo_de_busca_e_nome_de_pasta_com_limite",
       "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_exportacao_e_link_com_download_e_sem_script",
       "redesign/painel_operacional/test_chat_ui.py::ConversaOrganizacaoHtml::test_aviso_de_temporaria_comeca_escondido_e_com_status",
@@ -812,13 +812,13 @@
     "cwd": null
   },
   {
-    "criterion": "Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto devolve a pergunta ao campo",
+    "criterion": "Parar antes do primeiro texto deixa a resposta vazia marcada como interrompida; erro no meio do stream também mantém o texto recebido marcado, e erro sem texto mantém a pergunta na conversa e oferece Tentar de novo (C7, 16/11/2026: a pergunta não volta ao campo)",
     "command": [
       "pytest",
       "-q",
       "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_antes_do_primeiro_texto_deixa_resposta_vazia_marcada",
       "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_no_meio_do_stream_mantem_o_texto_marcado",
-      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_sem_texto_devolve_a_pergunta_ao_campo",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_sem_texto_mantem_a_pergunta_e_oferece_tentar_de_novo",
       "redesign/painel_operacional/test_conversas_lote4.py::MarcasTests::test_interrompida_e_feedback_so_valem_para_resposta"
     ],
     "cwd": null
@@ -1539,6 +1539,961 @@
       "pytest",
       "-q",
       "redesign/painel_operacional/test_painel.py::HttpTests::test_cache_curto_tem_lock_por_nome_e_rota_lenta_nao_segura_a_outra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o menu tem, nessa ordem, Nova conversa, a busca, as oito seções, a lista de conversas e o rodapé",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_menu_tem_nova_busca_secoes_conversas_e_rodape_nessa_ordem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o menu não repete nota e tem um rodapé só",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_menu_sem_redundancia_de_nota_e_rodape_unico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Conversa não repete a lista de conversas nem tem busca de conversas própria",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_conversa_sem_lista_duplicada_nem_busca_de_conversas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a busca do mapa some na Conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_busca_do_mapa_some_na_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o cabeçalho da Conversa tem título, status, modelo, Temporária e Mais",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_cabecalho_da_conversa_tem_titulo_status_modelo_temporaria_e_mais"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o compositor fica na base, com Ditar, Enviar e Parar, e o contexto vem depois dele",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_compositor_na_base_com_ditar_enviar_parar_e_contexto_depois"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o estado vazio começa com a saudação e o botão Ir para o fim começa escondido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_estado_vazio_central_e_ir_para_o_fim_comecam_certos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Conhecimento mostra os cinco blocos numa tela só, sem abas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_conhecimento_todos_os_blocos_a_vista_sem_abas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as âncoras do Conhecimento apontam para os cinco blocos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_ancoras_do_conhecimento_apontam_para_os_blocos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada rota carrega uma vez por abertura da seção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_cada_rota_carrega_uma_vez_por_abertura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "erro na memória marca o Conhecimento, e erro nas integrações marca o Sistema",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_erro_da_memoria_marca_conhecimento_e_integracoes_marcam_sistema"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Nova versão compartilha a leitura do estado com o painel",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_nova_versao_compartilha_a_leitura_do_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o menu de ações tem papel de menu, rótulo próprio e fecha com Esc",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_menu_de_acoes_tem_papeis_rotulo_e_esc"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a barra do item de conversa tem as ações do menu, e nenhuma some",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_barra_do_item_tem_acoes_do_menu_e_nenhuma_some"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a barra de conversa mostra o título completo no title",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_barra_mostra_o_titulo_completo_no_title"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tecla / foca a busca de conversas na Conversa e a busca do mapa nas outras seções",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_slash_foca_a_busca_de_conversas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a gaveta tem botão com aria-expanded e fecha com Esc e com a escolha",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_gaveta_botao_com_aria_e_fecha_com_esc_e_escolha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a gaveta só aparece em tela estreita",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_gaveta_so_aparece_em_tela_estreita"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o CSS do lote é plano, sem sombra, gradiente nem acento extra",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::LoteConversaEstruturaTests::test_bloco_novo_do_css_plano_sem_sombra_gradiente_nem_acento_extra"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Markdown mostra títulos em três níveis, listas aninhadas, citação, tabela e ênfase",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_titulos_em_tres_niveis_listas_aninhadas_citacao_tabela_e_enfase"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "um link vira texto com o endereço visível e sem elemento a; Copiar link copia o endereço",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_link_vira_texto_com_endereco_visivel_e_botao_sem_elemento_a"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o bloco de código mostra a linguagem e copia só o código, com confirmação na região ao vivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_bloco_de_codigo_tem_linguagem_e_botao_copiar_com_confirmacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o indicador aparece enquanto a Seth responde e some ao parar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_indicador_aparece_enquanto_a_seth_responde_e_some_ao_parar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hora da mensagem aparece curta, com a data no title; mensagem sem hora não mostra nada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_hora_curta_com_data_no_title_e_mensagem_sem_hora_nao_mostra_nada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "mensagem nova grava a hora em ISO 8601 com o fuso do usuário e o da Seth",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_mensagem_nova_grava_hora_iso_com_fuso_do_usuario_e_da_seth"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "anexo aparece como etiqueta com nome e tamanho, e entra na conta do contexto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_anexo_aparece_como_etiqueta_com_nome_e_tamanho_e_conta_no_contexto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "remover um anexo tira a etiqueta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_remover_anexo_tira_a_etiqueta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o envio leva o texto do anexo no pedido, e a conversa guarda só o metadado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_envio_leva_o_texto_do_anexo_no_pedido_e_so_o_metadado_na_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a recusa de anexo diz o motivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_recusas_de_anexo_dizem_o_motivo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "arquivo acima de 80000 bytes (4 vezes o limite por arquivo) é recusado antes de ser lido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_arquivo_acima_de_4_vezes_o_limite_e_recusado_antes_de_ler"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "texto colado longo vira o anexo colado.txt; texto curto fica no campo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_texto_colado_longo_vira_colado_txt_e_curto_fica_no_campo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "arrastar e soltar um arquivo anexa no compositor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_arrastar_e_soltar_anexa_no_compositor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o uso informado pelo gateway aparece no Detalhes do contexto; sem uso, fica a estimativa em caracteres",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_uso_do_gateway_aparece_na_linha_de_contexto_e_sem_uso_fica_a_estimativa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "um pedido de vinte mensagens com acentos passa do teto antigo sem cortar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaFuncoesChat::test_pedido_de_vinte_mensagens_com_acentos_passa_o_teto_antigo_sem_cortar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o rascunho volta ao trocar de conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_rascunho_volta_ao_trocar_de_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Nova conversa tem rascunho próprio, e enviar limpa o rascunho da conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_nova_conversa_tem_rascunho_proprio_e_enviar_limpa_o_da_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o rascunho só existe em memória: recarregar a página começa vazio",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_rascunho_so_em_memoria_recarregar_comeca_vazio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Tentar de novo reenvia sem duplicar a pergunta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_tentar_de_novo_reenvia_sem_duplicar_a_pergunta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o pedido leva as instruções da conversa, e o chip com instruções aparece",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_pedido_leva_instrucoes_da_conversa_e_o_chip_aparece"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a resposta de contingência (fallback) também leva as instruções",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_fallback_tambem_leva_as_instrucoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "salvar as instruções grava na conversa, e limpar as tira",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_salvar_instrucoes_grava_na_conversa_e_limpar_tira"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções acima de 2000 caracteres não são gravadas e a tela avisa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_instrucoes_acima_de_2000_nao_gravam_e_avisam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o contador de instruções mostra os caracteres de 2000",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaRascunhoErroInstrucoes::test_contador_de_instrucoes_mostra_caracteres_de_2000"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o dialog de instruções tem limite e aviso em texto simples",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_dialog_de_instrucoes_tem_limite_e_aviso_em_texto_simples"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o item Instruções e o espelho da Temporária ficam no menu Mais",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_item_instrucoes_e_espelho_da_conversa_temporaria_no_menu_mais"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Anexar tem input oculto com os tipos de arquivo aceitos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_anexar_tem_input_oculto_com_os_tipos_aceitos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os avisos de organização têm espelho no menu",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_avisos_de_organizacao_tem_espelho_no_menu"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "no celular a faixa do cabeçalho cabe em duas linhas e a Temporária vai para o menu",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_celular_cabe_em_duas_linhas_e_tira_a_temporaria_para_o_menu"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "compartilhar não existe na tela e não foi inventado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_compartilhar_nao_existe_e_nao_foi_inventado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o código novo da tela não usa innerHTML nem link externo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteChatHtmlCss::test_codigo_novo_nao_usa_innerhtml_nem_link_externo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Parar mantém o texto recebido, marcado como interrompida",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_mantem_o_texto_recebido_marcado_interrompida"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "parar antes do primeiro texto deixa a resposta vazia e marcada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_parar_antes_do_primeiro_texto_deixa_resposta_vazia_marcada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Esc para a resposta em curso",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_esc_para_a_resposta_em_curso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "erro no meio do stream mantém o texto recebido, marcado como interrompida",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ConversaParar::test_erro_no_meio_do_stream_mantem_o_texto_marcado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "item numerado com sublista ou linha em branco segue na mesma lista ol, e o número inicial vira start",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ListasNumeradasMarkdown::test_lista_com_sublista_e_linha_em_branco_entre_itens_e_uma_ol_so"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "uma lista que começa em outro número usa o atributo start",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ListasNumeradasMarkdown::test_numero_inicial_do_texto_vira_start"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "um parágrafo entre duas listas numeradas recomeça a contagem",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::ListasNumeradasMarkdown::test_paragrafo_entre_listas_recomeca_a_contagem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a faixa de baixo do compositor é uma linha, com Detalhes e o modo conversa à direita",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_faixa_de_baixo_e_uma_linha_com_detalhes_e_modo_conversa_a_direita"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o botão Temporária é um interruptor curto com aria-pressed e o texto explicativo no title",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_botao_temporaria_e_interruptor_curto_com_titulo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Esc no menu Mais devolve o foco ao botão Mais",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_menu_mais_devolve_o_foco_ao_botao_com_esc"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a transcrição entra no Tab, tem nome e a ordem é menu, cabeçalho, mensagens e compositor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_transcricao_e_focavel_com_nome_e_ordem_de_tab_da_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a gaveta tem Fechar no lugar da seta, e Arquivadas, Lixeira, Organizar e Serviços ficam no rodapé",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_gaveta_tem_fechar_no_lugar_da_seta_e_rodape_fixo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os mosaicos ficam dois por linha até 360 px quando cabem, pelo CSS de auto-fit",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_mosaicos_ficam_dois_por_linha_ate_360_quando_cabem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os três cartões do Panorama começam no topo, com cabeçalho de mesma altura",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_cartoes_do_panorama_alinhados_no_topo_com_cabecalho_de_mesma_altura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a transcrição tem respiro no fim para a última mensagem e as ações caberem inteiras",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_ui.py::LoteAjustesFinais::test_respiro_no_fim_da_transcricao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a hora da mensagem é gravada e lida de volta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::HoraTests::test_hora_grava_e_le_de_volta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "hora inválida sai sem derrubar a conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::HoraTests::test_hora_invalida_sai_sem_derrubar_a_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "conversa antiga sem hora continua sendo lida",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::HoraTests::test_conversa_antiga_sem_hora_continua_lendo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a exportação leva a hora no JSON e no Markdown",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::HoraTests::test_exportacao_leva_a_hora_no_json_e_no_markdown"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "importar devolve a hora da mensagem",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::HoraTests::test_importar_devolve_a_hora"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as instruções gravam e são lidas sem os espaços das pontas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::InstrucoesTests::test_instrucoes_gravam_e_leem_sem_os_espacos_das_pontas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções vazias não gravam o campo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::InstrucoesTests::test_vazias_nao_gravam_o_campo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções acima do limite ou fora do tipo recusam a gravação com motivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::InstrucoesTests::test_acima_do_limite_ou_fora_do_tipo_recusa_a_gravacao_com_motivo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "um arquivo com instruções inválidas abre sem elas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::InstrucoesTests::test_arquivo_com_instrucoes_invalidas_abre_sem_elas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "exportar e importar preservam as instruções",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::InstrucoesTests::test_exportar_e_importar_preservam_as_instrucoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os anexos gravam só o nome e a quantidade de caracteres",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::AnexosMetadadoTests::test_anexos_gravam_so_nome_e_quantidade_de_caracteres"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "anexos fora do formato saem sem recusar a conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::AnexosMetadadoTests::test_anexos_fora_do_formato_saem_sem_recusar_a_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "no máximo três anexos ficam gravados",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_conversas_lote4.py::AnexosMetadadoTests::test_no_maximo_tres_anexos_ficam_gravados"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o uso do gateway sai antes do fim do stream",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::UsoTest::test_uso_do_gateway_sai_antes_do_fim"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem usage no gateway não existe evento de uso",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::UsoTest::test_sem_usage_no_gateway_nao_existe_evento_de_uso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "usage inválido é ignorado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::UsoTest::test_usage_invalido_e_ignorado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "vale o último usage visto, e sem o fim do stream o uso não sai",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::UsoTest::test_vale_o_ultimo_usage_visto_e_sem_done_nao_sai_uso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o uso válido aceita só inteiros não negativos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::UsoTest::test_uso_valido_aceita_so_inteiros_nao_negativos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota do stream repassa o uso do gateway antes do fim",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_stream_repassa_uso_do_gateway_antes_do_fim"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota do stream sem usage do gateway não inventa evento",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_stream_sem_usage_do_gateway_nao_inventa_evento"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a contingência repassa o uso quando o gateway manda",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_fallback_repassa_uso_quando_o_gateway_manda"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a contingência sem usage não manda o campo, e usage inválido sai",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream_rota.py::RotaChatStreamTests::test_fallback_sem_usage_nao_manda_o_campo_e_usage_invalido_sai"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as instruções viram system na frente do pedido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_instrucoes_viram_system_na_frente_do_pedido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções vazias ou só com espaço não mandam system",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_vazio_ou_so_espaco_nao_manda_system"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro passa pelas instruções",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_filtro_passa_pelas_instrucoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções com segredo não saem, e o motivo não ecoa o texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_instrucoes_com_segredo_nao_saem_e_o_motivo_nao_ecoa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o limite das instruções é de 2000 caracteres",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_limite_de_instrucoes_e_de_2000_caracteres"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "instruções fora do tipo são recusadas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_instrucoes_fora_do_tipo_sao_recusadas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o cliente não manda system dentro de mensagens",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_cliente_nao_manda_system_dentro_de_mensagens"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro padrão recusa segredo real nas instruções",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::InstrucoesTest::test_filtro_padrao_recusa_segredo_real_nas_instrucoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o bloco de anexos vai no fim da última mensagem do usuário",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_bloco_vai_no_fim_da_ultima_mensagem_do_usuario"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a cerca do bloco de anexo passa a maior sequência de crases",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_cerca_do_bloco_passa_a_maior_sequencia_de_crases"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o limite de 4000 caracteres vale só para o texto digitado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_limite_de_4000_vale_so_para_o_texto_digitado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "anexos acima dos limites são recusados",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_anexos_acima_dos_limites_sao_recusados"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "nome de anexo com caminho ou caractere de controle é recusado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_nome_com_caminho_ou_controle_e_recusado",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_nome_com_separador_de_linha_ou_formato_e_recusado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "nome válido sai sem espaço nas pontas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_nome_valido_sai_sem_espaco_nas_pontas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "anexo sem mensagem do usuário é recusado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_anexo_sem_mensagem_do_usuario_e_recusado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro passa pelo nome e pelo texto do anexo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_filtro_passa_pelo_nome_e_pelo_texto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "anexo com segredo não sai, e o motivo não ecoa o conteúdo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_anexo_com_segredo_nao_sai_e_o_motivo_nao_ecoa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro padrão recusa segredo real no anexo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_filtro_padrao_recusa_segredo_real_no_anexo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem anexos, o pedido fica igual ao de antes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_sem_anexos_o_pedido_fica_igual"
     ],
     "cwd": null
   }

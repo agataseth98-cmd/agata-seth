@@ -33,10 +33,16 @@
   const pct = (x) => (x === null || x === undefined ? "—" : Math.round(x * 100) + "%");
   let estado = null;
 
+  // Uma leitura por vez: dois blocos nv- abertos juntos (Conhecimento) compartilham a mesma requisição (painel-conversa-16-11).
+  let lendo = null;
   async function ler() {
-    try { estado = await fetchJson("/api/nova-versao/estado", {headers: {Accept: "application/json"}}); }
-    catch (_) { estado = null; }
-    return estado;
+    if (lendo) return lendo;
+    lendo = (async () => {
+      try { estado = await fetchJson("/api/nova-versao/estado", {headers: {Accept: "application/json"}}); }
+      catch (_) { estado = null; }
+      return estado;
+    })();
+    try { return await lendo; } finally { lendo = null; }
   }
   async function executar(acao, extra) {
     return fetchJson("/api/nova-versao/executar", {method: "POST", headers: H, body: JSON.stringify({acao, ...(extra || {})})}, 120000);
@@ -319,8 +325,10 @@
   };
 
   // Carga inicial: prototipo.js abre a tela do hash antes deste arquivo existir. Se a tela aberta é de nova versão (ex.: Custos), carrega agora.
-  const abertaAgora = document.querySelector(".secao:not([hidden]) > .sub:not([hidden])");
-  if (abertaAgora && String(abertaAgora.dataset.sub || "").startsWith("nv-")) AgataPainel.carregarNovaVersao(abertaAgora.dataset.sub);
+  // Todos os subs nv- visíveis (Conhecimento abre vários juntos), não só o primeiro.
+  document.querySelectorAll(".secao:not([hidden]) > .sub:not([hidden])").forEach((aberta) => {
+    if (String(aberta.dataset.sub || "").startsWith("nv-")) AgataPainel.carregarNovaVersao(aberta.dataset.sub);
+  });
   // Campo da chave fica num formulário só para o navegador não reclamar; o envio é pelo botão, nunca pelo submit.
   const formChave = byId("nv-api-form");
   if (formChave) formChave.addEventListener("submit", (e) => e.preventDefault());

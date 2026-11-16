@@ -11,6 +11,7 @@ import os
 import socket
 import re
 import secrets
+import select
 import subprocess
 import sys
 import tempfile
@@ -55,7 +56,7 @@ WIKI_LIBERADA = True
 LIMITE_RESPOSTA_VERIFICADOR = 262144
 ALLOWED_ORIGIN = f"http://{BIND}:{PORT}"
 GATEWAY_CHAT_URL = "http://127.0.0.1:20126/v1/chat/completions"  # constante: os testes trocam por servidor falso
-CHAT_STREAM_LIMITE_BYTES = 131_072
+CHAT_STREAM_LIMITE_BYTES = 262_144  # 16/11/2026 (C10): 20 mensagens com acentos mais anexos passavam de 131072
 CHAT_STREAM_TIMEOUT_S = 120
 # Organização das conversas (lote 3, 09/11/2026): pedidos pequenos de fixar, pasta, marcador, pasta e nome.
 SETH_ORGANIZACAO_LIMITE_BYTES = 4096
@@ -183,6 +184,37 @@ def _linhas_do_gateway(resposta):
             yield linha.decode("utf-8", errors="replace")
     except (OSError, http.client.HTTPException):
         return
+
+
+def _abrir_gateway(pedido: dict):
+    """Abre o pedido de chat no gateway e devolve (resposta, socket). Status 4xx/5xx vira OSError, como antes
+    (urllib), e a UI recebe 'gateway indisponível'. O socket é pego ANTES de getresponse: sem Content-Length
+    (HTTP/1.0), o http.client solta conexao.sock e o passa à resposta. Quem fecha a resposta fecha o socket."""
+    destino = urlparse(GATEWAY_CHAT_URL)
+    conexao = http.client.HTTPConnection(destino.hostname, destino.port, timeout=CHAT_STREAM_TIMEOUT_S)
+    resposta = None
+    try:
+        conexao.request("POST", destino.path or "/", body=json.dumps(pedido).encode("utf-8"),
+                        headers={"Content-Type": "application/json", "Accept": "text/event-stream"})
+        sock = conexao.sock
+        resposta = conexao.getresponse()
+        if resposta.status >= 400:
+            raise OSError(f"gateway respondeu {resposta.status}")
+    except Exception:
+        if resposta is not None:
+            resposta.close()
+        conexao.close()
+        raise
+    return resposta, sock
+
+
+def _derrubar_gateway(sock) -> None:
+    """Corta a conexão com o gateway a partir de outra thread. shutdown acorda a leitura bloqueada; close sozinho não acorda."""
+    if sock is not None:
+        try:
+            sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
 
 
 def _relay_modules():
@@ -1597,44 +1629,72 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, "text/plain; charset=utf-8", "pedido em JSON inválido".encode("utf-8"))
         try:
             pedido = chat_stream.montar_pedido(corpo.get("mensagens") if isinstance(corpo, dict) else None,
-                                               corpo.get("modelo") if isinstance(corpo, dict) else None)
+                                               corpo.get("modelo") if isinstance(corpo, dict) else None,
+                                               corpo.get("instrucoes") if isinstance(corpo, dict) else None,
+                                               corpo.get("anexos") if isinstance(corpo, dict) else None)
         except ValueError as erro:
             # A mensagem de montar_pedido traz só posição e regra (ex.: "mensagem 3 acima de 4000 caracteres"), nunca o texto.
             return self._send(400, "text/plain; charset=utf-8", str(erro).encode("utf-8"))
         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
             return self._send(429, "text/plain; charset=utf-8", b"busy")
+        resposta, fim = None, threading.Event()
         try:
             try:
-                req = urllib.request.Request(GATEWAY_CHAT_URL, data=json.dumps(pedido).encode("utf-8"),
-                                             headers={"Content-Type": "application/json", "Accept": "text/event-stream"},
-                                             method="POST")
-                resposta = urllib.request.urlopen(req, timeout=CHAT_STREAM_TIMEOUT_S)
-            except OSError:
+                resposta, sock_gateway = _abrir_gateway(pedido)
+            except (OSError, http.client.HTTPException):
                 return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
+            # Vigia: se o navegador sair no meio do stream, a conexão com o gateway cai já, sem esperar o próximo pedaço.
+            threading.Thread(target=self._vigiar_cliente, args=(sock_gateway, fim), daemon=True).start()
             with resposta:
                 # Modelo real (X-Modelo-Real, fato da Máquina) segue no cabeçalho da resposta; sem ele, a UI mostra o escolhido.
                 real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
                 self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)), (("X-Modelo-Real", real),) if real else ())
         finally:
+            fim.set()
+            if resposta is not None:
+                resposta.close()  # fecha o socket do gateway, mesmo se o cliente saiu no meio
             _SEM_CONVERSA_EM_CURSO.release()
 
+    def _vigiar_cliente(self, sock_gateway, fim: threading.Event) -> None:
+        """Thread do stream: espera o navegador (leitura do socket do cliente). Se ele fechar a conexão enquanto
+        o gateway ainda responde, derruba a conexão com o gateway. Para quando o stream termina (fim) ou o cliente sai."""
+        cliente = self.connection
+        saiu = False
+        while not fim.is_set():
+            try:
+                pronto, _, _ = select.select([cliente], [], [], 0.5)
+                if pronto and cliente.recv(1024) == b"":
+                    saiu = True
+                    break
+            except OSError:
+                saiu = True
+                break
+        if saiu:
+            _derrubar_gateway(sock_gateway)
+
     def _stream_sse(self, eventos, cabecalhos_extra=()) -> None:
-        """Repassa eventos como SSE. Sem Content-Length: a conexão fecha ao fim (HTTP/1.0)."""
-        self.send_response(200)
-        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
-        for nome, valor in cabecalhos_extra:
-            self.send_header(nome, valor)
-        self.end_headers()
+        """Repassa eventos como SSE. Sem Content-Length: a conexão fecha ao fim (HTTP/1.0).
+        Se o navegador sair (BrokenPipeError, ConnectionResetError ou outro OSError na escrita), para de escrever
+        e fecha o gerador, que solta a leitura do gateway."""
         try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+            for nome, valor in cabecalhos_extra:
+                self.send_header(nome, valor)
+            self.end_headers()
             for evento in eventos:
                 self.wfile.write(chat_stream.codificar_sse(evento))
                 self.wfile.flush()
         except OSError:
-            return  # o navegador saiu no meio do stream
+            pass  # o navegador saiu no meio do stream (BrokenPipeError e ConnectionResetError caem aqui)
+        finally:
+            fechar = getattr(eventos, "close", None)
+            if fechar is not None:
+                fechar()
 
     def _responder_escrita(self, rota: str, identificador, status: int, corpo: bytes,
                            tipo: str = "text/plain; charset=utf-8") -> None:
@@ -1770,6 +1830,12 @@ class Handler(BaseHTTPRequestHandler):
             modelo = chat_stream.modelo_valido(corpo.get("modelo") if isinstance(corpo, dict) else None)
         except ValueError:
             return self._send(400, "text/plain; charset=utf-8", b"modelo fora da lista")
+        try:
+            # Instruções da conversa (system, filtradas) e anexos (no fim da última mensagem do usuário), pelo mesmo montador do stream.
+            limpas = chat_stream.montar_mensagens(limpas, corpo.get("instrucoes") if isinstance(corpo, dict) else None,
+                                                  corpo.get("anexos") if isinstance(corpo, dict) else None)
+        except ValueError as erro:
+            return self._send(400, "text/plain; charset=utf-8", str(erro).encode("utf-8"))
         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
             return self._send(429, "text/plain; charset=utf-8", b"busy")
         try:
@@ -1780,7 +1846,11 @@ class Handler(BaseHTTPRequestHandler):
                 dados = json.loads(resposta.read().decode("utf-8"))
                 real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
             texto = dados["choices"][0]["message"].get("content") or ""
-            body = json.dumps({"schema_version": 1, "content": texto, "model": dados.get("model")}, ensure_ascii=False).encode("utf-8")
+            saida = {"schema_version": 1, "content": texto, "model": dados.get("model")}
+            uso = chat_stream.uso_valido(dados.get("usage"))  # só quando o gateway devolve a contagem; sem ela, o campo não existe
+            if uso is not None:
+                saida["uso"] = uso
+            body = json.dumps(saida, ensure_ascii=False).encode("utf-8")
             return self._send(200, "application/json; charset=utf-8", body, (("X-Modelo-Real", real),) if real else ())
         except (OSError, KeyError, IndexError, ValueError):
             return self._send(502, "text/plain; charset=utf-8", b"gateway indisponivel")

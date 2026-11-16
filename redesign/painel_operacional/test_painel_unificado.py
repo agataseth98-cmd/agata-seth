@@ -483,7 +483,19 @@ class MemoriaConselhoTests(ServidorDeTeste):
         antes = (self.arq.read_bytes(), sorted(os.listdir(self.arq.parent)))
         sem_caminho = self.pede_json("/api/conselho/memoria?n=2")[1]
         com_caminho = self.pede_json("/api/conselho/memoria?n=2&arquivo=/etc/hostname&caminho=../x")[1]
-        self.assertEqual(com_caminho, sem_caminho, "o caminho vindo do cliente não muda a leitura")
+        # observed_at e fresh_until saem da igualdade porque são a hora de cada pedido; o resto segue inteiro.
+        ISO_COM_FUSO = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$"
+        for corpo in (sem_caminho, com_caminho):
+            dados = json.loads(corpo)
+            for campo in ("observed_at", "fresh_until"):
+                self.assertIn(campo, dados, "a resposta da memória traz a janela de leitura")
+                self.assertRegex(dados[campo], ISO_COM_FUSO, "janela de leitura em ISO 8601 com fuso")
+        def sem_janela(corpo):
+            dados = json.loads(corpo)
+            dados.pop("observed_at", None)
+            dados.pop("fresh_until", None)
+            return dados
+        self.assertEqual(sem_janela(com_caminho), sem_janela(sem_caminho), "o caminho vindo do cliente não muda a leitura")
         self.assertEqual((self.arq.read_bytes(), sorted(os.listdir(self.arq.parent))), antes, "a leitura não grava")
         servidor = (HERE / "server.py").read_text(encoding="utf-8")
         trecho = servidor[servidor.index("def _conselho_memoria"):servidor.index("def _grafo")]
@@ -760,6 +772,153 @@ class ComportamentoDoPainelTests(unittest.TestCase):
         lacunas = hero.split("fonte sem leitura: ", 1)[1]
         self.assertIn("Whisper", lacunas)
         self.assertNotIn("Piper", lacunas, "o ausente não entra na lista de sem leitura")
+
+
+
+class LoteConversaEstruturaTests(unittest.TestCase):
+    """Lote painel-conversa-16-11 (16/11/2026): menu único, Conversa com compositor, Conhecimento numa tela e gaveta.
+
+    Conferência de marcação e de texto do JS (o comportamento de clique fica em test_chat_ui.py, com DOM mínimo).
+    """
+
+    @staticmethod
+    def bloco(abre, fecha):
+        i = HTML.index(abre)
+        return HTML[i:HTML.index(fecha, i) + len(fecha)]
+
+    def test_menu_tem_nova_busca_secoes_conversas_e_rodape_nessa_ordem(self):
+        aside = self.bloco('<aside class="sidebar"', "</aside>")
+        marcas = ['id="seth-nova"', 'id="seth-busca"', 'data-secao="panorama"', 'id="seth-conversas"',
+                  'id="organizar-abrir"', 'id="servicos-locais"']
+        posicoes = [aside.index(m) for m in marcas]
+        self.assertEqual(posicoes, sorted(posicoes), "ordem do menu: nova, busca, seções, conversas, rodapé")
+        self.assertEqual(re.findall(r'data-secao="(\w+)"', aside), SECOES)
+
+    def test_menu_sem_redundancia_de_nota_e_rodape_unico(self):
+        self.assertNotIn("O Humano no centro", HTML)
+        self.assertNotIn("human-note", HTML)
+        self.assertNotIn("side-bottom", HTML)
+        self.assertEqual(HTML.count('class="side-foot"'), 1)
+
+    def test_conversa_sem_lista_duplicada_nem_busca_de_conversas(self):
+        secao = self.bloco('<section class="secao" id="conversa"', "</section>")
+        self.assertNotIn('class="seth-lista"', secao)
+        self.assertNotIn('id="seth-conversas"', secao)
+        self.assertNotIn('id="seth-busca"', secao)
+        self.assertNotIn("<aside", secao)
+
+    def test_busca_do_mapa_some_na_conversa(self):
+        self.assertIn('id="mapa-busca"', HTML)
+        self.assertIn('byId("mapa-busca").hidden = alvo.id === "conversa"', JS["prototipo.js"])
+
+    def test_cabecalho_da_conversa_tem_titulo_status_modelo_temporaria_e_mais(self):
+        secao = self.bloco('<section class="secao" id="conversa"', "</section>")
+        cabecalho = secao[secao.index('<header class="seth-cabecalho">'):secao.index("</header>")]
+        for id_ in ("seth-titulo", "seth-status", "seth-modelo", "seth-temporaria", "seth-mais-abrir", "seth-mais-menu",
+                    "seth-copiar-ultima", "seth-export-json", "seth-export-md"):
+            with self.subTest(id=id_):
+                self.assertIn(f'id="{id_}"', cabecalho)
+        self.assertIn('aria-haspopup="menu"', cabecalho)
+        self.assertIn('role="menu"', cabecalho)
+
+    def test_compositor_na_base_com_ditar_enviar_parar_e_contexto_depois(self):
+        secao = self.bloco('<section class="secao" id="conversa"', "</section>")
+        ordem = [secao.index(f'id="{i}"') for i in ("seth-input", "seth-ditado", "seth-send", "seth-parar",
+                                                     "seth-contexto", "seth-voz-estado", "seth-temporaria-aviso",
+                                                     "seth-salvar-aviso", "seth-origem")]
+        self.assertEqual(ordem, sorted(ordem), "compositor na base; abaixo dele, contexto, voz e avisos (E3d)")
+        self.assertRegex(secao, r'<button class="text-link" type="button" id="seth-parar" hidden>')
+
+    def test_estado_vazio_central_e_ir_para_o_fim_comecam_certos(self):
+        secao = self.bloco('<section class="secao" id="conversa"', "</section>")
+        self.assertIn('id="seth-vazio-central"', secao)
+        self.assertIn('id="seth-exemplos"', secao[secao.index('id="seth-vazio-central"'):])
+        self.assertRegex(secao, r'<button class="seth-ir-fim" type="button" id="seth-ir-fim" hidden>')
+        self.assertIn("central.hidden = caminho.length > 0", JS["prototipo.js"])
+
+    def test_conhecimento_todos_os_blocos_a_vista_sem_abas(self):
+        secao = self.bloco('<section class="secao" id="conhecimento"', '<section class="secao" id="historia"')
+        self.assertIn('data-subs="juntos"', secao[:secao.index(">")])
+        self.assertNotIn('class="abas"', secao)
+        subs = ["sub-memoria", "sub-grafo", "sub-documentacao", "sub-nv-alexandria", "sub-nv-acervo"]
+        for sub in subs:
+            with self.subTest(sub=sub):
+                tag = re.search(r'<div class="sub[^"]*" id="%s"[^>]*>' % sub, secao).group(0)
+                self.assertNotIn(" hidden", tag)
+        ordem = [secao.index(f'id="{s}"') for s in subs]
+        self.assertEqual(ordem, sorted(ordem), "ordem: memória, grafo, documentação, alexandria, acervo")
+
+    def test_ancoras_do_conhecimento_apontam_para_os_blocos(self):
+        ancoras = re.findall(r'data-ancora="([^"]+)"', HTML)
+        self.assertEqual(ancoras, ["sub-memoria", "sub-grafo", "sub-documentacao", "sub-nv-alexandria", "sub-nv-acervo"])
+        for alvo in ancoras:
+            self.assertIn(f'id="{alvo}"', HTML)
+        self.assertIn("alvo.scrollIntoView({block: \"start\"})", JS["prototipo.js"])
+
+    def test_cada_rota_carrega_uma_vez_por_abertura(self):
+        js = JS["prototipo.js"]
+        self.assertIn('const ROTA_DE_SUB = {integracoes: "detalhes", memoria: "detalhes"};', js)
+        self.assertIn("if (feitas.has(rota)) return;", js)
+
+    def test_erro_da_memoria_marca_conhecimento_e_integracoes_marcam_sistema(self):
+        js = JS["prototipo.js"]
+        trecho = js[js.index("async function loadDetails()"):js.index("function wikiLineSource")]
+        self.assertIn('marcarEstado("conhecimento", "erro"', trecho)
+        self.assertIn('marcarEstado("sistema", "erro"', trecho)
+
+    def test_nova_versao_compartilha_a_leitura_do_estado(self):
+        nv = JS["nova_versao.js"]
+        self.assertIn("if (lendo) return lendo;", nv)
+        self.assertEqual(nv.count('fetchJson("/api/nova-versao/estado"'), 1)
+
+    def test_menu_de_acoes_tem_papeis_rotulo_e_esc(self):
+        js = JS["prototipo.js"]
+        self.assertIn('gatilho.setAttribute("aria-haspopup", "menu")', js)
+        self.assertIn('menu.setAttribute("role", "menu")', js)
+        self.assertIn('b.setAttribute("role", "menuitem")', js)
+        self.assertIn('gatilho.setAttribute("aria-label", "Mais ações de " + tituloLido)', js)
+        # J8 (16/11/2026): Esc fecha e devolve o foco ao gatilho pelo mesmo caminho da escolha (fecharMenuAberto(true)).
+        self.assertIn('if (e.key === "Escape") { e.preventDefault(); fecharMenuAberto(true); return; }', js)
+
+    def test_barra_do_item_tem_acoes_do_menu_e_nenhuma_some(self):
+        js = JS["prototipo.js"]
+        for rotulo in ("Renomear", "Fixar", "Arquivar", "Apagar", "Exportar JSON", "Exportar Markdown", "Pasta e marcadores"):
+            with self.subTest(rotulo=rotulo):
+                self.assertIn(rotulo, js)
+
+    def test_barra_mostra_o_titulo_completo_no_title(self):
+        self.assertIn('abrir.title = tituloLido + " · " + c.mensagens + " mensagens · " + c.atualizada;', JS["prototipo.js"])
+
+    def test_slash_foca_a_busca_de_conversas(self):
+        # C12a (16/11/2026): na Conversa, "/" foca a busca de conversas; nas outras seções, a busca do mapa.
+        self.assertIn('if (e.key === "/") { e.preventDefault(); if (byId("conversa").hidden) byId("search").focus(); else byId("seth-busca").focus(); }', JS["prototipo.js"])
+
+    def test_gaveta_botao_com_aria_e_fecha_com_esc_e_escolha(self):
+        botao = re.search(r'<button class="menu-abrir"[^>]*>', HTML).group(0)
+        self.assertIn('aria-controls="sidebar-principal"', botao)
+        self.assertIn('aria-expanded="false"', botao)
+        self.assertIn('id="sidebar-principal"', HTML)
+        js = JS["prototipo.js"]
+        self.assertIn('if (gavetaAberta()) { setGaveta(false); byId("menu-abrir").focus(); return; }', js)
+        self.assertIn("setGaveta(false);\n  byId(\"crumb\")", js.replace("  byId(\"crumb\").textContent", "setGaveta(false);\n  byId(\"crumb\")"))
+
+    def test_gaveta_so_aparece_em_tela_estreita(self):
+        self.assertRegex(CSS, r"\.menu-abrir\{display:none\}")
+        inicio = CSS.index("/* Gaveta em tela estreita")
+        estreita = CSS[inicio:CSS.index("@media (max-width:480px)", inicio)]
+        self.assertIn("@media (max-width:1023px){", estreita)
+        self.assertIn(".menu-abrir{display:inline-flex", estreita)
+        self.assertIn(".shell.menu-aberto .sidebar{transform:none}", estreita)
+
+    def test_bloco_novo_do_css_plano_sem_sombra_gradiente_nem_acento_extra(self):
+        bloco = re.sub(r"/\*.*?\*/", "", CSS[CSS.index("/* ===== Lote painel-conversa-16-11"):], flags=re.S)
+        for decl in re.findall(r"box-shadow\s*:\s*([^;}]+)", bloco):
+            self.assertEqual(decl.strip(), "none", "sombra no bloco novo")
+        self.assertNotIn("gradient", bloco)
+        self.assertNotIn("drop-shadow", bloco)
+        for cor in ("--gold", "--violet", "--blue", "--lime", "--green", "--orange"):
+            with self.subTest(cor=cor):
+                self.assertNotIn("var(" + cor, bloco, "acento único: só --teal (cores de estado só com palavra)")
 
 
 if __name__ == "__main__":

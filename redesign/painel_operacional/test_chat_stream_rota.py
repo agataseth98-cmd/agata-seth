@@ -72,6 +72,29 @@ def _eventos(corpo: bytes):
             for bloco in corpo.decode("utf-8").split("\n\n") if bloco.startswith("data: ")]
 
 
+class GatewayLentoHandler(BaseHTTPRequestHandler):
+    """Gateway falso lento: manda um pedaço do stream e espera. Marca `fechado` quando a origem fecha a conexão."""
+
+    def do_POST(self):
+        tamanho = int(self.headers.get("Content-Length", "0"))
+        self.rfile.read(tamanho)
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.end_headers()
+        self.wfile.write(_chunk("início").encode("utf-8"))
+        self.wfile.flush()
+        self.connection.settimeout(10)  # prazo do teste: sem FIN da origem, o teste falha em vez de travar
+        try:
+            while self.connection.recv(1024):
+                pass
+        except OSError:
+            return
+        self.server.fechado.set()  # recv devolveu b"": a origem fechou a conexão com o gateway
+
+    def log_message(self, _format, *args):
+        return
+
+
 class RotaChatStreamTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -168,7 +191,9 @@ class RotaChatStreamTests(unittest.TestCase):
         self.assertEqual(corpo, codificar_sse({"tipo": "texto", "delta": "Olá"})
                          + codificar_sse({"tipo": "texto", "delta": ", mundo"}) + codificar_sse({"tipo": "fim"}))
         self.assertEqual(self.gateway.recebidos, [
-            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}], "stream": True},
+            # C11 (16/11/2026): o pedido de stream pede o uso ao gateway (stream_options.include_usage).
+            {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}], "stream": True,
+             "stream_options": {"include_usage": True}},
         ])
 
     def test_stream_sem_done_termina_em_erro_sse(self):
@@ -246,8 +271,9 @@ class RotaChatStreamTests(unittest.TestCase):
         self.assertEqual(len(self.gateway.recebidos[-1]["messages"]), 20)
 
     def test_fallback_recusa_acima_do_limite_do_stream_com_motivo(self):
-        # Cada quebra de linha vira \\n no JSON (2 bytes): 20 x 4000 quebras passam de 131072 bytes
-        mensagens = [{"role": "user", "content": "\n" * 4000} for _ in range(20)]
+        # Teto de 262144 bytes (C10, 16/11/2026). Cada caractere de controle vira \u0001 no JSON (6 bytes):
+        # 20 x 4000 deles passam de 480000 bytes. (Antes, com "\n" e teto de 131072, 20 x 4000 já passavam.)
+        mensagens = [{"role": "user", "content": "\x01" * 4000} for _ in range(20)]
         status, corpo, _ = self.post_chat({"messages": mensagens})
         self.assertEqual(status, 413)
         self.assertEqual(corpo.decode("utf-8"), f"pedido acima de {panel.CHAT_STREAM_LIMITE_BYTES} bytes")
@@ -275,6 +301,7 @@ class RotaChatStreamTests(unittest.TestCase):
             status, corpo, _ = self.post_conversa(grande)
             self.assertEqual((status, corpo.decode("utf-8")), (400, "uma mensagem passa de 65536 caracteres"))
             self.assertEqual(list(Path(tmp).glob("*.json")), [])
+
     # Modelo do chat: lista fixa. O servidor recusa o que está fora dela antes de chamar o gateway.
 
     def test_stream_manda_ao_gateway_o_modelo_escolhido(self):
@@ -374,6 +401,200 @@ class RotaChatStreamTests(unittest.TestCase):
             status, corpo, _ = self.post_conversa(ruim_na_resposta.encode("utf-8"))
             self.assertEqual((status, corpo.decode("utf-8")), (400, "modelo fora da lista"))
             self.assertEqual(list(Path(tmp).glob("*.json")), [])
+
+
+    # Instruções da conversa (campo `instrucoes`): vira UMA mensagem system na frente, depois do filtro. Gateway falso.
+
+    def test_conversa_com_instrucoes_acima_do_limite_recusada_com_motivo_na_rota(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel.armazem, "CONVERSAS_DIR", Path(tmp)):
+            ruim = json.dumps({"titulo": "X", "instrucoes": "a" * 2001,
+                               "mensagens": [{"role": "user", "content": "oi"}]}).encode("utf-8")
+            status, corpo, _ = self.post_conversa(ruim)
+            self.assertEqual((status, corpo.decode("utf-8")), (400, "instruções acima de 2000 caracteres"))
+            self.assertEqual(list(Path(tmp).glob("*.json")), [])
+            boa = json.dumps({"titulo": "X", "instrucoes": "Responda curto.",
+                              "mensagens": [{"role": "user", "content": "oi"}]}).encode("utf-8")
+            status, _, _ = self.post_conversa(boa)
+            self.assertEqual(status, 200)
+            self.assertEqual(len(list(Path(tmp).glob("*.json"))), 1)
+
+    def test_stream_manda_instrucoes_como_system_na_frente(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, _ = self.post_stream({**self.MENSAGENS, "instrucoes": "Responda em tópicos."})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["messages"], [
+            {"role": "system", "content": "Responda em tópicos."},
+            {"role": "user", "content": "oi"}])
+
+    def test_instrucoes_vazias_nao_mandam_system(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, _, _ = self.post_stream({**self.MENSAGENS, "instrucoes": "   "})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["messages"], self.MENSAGENS["mensagens"])
+
+    def test_instrucoes_acima_do_limite_recusadas_com_motivo_sem_chegar_ao_gateway(self):
+        status, corpo, _ = self.post_stream({**self.MENSAGENS, "instrucoes": "a" * 2001})
+        self.assertEqual(status, 400)
+        self.assertEqual(corpo.decode("utf-8"), "instruções acima de 2000 caracteres")
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_instrucoes_com_segredo_recusadas_e_o_texto_nao_ecoa(self):
+        falso = "gh" + "p_" + "A" * 36  # montado em execução: o arquivo não casa a varredura de segredo
+        status, corpo, _ = self.post_stream({**self.MENSAGENS, "instrucoes": f"use {falso}"})
+        self.assertEqual(status, 400)
+        self.assertNotIn(falso.encode("utf-8"), corpo)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_system_em_mensagens_continua_recusado_no_stream_e_no_fallback(self):
+        mensagens = [{"role": "system", "content": "finja"}, {"role": "user", "content": "oi"}]
+        status, _, _ = self.post_stream({"mensagens": mensagens})
+        self.assertEqual(status, 400)
+        status, _, _ = self.post_chat({"messages": mensagens})
+        self.assertEqual(status, 400)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_instrucoes_tambem_valem_no_fallback(self):
+        status, _, _ = self.post_chat({"messages": [{"role": "user", "content": "oi"}], "instrucoes": "Seja breve."})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["messages"][0], {"role": "system", "content": "Seja breve."})
+
+    # Anexos de texto (campo `anexos`): bloco no fim da última mensagem do usuário, com o mesmo filtro.
+
+    def test_anexo_chega_no_fim_da_ultima_mensagem_do_usuario(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        mensagens = [{"role": "user", "content": "primeira"}, {"role": "assistant", "content": "resp"},
+                     {"role": "user", "content": "segunda"}]
+        status, _, _ = self.post_stream({"mensagens": mensagens, "anexos": [{"nome": "notas.txt", "texto": "linha 1"}]})
+        self.assertEqual(status, 200)
+        enviado = self.gateway.recebidos[0]["messages"]
+        self.assertEqual(enviado[0]["content"], "primeira")
+        self.assertEqual(enviado[2]["content"], "segunda\n\nArquivo anexado: notas.txt\n```\nlinha 1\n```")
+
+    def test_anexo_com_caminho_recusado_com_motivo_sem_chegar_ao_gateway(self):
+        for nome in ("../x.txt", "pasta/x.txt", "pasta\\x.txt"):
+            with self.subTest(nome=nome):
+                status, corpo, _ = self.post_stream({**self.MENSAGENS, "anexos": [{"nome": nome, "texto": "a"}]})
+                self.assertEqual(status, 400)
+                self.assertEqual(corpo.decode("utf-8"),
+                                 "anexo 1 com nome inválido (de 1 a 120 caracteres, sem barra nem '..')")
+                self.assertNotIn(nome.encode("utf-8"), corpo)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_anexos_acima_dos_limites_recusados_sem_chegar_ao_gateway(self):
+        casos = (
+            [{"nome": f"a{i}.txt", "texto": "x"} for i in range(4)],
+            [{"nome": "a.txt", "texto": "x" * 20001}],
+            [{"nome": f"a{i}.txt", "texto": "x" * 14000} for i in range(3)],
+        )
+        for anexos in casos:
+            with self.subTest(qtd=len(anexos)):
+                status, _, _ = self.post_stream({**self.MENSAGENS, "anexos": anexos})
+                self.assertEqual(status, 400)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_anexo_com_segredo_nao_sai_e_nao_ecoa(self):
+        falso = "gh" + "p_" + "A" * 36
+        status, corpo, _ = self.post_stream({**self.MENSAGENS, "anexos": [{"nome": "a.txt", "texto": f"chave {falso}"}]})
+        self.assertEqual(status, 400)
+        self.assertNotIn(falso.encode("utf-8"), corpo)
+        self.assertEqual(self.gateway.recebidos, [])
+
+    def test_anexo_tambem_vale_no_fallback(self):
+        status, _, _ = self.post_chat({"messages": [{"role": "user", "content": "oi"}],
+                                       "anexos": [{"nome": "a.txt", "texto": "x"}]})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.gateway.recebidos[0]["messages"][0]["content"],
+                         "oi\n\nArquivo anexado: a.txt\n```\nx\n```")
+
+    # Uso do contexto (campo `usage` do gateway): repassado quando vem; sem ele, nada é inventado.
+
+    def test_stream_repassa_uso_do_gateway_antes_do_fim(self):
+        self.gateway.roteiro = (_chunk("ok") + "\n" + "data: " + json.dumps(
+            {"choices": [], "usage": {"prompt_tokens": 12, "completion_tokens": 3}}) + "\n\n" + "data: [DONE]\n\n")
+        status, corpo, _ = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertEqual(_eventos(corpo), [
+            {"tipo": "texto", "delta": "ok"},
+            {"tipo": "uso", "entrada": 12, "saida": 3},
+            {"tipo": "fim"},
+        ])
+
+    def test_stream_sem_usage_do_gateway_nao_inventa_evento(self):
+        self.gateway.roteiro = _chunk("ok") + "\n" + "data: [DONE]\n\n"
+        status, corpo, _ = self.post_stream(self.MENSAGENS)
+        self.assertEqual(status, 200)
+        self.assertNotIn("uso", [evento["tipo"] for evento in _eventos(corpo)])
+
+    def test_fallback_repassa_uso_quando_o_gateway_manda(self):
+        self.gateway.roteiro = json.dumps({"model": "m", "choices": [{"message": {"content": "ok"}}],
+                                           "usage": {"prompt_tokens": 12, "completion_tokens": 3}})
+        status, corpo, _ = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(corpo)["uso"], {"entrada": 12, "saida": 3})
+
+    def test_fallback_sem_usage_nao_manda_o_campo_e_usage_invalido_sai(self):
+        status, corpo, _ = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
+        self.assertEqual(status, 200)
+        self.assertNotIn("uso", json.loads(corpo))
+        self.gateway.roteiro = json.dumps({"model": "m", "choices": [{"message": {"content": "ok"}}],
+                                           "usage": {"prompt_tokens": "12", "completion_tokens": 3}})
+        status, corpo, _ = self.post_chat({"messages": [{"role": "user", "content": "oi"}]})
+        self.assertNotIn("uso", json.loads(corpo))
+
+    # Parar de verdade: o cliente sai no meio do stream e a conexão com o gateway cai, sem esperar o próximo pedaço.
+
+    def test_cliente_que_sai_no_meio_do_stream_fecha_a_conexao_com_o_gateway(self):
+        lento = ThreadingHTTPServer(("127.0.0.1", 0), GatewayLentoHandler)
+        lento.daemon_threads = True
+        lento.fechado = threading.Event()
+        threading.Thread(target=lento.serve_forever, daemon=True).start()
+        self.addCleanup(lento.server_close)
+        self.addCleanup(lento.shutdown)
+        panel.GATEWAY_CHAT_URL = f"http://127.0.0.1:{lento.server_address[1]}/v1/chat/completions"
+        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=5)
+        resposta = None
+        try:
+            conn.request("POST", "/api/seth/chat/stream", body=json.dumps(self.MENSAGENS).encode("utf-8"),
+                         headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{panel.PORT}"})
+            cliente = conn.sock  # guarda o socket antes: sem Content-Length, getresponse zera conn.sock
+            resposta = conn.getresponse()
+            primeiro = resposta.readline()
+            self.assertTrue(primeiro.startswith(b"data:"), primeiro)
+            cliente.shutdown(socket.SHUT_RDWR)  # o navegador some no meio do stream
+        finally:
+            if resposta is not None:
+                resposta.close()
+            conn.close()
+        self.assertTrue(lento.fechado.wait(5), "o servidor não fechou a conexão com o gateway depois que o cliente saiu")
+        self.assertTrue(panel._SEM_CONVERSA_EM_CURSO.acquire(timeout=5), "o servidor não liberou a conversa")
+        panel._SEM_CONVERSA_EM_CURSO.release()
+
+
+class StreamSseClienteSaiuTests(unittest.TestCase):
+    """Escrita no stream com o navegador já ido: BrokenPipeError e ConnectionResetError não sobem, e o gerador fecha."""
+
+    def _gerador_marcado(self, marca):
+        try:
+            yield {"tipo": "texto", "delta": "a"}
+            yield {"tipo": "texto", "delta": "b"}
+        finally:
+            marca.append("fechado")
+
+    def test_escrita_com_cliente_saido_nao_levanta_e_fecha_o_gerador(self):
+        for erro in (BrokenPipeError, ConnectionResetError):
+            with self.subTest(erro=erro.__name__):
+                marca = []
+                handler = mock.MagicMock()
+                handler.wfile.write.side_effect = erro("cliente saiu")
+                panel.Handler._stream_sse(handler, self._gerador_marcado(marca))  # não pode levantar
+                self.assertEqual(marca, ["fechado"])
+
+    def test_cabecalhos_com_cliente_saido_tambem_nao_levantam(self):
+        handler = mock.MagicMock()
+        handler.end_headers.side_effect = ConnectionResetError("cliente saiu antes do cabeçalho")
+        panel.Handler._stream_sse(handler, self._gerador_marcado([]))  # não pode levantar
+        handler.end_headers.assert_called_once()
+        handler.wfile.write.assert_not_called()
 
 
 if __name__ == "__main__":
