@@ -1,0 +1,363 @@
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index 471143c0..ca75f5ce 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -41,6 +41,7 @@ passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/
+ passo "processo de aplicação: diff sem bloco gerado (selftest)" python3 -I scripts/equipe/diff_limpo.py --selftest
+ passo "processo de aplicação: número de MEMÓRIAS (selftest)" python3 -I scripts/equipe/numero_memorias.py --selftest
+ passo "processo de aplicação: trava de aplicação (selftest)" python3 -I scripts/equipe/trava.py --selftest
++passo "egress: critério de em dia da compilação (testes, sem compilar)" python3 -I scripts/testar_egress_em_dia.py
+ passo "ganchos do git: sintaxe do shell (bash -n)" bash -c 'for h in .githooks/*; do head -1 "$h" | grep -q "^#!.*sh" || continue; bash -n "$h" || exit 1; done'
+ passo "processo de aplicação: âncora staged devolvida ao HEAD (selftest, com o P-8 de verdade)" python3 -I scripts/equipe/ancora_indice.py --selftest
+ # verificar_workflows.py usa PyYAML. Sob `uv run --offline`, o python3 é um venv sem pacotes do sistema:
+diff --git a/scripts/egress_em_dia.py b/scripts/egress_em_dia.py
+new file mode 100755
+index 00000000..9eee218b
+--- /dev/null
++++ b/scripts/egress_em_dia.py
+@@ -0,0 +1,51 @@
++#!/usr/bin/env python3
++"""Critério de "em dia" da compilação do crate redesign/rust/egress (robustez-16-11, 16/11/2026).
++
++Em dia = os dois binários de target/release existem e têm mtime estritamente maior que o de todo arquivo de src/
++(em qualquer subpasta) e de todo Cargo.* do crate. tests/ não entra: cargo build --release não compila tests/.
++Só lê mtime: não chama cargo, não compila, não usa rede.
++
++Uso: python3 -I scripts/egress_em_dia.py <dir-do-crate>
++Saída 0 = em dia (pode pular a compilação); 1 = precisa compilar, com o motivo na saída.
++"""
++import sys
++from pathlib import Path
++
++BINARIOS = ("egress", "egress-socks5")
++
++
++def binarios(crate: Path):
++    return [crate / "target" / "release" / nome for nome in BINARIOS]
++
++
++def fontes(crate: Path):
++    return [p for p in (crate / "src").rglob("*") if p.is_file()] + [p for p in crate.glob("Cargo.*") if p.is_file()]
++
++
++def motivo(crate: Path) -> str:
++    """'' se os binários estão em dia; senão, o motivo de precisar compilar."""
++    bins = binarios(crate)
++    falta = [b.name for b in bins if not b.is_file()]
++    if falta:
++        return f"falta binário: {', '.join(falta)}"
++    mais_nova = max((f.stat().st_mtime for f in fontes(crate)), default=0.0)
++    atrasados = [b.name for b in bins if not b.stat().st_mtime > mais_nova]
++    if atrasados:
++        return f"binário não é mais novo que a fonte mais nova: {', '.join(atrasados)}"
++    return ""
++
++
++def main(argv) -> int:
++    if len(argv) != 2:
++        print("uso: egress_em_dia.py <dir-do-crate>")
++        return 2
++    m = motivo(Path(argv[1]))
++    if not m:
++        print("em dia: binários de target/release mais novos que src/ e Cargo.*")
++        return 0
++    print(f"precisa compilar: {m}")
++    return 1
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv))
+diff --git a/scripts/equipe/aplicar.py b/scripts/equipe/aplicar.py
+index 02cb7d9c..2ac623ba 100755
+--- a/scripts/equipe/aplicar.py
++++ b/scripts/equipe/aplicar.py
+@@ -92,6 +92,39 @@ def aplicacoes_remotas():
+   return trava.aplicacoes_abertas([d.get("headRefName", "") for d in json.loads(p.stdout or "[]")])
+ 
+ 
++# Checks que TÊM de passar: ausente ou diferente de 'pass' = não junta. CodeQL saiu desta lista: no #1004 (16/11/2026)
++# ele veio 'skipping' e isso derrubou a aplicação. Se o CodeQL falhar, o bucket 'fail' recusa do mesmo jeito.
++EXIGIDOS = ("fiscal-p8", "suite-adversarial")
++NEUTROS = ("skipping", "neutral")  # nem falha nem sucesso: não bloqueiam e não contam como passou
++
++
++def veredito_checks(cs):
++  """cs: {nome do check: bucket de 'gh pr checks'}. Devolve 'esperar', 'juntar' ou 'recusar'.
++  'esperar' enquanto houver check 'pending', obrigatório ausente ou nenhum check. Junta só sem falha, com os
++  obrigatórios em 'pass' e pelo menos um 'pass'. Bucket fora de pass/pending/NEUTROS é falha (falha fechada)."""
++  if not cs or any(b == "pending" for b in cs.values()) or any(n not in cs for n in EXIGIDOS): return "esperar"
++  if any(b not in ("pass",) + NEUTROS for b in cs.values()): return "recusar"
++  if any(cs[n] != "pass" for n in EXIGIDOS) or "pass" not in cs.values(): return "recusar"
++  return "juntar"
++
++
++def ler_checks(wt, num):
++  """Nome -> bucket de cada check do PR. Saída ilegível do gh vira {} (= ainda esperar; nunca junta por isso)."""
++  j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
++  try: return {c["name"]: c["bucket"] for c in json.loads(j)}
++  except Exception: return {}
++
++
++def esperar_ci(wt, num, dormir=time.sleep, relogio=time.time, limite_s=1500, pausa=10):
++  """(True, checks) só se veredito_checks der 'juntar' antes do limite. 25 min: check ausente ou API ruim não prende para sempre."""
++  dormir(20); fim = relogio() + limite_s
++  while True:
++      cs = ler_checks(wt, num); v = veredito_checks(cs)
++      if v != "esperar": return v == "juntar", cs
++      if relogio() > fim: return False, dict(cs, erro="timeout esperando os checks")
++      dormir(pausa)
++
++
+ def _aplicar(a, coautor, tag, wt, br):
+   sh(R, "git", "fetch", "-q"); sh(R, "git", "worktree", "add", "-q", "-b", br, wt, "origin/main")
+   montar(wt, a, coautor)
+@@ -99,17 +132,9 @@ def _aplicar(a, coautor, tag, wt, br):
+   pr = sh(wt, "gh", "pr", "create", "--repo", "agataseth98-cmd/agata-seth", "--base", "main", "--head", br, "--title", f"Aplica {', '.join(a.nomes)} (assinado)",
+           "--body", "Aplicação do(s) diff(s) assinado(s) pelo Humano; par movido para propostas/aplicadas/; entrada de MEMÓRIAS no mesmo commit.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)").stdout.strip()
+   num = pr.rsplit("/", 1)[-1]; print("PR", pr, flush=True)
+-  EXIGIDOS = ("fiscal-p8", "suite-adversarial", "CodeQL")  # CodeQL entrou em 21/10/2026: alerta alto não pode passar pela aplicação
+   def ci():
+-      """Espera e devolve True só se os TRÊS checks exigidos, pelo nome, passaram no HEAD atual da branch."""
+-      time.sleep(20); limite = time.time() + 1500  # 25 min: check ausente ou API ruim não prende para sempre
+-      while True:
+-          if time.time() > limite: return False, {"erro": "timeout esperando os checks"}
+-          j = sh(wt, "gh", "pr", "checks", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "name,bucket", ok=False).stdout
+-          try: cs = {c["name"]: c["bucket"] for c in json.loads(j)}
+-          except Exception: cs = {}
+-          if all(n in cs and cs[n] not in ("pending",) for n in EXIGIDOS): return all(cs[n] == "pass" for n in EXIGIDOS), cs
+-          time.sleep(10)
++      """Espera até nenhum check ficar pendente; True só se veredito_checks disser 'juntar' (ver esperar_ci)."""
++      return esperar_ci(wt, num)
+   def head_oid():
+       return json.loads(sh(wt, "gh", "pr", "view", num, "--repo", "agataseth98-cmd/agata-seth", "--json", "headRefOid").stdout)["headRefOid"]
+   def ci_pinado():
+diff --git a/scripts/equipe/testar_auxiliares.py b/scripts/equipe/testar_auxiliares.py
+index 5fac52c0..a21a06d7 100755
+--- a/scripts/equipe/testar_auxiliares.py
++++ b/scripts/equipe/testar_auxiliares.py
+@@ -19,6 +19,59 @@ def carregar(nome):
+     return m
+ 
+ 
++def _gh_falso(ap, respostas, fn):
++    """Troca ap.sh por um falso: cada chamada devolve a próxima saída (a última se repete). Sem rede, sem gh real."""
++    fila, chamadas = list(respostas), []
++    def falso(cwd, *a, ok=True, **k):
++        chamadas.append(a)
++        out = fila.pop(0) if len(fila) > 1 else fila[0]
++        return subprocess.CompletedProcess(a, 0, stdout=out, stderr="")
++    orig = ap.sh; ap.sh = falso
++    try:
++        return fn(), len(chamadas)
++    finally:
++        ap.sh = orig
++
++
++def casos_ci(ap):
++    """aplicar.py: espera e veredito dos checks do PR. Caso de 16/11/2026 (PR #1004): CodeQL 'skipping' e Analyze (rust) 'pending'
++    fizeram o aplicar sair com exit 1 sem juntar. Relógio falso: a espera não dorme de verdade."""
++    base = {"Analyze (actions)": "pass", "fiscal-p8": "pass", "suite-adversarial": "pass",
++            "Analyze (javascript-typescript)": "pass", "Analyze (python)": "pass"}
++    def j(d): return json.dumps([{"name": n, "bucket": b} for n, b in d.items()])
++    def espera(respostas):
++        t = [0.0]
++        return _gh_falso(ap, respostas, lambda: ap.esperar_ci("/x", "1", dormir=lambda s: t.__setitem__(0, t[0] + s), relogio=lambda: t[0]))
++    out = []
++    (r, n) = espera([j({**base, "CodeQL": "skipping", "Analyze (rust)": "pending"}), j({**base, "CodeQL": "skipping", "Analyze (rust)": "pass"})])
++    out.append(("aplicar: #1004 (rust pendente, CodeQL skipping): espera e junta quando tudo passa", r[0] is True and n == 2))
++    (r, n) = espera([j({**base, "CodeQL": "fail", "Analyze (rust)": "pending"}), j({**base, "CodeQL": "fail", "Analyze (rust)": "fail"})])
++    out.append(("aplicar: falha com check ainda pendente espera o fim e só então recusa", r[0] is False and n == 2))
++    (r, n) = espera([j({**base, "CodeQL": "skipping", "Analyze (rust)": "fail"})])
++    out.append(("aplicar: qualquer check em fail recusa (rust)", r[0] is False and n == 1))
++    (r, n) = espera([j({**base, "CodeQL": "fail"})])
++    out.append(("aplicar: CodeQL em fail recusa mesmo com obrigatórios em pass", r[0] is False))
++    (r, n) = espera([j({**base, "CodeQL": "skipping"})])
++    out.append(("aplicar: skipping fora dos obrigatórios não impede juntar", r[0] is True and n == 1))
++    (r, n) = espera([j({**base, "fiscal-p8": "skipping", "CodeQL": "skipping"})])
++    out.append(("aplicar: obrigatório em skipping não junta", r[0] is False and n == 1))
++    (r, n) = espera([j({**base, "Analyze (rust)": "action_required"})])
++    out.append(("aplicar: bucket desconhecido recusa (falha fechada)", r[0] is False and n == 1))
++    (r, n) = espera([j({k: v for k, v in base.items() if k != "suite-adversarial"})])
++    out.append(("aplicar: obrigatório ausente espera até o prazo e não junta", r[0] is False and "timeout" in r[1].get("erro", "")))
++    (r, n) = espera(["erro de rede no gh"])
++    out.append(("aplicar: saída ilegível do gh não junta", r[0] is False and "timeout" in r[1].get("erro", "")))
++    (r, n) = espera(["[]"])
++    out.append(("aplicar: nenhum check não junta", r[0] is False))
++    (cs, n) = _gh_falso(ap, [j({"fiscal-p8": "pass", "CodeQL": "skipping"})], lambda: ap.ler_checks("/x", "1"))
++    out.append(("aplicar: ler_checks converte o JSON do gh em nome -> bucket", cs == {"fiscal-p8": "pass", "CodeQL": "skipping"}))
++    out.append(("aplicar: ler_checks de saída ilegível devolve {} (sem decisão)", _gh_falso(ap, ["lixo"], lambda: ap.ler_checks("/x", "1"))[0] == {}))
++    out.append(("aplicar: veredito só com skipping (nenhum pass) recusa", ap.veredito_checks({"fiscal-p8": "skipping", "suite-adversarial": "skipping"}) == "recusar"))
++    out.append(("aplicar: veredito com obrigatórios em pass e CodeQL ausente junta", ap.veredito_checks({"fiscal-p8": "pass", "suite-adversarial": "pass"}) == "juntar"))
++    out.append(("aplicar: veredito com check pendente espera", ap.veredito_checks({**base, "Analyze (rust)": "pending"}) == "esperar"))
++    return out
++
++
+ def bloco(autor, minutos, prox):
+     t = (datetime.datetime.now().astimezone() - datetime.timedelta(minutes=minutos)).isoformat(timespec="seconds")
+     return f"## {autor}-2026-10-28-x\n- Hora: {t}\n- Assunto: a\n\ntexto\n\nPróximo responsável: {prox}\n"
+@@ -101,6 +154,7 @@ def main():
+     amb2 = dict(os.environ, EQUIPE_CANAL=os.path.join(iso2, "canal.md"), EQUIPE_REPO=iso2, EQUIPE_PARAR=os.path.join(iso2, "parar"))
+     r2 = subprocess.run(["bash", vg, "claude", "1", "--uma", "3"], capture_output=True, text=True, timeout=30, env=amb2)
+     casos.append(("vigia.sh: canal só com blocos meus não quebra a conta", r2.returncode == 0 and "SEM EVENTO" in r2.stdout and "erro" not in r2.stderr.lower()))
++    casos += casos_ci(ap)
+     for n, ok in casos:
+         print(("PASS  " if ok else "FALHA ") + n)
+     ruins = [n for n, ok in casos if not ok]
+diff --git a/scripts/instalar_egress_rust.sh b/scripts/instalar_egress_rust.sh
+index 5b0c2dba..92240a91 100755
+--- a/scripts/instalar_egress_rust.sh
++++ b/scripts/instalar_egress_rust.sh
+@@ -1,10 +1,16 @@
+ #!/usr/bin/env bash
+ # Compila a camada Rust de egress e instala em ~/.local/bin (D6, 15/11/2026).
++# Robustez (16/11/2026): a compilação roda com nice -n 15 e CARGO_BUILD_JOBS (padrão 2; sobrescreva pela variável).
++# Pula a compilação se os binários de target/release já estão em dia (scripts/egress_em_dia.py). A instalação roda sempre.
+ # Depois: systemctl --user daemon-reload && systemctl --user restart navegador-mcp
+ set -euo pipefail
+ raiz="$(cd "$(dirname "$0")/.." && pwd)"
+ cd "$raiz/redesign/rust/egress"
+-cargo build --release --locked
++if python3 -I "$raiz/scripts/egress_em_dia.py" "$(pwd)"; then
++  echo "compilação pulada: binários em dia"
++else
++  CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-2}" nice -n 15 cargo build --release --locked
++fi
+ mkdir -p "$HOME/.local/bin"
+ install -m 0755 target/release/egress "$HOME/.local/bin/agata-egress"
+ install -m 0755 target/release/egress-socks5 "$HOME/.local/bin/agata-egress-socks5"
+diff --git a/scripts/testar_egress_em_dia.py b/scripts/testar_egress_em_dia.py
+new file mode 100755
+index 00000000..7db901dc
+--- /dev/null
++++ b/scripts/testar_egress_em_dia.py
+@@ -0,0 +1,72 @@
++#!/usr/bin/env python3
++"""Testes do critério de "em dia" de scripts/egress_em_dia.py, com arquivos temporários e mtimes fixos.
++Não compila nada: sem cargo, sem rede, sem git. Quem decide compilar é o instalar/testar_egress_rust, não este teste."""
++import os
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI))
++import egress_em_dia as ed  # noqa: E402
++
++T0 = 1_700_000_000  # época fixa: o teste controla o mtime, sem sleep
++
++
++def montar(raiz: Path, mudar=None, sem=(), fonte=T0, binario=T0 + 100) -> Path:
++    """Crate mínimo: fontes com mtime `fonte`, binários com `binario`. `mudar` troca mtimes; `sem` omite arquivos."""
++    crate = raiz / "egress"
++    arquivos = {"Cargo.toml": fonte, "Cargo.lock": fonte, "src/lib.rs": fonte, "src/main.rs": fonte,
++                "src/bin/egress-socks5.rs": fonte, "tests/paridade.rs": fonte,
++                "target/release/egress": binario, "target/release/egress-socks5": binario}
++    arquivos.update(mudar or {})
++    for rel, t in arquivos.items():
++        if rel in sem:
++            continue
++        p = crate / rel
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_text("x\n", encoding="utf-8")
++        os.utime(p, (t, t))
++    return crate
++
++
++def main() -> int:
++    casos = []
++    with tempfile.TemporaryDirectory() as d:
++        R = Path(d)
++        n = [0]
++
++        def novo(**kw):
++            n[0] += 1
++            return montar(R / f"c{n[0]}", **kw)
++
++        casos.append(("em dia: binários mais novos que todas as fontes", ed.motivo(novo()) == ""))
++        casos.append(("fonte em subpasta (src/bin) mais nova que o binário invalida",
++                      ed.motivo(novo(mudar={"src/bin/egress-socks5.rs": T0 + 200})) != ""))
++        casos.append(("Cargo.lock mais novo invalida", ed.motivo(novo(mudar={"Cargo.lock": T0 + 200})) != ""))
++        casos.append(("Cargo.toml mais novo invalida", ed.motivo(novo(mudar={"Cargo.toml": T0 + 200})) != ""))
++        casos.append(("tests/ mais novo NÃO invalida (cargo build não compila tests/)",
++                      ed.motivo(novo(mudar={"tests/paridade.rs": T0 + 200})) == ""))
++        casos.append(("comparação estrita: binário com o mesmo mtime da fonte não está em dia",
++                      ed.motivo(novo(fonte=T0, binario=T0)) != ""))
++        casos.append(("falta egress-socks5: precisa compilar",
++                      "egress-socks5" in ed.motivo(novo(sem=("target/release/egress-socks5",)))))
++        casos.append(("sem target/: precisa compilar", "falta" in ed.motivo(novo(sem=("target/release/egress", "target/release/egress-socks5")))))
++        casos.append(("um binário mais velho que a fonte nova: aponta o binário atrasado",
++                      ed.motivo(novo(mudar={"src/lib.rs": T0 + 150, "target/release/egress": T0 + 100, "target/release/egress-socks5": T0 + 200})) == "binário não é mais novo que a fonte mais nova: egress"))
++        c = novo()
++        ok_cli = subprocess.run([sys.executable, "-I", str(AQUI / "egress_em_dia.py"), str(c)], capture_output=True, text=True)
++        casos.append(("CLI: em dia sai 0", ok_cli.returncode == 0 and ok_cli.stdout.startswith("em dia")))
++        c2 = novo(mudar={"src/main.rs": T0 + 500})
++        r2 = subprocess.run([sys.executable, "-I", str(AQUI / "egress_em_dia.py"), str(c2)], capture_output=True, text=True)
++        casos.append(("CLI: precisa compilar sai 1 com o motivo", r2.returncode == 1 and r2.stdout.startswith("precisa compilar")))
++    for nome, ok in casos:
++        print(("PASS  " if ok else "FALHA ") + nome)
++    ruins = [nome for nome, ok in casos if not ok]
++    print(f"critério de em dia do egress: {len(casos) - len(ruins)}/{len(casos)}")
++    return 1 if ruins else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/testar_egress_rust.py b/scripts/testar_egress_rust.py
+index 202efce1..8a0d3ea8 100644
+--- a/scripts/testar_egress_rust.py
++++ b/scripts/testar_egress_rust.py
+@@ -5,6 +5,10 @@ Compila redesign/rust/egress (cargo build --release), roda `egress ip` em cada
+ caso e compara o veredito (bloqueia ou não) com politica_egress._ip_bloqueado_py.
+ Também prova que, com AGATA_EGRESS_RUST, _ip_bloqueado nunca afrouxa.
+ Sem cargo: SKIP com código 0 só se AGATA_EGRESS_RUST_OPCIONAL=1; senão falha.
++
++Robustez (16/11/2026): a compilação roda com `nice -n 15` e CARGO_BUILD_JOBS (padrão 2, sobrescrevível pela variável).
++Pula a compilação quando os binários de target/release estão em dia (scripts/egress_em_dia.py).
++`--sem-compilar` nunca compila: usa o binário que já existe (falha se faltar).
+ """
+ import os, shutil, subprocess, sys
+ from pathlib import Path
+@@ -12,6 +16,7 @@ from pathlib import Path
+ RAIZ = Path(__file__).resolve().parent.parent
+ sys.path.insert(0, str(RAIZ / "scripts"))
+ import politica_egress as pe  # noqa: E402
++import egress_em_dia as ed  # noqa: E402
+ 
+ CASOS = ["1.1.1.1", "8.8.8.8", "127.0.0.1", "10.0.0.5", "172.16.0.1", "192.168.1.1",
+          "169.254.169.254", "0.0.0.0", "100.64.0.1", "224.0.0.1", "255.255.255.255",
+@@ -51,13 +56,29 @@ def _testar_socks5(binario: Path) -> bool:
+     return ok
+ 
+ 
++def _compilar(crate: Path) -> None:
++    """cargo build --release com nice -n 15 e CARGO_BUILD_JOBS (padrão 2; a variável sobrescreve)."""
++    env = dict(os.environ, CARGO_BUILD_JOBS=os.environ.get("CARGO_BUILD_JOBS", "2"))
++    subprocess.run(["nice", "-n", "15", "cargo", "build", "--release", "--quiet"], cwd=crate, check=True, env=env)
++
++
+ def main() -> int:
+-    if not shutil.which("cargo"):
+-        if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
+-            print("SKIP  cargo ausente"); return 0
+-        print("FALHA cargo ausente"); return 1
+     crate = RAIZ / "redesign/rust/egress"
+-    subprocess.run(["cargo", "build", "--release", "--quiet"], cwd=crate, check=True)
++    if "--sem-compilar" in sys.argv[1:]:
++        faltam = [b.name for b in ed.binarios(crate) if not b.is_file()]
++        if faltam:
++            if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
++                print(f"SKIP  --sem-compilar sem binário ({', '.join(faltam)})"); return 0
++            print(f"FALHA --sem-compilar sem binário ({', '.join(faltam)}); rode scripts/instalar_egress_rust.sh"); return 1
++        print("PULA  compilação (--sem-compilar): usando os binários de target/release")
++    elif ed.motivo(crate) == "":
++        print("PULA  compilação: binários de target/release em dia")
++    else:
++        if not shutil.which("cargo"):
++            if os.environ.get("AGATA_EGRESS_RUST_OPCIONAL") == "1":
++                print("SKIP  cargo ausente"); return 0
++            print("FALHA cargo ausente"); return 1
++        _compilar(crate)
+     binario = str(crate / "target/release/egress")
+     ok = True
+     for ip in CASOS:
