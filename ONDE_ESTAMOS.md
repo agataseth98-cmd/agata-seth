@@ -8,13 +8,17 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
-## Hoje, 16/11 (proposta higiene-16-11)
+## Hoje, 16/11 (proposta painel-conversa-16-11)
 
-Há uma proposta pequena de higiene esperando sua assinatura (`higiene-16-11`). Ela faz o teste local do sistema rodar também a suíte que barrou a painel-funcional-16-11 no GitHub; e tira do texto vivo as menções ao chat antigo e ao Goose, que saíram do sistema em 07/11. Comando: `bash scripts/aprovar.sh higiene-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. O registro é a entrada (1024) de `MEMÓRIAS.md`.
+Há uma proposta do painel esperando sua assinatura (`painel-conversa-16-11`). Para quem usa: a conversa com a Seth fica no padrão de ChatGPT e Claude, com o menu único no menu geral. O painel inteiro fica responsivo e segue o estilo que você fixou em 16/11, às 18h27. Comando: `bash scripts/aprovar.sh painel-conversa-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. O registro é a entrada (1026) de `MEMÓRIAS.md`.
 
-## Hoje, 16/11 (proposta painel-funcional-r2-16-11)
+## Hoje, 16/11 (higiene-16-11 aplicada)
 
-A primeira proposta do painel (`painel-funcional-16-11`) foi assinada por você, mas não entrou no sistema: o GitHub barrou a aplicação, porque um teste dos controles exigia que a lista de palavras proibidas mudasse junto com o painel. O código do painel é o mesmo; só essa lista muda. Por isso a proposta nova, `painel-funcional-r2-16-11`, precisa de uma assinatura sua: a da primeira não serve. Comando: `bash scripts/aprovar.sh painel-funcional-r2-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. A primeira foi para `propostas/superadas/`; o registro é a entrada (1022) de `MEMÓRIAS.md`.
+A higiene-16-11 foi assinada por você e aplicada (entrada 1025 de `MEMÓRIAS.md`). O teste local do sistema agora roda também a suíte que barrou a painel-funcional-16-11 no GitHub, e saíram do texto vivo as menções ao chat antigo e ao Goose.
+
+## Hoje, 16/11 (painel-funcional-r2-16-11 aplicada)
+
+A painel-funcional-r2-16-11 foi assinada por você e aplicada (entrada 1023 de `MEMÓRIAS.md`). O painel sai sem o chat antigo, com estados honestos e estilo consolidado.
 
 ## Lotes em andamento (medido em 12/11/2026, 09h, base `origin/main` `3f1e9055`)
 
