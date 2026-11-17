@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 48da27d1cfb3768e4f6aa10c21a480b4dec07665
-  Escrito em: 17/11/2026 13:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b333312df568348386f7e8fe0b7cfd07789cf314
+  Escrito em: 17/11/2026 13:58 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/48da27d1cfb3768e4f6aa10c21a480b4dec07665/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/48da27d1cfb3768e4f6aa10c21a480b4dec07665/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/48da27d1cfb3768e4f6aa10c21a480b4dec07665/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/48da27d1cfb3768e4f6aa10c21a480b4dec07665/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/48da27d1cfb3768e4f6aa10c21a480b4dec07665/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1033) DIÁRIO — 17/11/2026 · **Aplicada teto-sanitizador-17-11 (assinada pelo Humano em 17/11): o teto de profundidade do sanitizador passa de 12 para 32.** A assinatura passou na verificação P-8 e o diff entrou numa worktree limpa a partir do main, com o autoteste do sanitizador OK. O teto de nós e a falha fechada não mudam. Depois do merge, o gateway é reiniciado, a tool question volta na config do OpenCode e o journalctl é conferido sem 422; esse resultado entra em entrada nova.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, git apply e autoteste · Autorização: Humano — "assinado"
+
 (1032) DIÁRIO — 17/11/2026 · **Proposta teto-sanitizador-17-11: o teto de profundidade do sanitizador sobe de 12 para 32, e a tool question do OpenCode volta a passar.** Às 10:30 a rota seth-livre devolveu 422 três vezes por teto de varredura excedido. O erro gravado pelo OpenCode apontou o schema da tool question, com profundidade 13, um nível acima do teto de 12. A contenção já está fora do repositório: a tool question foi desligada na config do OpenCode, com cópia de segurança. A proposta sobe o teto para 32, mantém o teto de nós e a falha fechada, e acrescenta ao autoteste o schema da tool question e um segredo no nível 13, que continua bloqueado. Autoteste OK, CI local com TUDO OK e diff aplicado em cópia limpa. Falta a assinatura do Humano e, na aplicação, religar a tool e conferir o journalctl sem 422.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: erro gravado pelo OpenCode, journalctl, autoteste e CI local · Autorização: Humano — "pode fazer"
 
