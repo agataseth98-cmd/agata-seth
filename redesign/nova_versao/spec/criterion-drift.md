@@ -13,3 +13,4 @@
 - `o orçamento do turno esgota por rodadas, chamadas ou prazo` — **pass** — verified
 - `as sete palavras andam só pelos passos previstos e não repetem o registro` — **pass** — verified
 - `a reversão não apaga `AGATA_NV_DIR`; só remove o cache` — **pass** — verified
+- `a chave de provedor vai para o cofre próprio com permissão 0600 e nunca volta; o .env não é tocado` — **pass** — verified

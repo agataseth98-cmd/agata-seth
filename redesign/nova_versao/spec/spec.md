@@ -62,6 +62,7 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 - [ ] o orçamento do turno esgota por rodadas, chamadas ou prazo
 - [ ] as sete palavras andam só pelos passos previstos e não repetem o registro
 - [ ] a reversão não apaga `AGATA_NV_DIR`; só remove o cache
+- [ ] a chave de provedor vai para o cofre próprio com permissão 0600 e nunca volta; o .env não é tocado
 
 ### Sem teste ainda (texto preservado; vira checkbox quando tiver comando em `acceptance.json`)
 
@@ -79,11 +80,11 @@ Spec-mãe. Fonte do desenho: `~/Área de trabalho/Experimento GPT/` (diário `co
 
 O Humano cadastra e troca chaves de provedor pelo painel, com segurança: campo só de escrita, por provedor.
 
-- Ao salvar, a chave vai para `~/.config/agata/.env`, linha do nome do provedor, com permissão 0600; a gravação é atômica.
-- A única peça que lê esse arquivo é a rotina de gravação, e só para trocar a linha daquele nome. Nada devolve o valor: a resposta diz só "configurada, alterada em DATA".
+- Ao salvar, a chave vai para o cofre `~/.config/agata/conexoes/<id>.chave` (`redesign/conexoes/segredos.py`), pasta 0700 e arquivo 0600; a gravação é atômica. O `~/.config/agata/.env` não é tocado.
+- Só `_para_chamada()` lê o cofre, no instante da chamada. Nada devolve o valor: a resposta diz só "configurada, alterada em DATA".
 - O ledger registra "chave NOME alterada", nunca o valor. Log não recebe o valor.
-- Modelos, pedidos e a sombra não leem o arquivo. Nada disso entra no repo nem no canon.
-- Exceção à regra "nenhuma peça lê `.env`": só essa rotina, por escrita. Essa exceção precisa ser aprovada pelo Humano na assinatura, porque a regra atual não a prevê.
+- Modelos, pedidos e a sombra não leem o cofre. Nada disso entra no repo nem no canon.
+- Não há exceção à regra "nenhuma peça lê `.env`": a rotina do cofre não abre esse arquivo (`redesign/conexoes/segredos.py`, cabeçalho).
 
 ## Lotes seguintes (decisão do Humano, 06/11: "contanto que seja implementado tudo")
 

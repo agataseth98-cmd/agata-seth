@@ -11,7 +11,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:25+00:00"
+    "at": "2026-11-17T13:08:46+00:00"
   },
   {
     "criterion": "escritas concorrentes no ledger preservam a cadeia",
@@ -23,9 +23,9 @@
       "redesign/nova_versao/tests/test_nova_versao.py::EventosTests::test_escritas_concorrentes_preservam_a_cadeia"
     ],
     "returncode": 0,
-    "stdout": ".                                                                        [100%]\n1 passed in 0.03s\n",
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:25+00:00"
+    "at": "2026-11-17T13:08:46+00:00"
   },
   {
     "criterion": "a transição recusa salto fora da tabela e Remoção sem autorização",
@@ -39,7 +39,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:25+00:00"
+    "at": "2026-11-17T13:08:46+00:00"
   },
   {
     "criterion": "o orçamento padrão é só local e pago sem teto não gasta",
@@ -53,7 +53,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:25+00:00"
+    "at": "2026-11-17T13:08:46+00:00"
   },
   {
     "criterion": "o orçamento padrão tem 200 chamadas, 2 milhões de tokens, 120 s e R$ 0, e `orcamento.py` usa as mesmas quatro categorias da spec",
@@ -67,7 +67,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:46+00:00"
   },
   {
     "criterion": "a GPU local tem fila única e o teto de chamadas da tarefa vale",
@@ -79,9 +79,9 @@
       "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_gpu_em_fila_unica_e_teto_de_chamadas"
     ],
     "returncode": 0,
-    "stdout": ".                                                                        [100%]\n1 passed in 0.09s\n",
+    "stdout": ".                                                                        [100%]\n1 passed in 0.08s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "cancelar impede novos itens e contexto mudado manda o resultado para revisão",
@@ -93,9 +93,9 @@
       "redesign/nova_versao/tests/test_tarefas.py::TarefasTests::test_cancelar_impede_novos_itens_e_contexto_mudado_vai_para_revisao"
     ],
     "returncode": 0,
-    "stdout": ".                                                                        [100%]\n1 passed in 0.03s\n",
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "nomes vindos de fora só entram dentro da pasta-base, e symlink para fora é recusado",
@@ -109,7 +109,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "papel só recebe rota que passou na prova e de família diferente do sintetizador",
@@ -123,7 +123,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "o ensaio de retorno usa a rota alternativa quando a principal cai",
@@ -137,7 +137,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:26+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "o orçamento do turno esgota por rodadas, chamadas ou prazo",
@@ -151,7 +151,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:27+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "as sete palavras andam só pelos passos previstos e não repetem o registro",
@@ -165,7 +165,7 @@
     "returncode": 0,
     "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:27+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
   },
   {
     "criterion": "a reversão não apaga `AGATA_NV_DIR`; só remove o cache",
@@ -177,8 +177,22 @@
       "redesign/nova_versao/tests/test_nova_versao.py::ReversaoTests::test_reversao_nao_apaga_dados_so_remove_cache"
     ],
     "returncode": 0,
-    "stdout": ".                                                                        [100%]\n1 passed in 0.03s\n",
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
     "stderr": "",
-    "at": "2026-11-12T19:38:27+00:00"
+    "at": "2026-11-17T13:08:47+00:00"
+  },
+  {
+    "criterion": "a chave de provedor vai para o cofre próprio com permissão 0600 e nunca volta; o .env não é tocado",
+    "status": "pass",
+    "classification": "verified",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::CofreTests::test_chave_vai_para_o_cofre_0600_e_nunca_volta"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
+    "stderr": "",
+    "at": "2026-11-17T13:08:48+00:00"
   }
 ]
