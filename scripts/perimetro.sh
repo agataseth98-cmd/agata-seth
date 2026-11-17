@@ -257,27 +257,63 @@ P17_SKIPS=""
 P17_LIMITE=10
 P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
 
+# Resultado de cada controle, só para o último resultado gravado (ultimo.json, D4, 17/11/2026). Não muda veredito.
+PERIMETRO_REGISTRO=()
+_perimetro_registrar() { PERIMETRO_REGISTRO+=("${PERIMETRO_CTRL:-?}|$1"); }
+
 
 _perimetro_veredito() {
   local codigo="$1" p17_isento="${PERIMETRO_P17_ISENTO:-0}"
   PERIMETRO_P17_ISENTO=0
   if [ "$codigo" -ne 0 ]; then
     echo "veredito: FALHOU"
+    _perimetro_registrar FALHA
     FALHOU=1
     CONT_FALHA=$((CONT_FALHA + 1))
   elif [ "$PERIMETRO_ESTADO" = "SKIP" ]; then
     echo "veredito: SKIP"
+    _perimetro_registrar SKIP
     CONT_SKIP=$((CONT_SKIP + 1))
     # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese) não é pular em silêncio:
     # a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida.
     [ "$p17_isento" = 1 ] || P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
     echo "veredito: PARCIAL"
+    _perimetro_registrar PARCIAL
     CONT_PARCIAL=$((CONT_PARCIAL + 1))
   else
     echo "veredito: OK"
+    _perimetro_registrar OK
     CONT_OK=$((CONT_OK + 1))
   fi
+}
+
+# Último resultado do perímetro em ${AGATA_PERIMETRO_DIR:-$HOME/.cache/agata/perimetro}/ultimo.json (D4, 17/11/2026).
+# Escrita atômica: temporário na mesma pasta + mv. Qualquer falha é silenciosa e NÃO muda o código de saída nem a
+# saída padrão (quem chama ignora o retorno). Campos: gerado_em (ISO com fuso), head, resultado_geral, contagens, controles.
+_perimetro_gravar_ultimo() {
+  local falhou="${1:-1}" dir tmp head geral gerado controles="" sep="" item id veredito
+  {
+    dir="${AGATA_PERIMETRO_DIR:-$HOME/.cache/agata/perimetro}"
+    mkdir -p "$dir" || return 0
+    head="$(git rev-parse --short HEAD 2>/dev/null | tr -cd '0-9a-f')"
+    [ -n "$head" ] || head="desconhecido"
+    gerado="$(date -Is)"
+    geral=FALHA
+    [ "$falhou" -eq 0 ] && geral=OK
+    for item in "${PERIMETRO_REGISTRO[@]:-}"; do
+      [ -n "$item" ] || continue
+      id="$(printf '%s' "${item%%|*}" | tr -cd 'A-Za-z0-9-')"
+      veredito="$(printf '%s' "${item#*|}" | tr -cd 'A-Z')"
+      controles="${controles}${sep}{\"id\":\"${id}\",\"veredito\":\"${veredito}\"}"
+      sep=","
+    done
+    tmp="$dir/.ultimo.$$.tmp"
+    printf '{"gerado_em":"%s","head":"%s","resultado_geral":"%s","contagens":{"ok":%d,"skip":%d,"parcial":%d,"falha":%d},"controles":[%s]}\n' \
+      "$gerado" "$head" "$geral" "$(( ${CONT_OK:-0} ))" "$(( ${CONT_SKIP:-0} ))" "$(( ${CONT_PARCIAL:-0} ))" "$(( ${CONT_FALHA:-0} ))" "$controles" > "$tmp" \
+      && mv -f "$tmp" "$dir/ultimo.json"
+  } >/dev/null 2>&1
+  return 0
 }
 
 main() {
@@ -337,48 +373,56 @@ main() {
   p9_servicos_declarados
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-6" "Cópia da história fora desta máquina" "PROJETO, Riscos conhecidos"
   p6_backup_pendente
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-18" "Âncora de SHA não fica fail-soft esquecida" "MEMÓRIAS (277) -- fail-soft da âncora, detector textual não mecanizado até agora"
   p18_ancora_falha
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-19" "Citação de arquivo:linha em entrada nova de MEMÓRIAS confere contra a fonte real" "FALHAS.md, famílias CIT/FAB -- (59)-(250)/(251), 8/20 do catálogo de origem"
   p19_citacao_arquivo
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-21" "O nome do sistema não sai como marcador cru" "MEMÓRIAS (559); plano de replicabilidade, Fase 2"
   p21_nome_sistema
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-20" "Dado pessoal não vaza por caminho de framework nem por texto livre do canon público" "MEMÓRIAS (560)/(430); camada do decisor local"
   p20_dado_pessoal
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-22" "Derivados de hidratação não divergem do HEAD sem a fonte mudar" "MEMÓRIAS (333)/(349)"
   p22_derivados_drift
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-23" "Toda porta de entrada de modelo traz as diretrizes comuns (modo conciso, economia de tokens)" "MEMÓRIAS (667)"
   p23_portas_entrada
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-12" "Todo recurso do manifesto com backup restic verificavel < N dias" "ROADMAP, Fase 7 -- redesign/fase7-hd/REGUA-P12.md"
@@ -390,6 +434,7 @@ main() {
   checar_discordancia
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-14" "Chunk frio (MEMORIAS-FRIO-*.md), depois de selado, imutável" "MEMÓRIAS por período (Fase 4), MEMÓRIAS (357)"
@@ -416,6 +461,7 @@ main() {
   p15_roster_remoto
   echo "veredito: AVISO SÓ (nunca falha)"
   CONT_OK=$((CONT_OK + 1))
+  _perimetro_registrar OK
   echo
 
   cabecalho "P-16" "Quem muda um controle roda os testes daquele controle" "MEMÓRIAS (421); scripts/testar_perimetro.sh"
@@ -429,6 +475,7 @@ main() {
   echo
 
   echo "=== RESULTADO GERAL: $([ "$FALHOU" -eq 0 ] && echo OK || echo FALHOU) -- ${CONT_OK} OK · ${CONT_SKIP} SKIP · ${CONT_PARCIAL} PARCIAL · ${CONT_FALHA} FALHA ==="
+  _perimetro_gravar_ultimo "$FALHOU" || true
   return "$FALHOU"
 }
 

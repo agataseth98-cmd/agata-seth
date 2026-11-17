@@ -20,7 +20,8 @@ class MedicoesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dir = tempfile.TemporaryDirectory()
-        cls.env = mock.patch.dict(os.environ, {"AGATA_MEDICOES_DIR": cls.dir.name}); cls.env.start()
+        cls.nv = tempfile.TemporaryDirectory()  # 17/11/2026: sem isto o indicador lia as rodadas reais da avaliação
+        cls.env = mock.patch.dict(os.environ, {"AGATA_MEDICOES_DIR": cls.dir.name, "AGATA_NV_DIR": cls.nv.name}); cls.env.start()
         cls.old_port, cls.old_origin = panel.PORT, panel.ALLOWED_ORIGIN
         cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
         cls.server.daemon_threads = True
@@ -32,7 +33,7 @@ class MedicoesTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.shutdown(); cls.server.server_close()
         panel.PORT, panel.ALLOWED_ORIGIN = cls.old_port, cls.old_origin
-        cls.env.stop(); cls.dir.cleanup()
+        cls.env.stop(); cls.dir.cleanup(); cls.nv.cleanup()
 
     def setUp(self):
         med._JOB.clear(); med._JOB["estado"] = "ocioso"
@@ -132,6 +133,63 @@ class MedicoesTests(unittest.TestCase):
         Path(self.dir.name, "recuperacao.json").unlink()
         depois = {i["id"]: i for i in qual.indicadores(Path(self.dir.name))}
         self.assertEqual((depois["recall_busca"]["estado"], depois["recall_busca"]["valor"]), ("unknown", "não medido"))
+
+    def test_trava_comum_recusa_recuperacao_com_motivo_e_nao_deixa_job_rodando(self):
+        # D8 (17/11/2026): a nova versão segura a trava de recuperação; esta medição recusa com o motivo, sem abrir job.
+        med.TRAVA_RECUPERACAO.acquire()
+        try:
+            with mock.patch.object(med.subprocess, "run") as run:
+                with self.assertRaises(RuntimeError) as cm:
+                    med.executar("recuperacao", sincrono=True)
+            run.assert_not_called()
+            self.assertEqual(str(cm.exception), med.MOTIVO_RECUPERACAO_OCUPADA)
+            self.assertNotEqual(med._JOB.get("estado"), "rodando")
+        finally:
+            med.TRAVA_RECUPERACAO.release()
+
+    def test_trava_e_devolvida_quando_a_medicao_falha(self):
+        with mock.patch.object(med, "modelos_locais", return_value=[]), \
+                mock.patch.object(med.subprocess, "run", side_effect=OSError("python sumiu")):
+            d = med.executar("recuperacao_semantica", sincrono=True)
+        self.assertEqual((d["job"]["estado"], d["job"]["codigo"]), ("falhou", 127))
+        self.assertTrue(med.TRAVA_RECUPERACAO.acquire(blocking=False))
+        med.TRAVA_RECUPERACAO.release()
+
+    def test_trava_e_devolvida_no_caminho_em_segundo_plano(self):
+        with mock.patch.object(med, "modelos_locais", return_value=[]), \
+                mock.patch.object(med.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout="", stderr="")):
+            med.executar("recuperacao")
+        for _ in range(500):  # a thread devolve a trava depois de gravar o estado: espera, sem tempo fixo
+            if med.TRAVA_RECUPERACAO.acquire(blocking=False):
+                med.TRAVA_RECUPERACAO.release()
+                break
+            time.sleep(0.01)
+        else:
+            self.fail("a trava de recuperação não foi devolvida")
+        self.assertEqual(med._JOB["estado"], "ok")
+
+    def test_contexto_ocupado_nao_pega_a_trava_de_recuperacao(self):
+        med._JOB.update(estado="rodando")
+        with mock.patch.object(med, "modelos_locais", return_value=["qwen3:4b"]):
+            with self.assertRaises(RuntimeError) as cm:
+                med.executar("recuperacao", sincrono=True)
+        self.assertEqual(str(cm.exception), med.MOTIVO_OCUPADO)
+        self.assertTrue(med.TRAVA_RECUPERACAO.acquire(blocking=False))   # a recusa não deixou a trava presa
+        med.TRAVA_RECUPERACAO.release()
+
+    def test_motivo_ocupado_so_devolve_texto_fixo(self):
+        self.assertEqual(med.motivo_ocupado(RuntimeError("ocupado")), "ocupado")
+        self.assertEqual(med.motivo_ocupado(RuntimeError(med.MOTIVO_RECUPERACAO_OCUPADA)), med.MOTIVO_RECUPERACAO_OCUPADA)
+        self.assertEqual(med.motivo_ocupado(RuntimeError("caminho /home/x interno")), "ocupado")
+
+    def test_http_recuperacao_ocupada_responde_429_com_motivo_fixo(self):
+        med.TRAVA_RECUPERACAO.acquire()
+        try:
+            status, corpo = self.post({"acao": "recuperacao"})
+        finally:
+            med.TRAVA_RECUPERACAO.release()
+        self.assertEqual(status, 429)
+        self.assertEqual(corpo.decode("utf-8"), "measurement busy: " + med.MOTIVO_RECUPERACAO_OCUPADA)
 
     def test_pagina_tem_os_controles_e_o_js_so_chama_as_rotas_das_medicoes(self):
         html = (HERE / "prototipo.html").read_text(encoding="utf-8")

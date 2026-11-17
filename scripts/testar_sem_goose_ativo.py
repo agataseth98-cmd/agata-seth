@@ -34,7 +34,7 @@ EXCECOES = {
     "redesign/router/auditoria_turno.py": (2, "docstring com a medição do Goose (MEMÓRIAS 662 e 664); OpenCode ainda não medido"),
     "scripts/estado_para_eco.sh": (1, "comentário histórico do incidente da ferramenta write do Goose (MEMÓRIAS 516 e 517)"),
     "redesign/mcp/servidor.py": (1, "lista de executores do MCP; OpenCode ainda não foi medido contra o servidor"),
-    "config/portas-de-entrada.txt": (1, "caminho redesign/goose/AGENTS.md (P-23 confere o arquivo), que fica até a decisão de remoção; a coluna de texto já não cita o Goose (higiene-16-11)"),
+    "config/portas-de-entrada.txt": (1, "caminho redesign/goose/AGENTS.md (P-23 confere o arquivo, que fica até a decisão de remoção); a coluna de texto diz 'arquivo histórico do Goose' (atualiza-17-11, T2); caminho e texto estão na mesma linha, por isso a contagem é 1"),
     "config/agata-identidade.json": (1, "proveniência histórica da paleta (tema do Goose); texto de origem, não referência ativa"),
     "redesign/painel_operacional/spec/acceptance.json": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),
     "redesign/painel_operacional/test_painel_unificado.py": (2, "critério/teste que afirma a ausência da palavra na página; lote painel-funcional-r2-16-11"),

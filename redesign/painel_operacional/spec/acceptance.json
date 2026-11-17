@@ -1390,7 +1390,7 @@
     "cwd": null
   },
   {
-    "criterion": "`/api/status` traz `sem_leitura` com as fontes desconhecidas ou ausentes, e a conversa com a Seth quando o estado do gateway é `unknown`; sem fonte nessa situação, a lista sai vazia",
+    "criterion": "`/api/status` traz `sem_leitura` só com as fontes em `unknown` (desconhecidas), e a conversa com a Seth quando o estado do gateway é `unknown`; a unidade `ausente` (não existe no escopo do usuário) fica fora dessa lista e aparece como ausente na própria linha; sem fonte nessa situação, a lista sai vazia",
     "command": [
       "pytest",
       "-q",
@@ -2494,6 +2494,358 @@
       "pytest",
       "-q",
       "redesign/painel_operacional/test_chat_stream.py::AnexosTest::test_sem_anexos_o_pedido_fica_igual"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o que posso fazer e as integrações são uma lista só, em Sistema > Integrações, com cada tema uma vez",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::FusaoIntegracoesTests::test_cada_tema_aparece_uma_vez_e_os_exclusivos_ficam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada linha da lista de integrações tem categoria do conjunto fechado, evidência e busca",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::FusaoIntegracoesTests::test_cada_linha_tem_categoria_do_conjunto_fechado_evidencia_e_busca"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a lista de integrações fica em Integrações, com cinco filtros, busca e fronteiras",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::FusaoIntegracoesTests::test_lista_fica_em_integracoes_com_cinco_filtros_busca_e_fronteiras"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Panorama não tem subcapacidades e tem atalho para Integrações",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::FusaoIntegracoesTests::test_panorama_sem_subcapacidades_e_com_atalho_para_integracoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Atualizar aparece uma vez por tela e não se repete na seção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::DuplicatasEAtalhosTests::test_atualizar_aparece_uma_vez_por_tela_e_nao_se_repete_na_secao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Estado operacional não tem timers e tem atalho para Manutenção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::DuplicatasEAtalhosTests::test_estado_operacional_sem_timers_e_com_atalho_para_manutencao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "timers e tarefas ficam só em Manutenção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::DuplicatasEAtalhosTests::test_timers_e_tarefas_ficam_so_em_manutencao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "as lacunas ficam só em Qualidade > Lacunas, com a lista do mapa e o canon",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::DuplicatasEAtalhosTests::test_lacunas_ficam_so_em_qualidade"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a Visão do sistema tem só números e atalhos, sem Melhorias a propor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::DuplicatasEAtalhosTests::test_visao_do_sistema_so_numeros_e_atalhos"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os provedores aparecem numa tabela só, em Conexões, com as colunas do contrato",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::ProvedoresETabelasTests::test_conexoes_tem_uma_tabela_com_as_colunas_e_tarifas_so_o_formulario"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os botões do Conselho saem de /api/provedores, lido no campo items",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_botoes_do_conselho_saem_de_provedores"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a recuperação é um indicador só, com as duas leituras (corpus, valor, estado, fonte e data)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_recuperacao_mostra_as_duas_leituras_num_indicador_so"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o código tem uma só recuperação, com as duas leituras e o rótulo \"Recuperação\" uma vez",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::RecuperacaoEMedicoesTests::test_recuperacao_e_um_indicador_com_as_duas_leituras"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "os botões de medir dizem o corpus e a medição ocupada mostra o motivo no botão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::RecuperacaoEMedicoesTests::test_botoes_de_medir_dizem_o_corpus_e_mostram_ocupado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "medição ocupada (HTTP 429) mostra o motivo no botão, pela mesma trava",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_medicao_com_trava_ocupada_mostra_o_motivo_no_botao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada tela nova está na seção certa, com resultado, pílula de estado e fonte",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeLeituraNovaTests::test_cada_tela_nova_esta_na_secao_certa_com_resultado_pilula_e_fonte"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada tela nova carrega a própria rota ao abrir, pelo mesmo mecanismo das abas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeLeituraNovaTests::test_carregamento_usa_o_mesmo_mecanismo_das_abas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Equipe sem rota mostra sem leitura com o motivo da rota",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_equipe_sem_rota_mostra_sem_leitura_com_motivo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Equipe com rota mostra sessão, presentes, ausentes, divergências em destaque, vigias e eventos",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_equipe_com_rota_mostra_sessao_ausentes_divergencias_e_vigias"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Equipe sem lista de esperados diz \"sessão sem lista de esperados\" na sessão e nos vigias",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_equipe_sem_lista_de_esperados_diz_isso_na_sessao_e_nos_vigias"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Equipe com vigias lidos mostra agente, unidade e estado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_equipe_com_vigias_lidos_mostra_unidade_e_estado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Backup mostra primeiro o veredito do P-12 do último perímetro, com a data",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_backup_mostra_o_p12_do_perimetro_antes_do_registro"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Backup sem ultimo.json do perímetro diz \"P-12: sem leitura\"",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_backup_sem_ultimo_json_do_perimetro_diz_p12_sem_leitura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Backup mostra o registro de cobertura com a própria régua, e a nota diz que ela não é o veredito do P-12",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_backup_sem_rota_e_com_rota"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Saída de rede mostra os binários como lista, se o navegador usa Rust e a paridade sem registro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_saida_de_rede_mostra_binarios_navegador_e_paridade_sem_registro"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Perímetro sem leitura diz o motivo, e com resultado mostra as contagens e os controles",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_perimetro_sem_rota_e_com_controles"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Perímetro diz que mostra o último resultado gravado e que o painel não o roda",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeLeituraNovaTests::test_perimetro_diz_que_mostra_o_ultimo_resultado_gravado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "CI mostra as falhas primeiro na lista de passos e compara o head com o do repositório",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_ci_passos_com_falha_primeiro_e_head_comparado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "resultado do perímetro ou do CI gravado há mais de 24 h não sai como ok: o state vira warning, a resposta traz envelhecido e o motivo, e a tela mostra o aviso",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_resultado_gravado_ha_mais_de_24_h_nao_sai_ok",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_perimetro_e_ci_envelhecidos_mostram_o_aviso_na_tela"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tela CI mostra mesmo head do repositório quando o head gravado é igual ao atual",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_ci_com_mesmo_head_diz_mesmo_head_do_repositorio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tela CI mostra head diferente do atual quando o head gravado é de outro commit",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::TelasDeComportamentoTests::test_ci_com_head_diferente_diz_head_diferente_do_atual"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "cada rota de leitura responde schema_version, state, source, observed_at e fresh_until, e sem leitura traz motivo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_rotas_de_leitura_respondem_com_campos_e_sem_executar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/perimetro` lê o último resultado gravado e não executa o perímetro",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_perimetro_le_o_ultimo_resultado_e_nao_executa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/ci` lê o último resultado gravado e não executa o CI",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_ci_le_o_ultimo_resultado_e_nao_executa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/provedores` vem do catálogo e não constrói o Council",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_provedores_vem_do_catalogo_e_nao_constroi_o_council"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/equipe` lê sessão, itens, ausentes, divergências e vigias",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_equipe_le_sessao_itens_ausentes_divergencias_e_vigias"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/backup` lê HD, régua e pendentes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_backup_hd_regua_e_pendentes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/egress` marca em dia pelo mtime, e o navegador usa Rust só pela chave",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::LeiturasCurtasTests::test_egress_em_dia_por_mtime_e_navegador_so_pela_chave"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Conexões tem uma linha por provedor do catálogo, com a conexão configurada quando ela existe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel_unificado.py::ProvedoresETabelasTests::test_conexoes_tem_uma_linha_por_provedor_do_catalogo"
     ],
     "cwd": null
   }

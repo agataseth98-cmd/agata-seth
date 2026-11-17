@@ -37,14 +37,22 @@ const statusText = {
   unknown: "resultado incerto; reenvio bloqueado",
 };
 
-function renderProviders(items) {
+// Tabela "Abas de chat suportadas": linhas de /api/provedores (fonte única). A última coluna diz se a aba está aberta agora.
+function renderProviders(dados) {
   const body = $("providerTable").querySelector("tbody");
   body.replaceChildren();
+  const items = (dados && dados.provedores) || [];
+  if (!items.length) {
+    const row = document.createElement("tr");
+    const cell = node("td", "Sem leitura dos provedores: " + ((dados && dados.motivo) || "motivo não informado") + ".", "hint");
+    cell.colSpan = 4;
+    row.append(cell);
+    body.append(row);
+  }
   for (const provider of items) {
     const row = document.createElement("tr");
-    const mode = provider.adapter_state === "experimental" ? "experimental" : provider.access_mode;
-    const availability = provider.tab_open ? "aba aberta" : "aba não detectada";
-    for (const value of [provider.name, provider.kind, mode, availability]) {
+    const availability = state.providers.includes(provider.id) ? "aba aberta" : "aba não detectada";
+    for (const value of [provider.nome, provider.tipo, provider.acesso, availability]) {
       row.append(node("td", value));
     }
     body.append(row);
@@ -54,7 +62,7 @@ function renderProviders(items) {
   select.replaceChildren(node("option", "Selecione um adaptador"));
   select.options[0].value = "";
   for (const id of state.providers) {
-    const option = node("option", items.find((item) => item.id === id)?.name || id);
+    const option = node("option", items.find((item) => item.id === id)?.nome || id);
     option.value = id;
     select.append(option);
   }
@@ -141,14 +149,15 @@ function renderHistory(actions, legacy) {
 
 async function atualizarConselho() {
   try {
-    const [snapshot, catalog] = await Promise.all([
-      api("/api/relay-council/state"), api("/api/relay-council/catalog"),
-    ]);
+    const snapshot = await api("/api/relay-council/state");
+    // Provedores vêm de /api/provedores (fonte única), pelo leitor do painel; sem o painel, não há lista.
+    const provedores = window.AgataPainel ? await window.AgataPainel.lerProvedores()
+      : {state: "sem_leitura", motivo: "o painel ainda não carregou a lista", provedores: []};
     state.csrf = snapshot.csrf;
     state.providers = snapshot.providers || [];
     state.actions = snapshot.actions || [];
     state.legacy = snapshot.legacy_history || [];
-    renderProviders(catalog.providers || []);
+    renderProviders(provedores);
     renderQueue(state.actions);
     renderGroups(snapshot.groups || []);
     renderHistory(state.actions, state.legacy);

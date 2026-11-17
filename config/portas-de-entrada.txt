@@ -9,4 +9,4 @@ GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
 CLAUDE.md|Claude Code (importa o AGENTS.md)
 PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
 redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)
-redesign/goose/AGENTS.md|instruções globais do Goose (~/.config/goose/AGENTS.md), que saiu do sistema em 07/11/2026; o arquivo fica até a decisão de remoção
+redesign/goose/AGENTS.md|arquivo histórico do Goose (saiu em 07/11/2026)

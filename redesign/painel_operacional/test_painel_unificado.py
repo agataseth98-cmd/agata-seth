@@ -27,16 +27,20 @@ JS_TODOS = "\n".join(JS.values())
 SECOES = ["panorama", "conversa", "conselho", "sistema", "conhecimento", "historia", "custos", "qualidade"]
 SUBS_POR_SECAO = {
     # importantes: aba do Panorama criada em 11/11/2026 (pedido do Humano); é a única mudança nesta lista.
-    "panorama": ["panorama", "visao", "capacidades", "plano", "frentes", "importantes"],
+    # 17/11/2026: "O que posso fazer" saiu do Panorama (virou atalho para Sistema > Integrações).
+    "panorama": ["panorama", "visao", "plano", "frentes", "importantes"],
     "conversa": ["conversa"],
     # conselho-memoria: aba Memória compartilhada, pedida pelo Humano em 07/11/2026 (leitura do cache do Conselho).
     "conselho": ["conselho", "conselho-memoria"],
-    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes"],
+    # 17/11/2026: Equipe, Backup e Saída de rede entram como abas de Sistema (leitura nova).
+    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes",
+                "equipe", "backup", "saida-rede"],
     "conhecimento": ["memoria", "grafo", "documentacao", "nv-alexandria", "nv-acervo"],
     # historia: seção nova de 11/11/2026 (texto da História, só leitura, e o Ouvir); ver test_historia.py.
     "historia": ["historia"],
     "custos": ["nv-orcamento", "nv-tarifas"],
-    "qualidade": ["operator-console", "qualidade", "sdd", "lacunas", "nv-avaliacao", "nv-sentidos"],
+    # 17/11/2026: Perímetro e CI entram como abas de Qualidade (último resultado gravado).
+    "qualidade": ["operator-console", "qualidade", "sdd", "lacunas", "perimetro", "ci", "nv-avaliacao", "nv-sentidos"],
 }
 ARQUIVOS_RETIRADOS = ["/app.js", "/styles.css", "/frentes.js", "/nova_versao.css",
                       "/conselho-rede/style.css", "/operator_console/style.css"]
@@ -560,7 +564,6 @@ GANCHOS_JS = {
     "close-dialog": "gancho do JS que fecha o diálogo de evidência; o estilo vem de .btn",
     "close-vault": "gancho do JS que fecha o diálogo do vault; o estilo vem de .btn",
     "evidence": "gancho do JS dos botões EVIDÊNCIA; o estilo vem de .btn",
-    "integration-legend": "marcador da legenda de integrações; o estilo vem de .filterbar",
     "seth-panel": "marcador do painel da Seth; o estilo vem de .panel",
 }
 
@@ -923,3 +926,654 @@ class LoteConversaEstruturaTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Lote atualiza-17-11 (17/11/2026, lote 2b do painel): testes de página para P1 a P7.
+# Estrutura lida do HTML (HTMLParser e fatias por marcador); comportamento de prototipo.js e nova_versao.js num contexto
+# node com DOM mínimo e fetch roteirizado por cenário. Nada sai da máquina: as rotas são respostas fixas no teste.
+# ----------------------------------------------------------------------------------------------------------------------
+TEMAS_FUNDIDOS = [
+    "Conversa com a Seth", "Voz: saída e entrada", "Memória: canon ↔ Obsidian", "Escrita controlada → canon",
+    "Navegação: navegador e Discord", "Roteamento por capacidade", "Manutenção programada",
+    "Réplica Windows e failover", "Home Assistant e WhatsApp",
+]
+EXCLUSIVOS = [
+    "Trabalhar com código", "Verificar o sistema", "Sucessão e espelho do canon",
+    "OmniRoute → painel ao vivo", "Painel operacional", "Vigia do Claude", "NotebookLM e fontes externas",
+]
+# Títulos que existiam antes (Panorama e Integrações) e saíram com a fusão: nenhum pode voltar como linha separada.
+TITULOS_ANTIGOS = [
+    "Conectar Home Assistant ou WhatsApp", "Ouvir respostas", "Falar com a Seth", "Buscar na memória",
+    "Navegar e comunicar", "Escolher rota por capacidade", "Executar manutenção programada", "Acrescentar memória",
+    "Réplica Windows de leitura/failover", "Conversar com a Seth", "Conversa com a Seth · gateway", "Canon ↔ Obsidian",
+    "Navegador e Discord", "OmniRoute, Laya e Jev", "Rotinas de manutenção",
+]
+CATEGORIAS_DA_LISTA = {"USAR", "ENTENDER", "MELHORAR", "GOVERNAR", "MANTER"}
+
+
+def fatia_secao(secao_id):
+    """HTML de uma <section class="secao"> pelo id."""
+    inicio = HTML.index(f'<section class="secao" id="{secao_id}"')
+    return HTML[inicio:HTML.index('<section class="secao"', inicio + 1) if '<section class="secao"' in HTML[inicio + 1:] else len(HTML)]
+
+
+def fatia_sub(sub_id):
+    """HTML de um subpainel (<div class="sub"...> com id sub-<nome>) até o próximo subpainel ou o fim da seção."""
+    inicio = HTML.index(f'id="sub-{sub_id}"')
+    fins = [i for i in (HTML.find('<div class="sub', inicio + 1), HTML.find("</section>", inicio + 1)) if i != -1]
+    return HTML[inicio:min(fins)]
+
+
+class CartoesDaLista(HTMLParser):
+    """Cartões da lista de integrações: título (h3), categoria (primeiro small dentro de cap-meta) e evidência."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.cartoes = []
+        self._cartao = None
+        self._meta = False
+        self._em_h3 = False
+        self._em_categoria = False
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        classes = (a.get("class") or "").split()
+        if tag == "article" and "cap-card" in classes:
+            self._cartao = {"attrs": a, "titulo": "", "categoria": None, "evidencia": False}
+            self.cartoes.append(self._cartao)
+            self._meta = False
+        elif self._cartao is None:
+            return
+        elif tag == "div" and "cap-meta" in classes:
+            self._meta = True
+        elif tag == "h3":
+            self._em_h3 = True
+        elif tag == "small" and self._meta and self._cartao["categoria"] is None:
+            self._em_categoria = True
+            self._cartao["categoria"] = ""
+        elif tag == "button" and "evidence" in classes:
+            self._cartao["evidencia"] = True
+
+    def handle_endtag(self, tag):
+        if tag == "h3":
+            self._em_h3 = False
+        elif tag == "small":
+            self._em_categoria = False
+        elif tag == "article" and self._cartao is not None:
+            self._cartao = None
+
+    def handle_data(self, data):
+        if self._cartao is None:
+            return
+        if self._em_h3:
+            self._cartao["titulo"] += data
+        if self._em_categoria:
+            self._cartao["categoria"] += data
+
+
+class FusaoIntegracoesTests(unittest.TestCase):
+    """P1 (17/11/2026): O que posso fazer e Integrações viram uma lista só, em Sistema > Integrações."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.parser = CartoesDaLista()
+        cls.parser.feed(HTML)
+
+    def test_cada_tema_aparece_uma_vez_e_os_exclusivos_ficam(self):
+        titulos = [c["titulo"].strip() for c in self.parser.cartoes]
+        self.assertEqual(len(titulos), 16, titulos)
+        for tema in TEMAS_FUNDIDOS + EXCLUSIVOS:
+            with self.subTest(tema=tema):
+                self.assertEqual(titulos.count(tema), 1)
+        self.assertEqual(sorted({t for t in titulos if titulos.count(t) > 1}), [])
+        for antigo in TITULOS_ANTIGOS:
+            with self.subTest(antigo=antigo):
+                self.assertNotIn(antigo, titulos)
+
+    def test_cada_linha_tem_categoria_do_conjunto_fechado_evidencia_e_busca(self):
+        for c in self.parser.cartoes:
+            with self.subTest(titulo=c["titulo"]):
+                self.assertIn((c["categoria"] or "").split(" · ")[0].strip(), CATEGORIAS_DA_LISTA)
+                self.assertTrue(c["evidencia"], "linha sem botão de evidência")
+                self.assertIn("data-search", c["attrs"])
+
+    def test_lista_fica_em_integracoes_com_cinco_filtros_busca_e_fronteiras(self):
+        sub = fatia_sub("integracoes")
+        self.assertIn('id="integration-list"', sub)
+        self.assertEqual(re.findall(r'data-filter="(\w+)"', sub), ["all", "active", "partial", "planned", "horizon"])
+        self.assertEqual(len(re.findall(r'<article class="cap-card"', sub)), 16)
+        self.assertIn("O que atravessa", sub)
+        self.assertIn('class="footer-note"', sub)
+        self.assertIn('id="no-results"', sub)
+
+    def test_panorama_sem_subcapacidades_e_com_atalho_para_integracoes(self):
+        self.assertNotIn('data-sub="capacidades"', HTML)
+        self.assertNotIn('id="sub-capacidades"', HTML)
+        self.assertNotIn("O que posso fazer", HTML)
+        nav = HTML[HTML.index('aria-label="Subpainéis de Panorama"'):]
+        nav = nav[:nav.index("</nav>")]
+        atalhos = re.findall(r'<button[^>]*data-open-page="sistema"[^>]*data-open-sub="integracoes"[^>]*>[^<]+</button>', nav)
+        self.assertEqual(len(atalhos), 1)
+
+
+class DuplicatasEAtalhosTests(unittest.TestCase):
+    """P2 (17/11/2026): Atualizar um por tela; timers e tarefas só em Manutenção; Visão do sistema só com números."""
+
+    def test_atualizar_aparece_uma_vez_por_tela_e_nao_se_repete_na_secao(self):
+        for secao in ("panorama", "sistema"):
+            with self.subTest(secao=secao):
+                botoes = re.findall(r"<button[^>]*>[^<]*Atualizar[^<]*</button>", fatia_secao(secao))
+                self.assertEqual(len(botoes), 1, botoes)
+        self.assertIn('id="refresh-main"', fatia_secao("panorama"))
+        self.assertIn('id="refresh-status"', fatia_sub("operacao"))
+
+    def test_estado_operacional_sem_timers_e_com_atalho_para_manutencao(self):
+        op = fatia_sub("operacao")
+        for velho in ('id="live-timers"', 'id="live-tasks"', "timer-panel"):
+            self.assertNotIn(velho, op)
+        self.assertIn('data-open-page="sistema" data-open-sub="manutencao"', op)
+
+    def test_timers_e_tarefas_ficam_so_em_manutencao(self):
+        man = fatia_sub("manutencao")
+        self.assertIn('id="live-timers"', man)
+        self.assertIn('id="maintenance-tasks"', man)
+        self.assertEqual(HTML.count('id="live-timers"'), 1)
+        self.assertEqual(HTML.count('id="maintenance-tasks"'), 1)
+        self.assertNotIn("maintenance-timers", HTML)
+
+    def test_lacunas_ficam_so_em_qualidade(self):
+        # 17/11/2026 (lote 2b): a lista de lacunas tem um lugar só, Qualidade > Lacunas; Panorama, Sistema e Conhecimento não a repetem.
+        lac = fatia_sub("lacunas")
+        self.assertIn('id="lacunas-lista"', lac)
+        self.assertIn('id="lacunas-canon"', lac)
+        self.assertEqual(HTML.count('id="lacunas-lista"'), 1)
+        self.assertEqual(HTML.count('id="lacunas-canon"'), 1)
+        self.assertIn("lacunas", estrutura().sub_em["qualidade"])
+        for secao in ("panorama", "sistema", "conhecimento"):
+            with self.subTest(secao=secao):
+                self.assertNotIn("lacunas", estrutura().sub_em[secao])
+
+    def test_visao_do_sistema_so_numeros_e_atalhos(self):
+        vis = fatia_sub("visao")
+        self.assertNotIn("visao-melhorias", HTML)
+        self.assertIn('id="visao-kpis"', vis)
+        self.assertNotIn("<ul", vis)
+        self.assertIn('data-open-page="qualidade" data-open-sub="lacunas"', vis)
+        self.assertIn('data-open-page="sistema" data-open-sub="integracoes"', vis)
+
+
+class ProvedoresETabelasTests(unittest.TestCase):
+    """P3 (17/11/2026): botões e tabela do Conselho vêm de /api/provedores; Conexões tem uma tabela; Gravar chave lê o seletor certo."""
+
+    def test_botoes_do_conselho_sao_gerados_e_abrir_delega_o_clique(self):
+        bloco_modelos = HTML[HTML.index('id="modelos-links"'):HTML.index('id="status"')]
+        self.assertNotIn('data-alvo="', bloco_modelos, "botão de modelo fixo no HTML")
+        self.assertIn('id="modelos-links"', HTML)
+        self.assertIn('id="providerTable"', HTML)
+        self.assertIn(">Aba agora<", HTML)
+        js = JS["prototipo.js"]
+        self.assertIn('lerRotaTela("/api/provedores")', js)
+        self.assertIn("b.dataset.alvo = p.id", js)
+        abrir = JS["abrir.js"]
+        self.assertIn("document.addEventListener('click'", abrir)
+        self.assertIn("closest('[data-alvo]')", abrir)
+        self.assertNotIn("querySelectorAll('[data-alvo]')", abrir)
+        self.assertIn("AgataPainel.lerProvedores", JS["conselho-rede/app.js"])
+
+    def test_conexoes_tem_uma_tabela_com_as_colunas_e_tarifas_so_o_formulario(self):
+        con = fatia_sub("nv-conexoes")
+        tabela = con[con.index('id="nv-con-tabela"'):]
+        cabecalhos = re.findall(r"<th>([^<]+)</th>", tabela[:tabela.index("</thead>")])
+        self.assertEqual(cabecalhos, ["provedor", "id", "caminhos", "aba", "chave", "modelo", "tarifa", "fonte e data"])
+        tar = fatia_sub("nv-tarifas")
+        self.assertNotIn("nv-con-tabela", tar)
+        self.assertIn('id="nv-api-provedor"', tar)
+        self.assertIn('id="nv-tar-entrada"', tar)
+        self.assertIn('data-open-sub="nv-conexoes"', tar)
+        self.assertIn('id="nv-chave-provedor"', con)
+        self.assertNotIn('id="nv-chave-provedor"', tar)
+
+    def test_conexoes_tem_uma_linha_por_provedor_do_catalogo(self):
+        # 17/11/2026: a tabela de Conexões sai do catálogo de /api/provedores; a conexão configurada entra na linha do seu provedor.
+        estado = {"conexoes": [{"id": "zai", "nome": "Z.ai / GLM", "origem": "catalogo", "modos": {"api": {
+            "disponivel": True, "falta": [], "chave": {"no_cofre": True, "desde": 1700000000, "no_ambiente": False},
+            "modelo": "glm-x", "tarifa": {"entrada_usd_mtok": 1, "saida_usd_mtok": 5, "cambio_brl": 5.5, "fonte": "https://oficial", "data": "2026-11-04"}}}}],
+            "orcamento": {"provedores": {}}, "teste_rotas": {}}
+        provedores = {"state": "ok", "motivo": None, "provedores": [
+            {"id": "zai", "nome": "Z.ai / GLM", "tipo": "chat", "acesso": "browser_tab_only"},
+            {"id": "chatgpt", "nome": "ChatGPT", "tipo": "chat", "acesso": "browser_tab_only"}]}
+        r = _roda_telas({"modo": "gravar", "estado": estado, "provedores": provedores, "escolhas": {"seletor": "zai", "outro": "chatgpt"},
+                         "ids": ["nv-con-lista"]})
+        self.assertEqual(r["erros"], [])
+        linhas = r["ids"]["nv-con-lista"]["filhos"]
+        self.assertEqual(len(linhas), 2, "uma linha por provedor do catálogo")
+        self.assertIn("no cofre desde", linhas[0])
+        self.assertIn("sem conexão configurada", linhas[1])
+        self.assertIn("ChatGPT", linhas[1])
+
+    def test_gravar_e_remover_chave_leem_o_seletor_da_propria_tela(self):
+        js = JS["nova_versao.js"]
+        gravar = js[js.index('confirmar(byId("nv-api-gravar")'):js.index('confirmar(byId("nv-api-remover")')]
+        remover = js[js.index('confirmar(byId("nv-api-remover")'):js.index('confirmar(byId("nv-add-salvar")')]
+        self.assertIn('val("nv-chave-provedor")', gravar)
+        self.assertNotIn("nv-api-provedor", gravar)
+        self.assertIn('val("nv-chave-provedor")', remover)
+        self.assertNotIn("nv-api-provedor", remover)
+
+
+class RecuperacaoEMedicoesTests(unittest.TestCase):
+    """P4 (17/11/2026): um indicador Recuperação com duas leituras; cada botão de medir diz o corpus; ocupado mostra o motivo."""
+
+    def test_recuperacao_e_um_indicador_com_as_duas_leituras(self):
+        js = JS["prototipo.js"]
+        self.assertIn('item.id === "recall_busca"', js)
+        self.assertIn("leiturasDaRecuperacao(item)", js)
+        self.assertIn('l.textContent = "Recuperação"', js)
+        self.assertEqual(js.count('"Recuperação"'), 1)
+
+    def test_botoes_de_medir_dizem_o_corpus_e_mostram_ocupado(self):
+        qual = re.search(r'id="medir-recuperacao">([^<]*)<', HTML).group(1)
+        ava = re.search(r'id="nv-run-recuperacao">([^<]*)<', HTML).group(1)
+        self.assertIn("corpus do vault", qual)
+        self.assertIn("conjunto da avaliação", ava)
+        self.assertIn('"ocupado: "', JS["prototipo.js"])
+        self.assertIn('"ocupado: "', JS["nova_versao.js"])
+
+
+class TelasDeLeituraNovaTests(unittest.TestCase):
+    """P5 e P6 (17/11/2026): Equipe, Backup, Saída de rede, Perímetro e CI nas abas certas, no padrão da referência."""
+
+    TELAS = {
+        "equipe": ("equipe", "sistema", ["equipe-resultado", "equipe-estado", "equipe-fonte", "equipe-kpis", "equipe-presentes", "equipe-ausentes"]),
+        "backup": ("backup", "sistema", ["backup-resultado", "backup-estado", "backup-fonte", "backup-kpis", "backup-recursos"]),
+        "saida-rede": ("saida-rede", "sistema", ["egress-resultado", "egress-estado", "egress-fonte", "egress-kpis", "egress-binarios"]),
+        "perimetro": ("perimetro", "qualidade", ["perimetro-resultado", "perimetro-estado", "perimetro-fonte", "perimetro-kpis", "perimetro-controles"]),
+        "ci": ("ci", "qualidade", ["ci-resultado", "ci-estado", "ci-fonte", "ci-kpis", "ci-passos"]),
+    }
+
+    def test_cada_tela_nova_esta_na_secao_certa_com_resultado_pilula_e_fonte(self):
+        e = estrutura()
+        for sub, (_, secao, ids) in self.TELAS.items():
+            with self.subTest(sub=sub):
+                self.assertIn(sub, e.sub_em[secao])
+                bloco = fatia_sub(sub)
+                self.assertIn('class="resultado"', bloco)
+                for id_ in ids:
+                    self.assertIn(f'id="{id_}"', bloco)
+
+    def test_perimetro_diz_que_mostra_o_ultimo_resultado_gravado(self):
+        self.assertIn("O painel não roda o perímetro; mostra o último resultado gravado.", fatia_sub("perimetro"))
+
+    def test_carregamento_usa_o_mesmo_mecanismo_das_abas(self):
+        js = JS["prototipo.js"]
+        for sub, rotulo in (("equipe", "carregarEquipe"), ("backup", "carregarBackup"), ("saida-rede", "carregarEgress"),
+                            ("perimetro", "carregarPerimetro"), ("ci", "carregarCI")):
+            with self.subTest(sub=sub):
+                self.assertRegex(js, rf'(?:"{re.escape(sub)}"|\b{sub}):\s*\(\)\s*=>\s*{rotulo}\(\)')
+
+    def test_classes_novas_tem_regra_so_com_tokens_e_sem_sombra_nem_gradiente(self):
+        css = re.sub(r"/\*.*?\*/", "", CSS, flags=re.S)
+        for classe in ("resultado", "cap-estado", "cap-hora"):
+            with self.subTest(classe=classe):
+                regra = re.search(r"\." + classe + r"\{([^}]*)\}", css)
+                self.assertIsNotNone(regra, f".{classe} sem regra")
+                self.assertNotRegex(regra.group(1), r"#[0-9a-fA-F]{3,8}|rgba?\(")
+        self.assertEqual(re.findall(r"box-shadow|text-shadow|gradient\(", css), [])
+
+
+# Harness de comportamento das telas novas, Recuperação, Visão e Gravar chave. Mesmo desenho de NODE_COMPORTAMENTO.
+NODE_TELAS = r"""
+const fs = require('fs'); const path = require('path'); const vm = require('vm');
+process.on('unhandledRejection', () => {});
+const cen = JSON.parse(fs.readFileSync(0, 'utf8')); const dir = process.env.PAINEL_DIR;
+class No {}
+class Texto extends No { constructor(t) { super(); this.textContent = String(t); } }
+class Elemento extends No {
+  constructor(tag) {
+    super();
+    this.tag = tag; this.texto = ''; this.children = []; this.hidden = false; this.className = ''; this.value = '';
+    this.disabled = false; this.dataset = {}; this.attrs = {}; this.ouvintes = {}; this.style = {};
+    this.classList = {add() {}, remove() {}, toggle() {}, contains() { return false; }};
+  }
+  get textContent() { return this.texto + this.children.map((c) => c.textContent).join(''); }
+  set textContent(v) { this.children = []; this.texto = String(v); }
+  append(...nos) { this.children.push(...nos); }
+  replaceChildren(...nos) { this.children = nos; this.texto = ''; }
+  setAttribute(k, v) { this.attrs[k] = String(v); }
+  getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; }
+  addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
+  focus() {} blur() {} remove() {} select() {}
+  closest() { return null; }
+  querySelector() { return new Elemento('sel'); }
+  querySelectorAll() { return []; }
+}
+const registro = new Map();
+const elementoDoId = (id) => { if (!registro.has(id)) registro.set(id, new Elemento('id:' + id)); return registro.get(id); };
+const documento = {
+  visibilityState: 'visible', body: new Elemento('body'), documentElement: new Elemento('html'),
+  getElementById: elementoDoId, querySelector() { return new Elemento('sel'); }, querySelectorAll() { return []; },
+  createElement(tag) { return new Elemento(tag); }, createElementNS(ns, tag) { return new Elemento(tag); },
+  createTextNode(t) { return new Texto(t); }, addEventListener() {}, removeEventListener() {},
+};
+const pedidos = [];
+const ctx = {};
+ctx.window = ctx; ctx.document = documento; ctx.location = {hash: ''}; ctx.history = {};
+ctx.localStorage = {getItem() { return null; }, setItem() {}, removeItem() {}};
+ctx.navigator = {clipboard: {}}; ctx.Node = No;
+ctx.fetch = async (url, opcoes) => {
+  const metodo = (opcoes && opcoes.method) || 'GET';
+  pedidos.push({url, metodo, corpo: opcoes && opcoes.body ? JSON.parse(opcoes.body) : null});
+  const rota = (cen.rotas || {})[url.split('?')[0]];
+  if (!rota) return {ok: false, status: 404, json: async () => ({}), text: async () => ''};
+  const ok = rota.status === undefined || (rota.status >= 200 && rota.status < 300);
+  return {ok, status: rota.status || 200, json: async () => rota.corpo || {}, text: async () => ''};
+};
+ctx.AbortController = function () { this.signal = {}; this.abort = () => {}; };
+ctx.setTimeout = () => 0; ctx.clearTimeout = () => {}; ctx.setInterval = () => 0; ctx.clearInterval = () => {};
+ctx.addEventListener = () => {};
+vm.createContext(ctx);
+const esperar = async () => { for (let i = 0; i < 60; i++) await new Promise((r) => setImmediate(r)); };
+const leitura = (ids) => Object.fromEntries((ids || []).map((id) => { const el = elementoDoId(id);
+  return [id, {texto: el.textContent, filhos: el.children.map((c) => c.textContent), alvos: el.children.map((c) => (c.dataset && c.dataset.alvo) || null), hidden: el.hidden, classe: el.className}]; }));
+(async () => {
+  const saida = {erros: []};
+  try {
+    if (cen.modo === 'gravar') {
+      ctx.AgataPainel = {
+        fetchJson: async (url, opcoes) => {
+          pedidos.push({url, metodo: (opcoes && opcoes.method) || 'GET', corpo: opcoes && opcoes.body ? JSON.parse(opcoes.body) : null});
+          return url.startsWith('/api/nova-versao/estado') ? cen.estado : {schema_version: 1, resultado: {}};
+        },
+        marcarEstado() {},
+        lerProvedores: async () => cen.provedores,
+      };
+      vm.runInContext(fs.readFileSync(path.join(dir, 'nova_versao.js'), 'utf8'), ctx, {filename: 'nova_versao.js'});
+      await esperar();
+      await ctx.AgataPainel.carregarNovaVersao('nv-conexoes');
+      await esperar();
+      elementoDoId('nv-chave-provedor').value = cen.escolhas.seletor;
+      elementoDoId('nv-api-provedor').value = cen.escolhas.outro;
+      elementoDoId('nv-api-chave').value = 'chave-de-teste';
+      const gravar = elementoDoId('nv-api-gravar').ouvintes.click[0];
+      await gravar(); await gravar(); await esperar();
+      elementoDoId('nv-chave-provedor').value = cen.escolhas.seletor;
+      const remover = elementoDoId('nv-api-remover').ouvintes.click[0];
+      await remover(); await remover(); await esperar();
+    } else {
+      const fonte = fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8');
+      const marca = 'aoMudarHash();\n})();';
+      if (!fonte.includes(marca)) throw new Error('marca de fim do prototipo.js não achada');
+      vm.runInContext(fonte.replace(marca, 'aoMudarHash();\nwindow.__teste = {carregarEquipe, carregarBackup, carregarEgress, carregarPerimetro, carregarCI, carregarQualidade, carregarVisaoSistema, montarBotoesDoConselho};\n})();'), ctx, {filename: 'prototipo.js'});
+      await esperar();
+      if (cen.modo === 'medicao') {
+        const botao = elementoDoId('medir-recuperacao');
+        await botao.ouvintes.click[0](); await botao.ouvintes.click[0]();
+      } else {
+        await ctx.__teste[cen.funcao]();
+      }
+      await esperar();
+    }
+    saida.ids = leitura(cen.ids);
+    saida.pedidos = pedidos.filter((p) => !p.url.startsWith('/api/status')).map((p) => ({url: p.url, metodo: p.metodo, corpo: p.corpo}));
+  } catch (e) { saida.erros.push(String((e && e.stack) || e).slice(0, 400)); }
+  console.log(JSON.stringify(saida));
+})();
+"""
+
+
+def _roda_telas(cenario):
+    ambiente = dict(os.environ, PAINEL_DIR=str(HERE))
+    resultado = subprocess.run(["node", "-e", NODE_TELAS], input=json.dumps(cenario, ensure_ascii=False),
+                               capture_output=True, text=True, timeout=120, env=ambiente)
+    if resultado.returncode != 0 and not resultado.stdout:
+        raise AssertionError("node não rodou (não medido): " + resultado.stderr[-400:])
+    return json.loads(resultado.stdout.strip().splitlines()[-1])
+
+
+# Formato real de /api/equipe (medido em 127.0.0.1:20199 em 17/11/2026): blocos com state próprio; listas, não dicionários.
+EQUIPE_OK = {"schema_version": 1, "state": "warning", "source": "sincronia/equipe", "observed_at": "2026-11-17T08:00:00-03:00",
+             "fresh_until": "2099-01-01T00:00:00Z",
+             "sessao": {"state": "ok", "estado": "aguardando", "base": "619416ed99a8", "presentes": [{"agente": "codex", "desde": "2026-11-09T08:50:27-03:00"}], "esperados": []},
+             "ausentes": {"state": "ok", "itens": [{"agente": "codex", "origem": ["config"], "desde": None, "motivo": None, "ate": None}]},
+             "divergencias": ["codex: ausente no config e presente na sessão"], "divergencias_motivo": None,
+             "itens": {"state": "ok", "agentes": [{"agente": "codex", "state": "ok", "total": 10, "por_estado": {"bloqueado": 1, "em_revisao": 1, "pronto": 8}}]},
+             "vigias": {"state": "sem_leitura", "itens": [], "motivo": "a sessão não declara agentes esperados (campo esperados)"},
+             "eventos": {"state": "ok", "linhas": ["08:00 sessão aberta"]}}
+# Formato real de /api/backup (17/11/2026): hd é um objeto, pendentes_hd é número, recursos é lista.
+BACKUP_OK = {"schema_version": 1, "state": "warning", "source": "p12-cobertura.json (cache do P-12)", "observed_at": "2026-11-17T08:00:00-03:00",
+             "fresh_until": "2099-01-01T00:00:00Z", "hd": {"presente": True, "repositorio_presente": True, "motivo": None},
+             "pendentes_hd": 1, "regua_dias": 14,
+             "recursos": [{"recurso": "memoria", "state": "ok", "verificado_em": "2026-11-16T10:00:00+00:00", "idade_dias": 1, "snapshot": "abc", "dentro_da_regua": True},
+                          {"recurso": "canon", "state": "ok", "verificado_em": "2026-10-01T10:00:00+00:00", "idade_dias": 47, "snapshot": "def", "dentro_da_regua": False}]}
+# Formato real de /api/perimetro já gravado: contagens e controles, com o P-12 entre eles.
+PERIMETRO_OK = {"schema_version": 1, "state": "ok", "source": "scripts/perimetro.sh → ultimo.json", "observed_at": "2026-11-17T08:00:00-03:00",
+                "fresh_until": "2099-01-01T00:00:00Z", "gerado_em": "2026-11-17T08:35:00-03:00", "idade_horas": 0.4, "head": "ac08bf4f",
+                "resultado_geral": "OK", "contagens": {"ok": 10, "skip": 2, "parcial": 1, "falha": 0},
+                "controles": [{"id": "P-1", "veredito": "OK"}, {"id": "P-12", "veredito": "OK"}]}
+# Formato real de /api/ci gravado (17/11/2026) e a parte de /api/status que a tela CI usa para o head do repositório (R2).
+CI_GRAVADO = {"schema_version": 1, "state": "ok", "source": "scripts/ci_sdd_local.sh → ultimo.json", "observed_at": "2026-11-17T08:00:00-03:00",
+              "fresh_until": "2099-01-01T00:00:00Z", "gerado_em": "2026-11-17T08:40:00-03:00", "idade_horas": 0.4, "head": "ac08bf4f",
+              "ok": 2, "falha": 0, "linha_final": "CI LOCAL: TUDO OK", "passos": [{"nome": "testes SDD (pytest)", "ok": True}]}
+STATUS_COM_HEAD = {"schema_version": 1, "services": [{"unit": "a", "state": "ok"}], "timers": [], "git": {"head": "ac08bf4f"},
+                   "chat": {"http_status": 200}, "models": {"models": []}, "proposals": {"items": []}}
+
+
+class TelasDeComportamentoTests(unittest.TestCase):
+    """P5 e P7 (17/11/2026): cada tela mostra 'sem leitura' com o motivo quando a rota falha, e os campos quando responde."""
+
+    def test_equipe_sem_rota_mostra_sem_leitura_com_motivo(self):
+        r = _roda_telas({"modo": "telas", "funcao": "carregarEquipe", "ids": ["equipe-resultado", "equipe-estado"], "rotas": {}})
+        self.assertEqual(r["erros"], [])
+        self.assertIn("Sem leitura da equipe", r["ids"]["equipe-resultado"]["texto"])
+        self.assertIn("/api/equipe", r["ids"]["equipe-resultado"]["texto"])
+        self.assertEqual(r["ids"]["equipe-estado"]["texto"], "SEM LEITURA")
+
+    def test_equipe_com_rota_mostra_sessao_ausentes_divergencias_e_vigias(self):
+        r = _roda_telas({"modo": "telas", "funcao": "carregarEquipe", "ids": ["equipe-resultado", "equipe-estado", "equipe-presentes", "equipe-ausentes", "equipe-divergencias", "equipe-divergencias-bloco", "equipe-vigias", "equipe-eventos"],
+                         "rotas": {"/api/equipe": {"corpo": EQUIPE_OK}}})
+        self.assertEqual(r["erros"], [])
+        ids = r["ids"]
+        self.assertIn("1 presente, 1 ausente e 1 divergência.", ids["equipe-resultado"]["texto"])
+        self.assertEqual(ids["equipe-estado"]["texto"], "ATENÇÃO")
+        self.assertEqual(len(ids["equipe-presentes"]["filhos"]), 1)
+        self.assertEqual(len(ids["equipe-ausentes"]["filhos"]), 1)
+        self.assertIn("codex: ausente no config e presente na sessão", ids["equipe-divergencias"]["texto"])
+        self.assertFalse(ids["equipe-divergencias-bloco"]["hidden"])
+        self.assertIn("Vigias: sessão sem lista de esperados.", ids["equipe-vigias"]["texto"])
+        self.assertIn("08:00 sessão aberta", ids["equipe-eventos"]["texto"])
+
+    def test_equipe_sem_lista_de_esperados_diz_isso_na_sessao_e_nos_vigias(self):
+        r = _roda_telas({"modo": "telas", "funcao": "carregarEquipe", "ids": ["equipe-sessao", "equipe-vigias"], "rotas": {"/api/equipe": {"corpo": EQUIPE_OK}}})
+        self.assertEqual(r["erros"], [])
+        self.assertIn("sessão sem lista de esperados", r["ids"]["equipe-sessao"]["texto"])
+        self.assertIn("sessão sem lista de esperados", r["ids"]["equipe-vigias"]["texto"])
+
+    def test_equipe_com_vigias_lidos_mostra_unidade_e_estado(self):
+        dados = dict(EQUIPE_OK, vigias={"state": "ok", "itens": [{"agente": "codex", "unit": "agata-vigia@codex.service", "state": "ok", "active_state": "active"}]})
+        r = _roda_telas({"modo": "telas", "funcao": "carregarEquipe", "ids": ["equipe-vigias"], "rotas": {"/api/equipe": {"corpo": dados}}})
+        self.assertEqual(r["erros"], [])
+        self.assertIn("codex · agata-vigia@codex.service", r["ids"]["equipe-vigias"]["texto"])
+        self.assertIn("LEITURA VÁLIDA", r["ids"]["equipe-vigias"]["texto"])
+
+    def test_backup_sem_rota_e_com_rota(self):
+        vazio = _roda_telas({"modo": "telas", "funcao": "carregarBackup", "ids": ["backup-resultado", "backup-estado"], "rotas": {}})
+        self.assertIn("Sem leitura do registro de cobertura", vazio["ids"]["backup-resultado"]["texto"])
+        r = _roda_telas({"modo": "telas", "funcao": "carregarBackup", "ids": ["backup-resultado", "backup-presenca", "backup-recursos", "backup-regua-nota"],
+                         "rotas": {"/api/backup": {"corpo": BACKUP_OK}}})
+        self.assertEqual(r["erros"], [])
+        self.assertIn("1 de 2 recursos dentro da régua de 14 dias", r["ids"]["backup-resultado"]["texto"])
+        self.assertIn("HD presente", r["ids"]["backup-presenca"]["texto"])
+        self.assertEqual(len(r["ids"]["backup-recursos"]["filhos"]), 2)
+        self.assertIn("não é o veredito do P-12", r["ids"]["backup-regua-nota"]["texto"])
+
+    def test_backup_mostra_o_p12_do_perimetro_antes_do_registro(self):
+        r = _roda_telas({"modo": "telas", "funcao": "carregarBackup", "ids": ["backup-resultado", "backup-p12-estado", "backup-p12"],
+                         "rotas": {"/api/backup": {"corpo": BACKUP_OK}, "/api/perimetro": {"corpo": PERIMETRO_OK}}})
+        self.assertEqual(r["erros"], [])
+        self.assertTrue(r["ids"]["backup-resultado"]["texto"].startswith("P-12: OK no último perímetro gravado em "))
+        self.assertIn("17/11/2026", r["ids"]["backup-resultado"]["texto"])  # data legível (niceTime), não o ISO bruto
+        self.assertEqual(r["ids"]["backup-p12-estado"]["texto"], "P-12 OK")
+        self.assertIn("17/11/2026", r["ids"]["backup-p12"]["texto"])
+
+    def test_backup_sem_ultimo_json_do_perimetro_diz_p12_sem_leitura(self):
+        sem = {"schema_version": 1, "state": "sem_leitura", "motivo": "o perímetro ainda não gravou resultado nesta Máquina"}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarBackup", "ids": ["backup-resultado", "backup-p12-estado"],
+                         "rotas": {"/api/backup": {"corpo": BACKUP_OK}, "/api/perimetro": {"corpo": sem}}})
+        self.assertEqual(r["erros"], [])
+        self.assertTrue(r["ids"]["backup-resultado"]["texto"].startswith("P-12: sem leitura (o perímetro ainda não gravou resultado nesta Máquina)."))
+        self.assertEqual(r["ids"]["backup-p12-estado"]["texto"], "P-12 SEM LEITURA")
+
+    def test_saida_de_rede_mostra_binarios_navegador_e_paridade_sem_registro(self):
+        # Formato real de /api/egress (17/11/2026): binarios é uma lista com nome, presente, mtime e em_dia.
+        dados = {"schema_version": 1, "state": "warning", "source": "redesign/rust/egress/target/release", "observed_at": "2026-11-17T08:00:00Z", "fresh_until": "2099-01-01T00:00:00Z",
+                 "paridade": "sem registro", "motivo": "falta binário: egress-socks5",
+                 "binarios": [{"nome": "egress", "presente": True, "mtime": "2026-11-16", "em_dia": True},
+                              {"nome": "egress-socks5", "presente": True, "mtime": "2026-10-01", "em_dia": False}],
+                 "fonte_mais_nova": "2026-11-17T08:35:50-03:00", "navegador_usa_rust": None}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarEgress", "ids": ["egress-resultado", "egress-binarios", "egress-dl"], "rotas": {"/api/egress": {"corpo": dados}}})
+        self.assertIn("Binários em dia: 1 de 2", r["ids"]["egress-resultado"]["texto"])
+        self.assertIn("Navegador usa Rust: não medido", r["ids"]["egress-resultado"]["texto"])
+        self.assertIn("Paridade: sem registro", r["ids"]["egress-resultado"]["texto"])
+        self.assertEqual(len(r["ids"]["egress-binarios"]["filhos"]), 2)
+
+    def test_perimetro_sem_rota_e_com_controles(self):
+        vazio = _roda_telas({"modo": "telas", "funcao": "carregarPerimetro", "ids": ["perimetro-resultado"], "rotas": {}})
+        self.assertIn("Sem leitura do perímetro", vazio["ids"]["perimetro-resultado"]["texto"])
+        dados = {"schema_version": 1, "state": "ok", "source": "perimetro", "observed_at": "2026-11-17T08:00:00Z", "fresh_until": "2099-01-01T00:00:00Z",
+                 "gerado_em": "2026-11-16T22:00:00Z", "idade_horas": 10, "head": "abc1234", "resultado_geral": "OK",
+                 "contagens": {"ok": 10, "skip": 2, "parcial": 1, "falha": 0}, "controles": [{"id": "P1", "veredito": "OK"}, {"id": "P8", "veredito": "FALHA"}]}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarPerimetro", "ids": ["perimetro-resultado", "perimetro-controles"], "rotas": {"/api/perimetro": {"corpo": dados}}})
+        self.assertIn("Resultado geral: OK", r["ids"]["perimetro-resultado"]["texto"])
+        self.assertEqual(len(r["ids"]["perimetro-controles"]["filhos"]), 2)
+
+    def test_ci_passos_com_falha_primeiro_e_head_comparado(self):
+        dados = {"schema_version": 1, "state": "ok", "source": "ci", "observed_at": "2026-11-17T08:00:00Z", "fresh_until": "2099-01-01T00:00:00Z",
+                 "gerado_em": "2026-11-17T07:00:00Z", "idade_horas": 1, "head": "abc1234", "ok": 1, "falha": 1, "linha_final": "1 passou, 1 falhou",
+                 "passos": [{"nome": "lint", "ok": True}, {"nome": "suite", "ok": False}]}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarCI", "ids": ["ci-resultado", "ci-passos", "ci-dl"], "rotas": {"/api/ci": {"corpo": dados}}})
+        self.assertEqual(r["erros"], [])
+        self.assertEqual(r["ids"]["ci-resultado"]["texto"], "1 passou, 1 falhou")
+        self.assertIn("suite", r["ids"]["ci-passos"]["filhos"][0])
+        self.assertIn("FALHOU", r["ids"]["ci-passos"]["filhos"][0])
+        self.assertIn("head atual não medido", r["ids"]["ci-dl"]["texto"])
+
+    def _pares_ci(self, r):
+        filhos = r["ids"]["ci-dl"]["filhos"]
+        return dict(zip(filhos[0::2], filhos[1::2]))
+
+    def test_ci_com_mesmo_head_diz_mesmo_head_do_repositorio(self):
+        # R2 (17/11/2026): o painel lê /api/status ao carregar; head do CI igual ao do repositório.
+        r = _roda_telas({"modo": "telas", "funcao": "carregarCI", "ids": ["ci-dl", "ci-kpis"],
+                         "rotas": {"/api/ci": {"corpo": CI_GRAVADO}, "/api/status": {"corpo": STATUS_COM_HEAD}}})
+        self.assertEqual(r["erros"], [])
+        par = self._pares_ci(r)
+        self.assertEqual((par["head do CI"], par["head atual"]), ("ac08bf4f", "ac08bf4f"))
+        self.assertEqual(par["comparação"], "mesmo head do repositório")
+        self.assertIn("mesmo head do repositório", r["ids"]["ci-kpis"]["texto"])
+
+    def test_ci_com_head_diferente_diz_head_diferente_do_atual(self):
+        # R2 (17/11/2026): head do CI de outro commit; a tela diz que é diferente do atual, sem dizer que é o mesmo.
+        r = _roda_telas({"modo": "telas", "funcao": "carregarCI", "ids": ["ci-dl", "ci-kpis"],
+                         "rotas": {"/api/ci": {"corpo": dict(CI_GRAVADO, head="abc1234")}, "/api/status": {"corpo": STATUS_COM_HEAD}}})
+        self.assertEqual(r["erros"], [])
+        par = self._pares_ci(r)
+        self.assertEqual((par["head do CI"], par["head atual"]), ("abc1234", "ac08bf4f"))
+        self.assertEqual(par["comparação"], "head diferente do atual")
+        self.assertIn("head diferente do atual", r["ids"]["ci-kpis"]["texto"])
+        self.assertNotIn("mesmo head", r["ids"]["ci-dl"]["texto"])
+
+    def test_botoes_do_conselho_saem_de_provedores(self):
+        # Formato real de /api/provedores (17/11/2026): a lista vem em items, com total.
+        dados = {"schema_version": 1, "state": "ok", "source": "redesign/painel_operacional/relay_catalog.py (PROVIDERS)", "observed_at": "2026-11-17T08:00:00Z",
+                 "fresh_until": "2099-01-01T00:00:00Z", "total": 1, "items": [{"id": "zai", "nome": "Z.ai / GLM", "tipo": "chat", "acesso": "browser_tab_only"}]}
+        r = _roda_telas({"modo": "telas", "funcao": "montarBotoesDoConselho", "ids": ["modelos-links"], "rotas": {"/api/provedores": {"corpo": dados}}})
+        filhos = r["ids"]["modelos-links"]["filhos"]
+        self.assertEqual(filhos[0], "Modelos")
+        self.assertEqual(filhos[1], "Z.ai / GLM")
+        vazio = _roda_telas({"modo": "telas", "funcao": "montarBotoesDoConselho", "ids": ["modelos-links"], "rotas": {}})
+        self.assertIn("Sem leitura dos provedores", vazio["ids"]["modelos-links"]["filhos"][1])
+
+    def test_botoes_do_conselho_levam_o_alvo_de_cada_provedor(self):
+        # R3 (17/11/2026): /api/provedores com items no formato real; cada botão leva o id no data-alvo e o nome no texto.
+        import relay_catalog
+        itens = [{"id": p["id"], "nome": p["name"], "tipo": p["kind"], "acesso": p["access_mode"]} for p in relay_catalog.PROVIDERS]
+        dados = {"schema_version": 1, "state": "ok", "source": "redesign/painel_operacional/relay_catalog.py (PROVIDERS)",
+                 "observed_at": "2026-11-17T08:00:00Z", "fresh_until": "2099-01-01T00:00:00Z", "total": len(itens), "items": itens}
+        r = _roda_telas({"modo": "telas", "funcao": "montarBotoesDoConselho", "ids": ["modelos-links"], "rotas": {"/api/provedores": {"corpo": dados}}})
+        self.assertEqual(r["erros"], [])
+        bloco = r["ids"]["modelos-links"]
+        self.assertEqual(bloco["filhos"], ["Modelos", *[p["name"] for p in relay_catalog.PROVIDERS]])
+        self.assertEqual(bloco["alvos"], [None, *[p["id"] for p in relay_catalog.PROVIDERS]])
+
+    def test_perimetro_e_ci_envelhecidos_mostram_o_aviso_na_tela(self):
+        # R1 (17/11/2026): resultado gravado há mais de 24 h vem com envelhecido e motivo; a tela mostra o aviso e ATENÇÃO.
+        velho = dict(PERIMETRO_OK, state="warning", envelhecido=True, motivo="resultado gravado há 30 h", idade_horas=30)
+        r = _roda_telas({"modo": "telas", "funcao": "carregarPerimetro", "ids": ["perimetro-resultado", "perimetro-estado"],
+                         "rotas": {"/api/perimetro": {"corpo": velho}}})
+        self.assertEqual(r["erros"], [])
+        self.assertTrue(r["ids"]["perimetro-resultado"]["texto"].startswith("Resultado geral: OK."))
+        self.assertTrue(r["ids"]["perimetro-resultado"]["texto"].endswith(" Atenção: resultado gravado há 30 h."))
+        self.assertEqual(r["ids"]["perimetro-estado"]["texto"], "ATENÇÃO")
+        novo = dict(PERIMETRO_OK, envelhecido=False)
+        r = _roda_telas({"modo": "telas", "funcao": "carregarPerimetro", "ids": ["perimetro-resultado"],
+                         "rotas": {"/api/perimetro": {"corpo": novo}}})
+        self.assertNotIn("Atenção", r["ids"]["perimetro-resultado"]["texto"])
+        ci = dict(CI_GRAVADO, state="warning", envelhecido=True, motivo="resultado gravado há 30 h", idade_horas=30)
+        r = _roda_telas({"modo": "telas", "funcao": "carregarCI", "ids": ["ci-resultado", "ci-estado"],
+                         "rotas": {"/api/ci": {"corpo": ci}}})
+        self.assertEqual(r["erros"], [])
+        self.assertEqual(r["ids"]["ci-resultado"]["texto"], "CI LOCAL: TUDO OK Atenção: resultado gravado há 30 h.")
+        self.assertEqual(r["ids"]["ci-estado"]["texto"], "ATENÇÃO")
+
+    def test_recuperacao_mostra_as_duas_leituras_num_indicador_so(self):
+        # Formato real de /api/qualidade-llm (17/11/2026): leituras com corpus, rotulo, estado, valor, fonte e medido_em (não "data").
+        dados = {"schema_version": 1, "state": "warning", "items": [{"id": "recall_busca", "titulo": "Recuperação: recall@k da busca", "estado": "warning", "valor": "2 de 2 corpora medidos",
+                                                  "evidencia": "medido", "fonte": "scripts/medir_recuperacao.py", "leituras": [
+            {"corpus": "vault", "rotulo": "Vault: gabarito calculado na hora", "valor": "@5 90%", "estado": "ok", "fonte": "scripts/medir_recuperacao.py", "medido_em": "2026-11-16"},
+            {"corpus": "conjunto da avaliação", "rotulo": "Conjunto da avaliação, split dev", "valor": "@5 75%", "estado": "warning", "fonte": "redesign/avaliacao/recuperacao.py", "medido_em": "2026-11-15"}]}]}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarQualidade", "ids": ["qualidade-kpis", "qualidade-lista"], "rotas": {"/api/qualidade-llm": {"corpo": dados}}})
+        self.assertEqual(r["erros"], [])
+        kpis = r["ids"]["qualidade-kpis"]["texto"]
+        self.assertEqual(kpis.count("Recuperação"), 1)
+        self.assertIn("vault: @5 90%", kpis)
+        self.assertIn("conjunto da avaliação: @5 75%", kpis)
+        self.assertIn("data: 2026-11-16", kpis)
+        self.assertEqual(len(r["ids"]["qualidade-kpis"]["filhos"]), 1)
+
+    def test_visao_mostra_numeros_com_atalho_para_a_tela_de_origem(self):
+        status = {"schema_version": 1, "services": [{"unit": "a", "state": "ok"}], "timers": [], "git": {"head": "abc1234"},
+                  "chat": {"http_status": 200}, "models": {"models": []}, "proposals": {"items": []}}
+        r = _roda_telas({"modo": "telas", "funcao": "carregarVisaoSistema", "ids": ["visao-kpis"],
+                         "rotas": {"/api/status": {"corpo": status}, "/api/capacidades": {"corpo": {"schema_version": 1, "items": [{"id": "x", "state": "ok"}]}},
+                                   "/api/lacunas": {"corpo": {"schema_version": 1, "items": []}}}})
+        self.assertEqual(r["erros"], [])
+        filhos = r["ids"]["visao-kpis"]["filhos"]
+        self.assertEqual(len(filhos), 8)
+        self.assertIn("Lacunas agora", filhos[6])
+        self.assertIn("Capacidades com leitura", filhos[5])
+
+    def test_medicao_com_trava_ocupada_mostra_o_motivo_no_botao(self):
+        r = _roda_telas({"modo": "medicao", "ids": ["medir-recuperacao"],
+                         "rotas": {"/api/medicoes/executar": {"status": 429, "corpo": {"motivo": "outra medição em curso"}}}})
+        self.assertEqual(r["erros"], [])
+        self.assertEqual(r["ids"]["medir-recuperacao"]["texto"], "ocupado: outra medição em curso")
+
+    def test_gravar_e_remover_chave_usam_o_seletor_da_conexao_e_nao_o_de_tarifas(self):
+        estado = {"conexoes": [{"id": "zai", "nome": "Z.ai / GLM", "origem": "catalogo", "modos": {"api": {
+            "disponivel": True, "falta": [], "chave": {"no_cofre": True, "desde": 1700000000, "no_ambiente": False},
+            "modelo": "glm-x", "tarifa": {"entrada_usd_mtok": 1, "saida_usd_mtok": 5, "cambio_brl": 5.5, "fonte": "https://oficial", "data": "2026-11-04"}}}}],
+            "orcamento": {"provedores": {}}, "teste_rotas": {}}
+        provedores = {"state": "ok", "provedores": [{"id": "zai", "nome": "Z.ai / GLM", "tipo": "chat", "acesso": "browser_tab_only"}], "motivo": None}
+        r = _roda_telas({"modo": "gravar", "estado": estado, "provedores": provedores, "escolhas": {"seletor": "zai", "outro": "chatgpt"},
+                         "ids": ["nv-con-lista", "nv-api-nota"]})
+        self.assertEqual(r["erros"], [])
+        gravados = [p["corpo"] for p in r["pedidos"] if p["corpo"] and p["corpo"].get("acao") == "gravar_chave"]
+        removidos = [p["corpo"] for p in r["pedidos"] if p["corpo"] and p["corpo"].get("acao") == "remover_chave"]
+        self.assertEqual([(g["provedor"], g["chave"]) for g in gravados], [("zai", "chave-de-teste")])
+        self.assertEqual([x["provedor"] for x in removidos], ["zai"])
+        linha = r["ids"]["nv-con-lista"]["filhos"]
+        self.assertEqual(len(linha), 1)
+        self.assertIn("aba do navegador", linha[0])
+        self.assertIn("https://oficial · 2026-11-04", linha[0])
+        self.assertIn("no cofre desde", linha[0])

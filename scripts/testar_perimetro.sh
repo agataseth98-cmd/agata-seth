@@ -49,6 +49,8 @@ export AGATA_TESTE_PERIMETRO=1   # impede o P-16 de recursar dentro do clone
 # --selftest de scripts/perimetro/p20_decisor.py.
 export AGATA_DECISOR_URL="http://127.0.0.1:9"
 export AGATA_DECISOR_LOG="$(mktemp -d -t decisor-teste.XXXXXX)"
+# 17/11/2026 (D4): cada clone roda o perímetro inteiro e gravaria ultimo.json; a suíte grava numa pasta própria.
+export AGATA_PERIMETRO_DIR="$(mktemp -d -t perimetro-suite.XXXXXX)"
 
 OK=0; FALHOU=0; PULADO=0
 falhas_detalhe=()
@@ -732,6 +734,52 @@ if [[ -z "$FILTRO" || "$FILTRO" == "__AGREGADOS__" ]]; then
   else
     FALHOU=$((FALHOU + 1))
     falhas_detalhe+=("security: contraprovas offline de escrita, dados externos, egress e compose")
+  fi
+fi
+
+# (17/11/2026, D4 e D5) Resumos gravados ao fim do perímetro e do CI: campos, escrita atômica, rc que não muda e
+# escrita impossível silenciosa. Os dois scripts são sourceáveis (não rodam o perímetro nem o CI); tudo vai para
+# diretório temporário criado aqui.
+if [[ -z "$FILTRO" || "$FILTRO" == "__AGREGADOS__" ]]; then
+  _dir_resumos="$(mktemp -d -t resumos-teste.XXXXXX)"
+  if (
+      export AGATA_PERIMETRO_DIR="$_dir_resumos/perimetro"
+      source "$RAIZ/scripts/perimetro.sh"
+      PERIMETRO_REGISTRO=("P-1|OK" "P-2|SKIP" "P-25-SELOS|FALHA")
+      CONT_OK=1; CONT_SKIP=1; CONT_PARCIAL=0; CONT_FALHA=1
+      saida="$(_perimetro_gravar_ultimo 1)"; rc=$?
+      [ -z "$saida" ] && [ "$rc" -eq 0 ] || exit 3
+      python3 -I -c 'import json,sys,datetime
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+assert set(d)=={"gerado_em","head","resultado_geral","contagens","controles"}, sorted(d)
+assert d["resultado_geral"]=="FALHA", d["resultado_geral"]
+assert d["contagens"]=={"ok":1,"skip":1,"parcial":0,"falha":1}, d["contagens"]
+assert d["controles"]==[{"id":"P-1","veredito":"OK"},{"id":"P-2","veredito":"SKIP"},{"id":"P-25-SELOS","veredito":"FALHA"}], d["controles"]
+assert datetime.datetime.fromisoformat(d["gerado_em"]).tzinfo is not None
+assert isinstance(d["head"], str) and d["head"]' "$AGATA_PERIMETRO_DIR/ultimo.json" || exit 4
+      [ -z "$(find "$AGATA_PERIMETRO_DIR" -name ".ultimo.*.tmp")" ] || exit 5
+      : > "$_dir_resumos/arquivo"
+      AGATA_PERIMETRO_DIR="$_dir_resumos/arquivo/sub" _perimetro_gravar_ultimo 0 > "$_dir_resumos/falha.txt" 2>&1; rc2=$?
+      [ "$rc2" -eq 0 ] && [ ! -s "$_dir_resumos/falha.txt" ] || exit 6
+    ) && (
+      export AGATA_CI_DIR="$_dir_resumos/ci"
+      source "$RAIZ/scripts/ci_sdd_local.sh"
+      CI_PASSOS=("testes SDD (pytest)|1" "suite \"adversarial\" \\ barra|0")
+      FALHAS=1
+      _ci_gravar_ultimo "CI LOCAL: 1 passo(s) falharam" || exit 7
+      python3 -I -c 'import json,sys
+d=json.load(open(sys.argv[1],encoding="utf-8"))
+assert set(d)=={"gerado_em","head","ok","falha","linha_final","passos"}, sorted(d)
+assert (d["ok"], d["falha"], d["linha_final"]) == (1, 1, "CI LOCAL: 1 passo(s) falharam"), d
+assert d["passos"]==[{"nome":"testes SDD (pytest)","ok":True},{"nome":"suite \"adversarial\" \\ barra","ok":False}], d["passos"]' "$AGATA_CI_DIR/ultimo.json" || exit 8
+      : > "$_dir_resumos/arq-ci"
+      AGATA_CI_DIR="$_dir_resumos/arq-ci/sub" _ci_gravar_ultimo "x" > "$_dir_resumos/falha-ci.txt" 2>&1; rc3=$?
+      [ "$rc3" -eq 0 ] && [ ! -s "$_dir_resumos/falha-ci.txt" ] || exit 9
+    ); then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("resumos gravados (D4/D5): ultimo.json do perímetro e do CI (campos, rc e escrita falha)")
   fi
 fi
 

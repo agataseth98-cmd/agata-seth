@@ -112,28 +112,110 @@ def _ind(id_, titulo, estado, valor, evidencia, fonte):
     return {"id": id_, "titulo": titulo, "estado": estado, "valor": valor, "evidencia": evidencia, "fonte": fonte}
 
 
+def _ler(arq: Path):
+    try:
+        return json.loads(arq.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _garantir_caminho(p: Path) -> None:
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
+
+
+def _leitura_vault(rec, sem) -> dict:
+    """Leitura 1 de 2 (17/11/2026): vault com gabarito calculado na hora (scripts/medir_recuperacao.py). Por texto e,
+    se houver, por sentido: os dois são do MESMO corpus (o vault)."""
+    base = {"corpus": "vault", "rotulo": "Vault: gabarito calculado na hora (3 palavras raras por nota)",
+            "fonte": "scripts/medir_recuperacao.py"}
+    if rec and isinstance(rec.get("recall"), dict):
+        r5 = rec["recall"].get("5", 0)
+        extra = (f" · por sentido: @1 {sem['recall'].get('1', 0):.0%} · @10 {sem['recall'].get('10', 0):.0%}"
+                 if sem and isinstance(sem.get("recall"), dict) else " · por sentido: não medido")
+        return {**base, "estado": "ok" if r5 >= 0.9 else "warning",
+                "valor": f"texto: @1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})" + extra,
+                "evidencia": f"Medido em {rec.get('medido_em', '?')} com consultas de palavras raras (caso fácil da busca léxica); paráfrase: não medido.",
+                "medido_em": rec.get("medido_em") or None}
+    return {**base, "estado": "unknown", "valor": "não medido",
+            "evidencia": "rode a medição na aba Qualidade de LLM (leitura do vault; sem modelo)", "medido_em": None}
+
+
+def _leitura_conjunto(split: str, run: dict) -> dict:
+    """Leitura do conjunto da avaliação, uma por split (17/11/2026): só o método busca_texto, forma exata e paráfrase."""
+    resumo = run.get("resumo") if isinstance(run.get("resumo"), dict) else {}
+    k = resumo.get("k", 5)
+    metodo = (resumo.get("por_metodo") or {}).get("busca_texto") or {}
+    exata = metodo.get("exata") or {}
+    parafrase = metodo.get("parafrase") or {}
+    base = {"corpus": f"conjunto:{split}", "rotulo": f"Conjunto da avaliação, split {split} (relevância revisada à mão)",
+            "fonte": f"redesign/avaliacao/recuperacao.py · rodada {run.get('run_id', '?')}",
+            "medido_em": run.get("fim") or run.get("inicio")}
+    r, n = exata.get("recall_at_k"), exata.get("n")
+    if not isinstance(r, (int, float)) or not isinstance(n, int) or n <= 0:
+        return {**base, "estado": "unknown", "valor": "não medido", "evidencia": "a rodada não tem consultas exatas medidas"}
+    mrr = exata.get("mrr") if isinstance(exata.get("mrr"), (int, float)) else 0
+    if isinstance(parafrase.get("recall_at_k"), (int, float)) and parafrase.get("n"):
+        par = f"paráfrase @{k} {parafrase['recall_at_k']:.0%} (n={parafrase['n']})"
+    else:
+        par = "paráfrase: não medido"
+    return {**base, "estado": "ok" if r >= 0.9 else "warning",
+            "valor": f"@{k} {r:.0%} · MRR {mrr:.2f} (n={n}, consultas exatas) · {par}",
+            "evidencia": "Relevância revisada só nas tarefas do conjunto; n pequeno não generaliza."}
+
+
+def _leituras_conjunto() -> list[dict]:
+    """Leitura 2 de 2: a rodada mais nova de `recuperacao` em cada split, do registro comum. Só lê o resumo; não grava
+    (registro.pasta() cria diretório; por isso não é chamado daqui)."""
+    _garantir_caminho(ROOT / "redesign" / "nova_versao")
+    try:
+        import eventos
+    except ImportError:
+        return [{"corpus": "conjunto", "rotulo": "Conjunto da avaliação (por split)", "estado": "unknown",
+                 "valor": "não medido", "evidencia": "registro da avaliação indisponível nesta árvore",
+                 "fonte": "redesign/avaliacao/registro.py", "medido_em": None}]
+    pasta = eventos.dados() / "avaliacao" / "execucoes"
+    if not pasta.is_dir():
+        return []
+    vistos: dict = {}
+    for arq in sorted(pasta.glob("r-*.resumo.json"), reverse=True)[:400]:  # o nome começa pela data: o mais novo primeiro
+        try:
+            if arq.stat().st_size > 1_048_576:
+                continue
+            run = json.loads(arq.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(run, dict) or run.get("medidor") != "recuperacao" or run.get("estado") != "concluida":
+            continue
+        split = run.get("split")
+        if isinstance(split, str) and split not in vistos:
+            vistos[split] = run
+    return [_leitura_conjunto(split, vistos[split]) for split in sorted(vistos)]
+
+
+def _recall_busca(pasta: Path) -> dict:
+    """recall_busca com DUAS leituras separadas por corpus (17/11/2026). Nenhum número é misturado nem média."""
+    leituras = [_leitura_vault(_ler(pasta / "recuperacao.json"), _ler(pasta / "recuperacao-semantica.json"))]
+    leituras += _leituras_conjunto() or [{"corpus": "conjunto", "rotulo": "Conjunto da avaliação (por split)",
+                                          "estado": "unknown", "valor": "não medido",
+                                          "evidencia": "nenhuma rodada de recuperação na avaliação; rode pela aba Qualidade de LLM",
+                                          "fonte": "redesign/avaliacao/recuperacao.py", "medido_em": None}]
+    medidas = [x for x in leituras if x["estado"] != "unknown"]
+    if not medidas:
+        estado, valor = "unknown", "não medido"
+    else:
+        estado = "warning" if any(x["estado"] == "warning" for x in medidas) else "ok"
+        valor = f"{len(medidas)} de {len(leituras)} corpora medidos; cada número traz o seu corpus (ver leituras)"
+    return {"id": "recall_busca", "titulo": "Recuperação: recall@k da busca", "estado": estado, "valor": valor,
+            "evidencia": "Duas leituras que não se somam: o vault (gabarito calculado) e o conjunto da avaliação (por split).",
+            "fonte": "scripts/medir_recuperacao.py · redesign/avaliacao/recuperacao.py", "leituras": leituras}
+
+
 def _medicoes() -> list[dict]:
     """Indicadores que dependem de medição pesada salva pelo painel; sem arquivo, saem como não medidos."""
     pasta = Path(os.environ.get("AGATA_MEDICOES_DIR", Path.home() / ".cache" / "agata" / "painel" / "medicoes"))
-    def ler(arq):
-        try:
-            return json.loads(arq.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return None
-    rec = ler(pasta / "recuperacao.json")
-    if rec and isinstance(rec.get("recall"), dict):
-        r5 = rec["recall"].get("5", 0)
-        sem = ler(pasta / "recuperacao-semantica.json")
-        extra = (f" · por sentido: @1 {sem['recall'].get('1', 0):.0%} · @10 {sem['recall'].get('10', 0):.0%}"
-                 if sem and isinstance(sem.get("recall"), dict) else " · por sentido: não medido")
-        a = _ind("recall_busca", "Recuperação: recall@k da busca", "ok" if r5 >= 0.9 else "warning",
-                 f"texto: @1 {rec['recall'].get('1', 0):.0%} · @5 {r5:.0%} · MRR {rec.get('mrr', 0):.2f} (n={rec.get('n', '?')})" + extra,
-                 f"Medido em {rec.get('medido_em', '?')} com consultas de palavras raras (caso fácil da busca léxica); paráfrase: não medido.",
-                 "scripts/medir_recuperacao.py")
-    else:
-        a = _ind("recall_busca", "Recuperação: recall@k da busca", "unknown", "não medido",
-                 "rode a medição na aba Qualidade de LLM (leitura do vault; sem modelo)", "scripts/medir_recuperacao.py")
-    modelos = [d for d in (ler(x) for x in sorted(pasta.glob("contexto-*.json"))) if d and "linhas" in d]
+    a = _recall_busca(pasta)
+    modelos = [d for d in (_ler(x) for x in sorted(pasta.glob("contexto-*.json"))) if d and "linhas" in d]
     if modelos:
         partes = [f"{d.get('modelo', '?')} ({d.get('tarefa', 'agulha')}): " + (f"≥{d['efetivo_tokens']} tokens" if d.get("efetivo_tokens") else "abaixo do menor comprimento") for d in modelos]
         pior = min((d.get("efetivo_tokens") or 0) for d in modelos)
@@ -186,6 +268,7 @@ def snapshot(raiz: Path = ROOT) -> dict:
 def _selftest() -> int:
     import tempfile
     os.environ["AGATA_MEDICOES_DIR"] = tempfile.mkdtemp()
+    os.environ["AGATA_NV_DIR"] = tempfile.mkdtemp()  # 17/11/2026: sem isto, o selftest leria as rodadas reais da avaliação
     falhou = 0
     def conferir(nome, cond):
         nonlocal falhou
