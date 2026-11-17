@@ -25,6 +25,7 @@ const proposalChecks = new Map();
 const PREFIXO_IMPORTADO = /^\[LibreChat\] +/;
 const tituloDaLista = (texto) => String(texto || "").replace(PREFIXO_IMPORTADO, "");
 
+const contar = (n, um, varios) => n + " " + (n === 1 ? um : varios);
 function setSidebarCollapsed(collapsed) {
   shell.classList.toggle("sidebar-collapsed", collapsed);
   sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
@@ -58,20 +59,20 @@ function filterSearch(value) {
   const ativos = subsAtivos();
   if (!ativos.length) return;
   const query = value.toLocaleLowerCase("pt-BR");
-  let cards = 0; let visible = 0; let capacidadesAbertas = false;
+  let cards = 0; let visible = 0; let listaAberta = false;
   ativos.forEach((ativo) => {
-    const capacidades = ativo.dataset.sub === "capacidades";
-    if (capacidades) capacidadesAbertas = true;
+    const lista = ativo.dataset.sub === "integracoes";
+    if (lista) listaAberta = true;
     [...ativo.querySelectorAll(".cap-card")].forEach((card) => {
       cards++;
       const matchesText = !query || card.innerText.toLocaleLowerCase("pt-BR").includes(query);
-      const matchesState = !capacidades || capFilter === "all" || card.dataset.state === capFilter;
+      const matchesState = !lista || capFilter === "all" || card.dataset.state === capFilter;
       card.hidden = !(matchesText && matchesState);
       if (!card.hidden) visible++;
     });
   });
   const empty = byId("no-results");
-  if (empty) empty.classList.toggle("show", capacidadesAbertas && cards > 0 && visible === 0);
+  if (empty) empty.classList.toggle("show", listaAberta && cards > 0 && visible === 0);
 }
 
 // Estados de uma seção: carregando, vazio ou erro. Ficam ocultos no HTML; aqui só um aparece por vez.
@@ -89,9 +90,8 @@ AgataPainel.fetchJson = (url, options, timeoutMs) => fetchJson(url, options, tim
 
 // Carregamento de cada subpainel quando ele abre (nomes = data-sub do HTML).
 const CARREGAR_SUB = {
-  integracoes: () => loadDetails(),
+  integracoes: () => { loadDetails(); loadCapacidades(); },
   memoria: () => loadDetails(),
-  capacidades: () => loadCapacidades(),
   grafo: () => carregarGrafo(),
   lacunas: () => { calcularLacunas(); carregarLacunasCanon(); },
   visao: () => carregarVisaoSistema(),
@@ -100,6 +100,12 @@ const CARREGAR_SUB = {
   frentes: () => carregarFrentes(),
   importantes: () => carregarImportantes(),
   "conselho-memoria": () => carregarMemoriaConselho(),
+  // 17/11/2026: telas de leitura nova (Sistema e Qualidade). Cada uma lê a própria rota ao abrir.
+  equipe: () => carregarEquipe(),
+  backup: () => carregarBackup(),
+  "saida-rede": () => carregarEgress(),
+  perimetro: () => carregarPerimetro(),
+  ci: () => carregarCI(),
   // História (11/11/2026): historia.js registra AgataPainel.carregarHistoria ao carregar; antes disso, não faz nada.
   historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
 };
@@ -415,8 +421,6 @@ function render(snapshot, forced = false) {
   chip("timer-panel-state", timerState, timerState === "ok" ? "LEITURA VÁLIDA" : null);
   set("overview-timers", timerState === "unknown" ? "—" : timerState === "stale" ? "Vencida" : timerStates.filter((x) => x === "ok").length + "/" + timerStates.length);
   replaceRows("live-timers", timerRows(timers, forced), "Timers indisponíveis.");
-  replaceRows("maintenance-timers", timerRows(timers, forced), "Timers indisponíveis.");
-  replaceRows("live-tasks", taskRows(snapshot.maintenance, forced), "Tarefas indisponíveis.");
   replaceRows("maintenance-tasks", taskRows(snapshot.maintenance, forced), "Tarefas indisponíveis.");
   set("timer-age", "Fonte: systemctl de usuário · disparo, resultado da unidade e resultado de cada tarefa são leituras distintas.");
   renderProposals(snapshot.proposals || {}, forced);
@@ -438,21 +442,39 @@ function rotuloDoCartao(itens, estados) {
   if (estados.length === 1 && estados[0] === "stale") return ["chip partial", "DESATUALIZADO"];
   return ["chip partial", "ATENÇÃO"];
 }
-// Cartões com data-unit (sem data-fonte) recebem o estado lido de /api/details. Os de data-fonte="status" leem /api/status (renderCartoesDeStatus).
+// Cartões com data-unit (sem data-fonte) recebem o estado lido de /api/details. Os de data-fonte="status" leem /api/status.
+// 17/11/2026: a lista é uma só (Sistema > Integrações). Cada cartão tem uma pílula: a da leitura da própria rota ou, sem rota, a da sonda.
+function aplicarLeitura(cartao, [classe, rotulo], partes, fonte, comHora) {
+  const selo = cartao.querySelector(".chip"); const linha = cartao.querySelector("p.subnote"); const hora = cartao.querySelector(".cap-hora");
+  if (!selo || !linha) return;
+  selo.className = classe; selo.textContent = rotulo;
+  linha.textContent = partes.join("; ");
+  if (hora) hora.textContent = comHora && comHora.observed_at ? "lido " + niceTime(comHora.observed_at) : "hora não medida";
+  cartao.dataset.leitura = partes.join(". ");
+  cartao.dataset.fonteLida = fonte;
+  comporEvidencia(cartao);
+}
+// Evidência = texto fixo do HTML + leitura viva (unidades ou status) + sonda de capacidade. Documento não tem leitura.
+function comporEvidencia(cartao) {
+  const botao = cartao.querySelector("button.evidence");
+  if (!botao || cartao.dataset.probe === "documento") return;
+  if (!botao.dataset.base) { botao.dataset.base = botao.dataset.body || ""; botao.dataset.fonteBase = botao.dataset.source || ""; }
+  botao.dataset.body = [botao.dataset.base, cartao.dataset.leitura, cartao.dataset.sonda ? "Sonda de capacidade: " + cartao.dataset.sonda : ""].filter(Boolean).join(" ");
+  botao.dataset.source = [cartao.dataset.fonteLida, cartao.dataset.sondaFonte, botao.dataset.fonteBase].filter(Boolean).join(" · ");
+}
+function evidenciaDe(botao, texto, fonte) {
+  if (!botao) return;
+  botao.dataset.body = texto;
+  botao.dataset.source = fonte;
+}
 function renderIntegrationCards(items, forced = false) {
   const porUnidade = new Map((items || []).map((item) => [item.unit, item]));
   document.querySelectorAll("#integration-list .cap-card[data-unit]:not([data-fonte])").forEach((cartao) => {
-    const selo = cartao.querySelector(".chip");
-    const linha = cartao.querySelector("p.subnote");
-    if (!selo || !linha) return;
     const unidades = cartao.dataset.unit.split(" ");
     const itens = unidades.map((u) => porUnidade.get(u));
     const estados = unidades.map((u) => stateOf(porUnidade.get(u), forced));
-    const [classe, rotulo] = rotuloDoCartao(itens, estados);
-    selo.className = classe; selo.textContent = rotulo;
     const partes = unidades.map((u, i) => linhaDaUnidade(u, itens[i], forced));
-    linha.textContent = partes.join("; ");
-    evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/details. " + partes.join(". ") + ".", "/api/details · " + unidades.join(", "));
+    aplicarLeitura(cartao, rotuloDoCartao(itens, estados), partes, "/api/details · " + unidades.join(", "), itens.find(Boolean));
   });
 }
 // F11 (16/11/2026): cartões que dependem de /api/status (gateway da Seth, OmniRoute e timers) leem o snapshot do Panorama.
@@ -460,21 +482,14 @@ function renderIntegrationCards(items, forced = false) {
 function renderCartoesDeStatus(snapshot, forced = false) {
   const lidos = [...(snapshot.services || []), ...(snapshot.timers || [])];
   document.querySelectorAll("#integration-list .cap-card[data-fonte='status'][data-unit]").forEach((cartao) => {
-    const selo = cartao.querySelector(".chip"); const linha = cartao.querySelector("p.subnote");
-    if (!selo || !linha) return;
     const unidades = cartao.dataset.unit.split(" ");
     const itens = unidades.map((u) => lidos.find((i) => i.unit === u));
     const estados = itens.map((item) => stateOf(item, forced));
-    const [classe, rotulo] = rotuloDoCartao(itens, estados);
-    selo.className = classe; selo.textContent = rotulo;
     const partes = unidades.map((u, i) => linhaDaUnidade(u, itens[i], forced));
-    linha.textContent = partes.join("; ");
-    evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/status. " + partes.join(". ") + ".", "/api/status · " + unidades.join(", "));
+    aplicarLeitura(cartao, rotuloDoCartao(itens, estados), partes, "/api/status · " + unidades.join(", "), itens.find(Boolean));
   });
   const cartao = document.querySelector("#integration-list .cap-card[data-fonte='chat']");
   if (!cartao) return;
-  const selo = cartao.querySelector(".chip"); const linha = cartao.querySelector("p.subnote");
-  if (!selo || !linha) return;
   const chat = snapshot.chat || null;
   const estado = stateOf(chat, forced);
   const http = chat && Number.isInteger(chat.http_status) ? "HTTP " + chat.http_status : null;
@@ -485,10 +500,7 @@ function renderCartoesDeStatus(snapshot, forced = false) {
     ausente: ["chip ausente", "NÃO EXISTE (ESCOPO DO USUÁRIO)"],
     unknown: ["chip horizon", "SEM LEITURA"],
   };
-  const [classe, rotulo] = rotulos[estado] || rotulos.unknown;
-  selo.className = classe; selo.textContent = rotulo;
-  linha.textContent = sourceLine(chat) + (chat && chat.error ? " · " + chat.error : "");
-  evidenciaDe(cartao.querySelector("button.evidence"), "Leitura de /api/status, gateway da Seth. " + linha.textContent, "/api/status · chat");
+  aplicarLeitura(cartao, rotulos[estado] || rotulos.unknown, [sourceLine(chat) + (chat && chat.error ? " · " + chat.error : "")], "/api/status · chat", chat);
 }
 function renderDetails(data, forced = false) {
   renderedDetailsState = detailsStateKey(data, forced);
@@ -642,7 +654,8 @@ setInterval(() => {
 }, 5000);
 atualizarPanorama();
 
-/* (27/10/2026) Selo de cada capacidade vem de /api/capacidades; sem sonda, o cartão é documento. */
+/* (27/10/2026) Selo de cada capacidade vem de /api/capacidades; sem sonda, o cartão é documento.
+   17/11/2026: os cartões da lista de integrações; a sonda entra na evidência e, sem rota de leitura, na pílula. */
 async function loadCapacidades() {
   let dados = null;
   try { dados = await fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
@@ -652,59 +665,311 @@ async function loadCapacidades() {
     const item = porId.get(el.dataset.live);
     el.textContent = item ? (rotuloVivo[item.state] || "sem leitura") : "sem leitura";
   });
-  document.querySelectorAll("[data-sub='capacidades'] .cap-card").forEach((cartao) => {
+  document.querySelectorAll("#integration-list .cap-card").forEach((cartao) => {
     const chip = cartao.querySelector(".chip");
     const probe = cartao.dataset.probe;
+    const hora = cartao.querySelector(".cap-hora");
     if (!chip) return;
     if (probe === "documento") {
       cartao.dataset.state = "documento";
       chip.className = "chip horizon"; chip.textContent = "DOCUMENTO · sem leitura";
+      if (hora) hora.textContent = "sem sonda";
       const botao = cartao.querySelector("button.evidence");
       if (botao) { botao.dataset.body = "Esta capacidade é documento: não há sonda de leitura. O texto descreve o desenho e não é medição do sistema."; botao.dataset.source = "documento do canon"; }
       return;
     }
+    if (!probe) return;
+    const lidaPorRota = Boolean(cartao.dataset.unit || cartao.dataset.fonte);
     const item = porId.get(probe);
-    if (!item) { cartao.dataset.state = "planned"; chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; return; }
-    cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned"}[item.state] || "planned";
-    const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
-    chip.className = rotulo[0]; chip.textContent = rotulo[1];
+    if (!item) {
+      cartao.dataset.state = "planned";
+      cartao.dataset.sonda = "sem leitura da sonda nesta medição.";
+      if (!lidaPorRota) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; }
+    } else {
+      cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned"}[item.state] || "planned";
+      cartao.dataset.sonda = item.evidencia || "sem leitura nesta medição.";
+      cartao.dataset.sondaFonte = item.source + " · " + item.source_ref;
+      if (!lidaPorRota) {
+        const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
+        chip.className = rotulo[0]; chip.textContent = rotulo[1];
+        if (hora) hora.textContent = dados && dados.observed_at ? "lido " + niceTime(dados.observed_at) : "hora não medida";
+      }
+    }
     ligarCartoesClicaveis();
-    const botao = cartao.querySelector("button.evidence");
-    if (botao) { botao.dataset.body = item.evidencia || "Sem leitura nesta medição."; botao.dataset.source = item.source + " · " + item.source_ref; }
+    comporEvidencia(cartao);
   });
 }
+/* 17/11/2026: telas de leitura nova. Cada rota responde state, source, observed_at e fresh_until; sem_leitura traz motivo.
+   Rota que não responde vira "sem leitura" com o motivo: nada antigo aparece como atual. */
+const ESTADO_LIDO = {
+  ok: ["LEITURA VÁLIDA", "chip active"], warning: ["ATENÇÃO", "chip partial"], falha: ["FALHA", "chip erro"],
+  sem_leitura: ["SEM LEITURA", "chip horizon"], ausente: ["AUSENTE", "chip ausente"],
+};
+function estadoDe(dados) { return (dados && dados.state) || "sem_leitura"; }
+function pilulaLida(el, estado) {
+  if (!el) return;
+  const [texto, classe] = ESTADO_LIDO[estado] || ESTADO_LIDO.sem_leitura;
+  el.className = classe; el.textContent = texto;
+}
+async function lerRotaTela(url) {
+  try {
+    return await fetchJson(url, {headers: {Accept: "application/json"}});
+  } catch (erro) {
+    return {state: "sem_leitura", motivo: "a rota " + url + " não respondeu (" + erro.message + ")"};
+  }
+}
+function fonteDaTela(dados) {
+  if (estadoDe(dados) === "sem_leitura") return "Sem leitura: " + ((dados && dados.motivo) || "motivo não informado") + ".";
+  return sourceLine(dados);
+}
+function mosaico(kp, rotulo, valor, nota) {
+  const d = document.createElement("div"); d.className = "kpi";
+  const l = document.createElement("div"); l.className = "label"; l.textContent = rotulo;
+  const v = document.createElement("div"); v.className = "value"; v.textContent = valor === null || valor === undefined || valor === "" ? "não medido" : String(valor);
+  d.append(l, v);
+  if (nota) { const n = document.createElement("div"); n.className = "note"; n.textContent = nota; d.append(n); }
+  kp.append(d);
+}
+function pares(dl, lista) {
+  dl.replaceChildren();
+  lista.forEach(([chave, valor]) => {
+    const dt = document.createElement("dt"); dt.textContent = chave;
+    const dd = document.createElement("dd"); dd.textContent = valor === null || valor === undefined || valor === "" ? "não medido" : String(valor);
+    dl.append(dt, dd);
+  });
+}
+// Linha de tabela: cada célula é texto, ou {pilula: true, classe, texto} para o selo de estado.
+function linhasDaTabela(tbody, linhas, vazio, colunas) {
+  tbody.replaceChildren();
+  if (!linhas.length) {
+    const tr = document.createElement("tr"); const td = document.createElement("td");
+    td.className = "vazio"; td.textContent = vazio; td.colSpan = colunas; tr.append(td); tbody.append(tr);
+    return;
+  }
+  linhas.forEach((celulas) => {
+    const tr = document.createElement("tr");
+    celulas.forEach((c) => {
+      const td = document.createElement("td");
+      if (c && c.pilula) { const s = document.createElement("span"); s.className = c.classe; s.textContent = c.texto; td.append(s); }
+      else td.textContent = c === null || c === undefined || c === "" ? "não medido" : String(c);
+      tr.append(td);
+    });
+    tbody.append(tr);
+  });
+}
+const pilulaSim = (valor, simTxt = "sim", naoTxt = "não") => ({pilula: true, classe: valor === true ? "chip active" : valor === false ? "chip partial" : "chip horizon", texto: valor === true ? simTxt : valor === false ? naoTxt : "não medido"});
+
+/* 17/11/2026 (contrato real): /api/equipe, /api/backup, /api/egress e /api/perimetro trazem blocos com state próprio.
+   Lista vazia ou bloco com state sem_leitura nunca vira número: sai "não medido" ou o motivo que o servidor deu. */
+const blocoLido = (b) => !!b && !!b.state && b.state !== "sem_leitura";
+const listaDe = (x) => (Array.isArray(x) ? x : []);
+const simNao = (v) => (v === true ? "sim" : v === false ? "não" : null);
+const dataLida = (v) => (v ? niceTime(v) : null);
+
+async function carregarEquipe() {
+  const d = await lerRotaTela("/api/equipe");
+  const estado = estadoDe(d); const lido = estado !== "sem_leitura";
+  const sessao = d.sessao || {}; const sessaoLida = blocoLido(d.sessao);
+  const presentes = listaDe(sessao.presentes); const esperados = listaDe(sessao.esperados);
+  // Sem lista de esperados, o servidor marca os vigias como sem_leitura: a tela diz isso com as palavras dela.
+  const semEsperados = !esperados.length;
+  const ausentesBloco = d.ausentes || {}; const ausentesLidos = blocoLido(d.ausentes); const ausentes = listaDe(ausentesBloco.itens);
+  const divergencias = listaDe(d.divergencias);
+  const itensBloco = d.itens || {}; const agentes = listaDe(itensBloco.agentes);
+  const vigiasBloco = d.vigias || {}; const vigias = listaDe(vigiasBloco.itens);
+  const eventosBloco = d.eventos || {}; const eventos = listaDe(eventosBloco.linhas);
+  set("equipe-resultado", lido
+    ? "Sessão " + (sessao.estado || "não medida") + (sessao.base ? " em " + sessao.base : "") + ": " + (sessaoLida ? contar(presentes.length, "presente", "presentes") : "presentes não medidos") + ", " + (ausentesLidos ? contar(ausentes.length, "ausente", "ausentes") : "ausentes não medidos") + " e " + contar(divergencias.length, "divergência", "divergências") + "."
+    : "Sem leitura da equipe: " + ((d && d.motivo) || "motivo não informado") + ".");
+  const kp = byId("equipe-kpis"); kp.replaceChildren();
+  mosaico(kp, "Presentes", sessaoLida ? presentes.length : null, "sessão " + (sessao.estado || "não medida"));
+  mosaico(kp, "Ausentes", ausentesLidos ? ausentes.length : null, "com motivo e origem");
+  mosaico(kp, "Divergências", lido ? divergencias.length : null, divergencias.length ? "em destaque abaixo" : "nenhuma nesta leitura");
+  mosaico(kp, "Eventos", blocoLido(d.eventos) ? eventos.length : null, "últimos da leitura");
+  pilulaLida(byId("equipe-estado"), estado);
+  pares(byId("equipe-sessao"), [["estado", sessao.estado], ["base", sessao.base],
+    ["agentes esperados", semEsperados ? "sessão sem lista de esperados" : esperados.join(", ")]]);
+  set("equipe-fonte", fonteDaTela(d) + (lido && d.divergencias_motivo ? " Divergências: " + d.divergencias_motivo + "." : ""));
+  byId("equipe-divergencias-bloco").hidden = !divergencias.length;
+  const listaDiv = byId("equipe-divergencias"); listaDiv.replaceChildren();
+  divergencias.forEach((texto) => { const li = document.createElement("li"); li.textContent = String(texto); listaDiv.append(li); });
+  linhasDaTabela(byId("equipe-presentes"), presentes.map((p) => [p.agente, dataLida(p.desde)]), "Nenhum agente presente nesta leitura.", 2);
+  linhasDaTabela(byId("equipe-ausentes"), ausentes.map((x) => [x.agente, dataLida(x.desde), x.motivo, listaDe(x.origem).join(", ")]), "Nenhum agente ausente nesta leitura.", 4);
+  linhasDaTabela(byId("equipe-itens"), agentes.map((a) => [a.agente,
+    (a.total != null ? "total " + a.total + " · " : "") + (Object.entries(a.por_estado || {}).map(([k, n]) => k + ": " + n).join(" · ") || "não medido")]), "Sem itens por agente.", 2);
+  const vig = byId("equipe-vigias"); vig.replaceChildren();
+  if (!lido || !blocoLido(vigiasBloco)) {
+    const p = document.createElement("p"); p.className = "vazio";
+    p.textContent = !lido ? "Vigias sem leitura: " + ((d && d.motivo) || "motivo não informado") + "."
+      : semEsperados ? "Vigias: sessão sem lista de esperados."
+        : "Vigias sem leitura: " + (vigiasBloco.motivo || "motivo não informado") + ".";
+    vig.append(p);
+  } else if (!vigias.length) {
+    const p = document.createElement("p"); p.className = "vazio"; p.textContent = "Sem vigias nesta leitura."; vig.append(p);
+  }
+  vigias.forEach((v) => {
+    const linha = document.createElement("div"); linha.className = "service";
+    const nome = document.createElement("span"); nome.textContent = (v.agente ? v.agente + " · " : "") + (v.unit || "unidade não informada");
+    const selo = document.createElement("b"); selo.textContent = (ESTADO_LIDO[v.state] || ESTADO_LIDO.sem_leitura)[0] + (v.active_state ? " · " + v.active_state : "");
+    linha.append(nome, selo); vig.append(linha);
+  });
+  const ev = byId("equipe-eventos"); ev.replaceChildren();
+  if (!eventos.length) {
+    const li = document.createElement("li");
+    li.textContent = !lido ? "Eventos sem leitura: " + ((d && d.motivo) || "motivo não informado") + "."
+      : blocoLido(eventosBloco) ? "Nenhum evento nesta leitura." : "Eventos sem leitura: " + (eventosBloco.motivo || "motivo não informado") + ".";
+    ev.append(li);
+  }
+  eventos.forEach((e) => { const li = document.createElement("li"); li.textContent = typeof e === "string" ? e : JSON.stringify(e); ev.append(li); });
+}
+
+// P-12 (17/11/2026): o veredito vem do último perímetro gravado (/api/perimetro, controle P-12), não do registro de cobertura.
+function p12DoPerimetro(per) {
+  if (estadoDe(per) === "sem_leitura") return {veredito: null, data: null, texto: "P-12: sem leitura (" + ((per && per.motivo) || "motivo não informado") + ")."};
+  const controle = listaDe(per.controles).find((c) => c.id === "P-12");
+  if (!controle) return {veredito: null, data: per.gerado_em || null, texto: "P-12: sem leitura (o último perímetro não traz o controle P-12)."};
+  return {veredito: controle.veredito || null, data: per.gerado_em || null,
+    texto: "P-12: " + (controle.veredito || "não medido") + " no último perímetro gravado em " + (per.gerado_em ? niceTime(per.gerado_em) : "data não informada") + "."};
+}
+
+async function carregarBackup() {
+  const [d, per] = await Promise.all([lerRotaTela("/api/backup"), lerRotaTela("/api/perimetro")]);
+  const estado = estadoDe(d); const lido = estado !== "sem_leitura";
+  const p12 = p12DoPerimetro(per);
+  const hd = d.hd || {};
+  const recursos = listaDe(d.recursos);
+  const dentro = recursos.filter((r) => r.dentro_da_regua === true).length;
+  const pendentes = typeof d.pendentes_hd === "number" ? d.pendentes_hd : null;
+  const regua = d.regua_dias;
+  set("backup-resultado", p12.texto + " " + (lido
+    ? "Registro de cobertura (última verificação anotada): " + dentro + " de " + recursos.length + " recursos dentro da régua de " + (regua ?? "não medida") + " dias."
+    : "Sem leitura do registro de cobertura: " + ((d && d.motivo) || "motivo não informado") + "."));
+  const chipP12 = byId("backup-p12-estado");
+  if (chipP12) {
+    chipP12.className = p12.veredito ? classeDoVeredito(p12.veredito) : "chip horizon";
+    chipP12.textContent = p12.veredito ? "P-12 " + String(p12.veredito).toUpperCase() : "P-12 SEM LEITURA";
+  }
+  pares(byId("backup-p12"), [["veredito", p12.veredito], ["perímetro gravado em", p12.data ? niceTime(p12.data) : null]]);
+  set("backup-p12-fonte", "Fonte: " + ((per && per.source) || "/api/perimetro") + ". Controle P-12 do perímetro, não o registro de cobertura abaixo.");
+  const kp = byId("backup-kpis"); kp.replaceChildren();
+  mosaico(kp, "Recursos dentro da régua", lido && recursos.length ? dentro + " de " + recursos.length : null, "registro de cobertura, abaixo");
+  mosaico(kp, "Régua do registro", lido && regua != null ? regua + " dias" : null, "não é o veredito do P-12");
+  mosaico(kp, "Pendentes no HD", lido ? pendentes : null, "a copiar");
+  pilulaLida(byId("backup-estado"), estado);
+  pares(byId("backup-presenca"), [["HD presente", simNao(hd.presente)], ["repositório presente", simNao(hd.repositorio_presente)]]
+    .concat(hd.motivo ? [["motivo", hd.motivo]] : []));
+  set("backup-fonte", fonteDaTela(d));
+  set("backup-regua-nota", "O registro de cobertura (última verificação anotada) tem régua de " + (regua ?? "não medida") + " dias. Essa régua não é o veredito do P-12: o P-12 vem do último perímetro gravado.");
+  linhasDaTabela(byId("backup-recursos"), recursos.map((r) => [r.recurso, dataLida(r.verificado_em), r.idade_dias, r.snapshot, pilulaSim(r.dentro_da_regua, "dentro", "fora")]), "Sem recursos lidos.", 5);
+  byId("backup-recursos-vazio").hidden = recursos.length > 0;
+  set("backup-pendentes", pendentes === null ? "" : "Pendentes no HD: " + pendentes + " (a copiar).");
+}
+
+// Saída de rede (17/11/2026): binarios é uma lista; cada item traz nome, presente, mtime e em_dia.
+function seloEmDia(b) {
+  if (b.em_dia === true) return {pilula: true, classe: "chip active", texto: "em dia"};
+  if (b.presente === false) return {pilula: true, classe: "chip erro", texto: "ausente"};
+  if (b.em_dia === false) return {pilula: true, classe: "chip partial", texto: "fora de dia"};
+  return {pilula: true, classe: "chip horizon", texto: "não medido"};
+}
+async function carregarEgress() {
+  const d = await lerRotaTela("/api/egress");
+  const estado = estadoDe(d); const lido = estado !== "sem_leitura";
+  const bins = listaDe(d.binarios);
+  const emDia = bins.filter((b) => b.em_dia === true).length;
+  const rust = simNao(d.navegador_usa_rust);
+  const paridade = d.paridade === null || d.paridade === undefined || d.paridade === "" ? "sem registro" : (typeof d.paridade === "string" ? d.paridade : JSON.stringify(d.paridade));
+  set("egress-resultado", lido
+    ? "Binários em dia: " + emDia + " de " + bins.length + ". Navegador usa Rust: " + (rust || "não medido") + ". Paridade: " + paridade + "."
+    : "Sem leitura da saída de rede: " + ((d && d.motivo) || "motivo não informado") + ".");
+  const kp = byId("egress-kpis"); kp.replaceChildren();
+  mosaico(kp, "Binários em dia", lido && bins.length ? emDia + " de " + bins.length : null, "egress e egress-socks5");
+  pilulaLida(byId("egress-estado"), estado);
+  linhasDaTabela(byId("egress-binarios"), bins.map((b) => [b.nome, simNao(b.presente), b.mtime, seloEmDia(b)]), "Sem binários lidos.", 4);
+  pares(byId("egress-dl"), [["navegador usa Rust", rust], ["paridade", paridade]]);
+  set("egress-fonte", fonteDaTela(d) + (lido && d.motivo ? " Motivo: " + d.motivo + "." : ""));
+}
+
+// Veredito de controle (perímetro e P-12): cor e palavra, nunca só cor.
+// O perímetro grava o veredito em maiúsculas (OK, PARCIAL, SKIP, FALHA): a comparação ignora a caixa.
+const classeDoVeredito = (v) => ({ok: "chip active", falha: "chip erro", parcial: "chip partial", skip: "chip horizon"}[String(v || "").toLowerCase()] || "chip horizon");
+
+async function carregarPerimetro() {
+  const d = await lerRotaTela("/api/perimetro");
+  const estado = estadoDe(d); const lido = estado !== "sem_leitura";
+  const cont = d.contagens || {}; const controles = listaDe(d.controles);
+  // R1 (17/11/2026): resultado gravado há mais de 24 h aparece com aviso, mesmo com contagens OK.
+  const aviso = lido && d.envelhecido ? " Atenção: " + (d.motivo || "resultado gravado há muito tempo") + "." : "";
+  set("perimetro-resultado", lido
+    ? "Resultado geral: " + (d.resultado_geral || "não medido") + ". Contagens: " + (cont.ok ?? "não medido") + " ok, " + (cont.falha ?? "não medido") + " falha(s)." + aviso
+    : "Sem leitura do perímetro: " + ((d && d.motivo) || "motivo não informado") + ".");
+  const kp = byId("perimetro-kpis"); kp.replaceChildren();
+  mosaico(kp, "Resultado geral", lido ? d.resultado_geral : null);
+  mosaico(kp, "OK", lido ? cont.ok : null, "controles");
+  mosaico(kp, "Skip", lido ? cont.skip : null, "pulados");
+  mosaico(kp, "Parcial", lido ? cont.parcial : null, "controles");
+  mosaico(kp, "Falha", lido ? cont.falha : null, "controles");
+  mosaico(kp, "Idade do resultado", lido && d.idade_horas != null ? d.idade_horas + " h" : null, "desde a gravação");
+  pilulaLida(byId("perimetro-estado"), estado);
+  linhasDaTabela(byId("perimetro-controles"), controles.map((c) => [c.id, {pilula: true, classe: classeDoVeredito(c.veredito), texto: String(c.veredito || "não medido")}]),
+    "Sem controles lidos.", 2);
+  set("perimetro-fonte", fonteDaTela(d) + " · head " + (d.head || "não informado") + " · gerado em " + (dataLida(d.gerado_em) || "não informado") + ".");
+}
+
+async function carregarCI() {
+  const d = await lerRotaTela("/api/ci");
+  const estado = estadoDe(d); const lido = estado !== "sem_leitura";
+  const atual = lastSnapshot && lastSnapshot.git && lastSnapshot.git.head ? String(lastSnapshot.git.head) : null;
+  const ciHead = d.head ? String(d.head) : null;
+  const mesmo = ciHead && atual ? (ciHead.startsWith(atual) || atual.startsWith(ciHead)) : null;
+  const comparacao = !ciHead ? "CI sem head gravado" : mesmo === null ? "head atual não medido" : mesmo ? "mesmo head do repositório" : "head diferente do atual";
+  // Falhas primeiro: ok falso antes de ok verdadeiro.
+  const passos = (Array.isArray(d.passos) ? d.passos : []).slice().sort((a, b) => (a.ok === true) - (b.ok === true));
+  // R1 (17/11/2026): resultado gravado há mais de 24 h aparece com aviso, mesmo com linha final OK.
+  const avisoCI = lido && d.envelhecido ? " Atenção: " + (d.motivo || "resultado gravado há muito tempo") + "." : "";
+  set("ci-resultado", lido ? (d.linha_final || "Sem linha final nesta leitura.") + avisoCI : "Sem leitura do CI: " + ((d && d.motivo) || "motivo não informado") + ".");
+  const kp = byId("ci-kpis"); kp.replaceChildren();
+  mosaico(kp, "Passos ok", lido ? d.ok : null, "da última execução");
+  mosaico(kp, "Falhas", lido ? d.falha : null, !lido ? "sem leitura" : passos.some((p) => p.ok === false) ? "primeiros na lista" : "nenhuma falha");
+  mosaico(kp, "Idade", lido && d.idade_horas != null ? d.idade_horas + " h" : null, "desde a gravação");
+  mosaico(kp, "Head", lido ? comparacao : null, ciHead ? ciHead.slice(0, 10) : null);
+  pilulaLida(byId("ci-estado"), estado);
+  pares(byId("ci-dl"), [["linha final", d.linha_final], ["head do CI", ciHead], ["head atual", atual], ["comparação", comparacao]]);
+  set("ci-fonte", fonteDaTela(d) + " · gerado em " + (dataLida(d.gerado_em) || "não informado") + ".");
+  linhasDaTabela(byId("ci-passos"), passos.map((p) => [p.nome, {pilula: true,
+    classe: p.ok === true ? "chip active" : p.ok === false ? "chip erro" : "chip horizon",
+    texto: p.ok === true ? "OK" : p.ok === false ? "FALHOU" : "não medido"}]), "Sem passos lidos.", 2);
+}
+
+// Provedores (17/11/2026): /api/provedores é a fonte única (catálogo do Conselho). Botões, tabela e Conexões leem daqui.
+async function lerProvedores() {
+  const dados = await lerRotaTela("/api/provedores");
+  const lista = Array.isArray(dados.items) ? dados.items : [];
+  // Sem lista não há leitura, mesmo que a rota diga "ok".
+  const state = lista.length ? estadoDe(dados) : "sem_leitura";
+  return {state, provedores: lista, motivo: dados.motivo || null, fonte: dados.source || null, observed_at: dados.observed_at || null};
+}
+AgataPainel.lerProvedores = lerProvedores;
+async function montarBotoesDoConselho() {
+  const raiz = byId("modelos-links");
+  if (!raiz) return;
+  const r = await lerProvedores();
+  const titulo = document.createElement("div"); titulo.className = "abrir-titulo"; titulo.textContent = "Modelos";
+  if (r.state === "sem_leitura") {
+    const p = document.createElement("p"); p.className = "subnote";
+    p.textContent = "Sem leitura dos provedores: " + (r.motivo || "motivo não informado") + ".";
+    raiz.replaceChildren(titulo, p);
+    return;
+  }
+  raiz.replaceChildren(titulo, ...r.provedores.map((p) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.dataset.alvo = p.id; b.textContent = p.nome;
+    return b;
+  }));
+}
+window.addEventListener("load", () => { montarBotoesDoConselho(); });
+
 /* F5: ao carregar a página, atualiza todas as leituras (não só a aba aberta). */
 window.addEventListener("load", () => { loadDetails(); loadCapacidades(); });
-
-/* (27/10/2026) Textos de evidência com data antiga viram leitura do momento (timers e unidades). */
-function evidenciaDe(botao, texto, fonte) {
-  if (!botao) return;
-  botao.dataset.body = texto;
-  botao.dataset.source = fonte;
-}
-function aplicarEvidenciasVivas() {
-  const timers = (lastSnapshot && lastSnapshot.timers) || [];
-  const porUnidade = new Map(timers.map((t) => [t.unit, t]));
-  const hora = (valor) => (valor ? valor.replace(/ -03$/, "") : "não informada");
-  const manutencao = porUnidade.get("agata-manutencao.timer");
-  const inbox = porUnidade.get("agata-vault-inbox.timer");
-  if (manutencao) {
-    const botao = document.querySelector('button.evidence[data-title="Janela de manutenção"]');
-    evidenciaDe(botao, "Medido agora: agata-manutencao.timer " + (manutencao.active_state || "sem estado") + "; próxima execução " + hora(manutencao.next_trigger) + "; última " + hora(manutencao.last_trigger) + ". O resultado da tarefa não é inferido do disparo.", "systemctl --user show · agata-manutencao.timer");
-  }
-  if (inbox) {
-    const botao = document.querySelector('button.evidence[data-title="Rotinas locais"]');
-    evidenciaDe(botao, "Medido agora: agata-vault-inbox.timer " + (inbox.active_state || "sem estado") + "; última execução " + hora(inbox.last_trigger) + ". Atenção: a MEMÓRIAS (804, 22/10) registra que o timer foi parado pelo Humano. Estado atual e decisão divergem; quem decide é o Humano.", "systemctl --user show · agata-vault-inbox.timer · MEMÓRIAS (804)");
-  }
-  fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}).then((dados) => {
-    const navegar = ((dados && dados.items) || []).find((i) => i.id === "navegar");
-    if (!navegar) return;
-    document.querySelectorAll('button.evidence[data-title="Navegador e Discord"]').forEach((botao) => {
-      evidenciaDe(botao, navegar.evidencia, "systemctl --user show · navegador-mcp e discord-mcp");
-    });
-  }).catch(() => {});
-}
-window.addEventListener("load", () => setTimeout(aplicarEvidenciasVivas, 1500));
 
 /* (27/10/2026) Cartões com sonda abrem o mesmo popup da EVIDÊNCIA, sobre a tela. Teclado: Enter ou Espaço. */
 function abrirEvidenciaDoCartao(cartao) {
@@ -717,7 +982,7 @@ function abrirEvidenciaDoCartao(cartao) {
   dialogo.showModal();
 }
 function ligarCartoesClicaveis() {
-  document.querySelectorAll("[data-sub='capacidades'] .cap-card[data-probe]:not([data-probe='documento'])").forEach((cartao) => {
+  document.querySelectorAll("#integration-list .cap-card[data-probe]:not([data-probe='documento'])").forEach((cartao) => {
     if (cartao.dataset.ligado) return;
     cartao.dataset.ligado = "1";
     cartao.tabIndex = 0; cartao.setAttribute("role", "button");
@@ -2439,10 +2704,9 @@ window.addEventListener("load", () => { ligarGrafo(); });
 /* (27/10/2026) Mapa de lacunas: cada item do painel sem fonte medida agora vira LACUNA, com o motivo. Lido do próprio DOM. */
 function calcularLacunas() {
   const itens = [];
-  document.querySelectorAll("[data-sub='capacidades'] .cap-card").forEach((cartao) => {
+  document.querySelectorAll("#integration-list .cap-card").forEach((cartao) => {
     const titulo = cartao.querySelector("h3").textContent;
-    const probe = cartao.dataset.probe;
-    if (probe === "documento") itens.push({nome: titulo, motivo: "sem sonda: é documento, não leitura do sistema", onde: "O que posso fazer"});
+    if (cartao.dataset.probe === "documento") itens.push({nome: titulo, motivo: "sem sonda: é documento, não leitura do sistema", onde: "Sistema › Integrações"});
   });
   document.querySelectorAll("[data-live]").forEach((el) => {
     if (el.textContent === "sem leitura") itens.push({nome: el.dataset.live, motivo: "sem leitura agora", onde: "texto vivo"});
@@ -2456,7 +2720,7 @@ function calcularLacunas() {
   return itens.length;
 }
 function marcarLacunasNosCartoes() {
-  document.querySelectorAll("[data-sub='capacidades'] .cap-card[data-probe='documento'] .chip").forEach((chip) => {
+  document.querySelectorAll("#integration-list .cap-card[data-probe='documento'] .chip").forEach((chip) => {
     chip.className = "chip horizon"; chip.textContent = "LACUNA · sem sonda";
   });
 }
@@ -2555,18 +2819,34 @@ async function carregarMedicoes() {
     else if (j.estado === "ok" || j.estado === "falhou") nota.textContent = (j.estado === "ok" ? "Concluído" : "Falhou") + ": " + j.acao + (j.modelo ? " em " + j.modelo : "") + " (" + j.segundos + " s). " + (j.detalhe || "");
   }
 }
+async function pedirComTrava(url, corpo) {
+  const r = await fetch(url, {method: "POST", credentials: "same-origin", cache: "no-store", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(corpo)});
+  if (r.ok) return;
+  const dados = await r.json().catch(() => ({}));
+  const erro = new Error("HTTP " + r.status);
+  erro.ocupado = r.status === 409 || r.status === 429;
+  erro.motivo = dados.motivo || dados.erro || (erro.ocupado ? "a trava comum está em uso" : "");
+  throw erro;
+}
 function ligarMedicao(botao, rotulo, pedido) {
   let armado = false;
   botao.addEventListener("click", async () => {
     if (!armado) { armado = true; botao.textContent = "Confirmar: " + rotulo.toLowerCase(); return; }
     armado = false; botao.textContent = rotulo; botao.disabled = true;
     try {
-      await fetchJson("/api/medicoes/executar", {method: "POST", headers: {"Content-Type": "application/json", Accept: "application/json"}, body: JSON.stringify(pedido())});
-    } catch (_) { byId("medir-nota").textContent = "Não foi possível iniciar (ocupado ou fora da lista)."; }
+      await pedirComTrava("/api/medicoes/executar", pedido());
+    } catch (erro) {
+      if (erro.ocupado) {
+        const motivo = erro.motivo || "a trava comum está em uso";
+        botao.textContent = "ocupado: " + motivo;
+        byId("medir-nota").textContent = "Ocupado: " + motivo + ". Nada foi iniciado.";
+        setTimeout(() => { if (botao.textContent.startsWith("ocupado")) botao.textContent = rotulo; }, 8000);
+      } else byId("medir-nota").textContent = "Não foi possível iniciar (fora da lista).";
+    }
     botao.disabled = false; carregarMedicoes();
   });
 }
-ligarMedicao(byId("medir-recuperacao"), "Medir recuperação da busca", () => ({acao: "recuperacao"}));
+ligarMedicao(byId("medir-recuperacao"), "Medir recuperação · corpus do vault", () => ({acao: "recuperacao"}));
 ligarMedicao(byId("medir-semantica"), "Medir busca por sentido", () => ({acao: "recuperacao_semantica"}));
 ligarMedicao(byId("medir-contexto"), "Medir contexto efetivo", () => ({acao: "contexto", modelo: byId("medir-modelo").value, tarefa: byId("medir-tarefa").value, raciocinio: byId("medir-raciocinio").value}));
 async function carregarQualidade() {
@@ -2576,13 +2856,17 @@ async function carregarQualidade() {
   let dados = null;
   try { dados = await fetchJson("/api/qualidade-llm", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
   if (!dados || !Array.isArray(dados.items)) { if (titulo) titulo.textContent = "Sem leitura"; return; }
-  const rotulo = {ok: "ok", warning: "atenção", unknown: "não medido"};
   dados.items.forEach((item) => {
+    if (item.id === "recall_busca") {
+      kpis.append(kpiRecuperacao(item));
+      const li = document.createElement("li"); li.textContent = "Recuperação: " + leiturasDaRecuperacao(item).map((x) => x.corpus + " " + (x.valor ?? "não medido")).join(" · ");
+      lista.append(li);
+      return;
+    }
     const d = document.createElement("div"); d.className = "kpi";
     const l = document.createElement("div"); l.className = "label"; l.textContent = item.titulo;
     const v = document.createElement("div"); v.className = "note"; v.textContent = item.valor;
-    const e = document.createElement("div"); e.className = "note"; e.textContent = (rotulo[item.estado] || "sem leitura").toUpperCase();
-    d.append(l, v, e); kpis.append(d);
+    d.append(l, v, seloDeEstado(item.estado)); kpis.append(d);
     const li = document.createElement("li"); li.textContent = item.titulo + ": " + item.evidencia + " (fonte: " + item.fonte + ")";
     lista.append(li);
   });
@@ -2590,21 +2874,44 @@ async function carregarQualidade() {
   const naoMedidos = dados.items.filter((i) => i.estado === "unknown").length;
   if (titulo) titulo.textContent = atencao + " em atenção · " + naoMedidos + " não medidos";
 }
+// Recuperação (17/11/2026): recall_busca traz leituras rotuladas pelo corpus (vault; conjunto da avaliação), cada uma com fonte e data.
+// Sem a lista de leituras (rota antiga), a leitura única vira o corpus "não informado".
+function leiturasDaRecuperacao(item) {
+  if (Array.isArray(item.leituras) && item.leituras.length) return item.leituras.map((x) => ({corpus: x.corpus || x.rotulo || "corpus não informado", valor: x.valor, estado: x.estado, fonte: x.fonte, data: x.medido_em || x.data || x.observed_at}));
+  return [{corpus: "corpus não informado", valor: item.valor, estado: item.estado, fonte: item.fonte, data: item.observed_at}];
+}
+// Estado com marca e palavra (filtro de estilo): pílula com o texto, nunca só cor.
+const SELO_ESTADO = {ok: ["OK", "chip active"], warning: ["ATENÇÃO", "chip partial"], falha: ["FALHA", "chip erro"]};
+function seloDeEstado(estado) {
+  const [texto, classe] = SELO_ESTADO[estado] || ["NÃO MEDIDO", "chip horizon"];
+  const s = document.createElement("span"); s.className = classe; s.textContent = texto; return s;
+}
+function kpiRecuperacao(item) {
+  const d = document.createElement("div"); d.className = "kpi";
+  const l = document.createElement("div"); l.className = "label"; l.textContent = "Recuperação";
+  d.append(l);
+  // Uma leitura por bloco: corpus e valor; estado; fonte e a data da medição (AAAA-MM-DD, sem fuso).
+  leiturasDaRecuperacao(item).forEach((x) => {
+    const v = document.createElement("div"); v.className = "note";
+    v.textContent = x.corpus + ": " + (x.valor ?? "não medido");
+    const meta = document.createElement("div"); meta.className = "note";
+    meta.textContent = "fonte: " + (x.fonte || "não informada") + " · data: " + (x.data ? String(x.data).slice(0, 10) : "não informada");
+    d.append(v, seloDeEstado(x.estado), meta);
+  });
+  return d;
+}
+
 async function carregarVisaoSistema() {
-  const kpis = byId("visao-kpis"); const lista = byId("visao-melhorias");
-  if (!kpis || !lista) return;
-  kpis.replaceChildren(); lista.replaceChildren();
-  const cartao = (rotulo, valor, aba) => {
+  const kpis = byId("visao-kpis");
+  if (!kpis) return;
+  kpis.replaceChildren();
+  // Cada número abre a tela de onde ele vem (atalho); sem leitura, o número sai como não medido.
+  const cartao = (rotulo, valor, aba, sub) => {
     const d = document.createElement("div"); d.className = "kpi"; d.tabIndex = 0; d.setAttribute("role", "button");
     const l = document.createElement("div"); l.className = "label"; l.textContent = rotulo;
     const v = document.createElement("div"); v.className = "value"; v.textContent = valor;
-    d.append(l, v); if (aba) { d.dataset.openPage = aba; }
+    d.append(l, v); d.dataset.openPage = aba; d.dataset.openSub = sub;
     kpis.append(d);
-  };
-  const melhoria = (texto, aba) => {
-    const li = document.createElement("li"); li.textContent = texto;
-    if (aba) { const b = document.createElement("button"); b.className = "text-link"; b.type = "button"; b.dataset.openPage = aba; b.textContent = " ver aba"; li.append(b); }
-    lista.append(li);
   };
   try {
     const [status, caps, lac] = await Promise.all([
@@ -2614,26 +2921,20 @@ async function carregarVisaoSistema() {
     ]);
     const servicos = (status.services || []).filter((x) => x.state !== "ausente");
     const ativos = servicos.filter((x) => x.state === "ok").length;
-    cartao("Serviços ativos", ativos + " de " + servicos.length, "operacao");
-    cartao("Timers", String((status.timers || []).filter((x) => x.state === "ok").length) + " ok", "operacao");
-    cartao("Git", status.git ? status.git.head : "—", "operacao");
-    cartao("Conversa (painel)", status.chat && status.chat.http_status === 200 ? "responde" : "sem resposta", "operacao");
+    cartao("Serviços ativos", ativos + " de " + servicos.length, "sistema", "operacao");
+    cartao("Timers", String((status.timers || []).filter((x) => x.state === "ok").length) + " ok", "sistema", "manutencao");
+    cartao("Git", (status.git && status.git.head) || "não medido", "sistema", "operacao");
+    cartao("Conversa (painel)", status.chat && status.chat.http_status === 200 ? "responde" : "sem resposta", "sistema", "operacao");
     const modelos = (status.models && status.models.models) || [];
-    cartao("Modelos registrados", String(modelos.length), "modelos");
+    cartao("Modelos registrados", String(modelos.length), "sistema", "modelos");
     const cap = caps.items || [];
-    cartao("Capacidades com leitura", cap.filter((x) => x.state === "ok").length + " de " + cap.length, "capacidades");
-    cartao("Lacunas agora", String((lac.items || []).length), "lacunas");
+    cartao("Capacidades com leitura", cap.filter((x) => x.state === "ok").length + " de " + cap.length, "sistema", "integracoes");
+    cartao("Lacunas agora", String((lac.items || []).length), "qualidade", "lacunas");
     const props = (status.proposals && status.proposals.items) || [];
-    const naoVersionadas = props.filter((p) => p.versionada === false);
     const pendentes = props.filter((p) => !p.substituida_por && !p.marker_present && p.versionada !== false);
-    cartao("Propostas sem assinatura", String(pendentes.length), "plano");
-    (lac.items || []).forEach((i) => melhoria("Lacuna · " + i.nome + " — " + i.motivo, "lacunas"));
-    pendentes.forEach((p) => melhoria("Proposta sem assinatura · " + p.name, "plano"));
-    naoVersionadas.forEach((p) => melhoria("LACUNA · não versionada · " + p.name + " — existe só no checkout local, sem commit no git", "plano"));
-    cap.filter((x) => x.state !== "ok").forEach((x) => melhoria("Capacidade sem leitura ok · " + x.id, "capacidades"));
-    if (!lista.children.length) melhoria("Nada pendente nas leituras de agora.", null);
+    cartao("Propostas sem assinatura", String(pendentes.length), "panorama", "plano");
   } catch (erro) {
-    const p = document.createElement("p"); p.textContent = "Visão indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; lista.append(p);
+    const p = document.createElement("p"); p.textContent = "Visão indisponível (" + erro.message + "). Nada anterior foi mantido como atual."; kpis.append(p);
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "_como_usar": "Gerado por scripts/capivara_capacidades.py. Não muda rota: o gateway não lê este arquivo. `medido` e `observado` só recebem registros com proveniência completa (metrica, valor, protocolo, amostra, provedor, endpoint, versao_resolvida, data).",
-  "gerado_em": "2026-10-25 00:22 -0300",
+  "gerado_em": "2026-11-17 08:41 -0300",
   "filas": {
     "seth-rapido": [
       "mistral/ministral-14b-latest",
@@ -33,7 +33,7 @@
     "gemini/gemini-2.5-flash": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-2.5-flash",
         "janela": 1048576,
@@ -117,7 +117,7 @@
     "gemini/gemini-3-flash-preview": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3-flash-preview",
         "janela": 1048576,
@@ -241,7 +241,7 @@
     "gemini/gemini-3.1-flash-lite": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "gemini",
         "id_resolvido": "gemini-3.1-flash-lite",
         "janela": 1048576,
@@ -702,7 +702,7 @@
     "mistral/codestral-latest": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "mistral",
         "id_resolvido": "codestral-latest",
         "janela": 128000,
@@ -1715,7 +1715,7 @@
     "openrouter/cohere/north-mini-code:free": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "openrouter",
         "id_resolvido": "cohere/north-mini-code:free",
         "janela": 256000,
@@ -1808,7 +1808,7 @@
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
       "catalogo": {
         "fonte": "omniroute /v1/models",
-        "lido_em": "2026-10-25 00:22 -0300",
+        "lido_em": "2026-11-17 08:41 -0300",
         "provedor": "openrouter",
         "id_resolvido": "nvidia/nemotron-3-ultra-550b-a55b:free",
         "janela": 1000000,

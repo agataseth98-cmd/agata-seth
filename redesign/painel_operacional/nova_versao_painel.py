@@ -18,6 +18,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 for _p in ("nova_versao", "alexandria", "corpo", "metacognicao", "conexoes", "avaliacao", "sentidos"):
     sys.path.insert(0, str(ROOT / "redesign" / _p))
+_AQUI = str(Path(__file__).resolve().parent)
+if _AQUI not in sys.path:
+    sys.path.insert(0, _AQUI)
+# Trava comum com medicoes_painel (17/11/2026, D8): recuperação da busca não roda em dois lugares ao mesmo tempo.
+from medicoes_painel import MOTIVO_OCUPADO, MOTIVO_RECUPERACAO_OCUPADA, TRAVA_RECUPERACAO  # noqa: E402
 
 ACOES = ("iniciar", "indexar", "consultar", "skills", "fotografar", "salvar_orcamento", "classificar",
          "gravar_chave", "remover_chave", "ajustar_conexao", "adicionar_provedor", "testar_rotas", "cancelar_teste",
@@ -84,22 +89,39 @@ def _estado_avaliacao() -> dict:
         return {"erro": f"{e.__class__.__name__}: {str(e)[:160]}", "job": job}
 
 
-def _rodar_avaliacao(fazer):
+def _rodar_avaliacao(fazer, com_trava: bool = False):
+    novo = {"estado": "falhou", "detalhe": "rodada interrompida"}
     try:
         r = fazer()
         novo = {"estado": r.get("estado", "concluida"), "run_id": r.get("run_id")}
     except Exception as e:  # noqa: BLE001
         novo = {"estado": "falhou", "detalhe": f"{e.__class__.__name__}: {str(e)[:160]}"}
-    with _TESTE_LOCK:
-        _AVAL.clear(); _AVAL.update(novo, fim=time.time())
+    finally:
+        with _TESTE_LOCK:
+            _AVAL.clear(); _AVAL.update(novo, fim=time.time())
+        if com_trava:
+            TRAVA_RECUPERACAO.release()
 
 
-def _iniciar_avaliacao(fazer, rotulo: str) -> dict:
-    with _TESTE_LOCK:
-        if _AVAL.get("estado") == "rodando" or _TESTE.get("estado") == "rodando":
-            raise RuntimeError("ocupado")
-        _AVAL.clear(); _AVAL.update(estado="rodando", tipo=rotulo, inicio=time.time())
-    threading.Thread(target=_rodar_avaliacao, args=(fazer,), daemon=True).start()
+def _iniciar_avaliacao(fazer, rotulo: str, com_trava: bool = False) -> dict:
+    """Abre a rodada em segundo plano. Com `com_trava` (recuperação da busca), pega a trava comum antes e a devolve ao fim."""
+    if com_trava and not TRAVA_RECUPERACAO.acquire(blocking=False):
+        raise RuntimeError(MOTIVO_RECUPERACAO_OCUPADA)
+    try:
+        with _TESTE_LOCK:
+            if _AVAL.get("estado") == "rodando" or _TESTE.get("estado") == "rodando":
+                raise RuntimeError(MOTIVO_OCUPADO)
+            _AVAL.clear(); _AVAL.update(estado="rodando", tipo=rotulo, inicio=time.time())
+    except BaseException:
+        if com_trava:
+            TRAVA_RECUPERACAO.release()
+        raise
+    try:
+        threading.Thread(target=_rodar_avaliacao, args=(fazer, com_trava), daemon=True).start()
+    except BaseException:
+        if com_trava:
+            TRAVA_RECUPERACAO.release()
+        raise
     return {"estado": "rodando", "tipo": rotulo}
 
 
@@ -134,7 +156,7 @@ def _avaliacao(acao: str, dados: dict) -> dict:
     if acao == "medir_recuperacao":
         import recuperacao  # noqa: E402
         split = dados.get("split") if dados.get("split") in conjunto.SPLITS else "dev"
-        return _iniciar_avaliacao(lambda: recuperacao.rodar(split), "recuperacao")
+        return _iniciar_avaliacao(lambda: recuperacao.rodar(split), "recuperacao", com_trava=True)
     # avaliar: confere tudo antes de abrir a thread, para a recusa voltar na hora
     split = dados.get("split")
     rotas = dados.get("rotas")

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import hashlib
 import http.client
+import importlib.util
 import collections
 import json
 import os
@@ -41,6 +43,7 @@ import historia_painel  # noqa: E402
 import importantes  # noqa: E402
 import seth_voz  # noqa: E402
 import seth_ditado  # noqa: E402
+import relay_catalog  # noqa: E402  (17/11/2026, D7): fonte única dos provedores do Conselho
 from relogio import FRESH_SECONDS, _now, _reading_window, _stamp  # noqa: E402
 from armazem import (  # noqa: E402
     CONVERSA_LIMITE_BYTES, IMPORTACAO_LIMITE_BYTES, VAULT_ITENS, ErroConversa, _conversa_apagar, _conversa_caminho,
@@ -949,12 +952,13 @@ def _cached_details() -> dict:
 
 def _fontes_sem_leitura(services: list, timers: list, git: dict, chat: dict,
                         maintenance: dict, proposals: dict, models: dict) -> list[str]:
-    """Nomes legíveis das fontes cujo estado é unknown ou ausente (S2). Lista vazia = todas lidas."""
+    """Nomes legíveis das fontes que não foram lidas (state unknown). Lista vazia = todas lidas.
+    'ausente' (unidade que não existe nesta Máquina) NÃO entra: já aparece como ausente, separado (17/11/2026, D9)."""
     fontes = [(item["unit"], item) for item in services]
     fontes += [(item["unit"], item) for item in timers]
     fontes += [("Git local", git), ("Conversa com a Seth (gateway)", chat), ("Tarefas de manutenção", maintenance),
                ("Propostas", proposals), ("Modelos (registro de capacidades)", models)]
-    return [nome for nome, leitura in fontes if leitura.get("state") in ("unknown", "ausente")]
+    return [nome for nome, leitura in fontes if leitura.get("state") == "unknown"]
 
 
 def collect() -> dict:
@@ -1069,18 +1073,483 @@ def _wiki_search(query: str, mode: str) -> dict:
 
 
 # Botões "Abrir" do painel. Lista FIXA: o painel só pede um destino pelo nome; nunca um comando ou caminho.
-ABRIR_PROVEDORES = {
-    "deepseek": "https://chat.deepseek.com/",
-    "gemini": "https://gemini.google.com/",
-    "zai": "https://chat.z.ai/",
-    "chatgpt": "https://chatgpt.com/",
-    "claude": "https://claude.ai/",
-    "grok": "https://grok.com/",
-    "qwen": "https://chat.qwen.ai/",
-    "mistral": "https://chat.mistral.ai/",
-    "kimi": "https://www.kimi.ai/en",
-    "omniroute": "http://127.0.0.1:20128/",
+# Derivada do catálogo de provedores do Conselho (17/11/2026, D7). omniroute é o roteador local: não é provedor do catálogo.
+ABRIR_PROVEDORES = {provedor["id"]: provedor["site"] for provedor in relay_catalog.PROVIDERS}
+ABRIR_PROVEDORES["omniroute"] = "http://127.0.0.1:20128/"
+# ---------------------------------------------------------------------------------------------------------------
+# Leituras da Equipe, do backup, do egress, do perímetro, do CI e dos provedores (17/11/2026, lote 2b).
+# Todas: GET, sem parâmetro do cliente, caminho fixo no código (a pasta pode vir de variável de ambiente do
+# serviço, nunca da requisição), leitura com teto de tamanho, cache curto (_cached_curto) e campos state,
+# source, observed_at, fresh_until. Ausência de dado = state sem_leitura com motivo, nunca lista vazia muda.
+# Nenhuma delas executa o perímetro, o CI, o restic, cargo nem equipe.py: só lê o que os outros deixaram.
+# ---------------------------------------------------------------------------------------------------------------
+LIMITE_LEITURA_JSON = 262_144
+EQUIPE_AGENTE_RE = re.compile(r"[a-z][a-z0-9-]{0,30}")          # mesmo formato de equipe.py (MEMBRO)
+EQUIPE_ESTADO_RE = re.compile(r"[a-z_]{1,30}")
+EQUIPE_UNIT_RE = re.compile(r"agata-vigia@[a-z][a-z0-9-]{0,30}\.service")
+EQUIPE_AUSENTES_CONFIG = ROOT / "config/equipe-ausentes.txt"
+DIARIO_LINHAS = 20
+REGUA_BACKUP_DIAS = 14                                           # mesma régua do P-12 (scripts/perimetro.sh, P12_N_DIAS)
+BACKUP_RECURSO_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,120}")
+BACKUP_SNAPSHOT_RE = re.compile(r"[A-Za-z0-9._:-]{1,80}")
+EGRESS_CRATE_REL = "redesign/rust/egress"
+EGRESS_REGRA_ARQ = ROOT / "scripts/egress_em_dia.py"   # a regra de "em dia" é a do script, lida daqui (não da raiz do crate)
+EGRESS_UNIT = "navegador-mcp.service"
+CONTROLE_RE = re.compile(r"P-[A-Z0-9][A-Z0-9-]{0,30}")
+VEREDITOS = ("OK", "SKIP", "PARCIAL", "FALHA")
+HEAD_RE = re.compile(r"[0-9a-f]{4,40}")
+RESULTADO_VELHO_HORAS = 24  # R1 (17/11/2026): resultado gravado há mais de 24 h não sai "ok"
+_SP = ZoneInfo("America/Sao_Paulo")
+
+
+def _leitura_segura(produzir) -> dict:
+    """Erro inesperado numa leitura nova não derruba a rota: vira sem_leitura, sem o texto do erro."""
+    try:
+        return produzir()
+    except Exception:  # noqa: BLE001 — a rota responde; o motivo não traz detalhe interno
+        observed_at, fresh_until = _reading_window()
+        return {"state": "sem_leitura", "motivo": "leitura indisponível agora", "observed_at": observed_at,
+                "fresh_until": fresh_until}
+
+
+def _ler_json_limitado(arq: Path) -> dict:
+    """Objeto JSON de arquivo local, com teto de tamanho. Erro de leitura ou de formato sobe como OSError/ValueError."""
+    if arq.stat().st_size > LIMITE_LEITURA_JSON:
+        raise ValueError("arquivo acima do limite")
+    dados = json.loads(arq.read_text(encoding="utf-8"))
+    if not isinstance(dados, dict):
+        raise ValueError("formato inesperado")
+    return dados
+
+
+def _texto_curto(valor, limite: int = 80) -> str | None:
+    """Campo de arquivo local: só texto, sem caractere de controle, com teto. Qualquer outro tipo vira None."""
+    if not isinstance(valor, str):
+        return None
+    limpo = re.sub(r"[\x00-\x1f\x7f]", "", valor)[:limite]
+    return limpo or None
+
+
+def _arquivos(pasta: Path, padrao: str) -> list[Path]:
+    try:
+        return sorted(pasta.glob(padrao))
+    except OSError:
+        return []
+
+
+def _iso_de_tempo(ts: float) -> str:
+    return datetime.fromtimestamp(ts, _SP).isoformat(timespec="seconds")
+
+
+# --- Equipe (D1): só lê sessao.json, estado-*.json, ausencia-*.json, config/equipe-ausentes.txt e o diário ---
+def _equipe_pasta() -> Path:
+    return Path(os.environ.get("AGATA_EQUIPE_DIR", Path.home() / ".cache/agata/sincronia/equipe"))
+
+
+def _equipe_diario() -> Path:
+    return Path(os.environ.get("AGATA_EQUIPE_DIARIO", EVENTOS_DIARIO))
+
+
+def _ausentes_config() -> tuple[set | None, str | None]:
+    """Agentes listados como ausentes no config (um por linha, # comenta). (None, motivo) se não der para ler."""
+    try:
+        if EQUIPE_AUSENTES_CONFIG.stat().st_size > 65_536:
+            raise ValueError("acima do limite")
+        texto = EQUIPE_AUSENTES_CONFIG.read_text(encoding="utf-8")
+    except (OSError, ValueError):
+        return None, "config/equipe-ausentes.txt indisponível"
+    nomes = set()
+    for linha in texto.splitlines():
+        nome = linha.split("#", 1)[0].strip()
+        if not nome:
+            continue
+        if not EQUIPE_AGENTE_RE.fullmatch(nome):
+            return None, "linha inválida em config/equipe-ausentes.txt"
+        nomes.add(nome)
+    return nomes, None
+
+
+def _diario_recente(arq: Path, n: int = DIARIO_LINHAS, limite_bytes: int = 65_536) -> dict:
+    """Últimas linhas do diário de eventos (uma linha por evento). Lê só a cauda. Nunca abre o canal de mensagens."""
+    try:
+        tamanho = arq.stat().st_size
+        with arq.open("rb") as arquivo:
+            if tamanho > limite_bytes:
+                arquivo.seek(tamanho - limite_bytes)
+            cauda = arquivo.read(limite_bytes)
+    except OSError:
+        return {"state": "sem_leitura", "motivo": "diário de eventos ausente", "linhas": []}
+    linhas = cauda.decode("utf-8", errors="replace").splitlines()
+    if tamanho > limite_bytes and linhas:
+        linhas = linhas[1:]  # a primeira linha da cauda pode ter sido cortada
+    linhas = [limpa for limpa in (_texto_curto(linha, 300) for linha in linhas) if limpa][-n:]
+    if not linhas:
+        return {"state": "ok", "motivo": "diário sem eventos", "linhas": []}
+    return {"state": "ok", "linhas": linhas}
+
+
+def _equipe_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    pasta = _equipe_pasta()
+    sessao, motivo_sessao = None, None
+    try:
+        sessao = _ler_json_limitado(pasta / "sessao.json")
+    except (OSError, ValueError):
+        motivo_sessao = "sessao.json ausente ou ilegível: nenhuma partida registrada nesta Máquina"
+    presentes, esperados = [], []
+    if sessao is not None:
+        bruto = sessao.get("presentes") if isinstance(sessao.get("presentes"), dict) else {}
+        for agente in sorted(bruto)[:50]:
+            info = bruto[agente]
+            if EQUIPE_AGENTE_RE.fullmatch(agente):
+                presentes.append({"agente": agente,
+                                  "desde": _texto_curto(info.get("chegou_em") if isinstance(info, dict) else None, 40)})
+        lista = sessao.get("esperados") if isinstance(sessao.get("esperados"), list) else []
+        esperados = [a for a in lista[:50] if isinstance(a, str) and EQUIPE_AGENTE_RE.fullmatch(a)]
+        estado = _texto_curto(sessao.get("estado"), 30)
+        base = sessao.get("base") if isinstance(sessao.get("base"), str) and HEAD_RE.fullmatch(sessao["base"]) else None
+        bloco_sessao = {"state": "warning" if estado == "divergente" else "ok", "estado": estado,
+                        "base": base[:12] if base else None, "presentes": presentes, "esperados": esperados}
+    else:
+        bloco_sessao = {"state": "sem_leitura", "motivo": motivo_sessao, "estado": None, "base": None,
+                        "presentes": [], "esperados": []}
+    presentes_nomes = {p["agente"] for p in presentes}
+
+    config, motivo_config = _ausentes_config()
+    declarados = {}
+    for arq in _arquivos(pasta, "ausencia-*.json")[:50]:
+        agente = arq.name[len("ausencia-"):-len(".json")]
+        if not EQUIPE_AGENTE_RE.fullmatch(agente):
+            continue
+        try:
+            info = _ler_json_limitado(arq)
+            declarados[agente] = {"desde": _texto_curto(info.get("desde"), 40),
+                                  "motivo": _texto_curto(info.get("motivo"), 200), "ate": _texto_curto(info.get("ate"), 40)}
+        except (OSError, ValueError):
+            declarados[agente] = {"desde": None, "motivo": "arquivo de ausência ilegível", "ate": None}
+    itens_ausentes = []
+    for agente in sorted(set(config or ()) | set(declarados)):
+        origem = (["config"] if config and agente in config else []) + (["ausencia"] if agente in declarados else [])
+        info = declarados.get(agente, {})
+        itens_ausentes.append({"agente": agente, "origem": origem, "desde": info.get("desde"),
+                               "motivo": info.get("motivo"), "ate": info.get("ate")})
+    bloco_ausentes = {"state": "ok" if config is not None else "sem_leitura", "itens": itens_ausentes}
+    if config is None:
+        bloco_ausentes["motivo"] = motivo_config
+
+    divergencias, divergencias_motivo = [], None
+    if sessao is None:
+        divergencias_motivo = "sessão indisponível: não dá para comparar com os presentes"
+    else:
+        for agente in sorted(config or ()):
+            if agente in presentes_nomes:
+                divergencias.append(f"{agente}: ausente no config e presente na sessão")
+        for agente in sorted(declarados):
+            if agente in presentes_nomes:
+                divergencias.append(f"{agente}: ausência declarada (ausencia-{agente}.json) e presente na sessão")
+            if config is not None and agente not in config:
+                divergencias.append(f"{agente}: ausência declarada na sessão e fora do config")
+
+    agentes_itens = []
+    for arq in _arquivos(pasta, "estado-*.json")[:50]:
+        agente = arq.name[len("estado-"):-len(".json")]
+        if not EQUIPE_AGENTE_RE.fullmatch(agente):
+            continue
+        try:
+            brutos = _ler_json_limitado(arq).get("itens")
+            if not isinstance(brutos, dict):
+                raise ValueError("itens fora do formato")
+            por_estado: dict = {}
+            for valor in brutos.values():
+                estado = valor.get("estado") if isinstance(valor, dict) else None
+                chave = estado if isinstance(estado, str) and EQUIPE_ESTADO_RE.fullmatch(estado) else "sem_estado"
+                por_estado[chave] = por_estado.get(chave, 0) + 1
+            agentes_itens.append({"agente": agente, "state": "ok", "total": len(brutos),
+                                  "por_estado": dict(sorted(por_estado.items()))})
+        except (OSError, ValueError):
+            agentes_itens.append({"agente": agente, "state": "sem_leitura", "motivo": "estado do agente ilegível"})
+    if agentes_itens:
+        bloco_itens = {"state": "ok", "agentes": agentes_itens}
+    else:
+        bloco_itens = {"state": "sem_leitura", "motivo": "nenhum estado-<agente>.json nesta Máquina", "agentes": []}
+
+    if not esperados:
+        bloco_vigias = {"state": "sem_leitura", "itens": [],
+                        "motivo": "a sessão não declara agentes esperados (campo esperados)" if sessao is not None else motivo_sessao}
+    else:
+        unidades = [f"agata-vigia@{agente}.service" for agente in esperados]
+        unidades = [u for u in unidades if EQUIPE_UNIT_RE.fullmatch(u)]
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            leituras = list(pool.map(_service_snapshot, unidades))
+        vigias = [{"agente": u[len("agata-vigia@"):-len(".service")], "unit": u,
+                   "state": "sem_leitura" if leitura["state"] == "unknown" else leitura["state"],
+                   "active_state": leitura.get("active_state")} for u, leitura in zip(unidades, leituras)]
+        bloco_vigias = {"state": "ok", "itens": vigias}
+
+    if sessao is None:
+        estado_geral = "sem_leitura"
+    else:
+        alerta_vigia = any(v["agente"] in presentes_nomes and v["state"] != "ok" for v in bloco_vigias["itens"])
+        estado_geral = "warning" if (divergencias or bloco_sessao["state"] == "warning" or alerta_vigia) else "ok"
+    value = {"schema_version": 1, "state": estado_geral,
+             "source": "sincronia/equipe (sessao.json, estado-*.json, ausencia-*.json); config/equipe-ausentes.txt; "
+                       "systemctl --user (vigias); diário eventos.log (só a cauda)",
+             "observed_at": observed_at, "fresh_until": fresh_until, "sessao": bloco_sessao, "ausentes": bloco_ausentes,
+             "divergencias": divergencias, "divergencias_motivo": divergencias_motivo, "itens": bloco_itens,
+             "vigias": bloco_vigias, "eventos": _diario_recente(_equipe_diario())}
+    if sessao is None:
+        value["motivo"] = motivo_sessao
+    return value
+
+
+# --- Backup (D2): só lê o cache do P-12, os marcadores e a 1ª linha de ~/.config/agata/hd-backup. Não roda restic. ---
+def _backup_pasta() -> Path:
+    return Path(os.environ.get("AGATA_BACKUP_STAGING_DIR", Path.home() / ".agata-backup-staging"))
+
+
+def _hd_backup() -> dict:
+    """HD de backup como o perímetro: 1ª linha de hd-backup; sem o arquivo, a pasta AgataBkup01 em /run/media.
+    O caminho não sai na resposta; só presente e repositório_presente."""
+    arq = Path(os.environ.get("AGATA_HD_BACKUP_CONFIG", Path.home() / ".config/agata/hd-backup"))
+    linha = ""
+    try:
+        if arq.stat().st_size <= 4096:
+            linha = arq.read_text(encoding="utf-8").splitlines()[0].strip()
+    except (OSError, ValueError, IndexError):
+        linha = ""
+    try:
+        hd = Path(linha) if linha else Path("/run/media") / getpass.getuser() / "AgataBkup01"
+        presente = hd.is_dir()
+        repo = Path(os.environ["AGATA_RESTIC_REPO"]) if os.environ.get("AGATA_RESTIC_REPO") else hd / "restic-agata-local"
+        repositorio = presente and repo.is_dir()
+    except (OSError, KeyError, ValueError):
+        return {"presente": None, "repositorio_presente": None, "motivo": "HD não pôde ser consultado agora"}
+    return {"presente": presente, "repositorio_presente": bool(repositorio),
+            "motivo": None if presente else "pasta do HD ausente (disco desmontado ou desconectado)"}
+
+
+def _backup_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    pasta = _backup_pasta()
+    agora = _now()
+    try:
+        pendentes = sum(1 for p in pasta.glob("PENDENTE-HD-DESCONECTADO*") if p.is_file())
+    except OSError:
+        pendentes = None
+    base = {"schema_version": 1,
+            "source": "p12-cobertura.json (cache do P-12), marcadores PENDENTE-HD-DESCONECTADO*, HD pela configuração "
+                      "local; restic não é executado",
+            "observed_at": observed_at, "fresh_until": fresh_until, "hd": _hd_backup(), "pendentes_hd": pendentes,
+            "regua_dias": REGUA_BACKUP_DIAS}
+    try:
+        cache = _ler_json_limitado(pasta / "p12-cobertura.json")
+    except (OSError, ValueError):
+        return {**base, "state": "sem_leitura", "motivo": "cache de cobertura (p12-cobertura.json) ausente ou ilegível",
+                "recursos": []}
+    recursos, ignorados = [], 0
+    for nome in sorted(cache)[:200]:
+        if not BACKUP_RECURSO_RE.fullmatch(nome):
+            ignorados += 1
+            continue
+        valor = cache[nome]
+        try:
+            verificado = datetime.fromisoformat(valor["verificado_em"])
+            if verificado.tzinfo is None:
+                raise ValueError("sem fuso")
+        except (KeyError, TypeError, ValueError):
+            recursos.append({"recurso": nome, "state": "sem_leitura", "motivo": "registro sem data com fuso",
+                             "dentro_da_regua": None})
+            continue
+        idade = (agora - verificado).total_seconds() / 86400
+        snap = valor.get("snapshot")
+        recursos.append({"recurso": nome, "state": "ok", "verificado_em": verificado.isoformat(timespec="seconds"),
+                         "idade_dias": round(idade, 2),
+                         "snapshot": snap if isinstance(snap, str) and BACKUP_SNAPSHOT_RE.fullmatch(snap) else None,
+                         "dentro_da_regua": idade <= REGUA_BACKUP_DIAS})
+    if not recursos:
+        return {**base, "state": "sem_leitura", "motivo": "cache sem nenhum recurso com nome válido", "recursos": []}
+    fora = any(r["state"] != "ok" or r["dentro_da_regua"] is False for r in recursos)
+    value = {**base, "state": "warning" if fora else "ok", "recursos": recursos}
+    if ignorados:
+        value["ignorados"] = ignorados
+    return value
+
+
+# --- Egress (D3): mesma regra de em dia de scripts/egress_em_dia.py (importada, sem subprocess) ---
+def _egress_em_dia_modulo():
+    spec = importlib.util.spec_from_file_location("egress_em_dia_painel", EGRESS_REGRA_ARQ)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+def _navegador_usa_rust() -> bool | None:
+    """True se a unidade do navegador tem AGATA_EGRESS_RUST com valor. Só essa chave é lida; o valor não sai."""
+    try:
+        proc = subprocess.run(["/usr/bin/systemctl", "--user", "show", "--no-pager",
+                               "--property=LoadState,Environment", "--", EGRESS_UNIT],
+                              capture_output=True, text=True, timeout=5, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0 or len(proc.stdout) > 65_536:
+        return None
+    valores = _parse_pairs(proc.stdout)
+    if valores.get("LoadState") != "loaded" or "Environment" not in valores:
+        return None
+    for token in valores["Environment"].split():
+        if token.startswith("AGATA_EGRESS_RUST="):
+            return bool(token[len("AGATA_EGRESS_RUST="):])
+    return False
+
+
+def _egress_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    crate = ROOT / EGRESS_CRATE_REL
+    base = {"schema_version": 1,
+            "source": "redesign/rust/egress/target/release (mtime; regra de scripts/egress_em_dia.py) · systemctl --user "
+                      "show navegador-mcp.service",
+            "observed_at": observed_at, "fresh_until": fresh_until, "paridade": "sem registro"}
+    try:
+        modulo = _egress_em_dia_modulo()
+        if not (crate / "src").is_dir():
+            return {**base, "state": "sem_leitura", "motivo": "crate redesign/rust/egress sem src/ nesta árvore",
+                    "binarios": [], "navegador_usa_rust": _navegador_usa_rust()}
+        fontes = modulo.fontes(crate)
+        mais_nova = max((f.stat().st_mtime for f in fontes), default=0.0)
+        binarios = []
+        for caminho in modulo.binarios(crate):
+            presente = caminho.is_file()
+            mtime = caminho.stat().st_mtime if presente else None
+            binarios.append({"nome": caminho.name, "presente": presente,
+                             "mtime": _iso_de_tempo(mtime) if mtime is not None else None,
+                             "em_dia": bool(presente and mtime > mais_nova)})
+        motivo = modulo.motivo(crate)
+    except (OSError, ValueError, ImportError, SyntaxError):
+        return {**base, "state": "sem_leitura", "motivo": "regra de em dia indisponível agora", "binarios": [],
+                "navegador_usa_rust": None}
+    value = {**base, "state": "ok" if all(b["em_dia"] for b in binarios) else "warning", "binarios": binarios,
+             "fonte_mais_nova": _iso_de_tempo(mais_nova) if fontes else None,
+             "navegador_usa_rust": _navegador_usa_rust()}
+    if motivo:
+        value["motivo"] = motivo
+    return value
+
+
+# --- Perímetro e CI (D4/D5/D6): só leem o ultimo.json que cada um grava ao terminar. Nunca executam nada. ---
+def _perimetro_pasta() -> Path:
+    return Path(os.environ.get("AGATA_PERIMETRO_DIR", Path.home() / ".cache/agata/perimetro"))
+
+
+def _ci_pasta() -> Path:
+    return Path(os.environ.get("AGATA_CI_DIR", Path.home() / ".cache/agata/ci"))
+
+
+def _data_com_fuso(valor) -> datetime | None:
+    if not isinstance(valor, str) or len(valor) > 40:
+        return None
+    try:
+        dt = datetime.fromisoformat(valor)
+    except ValueError:
+        return None
+    return dt if dt.tzinfo is not None else None
+
+
+def _inteiro_pequeno(valor) -> bool:
+    return type(valor) is int and 0 <= valor <= 100_000
+
+
+def _envelhece(state: str, idade_horas: float) -> tuple[str, dict]:
+    """R1 (17/11/2026): resultado gravado há mais de RESULTADO_VELHO_HORAS não sai "ok" (vira "warning") e a resposta diz por quê."""
+    if idade_horas <= RESULTADO_VELHO_HORAS:
+        return state, {"envelhecido": False}
+    return ("warning" if state == "ok" else state), {"envelhecido": True, "motivo": f"resultado gravado há {int(idade_horas)} h"}
+
+
+def _perimetro_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    base = {"schema_version": 1, "source": "scripts/perimetro.sh → ultimo.json (gravado ao fim de cada execução)",
+            "observed_at": observed_at, "fresh_until": fresh_until}
+    arq = _perimetro_pasta() / "ultimo.json"
+    if not arq.is_file():
+        return {**base, "state": "sem_leitura", "motivo": "o perímetro ainda não gravou resultado nesta Máquina"}
+    try:
+        dados = _ler_json_limitado(arq)
+    except (OSError, ValueError):
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do perímetro ilegível ou acima do limite"}
+    gerado = _data_com_fuso(dados.get("gerado_em"))
+    geral = dados.get("resultado_geral")
+    contagens_brutas = dados.get("contagens") if isinstance(dados.get("contagens"), dict) else {}
+    chaves = ("ok", "skip", "parcial", "falha")
+    if gerado is None or geral not in ("OK", "FALHA") or not all(_inteiro_pequeno(contagens_brutas.get(k)) for k in chaves):
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do perímetro com campos inválidos"}
+    controles = []
+    for item in (dados.get("controles") if isinstance(dados.get("controles"), list) else [])[:200]:
+        if (isinstance(item, dict) and isinstance(item.get("id"), str) and CONTROLE_RE.fullmatch(item["id"])
+                and item.get("veredito") in VEREDITOS):
+            controles.append({"id": item["id"], "veredito": item["veredito"]})
+    if not controles:
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do perímetro sem nenhum controle válido"}
+    contagens = {k: contagens_brutas[k] for k in chaves}
+    head = dados.get("head") if isinstance(dados.get("head"), str) and HEAD_RE.fullmatch(dados["head"]) else None
+    if geral == "FALHA":
+        state = "falha"
+    else:
+        state = "warning" if (contagens["skip"] or contagens["parcial"]) else "ok"
+    idade = round((_now() - gerado).total_seconds() / 3600, 2)
+    state, velho = _envelhece(state, idade)
+    return {**base, "state": state, "gerado_em": gerado.isoformat(timespec="seconds"),
+            "idade_horas": idade, "head": head,
+            "resultado_geral": geral, "contagens": contagens, "controles": controles, **velho}
+
+
+def _ci_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    base = {"schema_version": 1, "source": "scripts/ci_sdd_local.sh → ultimo.json (gravado ao fim de cada execução)",
+            "observed_at": observed_at, "fresh_until": fresh_until}
+    arq = _ci_pasta() / "ultimo.json"
+    if not arq.is_file():
+        return {**base, "state": "sem_leitura", "motivo": "o CI local ainda não gravou resultado nesta Máquina"}
+    try:
+        dados = _ler_json_limitado(arq)
+    except (OSError, ValueError):
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do CI ilegível ou acima do limite"}
+    gerado = _data_com_fuso(dados.get("gerado_em"))
+    if gerado is None or not _inteiro_pequeno(dados.get("ok")) or not _inteiro_pequeno(dados.get("falha")):
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do CI com campos inválidos"}
+    passos = []
+    for item in (dados.get("passos") if isinstance(dados.get("passos"), list) else [])[:300]:
+        nome = _texto_curto(item.get("nome") if isinstance(item, dict) else None, 200)
+        if nome and isinstance(item.get("ok"), bool):
+            passos.append({"nome": nome, "ok": item["ok"]})
+    if not passos:
+        return {**base, "state": "sem_leitura", "motivo": "ultimo.json do CI sem nenhum passo válido"}
+    head = dados.get("head") if isinstance(dados.get("head"), str) and HEAD_RE.fullmatch(dados["head"]) else None
+    idade = round((_now() - gerado).total_seconds() / 3600, 2)
+    state, velho = _envelhece("falha" if dados["falha"] > 0 else "ok", idade)
+    return {**base, "state": state, "gerado_em": gerado.isoformat(timespec="seconds"),
+            "idade_horas": idade, "head": head, "ok": dados["ok"],
+            "falha": dados["falha"], "linha_final": _texto_curto(dados.get("linha_final"), 200), "passos": passos, **velho}
+
+
+# --- Provedores (D7): catálogo estático; não constrói o Council nem abre state.sqlite3 ---
+def _provedores_snapshot() -> dict:
+    observed_at, fresh_until = _reading_window()
+    itens = [{"id": p["id"], "nome": p["name"], "tipo": p["kind"], "acesso": p["access_mode"]}
+             for p in relay_catalog.PROVIDERS]
+    return {"schema_version": 1, "state": "ok", "source": "redesign/painel_operacional/relay_catalog.py (PROVIDERS)",
+            "observed_at": observed_at, "fresh_until": fresh_until, "total": len(itens), "items": itens}
+
+
+# Rotas de leitura curta (GET): nome do cache, produtor. Lambdas: a função é resolvida na chamada (testes trocam).
+LEITURAS_CURTAS = {
+    "/api/provedores": ("provedores", lambda: _leitura_segura(_provedores_snapshot)),
+    "/api/equipe": ("equipe", lambda: _leitura_segura(_equipe_snapshot)),
+    "/api/backup": ("backup", lambda: _leitura_segura(_backup_snapshot)),
+    "/api/egress": ("egress", lambda: _leitura_segura(_egress_snapshot)),
+    "/api/perimetro": ("perimetro", lambda: _leitura_segura(_perimetro_snapshot)),
+    "/api/ci": ("ci", lambda: _leitura_segura(_ci_snapshot)),
 }
+
 # Fila própria de pedidos de foco/abertura de abas (lida pela extensão; separada da fila de envios).
 FOCOS_PENDENTES = []
 FOCOS_MAX = 20
@@ -1271,6 +1740,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._importantes_listar()
         if self.path == "/api/eventos":
             return self._send(200, "text/plain; charset=utf-8", _eventos_recentes())
+        if self.path in LEITURAS_CURTAS:
+            nome_cache, produzir = LEITURAS_CURTAS[self.path]
+            body = json.dumps(_cached_curto(nome_cache, produzir), ensure_ascii=False).encode("utf-8")
+            return self._send(200, "application/json; charset=utf-8", body)
         if self.path == "/api/relay-council/catalog":
             _cache, catalog, _contract, _sanitizer = _relay_modules()
             council = _council_state()
@@ -1382,8 +1855,8 @@ class Handler(BaseHTTPRequestHandler):
                 resultado = medicoes_painel.executar(payload.get("acao"), payload.get("modelo"), tarefa=payload.get("tarefa"), raciocinio=payload.get("raciocinio"))
             except ValueError:
                 return self._send(400, "text/plain; charset=utf-8", b"invalid measurement")
-            except RuntimeError:
-                return self._send(429, "text/plain; charset=utf-8", b"measurement busy")
+            except RuntimeError as exc:  # D8 (17/11/2026): só motivo fixo vai no corpo
+                return self._send(429, "text/plain; charset=utf-8", f"measurement busy: {medicoes_painel.motivo_ocupado(exc)}".encode("utf-8"))
             body = json.dumps({"schema_version": 1, **resultado}, ensure_ascii=False).encode("utf-8")
             return self._send(202, "application/json; charset=utf-8", body)
         if self.path == "/api/nova-versao/executar":
@@ -1391,8 +1864,8 @@ class Handler(BaseHTTPRequestHandler):
                 resultado = nova_versao_painel.executar(payload.get("acao"), payload)
             except ValueError:
                 return self._send(400, "text/plain; charset=utf-8", b"invalid nova-versao action")
-            except RuntimeError:
-                return self._send(429, "text/plain; charset=utf-8", b"nova-versao busy")
+            except RuntimeError as exc:  # D8 (17/11/2026): só motivo fixo vai no corpo
+                return self._send(429, "text/plain; charset=utf-8", f"nova-versao busy: {medicoes_painel.motivo_ocupado(exc)}".encode("utf-8"))
             except FileNotFoundError:
                 return self._send(409, "text/plain; charset=utf-8", b"nova-versao index missing")
             except PermissionError:

@@ -4,12 +4,14 @@ import collections
 import http.client
 import importlib.util
 import json
+import os
 import re
 import tempfile
 import threading
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from types import SimpleNamespace
@@ -127,7 +129,8 @@ class PainelTests(unittest.TestCase):
         ok = {"state": "ok"}
         services = [{"unit": "a.service", "state": "ok"}, {"unit": "b.service", "state": "ausente"}]
         timers = [{"unit": "c.timer", "state": "unknown"}]
-        self.assertEqual(panel._fontes_sem_leitura(services, timers, ok, ok, ok, ok, ok), ["b.service", "c.timer"])
+        # 17/11/2026 (D9): 'ausente' já aparece separado; sem_leitura lista só o que não foi lido (unknown).
+        self.assertEqual(panel._fontes_sem_leitura(services, timers, ok, ok, ok, ok, ok), ["c.timer"])
         self.assertEqual(panel._fontes_sem_leitura([{"unit": "a.service", "state": "ok"}], [], ok,
                                                    {"state": "unknown"}, ok, ok, ok),
                          ["Conversa com a Seth (gateway)"])
@@ -338,7 +341,8 @@ class HttpTests(unittest.TestCase):
             patches = [mock.patch.object(panel, "ROOT", Path(tmp)),
                        mock.patch.object(panel, "MAINTENANCE_STATE", Path(tmp) / "estado.json"),
                        mock.patch.object(panel, "_verify", side_effect=fake_verify),
-                       mock.patch.object(panel, "_timer_snapshot", side_effect=lambda unit: {"unit": unit, "state": "ausente"}),
+                       # 17/11/2026 (D9): ausente não entra em sem_leitura; aqui a leitura do timer não foi feita (unknown).
+                       mock.patch.object(panel, "_timer_snapshot", side_effect=lambda unit: {"unit": unit, "state": "unknown"}),
                        mock.patch.object(panel, "_chat_snapshot", return_value=gateway),
                        mock.patch.object(panel, "_unidade_ativa", return_value=True),
                        mock.patch.object(panel, "_http_ok", return_value=True)]
@@ -783,6 +787,394 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(mensagens[1], {"role": "assistant", "content": "ola", "modelo": "seth-livre",
                                             "modelo_real": "openai/gpt-oss-120b"})
             self.assertEqual(mensagens[2], {"role": "assistant", "content": "tudo", "modelo": "seth-livre"})
+
+
+class LeiturasCurtasTests(unittest.TestCase):
+    """Rotas de leitura da Equipe, do backup, do egress, do perímetro, do CI e dos provedores (17/11/2026, D1-D7).
+    Tudo em pasta falsa; o sistema e a rede entram como dublês. Nenhum teste lê o HD real, o estado real da Equipe,
+    o diário real, nem executa perímetro, CI, restic ou systemctl."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.old_port, cls.old_origin = panel.PORT, panel.ALLOWED_ORIGIN
+        cls.server = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
+        cls.server.daemon_threads = True
+        panel.PORT = cls.server.server_address[1]
+        panel.ALLOWED_ORIGIN = f"http://127.0.0.1:{panel.PORT}"
+        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
+        cls.thread.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.shutdown()
+        cls.server.server_close()
+        cls.thread.join(timeout=3)
+        panel.PORT, panel.ALLOWED_ORIGIN = cls.old_port, cls.old_origin
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = Path(tmp.name)
+        env = mock.patch.dict(os.environ, {
+            "AGATA_EQUIPE_DIR": str(self.dir / "equipe"),
+            "AGATA_EQUIPE_DIARIO": str(self.dir / "eventos.log"),
+            "AGATA_BACKUP_STAGING_DIR": str(self.dir / "staging"),
+            "AGATA_HD_BACKUP_CONFIG": str(self.dir / "hd-backup"),
+            "AGATA_RESTIC_REPO": "",
+            "AGATA_PERIMETRO_DIR": str(self.dir / "perimetro"),
+            "AGATA_CI_DIR": str(self.dir / "ci"),
+        })
+        env.start()
+        self.addCleanup(env.stop)
+        self.config = self.dir / "equipe-ausentes.txt"
+        cfg = mock.patch.object(panel, "EQUIPE_AUSENTES_CONFIG", self.config)
+        cfg.start()
+        self.addCleanup(cfg.stop)
+        panel._CACHE_CURTO.clear()
+        self.addCleanup(panel._CACHE_CURTO.clear)
+
+    def request(self, method, path, headers=None):
+        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=5)
+        try:
+            conn.request(method, path, headers=headers or {})
+            resposta = conn.getresponse()
+            return resposta.status, resposta.read()
+        finally:
+            conn.close()
+
+    def mesmo_site(self):
+        return {"Sec-Fetch-Site": "same-origin"}
+
+    def _json(self, caminho, dados):
+        caminho.parent.mkdir(parents=True, exist_ok=True)
+        caminho.write_text(json.dumps(dados, ensure_ascii=False), encoding="utf-8")
+
+    def _vigias_falsas(self):
+        estados = {"agata-vigia@claude.service": "ok", "agata-vigia@codex.service": "warning",
+                   "agata-vigia@gemini.service": "ausente"}
+
+        def vigia(unit):
+            estado = estados[unit]
+            return {"unit": unit, "state": estado, "active_state": "active" if estado == "ok" else "inactive"}
+        patch = mock.patch.object(panel, "_service_snapshot", side_effect=vigia)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def _equipe_com_partida(self):
+        agora = "2026-11-17T08:00:00-03:00"
+        eq = self.dir / "equipe"
+        self._json(eq / "sessao.json", {
+            "estado": "em_andamento", "base": "a" * 40,
+            "presentes": {"claude": {"chegou_em": agora, "item": "x", "base": "a" * 40},
+                          "codex": {"chegou_em": agora, "item": "y", "base": "a" * 40}},
+            "esperados": ["claude", "codex", "gemini"], "matriz": []})
+        self._json(eq / "estado-claude.json", {"agente": "claude", "itens": {
+            "a": {"estado": "em_andamento", "caminhos": ["redesign/segredo-de-caminho.py"]},
+            "b": {"estado": "pronto"}, "c": {"estado": "pronto"}}})
+        self._json(eq / "ausencia-gemini.json", {"desde": agora, "motivo": "cota esgotada", "ate": ""})
+        self.config.write_text("# ausentes offline\ncodex\n", encoding="utf-8")
+        self._vigias_falsas()
+        return agora
+
+    def test_equipe_sem_arquivos_diz_sem_leitura_com_motivo(self):
+        d = panel._equipe_snapshot()
+        self.assertEqual(d["state"], "sem_leitura")
+        self.assertIn("nenhuma partida", d["motivo"])
+        for bloco in ("sessao", "itens", "vigias", "eventos", "ausentes"):
+            self.assertEqual(d[bloco]["state"], "sem_leitura", bloco)
+        self.assertTrue(d["source"] and d["observed_at"] and d["fresh_until"])
+
+    def test_equipe_le_sessao_itens_ausentes_divergencias_e_vigias(self):
+        agora = self._equipe_com_partida()
+        with self.dir.joinpath("eventos.log").open("w", encoding="utf-8") as f:
+            f.writelines(f"10:{n:02d} MAIN andou: linha {n}\n" for n in range(25))
+        d = panel._equipe_snapshot()
+        self.assertEqual(d["state"], "warning")
+        self.assertEqual(d["sessao"]["presentes"], [{"agente": "claude", "desde": agora}, {"agente": "codex", "desde": agora}])
+        self.assertEqual(d["sessao"]["esperados"], ["claude", "codex", "gemini"])
+        ausentes = {a["agente"]: a for a in d["ausentes"]["itens"]}
+        self.assertEqual(ausentes["codex"]["origem"], ["config"])
+        self.assertEqual((ausentes["gemini"]["origem"], ausentes["gemini"]["motivo"]), (["ausencia"], "cota esgotada"))
+        self.assertIn("codex: ausente no config e presente na sessão", d["divergencias"])
+        self.assertIn("gemini: ausência declarada na sessão e fora do config", d["divergencias"])
+        por_agente = {i["agente"]: i for i in d["itens"]["agentes"]}
+        self.assertEqual((por_agente["claude"]["total"], por_agente["claude"]["por_estado"]),
+                         (3, {"em_andamento": 1, "pronto": 2}))
+        self.assertEqual([(v["agente"], v["state"]) for v in d["vigias"]["itens"]],
+                         [("claude", "ok"), ("codex", "warning"), ("gemini", "ausente")])
+        self.assertEqual(d["eventos"]["state"], "ok")
+        self.assertEqual(len(d["eventos"]["linhas"]), 20)
+        self.assertEqual(d["eventos"]["linhas"][-1], "10:24 MAIN andou: linha 24")
+        bruto = json.dumps(d, ensure_ascii=False)
+        self.assertNotIn("segredo-de-caminho", bruto)   # caminhos de arquivo dos itens não saem
+        self.assertNotIn("caminhos", bruto)
+
+    def test_equipe_nao_le_o_canal_de_mensagens(self):
+        self._equipe_com_partida()
+        (self.dir / "conversa.md").write_text("## mensagem\nSEGREDO-DO-CANAL\n", encoding="utf-8")
+        self.assertNotIn("SEGREDO-DO-CANAL", json.dumps(panel._equipe_snapshot(), ensure_ascii=False))
+
+    def test_equipe_so_aceita_nome_de_vigia_valido(self):
+        self._equipe_com_partida()
+        self._json(self.dir / "equipe" / "sessao.json", {
+            "estado": "em_andamento", "base": "a" * 40, "presentes": {},
+            "esperados": ["claude", "../etc", "Nome Ruim", "x" * 40]})
+        d = panel._equipe_snapshot()
+        self.assertEqual([v["unit"] for v in d["vigias"]["itens"]], ["agata-vigia@claude.service"])
+        self.assertNotIn("etc", json.dumps(d))
+
+    def test_equipe_diario_so_a_cauda_e_limite_por_linha(self):
+        self._json(self.dir / "equipe" / "sessao.json", {"estado": "aguardando", "base": "a" * 40, "presentes": {}})
+        with self.dir.joinpath("eventos.log").open("w", encoding="utf-8") as f:
+            f.writelines(("L%05d " % n) + "x" * 400 + "\n" for n in range(2000))
+        linhas = panel._equipe_snapshot()["eventos"]["linhas"]
+        self.assertEqual(len(linhas), 20)
+        self.assertTrue(all(len(l) <= 300 for l in linhas))
+        self.assertTrue(linhas[-1].startswith("L01999"))
+
+    def test_equipe_http_responde_e_recusa_origem_cruzada(self):
+        status, corpo = self.request("GET", "/api/equipe", self.mesmo_site())
+        self.assertEqual(status, 200)
+        d = json.loads(corpo)
+        self.assertTrue({"state", "source", "observed_at", "fresh_until"} <= set(d))
+        self.assertEqual(self.request("GET", "/api/equipe", {"Sec-Fetch-Site": "cross-site"})[0], 403)
+        self.assertEqual(self.request("POST", "/api/equipe", {"Sec-Fetch-Site": "same-origin"})[0], 405)
+
+    def _backup_com_cache(self, hd_existe=True):
+        hd = self.dir / "hd"
+        if hd_existe:
+            (hd / "restic-agata-local").mkdir(parents=True)
+        (self.dir / "hd-backup").write_text(f"{hd}\n", encoding="utf-8")
+        agora = datetime.now(timezone.utc)
+        staging = self.dir / "staging"
+        self._json(staging / "p12-cobertura.json", {
+            "modelo-a": {"sha256": "f" * 64, "verificado_em": (agora - timedelta(days=2)).isoformat(), "snapshot": "56038913"},
+            "modelo-b": {"sha256": "e" * 64, "verificado_em": (agora - timedelta(days=20)).isoformat(), "snapshot": "9433e3b8"},
+        })
+        (staging / "PENDENTE-HD-DESCONECTADO").write_text("x", encoding="utf-8")
+        (staging / "PENDENTE-HD-DESCONECTADO-2").write_text("y", encoding="utf-8")
+        return hd
+
+    def test_backup_hd_regua_e_pendentes(self):
+        hd = self._backup_com_cache()
+        d = panel._backup_snapshot()
+        self.assertEqual((d["hd"]["presente"], d["hd"]["repositorio_presente"]), (True, True))
+        self.assertNotIn(str(hd), json.dumps(d))          # o caminho do HD não sai na resposta
+        self.assertEqual(d["pendentes_hd"], 2)
+        por = {r["recurso"]: r for r in d["recursos"]}
+        self.assertTrue(por["modelo-a"]["dentro_da_regua"])
+        self.assertFalse(por["modelo-b"]["dentro_da_regua"])
+        self.assertAlmostEqual(por["modelo-a"]["idade_dias"], 2, delta=0.1)
+        self.assertEqual(por["modelo-a"]["snapshot"], "56038913")
+        self.assertNotIn("sha256", json.dumps(d))
+        self.assertEqual((d["state"], d["regua_dias"]), ("warning", 14))
+
+    def test_backup_tudo_na_regua_e_hd_desmontado(self):
+        self._backup_com_cache(hd_existe=False)
+        staging = self.dir / "staging" / "p12-cobertura.json"
+        agora = datetime.now(timezone.utc)
+        self._json(staging, {"modelo-a": {"verificado_em": (agora - timedelta(days=1)).isoformat(), "snapshot": "abc12345"}})
+        d = panel._backup_snapshot()
+        self.assertEqual((d["hd"]["presente"], d["hd"]["repositorio_presente"]), (False, False))
+        self.assertIn("desconectado", d["hd"]["motivo"])
+        self.assertEqual(d["state"], "ok")
+
+    def test_backup_sem_cache_e_sem_restic(self):
+        with mock.patch.object(panel.subprocess, "run", side_effect=AssertionError("restic não pode rodar")) as run:
+            d = panel._backup_snapshot()
+        run.assert_not_called()
+        self.assertEqual(d["state"], "sem_leitura")
+        self.assertIn("p12-cobertura.json", d["motivo"])
+        self.assertEqual(d["recursos"], [])
+
+    def test_backup_registro_sem_data_vira_item_sem_leitura(self):
+        self._backup_com_cache()
+        self._json(self.dir / "staging" / "p12-cobertura.json", {"quebrado": {"verificado_em": "ontem"}})
+        d = panel._backup_snapshot()
+        self.assertEqual((d["state"], d["recursos"][0]["state"], d["recursos"][0]["dentro_da_regua"]),
+                         ("warning", "sem_leitura", None))
+
+    def _crate(self, root, binario_antigo=False):
+        crate = root / "redesign/rust/egress"
+        (crate / "src").mkdir(parents=True)
+        (crate / "target/release").mkdir(parents=True)
+        fonte, cargo = crate / "src/main.rs", crate / "Cargo.toml"
+        fonte.write_text("fn main() {}\n", encoding="utf-8")
+        cargo.write_text("[package]\n", encoding="utf-8")
+        os.utime(fonte, (1_700_000_000, 1_700_000_000))
+        os.utime(cargo, (1_700_000_000, 1_700_000_000))
+        egress = crate / "target/release/egress"
+        socks = crate / "target/release/egress-socks5"
+        egress.write_text("bin", encoding="utf-8")
+        socks.write_text("bin", encoding="utf-8")
+        os.utime(egress, (1_700_000_100, 1_700_000_100))
+        os.utime(socks, (1_699_999_000 if binario_antigo else 1_700_000_100,) * 2)
+        return crate
+
+    def test_egress_em_dia_por_mtime_e_navegador_so_pela_chave(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)):
+            self._crate(Path(tmp), binario_antigo=True)
+            sistema = SimpleNamespace(returncode=0, stdout="LoadState=loaded\nEnvironment=HOME=/h AGATA_EGRESS_RUST=/home/u/.local/bin/agata-egress PATH=/bin\n")
+            with mock.patch.object(panel.subprocess, "run", return_value=sistema) as run:
+                d = panel._egress_snapshot()
+        self.assertEqual(d["state"], "warning")
+        por = {b["nome"]: b for b in d["binarios"]}
+        self.assertEqual((por["egress"]["presente"], por["egress"]["em_dia"]), (True, True))
+        self.assertEqual((por["egress-socks5"]["presente"], por["egress-socks5"]["em_dia"]), (True, False))
+        self.assertIn("egress-socks5", d["motivo"])
+        self.assertIs(d["navegador_usa_rust"], True)
+        self.assertNotIn("/home/u/.local/bin", json.dumps(d))   # o valor da chave não sai
+        self.assertEqual(d["paridade"], "sem registro")
+        self.assertEqual(run.call_args.args[0][-1], panel.EGRESS_UNIT)
+        self.assertNotIn("shell", run.call_args.kwargs)
+
+    def test_egress_tudo_em_dia_e_chave_ausente_ou_sistema_sem_leitura(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)):
+            self._crate(Path(tmp))
+            sem_chave = SimpleNamespace(returncode=0, stdout="LoadState=loaded\nEnvironment=PATH=/bin\n")
+            with mock.patch.object(panel.subprocess, "run", return_value=sem_chave):
+                d = panel._egress_snapshot()
+            self.assertEqual((d["state"], d["navegador_usa_rust"]), ("ok", False))
+            self.assertNotIn("motivo", d)
+            with mock.patch.object(panel.subprocess, "run", side_effect=OSError("sem systemctl")):
+                self.assertIsNone(panel._egress_snapshot()["navegador_usa_rust"])
+
+    def test_egress_sem_crate_diz_sem_leitura(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)), \
+                mock.patch.object(panel.subprocess, "run", side_effect=OSError("sem systemctl")):
+            d = panel._egress_snapshot()
+        self.assertEqual(d["state"], "sem_leitura")
+        self.assertIn("src/", d["motivo"])
+
+    def _ha(self, horas):
+        """Carimbo com fuso, `horas` atrás no relógio do painel: a regra de idade (R1) não depende da data de hoje."""
+        return (panel._now() - timedelta(hours=horas)).isoformat(timespec="seconds")
+
+    def _json_perimetro(self, **campos):
+        base = {"gerado_em": self._ha(1), "head": "ac08bf4f", "resultado_geral": "OK",
+                "contagens": {"ok": 14, "skip": 0, "parcial": 0, "falha": 0},
+                "controles": [{"id": "P-1", "veredito": "OK"}, {"id": "P-25-SELOS", "veredito": "OK"}]}
+        base.update(campos)
+        self._json(self.dir / "perimetro" / "ultimo.json", base)
+
+    def test_perimetro_le_o_ultimo_resultado_e_nao_executa(self):
+        self._json_perimetro(contagens={"ok": 13, "skip": 1, "parcial": 0, "falha": 0},
+                             controles=[{"id": "P-1", "veredito": "OK"}, {"id": "P-2", "veredito": "SKIP"}],
+                             extra="descartado", segredo="nao-sai")
+        with mock.patch.object(panel.subprocess, "run", side_effect=AssertionError), \
+                mock.patch.object(panel.subprocess, "Popen", side_effect=AssertionError):
+            d = panel._perimetro_snapshot()
+        self.assertEqual((d["state"], d["resultado_geral"], d["head"]), ("warning", "OK", "ac08bf4f"))
+        self.assertEqual(d["controles"][1], {"id": "P-2", "veredito": "SKIP"})
+        self.assertNotIn("nao-sai", json.dumps(d))
+        self.assertNotIn("extra", d)
+        self.assertIsInstance(d["idade_horas"], float)
+
+    def test_perimetro_falha_ok_e_leituras_invalidas(self):
+        self._json_perimetro(resultado_geral="FALHA", contagens={"ok": 13, "skip": 0, "parcial": 0, "falha": 1})
+        self.assertEqual(panel._perimetro_snapshot()["state"], "falha")
+        self._json_perimetro()
+        self.assertEqual(panel._perimetro_snapshot()["state"], "ok")
+        self._json_perimetro(resultado_geral="TALVEZ")
+        self.assertEqual(panel._perimetro_snapshot()["state"], "sem_leitura")
+        (self.dir / "perimetro" / "ultimo.json").write_text("{ quebrado", encoding="utf-8")
+        self.assertEqual(panel._perimetro_snapshot()["state"], "sem_leitura")
+        (self.dir / "perimetro" / "ultimo.json").write_text(" " * 300_000, encoding="utf-8")
+        self.assertEqual(panel._perimetro_snapshot()["state"], "sem_leitura")
+        self.assertEqual(panel._perimetro_snapshot()["motivo"], "ultimo.json do perímetro ilegível ou acima do limite")
+
+    def test_ci_le_o_ultimo_resultado_e_nao_executa(self):
+        self._json(self.dir / "ci" / "ultimo.json", {
+            "gerado_em": self._ha(1), "head": "ac08bf4f", "ok": 2, "falha": 0,
+            "linha_final": "CI LOCAL: TUDO OK",
+            "passos": [{"nome": "testes SDD (pytest)", "ok": True}, {"nome": "suite adversarial", "ok": True}, {"nome": 7, "ok": True}]})
+        with mock.patch.object(panel.subprocess, "run", side_effect=AssertionError):
+            d = panel._ci_snapshot()
+        self.assertEqual((d["state"], d["ok"], d["falha"], d["linha_final"]), ("ok", 2, 0, "CI LOCAL: TUDO OK"))
+        self.assertEqual(len(d["passos"]), 2)   # o passo com nome que não é texto não entra
+        self._json(self.dir / "ci" / "ultimo.json", {"gerado_em": self._ha(1), "ok": 1, "falha": 1,
+                                                       "linha_final": "CI LOCAL: 1 passo(s) falharam",
+                                                       "passos": [{"nome": "x", "ok": False}]})
+        self.assertEqual(panel._ci_snapshot()["state"], "falha")
+        self.assertEqual(self.request("GET", "/api/ci", self.mesmo_site())[0], 200)
+
+    def test_ci_sem_arquivo_diz_sem_leitura(self):
+        d = panel._ci_snapshot()
+        self.assertEqual(d["state"], "sem_leitura")
+        self.assertTrue(d["motivo"].startswith("o CI local ainda"))
+
+    def _get_limpo(self, caminho):
+        """GET na rota de leitura curta, com o cache curto zerado: uma leitura anterior não vence a gravada agora."""
+        panel._CACHE_CURTO.clear()
+        status, corpo = self.request("GET", caminho, self.mesmo_site())
+        return status, json.loads(corpo)
+
+    def test_resultado_gravado_ha_mais_de_24_h_nao_sai_ok(self):
+        # R1 (17/11/2026): resultado de 30 h atrás sai "warning", com envelhecido e motivo; falha continua falha.
+        velho = self._ha(30)
+        ci_arq = self.dir / "ci" / "ultimo.json"
+        self._json_perimetro(gerado_em=velho)
+        d = panel._perimetro_snapshot()
+        self.assertEqual((d["state"], d["envelhecido"], d["motivo"]), ("warning", True, "resultado gravado há 30 h"))
+        self.assertGreater(d["idade_horas"], 24)
+        self._json_perimetro(gerado_em=self._ha(1))
+        d = panel._perimetro_snapshot()
+        self.assertEqual((d["state"], d["envelhecido"]), ("ok", False))
+        self.assertNotIn("motivo", d)
+        self._json_perimetro(gerado_em=velho, resultado_geral="FALHA", contagens={"ok": 13, "skip": 0, "parcial": 0, "falha": 1})
+        self.assertEqual((panel._perimetro_snapshot()["state"], panel._perimetro_snapshot()["envelhecido"]), ("falha", True))
+        self._json_perimetro(gerado_em=velho)
+        status, http_d = self._get_limpo("/api/perimetro")
+        self.assertEqual((status, http_d["state"], http_d["envelhecido"], http_d["motivo"]), (200, "warning", True, "resultado gravado há 30 h"))
+        self._json(ci_arq, {"gerado_em": velho, "head": "ac08bf4f", "ok": 2, "falha": 0,
+                            "linha_final": "CI LOCAL: TUDO OK", "passos": [{"nome": "testes", "ok": True}]})
+        c = panel._ci_snapshot()
+        self.assertEqual((c["state"], c["envelhecido"], c["motivo"]), ("warning", True, "resultado gravado há 30 h"))
+        self._json(ci_arq, {"gerado_em": velho, "head": "ac08bf4f", "ok": 1, "falha": 1,
+                            "linha_final": "CI LOCAL: 1 passo(s) falharam", "passos": [{"nome": "x", "ok": False}]})
+        self.assertEqual((panel._ci_snapshot()["state"], panel._ci_snapshot()["envelhecido"]), ("falha", True))
+        status, http_c = self._get_limpo("/api/ci")
+        self.assertEqual((status, http_c["state"], http_c["envelhecido"]), (200, "falha", True))
+        self._json(ci_arq, {"gerado_em": velho, "head": "ac08bf4f", "ok": 2, "falha": 0,
+                            "linha_final": "CI LOCAL: TUDO OK", "passos": [{"nome": "testes", "ok": True}]})
+        status, http_c = self._get_limpo("/api/ci")
+        self.assertEqual((status, http_c["state"], http_c["envelhecido"], http_c["motivo"]), (200, "warning", True, "resultado gravado há 30 h"))
+
+    def test_provedores_vem_do_catalogo_e_nao_constroi_o_council(self):
+        import relay_catalog
+        antes = panel._COUNCIL
+        with mock.patch.object(panel, "_council_state", side_effect=AssertionError("o Council não pode ser construído")):
+            status, corpo = self.request("GET", "/api/provedores", self.mesmo_site())
+        d = json.loads(corpo)
+        self.assertEqual((status, d["state"], d["total"]), (200, "ok", 9))
+        self.assertEqual({i["id"] for i in d["items"]}, {p["id"] for p in relay_catalog.PROVIDERS})
+        self.assertEqual(set(d["items"][0]), {"id", "nome", "tipo", "acesso"})
+        nomes = {i["nome"] for i in d["items"]}
+        self.assertTrue({"Z.ai / GLM", "Le Chat / Mistral"} <= nomes)
+        self.assertIs(panel._COUNCIL, antes)
+        self.assertEqual(set(panel.ABRIR_PROVEDORES), {p["id"] for p in relay_catalog.PROVIDERS} | {"omniroute"})
+
+    def test_leitura_com_erro_inesperado_nao_derruba_a_rota(self):
+        def quebra():
+            raise RuntimeError("detalhe interno do disco")
+        d = panel._leitura_segura(quebra)
+        self.assertEqual(d["state"], "sem_leitura")
+        self.assertNotIn("detalhe interno", json.dumps(d))
+
+    def test_rotas_de_leitura_respondem_com_campos_e_sem_executar(self):
+        # Só o systemctl do navegador (leitura do egress) é permitido; perímetro, CI, restic e cargo não podem rodar.
+        with mock.patch.object(panel.subprocess, "run", side_effect=AssertionError("nada executa")), \
+                mock.patch.object(panel, "_navegador_usa_rust", return_value=None), \
+                mock.patch.object(panel, "ROOT", self.dir):
+            for rota in panel.LEITURAS_CURTAS:
+                panel._CACHE_CURTO.clear()
+                status, corpo = self.request("GET", rota, self.mesmo_site())
+                self.assertEqual(status, 200, rota)
+                d = json.loads(corpo)
+                self.assertIn("state", d, rota)
+                self.assertIn("observed_at", d, rota)
+                self.assertIn("fresh_until", d, rota)
+                self.assertIn("source", d, rota)
 
 
 if __name__ == "__main__":

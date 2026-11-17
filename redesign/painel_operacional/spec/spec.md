@@ -190,7 +190,7 @@ Lote `painel-funcional-16-11`. Os critérios com teste estão no fim de "Critér
 - Chat antigo fora. O LibreChat (porta 3080) saiu do atalho de ligar o sistema em 07/11/2026: o comentário desse atalho diz que o Humano excluiu os contêineres e os volumes nesse dia. O `config/modelos-gratuitos.md` registra a saída do Goose em 07/11/2026 e ainda descreve o LibreChat como consumidor (texto anterior à retirada; não é fonte da data). Na base medida (HEAD da worktree), o código do painel ainda citava o LibreChat (`server.py`: 4 ocorrências de LibreChat ou 3080; `prototipo.html`: 8 de LibreChat). Este lote, 16/11/2026, tira essas citações do painel; a data da saída do chat antigo é 07/11/2026.
 - Gateway no lugar do chat antigo: `/api/status` descreve o chat como o gateway da Seth (`chat.source` `seth-gateway`, `chat.source_ref` `127.0.0.1:20126/`). A capacidade `conversar` de `/api/capacidades` aponta para o gateway. Nenhuma resposta de `/api/status` ou `/api/capacidades` contém `3080` nem `LibreChat`.
 - `/api/abrir` não aceita o alvo `librechat`: recusa com 400 "destino fora da lista" e não enfileira foco (teste `HttpTests.test_abrir_librechat_responde_400_e_nao_enfileira_foco` em `test_painel.py`).
-- `/api/status` traz `sem_leitura`: a lista das fontes sem leitura (unidade desconhecida ou ausente, timer desconhecido ou ausente) e a conversa com a Seth quando o estado do gateway é `unknown`. Sem nenhuma fonte nessa situação, a lista sai vazia.
+- `/api/status` traz `sem_leitura`: a lista das fontes em `unknown` (unidades, timers, Git, conversa, manutenção, propostas e modelos), e a conversa com a Seth quando o gateway está `unknown`. Unidade `ausente` (não existe no escopo do usuário) não entra nessa lista: aparece como ausente na própria linha. Sem nenhuma fonte nessa situação, a lista sai vazia.
 - Unidade inexistente: `LoadState` not-found vira estado `ausente`, com o texto "unidade não existe no escopo do usuário desta Máquina" (o `systemctl --user` só enxerga o escopo do usuário; na página, o chip diz "NÃO EXISTE (ESCOPO DO USUÁRIO)" e a linha do herói diz "unidade não existe (escopo do usuário)"). Vale para serviços e timers, e para as lacunas. `ausente` é diferente de `inactive` (declarada e parada) e de `unknown` (sem leitura). No estado geral, `ausente` não conta como `ok`. Integrações usam a mesma função de serviço; isso é inferido pelo teste, não medido à parte.
 - `/api/medicoes/estado` traz `modelos_estado`: `ok` quando a lista de modelos do Ollama foi lida (`modelos_motivo` nulo); `sem_leitura` quando não foi, com `modelos` vazio e `modelos_motivo` em português, sem host nem porta (`127.0.0.1`, `11434`). Falha de leitura não vira lista vazia muda.
 - `/api/details` observa `painel-operacional.service` e `agata-vigia@claude.service`. Cada unidade com rótulo traz `rotulo` ("Painel operacional" e "Vigia do Claude"); as demais não trazem o campo.
@@ -219,6 +219,34 @@ Lote `painel-conversa-16-11`. Descreve o contrato da tela (não o histórico). O
 - Filtro de estilo. Toda tela segue o ESTILO.md da skill `agata-painel` (decisão do Humano, 16/11/2026, 18:27): plano, um acento, estado com marca e palavra, sem sombra nem gradiente, e conferido em 360, 768, 1440 e 2560 px sem rolagem horizontal da página.
 - Não existe nesta versão: imagem na conversa (o anexo aceita só texto), compartilhar conversa (link público segue como pendência de decisão do Humano), e mais modelos no seletor (só `seth-livre` e `seth-public`).
 
+### Lote 2b: listas únicas e telas de operação (17/11/2026)
+
+Lote `atualiza-17-11`. Os critérios com teste estão em "Critérios de aceite", subseção "Critérios do lote 2b: listas únicas e telas de operação (17/11/2026)". O que só se viu em foto está como não medido.
+
+- Rotas de leitura (contrato real, medido nas respostas do servidor em 17/11/2026). Todas trazem `schema_version` 1, `state`, `source`, `observed_at` e `fresh_until`; sem leitura, trazem `state` `sem_leitura` com `motivo`.
+  - `/api/provedores`: `items` (cada um com `id`, `nome`, `tipo` e `acesso`) e `total`. É a fonte única dos botões do Conselho, da tabela de provedores e de Conexões.
+  - `/api/equipe`: `sessao` (`state`, `estado`, `base`, `presentes` como lista de `agente` e `desde`, `esperados`); `ausentes` (`state` e `itens`, com `agente`, `origem` em lista, `desde`, `motivo`, `ate`); `divergencias` (lista de texto) e `divergencias_motivo`; `itens` (`state` e `agentes`, com `agente`, `total` e `por_estado`); `vigias` (`state` e `itens`, com `agente`, `unit`, `state` e `active_state`); `eventos` (`state` e `linhas`).
+  - `/api/backup`: `hd` (`presente`, `repositorio_presente`, `motivo`); `pendentes_hd` (número); `regua_dias`; `recursos` (lista com `recurso`, `state`, `verificado_em`, `idade_dias`, `snapshot` e `dentro_da_regua`).
+  - `/api/egress`: `binarios` (lista com `nome`, `presente`, `mtime` e `em_dia`); `fonte_mais_nova`; `navegador_usa_rust`; `paridade`; `motivo`.
+  - `/api/perimetro`: `gerado_em`, `idade_horas`, `head`, `resultado_geral`, `contagens` (`ok`, `skip`, `parcial`, `falha`) e `controles` (`id` e `veredito`). O veredito sai em maiúsculas (medido: OK, PARCIAL e SKIP). Sem `ultimo.json`, `sem_leitura` com o motivo. Acima de 24 h, `ok` vira `warning` (`falha` continua), com `envelhecido: true` e `motivo` `resultado gravado há N h`; abaixo, `envelhecido: false` (R1, 17/11/2026).
+  - `/api/ci`: `gerado_em`, `idade_horas`, `head`, `ok`, `falha`, `linha_final` e `passos` (`nome` e `ok`). Sem resultado gravado, `sem_leitura` com o motivo. Acima de 24 h, `ok` vira `warning` (`falha` continua), com `envelhecido: true` e `motivo` `resultado gravado há N h`; abaixo, `envelhecido: false` (R1, 17/11/2026).
+  - `/api/qualidade-llm`: `items`. O item `recall_busca` traz `leituras`, cada uma com `corpus`, `rotulo`, `estado`, `valor`, `fonte` e `medido_em` (não há campo `data`).
+  - Medição ocupada: HTTP 429 com `motivo` no corpo.
+- Equipe (Sistema > Equipe): mostra a sessão (estado, base e agentes esperados), os presentes e os ausentes, as divergências em destaque (o codex aparece como ausente no config e presente na sessão), os itens por estado, os vigias e os eventos. Sessão sem lista de esperados: a tela diz "sessão sem lista de esperados" e os vigias saem como sem leitura.
+- Backup (Sistema > Backup): primeiro o veredito do P-12 do último perímetro gravado, com a data. Depois HD e repositório. Por último o registro de cobertura (última verificação anotada), com a régua dele. A régua do registro não é o veredito do P-12. Sem `ultimo.json` do perímetro, a tela diz "P-12: sem leitura".
+- Saída de rede (Sistema > Saída de rede): os binários egress e egress-socks5, em dia pelo mtime; se o navegador usa Rust; a paridade, "sem registro" quando não há registro.
+- Perímetro e CI (Qualidade > Perímetro e Qualidade > CI): mostram o último resultado gravado por `scripts/perimetro.sh` e `scripts/ci_sdd_local.sh`, com head, idade e contagens. No CI, as falhas vêm primeiro.
+- Qualidade de LLM: a recuperação é um indicador só, com as duas leituras (corpus do vault e conjunto da avaliação), cada uma com valor, estado, fonte e data da medição. Os botões de medir dizem o corpus; medição ocupada mostra o motivo no botão.
+- Listas únicas (fusões do lote):
+  - Integrações: "O que posso fazer" e Integrações são uma lista só, em Sistema > Integrações (cinco filtros, busca, categoria do conjunto fechado e evidência em cada linha). O Panorama não tem subcapacidades; tem atalho para Integrações.
+  - Provedores: uma tabela, em Sistema > Conexões; os botões do Conselho saem de `/api/provedores`.
+  - Timers e tarefas: só em Manutenção. Estado operacional não repete.
+  - Lacunas: só em Qualidade > Lacunas (`lacunas-lista` e `lacunas-canon`). A Visão do sistema não tem mais "Melhorias a propor".
+  - Recuperação: um indicador, com a mesma trava de medição dos outros botões.
+  - Atualizar: um botão por tela.
+- Abas novas: em Sistema, Equipe, Backup e Saída de rede (Integrações e Conexões já existiam); em Qualidade, Perímetro e CI (Qualidade de LLM e Lacunas já existiam).
+- Regra: o painel não executa perímetro nem CI; mostra o último resultado gravado. A tela diz isso ("O painel não roda o perímetro; mostra o último resultado gravado."). As rotas `/api/perimetro` e `/api/ci` só leem arquivo.
+
 ## Mapeamento de funções
 
 Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operator_console` e `/conselho-rede`. A coluna "Subpainel e ids" traz o id do subpainel ou dos controles. "Casca" são elementos de moldura; estão listados para não sumirem, e a decisão de não mapeá-los a uma seção é pedida ao Humano.
@@ -231,10 +259,10 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Panorama | Atalhos "Abrir" para Estado operacional, Visão, Conselho e conversa da Seth | panorama | sub-panorama (`data-open-page`, vira `data-secao`) |
 | prototipo · Panorama | Atalhos de memória: Começar no vault, Linha do tempo, Mapa do sistema, Brain Atlas, Base de memórias | panorama | sub-panorama (abrem `vault-dialog`; dono conhecimento) |
 | prototipo · Visão do sistema | Indicadores clicáveis que levam à seção de origem | panorama | sub-visao (`visao-kpis`) |
-| prototipo · Visão do sistema | Melhorias a propor: o que falta ou está pendente | panorama | sub-visao (`visao-melhorias`) |
-| prototipo · O que posso fazer | Filtros: tudo, disponível, parcial, planejado, horizonte | panorama | sub-capacidades (classe `filterbar`) |
-| prototipo · O que posso fazer | Cartões de capacidade e botão EVIDÊNCIA (diálogo de evidência) | panorama | sub-capacidades (classe `cap-card`, `evidence-dialog`) |
-| prototipo · O que posso fazer | Marca de lacuna nos cartões sem medição | panorama | sub-capacidades (`marcarLacunasNosCartoes`) |
+| retirado (17/11/2026) | Melhorias a propor da Visão do sistema | retirado | saiu no lote 2b; as lacunas estão em Qualidade > Lacunas (`lacunas-lista`) |
+| prototipo · Integrações (lote 2b) | Filtros: tudo, disponível, parcial, planejado, horizonte (a lista saiu do Panorama) | sistema | sub-integracoes (classe `filterbar`) |
+| prototipo · Integrações (lote 2b) | Cartões de capacidade e botão EVIDÊNCIA (diálogo de evidência) | sistema | sub-integracoes (classe `cap-card`, `evidence-dialog`) |
+| prototipo · Integrações (lote 2b) | Marca de lacuna nos cartões sem medição | sistema | sub-integracoes (`marcarLacunasNosCartoes`) |
 | prototipo · Plano de trabalho | Propostas para examinar, só leitura de origem local | panorama | sub-plano (`/api/proposals/verify`) |
 | prototipo · Plano de trabalho | Atalhos Estado do sistema e Início do vault | panorama | sub-plano |
 | prototipo · Importantes (11/11/2026) | Lista local: guardar, marcar feito, descartar, reabrir, editar e trazer do Conselho | panorama | sub-importantes (`importantes-lista`, `importantes-form`, `importantes-trazer`) |
@@ -274,6 +302,9 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Conselho (nova, pedida pelo Humano em 07/11/2026) | Memória compartilhada do Conselho, só leitura do cache: número, data e hora, autor, tipo e texto; filtro por tipo; atualizar | conselho | sub-conselho-memoria (`memoria-lista`, `memoria-tipo`, `memoria-atualizar`, `memoria-resumo`) |
 | prototipo · Estado operacional | Unidades, repositório, agenda observada, tarefas da janela e atualizar leitura | sistema | sub-operacao (`refresh-status`) |
 | prototipo · Integrações | Cartões de integração com leitura por unidade: `/api/details` para os cartões com `data-unit`; `/api/status` para o gateway da Seth, OmniRoute e as rotinas (timers); fronteiras e fontes (FONTE) | sistema | sub-integracoes (`integration-list`) |
+| prototipo · Equipe (lote 2b) | Sessão, presentes e ausentes; divergências em destaque; itens por estado; vigias; eventos; "sessão sem lista de esperados" | sistema | sub-equipe (`equipe-kpis`, `equipe-presentes`, `equipe-ausentes`, `equipe-vigias`, `equipe-eventos`) |
+| prototipo · Backup (lote 2b) | P-12 do último perímetro primeiro, com a data; HD e repositório; registro de cobertura com a própria régua | sistema | sub-backup (`backup-p12`, `backup-kpis`, `backup-recursos`) |
+| prototipo · Saída de rede (lote 2b) | Binários egress e egress-socks5 em dia; navegador usa Rust; paridade | sistema | sub-saida-rede (`egress-binarios`, `egress-dl`) |
 | prototipo · Modelos & rota | Capacidades registradas, decisão e ficha do modelo | sistema | sub-modelos |
 | prototipo · Manutenção | Próximos e últimos disparos; tarefas | sistema | sub-manutencao |
 | casca · barra lateral | Abrir Obsidian e OmniRoute (`/api/abrir`, lista fixa) | sistema | servicos-locais |
@@ -296,6 +327,8 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 | prototipo · Operator Console | Abrir pacote; abas Visão, Capacidades, Revisões e Drift; frescor e integridade | qualidade | sub-operator-console (`package`, `state`, `freshness`, `integrity`) — sem iframe |
 | prototipo · Qualidade de LLM | Indicadores medidos; sem medição sai como não medido | qualidade | sub-qualidade (`qualidade-lista`, `qualidade-titulo`) |
 | prototipo · Qualidade de LLM | Medir recuperação, medir busca por sentido, medir contexto efetivo (modelo, tarefa, raciocínio) | qualidade | sub-qualidade (`medir-recuperacao`, `medir-semantica`, `medir-contexto`, `medir-modelo`) |
+| prototipo · Perímetro (lote 2b) | Último resultado gravado por `scripts/perimetro.sh`: contagens e veredito por controle; o painel não executa o perímetro | qualidade | sub-perimetro (`perimetro-kpis`, `perimetro-controles`) |
+| prototipo · CI (lote 2b) | Última linha e passos gravados por `scripts/ci_sdd_local.sh`, falhas primeiro; o painel não executa o CI | qualidade | sub-ci (`ci-kpis`, `ci-passos`) |
 | prototipo · SDD | Componentes ancorados e estado da âncora | qualidade | sub-sdd (`sdd-lista`, `sdd-titulo`) |
 | prototipo · SDD | Âncora e critérios por componente; projetos externos de `config/sdd` | qualidade | sub-sdd |
 | prototipo · Lacunas | Declarado e não confirmado (canon); lista de lacunas | qualidade | sub-lacunas (`lacunas-canon`, `lacunas-lista`, `lacunas-total`) |
@@ -454,7 +487,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] o HTTP 200 do gateway da Seth vira estado `ok` em `/api/status` (campo `chat`), com `source` `seth-gateway` e `source_ref` `127.0.0.1:20126/`
 - [ ] `/api/status` e `/api/capacidades` não citam `3080` nem `LibreChat`, e a capacidade `conversar` tem `source` `seth-gateway · 127.0.0.1:20126`
 - [ ] `server.py` e `nova_versao_painel.py` não citam `LibreChat` nem a porta `3080` (checagem do texto do código, não de resposta HTTP)
-- [ ] `/api/status` traz `sem_leitura` com as fontes desconhecidas ou ausentes, e a conversa com a Seth quando o estado do gateway é `unknown`; sem fonte nessa situação, a lista sai vazia
+- [ ] `/api/status` traz `sem_leitura` só com as fontes em `unknown` (desconhecidas), e a conversa com a Seth quando o estado do gateway é `unknown`; a unidade `ausente` (não existe no escopo do usuário) fica fora dessa lista e aparece como ausente na própria linha; sem fonte nessa situação, a lista sai vazia
 - [ ] unidade com `LoadState` not-found vira estado `ausente` com o texto "unidade não existe no escopo do usuário desta Máquina", em serviço e em timer, e `ausente` não conta como `ok` no estado geral (sai `warning`)
 - [ ] nas lacunas, unidade não existente sai como `ausente` com o mesmo motivo, e unidade declarada no boot e inativa sai como "declarada no boot e inativa agora"
 - [ ] `/api/medicoes/estado` com a lista de modelos do Ollama sem leitura devolve `modelos` vazio, `modelos_estado` `sem_leitura` e `modelos_motivo` preenchido, sem `127.0.0.1` nem `11434`
@@ -590,6 +623,48 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - NÃO MEDIDO, manual: leitor de tela (role log e aria-live) não foi testado com leitor real; o foco que volta ao botão Mais ao escolher um item do menu não foi medido em navegador (só o Esc tem teste de comportamento).
 - NÃO MEDIDO, manual: o modo conversa por voz e o ditado não foram medidos nesta rodada; a voz é a do sistema e depende da máquina.
 - NÃO MEDIDO, manual: o que a via pública (seth-public) faz com as instruções da conversa. A tela diz que o gateway as descarta; isso vem do gateway e não foi medido aqui.
+
+### Critérios do lote 2b: listas únicas e telas de operação (17/11/2026)
+
+- [ ] o que posso fazer e as integrações são uma lista só, em Sistema > Integrações, com cada tema uma vez
+- [ ] cada linha da lista de integrações tem categoria do conjunto fechado, evidência e busca
+- [ ] a lista de integrações fica em Integrações, com cinco filtros, busca e fronteiras
+- [ ] o Panorama não tem subcapacidades e tem atalho para Integrações
+- [ ] Atualizar aparece uma vez por tela e não se repete na seção
+- [ ] Estado operacional não tem timers e tem atalho para Manutenção
+- [ ] timers e tarefas ficam só em Manutenção
+- [ ] as lacunas ficam só em Qualidade > Lacunas, com a lista do mapa e o canon
+- [ ] a Visão do sistema tem só números e atalhos, sem Melhorias a propor
+- [ ] os provedores aparecem numa tabela só, em Conexões, com as colunas do contrato
+- [ ] Conexões tem uma linha por provedor do catálogo, com a conexão configurada quando ela existe
+- [ ] os botões do Conselho saem de /api/provedores, lido no campo items
+- [ ] a recuperação é um indicador só, com as duas leituras (corpus, valor, estado, fonte e data)
+- [ ] o código tem uma só recuperação, com as duas leituras e o rótulo "Recuperação" uma vez
+- [ ] os botões de medir dizem o corpus e a medição ocupada mostra o motivo no botão
+- [ ] medição ocupada (HTTP 429) mostra o motivo no botão, pela mesma trava
+- [ ] cada tela nova está na seção certa, com resultado, pílula de estado e fonte
+- [ ] cada tela nova carrega a própria rota ao abrir, pelo mesmo mecanismo das abas
+- [ ] Equipe sem rota mostra sem leitura com o motivo da rota
+- [ ] Equipe com rota mostra sessão, presentes, ausentes, divergências em destaque, vigias e eventos
+- [ ] Equipe sem lista de esperados diz "sessão sem lista de esperados" na sessão e nos vigias
+- [ ] Equipe com vigias lidos mostra agente, unidade e estado
+- [ ] Backup mostra primeiro o veredito do P-12 do último perímetro, com a data
+- [ ] Backup sem ultimo.json do perímetro diz "P-12: sem leitura"
+- [ ] Backup mostra o registro de cobertura com a própria régua, e a nota diz que ela não é o veredito do P-12
+- [ ] Saída de rede mostra os binários como lista, se o navegador usa Rust e a paridade sem registro
+- [ ] Perímetro sem leitura diz o motivo, e com resultado mostra as contagens e os controles
+- [ ] Perímetro diz que mostra o último resultado gravado e que o painel não o roda
+- [ ] CI mostra as falhas primeiro na lista de passos e compara o head com o do repositório
+- [ ] resultado do perímetro ou do CI gravado há mais de 24 h não sai como ok: o state vira warning, a resposta traz envelhecido e o motivo, e a tela mostra o aviso
+- [ ] a tela CI mostra mesmo head do repositório quando o head gravado é igual ao atual
+- [ ] a tela CI mostra head diferente do atual quando o head gravado é de outro commit
+- [ ] cada rota de leitura responde schema_version, state, source, observed_at e fresh_until, e sem leitura traz motivo
+- [ ] `/api/perimetro` lê o último resultado gravado e não executa o perímetro
+- [ ] `/api/ci` lê o último resultado gravado e não executa o CI
+- [ ] `/api/provedores` vem do catálogo e não constrói o Council
+- [ ] `/api/equipe` lê sessão, itens, ausentes, divergências e vigias
+- [ ] `/api/backup` lê HD, régua e pendentes
+- [ ] `/api/egress` marca em dia pelo mtime, e o navegador usa Rust só pela chave
 
 ## Desenho e alternativas
 

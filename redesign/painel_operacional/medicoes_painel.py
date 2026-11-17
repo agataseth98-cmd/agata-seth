@@ -25,6 +25,19 @@ RACIOCINIO = ("desligado", "ligado")
 TIMEOUT_S = {"recuperacao": 300, "recuperacao_semantica": 300, "contexto": 3600}
 _LOCK = threading.Lock()
 _JOB: dict = {"estado": "ocioso"}
+# Trava COMUM das medições de recuperação da busca (17/11/2026, D8): este painel e a nova versão
+# (nova_versao_painel, medir_recuperacao) não rodam ao mesmo tempo. Quem chega com ela ocupada recebe o motivo.
+TRAVA_RECUPERACAO = threading.Lock()
+MOTIVO_OCUPADO = "ocupado"
+MOTIVO_RECUPERACAO_OCUPADA = "medição de recuperação da busca já em curso (painel de medições ou conjunto da nova versão)"
+MOTIVOS_OCUPADO = (MOTIVO_OCUPADO, MOTIVO_RECUPERACAO_OCUPADA)
+ACOES_RECUPERACAO = ("recuperacao", "recuperacao_semantica")
+
+
+def motivo_ocupado(exc: BaseException) -> str:
+    """Só devolve motivo fixo conhecido; qualquer outro texto de erro vira 'ocupado' (não ecoa detalhe interno)."""
+    texto = str(exc)
+    return texto if texto in MOTIVOS_OCUPADO else MOTIVO_OCUPADO
 
 
 def pasta() -> Path:
@@ -73,8 +86,10 @@ def estado() -> dict:
             **resultados()}
 
 
-def _rodar(acao: str, argv: list[str]) -> None:
+def _rodar(acao: str, argv: list[str], com_trava: bool = False) -> None:
+    """Roda o script de medição. Com `com_trava`, libera a trava comum de recuperação ao terminar, mesmo com erro."""
     inicio = time.time()
+    novo = {"estado": "falhou", "codigo": 1, "detalhe": "medição interrompida"}
     try:
         r = subprocess.run(argv, cwd=ROOT, capture_output=True, text=True, timeout=TIMEOUT_S[acao],
                            env={**os.environ, "AGATA_MEDICOES_DIR": str(pasta())})
@@ -85,8 +100,11 @@ def _rodar(acao: str, argv: list[str]) -> None:
         novo = {"estado": "falhou", "codigo": 124, "detalhe": f"tempo esgotado ({TIMEOUT_S[acao]} s)"}
     except OSError as exc:
         novo = {"estado": "falhou", "codigo": 127, "detalhe": str(exc)[:200]}
-    with _LOCK:
-        _JOB.update(novo, fim=time.time(), segundos=round(time.time() - inicio, 1))
+    finally:
+        with _LOCK:
+            _JOB.update(novo, fim=time.time(), segundos=round(time.time() - inicio, 1))
+        if com_trava:
+            TRAVA_RECUPERACAO.release()
 
 
 def executar(acao: str, modelo: str | None = None, sincrono: bool = False, tarefa: str | None = None, raciocinio: str | None = None) -> dict:
@@ -105,10 +123,18 @@ def executar(acao: str, modelo: str | None = None, sincrono: bool = False, taref
             raise ValueError("modelo fora da lista do Ollama local")
         escolhido = permitidos[modelo]  # só valor vindo do Ollama segue adiante
     acao = ACOES[ACOES.index(acao)]
-    with _LOCK:
-        if _JOB.get("estado") == "rodando":
-            raise RuntimeError("ocupado")
-        _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, tarefa=tarefa_ok, raciocinio=raciocinio_ok if escolhido else None, inicio=time.time())
+    recuperacao = acao in ACOES_RECUPERACAO
+    if recuperacao and not TRAVA_RECUPERACAO.acquire(blocking=False):
+        raise RuntimeError(MOTIVO_RECUPERACAO_OCUPADA)
+    try:
+        with _LOCK:
+            if _JOB.get("estado") == "rodando":
+                raise RuntimeError(MOTIVO_OCUPADO)
+            _JOB.clear(); _JOB.update(estado="rodando", acao=acao, modelo=escolhido, tarefa=tarefa_ok, raciocinio=raciocinio_ok if escolhido else None, inicio=time.time())
+    except BaseException:
+        if recuperacao:
+            TRAVA_RECUPERACAO.release()
+        raise
     argv = [sys.executable, str(ROOT / "scripts" / ("medir_contexto_efetivo.py" if acao == "contexto" else "medir_recuperacao.py")), "--salvar"]
     if acao == "recuperacao_semantica":
         argv.append("--semantico")
@@ -117,7 +143,12 @@ def executar(acao: str, modelo: str | None = None, sincrono: bool = False, taref
         if raciocinio_ok == "ligado":
             argv.append("--raciocinio")
     if sincrono:
-        _rodar(acao, argv)
+        _rodar(acao, argv, recuperacao)  # libera a trava ao terminar, mesmo com erro
     else:
-        threading.Thread(target=_rodar, args=(acao, argv), daemon=True).start()
+        try:
+            threading.Thread(target=_rodar, args=(acao, argv, recuperacao), daemon=True).start()
+        except BaseException:
+            if recuperacao:
+                TRAVA_RECUPERACAO.release()
+            raise
     return estado()

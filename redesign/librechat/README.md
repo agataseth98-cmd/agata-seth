@@ -1,4 +1,4 @@
-# LibreChat -- lane de conversa da Seth
+# LibreChat -- configuração histórica do chat antigo (fora do sistema desde 07/11/2026)
 
 > Aviso (16/11/2026): pasta histórica. O LibreChat saiu do sistema em 07/11/2026 (o atalho `seth` não o sobe; `redesign/systemd/seth`, linha 5).
 > A conversa com a Seth é pelo painel operacional (porta 20146; o atalho `seth` abre `$PAINEL/prototipo`). O gateway escuta em 127.0.0.1:20126.

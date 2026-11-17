@@ -11,6 +11,7 @@ Fatos medidos, não impressões. Antes de mudar qualquer coisa, leia a seção d
 - Código: `redesign/painel_operacional/` (`server.py`, `prototipo.html`, `prototipo.js`, `prototipo.css`, `test_painel.py`).
 - Lista de conversas: mora no menu lateral (`aside.sidebar`, com Arquivadas, Lixeira, Organizar conversas e Serviços no rodapé), desde 16/11/2026. A seção Conversa tem só a tela da conversa; não repete a lista.
 - Conhecimento: cinco blocos numa tela só, sem abas (âncoras `data-ancora` no topo). Não procure `data-sub` nessa seção.
+- Telas de operação (17/11/2026): leituras `GET /api/equipe`, `/api/backup`, `/api/egress`, `/api/perimetro`, `/api/ci`, `/api/provedores` e `/api/qualidade-llm`; o painel não executa perímetro nem CI, só mostra o último resultado gravado.
 - Herói do Panorama: sem retrato desde 16/11/2026 (o retrato fica só na marca da casca).
 - Serviço: `painel-operacional.service` (usuário), porta **20146**, bind só em `127.0.0.1`. Depois de aplicar, reinicie: `systemctl --user restart painel-operacional.service`.
 - Página: `http://127.0.0.1:20146/prototipo`. Só o `main` vale: o serviço serve o arquivo do checkout principal.

@@ -84,6 +84,40 @@ class NovaVersaoPainelTests(unittest.TestCase):
         self.assertEqual(a["estado"], "erro")
         self.assertEqual(a["itens"], [])
 
+    def test_medir_recuperacao_respeita_a_trava_comum_com_as_medicoes(self):
+        # D8 (17/11/2026): a trava de recuperação é a mesma de medicoes_painel; com ela ocupada, a recusa traz o motivo.
+        import medicoes_painel
+        medicoes_painel.TRAVA_RECUPERACAO.acquire()
+        try:
+            with self.assertRaises(RuntimeError) as cm:
+                self.m.executar("medir_recuperacao", {"split": "dev"})
+            self.assertEqual(str(cm.exception), medicoes_painel.MOTIVO_RECUPERACAO_OCUPADA)
+            self.assertNotEqual(self.m._AVAL.get("estado"), "rodando")
+        finally:
+            medicoes_painel.TRAVA_RECUPERACAO.release()
+
+    def test_rodada_de_recuperacao_devolve_a_trava_ao_terminar_mesmo_com_erro(self):
+        import medicoes_painel
+        self.assertTrue(medicoes_painel.TRAVA_RECUPERACAO.acquire(blocking=False))   # a rodada herda a trava
+        self.m._AVAL.clear(); self.m._AVAL.update(estado="rodando")
+        self.m._rodar_avaliacao(lambda: (_ for _ in ()).throw(ValueError("conjunto quebrado")), True)
+        self.assertEqual(self.m._AVAL["estado"], "falhou")
+        self.assertTrue(medicoes_painel.TRAVA_RECUPERACAO.acquire(blocking=False))   # devolvida
+        medicoes_painel.TRAVA_RECUPERACAO.release()
+        self.m._AVAL.clear(); self.m._AVAL.update(estado="ocioso")
+
+    def test_recuperacao_ocupada_por_outra_rodada_nao_pega_a_trava(self):
+        import medicoes_painel
+        self.m._AVAL.clear(); self.m._AVAL.update(estado="rodando")
+        try:
+            with self.assertRaises(RuntimeError) as cm:
+                self.m._iniciar_avaliacao(lambda: {"estado": "concluida"}, "recuperacao", com_trava=True)
+            self.assertEqual(str(cm.exception), "ocupado")
+            self.assertTrue(medicoes_painel.TRAVA_RECUPERACAO.acquire(blocking=False))   # a recusa não prende a trava
+            medicoes_painel.TRAVA_RECUPERACAO.release()
+        finally:
+            self.m._AVAL.clear(); self.m._AVAL.update(estado="ocioso")
+
     def test_estado_sem_dados_diz_nao_medido(self):
         e = self.m.estado()
         self.assertEqual(e["corpo"]["saude"]["estado"], "não medido")

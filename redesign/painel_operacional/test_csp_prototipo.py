@@ -16,7 +16,8 @@ CLASSES_NOVAS = (
 )
 IDS_PRESERVADOS = (
     "grafo-form", "grafo-entrada", "grafo-svg", "lacunas-lista", "qualidade-lista",
-    "sdd-lista", "visao-melhorias", "medir-nota", "vault-canvas",
+    # 17/11/2026: visao-melhorias saiu da Visão (resumo de números com atalhos); a lista de lacunas segue em lacunas-lista.
+    "sdd-lista", "medir-nota", "vault-canvas",
 )
 
 # Mapeamento copiado do diff de correção: o elemento com este id deve ter esta classe e esta tag.
@@ -26,7 +27,6 @@ ELEMENTOS_COM_CLASSE = (
     ("grafo-svg", "grafo-svg", "svg"),
     ("lacunas-lista", "lista-coluna", "ul"),
     ("qualidade-lista", "lista-coluna", "ul"),
-    ("visao-melhorias", "lista-coluna", "ul"),
     ("sdd-lista", "lista-componentes", "div"),
     ("medir-nota", "medir-nota", "p"),
     ("vault-canvas", "vault-canvas", "ul"),
@@ -131,7 +131,8 @@ class CspPrototipoTests(unittest.TestCase):
     def test_mapeamento_cobre_as_classes_novas(self):
         usadas = {c for _, c, _ in ELEMENTOS_COM_CLASSE} | {c for _, c, _ in PAI_DO_ID}
         self.assertEqual(set(CLASSES_NOVAS), usadas)
-        self.assertEqual(11, len(ELEMENTOS_COM_CLASSE) + len(PAI_DO_ID))
+        # 11 no diff de correção (C0); visao-melhorias saiu da Visão em 17/11/2026: 10 elementos mapeados.
+        self.assertEqual(10, len(ELEMENTOS_COM_CLASSE) + len(PAI_DO_ID))
 
     def test_elemento_tem_a_classe_do_seu_id(self):
         arvore = arvore_de(self.html)

@@ -147,31 +147,55 @@
     return h("div", {class: "nv-caminho"}, h("b", {text: nome}), h("div", {}, selo(texto, ok === true ? "ok" : ok === false ? "aviso" : "neutro"),
       detalhe ? h("small", {text: detalhe}) : null));
   }
+  // Lista de provedores de /api/provedores (catálogo do Conselho), lida ao abrir Conexões ou Tarifas. Sem leitura, a coluna diz o motivo.
+  let provedoresLidos = {state: "sem_leitura", provedores: [], motivo: "ainda não lido"};
+  const ACESSO_ROTULO = {browser_tab_only: "aba do navegador"};
+  const abaDoProvedor = (id) => {
+    if (provedoresLidos.state === "sem_leitura") return "sem leitura";
+    const p = provedoresLidos.provedores.find((x) => x.id === id);
+    return p ? (ACESSO_ROTULO[p.acesso] || p.acesso || "acesso não informado") : "sem aba no Conselho";
+  };
+  // Seletor de provedores com API: a tela de Conexões tem o seu (chave); Custos > Tarifas tem o seu (tarifa).
+  function preencherSeletor(id, cs) {
+    const sel = byId(id); if (!sel) return;
+    const atual = sel.value;
+    sel.replaceChildren(...cs.filter((c) => c.modos && c.modos.api).map((c) => h("option", {value: c.id, text: c.nome})));
+    if (atual) sel.value = atual;
+  }
+  function tarifas() {
+    preencherSeletor("nv-api-provedor", (estado && estado.conexoes) || []);
+  }
   function conexoes() {
     const cs = (estado && estado.conexoes) || [];
     const tr = (estado && estado.teste_rotas) || {}; const j = tr.job || {}; const u = tr.ultimo;
     const orc = (estado && estado.orcamento) || {provedores: {}};
     const liberado = (m) => !!(m && m.disponivel && orc.provedores[m.categoria]);
     const prontas = cs.reduce((n, c) => n + ["cli", "api"].filter((m) => liberado(c.modos[m])).length, 0);
-    por("nv-con-kpis", kpi("Provedores", cs.length, "teal"), kpi("Caminhos prontos", prontas, prontas ? "teal" : "gold"),
+    // Linhas da tabela: o catálogo de /api/provedores (lido ao abrir a tela) junto com as conexões configuradas.
+    const catalogo = provedoresLidos.state === "sem_leitura" ? [] : provedoresLidos.provedores;
+    const doCatalogo = new Set(catalogo.map((p) => p.id));
+    const linhas = catalogo.map((p) => ({id: p.id, nome: p.nome, c: cs.find((x) => x.id === p.id) || null}))
+      .concat(cs.filter((x) => !doCatalogo.has(x.id)).map((x) => ({id: x.id, nome: x.nome, c: x})));
+    por("nv-con-kpis", kpi("Provedores", linhas.length, "teal"), kpi("Caminhos prontos", prontas, prontas ? "teal" : "gold"),
       kpi("Gasto estimado", "R$ " + ((estado && estado.gasto_reais) || 0).toFixed(2), "", "teto R$ " + (orc.teto_reais || 0)),
       kpi("Último teste", u ? quando(u.quando) : "nenhum", "violet", u ? u.estado : null));
-    const sel = byId("nv-api-provedor"); const atual = sel.value;
-    sel.replaceChildren(...cs.filter((c) => c.modos.api).map((c) => h("option", {value: c.id, text: c.nome})));
-    if (atual) sel.value = atual;
-    por("nv-con-lista", cs.map((c) => {
-      const m = c.modos || {}; const linhas = [];
-      if (m.navegador) linhas.push(caminho("navegador", null, "você aprova cada envio", "adaptador " + (m.navegador.adaptador || "não medido") + " · Conselho em Rede"));
-      if (m.cli) linhas.push(caminho("programa", liberado(m.cli),
-        !m.cli.instalado ? "não instalado" : liberado(m.cli) ? "pronto" : m.cli.disponivel ? "instalado · desligado no orçamento" : "instalado",
-        "login " + m.cli.login + (m.cli.modelo ? " · modelo " + m.cli.modelo : "") + " · categoria assinatura"));
-      if (m.api) {
-        const ch = m.api.chave || {};
-        linhas.push(caminho("API", liberado(m.api), !m.api.disponivel ? "falta " + m.api.falta.join(", ") : liberado(m.api) ? "pronta" : "pronta · desligada no orçamento",
-          "chave " + (ch.no_cofre ? "no cofre desde " + quando(ch.desde) : ch.no_ambiente ? "no ambiente" : "ausente") + (m.api.modelo ? " · modelo " + m.api.modelo : "")));
-      }
-      return h("div", {class: "nv-cartao"}, h("div", {class: "nv-cartao-topo"}, h("h3", {text: c.nome}), selo(c.origem === "local" ? "adicionado por você" : "catálogo", "neutro")), ...linhas);
-    }));
+    preencherSeletor("nv-chave-provedor", cs);
+    preencherSeletor("nv-api-provedor", cs);
+    // Uma tabela, uma linha por provedor do catálogo (/api/provedores, fonte única; 17/11/2026). Conexão configurada fora do catálogo entra no fim.
+    por("nv-con-lista", linhas.map(({id, nome, c}) => {
+      const m = (c && c.modos) || {}; const ch = (m.api && m.api.chave) || null; const tar = m.api && m.api.tarifa;
+      const caminhos = !c ? "sem conexão configurada" : ([m.navegador ? "navegador" : null, m.cli ? "programa" + (m.cli.instalado ? "" : " (não instalado)") : null,
+        m.api ? "API" + (m.api.disponivel ? "" : " (falta " + m.api.falta.join(", ") + ")") : null].filter(Boolean).join(" · ") || "nenhum");
+      const chave = !c || !m.api ? "não se aplica" : ch && ch.no_cofre ? "no cofre desde " + quando(ch.desde) : ch && ch.no_ambiente ? "no ambiente" : "ausente";
+      const modelo = (m.api && m.api.modelo) || (m.cli && m.cli.modelo) || "não informado";
+      const tarifa = tar ? "US$ " + tar.entrada_usd_mtok + " / " + tar.saida_usd_mtok + " por milhão · câmbio " + tar.cambio_brl : "não medido";
+      const fonte = tar ? (tar.fonte || "sem fonte") + " · " + (tar.data || "sem data") : "não medido";
+      return h("tr", {}, h("td", {text: (c && c.nome) || nome}), h("td", {class: "mono", text: id}), h("td", {text: caminhos}),
+        h("td", {text: abaDoProvedor(id)}), h("td", {text: chave}), h("td", {class: "mono", text: modelo}), h("td", {class: "num", text: tarifa}), h("td", {text: fonte}));
+    }).concat(linhas.length ? [] : [h("tr", {}, h("td", {colspan: "8", class: "vazio", text: "Nenhum provedor no catálogo."}))]));
+    nota("nv-con-nota", provedoresLidos.state === "sem_leitura"
+      ? "Aba do Conselho sem leitura: " + (provedoresLidos.motivo || "motivo não informado") + "."
+      : "Aba do Conselho: catálogo lido agora, " + provedoresLidos.provedores.length + " provedores.", provedoresLidos.state === "sem_leitura" ? "erro" : "ok");
     byId("nv-red-titulo").textContent = j.estado === "rodando" ? "Testando…" : u ? "Último teste · " + quando(u.quando) + (u.obsoleto ? " · contexto mudou, revalidar" : "") : "Testar rotas";
     if (j.estado === "rodando") setTimeout(() => recarregar("nv-conexoes"), 5000);
     const res = tr.resultados || [];
@@ -311,7 +335,7 @@
       h("td", {class: "num", text: x.tempo_mediano_s === null ? "—" : x.tempo_mediano_s.toFixed(2) + " s"}))));
   }
 
-  const telas = {"nv-acervo": acervo, "nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-tarifas": conexoes, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
+  const telas = {"nv-acervo": acervo, "nv-sentidos": sentidos, "nv-conexoes": conexoes, "nv-tarifas": tarifas, "nv-alexandria": alexandria, "nv-metacognicao": metacognicao, "nv-corpo": corpo, "nv-orcamento": orcamento, "nv-avaliacao": avaliacao};
   AgataPainel.carregarNovaVersao = async function (nome) {
     await ler();
     const secao = (byId("sub-" + nome) || {dataset: {}}).dataset.secao;
@@ -321,6 +345,7 @@
       return;
     }
     if (secao) AgataPainel.marcarEstado(secao, null);
+    if (nome === "nv-conexoes" || nome === "nv-tarifas") provedoresLidos = await AgataPainel.lerProvedores();
     (telas[nome] || (() => {}))();
   };
 
@@ -390,13 +415,13 @@
   });
   confirmar(byId("nv-api-gravar"), async () => {
     const campo = byId("nv-api-chave"); const chave = campo.value; campo.value = "";
-    const pid = val("nv-api-provedor"); if (!pid || !chave) return;
+    const pid = val("nv-chave-provedor"); if (!pid || !chave) return;
     try { await executar("gravar_chave", {provedor: pid, chave}); nota("nv-api-nota", "Chave gravada no cofre. Ela não volta para a tela.", "ok"); }
     catch (_) { nota("nv-api-nota", "Recusada: formato ou prefixo não confere com o provedor.", "erro"); }
     recarregar("nv-conexoes");
   });
   confirmar(byId("nv-api-remover"), async () => {
-    const pid = val("nv-api-provedor"); if (!pid) return;
+    const pid = val("nv-chave-provedor"); if (!pid) return;
     try { const r = await executar("remover_chave", {provedor: pid}); nota("nv-api-nota", r.resultado.removida ? "Chave removida do cofre." : "Não havia chave no cofre.", "ok"); }
     catch (e) { nota("nv-api-nota", motivoErro(e), "erro"); }
     recarregar("nv-conexoes");
@@ -447,7 +472,16 @@
     try { await executar("cancelar_avaliacao"); nota("nv-run-nota", "Cancelamento pedido: nenhum item novo começa.", "ok"); } catch (e) { nota("nv-run-nota", motivoErro(e), "erro"); }
   });
   if (byId("nv-run-recuperacao")) byId("nv-run-recuperacao").addEventListener("click", async () => {
-    try { await executar("medir_recuperacao", {split: val("nv-run-split")}); nota("nv-run-nota", "Medindo a busca, sem modelo.", "ok"); } catch (e) { nota("nv-run-nota", motivoErro(e), "erro"); }
+    const botao = byId("nv-run-recuperacao"); const rotulo = botao.textContent;
+    try { await executar("medir_recuperacao", {split: val("nv-run-split")}); nota("nv-run-nota", "Medindo a busca, sem modelo.", "ok"); }
+    catch (e) {
+      // Trava comum ocupada: o próprio botão diz o motivo; volta ao rótulo sozinho.
+      if (String((e && e.message) || "").includes("429")) {
+        botao.textContent = "ocupado: " + motivoErro(e);
+        setTimeout(() => { if (botao.textContent.startsWith("ocupado")) botao.textContent = rotulo; }, 8000);
+      }
+      nota("nv-run-nota", motivoErro(e), "erro");
+    }
     recarregar("nv-avaliacao");
   });
   confirmar(byId("nv-sen-medir"), async () => {

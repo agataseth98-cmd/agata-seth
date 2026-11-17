@@ -24,3 +24,7 @@ Decisão do lote painel-conversa-16-11 (16/11/2026). Decidido pelo Humano em 16/
 Decidido pelo Humano em 16/11/2026, 18:27, frase exata: "esse estilo é o último filtro de requinte a partir de agora, estabeleça."
 
 Efeito no escopo: o menu lateral vira a única lista de conversas; o Conhecimento vira uma tela só, com os cinco blocos; a Conversa segue o padrão de chat com modelo (ver "Conversa, menu único e Conhecimento numa tela (16/11/2026)" em spec/spec.md); o filtro de estilo passa a valer para toda tela, pela skill agata-painel (ESTILO.md).
+
+Decisão do lote atualiza-17-11 (lote 2b do painel). Decidido pelo Humano em 17/11/2026, 08:24, frase exata: "inventarie, audite e atualize o sistema e depois aplique tudo que vc sugeriu para o painel a luz do que for encontrado depois atualize o agata-conceito-16-11-2026, na área de trabalho para refletir o estado atual."
+
+Efeito no escopo: o painel é auditado contra o contrato real das rotas e as telas novas são integradas a ele (listas únicas, Equipe, Backup com o P-12 do último perímetro, Saída de rede, Perímetro e CI). A atualização do documento agata-conceito-16-11-2026 na área de trabalho não está neste lote.

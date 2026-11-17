@@ -23,6 +23,18 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem oito seções, escolhidas pe
 - O estilo é um arquivo só, `prototipo.css`, com tokens em `:root`. Cada cor hexadecimal ou rgb virou token nomeado pelo valor (`--cor-...`); não há cor literal fora de `:root`.
 - Os scripts ficam em IIFE. O único nome global é `window.AgataPainel`, usado por `nova_versao.js` para falar com o `prototipo.js`.
 
+## Telas de operação (lote 2b, 17/11/2026)
+
+- Listas únicas: "O que posso fazer" e Integrações são uma lista só, em Sistema > Integrações. Provedores aparecem numa tabela só (Sistema > Conexões). Timers e tarefas ficam só em Manutenção. Lacunas ficam só em Qualidade > Lacunas. A Visão do sistema tem só números e atalhos.
+- Sistema > Equipe (`/api/equipe`): sessão, presentes e ausentes, divergências em destaque, itens por estado, vigias e eventos. Sessão sem lista de esperados: a tela diz "sessão sem lista de esperados".
+- Sistema > Backup (`/api/backup` e `/api/perimetro`): primeiro o veredito do P-12 do último perímetro gravado, com a data; depois HD e repositório; por último o registro de cobertura (última verificação anotada), com a régua dele, que não é o veredito do P-12. Sem `ultimo.json` do perímetro, "P-12: sem leitura".
+- Sistema > Saída de rede (`/api/egress`): binários egress e egress-socks5 em dia pelo mtime; navegador usa Rust; paridade.
+- Qualidade > Perímetro (`/api/perimetro`) e Qualidade > CI (`/api/ci`): último resultado gravado por `scripts/perimetro.sh` e `scripts/ci_sdd_local.sh`, com head, idade e contagens; no CI, falhas primeiro.
+- Qualidade > Qualidade de LLM (`/api/qualidade-llm`): a recuperação é um indicador com as duas leituras (corpus do vault e conjunto da avaliação), cada uma com valor, estado, fonte e `medido_em`. Medição ocupada responde HTTP 429 com `motivo`, e o botão mostra o motivo.
+- Fonte única de provedores: `/api/provedores` responde `items` e `total`; os botões do Conselho e a tabela saem dela.
+- Contrato das rotas de leitura: `schema_version` 1, `state`, `source`, `observed_at` e `fresh_until`; sem leitura, `state` `sem_leitura` com `motivo`. Campos por rota na seção Contrato da spec ("Lote 2b").
+- O painel não executa `scripts/perimetro.sh` nem `scripts/ci_sdd_local.sh`. As rotas só leem o arquivo gravado por eles (`ultimo.json`); a tela diz "O painel não roda o perímetro; mostra o último resultado gravado."
+
 ## Conselho em Rede
 
 - A página prepara prompts individuais, debates, cadeias e baterias de ensaio. O roster experimental contém nove chats: DeepSeek, Gemini, Z.ai, ChatGPT, Claude, Grok, Qwen, Mistral e Kimi. Só IDs detectados em abas abertas aparecem como destinos; a detecção não comprova login nem prontidão. Preparar uma rodada apenas cria pedidos pendentes; cada prompt, continuação e síntese precisa de aprovação humana separada.

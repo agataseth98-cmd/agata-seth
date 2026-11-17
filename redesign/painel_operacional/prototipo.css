@@ -193,7 +193,8 @@ main{min-width:0;align-self:start;width:100%;max-width:1200px;margin:0 auto;padd
 .kpi{position:relative;min-width:0;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-3);background:var(--sheet)}
 .kpi .label{font:600 var(--fs-1)/1.4 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 .kpi .value{margin:8px 0 6px;font:700 var(--fs-8)/1.1 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
-.kpi .note{font-size:var(--fs-3);line-height:1.5;color:var(--muted)}
+.kpi .note{font-size:var(--fs-3);line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
+.subnote + .kpis{margin-top:20px}
 .nv-page .kpi .value{font-size:var(--fs-7)}
 
 /* ===== Cartões, grades e listas ===== */
@@ -480,7 +481,7 @@ td.mono{font-family:var(--mono);font-size:var(--fs-2);overflow-wrap:anywhere}
 .nv-nota.ok{color:var(--ok)}
 .nv-nota.erro{color:var(--rose)}
 .nv-dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0;font-size:var(--fs-3)}
-.nv-dl dt{padding-top:2px;font:var(--fs-2)/1.4 var(--mono);color:var(--muted)}
+.nv-dl dt{padding-top:2px;font:var(--fs-2)/1.4 var(--sans);color:var(--muted)}
 .nv-dl dd{margin:0;color:var(--ink);overflow-wrap:anywhere}
 .nv-tabela{font-size:var(--fs-3)}
 .nv-tabela td.num{font-family:var(--mono)}
@@ -891,3 +892,8 @@ body:has(#conversa:not([hidden])) main{height:100vh;height:100dvh;overflow:hidde
   .topbar .snapshot{display:none}
   main{padding-left:16px;padding-right:16px}
 }
+
+/* 17/11/2026: lista de integrações (uma só) e telas de leitura nova. Só tokens; sem sombra nem gradiente. */
+.resultado{margin:0 0 4px;font:600 var(--fs-4)/1.4 var(--sans);color:var(--ink)}
+.cap-estado{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 8px}
+.cap-hora{font-size:var(--fs-1);color:var(--muted);font-variant-numeric:tabular-nums}

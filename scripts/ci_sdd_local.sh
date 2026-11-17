@@ -3,14 +3,46 @@
 # (.github/workflows/perimetro.yml, seção no fim), na ordem, sem parar no primeiro erro.
 # Uso: bash scripts/ci_sdd_local.sh            (a partir da raiz do repositório)
 # pytest: usa $PYTEST se definido; senão, o `pytest` do PATH. Não instala nada.
+# Resumo do último CI local (D5, 17/11/2026): ${AGATA_CI_DIR:-$HOME/.cache/agata/ci}/ultimo.json, com gerado_em, head,
+# ok e falha (contagens), linha_final e passos [{nome, ok}]. Escrita atômica; falha de escrita é silenciosa e não muda
+# o código de saída nem a saída padrão. Definida ANTES de qualquer efeito (sem TMP, sem trap), para o teste carregar
+# este arquivo por `source` e chamar a função sem rodar os passos.
+CI_PASSOS=()
+_ci_texto_json() { sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+_ci_gravar_ultimo() {
+  local linha="$1" dir tmp head gerado item nome okv passos="" sep="" ok=0 falhas="${FALHAS:-0}"
+  {
+    dir="${AGATA_CI_DIR:-$HOME/.cache/agata/ci}"
+    mkdir -p "$dir" || return 0
+    head="$(git -C "${RAIZ:-.}" rev-parse --short HEAD 2>/dev/null | tr -cd '0-9a-f')"
+    [ -n "$head" ] || head="desconhecido"
+    gerado="$(date -Is)"
+    for item in "${CI_PASSOS[@]:-}"; do
+      [ -n "$item" ] || continue
+      nome="${item%|*}"
+      okv="${item##*|}"
+      [ "$okv" = 1 ] && ok=$((ok + 1))
+      passos="${passos}${sep}{\"nome\":\"$(printf '%s' "$nome" | _ci_texto_json)\",\"ok\":$([ "$okv" = 1 ] && echo true || echo false)}"
+      sep=","
+    done
+    tmp="$dir/.ultimo.$$.tmp"
+    printf '{"gerado_em":"%s","head":"%s","ok":%d,"falha":%d,"linha_final":"%s","passos":[%s]}\n' \
+      "$gerado" "$head" "$ok" "$falhas" "$(printf '%s' "$linha" | _ci_texto_json)" "$passos" > "$tmp" \
+      && mv -f "$tmp" "$dir/ultimo.json"
+  } >/dev/null 2>&1
+  return 0
+}
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then return 0; fi
+# set -u só na execução (R4, 17/11/2026): dar source para testar as funções não muda as opções do shell de quem chamou.
 set -u
+
 RAIZ="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$RAIZ" || exit 1
 PYTEST="${PYTEST:-$(command -v pytest || true)}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 FALHAS=0
-passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); fi; }
+passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; CI_PASSOS+=("$nome|1"); else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); CI_PASSOS+=("$nome|0"); fi; }
 
 if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
 # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
@@ -103,5 +135,8 @@ passo "suite adversarial: contrato de leitura de memória" "$PY_SISTEMA" -I scri
 passo "suite adversarial: contrato da trava do escriba" "$PY_SISTEMA" -I scripts/testar_trava_escriba.py
 passo "suite adversarial: contrato sem Goose ativo" "$PY_SISTEMA" -I scripts/testar_sem_goose_ativo.py
 
-if [ "$FALHAS" -eq 0 ]; then echo "CI LOCAL: TUDO OK"; exit 0; fi
-echo "CI LOCAL: $FALHAS passo(s) falharam"; exit 1
+if [ "$FALHAS" -eq 0 ]; then LINHA_FINAL="CI LOCAL: TUDO OK"; else LINHA_FINAL="CI LOCAL: $FALHAS passo(s) falharam"; fi
+_ci_gravar_ultimo "$LINHA_FINAL" || true
+echo "$LINHA_FINAL"
+if [ "$FALHAS" -eq 0 ]; then exit 0; fi
+exit 1
