@@ -1,0 +1,102 @@
+diff --git a/redesign/avaliacao/spec/brainstorm.md b/redesign/avaliacao/spec/brainstorm.md
+new file mode 100644
+index 00000000..813f4b3b
+--- /dev/null
++++ b/redesign/avaliacao/spec/brainstorm.md
+@@ -0,0 +1,42 @@
++# Brainstorm — medição experimental de rota na avaliação
++
++## Usuários
++
++- O Humano inicia uma rodada experimental explícita para comparar custo por tarefa correta antes de decidir sobre cache ou roteamento.
++- O avaliador consulta metadados já recebidos pelo cliente e distingue ausência de zero.
++
++## Estado que muda
++
++- Uma rodada de `avaliar.py` poderá gravar tempos e metadados no registro JSONL existente.
++- Não há captura contínua de chamadas do gateway nem alteração de rota em produção.
++
++## Erros e concorrência
++
++- Só se medem chamadas que a avaliação já faria; nenhuma chamada ou retry adicional.
++- Falhas permanecem no resultado existente da avaliação. Não há writer/buffer contínuo nem efeito sobre resposta de produção.
++- Se o adapter não expõe primeiro chunk ou metadado, registra-se `null` com motivo.
++
++## Migração
++
++- Campos experimentais serão opcionais; rodadas antigas não recebem backfill.
++- Dados ficam no diretório de execuções da avaliação e seguem o ciclo de remoção já documentado. Não se introduz retenção nova.
++
++## Observabilidade
++
++- Tempos no cliente: início, primeiro chunk recebido e término, em relógio monotônico.
++- Modelo/rota, headers e usage entram somente se já expostos; cache/prefill e custo desconhecidos ficam nulos com motivo.
++- GPU/RAM, se medidos, são fotografias agregadas antes/depois e apenas em rodada local.
++- Overhead é comparado entre rodadas equivalentes ligadas/desligadas, contra limiar fixado previamente.
++- Resultado e falha preservam o registro da avaliação; correção/retrabalho fica separado e custo por tarefa usa pareamento correto com baseline explícito.
++
++## Reversão
++
++- Desativar a opção impede medições futuras; a avaliação existente continua disponível.
++- Reverter a extensão deixa registros antigos legíveis; remoção de dados segue a reversão já definida para `<dados>/avaliacao/`.
++- Nenhuma mudança em `seth_gateway.py`, cache ou roteador.
++
++## Sucesso
++
++- A rodada informa custo conhecido e latência observada por tarefa correta pareada com baseline, sem inferir valores ausentes.
++- A medição não amplia chamadas e não atua fora da avaliação explicitamente iniciada.
++- Overhead é reportado e comparado ao limiar prévio, sem transformar o limiar em política permanente.
+diff --git a/redesign/avaliacao/spec/decision.md b/redesign/avaliacao/spec/decision.md
+new file mode 100644
+index 00000000..58f8dbed
+--- /dev/null
++++ b/redesign/avaliacao/spec/decision.md
+@@ -0,0 +1,11 @@
++# Decisão — medição experimental de rota na avaliação
++
++- Direção da proposta: medir antes de escolher cache/roteamento e buscar menor custo total por tarefa correta.
++- Arquitetura proposta para V1: medição apenas em rodada experimental explicitamente iniciada, reutilizando `avaliar.py`, o cliente de rota existente e `registro.py`; sem instrumentação contínua do gateway.
++- Ausências são representadas por `null` e motivo; não se fazem chamadas extras nem se cria retenção nova. Recursos de rotas locais são agregados antes/depois da rodada.
++- Pareamento correto e baseline são declarados para métricas por tarefa; retrabalho posterior fica separado.
++- O limiar de overhead é fixado antes de cada experimento e não constitui decisão permanente de sistema.
++- Os critérios enumerados na spec são orientação para implementação posterior, não critérios executáveis desta proposta. `acceptance.json` e testes entram junto com o código numa próxima proposta.
++- A implementação permanece pendente de revisão/decisão; nenhum código foi alterado.
++
++DECISAO: pendente
+diff --git a/redesign/avaliacao/spec/spec.md b/redesign/avaliacao/spec/spec.md
+index a2b67d8c..96110842 100644
+--- a/redesign/avaliacao/spec/spec.md
++++ b/redesign/avaliacao/spec/spec.md
+@@ -111,3 +111,32 @@ Nada no canon. Reversão por revert. Apagar `<dados>/avaliacao/` remove execuç
+ - `registro_medidor.py`
+ - `revisoes.py`
+ - `revisar.py`
++
++
++## Extensão proposta: medição experimental de rota
++
++Esta extensão descreve uma medição apenas em rodada experimental de avaliação iniciada explicitamente pelo Humano. Não instrumenta continuamente o gateway e não altera roteamento em produção. A implementação posterior reutilizará o cliente já chamado por `avaliar.py` e o registro comum `registro.py`; não acrescentará chamadas, retries ou retenção.
++
++### Contrato proposto
++
++- Medir no cliente, com relógio monotônico, início da chamada, primeiro chunk recebido e fim. Se o adapter não expuser streaming ou um instante confiável para o primeiro chunk, registrar `null` e o motivo `nao_exposto`; não estimar esse instante.
++- Registrar rota selecionada, modelo, headers e usage somente quando já expostos pela resposta ou cliente. Cada campo indisponível fica `null` com motivo. Não fazer chamada adicional para obter metadados.
++- Cache e prefill ficam `null` com motivo quando não expostos. Custo só recebe valor quando conhecido pela resposta ou runtime; não será calculado por tarifa nesta medição.
++- Preservar resultado, falha, baseline e pareamento da avaliação. Correção/retrabalho posterior permanece separado. Qualquer coeficiente de custo compara pares corretos e comparáveis e declara baseline e denominador.
++- Para rotas locais, GPU e RAM podem ser fotografadas de forma agregada antes e depois da rodada, nunca por requisição. Para rotas remotas esses campos ficam ausentes com motivo.
++- A medição acompanha apenas as chamadas já feitas pela rodada. Falhas permanecem no estado de execução existente.
++- Comparar rodadas equivalentes com medição ligada e desligada, contra limiar de overhead fixado antes do experimento. O limiar é parâmetro experimental, não política permanente.
++- Dados locais permanecem em `<dados>/avaliacao/execucoes/` e seguem o ciclo de remoção já descrito nesta spec. Não se cria política nova de retenção.
++
++### Critérios da implementação posterior, não ativos nesta proposta
++
++Os itens abaixo orientam a implementação futura; não são critérios executáveis desta proposta. O arquivo `acceptance.json` e os testes executáveis entram junto com o código na próxima proposta.
++
++1. A medição começa somente numa rodada experimental de avaliação explicitamente iniciada, sem instrumentação contínua do gateway.
++2. Início, primeiro chunk e fim usam tempos monotônicos observados pelo cliente; primeiro chunk indisponível fica `null` com motivo.
++3. Rota selecionada e metadados expostos são registrados; campos não expostos ficam `null` com motivo e não provocam chamada adicional.
++4. Cache/prefill ausentes ficam `null` com motivo; custo só é preenchido quando conhecido pela resposta ou runtime.
++5. GPU/RAM são agregadas antes/depois e apenas em rodada local.
++6. Resultado correto e retrabalho posterior permanecem separados; coeficientes comparam pares corretos, baseline e denominador explícitos.
++7. Rodadas ligadas/desligadas são comparadas contra limiar de overhead fixado previamente, sem alterar chamadas ou roteamento.
++8. Os dados seguem o diretório e o ciclo de remoção já existentes, sem política de retenção nova.

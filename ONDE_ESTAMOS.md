@@ -10,6 +10,8 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 ## Hoje, 16/11 (proposta painel-conversa-16-11)
 
+17/11/2026 — Proposta de spec de medição experimental de rota pronta na branch `proposta/telemetria-spec-v1-20261117-r2`. Implementação e ganho não medidos; a assinatura futura cabe ao Humano.
+
 Há uma proposta do painel esperando sua assinatura (`painel-conversa-16-11`). Para quem usa: a conversa com a Seth fica no padrão de ChatGPT e Claude, com o menu único no menu geral. O painel inteiro fica responsivo e segue o estilo que você fixou em 16/11, às 18h27. Comando: `bash scripts/aprovar.sh painel-conversa-16-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR. O registro é a entrada (1026) de `MEMÓRIAS.md`.
 
 ## Hoje, 16/11 (higiene-16-11 aplicada)

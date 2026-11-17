@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 31c3897336ff7c983b5773ae2fc13fcd60278bbc
-  Escrito em: 16/11/2026 20:49 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ac08bf4fcd13f6f519cef27cc8774089a932f4e6
+  Escrito em: 17/11/2026 09:21 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31c3897336ff7c983b5773ae2fc13fcd60278bbc/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31c3897336ff7c983b5773ae2fc13fcd60278bbc/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31c3897336ff7c983b5773ae2fc13fcd60278bbc/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31c3897336ff7c983b5773ae2fc13fcd60278bbc/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/31c3897336ff7c983b5773ae2fc13fcd60278bbc/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac08bf4fcd13f6f519cef27cc8774089a932f4e6/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac08bf4fcd13f6f519cef27cc8774089a932f4e6/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac08bf4fcd13f6f519cef27cc8774089a932f4e6/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac08bf4fcd13f6f519cef27cc8774089a932f4e6/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ac08bf4fcd13f6f519cef27cc8774089a932f4e6/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1028) DIÁRIO — 17/11/2026 · **Proposta de spec para medição experimental de rota preparada.**
+
+A proposta documenta medição restrita a rodada experimental explícita. Implementação e ganho não medidos; a assinatura futura cabe ao Humano.
+
+Modelo: Codex · vetor: preparação da spec; execução e ganho não medidos · Autorização: Humano — "proposta de spec pronta, implementação/ganho não medidos, assinatura futura do Humano."
+
 (1027) DIÁRIO — 16/11/2026 · **Aplicada painel-conversa-16-11 (assinada pelo Humano em 16/11): conversa da Seth no padrão de chat, menu único, Conhecimento numa tela e o painel inteiro pelo filtro de estilo.** A lista de conversas saiu da tela da conversa e foi para o menu geral, agrupada por data, com as ações de cada conversa num menu e uma janela para organizar. A conversa ganhou coluna de leitura, compositor fixo, Markdown com tabela e código com copiar, hora na mensagem, rascunho por conversa só em memória, tentar de novo no erro, instruções por conversa e anexo de texto. O servidor grava hora, instruções e metadado de anexo, repassa o uso informado pelo gateway, fecha a chamada ao gateway ao parar e recusa instrução de sistema escondida nas mensagens. O Conhecimento ficou numa tela só, com âncoras. O painel inteiro passou pelo filtro de estilo decidido pelo Humano no mesmo dia, e a skill do painel passou a carregar esse filtro. Medido antes de propor: CI local com 88 passos e nenhuma falha, já com a suíte adversarial; revisão independente sem bloqueio; 64 combinações de largura e seção sem rolagem horizontal. Não medido: leitor de tela, voz e ditado na tela nova, anexar em navegador real, tema claro em todas as seções. Não existe e não foi criado: imagem na conversa, compartilhar, mais modelos no seletor. Fica para lote seguinte: fundir as listas repetidas do Sistema e criar as telas de equipe, perímetro, CI, backup e saída de rede em Rust.
 Modelo: Claude Fable 5.2 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: CI local com a suíte adversarial, checks do PR, revisão independente e fotos em oito larguras · Autorização: Humano — "esse estilo é o último filtro de requinte a partir de agora, estabeleça."
 
