@@ -1,0 +1,49 @@
+diff --git a/redesign/router/sanitizar.py b/redesign/router/sanitizar.py
+index 81628f01..1f9f243f 100644
+--- a/redesign/router/sanitizar.py
++++ b/redesign/router/sanitizar.py
+@@ -178,7 +178,11 @@ def varrer(texto: str) -> list[dict]:
+     return achados
+ 
+ 
+-_PROFUNDIDADE_MAX = 12   # payload OpenAI-compat real não passa disso; trava contra recursão patológica
++# (17/11/2026, P-8 teto-sanitizador-17-11) era 12. Medido: o schema da tool
++# `question` do OpenCode TUI chega a 13 (tools[4]...options.items.properties.label.type)
++# e era barrado com 422 na rota seth-livre. 32 cobre schemas JSON reais com
++# folga e continua travando recursão patológica; acima do teto segue FECHADO.
++_PROFUNDIDADE_MAX = 32
+ _NOS_MAX = 20000         # trava contra payload absurdamente grande (nº de chaves/itens visitados)
+ 
+ 
+@@ -339,7 +343,10 @@ def _autoteste() -> int:
+     # varredura simplesmente parou de olhar.
+     segredo = _fx("AK", "IA", "A" * 16)
+     for nome, payload in [
+-        ("profundidade > teto (13 > 12)", _payload_fundo(13, segredo)),
++        (f"profundidade > teto ({_PROFUNDIDADE_MAX + 1} > {_PROFUNDIDADE_MAX})",
++         _payload_fundo(_PROFUNDIDADE_MAX + 1, segredo)),
++        # dentro do teto o segredo é varrido de verdade (não passa por estar fundo)
++        ("segredo no nível 13, dentro do teto", _payload_fundo(13, segredo)),
+         ("nós > teto (20001 itens)", {"itens": (["x"] * 20001) + [segredo]}),
+     ]:
+         bloqueou = False
+@@ -350,6 +357,19 @@ def _autoteste() -> int:
+         print(f"{'PASS' if bloqueou else 'FALHA'}  teto-excedido[{nome}]  -> "
+               f"{'bloqueado' if bloqueou else 'PASSOU SEM BLOQUEAR'}")
+         falhas += 0 if bloqueou else 1
++    # controle (17/11/2026): forma da tool `question` do OpenCode, profundidade 13
++    question = {"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}],
++                "tools": [{"type": "function", "function": {"name": "question", "parameters": {
++                    "type": "object", "properties": {"questions": {"type": "array", "items": {
++                        "type": "object", "properties": {"options": {"type": "array", "items": {
++                            "type": "object", "properties": {"label": {"type": "string"}}}}}}}}}}}]}
++    try:
++        ok = sanitizar_payload(question) == question
++    except SegredoNoPayload:
++        ok = False
++    print(f"{'PASS' if ok else 'FALHA'}  teto-excedido[controle: schema da tool question (13) não bloqueia]  -> "
++          f"{'ok' if ok else 'bloqueou à toa'}")
++    falhas += 0 if ok else 1
+     # controle: payload normal, bem dentro do teto, não pode ser afetado
+     normal = {"model": "auto/chat", "messages": [{"role": "user", "content": "oi"}]}
+     ok = sanitizar_payload(normal) == normal
