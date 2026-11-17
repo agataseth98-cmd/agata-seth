@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b333312df568348386f7e8fe0b7cfd07789cf314
-  Escrito em: 17/11/2026 13:58 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f2d39bdc6fc8462b41208607a5a93b0f031b574d
+  Escrito em: 17/11/2026 18:17 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b333312df568348386f7e8fe0b7cfd07789cf314/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2d39bdc6fc8462b41208607a5a93b0f031b574d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2d39bdc6fc8462b41208607a5a93b0f031b574d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2d39bdc6fc8462b41208607a5a93b0f031b574d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2d39bdc6fc8462b41208607a5a93b0f031b574d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f2d39bdc6fc8462b41208607a5a93b0f031b574d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1035) DIÁRIO — 17/11/2026 · **Proposta orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, como regra de todos os modelos.** O Humano decidiu às 14:07 que, quando a tarefa se divide, o modelo mais capaz planeja, distribui, revisa e responde pelo resultado, e a execução vai para o mais barato que dá conta. A regra entra na lista "Sempre" do AGENTS.md; o teste de sincronia passa a contar 16 regras. CI local com TUDO OK e diff aplicado em cópia limpa. Falta a assinatura.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: CI local e cópia limpa · Autorização: Humano — "torne isso regra para todos os modelos"
+
+(1034) DIÁRIO — 17/11/2026 · **Resultado da teto-sanitizador-17-11 e Laya e Jev de volta: a Seth Livre aceita a tool question e o decisor local responde de novo.** Depois da aplicação (1033), o sanitizador foi reiniciado às 14:02; o formato da tool question passou com 200 e um pedido com profundidade 34 continuou barrado com 422; a linha que desligava a tool question saiu da config do OpenCode. Na auditoria da tarde apareceu que o Laya e o Jev estavam parados desde 06/11 às 08:27, sem alarme, e que as unidades não estavam instaladas. Às 18:05 as duas unidades foram ligadas a partir de config/, pelo agata.target, como as demais. O Laya voltou a decidir em 63 a 75 ms depois da primeira chamada, e o Jev decidiu em sombra. O perímetro ficou sem falha. Desfazer: desligar as duas unidades e mover os links.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: journalctl, log do decisor, portas e perímetro · Autorização: Humano — "lembre o sistema de reinstalar o laya" e o goal de 17/11
+
 (1033) DIÁRIO — 17/11/2026 · **Aplicada teto-sanitizador-17-11 (assinada pelo Humano em 17/11): o teto de profundidade do sanitizador passa de 12 para 32.** A assinatura passou na verificação P-8 e o diff entrou numa worktree limpa a partir do main, com o autoteste do sanitizador OK. O teto de nós e a falha fechada não mudam. Depois do merge, o gateway é reiniciado, a tool question volta na config do OpenCode e o journalctl é conferido sem 422; esse resultado entra em entrada nova.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, git apply e autoteste · Autorização: Humano — "assinado"
 
