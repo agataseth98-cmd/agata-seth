@@ -115,5 +115,14 @@
       "redesign/nova_versao/tests/test_nova_versao.py::ReversaoTests::test_reversao_nao_apaga_dados_so_remove_cache"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a chave de provedor vai para o cofre próprio com permissão 0600 e nunca volta; o .env não é tocado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_conexoes.py::CofreTests::test_chave_vai_para_o_cofre_0600_e_nunca_volta"
+    ],
+    "cwd": null
   }
 ]
