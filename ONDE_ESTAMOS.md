@@ -1,12 +1,18 @@
 # Onde estamos
 
-Atualizado em 16/11/2026.
+Atualizado em 17/11/2026.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
 Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
+
+## Hoje, 17/11 (proposta atualiza-17-11)
+
+Há uma proposta esperando sua assinatura (`atualiza-17-11`). O painel ganha uma lista única de integrações em Sistema, e os provedores aparecem numa tabela só, em Conexões. Equipe, Backup, Saída de rede, Perímetro e CI passam a ter tela de leitura, com a idade do último resultado; o painel só lê o que já foi gerado. Perímetro, CI, equipe e restic continuam rodando só pelo terminal. Comando: `bash scripts/aprovar.sh atualiza-17-11` (depois do merge do PR de proposta, no terminal, sem `!`).
+
+Os blocos de 16/11 sobre o painel e a higiene já foram aplicados (entradas 1023, 1025 e 1027). O bloco de 06/11 que pede para juntar o PR 927 está superado: o PR entrou em 07/11.
 
 ## Hoje, 16/11 (proposta painel-conversa-16-11)
 
