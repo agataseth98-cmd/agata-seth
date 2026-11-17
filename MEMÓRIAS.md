@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4
-  Escrito em: 17/11/2026 09:52 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d5301fa21300540c67116165f016331d10616a49
+  Escrito em: 17/11/2026 10:15 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/59bbf0e3ce48596efd4dcfbdbe30f9319adaa6a4/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5301fa21300540c67116165f016331d10616a49/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5301fa21300540c67116165f016331d10616a49/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5301fa21300540c67116165f016331d10616a49/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5301fa21300540c67116165f016331d10616a49/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d5301fa21300540c67116165f016331d10616a49/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1030) DIÁRIO — 17/11/2026 · **Proposta spec-mae-cofre-17-11: a spec-mãe passa a descrever o cofre de chaves que o código usa, com critério e teste.** A spec-mãe de redesign/nova_versao dizia que a chave de provedor ia para o arquivo .env do usuário e pedia exceção à regra de que nenhuma peça lê esse arquivo. O código grava num cofre próprio, com pasta 0700 e arquivo 0600 por provedor. O texto passa a descrever o cofre, a exceção sai, e entra o critério provado pelo teste do cofre, com gate e CI local medidos.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: teste do cofre, gate de sincronia e CI local · Autorização: Humano — "inventarie, audite e atualize o sistema"
+
 (1029) DIÁRIO — 17/11/2026 · **Aplicada atualiza-17-11 (assinada pelo Humano em 17/11): auditoria do sistema, listas únicas no painel e telas de equipe, backup, saída de rede, perímetro e CI.** No painel, "O que posso fazer" e "Integrações" viraram uma lista só, provedores e tarifas ficaram numa tabela com fonte única, timers e tarefas ficaram só em Manutenção, lacunas só em Qualidade, e a recuperação ganhou um indicador com as duas leituras rotuladas e trava comum. Entraram as telas de leitura de Equipe, Backup e Saída de rede em Sistema e de Perímetro e CI em Qualidade; o painel não executa perímetro, CI, restic nem o script da equipe, e resultado com mais de 24 horas aparece como atenção. O perímetro e o CI local passaram a gravar o último resultado, sem mudar veredito nem código de saída. No sistema: perfil da Capivara regenerado com os mesmos 11 modelos, textos históricos do chat antigo e do Goose, descrição em portas de entrada, e o script do CI local deixou de alterar o shell de quem o carrega. Na mesma auditoria, fora do repositório: snapshots dos dois modelos Whisper com P-12 OK, e 107 worktrees antigas removidas por ordem do Humano com tudo guardado no arquivo. Medido antes de propor: CI local com 88 passos e nenhuma falha; revisão independente sem bloqueio. Ficam abertos: a divergência entre a spec-mãe e a spec de conexões, que depende de decisão do Humano sobre o verificador de sincronia; o experimento do Bonsai 8B no decisor, sem decisão.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina), com agentes Claude Haiku 5.5 · vetor: auditoria em três frentes, CI local com a suíte adversarial e fotos em oito larguras · Autorização: Humano — "inventarie, audite e atualize o sistema e depois aplique tudo que vc sugeriu para o painel"
 
