@@ -67,8 +67,9 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 1.
+Abertas (sem APROVADO-): 2.
 - `orquestra-caro-17-11`
+- `sob-demanda-17-11`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)

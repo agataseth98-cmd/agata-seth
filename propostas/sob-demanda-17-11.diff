@@ -1,0 +1,619 @@
+diff --git a/config/laya-roteador-proxy.service b/config/laya-roteador-proxy.service
+new file mode 100644
+index 00000000..d83c25ba
+--- /dev/null
++++ b/config/laya-roteador-proxy.service
+@@ -0,0 +1,14 @@
++[Unit]
++Description=Ágata — proxy do Laya: encaminha :11436 para o laya-roteador em :11446; sai após 15 min ociosos
++# Ativado só pelo laya-roteador.socket (sem [Install]). Requires/After: o backend sobe antes deste proxy
++# aceitar a conexão, porque o ExecStartPost do backend só termina quando a porta interna responde.
++# Cold start: a 1ª chamada depois de ociosidade espera o backend subir (o socket segura a conexão). Como o
++# gateway desiste em 1,5 s, essa chamada cai na heurística da regra por tamanho (fail-soft), como fora do ar.
++# Sem conexão por --exit-idle-time, o proxy sai; com ele, o laya-roteador.service também cai (StopWhenUnneeded).
++PartOf=agata.target
++Requires=laya-roteador.service
++After=laya-roteador.service
++
++[Service]
++Type=simple
++ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=15min 127.0.0.1:11446
+diff --git a/config/laya-roteador.service b/config/laya-roteador.service
+index e1b1b818..e6216646 100644
+--- a/config/laya-roteador.service
++++ b/config/laya-roteador.service
+@@ -1,20 +1,28 @@
+ [Unit]
+ Description=Ágata — Laya ajustado que escolhe a fila da Seth; o Jev fica em sombra (MEMÓRIAS (718)/(719))
+-# Só loopback (:11436), CPU, ~70 ms por decisão. Mesmo protocolo do Ollaya
++# Só loopback, CPU, ~70 ms por decisão. Porta pública: :11436 (laya-roteador.socket). Esta unidade
++# escuta só em :11446 (interna, LAYA_PORT). Mesmo protocolo do Ollaya
+ # (`POST /v1/systemone`). O seth_gateway pede a rota aqui com timeout de 1,5 s;
+ # fora do ar, lento ou com confiança baixa = a regra por tamanho, como antes.
++# (17/11/2026, sob demanda) Não fica de pé à toa: sobe com a 1ª conexão ao socket (pelo proxy) e cai
++# quando o proxy sai, após 15 min sem conexão (StopWhenUnneeded). A 1ª chamada depois de ociosidade cai
++# na heurística: o gateway espera 1,5 s e o backend ainda carrega o modelo. Sem [Install]: quem fica no
++# agata.target é o laya-roteador.socket.
+ # Ambiente e checkpoint FORA do repo: ~/.local/share/agata-laya/ (venv com
+ # laya 0.4.8 do PyPI, Apache-2.0; modelo base convaiinnovations/laya
+ # "multilingual" ajustado -- ver (718)). `roteador-atual` é um link para o
+ # checkpoint em uso; só `scripts/laya_treino.py --promover` (o Humano) o troca.
+ PartOf=agata.target
++StopWhenUnneeded=yes
+ 
+ [Service]
+ Type=simple
++# 90 s > 60 s do prazo do ExecStartPost: o systemd não corta o probe antes do próprio prazo.
++TimeoutStartSec=90
+ Environment=HF_HOME=%h/.local/share/agata-laya/hf
+ Environment=HF_HUB_OFFLINE=1
+ Environment=LAYA_HOST=127.0.0.1
+-Environment=LAYA_PORT=11436
++Environment=LAYA_PORT=11446
+ Environment=LAYA_DEVICE=cpu
+ Environment=LAYA_THREADS=4
+ Environment=LAYA_MAX_LOADED=1
+@@ -26,6 +34,9 @@ Environment=LAYA_LOG_LEVEL=warning
+ # do JSON e o laya-serve recusa ("invalid LAYA_EXTRA_MODELS") -- caiu em loop na 1ª subida.
+ Environment='LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}'
+ ExecStart=%h/.local/share/agata-laya/.venv/bin/laya-serve
++# Só aceita o proxy depois de a porta interna responder: sem isto, o systemd-socket-proxyd conecta
++# antes de o laya-serve escutar e a 1ª chamada cai. Prazo global de 60 s (timeout); passou disso, falha.
++ExecStartPost=/usr/bin/timeout 60 /usr/bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/11446) 2>/dev/null; do sleep 0.5; done'
+ Restart=on-failure
+ RestartSec=15
+ # Medido em 15/10/2026: ~1,9 GB residente com o checkpoint carregado. Sem swap
+@@ -36,6 +47,3 @@ NoNewPrivileges=yes
+ PrivateTmp=yes
+ ProtectSystem=strict
+ ProtectHome=read-only
+-
+-[Install]
+-WantedBy=agata.target
+diff --git a/config/laya-roteador.socket b/config/laya-roteador.socket
+new file mode 100644
+index 00000000..103003fc
+--- /dev/null
++++ b/config/laya-roteador.socket
+@@ -0,0 +1,18 @@
++[Unit]
++Description=Ágata — porta pública do Laya (:11436, só loopback); acorda o laya-roteador sob demanda
++# Sob demanda (decisão do Humano, 17/11/2026: "tudo no sistema deve ser subido de acordo com a necessidade e
++# derrubado após um tempo seguro pré-determinado"). Este socket fica de pé com o agata.target e recebe as
++# chamadas do gateway em 127.0.0.1:11436. A 1ª conexão sobe laya-roteador-proxy.service, que sobe o
++# laya-roteador.service (porta interna :11446). Sem conexão por 15 min, o proxy sai e o backend cai junto
++# (StopWhenUnneeded). O socket continua escutando; quem fica no agata.target é este arquivo, não o backend.
++# ANTES de instalar: o laya-roteador.service antigo tinha [Install] WantedBy=agata.target, e o link
++# em agata.target.wants mantém o backend de pé no target. Rodar `systemctl --user disable laya-roteador.service`
++# com o arquivo antigo ainda instalado, depois parar o backend (ver o procedimento de instalação).
++PartOf=agata.target
++
++[Socket]
++ListenStream=127.0.0.1:11436
++Service=laya-roteador-proxy.service
++
++[Install]
++WantedBy=agata.target
+diff --git a/config/ollaya-proxy.service b/config/ollaya-proxy.service
+new file mode 100644
+index 00000000..53e7e124
+--- /dev/null
++++ b/config/ollaya-proxy.service
+@@ -0,0 +1,11 @@
++[Unit]
++Description=Ágata — proxy do Ollaya: encaminha :11435 para o contêiner em :11445; sai após 15 min ociosos
++# Ativado só pelo ollaya.socket (sem [Install]). Ver laya-roteador-proxy.service: o mesmo desenho, com o
++# contêiner Docker como backend. A 1ª chamada depois de ociosidade cai na regra determinística (fail-soft).
++PartOf=agata.target
++Requires=ollaya.service
++After=ollaya.service
++
++[Service]
++Type=simple
++ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=15min 127.0.0.1:11445
+diff --git a/config/ollaya.service b/config/ollaya.service
+index 2b5750d0..0a64f203 100644
+--- a/config/ollaya.service
++++ b/config/ollaya.service
+@@ -1,12 +1,18 @@
+ [Unit]
+ Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROTOCOLOS.md "Decisor local")
+-# Só loopback. Quem usa (seth_gateway em sombra, inbox do vault, P-20,
++# Só loopback. Porta pública: :11435 (ollaya.socket); o contêiner publica só em 127.0.0.1:11445 (interna).
++# Quem usa (seth_gateway em sombra, inbox do vault, P-20,
+ # consolidação) segue pela regra determinística se isto estiver fora do ar.
++# (17/11/2026, sob demanda) Sobe com a 1ª conexão ao ollaya.socket (pelo proxy) e cai quando o proxy
++# sai, após 15 min sem conexão (StopWhenUnneeded). Sem [Install]: quem fica no agata.target é o socket.
+ After=docker.service
+ PartOf=agata.target
++StopWhenUnneeded=yes
+ 
+ [Service]
+ Type=simple
++# 90 s > 60 s do prazo do ExecStartPost: o systemd não corta o probe antes do próprio prazo.
++TimeoutStartSec=90
+ # Imagem CPU pinada por digest (0.13.0, 13/10/2026): projeto novo, versões
+ # saindo a cada poucos dias -- atualizar é decisão explícita, nunca `latest`.
+ # Teto de memória porque a Máquina está sem swap, e oom-score-adj=1000: se a
+@@ -15,13 +21,16 @@ Type=simple
+ # com o resto (winnow:e4b leva ~4 s por decisão com folga).
+ ExecStartPre=-/usr/bin/docker rm -f ollaya
+ ExecStart=/usr/bin/docker run --rm --name ollaya \
+-  -p 127.0.0.1:11435:11435 \
++  -p 127.0.0.1:11445:11435 \
+   -v %h/.cache/agata/ollaya:/home/ollaya/.ollaya \
+   --memory=8g --cpus=8 --oom-score-adj=1000 \
+   ghcr.io/ollaya-dev/ollaya@sha256:31f749def61165d7bbb15def4e3d799a403461e0b8b777f359a924bb9b845ce6
++# Espera o Ollaya responder HTTP na porta interna (não só TCP): o docker-proxy aceita a conexão antes de
++# o contêiner escutar, por isso o probe usa curl (qualquer resposta HTTP conta) e não /dev/tcp. Prazo global
++# de 60 s (timeout); cada tentativa tem curl -m 2.
++ExecStartPost=/usr/bin/timeout 60 /usr/bin/bash -c 'until /usr/bin/curl -s -m 2 --noproxy 127.0.0.1 -o /dev/null http://127.0.0.1:11445/; do sleep 0.5; done'
+ ExecStop=/usr/bin/docker stop ollaya
++# Idempotente, com '-': se o ExecStartPost falhar, o ExecStop não roda; este garante que o contêiner não fica.
++ExecStopPost=-/usr/bin/docker stop ollaya
+ Restart=on-failure
+ RestartSec=15
+-
+-[Install]
+-WantedBy=agata.target
+diff --git a/config/ollaya.socket b/config/ollaya.socket
+new file mode 100644
+index 00000000..a50ad64a
+--- /dev/null
++++ b/config/ollaya.socket
+@@ -0,0 +1,15 @@
++[Unit]
++Description=Ágata — porta pública do decisor local Ollaya (:11435, só loopback); acorda o ollaya sob demanda
++# Sob demanda (decisão do Humano, 17/11/2026): ver laya-roteador.socket. O contêiner publica só em
++# 127.0.0.1:11445 (interna); quem fala com o decisor continua usando :11435, este socket.
++# ANTES de instalar: o ollaya.service antigo tinha [Install] WantedBy=agata.target, e o link
++# em agata.target.wants mantém o backend de pé no target. Rodar `systemctl --user disable ollaya.service`
++# com o arquivo antigo ainda instalado, depois parar o backend (ver o procedimento de instalação).
++PartOf=agata.target
++
++[Socket]
++ListenStream=127.0.0.1:11435
++Service=ollaya-proxy.service
++
++[Install]
++WantedBy=agata.target
+diff --git a/config/portas-agata.txt b/config/portas-agata.txt
+index 64ff1f1e..ea86ce21 100644
+--- a/config/portas-agata.txt
++++ b/config/portas-agata.txt
+@@ -59,3 +59,6 @@
+ 20132|omniroute-live-ws|127.0.0.1
+ 11435|ollaya|127.0.0.1
+ 11436|laya-roteador|127.0.0.1
++# Portas internas do sob demanda (17/11/2026): o backend e o contêiner. Quem fala com o sistema usa 11435/11436.
++11445|ollaya-interna|127.0.0.1
++11446|laya-roteador-interna|127.0.0.1
+diff --git a/config/servicos-agata.txt b/config/servicos-agata.txt
+index e400e22e..83a58e59 100644
+--- a/config/servicos-agata.txt
++++ b/config/servicos-agata.txt
+@@ -4,7 +4,7 @@
+ #   unidade  nome da unidade systemd (ou do contêiner, com escopo docker)
+ #   escopo   usuario = systemd --user | sistema = systemd | docker = contêiner
+ #   porta    porta TCP declarada em config/portas-agata.txt, ou `-`
+-#   p9       sim = scripts/perimetro/p09_servicos_declarados.sh avisa se cair | nao = listado, sem aviso
++#   p9       sim = scripts/perimetro/p09_servicos_declarados.sh avisa se cair | nao = listado; avisa só se 'failed'
+ #   origem   arquivo do repositório que define a unidade, ou "fora do repo" com o motivo
+ #
+ # Quem lê este arquivo: scripts/perimetro.sh (P-9, carregado na fonte), scripts/gerar_estado.py
+@@ -14,10 +14,16 @@
+ # perímetro: é mudança protegida (P-8), não ajuste de texto.
+ #
+ # Ordem das linhas com p9=sim: a mesma das listas que estavam escritas à mão em perimetro.sh.
++#
++# Sob demanda (17/11/2026, decisão do Humano: subir conforme a necessidade e derrubar após um tempo seguro):
++# a unidade declarada com p9=sim é o .socket, que fica de pé com o agata.target. O proxy e o backend são
++# p9=nao: parados é o estado normal deles, mas 'failed' avisa mesmo assim. Porta do backend (11445/11446) em portas-agata.txt.
+ 
+ agata-manutencao.timer|usuario|-|sim|config/systemd/agata-manutencao.timer
+ agata-manutencao.service|usuario|-|sim|config/systemd/agata-manutencao.service
+-laya-roteador.service|usuario|11436|sim|fora do repo (unidade do usuário; citada em redesign/systemd/seth)
++laya-roteador.socket|usuario|11436|sim|config/laya-roteador.socket (porta pública; sobe com o agata.target)
++laya-roteador-proxy.service|usuario|-|nao|config/laya-roteador-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
++laya-roteador.service|usuario|11446|nao|config/laya-roteador.service (sob demanda, sem [Install]; só sobe pelo proxy)
+ omniroute.service|usuario|20128|sim|fora do repo (unidade do OmniRoute; drop-ins em redesign/systemd/dropin-omniroute*.conf)
+ omniroute-sanitizer.service|usuario|20127|sim|fora do repo (unidade do usuário; citada em redesign/systemd/README.md)
+ openvino-whisper.service|usuario|20130|sim|redesign/systemd/openvino-whisper.service
+@@ -27,10 +33,12 @@ seth-gateway.service|usuario|20126|sim|redesign/systemd/seth-gateway.service
+ seth-escriba.service|usuario|20140|sim|redesign/systemd/seth-escriba.service
+ seth-verificador.service|usuario|20141|sim|redesign/systemd/seth-verificador.service
+ piper-tts.service|usuario|8890|sim|redesign/systemd/piper-tts.service
+-ollaya.service|usuario|11435|sim|config/ollaya.service
++ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
++ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
++ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
+ agata-vault-inbox.timer|usuario|-|sim|fora do repo (unidade do usuário)
+ 
+-# Unidades com WantedBy/PartOf de agata.target fora do P-9. Listadas para o ESTADO conferir; sem aviso.
++# Unidades com WantedBy/PartOf de agata.target fora do P-9 (p9=nao). Listadas para o ESTADO conferir; avisam só se 'failed'.
+ agata-drain.service|usuario|-|nao|redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
+ obsidian-app.service|usuario|-|nao|redesign/systemd/obsidian-app.service (app Flatpak; fora do P-9 antes deste manifesto)
+ ouvido-agata.service|usuario|20137|nao|redesign/systemd/ouvido-agata.service (entrada de voz; fora do P-9 antes deste manifesto)
+diff --git a/scripts/avaliar_decisor.py b/scripts/avaliar_decisor.py
+index be001d3a..d8590075 100644
+--- a/scripts/avaliar_decisor.py
++++ b/scripts/avaliar_decisor.py
+@@ -374,7 +374,9 @@ def encerrar(como: str) -> int:
+         f.unlink()
+     print(f"avaliação encerrada: {como}. Trechos de mensagem apagados.")
+     if como == "removido":
+-        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.service", "laya-roteador.service"])
++        # Sob demanda (17/11/2026): o socket é a porta pública; sem parar o socket, a próxima chamada acordava o backend.
++        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.socket", "laya-roteador.socket",
++                        "ollaya-proxy.service", "laya-roteador-proxy.service", "ollaya.service", "laya-roteador.service"])
+         print("ollaya e laya-roteador parados e desabilitados: todos os usos já caem na regra determinística. "
+               "Falta a proposta P-8 que tira o código (o executor prepara).")
+     else:
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index 0ad3ff3a..dee77375 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -88,6 +88,7 @@ fi
+ passo "workflows: YAML válido e sem chave repetida (selftest)" "$PY_YAML" -I scripts/verificar_workflows.py --selftest
+ passo "workflows: .github/workflows do repositório" "$PY_YAML" -I scripts/verificar_workflows.py
+ passo "sincronia: testes (fonte única, porquês, início de sessão, maxTurns)" python3 scripts/testar_sincronia.py
++passo "sob demanda: socket, proxy e backend (Laya, Ollaya)" python3 scripts/testar_sob_demanda.py
+ passo "sincronia: contexto de início de sessão (selftest)" python3 -I scripts/sessao_contexto.py --selftest
+ passo "sincronia: porquês (selftest)" python3 -I scripts/porques.py --selftest
+ passo "sincronia: verificador de porquês (aviso na 1ª versão, sai 0)" python3 scripts/porques.py --verificar
+diff --git a/scripts/gerar_estado.py b/scripts/gerar_estado.py
+index 775c6da6..8333fa64 100644
+--- a/scripts/gerar_estado.py
++++ b/scripts/gerar_estado.py
+@@ -166,7 +166,7 @@ def conferencia(raiz: Path) -> list[str]:
+ def renderizar(raiz: Path = RAIZ) -> str:
+     partes = [CABECALHO]
+     partes.append("## Serviços (boot)\n")
+-    partes.append("Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada, sem aviso.\n")
++    partes.append("Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada; avisa só se 'failed'.\n")
+     for s in servicos(raiz):
+         u, esc, porta, p9, origem = s["unidade"], s["escopo"], s["porta"], s["p9"], s["origem"]
+         if porta != "-":
+diff --git a/scripts/perimetro/p09_servicos_declarados.sh b/scripts/perimetro/p09_servicos_declarados.sh
+index 5c3f9cb1..ede1159d 100644
+--- a/scripts/perimetro/p09_servicos_declarados.sh
++++ b/scripts/perimetro/p09_servicos_declarados.sh
+@@ -10,11 +10,15 @@
+ p9_carregar_fonte() {
+   local arq="${P9_FONTE:-${_PERIMETRO_DIR:-$(dirname "${BASH_SOURCE[0]}")/..}/../config/servicos-agata.txt}"
+   local u esc porta p9 origem
+-  P9_UNIDADES_SISTEMA=(); P9_UNIDADES_USUARIO=(); P9_CONTAINERS_DOCKER=()
++  P9_UNIDADES_SISTEMA=(); P9_UNIDADES_USUARIO=(); P9_UNIDADES_USUARIO_NAO=(); P9_CONTAINERS_DOCKER=()
+   [ -f "$arq" ] || return 0
+   while IFS='|' read -r u esc porta p9 origem; do
+     case "$u" in ''|\#*) continue ;; esac
+-    [ "$p9" = "sim" ] || continue
++    # (17/11/2026) p9=nao: listado, sem aviso de parado. Só 'failed' avisa (ver o fim de p9_servicos_declarados).
++    if [ "$p9" != "sim" ]; then
++      if [ "$esc" = "usuario" ]; then P9_UNIDADES_USUARIO_NAO+=("$u"); fi
++      continue
++    fi
+     case "$esc" in
+       usuario) P9_UNIDADES_USUARIO+=("$u") ;;
+       sistema) P9_UNIDADES_SISTEMA+=("$u") ;;
+@@ -53,8 +57,10 @@ p9_servicos_declarados() {
+     # (24/10/2026) serviço parado do jeito normal fica 'inactive', não 'failed': no teste de queda
+     # e volta o gateway, o OmniRoute e o Laya caíram e o P-9 não disse nada. Agora 'inactive' também
+     # avisa, menos o oneshot (termina sozinho e fica parado de propósito, ex.: agata-manutencao.service).
++    # (17/11/2026, sob demanda) O .socket do Laya e do Ollaya é a porta pública: parado com o sistema ligado
++    # avisa como serviço. O backend e o proxy ficam p9=nao, porque parados é o normal deles.
+     if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
+-        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
++        || { [[ "$u" == *.service || "$u" == *.socket ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
+              && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
+       echo "AVISO (P-9): unidade de usuário '$u', declarada em config/servicos-agata.txt, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
+       avisos=1
+@@ -65,6 +71,13 @@ p9_servicos_declarados() {
+       avisos=1
+     fi
+   done
++  # (17/11/2026, sob demanda) Unidade de usuário com p9=nao: parada em repouso é o normal dela, mas 'failed' avisa.
++  for u in "${P9_UNIDADES_USUARIO_NAO[@]}"; do
++    if [ "$(systemctl --user is-active "$u" 2>/dev/null)" = "failed" ]; then
++      echo "AVISO (P-9): unidade de usuário '$u', listada em config/servicos-agata.txt com p9=nao, está 'failed' -- o que fazer: 'systemctl --user status $u'."
++      avisos=1
++    fi
++  done
+   if [ "$desligado" = 0 ] && command -v docker >/dev/null 2>&1; then
+     for u in "${P9_CONTAINERS_DOCKER[@]}"; do
+       rodando="$(docker ps --filter "name=^${u}\$" --format '{{.Names}}' 2>/dev/null)"
+diff --git a/scripts/testar_cobertura_servicos.py b/scripts/testar_cobertura_servicos.py
+index 33874d16..2095937d 100644
+--- a/scripts/testar_cobertura_servicos.py
++++ b/scripts/testar_cobertura_servicos.py
+@@ -28,10 +28,33 @@ systemctl() {
+ docker() { printf '%s\\n' librechat librechat-mongodb librechat-meilisearch librechat-ponte-host; }
+ _p9_ollama_na_gpu() { :; }
+ '''
+-for alvo, estado in [('agata-manutencao.timer', 'failed'), ('agata-manutencao.timer', 'inactive'), ('agata-manutencao.timer', 'unknown'), ('agata-manutencao.service', 'failed'), ('laya-roteador.service', 'failed')]:
++for alvo, estado in [('agata-manutencao.timer', 'failed'), ('agata-manutencao.timer', 'inactive'), ('agata-manutencao.timer', 'unknown'), ('agata-manutencao.service', 'failed'), ('laya-roteador.socket', 'failed'), ('laya-roteador.socket', 'inactive')]:
+     r = shell(base + f'ALVO={alvo}; ESTADO={estado}; p9_servicos_declarados')
+     assert r.returncode == 0 and alvo in r.stdout and 'AVISO (P-9)' in r.stdout, (alvo, estado, r.stdout, r.stderr)
+     n += 1
++# (17/11/2026) p9=nao: 'failed' avisa mesmo sem p9=sim; parado em repouso não avisa.
++for alvo in ('laya-roteador.service', 'laya-roteador-proxy.service', 'ollaya.service', 'ollaya-proxy.service'):
++    r = shell(base + f'ALVO={alvo}; ESTADO=failed; p9_servicos_declarados')
++    assert r.returncode == 0 and alvo in r.stdout and 'AVISO (P-9)' in r.stdout, (alvo, r.stdout, r.stderr)
++    n += 1
++    r = shell(base + f'ALVO={alvo}; ESTADO=inactive; p9_servicos_declarados')
++    assert r.returncode == 0 and alvo not in r.stdout, (alvo, r.stdout, r.stderr)
++    n += 1
++r = shell(base + 'ALVO=laya-roteador.service; ESTADO=inactive; p9_servicos_declarados')
++assert r.returncode == 0 and 'laya-roteador.service' not in r.stdout, (r.stdout, r.stderr)  # backend parado é normal
++n += 1
++r = shell(base + '''systemctl() {
++  case "$*" in
++    *is-enabled*) echo enabled;;
++    *is-active*) case "${@: -1}" in
++      agata.target|seth-gateway.service|laya-roteador.socket) echo inactive;;
++      *) echo active;;
++    esac;;
++  esac
++}
++ALVO=nenhum; ESTADO=active; p9_servicos_declarados''')
++assert r.returncode == 0 and 'AVISO (P-9): unidade de usuário' not in r.stdout, (r.stdout, r.stderr)  # sistema desligado: socket parado não avisa
++n += 1
+ r = shell(base + 'ALVO=nenhum; ESTADO=failed; p9_servicos_declarados')
+ assert r.returncode == 0 and not r.stdout, (r.stdout, r.stderr)
+ n += 1
+diff --git a/scripts/testar_sob_demanda.py b/scripts/testar_sob_demanda.py
+new file mode 100644
+index 00000000..caa79cff
+--- /dev/null
++++ b/scripts/testar_sob_demanda.py
+@@ -0,0 +1,250 @@
++#!/usr/bin/env python3
++"""Testes do desenho sob demanda do Laya e do Ollaya (17/11/2026, decisão do Humano: subir conforme a
++necessidade e derrubar após um tempo seguro).
++
++Cada serviço tem três unidades: o .socket (porta pública, fica de pé com o agata.target), o proxy
++(systemd-socket-proxyd, sai após 15 min ociosos) e o backend (laya-roteador.service ou ollaya.service, que
++sobe pelo proxy e cai com ele por StopWhenUnneeded). Os testes leem config/ e rodam o probe do ExecStartPost
++contra listeners locais em porta efêmera, com prazo de 3 s no lugar dos 60 s da unidade. Não tocam em systemd,
++em ~/.config/systemd, em produção nem em serviço real.
++
++Rodar: python3 scripts/testar_sob_demanda.py
++"""
++from __future__ import annotations
++
++import os
++import re
++import shlex
++import socket
++import subprocess
++import threading
++import unittest
++from http.server import BaseHTTPRequestHandler, HTTPServer
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parent.parent
++CONFIG = RAIZ / "config"
++PROXY_BIN = "/usr/lib/systemd/systemd-socket-proxyd"
++CURL_BIN = "/usr/bin/curl"
++TIMEOUT_BIN = "/usr/bin/timeout"
++PRAZO_PROBE_S = 60    # prazo global do ExecStartPost (timeout 60)
++TIMEOUT_START_S = 90  # TimeoutStartSec do backend: tem de passar do prazo do probe
++
++# (socket, proxy, backend, porta pública, porta interna)
++SERVICOS = (
++    ("laya-roteador.socket", "laya-roteador-proxy.service", "laya-roteador.service", 11436, 11446),
++    ("ollaya.socket", "ollaya-proxy.service", "ollaya.service", 11435, 11445),
++)
++
++
++def ler_unidade(caminho: Path) -> dict:
++    """Seções -> chave -> lista de valores. Comentário e linha em branco saem; `\\` no fim junta a linha seguinte."""
++    logicas, buf = [], ""
++    for linha in caminho.read_text(encoding="utf-8").splitlines():
++        s = linha.strip()
++        if buf == "" and (not s or s.startswith("#")):
++            continue
++        if linha.rstrip().endswith("\\"):
++            buf += linha.rstrip()[:-1] + " "
++            continue
++        logicas.append(buf + s)
++        buf = ""
++    secoes: dict = {}
++    atual = None
++    for linha in logicas:
++        if linha.startswith("[") and linha.endswith("]"):
++            atual = linha[1:-1]
++            secoes.setdefault(atual, {})
++            continue
++        chave, _, valor = linha.partition("=")
++        secoes.setdefault(atual, {}).setdefault(chave.strip(), []).append(valor.strip())
++    return secoes
++
++
++def ler_manifesto() -> list[list[str]]:
++    linhas = []
++    for linha in (CONFIG / "servicos-agata.txt").read_text(encoding="utf-8").splitlines():
++        if not linha.strip() or linha.lstrip().startswith("#"):
++            continue
++        campos = [c.strip() for c in linha.split("|")]
++        assert len(campos) == 5, linha
++        linhas.append(campos)
++    return linhas
++
++
++def comando_do_probe(unidade: Path) -> list[str]:
++    """O ExecStartPost da unidade, separado em argumentos: [timeout, 60, bash, -c, script]."""
++    valor = ler_unidade(unidade)["Service"]["ExecStartPost"][0]
++    argv = shlex.split(valor)
++    assert argv[:4] == [TIMEOUT_BIN, str(PRAZO_PROBE_S), "/usr/bin/bash", "-c"], argv[:4]
++    return argv
++
++
++def rodar_probe(argv: list[str], porta_orig: int, porta_nova: int, prazo: int = 3) -> int:
++    """Roda o probe com a porta trocada e prazo de `prazo` s (a unidade tem 60 s)."""
++    script = re.sub(rf"(127\.0\.0\.1[:/]){porta_orig}\b", rf"\g<1>{porta_nova}", argv[4])
++    assert str(porta_nova) in script and "127.0.0.1" in script, script
++    r = subprocess.run([TIMEOUT_BIN, str(prazo), "/usr/bin/bash", "-c", script],
++                       capture_output=True, text=True, timeout=60)
++    return r.returncode
++
++
++def porta_livre() -> int:
++    with socket.socket() as s:
++        s.bind(("127.0.0.1", 0))
++        return s.getsockname()[1]
++
++
++class UnidadesTest(unittest.TestCase):
++    def test_socket_fica_na_porta_publica_no_loopback_e_no_target(self):
++        for sock, proxy, _backend, publica, _interna in SERVICOS:
++            with self.subTest(unidade=sock):
++                s = ler_unidade(CONFIG / sock)
++                self.assertEqual(s["Socket"]["ListenStream"], [f"127.0.0.1:{publica}"])
++                self.assertEqual(s["Socket"]["Service"], [proxy])
++                self.assertEqual(s["Install"]["WantedBy"], ["agata.target"])
++                self.assertEqual(s["Unit"]["PartOf"], ["agata.target"])
++                self.assertNotIn("Service", s, "socket não tem [Service]")
++
++    def test_proxy_tem_idle_de_15_min_e_so_sobe_com_o_backend(self):
++        for _sock, proxy, backend, _publica, interna in SERVICOS:
++            with self.subTest(unidade=proxy):
++                p = ler_unidade(CONFIG / proxy)
++                self.assertNotIn("Install", p, "proxy é ativado só pelo socket")
++                self.assertEqual(p["Service"]["ExecStart"],
++                                 [f"{PROXY_BIN} --exit-idle-time=15min 127.0.0.1:{interna}"])
++                self.assertEqual(p["Unit"]["Requires"], [backend])
++                self.assertEqual(p["Unit"]["After"], [backend])
++                self.assertEqual(p["Unit"]["PartOf"], ["agata.target"])
++
++    def test_backend_nao_sobe_no_boot_e_cai_quando_ninguem_precisa(self):
++        for _sock, _proxy, backend, _publica, _interna in SERVICOS:
++            with self.subTest(unidade=backend):
++                b = ler_unidade(CONFIG / backend)
++                self.assertNotIn("Install", b, "backend não tem [Install]: quem fica no target é o socket")
++                self.assertEqual(b["Unit"]["StopWhenUnneeded"], ["yes"])
++                self.assertEqual(b["Unit"]["PartOf"], ["agata.target"])
++
++    def test_prazo_do_probe_cabe_dentro_do_timeout_de_start(self):
++        for _sock, _proxy, backend, _publica, _interna in SERVICOS:
++            with self.subTest(unidade=backend):
++                b = ler_unidade(CONFIG / backend)
++                self.assertEqual(b["Service"]["TimeoutStartSec"], [str(TIMEOUT_START_S)])
++                self.assertGreater(TIMEOUT_START_S, PRAZO_PROBE_S)
++                comando_do_probe(CONFIG / backend)
++
++    def test_backend_escuta_na_porta_interna_e_nao_na_publica(self):
++        laya = ler_unidade(CONFIG / "laya-roteador.service")
++        self.assertIn("LAYA_PORT=11446", laya["Service"]["Environment"])
++        self.assertNotIn("LAYA_PORT=11436", laya["Service"]["Environment"])
++        ollaya = ler_unidade(CONFIG / "ollaya.service")
++        exec_start = ollaya["Service"]["ExecStart"][0]
++        self.assertIn("-p 127.0.0.1:11445:11435", exec_start)
++        self.assertNotIn("127.0.0.1:11435:11435", exec_start)
++
++    def test_ollaya_derruba_o_conteiner_mesmo_se_o_probe_falhar(self):
++        ollaya = ler_unidade(CONFIG / "ollaya.service")
++        self.assertEqual(ollaya["Service"]["ExecStop"], ["/usr/bin/docker stop ollaya"])
++        self.assertEqual(ollaya["Service"]["ExecStopPost"], ["-/usr/bin/docker stop ollaya"])
++
++    def test_clientes_seguem_usando_a_porta_publica(self):
++        decisor = (RAIZ / "redesign" / "router" / "decisor.py").read_text(encoding="utf-8")
++        self.assertIn('"AGATA_DECISOR_URL", "http://127.0.0.1:11435"', decisor)
++        self.assertIn('"AGATA_LAYA_URL", "http://127.0.0.1:11436"', decisor)
++        rota = (RAIZ / "redesign" / "laya" / "laya_roteador.py").read_text(encoding="utf-8")
++        self.assertIn("http://127.0.0.1:11435/v1/systemone", rota)
++
++    def test_avaliar_decisor_tira_os_sockets_junto(self):
++        fonte = (RAIZ / "scripts" / "avaliar_decisor.py").read_text(encoding="utf-8")
++        for unidade in ("ollaya.socket", "laya-roteador.socket", "ollaya-proxy.service", "laya-roteador-proxy.service"):
++            self.assertIn(f'"{unidade}"', fonte)
++
++    def test_todo_unit_do_config_com_target_esta_no_manifesto(self):
++        declaradas = {c[0] for c in ler_manifesto()}
++        for arq in sorted(CONFIG.iterdir()):
++            if arq.suffix not in {".service", ".socket", ".timer"}:
++                continue
++            texto = arq.read_text(encoding="utf-8")
++            if re.search(r"^(WantedBy|PartOf)=agata\.target\s*$", texto, re.M):
++                self.assertIn(arq.name, declaradas, f"{arq.name} tem agata.target e falta em servicos-agata.txt")
++
++
++class ManifestoTest(unittest.TestCase):
++    def test_linhas_do_sob_demanda_no_manifesto(self):
++        linhas = {c[0]: c for c in ler_manifesto()}
++        for sock, proxy, backend, publica, interna in SERVICOS:
++            with self.subTest(servico=sock):
++                self.assertEqual(linhas[sock][1:4], ["usuario", str(publica), "sim"])
++                self.assertEqual(linhas[proxy][1:4], ["usuario", "-", "nao"])
++                self.assertEqual(linhas[backend][1:4], ["usuario", str(interna), "nao"])
++                self.assertTrue(linhas[backend][4].startswith(f"config/{backend}"), linhas[backend][4])
++
++    def test_portas_internas_declaradas_em_loopback(self):
++        portas = (CONFIG / "portas-agata.txt").read_text(encoding="utf-8")
++        for _sock, _proxy, _backend, _publica, interna in SERVICOS:
++            with self.subTest(porta=interna):
++                self.assertRegex(portas, rf"(?m)^{interna}\|[^|\n]+\|127\.0\.0\.1$")
++
++
++class ProbeTest(unittest.TestCase):
++    """O probe do ExecStartPost: só libera o proxy quando o backend responde na porta interna, dentro do prazo."""
++
++    def test_sintaxe_do_probe_e_valida(self):
++        for _sock, _proxy, backend, _publica, _interna in SERVICOS:
++            with self.subTest(unidade=backend):
++                r = subprocess.run(["/usr/bin/bash", "-n", "-c", comando_do_probe(CONFIG / backend)[4]],
++                                   capture_output=True, text=True)
++                self.assertEqual(r.returncode, 0, r.stderr)
++
++    def test_probe_do_laya_passa_so_com_a_porta_aberta(self):
++        argv = comando_do_probe(CONFIG / "laya-roteador.service")
++        self.assertNotEqual(rodar_probe(argv, 11446, porta_livre()), 0)
++        with socket.socket() as srv:
++            srv.bind(("127.0.0.1", 0))
++            srv.listen(4)
++            self.assertEqual(rodar_probe(argv, 11446, srv.getsockname()[1]), 0)
++
++    def test_probe_do_ollaya_exige_resposta_http_e_nao_so_tcp(self):
++        if not os.path.exists(CURL_BIN):
++            self.skipTest("sem /usr/bin/curl")
++        argv = comando_do_probe(CONFIG / "ollaya.service")
++        self.assertIn("-m 2", argv[4])
++        # docker-proxy aceita a conexão antes de o contêiner escutar: aqui o servidor aceita e fecha sem responder.
++        mudo = socket.socket()
++        mudo.bind(("127.0.0.1", 0))
++        mudo.listen(4)
++
++        def fechar_sem_responder():
++            while True:
++                try:
++                    conn, _ = mudo.accept()
++                except OSError:
++                    return
++                conn.close()
++
++        threading.Thread(target=fechar_sem_responder, daemon=True).start()
++        try:
++            self.assertNotEqual(rodar_probe(argv, 11445, mudo.getsockname()[1]), 0)
++        finally:
++            mudo.close()
++
++        class Ok(BaseHTTPRequestHandler):
++            def do_GET(self):
++                self.send_response(404)
++                self.end_headers()
++
++            def log_message(self, *args):
++                pass
++
++        http = HTTPServer(("127.0.0.1", 0), Ok)
++        threading.Thread(target=http.serve_forever, daemon=True).start()
++        try:
++            self.assertEqual(rodar_probe(argv, 11445, http.server_address[1]), 0)
++        finally:
++            http.shutdown()
++            http.server_close()
++        self.assertNotEqual(rodar_probe(argv, 11445, porta_livre()), 0)
++
++
++if __name__ == "__main__":
++    unittest.main()
