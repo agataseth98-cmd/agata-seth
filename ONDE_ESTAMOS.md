@@ -12,8 +12,6 @@ O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
 Há uma proposta esperando sua assinatura (`atualiza-17-11`). O painel ganha uma lista única de integrações em Sistema, e os provedores aparecem numa tabela só, em Conexões. Equipe, Backup, Saída de rede, Perímetro e CI passam a ter tela de leitura, com a idade do último resultado; o painel só lê o que já foi gerado. Perímetro, CI, equipe e restic continuam rodando só pelo terminal. Comando: `bash scripts/aprovar.sh atualiza-17-11` (depois do merge do PR de proposta, no terminal, sem `!`).
 
-A proposta `teto-sanitizador-17-11` está esperando sua assinatura. O OpenCode voltava erro na Seth porque uma ferramenta dele tem formato mais fundo que o limite de segurança; o limite sobe de 12 para 32 níveis e continua bloqueando o que passar disso. Comando: `bash scripts/aprovar.sh teto-sanitizador-17-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR.
-
 A proposta `spec-mae-cofre-17-11` está esperando sua assinatura. A spec-mãe passa a descrever o cofre de chaves que o código já usa, com um critério novo provado por teste. Comando: `bash scripts/aprovar.sh spec-mae-cofre-17-11`, no terminal, sem `!`. Assinatura só depois do merge deste PR.
 
 Os blocos de 16/11 sobre o painel e a higiene já foram aplicados (entradas 1023, 1025 e 1027). O bloco de 06/11 que pede para juntar o PR 927 está superado: o PR entrou em 07/11.
