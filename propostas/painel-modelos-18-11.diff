@@ -1,0 +1,851 @@
+diff --git a/redesign/painel_operacional/modelos.js b/redesign/painel_operacional/modelos.js
+new file mode 100644
+index 00000000..9a192cd0
+--- /dev/null
++++ b/redesign/painel_operacional/modelos.js
+@@ -0,0 +1,171 @@
++// Catálogo de modelos do /prototipo (18/11/2026): tabela por capacidade e estado, filtros e a decisão do Humano.
++// Lê /api/modelos; liberar e voltar ao standby fazem POST em /api/modelos/decisao, que só registra a decisão
++// (não altera rota nem OmniRoute). Nada entra como HTML: tudo é montado com createElement e textContent.
++(() => {
++const AgataPainel = (window.AgataPainel = window.AgataPainel || {});
++const byIdM = (id) => document.getElementById(id);
++const no = (tag, classe, texto) => {
++  const e = document.createElement(tag);
++  if (classe) e.className = classe;
++  if (texto !== undefined) e.textContent = texto;
++  return e;
++};
++const OPCOES_GET = {headers: {Accept: "application/json"}, cache: "no-store", credentials: "same-origin"};
++// Palavra e marca de cada estado: o estado nunca é só cor.
++const ESTADO_ROTULO = {
++  liberado: ["LIBERADO", "ok"], candidato_prova: ["CANDIDATO À PROVA", "aviso"], standby: ["STANDBY", "neutro"],
++  indisponivel: ["INDISPONÍVEL", "erro"], proibido_pela_regra: ["PROIBIDO PELA REGRA", "erro"],
++};
++let dados = null;
++let pendente = null;
++
++// Filtro puro (testável): vazio em um campo significa "todos".
++function filtrar(modelos, cap, prov, estado) {
++  return modelos.filter((m) => (!cap || m.capacidades.includes(cap)) && (!prov || m.provedor === prov) && (!estado || m.estado === estado));
++}
++
++function opcoes(select, valores, rotulo) {
++  const atual = select.value;
++  select.replaceChildren(...[["", rotulo]].concat(valores.map((v) => [v, ESTADO_ROTULO[v] ? ESTADO_ROTULO[v][0] : v])).map(([v, t]) => {
++    const o = no("option", "", t);
++    o.value = v;
++    return o;
++  }));
++  if (valores.includes(atual)) select.value = atual;
++}
++
++function selo(estado) {
++  const [texto, tom] = ESTADO_ROTULO[estado] || [String(estado).toUpperCase(), "neutro"];
++  return no("span", "nv-selo " + tom, texto);
++}
++
++function celulaAcao(m) {
++  const td = no("td", "mod-acoes");
++  if (m.estado === "proibido_pela_regra") {
++    td.append(no("span", "mod-fixo", "Sem decisão possível: proibido pela regra."));
++  } else if (m.estado === "indisponivel") {
++    td.append(no("span", "mod-fixo", "Sem decisão: acesso não funcionou na prova."));
++  }
++  if (m.pode_liberar) {
++    const b = no("button", "btn", "Liberar para rota");
++    b.type = "button";
++    b.addEventListener("click", () => pedirConfirmacao(m, "liberar"));
++    td.append(b);
++  }
++  if (m.pode_standby) {
++    const b = no("button", "btn secondary", "Voltar ao standby");
++    b.type = "button";
++    b.addEventListener("click", () => pedirConfirmacao(m, "standby"));
++    td.append(b);
++  }
++  if (m.decisao) {
++    td.append(no("span", "mod-fixo", "Decidido por " + m.decisao.quem + " em " + m.decisao.quando + "."));
++  }
++  return td;
++}
++
++function linha(m) {
++  const tr = no("tr");
++  const nome = no("td", "mod-nome");
++  nome.append(no("strong", "", m.nome), no("div", "mod-id", m.id));
++  const cap = no("td");
++  m.capacidades.forEach((c) => cap.append(no("span", "nv-selo neutro", c)));
++  const est = no("td");
++  est.append(selo(m.estado));
++  const acesso = no("td", "mod-acesso", m.acesso.verificado ? m.acesso.resumo : "Não medido");
++  if (m.acesso.nota) acesso.append(no("div", "mod-id", m.acesso.nota));
++  const ver = no("td", "mod-ver");
++  if (m.veredito) {
++    ver.append(no("span", "", m.veredito.resultado));
++    const fonte = [m.veredito.data, m.veredito.fonte].filter(Boolean).join(" · ");
++    if (fonte) ver.append(no("div", "mod-id", fonte));
++  } else {
++    ver.append(no("span", "nv-selo neutro", "SEM VEREDITO"));
++  }
++  tr.append(nome, no("td", "", m.provedor), cap, est, acesso, ver, celulaAcao(m));
++  return tr;
++}
++
++function renderizar() {
++  if (!dados) return;
++  const lista = byIdM("mod-lista");
++  const vistos = filtrar(dados.modelos, byIdM("mod-filtro-cap").value, byIdM("mod-filtro-prov").value, byIdM("mod-filtro-estado").value);
++  lista.replaceChildren(...vistos.map(linha));
++  byIdM("mod-vazio").hidden = vistos.length > 0;
++  byIdM("mod-tabela").hidden = vistos.length === 0;
++  const c = dados.contagens || {};
++  byIdM("mod-resumo").textContent = vistos.length + " de " + dados.modelos.length + " modelos. Fonte: " + dados.fonte
++    + " (" + (dados.arquivo_em || "sem hora") + "). " + Object.keys(ESTADO_ROTULO).map((e) => ESTADO_ROTULO[e][0].toLowerCase() + ": " + (c[e] || 0)).join("; ") + ".";
++}
++
++function pedirConfirmacao(m, acao) {
++  pendente = {id: m.id, acao};
++  const dlg = byIdM("mod-dialogo");
++  byIdM("mod-dialogo-titulo").textContent = acao === "liberar" ? "Liberar para rota" : "Voltar ao standby";
++  byIdM("mod-dialogo-texto").textContent = (acao === "liberar" ? "Registrar a liberação de " : "Registrar a volta ao standby de ") + m.id
++    + ". Só grava a decisão; nenhuma rota é alterada por aqui.";
++  dlg.returnValue = "";
++  dlg.showModal();
++}
++
++async function enviar() {
++  const nota = byIdM("mod-nota");
++  const p = pendente;
++  pendente = null;
++  if (!p) return;
++  try {
++    const r = await fetch("/api/modelos/decisao", {
++      method: "POST", cache: "no-store", credentials: "same-origin",
++      headers: {"Content-Type": "application/json", Accept: "application/json"},
++      body: JSON.stringify({id: p.id, acao: p.acao, confirmacao: p.id, quem: byIdM("mod-quem").value}),
++    });
++    if (!r.ok) {
++      nota.textContent = "Não registrado: " + (await r.text()).slice(0, 200) + ".";
++      return;
++    }
++    const j = await r.json();
++    nota.textContent = "Registrado: " + j.registrado.acao + " de " + j.registrado.id + " por " + j.registrado.quem + ". " + j.aviso + ".";
++    await carregar();
++  } catch (_) {
++    nota.textContent = "Não registrado: a página não conseguiu falar com o painel.";
++  }
++}
++
++async function carregar() {
++  const secao = byIdM("sub-catalogo-modelos");
++  if (!secao) return;
++  try {
++    const r = await fetch("/api/modelos", OPCOES_GET);
++    if (!r.ok) throw new Error("HTTP " + r.status);
++    const d = await r.json();
++    if (!d || !Array.isArray(d.modelos)) throw new Error("resposta incompleta");
++    dados = d;
++    opcoes(byIdM("mod-filtro-cap"), d.capacidades, "todas");
++    opcoes(byIdM("mod-filtro-prov"), d.provedores, "todos");
++    opcoes(byIdM("mod-filtro-estado"), d.estados, "todos");
++    if (d.estado === "sem_catalogo") {
++      byIdM("mod-resumo").textContent = "Não medido: não há catálogo em " + d.fonte + ".";
++      byIdM("mod-lista").replaceChildren();
++      byIdM("mod-tabela").hidden = true;
++      return;
++    }
++    renderizar();
++  } catch (_) {
++    dados = null;
++    byIdM("mod-resumo").textContent = "Não medido: não foi possível ler o catálogo agora.";
++    byIdM("mod-lista").replaceChildren();
++  }
++}
++
++["mod-filtro-cap", "mod-filtro-prov", "mod-filtro-estado"].forEach((id) => {
++  const e = byIdM(id);
++  if (e) e.addEventListener("change", renderizar);
++});
++const recarregar = byIdM("mod-recarregar");
++if (recarregar) recarregar.addEventListener("click", () => carregar());
++const dialogo = byIdM("mod-dialogo");
++if (dialogo) dialogo.addEventListener("close", () => { if (dialogo.returnValue === "ok") enviar(); else pendente = null; });
++
++AgataPainel.carregarModelos = carregar;
++AgataPainel.modelosFiltrar = filtrar;
++})();
+diff --git a/redesign/painel_operacional/modelos_painel.py b/redesign/painel_operacional/modelos_painel.py
+new file mode 100644
+index 00000000..5248ebd1
+--- /dev/null
++++ b/redesign/painel_operacional/modelos_painel.py
+@@ -0,0 +1,192 @@
++"""Catálogo de modelos no painel (18/11/2026): ver por capacidade e estado, e registrar a decisão do Humano.
++
++Lê um catálogo JSON (lista de modelos; formato de catalogo-modelos-18-11) e mostra o estado efetivo de cada um.
++Liberar para rota e voltar ao standby SÓ gravam uma linha em um arquivo de decisões (append-only, com quem e
++quando). Este módulo não altera rotas, não toca o OmniRoute e não lê chave nenhuma. `proibido_pela_regra` e
++`indisponivel` não podem ser liberados. A decisão mais recente de um id vale como estado efetivo na leitura.
++
++Caminhos (lidos na hora da chamada; os testes trocam os nomes):
++  AGATA_CATALOGO_MODELOS  catálogo (padrão ~/.local/share/agata/catalogo-modelos/catalogo.json)
++  AGATA_DECISOES_MODELOS  decisões (padrão: decisoes.jsonl ao lado do catálogo)
++"""
++from __future__ import annotations
++
++import datetime
++import fcntl
++import json
++import os
++import re
++from pathlib import Path
++
++PASTA_PADRAO = Path.home() / ".local/share/agata/catalogo-modelos"
++ESTADOS = ("liberado", "candidato_prova", "standby", "indisponivel", "proibido_pela_regra")
++ACOES = {"liberar": "liberado", "standby": "standby"}
++# De onde cada ação é permitida (estado efetivo atual).
++ORIGENS_PERMITIDAS = {"liberar": {"candidato_prova", "standby"}, "standby": {"liberado", "candidato_prova"}}
++LIMITE_CATALOGO_BYTES = 8_000_000
++LIMITE_TEXTO = 300
++QUEM_RE = re.compile(r"[^\w .@-]", re.U)
++
++
++class ErroModelos(Exception):
++    def __init__(self, status: int, motivo: str):
++        super().__init__(motivo)
++        self.status, self.motivo = status, motivo
++
++
++def catalogo_caminho() -> Path:
++    return Path(os.environ.get("AGATA_CATALOGO_MODELOS") or PASTA_PADRAO / "catalogo.json")
++
++
++def decisoes_caminho() -> Path:
++    return Path(os.environ.get("AGATA_DECISOES_MODELOS") or catalogo_caminho().with_name("decisoes.jsonl"))
++
++
++def _texto(valor, limite: int = LIMITE_TEXTO) -> str:
++    return valor[:limite] if isinstance(valor, str) else ""
++
++
++def _ler_catalogo() -> list[dict] | None:
++    """Lista de modelos válidos, ou None se o arquivo não existe. Arquivo ilegível levanta 500 (nada é inventado)."""
++    caminho = catalogo_caminho()
++    if not caminho.is_file():
++        return None
++    try:
++        if caminho.stat().st_size > LIMITE_CATALOGO_BYTES:
++            raise ErroModelos(413, "catalogo acima do limite")
++        dados = json.loads(caminho.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        raise ErroModelos(500, "catalogo ilegivel")
++    if not isinstance(dados, list):
++        raise ErroModelos(500, "catalogo fora do formato")
++    return [m for m in dados if isinstance(m, dict) and isinstance(m.get("id"), str) and m.get("estado") in ESTADOS]
++
++
++def _ler_decisoes() -> list[dict]:
++    caminho = decisoes_caminho()
++    if not caminho.is_file():
++        return []
++    saida = []
++    try:
++        for linha in caminho.read_text(encoding="utf-8").splitlines():
++            try:
++                d = json.loads(linha)
++            except ValueError:
++                continue  # linha quebrada não derruba a leitura; o arquivo não é reescrito
++            if isinstance(d, dict) and isinstance(d.get("id"), str) and d.get("acao") in ACOES:
++                saida.append(d)
++    except OSError:
++        raise ErroModelos(500, "decisoes ilegiveis")
++    return saida
++
++
++def _estado_efetivo(modelo: dict, ultima: dict | None) -> str:
++    base = modelo["estado"]
++    # Decisão só vale sobre quem pode recebê-la: proibido e indisponível nunca mudam por decisão.
++    if ultima and base in ("candidato_prova", "standby", "liberado"):
++        return ACOES[ultima["acao"]]
++    return base
++
++
++def _veredito(modelo: dict) -> dict | None:
++    """Veredito da prova, se o catálogo trouxer (`veredito`: texto ou {resultado, data, fonte}). Sem campo, None."""
++    v = modelo.get("veredito")
++    if isinstance(v, str) and v:
++        return {"resultado": _texto(v), "data": "", "fonte": ""}
++    if isinstance(v, dict) and isinstance(v.get("resultado"), str):
++        return {"resultado": _texto(v["resultado"]), "data": _texto(v.get("data"), 40), "fonte": _texto(v.get("fonte"))}
++    return None
++
++
++def _acesso(modelo: dict) -> dict:
++    a = modelo.get("acesso_verificado")
++    if not isinstance(a, dict):
++        return {"verificado": False, "resumo": "não verificado"}
++    resumo = f"HTTP {a.get('status')}" if a.get("status") is not None else "sem status"
++    if a.get("latencia_s") is not None:
++        resumo += f", {a['latencia_s']} s"
++    return {"verificado": True, "resumo": resumo, "data": _texto(a.get("data"), 40),
++            "nota": _texto(a.get("nota"), 120)}
++
++
++def _item(modelo: dict, ultima: dict | None) -> dict:
++    efetivo = _estado_efetivo(modelo, ultima)
++    return {
++        "id": _texto(modelo["id"], 200), "nome": _texto(modelo.get("nome")) or _texto(modelo["id"], 200),
++        "provedor": _texto(modelo.get("provedor"), 60),
++        "capacidades": [_texto(c, 40) for c in modelo.get("capacidades", []) if isinstance(c, str)][:12],
++        "contexto": _texto(modelo.get("contexto"), 80), "estado": efetivo, "estado_catalogo": modelo["estado"],
++        "acesso": _acesso(modelo), "veredito": _veredito(modelo), "fonte": _texto(modelo.get("fonte")),
++        "decisao": ({"acao": ultima["acao"], "quem": _texto(ultima.get("quem"), 80), "quando": _texto(ultima.get("quando"), 40)}
++                    if ultima and efetivo != modelo["estado"] else None),
++        "pode_liberar": efetivo in ORIGENS_PERMITIDAS["liberar"],
++        "pode_standby": efetivo in ORIGENS_PERMITIDAS["standby"],
++    }
++
++
++def listar() -> dict:
++    """Catálogo com estado efetivo, contagens e a fonte (caminho e hora do arquivo). Só leitura."""
++    catalogo = _ler_catalogo()
++    caminho = catalogo_caminho()
++    base = {"schema_version": 1, "fonte": str(caminho), "estados": list(ESTADOS)}
++    if catalogo is None:
++        return {**base, "estado": "sem_catalogo", "modelos": [], "contagens": {}, "capacidades": [], "provedores": []}
++    ultima: dict[str, dict] = {}
++    for d in _ler_decisoes():
++        ultima[d["id"]] = d
++    modelos = [_item(m, ultima.get(m["id"])) for m in catalogo]
++    contagens = {e: sum(1 for m in modelos if m["estado"] == e) for e in ESTADOS}
++    hora = datetime.datetime.fromtimestamp(caminho.stat().st_mtime).astimezone().isoformat(timespec="seconds")
++    return {**base, "estado": "ok" if modelos else "vazio", "arquivo_em": hora, "modelos": modelos,
++            "contagens": contagens,
++            "capacidades": sorted({c for m in modelos for c in m["capacidades"]}),
++            "provedores": sorted({m["provedor"] for m in modelos if m["provedor"]})}
++
++
++def decidir(pedido) -> dict:
++    """Registra liberar ou standby. Exige confirmacao == id (confirmação explícita). Só acrescenta ao arquivo de decisões."""
++    if not isinstance(pedido, dict):
++        raise ErroModelos(400, "pedido invalido")
++    ident, acao = pedido.get("id"), pedido.get("acao")
++    # Tipos primeiro: lista ou dict em qualquer campo texto é 400, nunca TypeError.
++    for campo in ("id", "acao", "confirmacao", "quem", "nota"):
++        valor = pedido.get(campo)
++        if (valor is not None or campo in ("id", "acao", "confirmacao")) and not isinstance(valor, str):
++            raise ErroModelos(400, f"campo {campo} deve ser texto")
++    if acao not in ACOES:
++        raise ErroModelos(400, "id ou acao invalidos")
++    if pedido.get("confirmacao") != ident:
++        raise ErroModelos(400, "confirmacao explicita ausente: envie confirmacao igual ao id")
++    quem = QUEM_RE.sub("", _texto(pedido.get("quem"), 60)).strip() or "humano"
++    caminho = decisoes_caminho()
++    try:
++        caminho.parent.mkdir(parents=True, exist_ok=True)
++        with caminho.open("a+", encoding="utf-8") as arq:
++            fcntl.flock(arq, fcntl.LOCK_EX)  # leitura do estado, validação e append sob a mesma trava
++            modelo = next((m for m in (_ler_catalogo() or []) if m["id"] == ident), None)
++            if modelo is None:
++                raise ErroModelos(404, "modelo fora do catalogo")
++            arq.seek(0)
++            anterior = None
++            for l in arq.read().splitlines():
++                try:
++                    d = json.loads(l)
++                except ValueError:
++                    continue
++                if isinstance(d, dict) and d.get("id") == ident and d.get("acao") in ACOES:
++                    anterior = d
++            atual = _estado_efetivo(modelo, anterior)
++            if modelo["estado"] == "proibido_pela_regra":
++                raise ErroModelos(409, "proibido pela regra: nao pode ser liberado nem mudar de estado")
++            if atual not in ORIGENS_PERMITIDAS[acao]:
++                raise ErroModelos(409, f"estado {atual} nao permite {acao}")
++            linha = {"quando": datetime.datetime.now().astimezone().isoformat(timespec="seconds"), "id": ident,
++                     "acao": acao, "de": atual, "para": ACOES[acao], "quem": quem + " (painel)",
++                     "nota": _texto(pedido.get("nota"), 200)}
++            arq.seek(0, 2)
++            arq.write(json.dumps(linha, ensure_ascii=False) + "\n")
++            arq.flush()
++    except OSError:
++        raise ErroModelos(500, "gravacao indisponivel; nada foi registrado")
++    return {"schema_version": 1, "registrado": linha,
++            "aviso": "decisao registrada; nenhuma rota foi alterada (isso e feito fora do painel)"}
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index c01e0956..69360720 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -897,3 +897,17 @@ body:has(#conversa:not([hidden])) main{height:100vh;height:100dvh;overflow:hidde
+ .resultado{margin:0 0 4px;font:600 var(--fs-4)/1.4 var(--sans);color:var(--ink)}
+ .cap-estado{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 8px}
+ .cap-hora{font-size:var(--fs-1);color:var(--muted);font-variant-numeric:tabular-nums}
++
++/* ===== Catálogo de modelos (18/11/2026) ===== */
++.mod-filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end;margin:12px 0}
++.mod-filtros .nv-campo select{width:100%}
++#mod-tabela td{vertical-align:top}
++.mod-nome{min-width:190px}
++.mod-id{margin-top:2px;font:var(--fs-1)/1.4 var(--mono);color:var(--muted);overflow-wrap:anywhere}
++.mod-acoes{min-width:170px}
++.mod-acoes .btn{display:block;margin-bottom:6px;white-space:normal}
++.mod-fixo{display:block;margin-bottom:6px;font-size:var(--fs-2);color:var(--muted)}
++#mod-tabela .nv-selo{margin:0 4px 4px 0}
++.mod-confirma form{display:flex;flex-direction:column;gap:12px}
++.mod-acesso,.mod-ver{min-width:150px}
++.mod-acesso .mod-id{max-width:240px}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 182a9985..5589c0f3 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -214,7 +214,7 @@
+   <p class="estado" data-estado="vazio" hidden>Sem leitura da Máquina ainda. Atualize a leitura em Estado operacional.</p>
+   <p class="estado" data-estado="erro" hidden>Não medido: não foi possível ler agora. Valor antigo, se houver, aparece com a hora dele.</p>
+ </div>
+-<nav class="abas" aria-label="Subpainéis de Sistema"><button type="button" data-sub="operacao" aria-controls="sub-operacao" aria-selected="true">Estado operacional</button><button type="button" data-sub="integracoes" aria-controls="sub-integracoes" aria-selected="false">Integrações</button><button type="button" data-sub="modelos" aria-controls="sub-modelos" aria-selected="false">Modelos & rota</button><button type="button" data-sub="manutencao" aria-controls="sub-manutencao" aria-selected="false">Manutenção</button><button type="button" data-sub="nv-corpo" aria-controls="sub-nv-corpo" aria-selected="false">Corpo operacional</button><button type="button" data-sub="nv-metacognicao" aria-controls="sub-nv-metacognicao" aria-selected="false">Metacognição</button><button type="button" data-sub="nv-conexoes" aria-controls="sub-nv-conexoes" aria-selected="false">Conexões de modelos</button><button type="button" data-sub="equipe" aria-controls="sub-equipe" aria-selected="false">Equipe</button><button type="button" data-sub="backup" aria-controls="sub-backup" aria-selected="false">Backup</button><button type="button" data-sub="saida-rede" aria-controls="sub-saida-rede" aria-selected="false">Saída de rede</button></nav>
++<nav class="abas" aria-label="Subpainéis de Sistema"><button type="button" data-sub="operacao" aria-controls="sub-operacao" aria-selected="true">Estado operacional</button><button type="button" data-sub="integracoes" aria-controls="sub-integracoes" aria-selected="false">Integrações</button><button type="button" data-sub="modelos" aria-controls="sub-modelos" aria-selected="false">Modelos & rota</button><button type="button" data-sub="manutencao" aria-controls="sub-manutencao" aria-selected="false">Manutenção</button><button type="button" data-sub="catalogo-modelos" aria-controls="sub-catalogo-modelos" aria-selected="false">Catálogo de modelos</button><button type="button" data-sub="nv-corpo" aria-controls="sub-nv-corpo" aria-selected="false">Corpo operacional</button><button type="button" data-sub="nv-metacognicao" aria-controls="sub-nv-metacognicao" aria-selected="false">Metacognição</button><button type="button" data-sub="nv-conexoes" aria-controls="sub-nv-conexoes" aria-selected="false">Conexões de modelos</button><button type="button" data-sub="equipe" aria-controls="sub-equipe" aria-selected="false">Equipe</button><button type="button" data-sub="backup" aria-controls="sub-backup" aria-selected="false">Backup</button><button type="button" data-sub="saida-rede" aria-controls="sub-saida-rede" aria-selected="false">Saída de rede</button></nav>
+ <div class="sub" id="sub-operacao" data-sub="operacao" data-secao="sistema">
+ 
+ 
+@@ -269,6 +269,15 @@
+     <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
+ 
+ 
++</div>
++<div class="sub" id="sub-catalogo-modelos" data-sub="catalogo-modelos" data-secao="sistema" hidden>
++  <div class="section-heading"><div><div class="eyebrow">Catálogo · decisão do Humano</div><h1>Modelos para liberar</h1><p>Cada modelo do catálogo por capacidade e estado, com o veredito da prova quando houver. Liberar ou voltar ao standby só registra a decisão num arquivo; nenhuma rota é alterada por aqui.</p></div><button class="btn secondary" id="mod-recarregar" type="button">Recarregar</button></div>
++  <div class="callout"><span id="mod-resumo" role="status" aria-live="polite">Sem leitura.</span><span class="right">REGISTRA DECISÃO · NÃO ALTERA ROTA</span></div>
++  <div class="mod-filtros"><label class="nv-campo"><span>capacidade</span><select id="mod-filtro-cap"><option value="">todas</option></select></label><label class="nv-campo"><span>provedor</span><select id="mod-filtro-prov"><option value="">todos</option></select></label><label class="nv-campo"><span>estado</span><select id="mod-filtro-estado"><option value="">todos</option></select></label><button class="btn secondary" id="mod-cadastrar" type="button" data-open-page="sistema" data-open-sub="nv-conexoes">Cadastrar provedor e chave</button></div>
++  <div class="nv-tabela-wrap"><table class="nv-tabela" id="mod-tabela"><thead><tr><th>modelo</th><th>provedor</th><th>capacidades</th><th>estado</th><th>acesso</th><th>veredito da prova</th><th>decisão</th></tr></thead><tbody id="mod-lista"></tbody></table></div>
++  <p class="nv-vazio" id="mod-vazio" hidden>Nenhum modelo com esse filtro.</p>
++  <p class="nv-nota" id="mod-nota" role="status" aria-live="polite">Para cadastrar um provedor novo, use Cadastrar provedor e chave (abre Conexões de modelos). A chave nunca volta para a tela.</p>
++  <dialog class="mod-confirma" id="mod-dialogo" aria-labelledby="mod-dialogo-titulo"><form method="dialog" class="dialog-inner"><h2 id="mod-dialogo-titulo">Confirmar decisão</h2><p id="mod-dialogo-texto"></p><label class="nv-campo largo"><span>seu nome (fica no registro)</span><input id="mod-quem" type="text" maxlength="60" autocomplete="off"></label><div class="nv-acoes"><button class="btn" id="mod-confirmar" value="ok">Confirmar</button><button class="btn secondary" id="mod-cancelar" value="cancelar">Cancelar</button></div></form></dialog>
+ </div>
+ <div class="sub nv-page" id="sub-nv-corpo" data-sub="nv-corpo" data-secao="sistema" hidden>
+ <div class="section-heading"><div><div class="eyebrow">Nova versão · estado da Máquina</div><h1>Corpo operacional</h1><p>Fotografia datada, só leitura: serviços, portas, recursos e modelos. Saúde em cinco estados. Dado ausente aparece como não medido; serviço sob demanda parado não é falha.</p></div></div>
+@@ -531,6 +540,7 @@
+ <script src="abrir.js"></script>
+ <script src="nova_versao.js"></script>
+ <script src="historia.js" defer></script>
++<script src="modelos.js" defer></script>
+ <script src="conselho-rede/app.js" defer></script>
+ <script src="operator_console/app.js" defer></script>
+ </body>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index b939a84e..e218ac6e 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -108,6 +108,8 @@ const CARREGAR_SUB = {
+   ci: () => carregarCI(),
+   // História (11/11/2026): historia.js registra AgataPainel.carregarHistoria ao carregar; antes disso, não faz nada.
+   historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
++  // Catálogo de modelos (18/11/2026): modelos.js registra AgataPainel.carregarModelos.
++  "catalogo-modelos": () => { if (AgataPainel.carregarModelos) AgataPainel.carregarModelos(); },
+ };
+ 
+ // Memória e integrações são a mesma leitura de detalhes: a rota carrega uma vez por abertura.
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 5544461a..002dfcee 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -40,6 +40,7 @@ import sdd_painel  # noqa: E402
+ import nova_versao_painel  # noqa: E402
+ import chat_stream  # noqa: E402
+ import historia_painel  # noqa: E402
++import modelos_painel  # noqa: E402
+ import importantes  # noqa: E402
+ import seth_voz  # noqa: E402
+ import seth_ditado  # noqa: E402
+@@ -141,6 +142,7 @@ _ASSETS = {
+     "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
+     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
+     "/historia.js": ("historia.js", "text/javascript; charset=utf-8"),
++    "/modelos.js": ("modelos.js", "text/javascript; charset=utf-8"),
+ }
+ # Telas antigas (painel unificado, spec 07/11/2026): link antigo cai na seção certa do /prototipo.
+ _REDIRECTS = {
+@@ -1694,6 +1696,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._send(200, "application/json; charset=utf-8", body)
+         if self.path.split("?", 1)[0] == "/api/historia":
+             return self._historia_listar()
++        if self.path.split("?", 1)[0] == "/api/modelos":
++            return self._modelos_listar()
+         if self.path.startswith("/api/historia/texto?"):
+             return self._historia_texto()
+         if self.path == "/api/frentes":
+@@ -1806,6 +1810,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._abrir_programa()
+         if self.path == "/api/historia/ouvir":
+             return self._historia_ouvir()
++        if self.path == "/api/modelos/decisao":
++            return self._modelos_decisao()
+         if self.path == "/api/seth/ouvir":
+             return self._seth_ouvir()
+         if self.path == "/api/seth/ouvir/parar":
+@@ -2396,6 +2402,33 @@ class Handler(BaseHTTPRequestHandler):
+         return self._responder_importante(rota, identificador, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
+                                           "application/json; charset=utf-8")
+ 
++    def _modelos_listar(self) -> None:
++        """Catálogo de modelos (18/11/2026): só leitura do JSON do catálogo e do arquivo de decisões."""
++        try:
++            dados = modelos_painel.listar()
++        except modelos_painel.ErroModelos as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
++    def _modelos_decisao(self) -> None:
++        """Liberar para rota ou voltar ao standby: só registra a decisão (append-only). Escrita, então só da origem do painel."""
++        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
++        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
++            return self._send(415, "text/plain; charset=utf-8", b"JSON required")
++        tamanho = self.headers.get("Content-Length", "")
++        if not tamanho.isdecimal() or int(tamanho) > 2048:
++            return self._send(413, "text/plain; charset=utf-8", b"pedido acima de 2048 bytes")
++        try:
++            pedido = json.loads(self.rfile.read(int(tamanho)).decode("utf-8"))
++        except (ValueError, UnicodeDecodeError):
++            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
++        try:
++            dados = modelos_painel.decidir(pedido)
++        except modelos_painel.ErroModelos as erro:
++            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
++        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
++
+     def _historia_listar(self) -> None:
+         """Seção História (11/11/2026): tomos e textos de historia/, só leitura. A checagem de origem já rodou em do_GET."""
+         try:
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 6bcdaeba..dd4e8279 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -708,6 +708,8 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
+ 
+ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem navegador; o arquivo e o registro vão para um diretório temporário). `test_importantes_ui.py` roda `prototipo.js` em node, com um DOM mínimo montado no próprio teste e um fetch roteirizado, e confere em texto o bloco novo (sem innerHTML, style nem on*). A lista de subpainéis do Panorama em `test_painel_unificado.py` ganhou `importantes` (única mudança nesse teste).
+ 
++Catálogo de modelos (18/11/2026, decisão do Humano: "facilitar o acesso ao cadastro para liberar os modelos para os humanos"): subpainel `catalogo-modelos` em Sistema. `GET /api/modelos` lê o catálogo JSON (`AGATA_CATALOGO_MODELOS`, padrão `~/.local/share/agata/catalogo-modelos/catalogo.json`) e o arquivo de decisões; `POST /api/modelos/decisao` ({id, acao liberar|standby, confirmacao igual ao id, quem}) só acrescenta uma linha a `decisoes.jsonl` (quem, quando, de, para). Não altera rotas nem o OmniRoute. `proibido_pela_regra` e `indisponivel` recusam liberar (409); sem `confirmacao` igual ao id, 400; origem alheia, 403. O cadastro de provedor e de chave é o fluxo existente de Conexões de modelos (botão leva até lá). Testes: `test_modelos_painel.py`.
++
+ ## Migração e reversão
+ 
+ - Sem migração de dados. O painel não guarda estado além do cache em `~/.cache/agata/painel/`.
+@@ -779,6 +781,9 @@ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem
+ - `historia_painel.py`
+ - `historia.js`
+ - `test_historia.py`
++- `modelos_painel.py`
++- `modelos.js`
++- `test_modelos_painel.py`
+ - `seth_voz.py`
+ - `seth_ditado.py`
+ - `test_seth_voz.py`
+diff --git a/redesign/painel_operacional/test_modelos_painel.py b/redesign/painel_operacional/test_modelos_painel.py
+new file mode 100644
+index 00000000..0c132dfb
+--- /dev/null
++++ b/redesign/painel_operacional/test_modelos_painel.py
+@@ -0,0 +1,290 @@
++"""Testes do catálogo de modelos no painel (18/11/2026): leitura, decisão registrada, recusas, página e CSP.
++
++O catálogo e o arquivo de decisões vão para um diretório temporário (variáveis AGATA_CATALOGO_MODELOS e
++AGATA_DECISOES_MODELOS). Os de rota sobem o servidor numa porta livre (127.0.0.1). Nenhum teste toca rotas,
++OmniRoute, ~/.config/agata ou o catálogo real.
++"""
++import http.client
++import importlib.util
++import json
++import os
++import re
++import subprocess
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++sys_path = str(HERE)
++import sys  # noqa: E402
++sys.path.insert(0, sys_path)
++import modelos_painel as mp  # noqa: E402
++
++_spec = importlib.util.spec_from_file_location("painel_modelos_teste", HERE / "server.py")
++panel = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(panel)
++
++HTML = (HERE / "prototipo.html").read_text(encoding="utf-8")
++CSS = (HERE / "prototipo.css").read_text(encoding="utf-8")
++JS = (HERE / "modelos.js").read_text(encoding="utf-8")
++BLOCO_HTML = HTML[HTML.index('<div class="sub" id="sub-catalogo-modelos"'): HTML.index('<div class="sub nv-page" id="sub-nv-corpo"')]
++
++CATALOGO = [
++    {"provedor": "nvidia", "id": "nvidia/a/cand", "nome": "cand", "capacidades": ["chat", "visao"], "contexto": "x",
++     "acesso_verificado": {"status": 200, "data": "2026-11-18 15:04", "latencia_s": 0.9}, "estado": "candidato_prova",
++     "fonte": "teste", "veredito": {"resultado": "aprovado em 3 de 3", "data": "2026-11-18", "fonte": "prova-x"}},
++    {"provedor": "nvidia", "id": "nvidia/a/sb", "nome": "sb", "capacidades": ["codigo"], "contexto": "x",
++     "acesso_verificado": "não verificado", "estado": "standby", "fonte": "teste"},
++    {"provedor": "outro", "id": "outro/b/proibido", "nome": "proibido", "capacidades": ["stt"], "contexto": "x",
++     "acesso_verificado": "não verificado", "estado": "proibido_pela_regra", "fonte": "teste"},
++    {"provedor": "outro", "id": "outro/b/fora", "nome": "fora", "capacidades": ["chat"], "contexto": "x",
++     "acesso_verificado": {"status": 404, "latencia_s": 0.4, "erro": "404"}, "estado": "indisponivel", "fonte": "teste"},
++]
++
++
++class Base(unittest.TestCase):
++    def setUp(self):
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        self.dir = Path(tmp.name)
++        self.cat = self.dir / "catalogo.json"
++        self.dec = self.dir / "decisoes.jsonl"
++        self.cat.write_text(json.dumps(CATALOGO), encoding="utf-8")
++        antigo = {k: os.environ.get(k) for k in ("AGATA_CATALOGO_MODELOS", "AGATA_DECISOES_MODELOS")}
++        os.environ["AGATA_CATALOGO_MODELOS"] = str(self.cat)
++        os.environ["AGATA_DECISOES_MODELOS"] = str(self.dec)
++        self.addCleanup(lambda: [os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v) for k, v in antigo.items()])
++
++    def decidir(self, ident, acao, **extra):
++        pedido = {"id": ident, "acao": acao, "confirmacao": ident, "quem": "Teste"}
++        pedido.update(extra)
++        return mp.decidir(pedido)
++
++    def linhas(self):
++        return [json.loads(x) for x in self.dec.read_text(encoding="utf-8").splitlines()] if self.dec.exists() else []
++
++
++class ModuloTests(Base):
++    def test_lista_com_contagens_filtros_e_veredito(self):
++        d = mp.listar()
++        self.assertEqual(d["estado"], "ok")
++        self.assertEqual(d["contagens"], {"liberado": 0, "candidato_prova": 1, "standby": 1, "indisponivel": 1, "proibido_pela_regra": 1})
++        self.assertEqual(d["capacidades"], ["chat", "codigo", "stt", "visao"])
++        self.assertEqual(d["provedores"], ["nvidia", "outro"])
++        cand = next(m for m in d["modelos"] if m["id"] == "nvidia/a/cand")
++        self.assertEqual(cand["veredito"]["resultado"], "aprovado em 3 de 3")
++        self.assertIsNone(next(m for m in d["modelos"] if m["id"] == "nvidia/a/sb")["veredito"])
++
++    def test_sem_catalogo_e_estado_proprio(self):
++        self.cat.unlink()
++        self.assertEqual(mp.listar()["estado"], "sem_catalogo")
++
++    def test_catalogo_ilegivel_nao_e_inventado(self):
++        self.cat.write_text("{nao e json", encoding="utf-8")
++        with self.assertRaises(mp.ErroModelos) as c:
++            mp.listar()
++        self.assertEqual(c.exception.status, 500)
++
++    def test_liberar_grava_linha_com_quem_e_quando_e_muda_o_estado(self):
++        r = self.decidir("nvidia/a/cand", "liberar")
++        linha = self.linhas()[0]
++        self.assertEqual((linha["id"], linha["acao"], linha["de"], linha["para"]), ("nvidia/a/cand", "liberar", "candidato_prova", "liberado"))
++        self.assertEqual(linha["quem"], "Teste (painel)")
++        self.assertRegex(linha["quando"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d")
++        self.assertIn("nenhuma rota foi alterada", r["aviso"])
++        m = next(m for m in mp.listar()["modelos"] if m["id"] == "nvidia/a/cand")
++        self.assertEqual((m["estado"], m["pode_liberar"], m["pode_standby"]), ("liberado", False, True))
++
++    def test_voltar_ao_standby_depois_de_liberar_e_append_only(self):
++        self.decidir("nvidia/a/sb", "liberar")
++        primeira = self.dec.read_text(encoding="utf-8")
++        self.decidir("nvidia/a/sb", "standby")
++        self.assertTrue(self.dec.read_text(encoding="utf-8").startswith(primeira), "a linha antiga continua intacta")
++        self.assertEqual(len(self.linhas()), 2)
++        self.assertEqual(next(m for m in mp.listar()["modelos"] if m["id"] == "nvidia/a/sb")["estado"], "standby")
++
++    def test_proibido_pela_regra_nao_pode_ser_liberado(self):
++        for acao in ("liberar", "standby"):
++            with self.assertRaises(mp.ErroModelos) as c:
++                self.decidir("outro/b/proibido", acao)
++            self.assertEqual(c.exception.status, 409)
++        self.assertEqual(self.linhas(), [])
++
++    def test_indisponivel_nao_pode_ser_liberado(self):
++        with self.assertRaises(mp.ErroModelos) as c:
++            self.decidir("outro/b/fora", "liberar")
++        self.assertEqual(c.exception.status, 409)
++
++    def test_decisao_antiga_nao_libera_o_que_virou_proibido(self):
++        self.dec.write_text(json.dumps({"id": "outro/b/proibido", "acao": "liberar", "quando": "x", "quem": "x"}) + "\n", encoding="utf-8")
++        m = next(m for m in mp.listar()["modelos"] if m["id"] == "outro/b/proibido")
++        self.assertEqual(m["estado"], "proibido_pela_regra")
++
++    def test_exige_confirmacao_explicita_e_id_do_catalogo(self):
++        for pedido, status in (({"id": "nvidia/a/cand", "acao": "liberar"}, 400),
++                               ({"id": "nvidia/a/cand", "acao": "liberar", "confirmacao": "outro"}, 400),
++                               ({"id": "nvidia/a/cand", "acao": "apagar", "confirmacao": "nvidia/a/cand"}, 400),
++                               ({"id": "nao/existe", "acao": "liberar", "confirmacao": "nao/existe"}, 404)):
++            with self.assertRaises(mp.ErroModelos) as c:
++                mp.decidir(pedido)
++            self.assertEqual(c.exception.status, status, pedido)
++        self.assertEqual(self.linhas(), [])
++
++    def test_quem_e_sanitizado_e_decisao_nao_altera_o_catalogo(self):
++        antes = self.cat.read_bytes()
++        self.decidir("nvidia/a/cand", "liberar", quem='Ana <script>"\n')
++        self.assertNotIn("<", self.linhas()[0]["quem"])
++        self.assertEqual(self.cat.read_bytes(), antes)
++
++
++class ConcorrenciaETiposTests(Base):
++    def test_duas_threads_liberando_o_mesmo_modelo_gravam_uma_linha(self):
++        resultados = []
++        barreira = threading.Barrier(2)
++
++        def tenta():
++            barreira.wait()
++            try:
++                self.decidir("nvidia/a/cand", "liberar")
++                resultados.append(200)
++            except mp.ErroModelos as e:
++                resultados.append(e.status)
++        ts = [threading.Thread(target=tenta) for _ in range(2)]
++        [t.start() for t in ts]
++        [t.join() for t in ts]
++        self.assertEqual(sorted(resultados), [200, 409])
++        self.assertEqual(len(self.linhas()), 1)
++
++    def test_tipos_invalidos_viram_400(self):
++        base = {"id": "nvidia/a/cand", "acao": "liberar", "confirmacao": "nvidia/a/cand"}
++        for campo, valor in (("acao", []), ("acao", {}), ("id", []), ("id", {}), ("confirmacao", []), ("quem", []),
++                             ("quem", {}), ("nota", []), ("nota", 5)):
++            with self.subTest(campo=campo, valor=valor):
++                pedido = dict(base)
++                pedido[campo] = valor
++                with self.assertRaises(mp.ErroModelos) as c:
++                    mp.decidir(pedido)
++                self.assertEqual(c.exception.status, 400)
++        self.assertEqual(self.linhas(), [])
++
++
++class RotasTests(Base):
++    @classmethod
++    def setUpClass(cls):
++        cls.porta_antiga = panel.PORT
++        cls.servidor = panel.ThreadingHTTPServer(("127.0.0.1", 0), panel.Handler)
++        cls.servidor.daemon_threads = True
++        panel.PORT = cls.servidor.server_address[1]
++        cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
++        cls.thread.start()
++
++    @classmethod
++    def tearDownClass(cls):
++        cls.servidor.shutdown()
++        cls.servidor.server_close()
++        cls.thread.join(timeout=3)
++        panel.PORT = cls.porta_antiga
++
++    def pede(self, caminho, metodo="GET", corpo=None, cab=None):
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=10)
++        try:
++            h = dict(cab or {})
++            if corpo is not None:
++                h.setdefault("Content-Type", "application/json")
++            conn.request(metodo, caminho, body=corpo, headers=h)
++            r = conn.getresponse()
++            return r.status, r.read()
++        finally:
++            conn.close()
++
++    def post(self, pedido, cab=None):
++        h = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin"}
++        h.update(cab or {})
++        return self.pede("/api/modelos/decisao", "POST", json.dumps(pedido).encode("utf-8"), h)
++
++    def test_get_api_modelos(self):
++        status, corpo = self.pede("/api/modelos")
++        self.assertEqual(status, 200)
++        self.assertEqual(len(json.loads(corpo)["modelos"]), 4)
++
++    def test_get_da_pagina_traz_o_subpainel_e_o_script_externo(self):
++        status, corpo = self.pede("/prototipo")
++        html = corpo.decode("utf-8")
++        self.assertEqual(status, 200)
++        self.assertIn('id="sub-catalogo-modelos"', html)
++        self.assertIn('<script src="modelos.js" defer></script>', html)
++        status, js = self.pede("/modelos.js")
++        self.assertEqual(status, 200)
++        self.assertIn(b"carregarModelos", js)
++
++    def test_post_libera_e_grava(self):
++        status, corpo = self.post({"id": "nvidia/a/cand", "acao": "liberar", "confirmacao": "nvidia/a/cand", "quem": "Teste"})
++        self.assertEqual(status, 200, corpo)
++        self.assertEqual(self.linhas()[0]["para"], "liberado")
++
++    def test_post_recusa_liberar_proibido(self):
++        status, _ = self.post({"id": "outro/b/proibido", "acao": "liberar", "confirmacao": "outro/b/proibido"})
++        self.assertEqual(status, 409)
++        self.assertEqual(self.linhas(), [])
++
++    def test_post_sem_confirmacao_400_e_origem_alheia_403(self):
++        self.assertEqual(self.post({"id": "nvidia/a/cand", "acao": "liberar"})[0], 400)
++        self.assertEqual(self.post({"id": "nvidia/a/cand", "acao": "liberar", "confirmacao": "nvidia/a/cand"},
++                                   {"Origin": "http://evil.example", "Sec-Fetch-Site": "cross-site"})[0], 403)
++        self.assertEqual(self.pede("/api/modelos/decisao", "POST", b"{}")[0], 403)
++        self.assertEqual(self.linhas(), [])
++
++    def test_post_tipos_invalidos_respondem_400_controlado(self):
++        for acao in ([], {}):
++            status, _ = self.post({"id": "nvidia/a/cand", "acao": acao, "confirmacao": "nvidia/a/cand"})
++            self.assertEqual(status, 400)
++        self.assertEqual(self.post([1])[0], 400)
++        self.assertEqual(self.linhas(), [])
++
++    def test_post_corpo_grande_e_json_invalido(self):
++        h = {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin"}
++        self.assertEqual(self.pede("/api/modelos/decisao", "POST", b"x" * 3000, h)[0], 413)
++        self.assertEqual(self.pede("/api/modelos/decisao", "POST", b"{nao", h)[0], 400)
++
++
++class PaginaTests(unittest.TestCase):
++    def test_sem_inline_nem_html_dinamico(self):
++        self.assertNotRegex(BLOCO_HTML, r"\sstyle=|\son\w+=|<script|<style")
++        self.assertNotRegex(JS, r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\(|\.style\b")
++        self.assertNotIn("target=", BLOCO_HTML)
++        self.assertNotRegex(BLOCO_HTML, r'href="https?:')
++
++    def test_link_de_cadastro_leva_a_conexoes_e_chave_nao_e_ecoada(self):
++        self.assertIn('data-open-page="sistema" data-open-sub="nv-conexoes"', BLOCO_HTML)
++        self.assertNotRegex(BLOCO_HTML, r'type="(password|text)"[^>]*(chave|key)')
++        self.assertNotRegex(JS, r"(?i)api[_-]?key|chave")
++
++    def test_menu_e_loader_registram_o_subpainel(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        self.assertIn('data-sub="catalogo-modelos"', HTML)
++        self.assertIn('"catalogo-modelos": () =>', js)
++
++    def test_responsivo_e_tabela_em_moldura(self):
++        self.assertIn("repeat(auto-fit,minmax(200px,1fr))", CSS)
++        self.assertRegex(BLOCO_HTML, r'<div class="nv-tabela-wrap"><table class="nv-tabela" id="mod-tabela">')
++
++    def test_filtro_roda_no_node(self):
++        script = (
++            "global.window={};global.document={getElementById:()=>null};"
++            f"eval(require('fs').readFileSync({json.dumps(str(HERE / 'modelos.js'))},'utf8'));"
++            "const f=window.AgataPainel.modelosFiltrar;"
++            "const m=JSON.parse(process.argv[1]);"
++            "console.log(JSON.stringify([f(m,'chat','','').length,f(m,'','outro','').length,f(m,'','','standby').length,f(m,'','','').length]));"
++        )
++        modelos = [{"capacidades": x["capacidades"], "provedor": x["provedor"], "estado": x["estado"]} for x in CATALOGO]
++        saida = subprocess.run(["node", "-e", script, json.dumps(modelos)], capture_output=True, text=True, timeout=30)
++        self.assertEqual(saida.returncode, 0, saida.stderr)
++        self.assertEqual(json.loads(saida.stdout), [2, 2, 1, 4])
++
++
++# Os testes de rota usam as mesmas ferramentas de linha de Base.
++RotasTests.linhas = Base.linhas
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/redesign/painel_operacional/test_painel_unificado.py b/redesign/painel_operacional/test_painel_unificado.py
+index 919a31e0..c3eb6fb6 100644
+--- a/redesign/painel_operacional/test_painel_unificado.py
++++ b/redesign/painel_operacional/test_painel_unificado.py
+@@ -33,7 +33,7 @@ SUBS_POR_SECAO = {
+     # conselho-memoria: aba Memória compartilhada, pedida pelo Humano em 07/11/2026 (leitura do cache do Conselho).
+     "conselho": ["conselho", "conselho-memoria"],
+     # 17/11/2026: Equipe, Backup e Saída de rede entram como abas de Sistema (leitura nova).
+-    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes",
++    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "catalogo-modelos", "nv-corpo", "nv-metacognicao", "nv-conexoes",
+                 "equipe", "backup", "saida-rede"],
+     "conhecimento": ["memoria", "grafo", "documentacao", "nv-alexandria", "nv-acervo"],
+     # historia: seção nova de 11/11/2026 (texto da História, só leitura, e o Ouvir); ver test_historia.py.
