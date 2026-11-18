@@ -1173,12 +1173,368 @@ def _injeta(payload: dict) -> dict:
     return payload
 
 
+# --- base do roteador (17/11/2026, proposta seth-base-17-11) ---------------------------------------------
+# Itens que valem em qualquer modo: served_by no log, cabeçalho sem duplicata na Seth, ferramenta escrita
+# como texto virar tool_calls. SETH_ROTEADOR (legado padrão | sombra | capacidade[:N]) só entra no 429
+# (a marca de log em _passar); nenhuma ação muda por modo, porque o 429 nasce no OmniRoute.
+
+
+def _modo_roteador() -> str:
+    """SETH_ROTEADOR, lido a cada chamada. Padrão 'legado'; vazio conta como legado."""
+    return (os.environ.get("SETH_ROTEADOR") or "legado").strip().lower() or "legado"
+
+
+_RE_CAB_LINHA = re.compile(r"^(?:\*\*)?agata(?:-seth)? · ", re.I)
+_RE_CAB_RODAPE = re.compile(r"^\s*(?:\*\*)?\s*(?:última entrada\s*:|pronto\.|quebrado\s*:)", re.I)
+
+
+def _cabecalho_unico_texto(texto: str, cab: str) -> str:
+    """Item 2 (não-stream). Se o texto não começa com linha de cabeçalho, prefixa `cab` (o que a Máquina já calculou
+    para o turno). Com SETH_CABECALHO_UNICO ligado (padrão), apaga cópia de cabeçalho SÓ no bloco inicial da resposta
+    (cabeçalhos, rodapés e linhas em branco antes do 1º conteúdo), e só quando a cópia vem com o rodapé dela logo depois.
+    Depois do 1º conteúdo (parágrafo, cerca de código, exemplo) nada é tocado. A 1ª linha de cabeçalho fica.
+    Em SSE a remoção não roda (limite)."""
+    if not texto.strip():
+        return texto
+    if not _RE_CAB_LINHA.match(texto.lstrip()):
+        texto = cab + texto
+    if not _cabecalho_unico_ligado():
+        return texto
+    linhas = texto.split("\n")
+    saida, viu, i = [], False, 0
+    while i < len(linhas):
+        linha = linhas[i]
+        if _RE_CAB_LINHA.match(linha.lstrip()):
+            if not viu:
+                viu = True
+                saida.append(linha)
+                i += 1
+                continue
+            if i + 1 < len(linhas) and _RE_CAB_RODAPE.match(linhas[i + 1]):
+                i += 1
+                while i < len(linhas) and _RE_CAB_RODAPE.match(linhas[i]):
+                    i += 1
+                continue
+            break  # cabeçalho sem rodapé depois da 1ª linha: conteúdo do modelo, não cópia
+        if _RE_CAB_RODAPE.match(linha) or not linha.strip():
+            saida.append(linha)
+            i += 1
+            continue
+        break  # 1º conteúdo: daqui para a frente o texto é do modelo
+    saida.extend(linhas[i:])
+    return "\n".join(saida)
+
+
+def _cabecalho_unico_json(corpo: bytes, cab: str) -> bytes:
+    """Item 2, resposta não-stream: aplica `_cabecalho_unico_texto` ao `content` da 1ª escolha, se houver texto."""
+    try:
+        o = json.loads(corpo)
+        m = o["choices"][0]["message"]
+        c = m.get("content")
+    except (ValueError, KeyError, IndexError, TypeError, AttributeError):
+        return corpo
+    if not isinstance(c, str) or not c.strip():
+        return corpo
+    novo = _cabecalho_unico_texto(c, cab)
+    if novo == c:
+        return corpo
+    m["content"] = novo
+    return json.dumps(o, ensure_ascii=False).encode("utf-8")
+
+
+def _cabecalho_sse_tardio(linha: bytes, pendente: str) -> bytes | None:
+    """Item 2, SSE. O cabeçalho que ficou pendente (a espiada não viu texto) sai antes do 1º chunk de TEXTO
+    que chegar depois. None se a linha não é um chunk com texto, ou se não há pendente."""
+    if not pendente or not linha.startswith(b"data:"):
+        return None
+    try:
+        o = json.loads(linha[5:])
+        ch = (o.get("choices") or [{}])[0]
+        texto = (ch.get("delta") or {}).get("content")
+    except (ValueError, AttributeError, IndexError, TypeError):
+        return None
+    if not isinstance(texto, str) or not texto.strip():
+        return None
+    ev = {"id": o.get("id"), "object": "chat.completion.chunk", "created": o.get("created"), "model": o.get("model"),
+          "choices": [{"index": ch.get("index", 0), "delta": {"content": pendente}, "finish_reason": None}]}
+    return b"data: " + json.dumps(ev, ensure_ascii=False).encode("utf-8") + b"\n\n"
+
+
+_RE_TOOL_BLOCO = re.compile(r"\s*<tool_call>(.*?)</tool_call>", re.S)
+_RE_TOOL_FUNCAO = re.compile(r"<function=([^>\s]+)\s*>(.*?)</function>", re.S)
+_RE_TOOL_PARAM = re.compile(r"<parameter=([^>\s]+)\s*>(.*?)</parameter>", re.S)
+
+
+def _nomes_de_tools(tools) -> frozenset:
+    """Nomes das ferramentas do pedido, nos dois formatos: `{"type":"function","function":{"name":..}}` ou plano."""
+    nomes = set()
+    for t in tools if isinstance(tools, list) else []:
+        if isinstance(t, dict):
+            f = t.get("function") if isinstance(t.get("function"), dict) else t
+            if isinstance(f.get("name"), str) and f["name"]:
+                nomes.add(f["name"])
+    return frozenset(nomes)
+
+
+def _toolcall_texto_ligado() -> bool:
+    """SETH_TOOLCALL_TEXTO=0 desliga só o item 3 (ferramenta escrita como texto). O cabeçalho não depende dela."""
+    return os.environ.get("SETH_TOOLCALL_TEXTO", "1") != "0"
+
+
+def _ferramentas_convertiveis(payload: dict, publica: bool) -> frozenset:
+    """Nomes que podem virar tool_calls neste pedido. Vazio com SETH_TOOLCALL_TEXTO=0, na faixa pública (sem
+    ferramentas) e com tool_choice none (o teto de rodadas não pode virar laço)."""
+    if not _toolcall_texto_ligado() or publica or payload.get("tool_choice") == "none":
+        return frozenset()
+    return _nomes_de_tools(payload.get("tools"))
+
+
+def _valor_parametro(bruto: str):
+    """Valor de <parameter=...>: o JSON, quando for JSON (número, bool, lista, objeto); senão o texto, sem as bordas."""
+    s = bruto.strip()
+    try:
+        return json.loads(s)
+    except ValueError:
+        return s
+
+
+def _chamadas_do_bloco(corpo: str) -> list | None:
+    """(nome, argumentos) de cada chamada num bloco <tool_call>, só se o bloco inteiro é chamada bem formada: JSON
+    {"name","arguments"}, ou o XML do Qwen (<function=NOME> com <parameter=CHAVE>VALOR</parameter>), sem nada solto
+    fora dos elementos. None se sobra qualquer coisa."""
+    s = corpo.strip()
+    if s.startswith(("{", "[")):
+        try:
+            o = json.loads(s)
+        except ValueError:
+            return None
+        pares = []
+        for it in (o if isinstance(o, list) else [o]):
+            if not isinstance(it, dict) or not isinstance(it.get("name"), str):
+                return None
+            args = it.get("arguments", {})
+            if isinstance(args, str):
+                try:
+                    args = json.loads(args)
+                except ValueError:
+                    return None
+            if not isinstance(args, dict):
+                return None
+            pares.append((it["name"], args))
+        return pares or None
+    funcoes = list(_RE_TOOL_FUNCAO.finditer(s))
+    if not funcoes or _RE_TOOL_FUNCAO.sub("", s).strip():
+        return None
+    pares = []
+    for f in funcoes:
+        if _RE_TOOL_PARAM.sub("", f.group(2)).strip():
+            return None
+        args = {p.strip(): _valor_parametro(v) for p, v in _RE_TOOL_PARAM.findall(f.group(2))}
+        pares.append((f.group(1).strip(), args))
+    return pares
+
+
+_TAG_TOOL = "<tool_call>"
+_RODAPES = ("última entrada:", "pronto.", "quebrado:")
+
+
+def _pode_ser_cabecalho(parcial: str) -> bool:
+    """Linha de cabeçalho ainda sem o fim da linha: começa como "agata" (** opcional). Até 300 caracteres."""
+    s = parcial.lstrip().lstrip("*").lower()
+    return len(s) <= 300 and ("agata".startswith(s) or s.startswith("agata"))
+
+
+def _pode_ser_rodape(parcial: str) -> bool:
+    """Linha do rodapé do cabeçalho ainda sem o fim da linha (prefixo de "Última entrada:", "pronto.", "quebrado:")."""
+    s = parcial.strip().lstrip("*").strip().lower()
+    return bool(s) and any(k.startswith(s) or s.startswith(k) for k in _RODAPES)
+
+
+def _sem_cabecalho_inicial(texto: str) -> str:
+    """Tira o cabeçalho que abre a resposta (o da Máquina ou a cópia que o modelo escreve), com o rodapé logo depois."""
+    linhas = texto.lstrip().split("\n")
+    i = 0
+    if linhas and _RE_CAB_LINHA.match(linhas[0].lstrip()):
+        i = 1
+        while i < len(linhas) and _RE_CAB_RODAPE.match(linhas[i]):
+            i += 1
+    return "\n".join(linhas[i:])
+
+
+def _extrair_tool_calls(texto: str, nomes) -> list | None:
+    """Regra estrita (revisão do Codex, 17/11): converte SÓ se o texto, sem o cabeçalho inicial (da Máquina ou do
+    modelo) e sem espaços nas bordas, é feito EXCLUSIVAMENTE de um ou mais blocos <tool_call>...</tool_call> completos
+    e bem formados, separados só por espaço em branco, com nomes em `nomes`. Qualquer outro caractere (texto, cerca,
+    "Exemplo:", bloco sem fechar) => None: nada é convertido. Devolve as tool_calls no padrão OpenAI."""
+    if not nomes or not isinstance(texto, str):
+        return None
+    t = _sem_cabecalho_inicial(texto).strip()
+    chamadas, pos = [], 0
+    while True:
+        m = _RE_TOOL_BLOCO.match(t, pos)
+        if m is None:
+            break
+        pares = _chamadas_do_bloco(m.group(1))
+        if not pares or _TAG_TOOL in m.group(1) or any(nome not in nomes for nome, _ in pares):
+            return None
+        for nome, args in pares:
+            chamadas.append({"id": "call_" + os.urandom(4).hex(), "type": "function",
+                             "function": {"name": nome, "arguments": json.dumps(args, ensure_ascii=False)}})
+        pos = m.end()
+    if not chamadas or t[pos:].strip():
+        return None
+    return chamadas
+
+
+def _tool_calls_do_json(corpo: bytes, nomes) -> bytes:
+    """Item 3, resposta não-stream: a 1ª escolha cujo content é SÓ blocos <tool_call> bem formados vira tool_calls
+    (content vazio, finish_reason tool_calls). Qualquer outra coisa no content: devolve o corpo igual."""
+    try:
+        o = json.loads(corpo)
+        if len(o["choices"]) != 1:
+            return corpo  # (revisão r3) mais de uma escolha: não se converte
+        ch = o["choices"][0]
+        m = ch["message"]
+        if ch.get("index", 0) != 0 or m.get("tool_calls") or not isinstance(m.get("content"), str):
+            return corpo
+    except (ValueError, KeyError, IndexError, TypeError, AttributeError):
+        return corpo
+    chamadas = _extrair_tool_calls(m["content"], nomes)
+    if chamadas is None:
+        return corpo
+    m["tool_calls"], m["content"] = chamadas, ""
+    ch["finish_reason"] = "tool_calls"
+    return json.dumps(o, ensure_ascii=False).encode("utf-8")
+
+
+def _decisao_tool_call(buf: bytes) -> str:
+    """Item 3, SSE, sobre o texto lido até agora. "sim": começa com <tool_call> (depois de um cabeçalho, se houver):
+    lê-se até o fim do stream. "mais": ainda pode ser cabeçalho (a linha "agata" sem o fim, ou o rodapé dele), ou
+    prefixo de <tool_call>, ou tem menos de 11 caracteres sem espaços: continua lendo. "nao": não pode ser ferramenta,
+    segue o stream normal. Sem texto ainda (só keepalive): "nao", para o keepalive não ficar retido."""
+    t = _texto_do_sse([buf]).lstrip()
+    if not t:
+        return "nao"
+    if "\n" not in t and _pode_ser_cabecalho(t):
+        return "mais"
+    linhas = t.split("\n")
+    i = 0
+    if _RE_CAB_LINHA.match(linhas[0].lstrip()):
+        i = 1
+        while i < len(linhas) - 1 and (_RE_CAB_RODAPE.match(linhas[i]) or not linhas[i].strip()):
+            i += 1
+    if i >= 1 and i == len(linhas) - 1 and _pode_ser_rodape(linhas[i]):
+        return "mais"
+    resto = "\n".join(linhas[i:]).lstrip()
+    if not resto:
+        return "mais"
+    if resto.startswith(_TAG_TOOL):
+        return "sim"
+    sem = "".join(resto.split())
+    if _TAG_TOOL.startswith(sem) or len(sem) < len(_TAG_TOOL):
+        return "mais"
+    return "nao"
+
+
+def _texto_inicia_tool_call(buf: bytes) -> bool:
+    return _decisao_tool_call(buf) == "sim"
+
+
+def _sse_tool_calls(buf: bytes, nomes) -> bytes | None:
+    """Item 3, SSE com o stream inteiro no buffer. Converte só se: (a) o stream terminou como deve (viu [DONE] e um
+    finish_reason do upstream); (b) o content inteiro é só blocos <tool_call> bem formados (_extrair_tool_calls); (c) o
+    stream não traz tool_calls de verdade. Senão devolve None, e o stream passa como chegou."""
+    partes, meta, viu_done, viu_finish = [], {}, False, False
+    for linha in buf.split(b"\n"):
+        if linha.strip() == b"data: [DONE]":
+            viu_done = True
+            continue
+        if not linha.startswith(b"data:"):
+            continue
+        if any(m in linha for m in _Handler._SSE_KEEPALIVE):  # keepalive do OmniRoute: nem resposta nem metadado
+            continue
+        try:
+            o = json.loads(linha[5:])
+        except ValueError:
+            continue
+        if not isinstance(o, dict):
+            continue
+        escolhas = o.get("choices") or []
+        if not isinstance(escolhas, list) or len(escolhas) > 1:
+            return None  # (revisão r4) evento com mais de uma escolha: nem se acumula nem se converte (o index sozinho não basta)
+        if any(isinstance(ch, dict) and ch.get("delta") for ch in escolhas):
+            for k in ("id", "created", "model"):  # metadado só de chunk com delta real
+                if o.get(k) is not None:
+                    meta.setdefault(k, o[k])
+        for ch in escolhas:
+            if not isinstance(ch, dict) or ch.get("index", 0) != 0:
+                return None  # (revisão r3) escolha diferente da 0: não se mistura o conteúdo, não se converte
+            if ch.get("finish_reason"):
+                viu_finish = True
+            d = ch.get("delta") if isinstance(ch.get("delta"), dict) else {}
+            if d.get("tool_calls"):
+                return None
+            if isinstance(d.get("content"), str):
+                partes.append(d["content"])
+    if not (viu_done and viu_finish):
+        return None  # stream sem fim normal: não se fabrica o término
+    chamadas = _extrair_tool_calls("".join(partes), nomes)
+    if chamadas is None:
+        return None
+
+    def ev(delta, finish=None) -> bytes:
+        o = {"id": meta.get("id", "seth-ferramenta"), "object": "chat.completion.chunk",
+             "created": meta.get("created", 0), "model": meta.get("model", ""),
+             "choices": [{"index": 0, "delta": delta, "finish_reason": finish}]}
+        return b"data: " + json.dumps(o, ensure_ascii=False).encode("utf-8") + b"\n\n"
+
+    saida = [ev({"role": "assistant"})]
+    saida += [ev({"tool_calls": [dict(c, index=i)]}) for i, c in enumerate(chamadas)]
+    saida += [ev({}, "tool_calls"), b"data: [DONE]\n\n"]
+    return b"".join(saida)
+
+
+def _converter_sse_stream(buf: bytes, leitor, nomes):
+    """Item 3, SSE: decide com o texto já lido e, se for ferramenta em texto, lê até o fim e converte. Devolve
+    (bytes a enviar, leitor a usar depois). Converte só com o stream terminado (fim normal do upstream): prazo,
+    erro, ou fim sem [DONE]/finish_reason, passam como chegaram."""
+    completo, estado, fim, erro = buf, _decisao_tool_call(buf), False, False
+    try:
+        while not fim and estado == "mais":
+            pedaco = leitor.ler(180)
+            if not pedaco:
+                fim = True
+            else:
+                completo += pedaco
+                estado = _decisao_tool_call(completo)
+        while not fim and estado == "sim":
+            pedaco = leitor.ler(180)
+            if not pedaco:
+                fim = True
+            else:
+                completo += pedaco
+    except Exception:  # noqa: BLE001 -- prazo (queue.Empty) ou upstream caído: nada de converter
+        fim = erro = True
+    saida = (_sse_tool_calls(completo, nomes) or completo) if (estado == "sim" and fim and not erro) else completo
+    return saida, (_LeitorVazio() if fim else leitor)
+
+
+class _LeitorVazio:
+    """Substituto do _Leitor quando o stream já foi lido por inteiro (item 3, SSE): não espera nada."""
+    _up = None
+
+    def ler(self, timeout: float) -> bytes:
+        return b""
+
+
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
     _cab_ctx = None  # (705) mensagens do pedido, se esta resposta leva o cabeçalho da Máquina
     _cab_injetado = None  # texto do cabeçalho que a Máquina injetou nesta resposta (cabeçalho único)
     _cab_estados = None
+    _served_by = None  # (17/11, item 1) campo "model" do upstream nesta resposta; "?" no log se não houve
+    _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
 
     def log_message(self, fmt, *args):
         pass
@@ -1198,6 +1554,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._msgs_pedido = []
         self._texto_maquina = ""
         self._cab_injetado = None
+        self._nomes_tools = frozenset()
         self._data_classification = None
         self._public_only_lane = False
         self._reg = None
@@ -1273,6 +1630,9 @@ class _Handler(BaseHTTPRequestHandler):
                 else:
                     payload = _injeta(payload)
                 self._aud = payload.pop("_agata_aud", "")
+                # (17/11, item 3) ferramentas que podem virar tool_calls: nada na faixa pública, nada com tool_choice none
+                # (o teto de rodadas põe none aqui dentro, em _injeta, por isso a leitura é depois)
+                self._nomes_tools = _ferramentas_convertiveis(payload, self._public_only_lane)
                 # (683) o LibreChat manda `user` (id do usuário); a API da Mistral
                 # recusa campo a mais com 422 "Extra inputs are not permitted" --
                 # Ministral e Codestral caíam sempre e a fila pulava para o próximo.
@@ -1313,8 +1673,9 @@ class _Handler(BaseHTTPRequestHandler):
     def _log(self, msg: str, t0: float):
         """(682) Erro e desconexão vão para o journal (antes nada era registrado:
         uma resposta que morreu no meio não deixava rastro aqui)."""
-        print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path}",
-              file=sys.stderr, flush=True)
+        # (17/11, item 1) served_by = campo "model" que o upstream devolveu nesta resposta; "?" se não veio
+        print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path} · "
+              f"served_by={self._served_by or '?'}", file=sys.stderr, flush=True)
 
     # (695) 200 sem texto nem ferramenta (Gemini, 14/10 15:00:12: "succeeded" em 2,4 s e o
     # LibreChat gravou resposta vazia). Nada foi enviado ao cliente ainda: tenta 1 vez a
@@ -1348,6 +1709,7 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
         t0 = time.monotonic()
+        self._served_by = None  # (17/11, item 1) por tentativa: a nova tentativa põe o modelo da sua resposta
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in _HOP_BY_HOP}
@@ -1359,7 +1721,11 @@ class _Handler(BaseHTTPRequestHandler):
             up = urllib.request.urlopen(req, timeout=180)
         except urllib.error.HTTPError as e:
             up = e
-            self._log(f"upstream HTTP {e.code}", t0)
+            # (17/11, item 4) o 429 nasce no OmniRoute (cota e circuit breaker de cada provedor), não numa escolha do
+            # gateway: aqui só se mede, com a fila que o gateway pediu e o modo. Nenhuma pausa é aplicada.
+            marca = (f" · 429_pausaria={self._rota} · roteador={_modo_roteador()}"
+                     if e.code == 429 and self._rota in self._SUBIR_FILA else "")
+            self._log(f"upstream HTTP {e.code}{marca}", t0)
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             self._log(f"upstream inacessível ({e})", t0)
             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
@@ -1396,6 +1762,7 @@ class _Handler(BaseHTTPRequestHandler):
                 buf_pre = up.read()
                 modelo_real = self._modelo_de_bytes(buf_pre)
                 vazio = up.status == 200 and not self._tem_conteudo(buf_pre, False)
+            self._served_by = modelo_real  # (17/11, item 1)
             if vazio and tentativa == 0 and self._rota in self._SUBIR_FILA:
                 try:
                     pl = json.loads(corpo)
@@ -1418,12 +1785,19 @@ class _Handler(BaseHTTPRequestHandler):
             self._log(f"upstream parou de responder ({e})", t0)
             up.close()
             return self._erro(504, f"upstream parou de responder: {e}")
+        if sse and up.status == 200 and self._nomes_tools and leitor is not None:
+            # (17/11, item 3, SSE) decide, lê até o fim se for ferramenta em texto, e só converte com o stream
+            # terminado: senão o stream passa como chegou
+            buf_pre, leitor = _converter_sse_stream(buf_pre, leitor, self._nomes_tools)
         if up.status == 200 and not sse and _resgate_ligado():
             buf_pre = _resgate_json(buf_pre)
+        if up.status == 200 and not sse and self._nomes_tools:
+            buf_pre = _tool_calls_do_json(buf_pre, self._nomes_tools)  # (17/11, item 3)
         if self._cab_ctx is not None and up.status == 200:
             cab = _cabecalho_maquina(self._cab_ctx, modelo_real) + "\n\n"
-            self._cab_injetado = cab
             texto_maquina = cab + _correcao_da_maquina(getattr(self, "_aud", "") or "")
+            # (revisão 17/11, achado 4) o filtro do cabeçalho do modelo compara com o texto INTEIRO que a Máquina injetou
+            self._cab_injetado = texto_maquina
             self._texto_maquina = texto_maquina
             self._cab_pendente = ""
             if sse:
@@ -1460,6 +1834,8 @@ class _Handler(BaseHTTPRequestHandler):
         if up.status == 200 and not sse and self._cab_injetado and _cabecalho_unico_ligado():
             buf_pre, _nc = limpa_cabecalho.limpar_json(buf_pre, self._cab_injetado)
             _registrar_cabecalho(self._rota, modelo_real, _nc)
+        if up.status == 200 and not sse and self._cab_injetado:
+            buf_pre = _cabecalho_unico_json(buf_pre, self._cab_injetado)  # (17/11, item 2): prefixo e duplicata
         self.send_response(up.status)
         for k, v in up.headers.items():
             if k.lower() not in _HOP_BY_HOP:
@@ -1481,6 +1857,8 @@ class _Handler(BaseHTTPRequestHandler):
                     self.wfile.write(pedaco)
                     self.wfile.write(b"\r\n")
             self.wfile.write(b"0\r\n\r\n")
+            if up.status == 200 and "/chat/completions" in self.path:
+                self._log("ok", t0)  # (17/11, item 1) uma linha por pedido concluído, com served_by
         except (BrokenPipeError, ConnectionResetError):
             # O cliente (LibreChat) desconectou no meio do stream -- reload da
             # página, timeout do navegador. Abandona ESTA requisição em silêncio;
@@ -1620,6 +1998,16 @@ class _Handler(BaseHTTPRequestHandler):
             if getattr(self, "_laco_cortou", False):
                 return b""
             linha, buf = buf.split(b"\n", 1)
+            tardio = _cabecalho_sse_tardio(linha, getattr(self, "_cab_pendente", "") or "")
+            if tardio:
+                # (item 2; revisão achado 4) o cabeçalho pendente sai antes do 1º texto que chegar depois. Ele volta para a fila
+                # e passa pelo mesmo filtro (limpa_cabecalho) que a linha seguinte: se o modelo escreveu o próprio
+                # cabeçalho logo depois, ele é apagado, e não sai duplo.
+                self._cab_pendente = ""
+                buf = tardio + linha + b"\n" + buf
+                continue
+            if getattr(self, "_served_by", None) is None:  # (17/11, item 1) o modelo pode vir só depois da espiada
+                self._served_by = self._modelo_de_bytes(linha)
             if _resgate_ligado():
                 if linha.strip() == b"data: [DONE]":
                     resg = _resgate_chunk(self._resgate, getattr(self, "_cab_pendente", "") or "")

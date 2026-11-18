@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth registra o modelo servido, mantém cabeçalho único e converte tool_call em texto só sob regra estrita.** Assinada pelo Humano; o seletor SETH_ROTEADOR fica no padrão legado e SETH_TOOLCALL_TEXTO=0 desliga o conversor.
 (1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem na primeira chamada e caem após 15 minutos ociosos.** Sockets e proxies do systemd assinados pelo Humano entram no repositório; a instalação na Máquina segue a ordem do registro da proposta.
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, para todos os modelos.** A regra entrou na lista Sempre do AGENTS.md, assinada pelo Humano; o teste de sincronia conta 16 regras.
 (1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando e segue as mesmas regras.** O comando configurar.py lista os provedores e acrescenta um novo com a tarifa, sem nunca gravar a chave, só o nome da variável. Toda chamada passa pelo mesmo caminho de orçamento, privacidade, custo e cofre. O Codex revisou quatro vezes e cada achado foi corrigido; a cota dele acabou antes do último veredito, e o revisor do Agata aprovou. 36 testes passam e o diff aplica em cópia limpa. Falta a assinatura.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1014) DIÁRIO — 14/11/2026 · **Aplicado teste-comparativo-14-11 com a assinatura do Humano (14/11): o desenho do teste comparativo está em redesign/teste_comparativo/DESENHO.md. A rodada não foi autorizada; ela pede aprovação à parte.**
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
 (1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
-(1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
+(1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicad …
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura …
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedid …
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano …

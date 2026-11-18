@@ -125,3 +125,4 @@ Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DO
 ## Código
 
 - `auditoria_turno.py` (verificação de divergência: `divergencia_turno` e `--verificar --sessao`)
+- `test_seth_base.py` (testes da base do roteador, 17/11/2026: ferramenta escrita como texto vira tool_calls, cabeçalho sem duplicata, served_by no log e modo do roteador; sem rede)
