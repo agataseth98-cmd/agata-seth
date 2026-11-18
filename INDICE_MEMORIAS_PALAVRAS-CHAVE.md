@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, para todos os modelos.** A regra entrou na lista Sempre do AGENTS.md, assinada pelo Humano; o teste de sincronia conta 16 regras.
+  palavras-chave: aplicada, orquestra, caro, modelo, baratos, executam, modelos, regra, entrou, lista, sempre, agents, assinada, humano, teste, sincronia, conta, regras
 (1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando e segue as mesmas regras.** O comando configurar.py lista os provedores e acrescenta um novo com a tarifa, sem nunca gravar a chave, só o nome da variável. Toda chamada passa pelo mesmo caminho de orçamento, privacidade, custo e cofre. O Codex revisou quatro vezes e cada achado foi corrigido; a cota dele acabou antes do último veredito, e o revisor do Agata aprovou. 36 testes passam e o diff aplica em cópia limpa. Falta a assinatura.
   palavras-chave: proposta, modelos, pagos, modelo, inclusive, pago, entra, agata, comando, segue, mesmas, regras, configurar, lista, provedores, acrescenta, novo, tarifa, nunca, gravar, chave, nome, variável, chamada, passa, mesmo, caminho, orçamento, privacidade, custo, cofre, codex, revisou, quatro, achado, corrigido, cota, dele, acabou, último, veredito, revisor, aprovou, testes, passam, diff, aplica, cópia, limpa, falta, assinatura
 (1037) DIÁRIO — 17/11/2026 · **Proposta seth-base-17-11: o gateway da Seth registra o modelo servido, garante um cabeçalho único e converte tool_call em texto só sob regra estrita.** Corrige três das cinco causas da falta de confiança na Seth medidas na auditoria de 17/11. O roteador ganha o seletor SETH_ROTEADOR com padrão legado, base do roteador por capacidade em canário. O Codex revisou em cinco rodadas; as quatro primeiras reprovaram com achados, todos corrigidos, e a quinta aprovou sem achado alto ou médio. 54 testes do lote e o autoteste do gateway passam; o diff aplica em cópia limpa. Falta a assinatura.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, nucleo, desenvolvimento, publicada, núcleo, ptah, thoth, refeito, main, mantendo, agata, fluxo, consolidado, decisão, humano, substitui, aplica, aplicada
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura do Humano (14/11): o ESTADO.md deixa de contar as aplicadas.**
   palavras-chave: aplicado, estado, aplicadas, assinatura, humano, deixa, contar
-(1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedido do Humano: o ESTADO.md deixa de contar as aplicadas, que ficavam um número atrás em todo PR de aplicação. Não aplicada.**
-  palavras-chave: proposta, estado, aplicadas, publicada, pedido, humano, deixa, contar, ficavam, número, atrás, aplicação, aplicada
+(1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedid …
+  palavras-chave: proposta, estado, aplicadas, publicada, pedid
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano …
   palavras-chave: aplicado, hook, assinatura, humano
 (1007) DIÁRIO — 14/11/2026 · **Erro meu na composição do pacote-14-11: o pre-com …
