@@ -506,7 +506,11 @@ _ROTA_BASE = "seth-livre"
 _LIMIAR_TRIVIAL_CHARS = 400
 _LIMIAR_PESADO_CHARS = 6000
 _ALIAS_PUBLICO = "seth-public"
-_ROTAS_LOCAIS = ("ollama-local/", "llamacpp-local/", "local/")
+# Modelos que rodam nesta Máquina (sem egresso): ollama-local/ e os llama-server (llama-cpp/*, llamacpp-*).
+# llama-cpp/ entrou em 18/11/2026: antes caía no ramo externo e exigia classificação pública.
+# Mesma lista de scripts/benchmark_roteamento.py (LOCAIS); o teste de sincronia está em
+# scripts/testar_benchmark_roteamento.py.
+_ROTAS_LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
 
 
 class DadosExternosSemClassificacao(ValueError):
@@ -3147,6 +3151,19 @@ def _selftest() -> int:
     ok21 = (_pub21["model"] == _ROTA_BASE and "agata_data_classification" not in _pub21
             and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21 and _casc21_ok)
     print(f"{'PASS' if ok21 else 'FALHA'}  política de dados: nuvem sem classe/fora de public bloqueia; alias público e local seguem")
+    # 21e (18/11/2026) llama-cpp/ e llamacpp- são locais: sem classificação passam; nuvem continua bloqueada.
+    _lcpp21 = [_politica_dados_externos({"model": m, "messages": []})["model"]
+               for m in ("llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b")]
+    _nuvem21 = []
+    for m in ("gemini/gemini-2.5-flash", "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"):
+        try:
+            _politica_dados_externos({"model": m, "messages": []})
+            _nuvem21.append(False)
+        except DadosExternosSemClassificacao:
+            _nuvem21.append(True)
+    ok21e = _lcpp21 == ["llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b"] and all(_nuvem21)
+    print(f"{'PASS' if ok21e else 'FALHA'}  llama-cpp/ e llamacpp- entram no ramo local; nuvem sem classe continua bloqueada")
+    falhas += 0 if ok21e else 1
     falhas += 0 if ok21 else 1
     _upstream_antes = _Dummy.ultimo_corpo
     _http_21 = 0

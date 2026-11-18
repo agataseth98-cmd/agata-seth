@@ -489,3 +489,21 @@ def test_chave_toolcall_texto_desliga_so_a_conversao(monkeypatch):
     monkeypatch.delenv("SETH_TOOLCALL_TEXTO", raising=False)
     assert g._ferramentas_convertiveis(p, True) == frozenset()                   # faixa pública
     assert g._ferramentas_convertiveis({**p, "tool_choice": "none"}, False) == frozenset()
+
+
+# --- llama-cpp/ e llamacpp-*: modelos desta Máquina entram no ramo local (18/11/2026) -----------------------
+
+def test_llama_cpp_entra_no_ramo_local_sem_classificacao():
+    for m in ("llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b", "llamacpp-local/qwen3-30b-a3b"):
+        assert g._politica_dados_externos({"model": m, "messages": []})["model"] == m
+    assert "llama-cpp/" in g._ROTAS_LOCAIS and "llamacpp-" in g._ROTAS_LOCAIS
+
+
+def test_nuvem_sem_classificacao_continua_bloqueada():
+    for m in ("gemini/gemini-2.5-flash", "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", "mistral/codestral-latest"):
+        bloqueou = False
+        try:
+            g._politica_dados_externos({"model": m, "messages": []})
+        except g.DadosExternosSemClassificacao:
+            bloqueou = True
+        assert bloqueou, m

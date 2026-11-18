@@ -14,8 +14,9 @@ Ferramentas: as 5 da Seth vão como definição, com respostas FALSAS e fixas. N
 verdade é consultado nem gravado. Mede se o modelo pede a ferramenta certa, com
 argumentos JSON válidos, e se usa o resultado.
 
-Privacidade: item `privado` (anexo do canon) só vai para `ollama-local/*` ou para o
-prefixo de provedor passado em `--liberar` (vazio por padrão). O resto fica `pulado_privacidade`.
+Privacidade: item `privado` (anexo do canon) só vai para modelo local (`ollama-local/*`,
+`llamacpp-*`, `llama-cpp/*`, `local/*`) ou para o prefixo de provedor passado em `--liberar`
+(vazio por padrão). O resto fica `pulado_privacidade`.
 
 Saída, fora do repositório (0700/0600): `~/.local/share/agata/benchmark/<AAAAmmdd-HHMMSS>/`
   respostas.jsonl  uma linha por item×modelo, com o texto (para o rótulo do Humano)
@@ -96,7 +97,7 @@ def carregar_corpus(caminho: Path) -> list[dict]:
 
 
 def liberado(item: dict, modelo: str, liberar: list[str]) -> bool:
-    return not item.get("privado") or modelo.startswith(LOCAL) or any(modelo.startswith(p) for p in liberar)
+    return not item.get("privado") or modelo.startswith(LOCAIS) or any(modelo.startswith(p) for p in liberar)
 
 
 def mensagem_usuario(item: dict, raiz: Path = RAIZ) -> str:
@@ -298,7 +299,11 @@ def _chamador(timeout: float):
     return chamar
 
 
-LOCAIS = ("ollama-local/", "llamacpp-local/", "local/")  # os mesmos prefixos de _ROTAS_LOCAIS do gateway
+# Modelos locais: a mesma lista de _ROTAS_LOCAIS do gateway (redesign/router/seth_gateway.py). Usada pela
+# privacidade do anexo do canon (liberado) e para recusar remotos no --via-gateway (remotos). Sincronia testada em
+# scripts/testar_benchmark_roteamento.py. llama-cpp/ e llamacpp- entraram em 18/11/2026: antes o nemotron pulava os
+# itens privados como se fosse remoto.
+LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
 
 
 def remotos(modelos: list[str]) -> list[str]:
@@ -388,7 +393,7 @@ def main(argv: list[str]) -> int:
     vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
     print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
           f"{len(vai)} vão rodar, {len(plano) - len(vai)} pulados por privacidade "
-          f"(liberados: {', '.join(liberar) or 'só ollama-local'})")
+          f"(liberados: {', '.join(liberar) or 'só locais: ' + ', '.join(LOCAIS)})")
     if "--executar" not in argv:
         print("nada chamado. Para rodar (gasta cota): --executar")
         return 0
@@ -519,6 +524,9 @@ def _selftest() -> int:
             ("anexo vai na mensagem", any("conteúdo do anexo" in c["messages"][1]["content"] for c in enviados)),
             ("privado: só local ou liberado", liberado(priv, LOCAL + "m", []) and not liberado(priv, "a/m", [])
              and liberado(priv, "a/m", ["a/"])),
+            ("privado: llama-cpp/ e llamacpp- contam como local; nuvem continua pulada",
+             liberado(priv, "llama-cpp/nemotron-3.5-lightning", []) and liberado(priv, "llamacpp-agata/m", [])
+             and not liberado(priv, "openrouter/x:free", []) and not liberado(priv, "gemini/x", [])),
             ("erro de rede vira estado, não derruba", rq["estado"] == "erro:TimeoutError"),
             ("resumo: taxa de erro conta só as feitas", any(x["metrica"] == "taxa_erro" and x["valor"] == 0.2
                                                              and x["amostra"] == 5 for x in res["medido"])),
