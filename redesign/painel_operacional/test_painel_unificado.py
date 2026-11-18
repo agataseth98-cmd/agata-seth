@@ -33,7 +33,7 @@ SUBS_POR_SECAO = {
     # conselho-memoria: aba Memória compartilhada, pedida pelo Humano em 07/11/2026 (leitura do cache do Conselho).
     "conselho": ["conselho", "conselho-memoria"],
     # 17/11/2026: Equipe, Backup e Saída de rede entram como abas de Sistema (leitura nova).
-    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "nv-corpo", "nv-metacognicao", "nv-conexoes",
+    "sistema": ["operacao", "integracoes", "modelos", "manutencao", "catalogo-modelos", "nv-corpo", "nv-metacognicao", "nv-conexoes",
                 "equipe", "backup", "saida-rede"],
     "conhecimento": ["memoria", "grafo", "documentacao", "nv-alexandria", "nv-acervo"],
     # historia: seção nova de 11/11/2026 (texto da História, só leitura, e o Ouvir); ver test_historia.py.

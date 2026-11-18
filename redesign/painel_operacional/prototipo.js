@@ -108,6 +108,8 @@ const CARREGAR_SUB = {
   ci: () => carregarCI(),
   // História (11/11/2026): historia.js registra AgataPainel.carregarHistoria ao carregar; antes disso, não faz nada.
   historia: () => { if (AgataPainel.carregarHistoria) AgataPainel.carregarHistoria(); },
+  // Catálogo de modelos (18/11/2026): modelos.js registra AgataPainel.carregarModelos.
+  "catalogo-modelos": () => { if (AgataPainel.carregarModelos) AgataPainel.carregarModelos(); },
 };
 
 // Memória e integrações são a mesma leitura de detalhes: a rota carrega uma vez por abertura.

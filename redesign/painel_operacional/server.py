@@ -40,6 +40,7 @@ import sdd_painel  # noqa: E402
 import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
 import historia_painel  # noqa: E402
+import modelos_painel  # noqa: E402
 import importantes  # noqa: E402
 import seth_voz  # noqa: E402
 import seth_ditado  # noqa: E402
@@ -141,6 +142,7 @@ _ASSETS = {
     "/conselho-rede/app.js": ("conselho-rede/app.js", "text/javascript; charset=utf-8"),
     "/assets/agata-portrait.png": ("assets/agata-portrait.png", "image/png"),
     "/historia.js": ("historia.js", "text/javascript; charset=utf-8"),
+    "/modelos.js": ("modelos.js", "text/javascript; charset=utf-8"),
 }
 # Telas antigas (painel unificado, spec 07/11/2026): link antigo cai na seção certa do /prototipo.
 _REDIRECTS = {
@@ -1694,6 +1696,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json; charset=utf-8", body)
         if self.path.split("?", 1)[0] == "/api/historia":
             return self._historia_listar()
+        if self.path.split("?", 1)[0] == "/api/modelos":
+            return self._modelos_listar()
         if self.path.startswith("/api/historia/texto?"):
             return self._historia_texto()
         if self.path == "/api/frentes":
@@ -1806,6 +1810,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._abrir_programa()
         if self.path == "/api/historia/ouvir":
             return self._historia_ouvir()
+        if self.path == "/api/modelos/decisao":
+            return self._modelos_decisao()
         if self.path == "/api/seth/ouvir":
             return self._seth_ouvir()
         if self.path == "/api/seth/ouvir/parar":
@@ -2395,6 +2401,33 @@ class Handler(BaseHTTPRequestHandler):
             identificador = resultado["id"]
         return self._responder_importante(rota, identificador, 200, json.dumps(resultado, ensure_ascii=False).encode("utf-8"),
                                           "application/json; charset=utf-8")
+
+    def _modelos_listar(self) -> None:
+        """Catálogo de modelos (18/11/2026): só leitura do JSON do catálogo e do arquivo de decisões."""
+        try:
+            dados = modelos_painel.listar()
+        except modelos_painel.ErroModelos as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
+
+    def _modelos_decisao(self) -> None:
+        """Liberar para rota ou voltar ao standby: só registra a decisão (append-only). Escrita, então só da origem do painel."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._send(403, "text/plain; charset=utf-8", b"cross-origin request denied")
+        if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+            return self._send(415, "text/plain; charset=utf-8", b"JSON required")
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal() or int(tamanho) > 2048:
+            return self._send(413, "text/plain; charset=utf-8", b"pedido acima de 2048 bytes")
+        try:
+            pedido = json.loads(self.rfile.read(int(tamanho)).decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return self._send(400, "text/plain; charset=utf-8", b"invalid JSON")
+        try:
+            dados = modelos_painel.decidir(pedido)
+        except modelos_painel.ErroModelos as erro:
+            return self._send(erro.status, "text/plain; charset=utf-8", erro.motivo.encode("utf-8"))
+        return self._send(200, "application/json; charset=utf-8", json.dumps(dados, ensure_ascii=False).encode("utf-8"))
 
     def _historia_listar(self) -> None:
         """Seção História (11/11/2026): tomos e textos de historia/, só leitura. A checagem de origem já rodou em do_GET."""

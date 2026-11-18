@@ -708,6 +708,8 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
 
 Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem navegador; o arquivo e o registro vão para um diretório temporário). `test_importantes_ui.py` roda `prototipo.js` em node, com um DOM mínimo montado no próprio teste e um fetch roteirizado, e confere em texto o bloco novo (sem innerHTML, style nem on*). A lista de subpainéis do Panorama em `test_painel_unificado.py` ganhou `importantes` (única mudança nesse teste).
 
+Catálogo de modelos (18/11/2026, decisão do Humano: "facilitar o acesso ao cadastro para liberar os modelos para os humanos"): subpainel `catalogo-modelos` em Sistema. `GET /api/modelos` lê o catálogo JSON (`AGATA_CATALOGO_MODELOS`, padrão `~/.local/share/agata/catalogo-modelos/catalogo.json`) e o arquivo de decisões; `POST /api/modelos/decisao` ({id, acao liberar|standby, confirmacao igual ao id, quem}) só acrescenta uma linha a `decisoes.jsonl` (quem, quando, de, para). Não altera rotas nem o OmniRoute. `proibido_pela_regra` e `indisponivel` recusam liberar (409); sem `confirmacao` igual ao id, 400; origem alheia, 403. O cadastro de provedor e de chave é o fluxo existente de Conexões de modelos (botão leva até lá). Testes: `test_modelos_painel.py`.
+
 ## Migração e reversão
 
 - Sem migração de dados. O painel não guarda estado além do cache em `~/.cache/agata/painel/`.
@@ -779,6 +781,9 @@ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem
 - `historia_painel.py`
 - `historia.js`
 - `test_historia.py`
+- `modelos_painel.py`
+- `modelos.js`
+- `test_modelos_painel.py`
 - `seth_voz.py`
 - `seth_ditado.py`
 - `test_seth_voz.py`
