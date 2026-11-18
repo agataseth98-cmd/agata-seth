@@ -1738,6 +1738,8 @@ class _LeitorVazio:
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
+    _refazer = False   # verificar-e-refazer: só do_POST liga; GET e demais leem o padrão (fix 18/11)
+    _verificar = False
     _cab_ctx = None  # (705) mensagens do pedido, se esta resposta leva o cabeçalho da Máquina
     _cab_injetado = None  # texto do cabeçalho que a Máquina injetou nesta resposta (cabeçalho único)
     _cab_estados = None

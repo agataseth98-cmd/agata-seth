@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 8ba46dbdc6e43971a4d31e9df7fed48048fa6b14
-  Escrito em: 18/11/2026 10:25 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0cb9d12dc24b27191055ff804f07ef01fbc5d3b7
+  Escrito em: 18/11/2026 10:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ba46dbdc6e43971a4d31e9df7fed48048fa6b14/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ba46dbdc6e43971a4d31e9df7fed48048fa6b14/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ba46dbdc6e43971a4d31e9df7fed48048fa6b14/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ba46dbdc6e43971a4d31e9df7fed48048fa6b14/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/8ba46dbdc6e43971a4d31e9df7fed48048fa6b14/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0cb9d12dc24b27191055ff804f07ef01fbc5d3b7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0cb9d12dc24b27191055ff804f07ef01fbc5d3b7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0cb9d12dc24b27191055ff804f07ef01fbc5d3b7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0cb9d12dc24b27191055ff804f07ef01fbc5d3b7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0cb9d12dc24b27191055ff804f07ef01fbc5d3b7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1047) DIÁRIO — 18/11/2026 · **Aplicada refazer-get-18-11: o GET do gateway da Seth volta a responder.** Assinada pelo Humano. Valor padrão de classe para _refazer e _verificar; teste de regressão.
+Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: p8_verificar, CI local · Autorização: Humano — assinatura APROVADO
+
 (1046) DIÁRIO — 18/11/2026 · **Incidente: a aplicação de verificar-refazer-18-11 quebrou todo GET do gateway da Seth; proposta refazer-get-18-11 corrige.** Depois do reinício às 10:22:52, /v1/models e /api/health ficaram sem resposta por AttributeError: o atributo _refazer só existia em pedidos POST, e os testes do lote só usavam POST; nem a revisão do Codex nem a do agata-revisor pegaram. A correção dá valor padrão de classe aos dois atributos e acrescenta um teste de regressão; 105 testes passam. Lição: lote que mexe no handler precisa de teste por GET.
 Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: journalctl, curl, testes do roteador · Autorização: Humano — "tem autorização para consertar tudo mesmo que mexa na produção"
 

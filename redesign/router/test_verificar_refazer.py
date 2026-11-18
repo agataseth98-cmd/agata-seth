@@ -646,3 +646,9 @@ def test_pedido_leva_so_a_resposta_ruim_e_a_nota():
     assert pedido["model"] == "seth-livre"
     assert pedido["messages"][1:] == [{"role": "assistant", "content": "RUIM"},
                                       {"role": "user", "content": g._nota_refazer(["achado A"])}]
+
+
+def test_get_nao_quebra_sem_refazer_definido():
+    # 18/11: _refazer só era atribuído em do_POST; GET (/v1/models, /api/health) dava AttributeError.
+    import seth_gateway as g
+    assert g._Handler._refazer is False and g._Handler._verificar is False
