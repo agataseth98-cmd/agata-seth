@@ -1,0 +1,270 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 397280aa..b3509a7e 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -506,7 +506,11 @@ _ROTA_BASE = "seth-livre"
+ _LIMIAR_TRIVIAL_CHARS = 400
+ _LIMIAR_PESADO_CHARS = 6000
+ _ALIAS_PUBLICO = "seth-public"
+-_ROTAS_LOCAIS = ("ollama-local/", "llamacpp-local/", "local/")
++# Modelos que rodam nesta Máquina (sem egresso): ollama-local/ e os llama-server (llama-cpp/*, llamacpp-*).
++# llama-cpp/ entrou em 18/11/2026: antes caía no ramo externo e exigia classificação pública.
++# Mesma lista de scripts/benchmark_roteamento.py (LOCAIS); o teste de sincronia está em
++# scripts/testar_benchmark_roteamento.py.
++_ROTAS_LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
+ 
+ 
+ class DadosExternosSemClassificacao(ValueError):
+@@ -3147,6 +3151,19 @@ def _selftest() -> int:
+     ok21 = (_pub21["model"] == _ROTA_BASE and "agata_data_classification" not in _pub21
+             and _local21["model"] == "ollama-local/qwen" and _deny21 and _bad21 and _casc21_ok)
+     print(f"{'PASS' if ok21 else 'FALHA'}  política de dados: nuvem sem classe/fora de public bloqueia; alias público e local seguem")
++    # 21e (18/11/2026) llama-cpp/ e llamacpp- são locais: sem classificação passam; nuvem continua bloqueada.
++    _lcpp21 = [_politica_dados_externos({"model": m, "messages": []})["model"]
++               for m in ("llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b")]
++    _nuvem21 = []
++    for m in ("gemini/gemini-2.5-flash", "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"):
++        try:
++            _politica_dados_externos({"model": m, "messages": []})
++            _nuvem21.append(False)
++        except DadosExternosSemClassificacao:
++            _nuvem21.append(True)
++    ok21e = _lcpp21 == ["llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b"] and all(_nuvem21)
++    print(f"{'PASS' if ok21e else 'FALHA'}  llama-cpp/ e llamacpp- entram no ramo local; nuvem sem classe continua bloqueada")
++    falhas += 0 if ok21e else 1
+     falhas += 0 if ok21 else 1
+     _upstream_antes = _Dummy.ultimo_corpo
+     _http_21 = 0
+diff --git a/redesign/router/test_seth_base.py b/redesign/router/test_seth_base.py
+index d3d5733f..e8b05a34 100644
+--- a/redesign/router/test_seth_base.py
++++ b/redesign/router/test_seth_base.py
+@@ -489,3 +489,21 @@ def test_chave_toolcall_texto_desliga_so_a_conversao(monkeypatch):
+     monkeypatch.delenv("SETH_TOOLCALL_TEXTO", raising=False)
+     assert g._ferramentas_convertiveis(p, True) == frozenset()                   # faixa pública
+     assert g._ferramentas_convertiveis({**p, "tool_choice": "none"}, False) == frozenset()
++
++
++# --- llama-cpp/ e llamacpp-*: modelos desta Máquina entram no ramo local (18/11/2026) -----------------------
++
++def test_llama_cpp_entra_no_ramo_local_sem_classificacao():
++    for m in ("llama-cpp/nemotron-3.5-lightning", "llamacpp-agata/qwen3-30b-a3b", "llamacpp-local/qwen3-30b-a3b"):
++        assert g._politica_dados_externos({"model": m, "messages": []})["model"] == m
++    assert "llama-cpp/" in g._ROTAS_LOCAIS and "llamacpp-" in g._ROTAS_LOCAIS
++
++
++def test_nuvem_sem_classificacao_continua_bloqueada():
++    for m in ("gemini/gemini-2.5-flash", "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", "mistral/codestral-latest"):
++        bloqueou = False
++        try:
++            g._politica_dados_externos({"model": m, "messages": []})
++        except g.DadosExternosSemClassificacao:
++            bloqueou = True
++        assert bloqueou, m
+diff --git a/scripts/benchmark_roteamento.py b/scripts/benchmark_roteamento.py
+index b966eaaa..e2d6b172 100755
+--- a/scripts/benchmark_roteamento.py
++++ b/scripts/benchmark_roteamento.py
+@@ -14,8 +14,9 @@ Ferramentas: as 5 da Seth vão como definição, com respostas FALSAS e fixas. N
+ verdade é consultado nem gravado. Mede se o modelo pede a ferramenta certa, com
+ argumentos JSON válidos, e se usa o resultado.
+ 
+-Privacidade: item `privado` (anexo do canon) só vai para `ollama-local/*` ou para o
+-prefixo de provedor passado em `--liberar` (vazio por padrão). O resto fica `pulado_privacidade`.
++Privacidade: item `privado` (anexo do canon) só vai para modelo local (`ollama-local/*`,
++`llamacpp-*`, `llama-cpp/*`, `local/*`) ou para o prefixo de provedor passado em `--liberar`
++(vazio por padrão). O resto fica `pulado_privacidade`.
+ 
+ Saída, fora do repositório (0700/0600): `~/.local/share/agata/benchmark/<AAAAmmdd-HHMMSS>/`
+   respostas.jsonl  uma linha por item×modelo, com o texto (para o rótulo do Humano)
+@@ -96,7 +97,7 @@ def carregar_corpus(caminho: Path) -> list[dict]:
+ 
+ 
+ def liberado(item: dict, modelo: str, liberar: list[str]) -> bool:
+-    return not item.get("privado") or modelo.startswith(LOCAL) or any(modelo.startswith(p) for p in liberar)
++    return not item.get("privado") or modelo.startswith(LOCAIS) or any(modelo.startswith(p) for p in liberar)
+ 
+ 
+ def mensagem_usuario(item: dict, raiz: Path = RAIZ) -> str:
+@@ -298,7 +299,11 @@ def _chamador(timeout: float):
+     return chamar
+ 
+ 
+-LOCAIS = ("ollama-local/", "llamacpp-local/", "local/")  # os mesmos prefixos de _ROTAS_LOCAIS do gateway
++# Modelos locais: a mesma lista de _ROTAS_LOCAIS do gateway (redesign/router/seth_gateway.py). Usada pela
++# privacidade do anexo do canon (liberado) e para recusar remotos no --via-gateway (remotos). Sincronia testada em
++# scripts/testar_benchmark_roteamento.py. llama-cpp/ e llamacpp- entraram em 18/11/2026: antes o nemotron pulava os
++# itens privados como se fosse remoto.
++LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
+ 
+ 
+ def remotos(modelos: list[str]) -> list[str]:
+@@ -388,7 +393,7 @@ def main(argv: list[str]) -> int:
+     vai = [(m, i) for m, i in plano if liberado(i, m, liberar)]
+     print(f"plano: {len(itens)} itens × {len(modelos)} modelos = {len(plano)}; "
+           f"{len(vai)} vão rodar, {len(plano) - len(vai)} pulados por privacidade "
+-          f"(liberados: {', '.join(liberar) or 'só ollama-local'})")
++          f"(liberados: {', '.join(liberar) or 'só locais: ' + ', '.join(LOCAIS)})")
+     if "--executar" not in argv:
+         print("nada chamado. Para rodar (gasta cota): --executar")
+         return 0
+@@ -519,6 +524,9 @@ def _selftest() -> int:
+             ("anexo vai na mensagem", any("conteúdo do anexo" in c["messages"][1]["content"] for c in enviados)),
+             ("privado: só local ou liberado", liberado(priv, LOCAL + "m", []) and not liberado(priv, "a/m", [])
+              and liberado(priv, "a/m", ["a/"])),
++            ("privado: llama-cpp/ e llamacpp- contam como local; nuvem continua pulada",
++             liberado(priv, "llama-cpp/nemotron-3.5-lightning", []) and liberado(priv, "llamacpp-agata/m", [])
++             and not liberado(priv, "openrouter/x:free", []) and not liberado(priv, "gemini/x", [])),
+             ("erro de rede vira estado, não derruba", rq["estado"] == "erro:TimeoutError"),
+             ("resumo: taxa de erro conta só as feitas", any(x["metrica"] == "taxa_erro" and x["valor"] == 0.2
+                                                              and x["amostra"] == 5 for x in res["medido"])),
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index dee77375..c4521e72 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -112,6 +112,7 @@ passo "suite adversarial: selftest gateway da Seth" env SETH_REPO="$RAIZ" "$PY_S
+ passo "suite adversarial: selftest Conselho remoto" env SETH_REPO="$RAIZ" "$PY_SISTEMA" scripts/conselho_remoto.py --selftest
+ passo "suite adversarial: selftest registro de pedidos" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/registro_pedidos.py --selftest
+ passo "suite adversarial: selftest benchmark de roteamento" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/benchmark_roteamento.py --selftest
++passo "suite adversarial: benchmark: locais e privacidade (testes)" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/testar_benchmark_roteamento.py
+ passo "suite adversarial: selftest queda por elo" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/queda_por_elo.py --selftest
+ passo "suite adversarial: selftest sombra de capacidade" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_capacidade.py --selftest
+ passo "suite adversarial: selftest sombra nova versão" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_nova_versao.py --selftest
+diff --git a/scripts/testar_benchmark_roteamento.py b/scripts/testar_benchmark_roteamento.py
+new file mode 100644
+index 00000000..4ee20151
+--- /dev/null
++++ b/scripts/testar_benchmark_roteamento.py
+@@ -0,0 +1,132 @@
++#!/usr/bin/env python3
++"""Suite unittest da privacidade do benchmark_roteamento (anexo do canon).
++
++Modelo local (ollama-local/, llamacpp-*, llama-cpp/, local/) roda o item privado; nuvem pula.
++--liberar continua abrindo o provedor pedido. --via-gateway aceita modelo local e recusa nuvem.
++LOCAIS tem que ser igual a _ROTAS_LOCAIS do gateway (teste de sincronia). Sem rede: o chamador é falso.
++Uso: python3 -I scripts/testar_benchmark_roteamento.py
++"""
++import contextlib
++import io
++import json
++import os
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++sys.dont_write_bytecode = True
++RAIZ = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(RAIZ / "scripts"))
++import benchmark_roteamento as b  # noqa: E402
++
++PRIVADO = {"id": "longo-x", "tipo": "contexto_longo", "pergunta": "leia", "privado": True}
++PUBLICO = {"id": "conv-x", "tipo": "conversa", "pergunta": "oi"}
++LLAMA = "llama-cpp/nemotron-3.5-lightning"
++LLAMA_AGATA = "llamacpp-agata/qwen3-30b-a3b"
++LOCAL_OLLAMA = "ollama-local/qwen3.5-9b-64k:latest"
++NUVEM = ["openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", "gemini/gemini-2.5-flash",
++         "mistral/codestral-latest", "zai/glm-4.7-flash"]
++RESPOSTA = {"model": "modelo-real", "choices": [{"message": {"role": "assistant", "content": "feito"},
++                                                  "finish_reason": "stop"}]}
++
++
++class PrivacidadeLocal(unittest.TestCase):
++    def test_llama_cpp_roda_item_privado(self):
++        self.assertTrue(b.liberado(PRIVADO, LLAMA, []))
++
++    def test_llamacpp_prefixo_roda_item_privado(self):
++        for m in (LLAMA_AGATA, "llamacpp-local/qwen3-30b-a3b"):
++            with self.subTest(modelo=m):
++                self.assertTrue(b.liberado(PRIVADO, m, []))
++
++    def test_ollama_local_continua_rodando(self):
++        self.assertTrue(b.liberado(PRIVADO, LOCAL_OLLAMA, []))
++
++    def test_nuvem_pula_item_privado(self):
++        for m in NUVEM:
++            with self.subTest(modelo=m):
++                self.assertFalse(b.liberado(PRIVADO, m, []))
++
++    def test_item_publico_roda_em_todo_modelo(self):
++        for m in [LLAMA, LLAMA_AGATA, LOCAL_OLLAMA, *NUVEM]:
++            with self.subTest(modelo=m):
++                self.assertTrue(b.liberado(PUBLICO, m, []))
++
++    def test_liberar_abre_so_o_prefixo_pedido(self):
++        self.assertTrue(b.liberado(PRIVADO, "gemini/gemini-2.5-flash", ["gemini/"]))
++        self.assertFalse(b.liberado(PRIVADO, "mistral/codestral-latest", ["gemini/"]))
++
++    def test_remotos_sao_so_a_nuvem(self):
++        self.assertEqual(b.remotos([LLAMA, "llamacpp-local/m", "ollama-local/q", "mistral/x"]), ["mistral/x"])
++
++    def test_locais_iguais_aos_do_gateway(self):
++        # Sincronia: se o gateway mudar _ROTAS_LOCAIS, este teste avisa antes da produção divergir do benchmark.
++        sys.dont_write_bytecode = True
++        sys.path.insert(0, str(RAIZ / "redesign" / "router"))
++        import seth_gateway as g  # noqa: E402
++        self.assertEqual(tuple(b.LOCAIS), tuple(g._ROTAS_LOCAIS))
++
++
++class PlanoDeExecucao(unittest.TestCase):
++    def _rodar(self, modelo, itens):
++        chamadas = []
++
++        def chamar(corpo, publico=True):
++            chamadas.append((corpo["model"], publico))
++            return RESPOSTA, 0.1
++
++        linhas = b._rodar_plano([(modelo, i) for i in itens], [], chamar, 0, b.SISTEMA, "")
++        return linhas, chamadas
++
++    def test_llama_cpp_nao_pula_item_privado(self):
++        linhas, chamadas = self._rodar(LLAMA, [PRIVADO, PUBLICO])
++        self.assertEqual([(l["item"], l["estado"]) for l in linhas], [("longo-x", "ok"), ("conv-x", "ok")])
++        # privado sem liberação: sem cabeçalho `public`, como no ollama-local
++        self.assertEqual(chamadas, [(LLAMA, False), (LLAMA, True)])
++
++    def test_nuvem_pula_privado_e_nao_chama(self):
++        linhas, chamadas = self._rodar("gemini/gemini-2.5-flash", [PRIVADO, PUBLICO])
++        self.assertEqual([l["estado"] for l in linhas], ["pulado_privacidade", "ok"])
++        self.assertEqual(chamadas, [("gemini/gemini-2.5-flash", True)])
++
++
++class PlanoPeloMain(unittest.TestCase):
++    def setUp(self):
++        self._tmp = tempfile.TemporaryDirectory()
++        self.corpus = os.path.join(self._tmp.name, "c.jsonl")
++        with open(self.corpus, "w", encoding="utf-8") as f:
++            f.write(json.dumps(PRIVADO) + "\n" + json.dumps(PUBLICO) + "\n")
++
++    def tearDown(self):
++        self._tmp.cleanup()
++
++    def _main(self, argv):
++        saida = io.StringIO()
++        with contextlib.redirect_stdout(saida):
++            codigo = b.main(argv + ["--corpus", self.corpus])
++        return codigo, saida.getvalue()
++
++    def test_plano_llama_cpp_roda_os_dois_itens(self):
++        codigo, texto = self._main(["--modelos", LLAMA])
++        self.assertEqual(codigo, 0)
++        self.assertIn("2 vão rodar, 0 pulados por privacidade", texto)
++
++    def test_plano_nuvem_pula_o_privado(self):
++        codigo, texto = self._main(["--modelos", "gemini/gemini-2.5-flash"])
++        self.assertEqual(codigo, 0)
++        self.assertIn("1 vão rodar, 1 pulados por privacidade", texto)
++
++    def test_via_gateway_aceita_llama_cpp(self):
++        codigo, texto = self._main(["--via-gateway", "--modelos", LLAMA])
++        self.assertEqual(codigo, 0)
++        self.assertIn("nada chamado", texto)
++
++    def test_via_gateway_recusa_nuvem(self):
++        codigo, texto = self._main(["--via-gateway", "--modelos", "gemini/gemini-2.5-flash"])
++        self.assertEqual(codigo, 2)
++        self.assertIn("remotos: gemini/gemini-2.5-flash", texto)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
