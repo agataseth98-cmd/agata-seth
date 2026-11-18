@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): dccf27f829d318ee767324b5c2e29c90eb83dfe8
-  Escrito em: 18/11/2026 15:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7238efff35e46fa9bc492f9daab77bb3e57f6f59
+  Escrito em: 18/11/2026 15:41 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dccf27f829d318ee767324b5c2e29c90eb83dfe8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dccf27f829d318ee767324b5c2e29c90eb83dfe8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dccf27f829d318ee767324b5c2e29c90eb83dfe8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dccf27f829d318ee767324b5c2e29c90eb83dfe8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dccf27f829d318ee767324b5c2e29c90eb83dfe8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7238efff35e46fa9bc492f9daab77bb3e57f6f59/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7238efff35e46fa9bc492f9daab77bb3e57f6f59/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7238efff35e46fa9bc492f9daab77bb3e57f6f59/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7238efff35e46fa9bc492f9daab77bb3e57f6f59/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7238efff35e46fa9bc492f9daab77bb3e57f6f59/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1055) DIÁRIO — 18/11/2026 · **Proposta painel-modelos-18-11: o Humano libera ou devolve ao standby cada modelo do catálogo pelo painel.** Subpainel Catálogo de modelos em Sistema; decisão só registrada em decisoes.jsonl, sob trava, sem mexer em rota; voz e aposentados não se liberam. Modelo: Sonnet orquestrado pelo Opus; revisão Codex r2 aprovou. Medido: 24 testes da página, CI local TUDO OK. Não medido: clique no navegador. Assinatura pendente: bash scripts/aprovar.sh painel-modelos-18-11.
+
 (1054) DIÁRIO — 18/11/2026 · **Proposta porta-entrada-18-11: todo modelo novo passa pela prova antes de rota; skills de terceiros comprovadas viram candidatas a adoção.** porta_entrada.py dá veredito util/dominado/inutil/neutro por tipo de pedido; skills_ledger aceita terceiro:NOME em pasta separada; skill agata-adotar-skill. Modelo: Sonnet orquestrado pelo Opus; revisão Codex r3 aprovou. Medido: 142 testes, CI local TUDO OK. Não medido: aplicação. Assinatura pendente: bash scripts/aprovar.sh porta-entrada-18-11.
 
 (1053) DIÁRIO — 18/11/2026 · **Aplicada skills-51-18-11: regra dos 51% dentro de 9 skills** Assinada pelo Humano em 18/11 13:09. 9 SKILL.md de .agents/skills ganham a seção Recomendação comprovada (L8): só recomenda como comprovada a solução com acertos acima de 51% e ao menos 10 usos conferidos; o resto vai como não comprovada, sem descarte.
