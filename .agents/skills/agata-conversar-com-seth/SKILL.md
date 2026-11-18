@@ -47,3 +47,13 @@ Só com pedido explícito ("abra minha conversa e apresente-se"). Precisa de uma
 - O áudio da voz: nenhum dos caminhos o ouve; só o Humano mede se ficou natural.
 - Como o LibreChat fragmenta o texto que manda à voz.
 - Sessões sem login no navegador: o caminho C não se aplica.
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-conversar-com-seth
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.

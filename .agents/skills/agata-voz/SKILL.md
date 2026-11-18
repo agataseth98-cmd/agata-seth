@@ -60,3 +60,13 @@ Escreve para ser falado, na voz comum: resultado primeiro, evidência (ou "não 
 3. Texto falado com mais de 12.000 caracteres: fale o resumo e diga que é resumo.
 4. O serviço sobe e desce por conta de quem fala (o sistema é sob demanda). Medição e voz não ficam ligadas à toa.
 5. Mudar esta skill ou o script passa por proposta P-8.
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-voz
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.

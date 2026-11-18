@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 91439ad8f8159e6a5c130b0d71e7c16d55e32d21
-  Escrito em: 18/11/2026 12:57 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 12be6e6035243e86f3846aa51706b519030880e1
+  Escrito em: 18/11/2026 13:24 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/91439ad8f8159e6a5c130b0d71e7c16d55e32d21/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/91439ad8f8159e6a5c130b0d71e7c16d55e32d21/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/91439ad8f8159e6a5c130b0d71e7c16d55e32d21/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/91439ad8f8159e6a5c130b0d71e7c16d55e32d21/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/91439ad8f8159e6a5c130b0d71e7c16d55e32d21/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12be6e6035243e86f3846aa51706b519030880e1/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12be6e6035243e86f3846aa51706b519030880e1/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12be6e6035243e86f3846aa51706b519030880e1/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12be6e6035243e86f3846aa51706b519030880e1/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/12be6e6035243e86f3846aa51706b519030880e1/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1053) DIÁRIO — 18/11/2026 · **Aplicada skills-51-18-11: regra dos 51% dentro de 9 skills** Assinada pelo Humano em 18/11 13:09. 9 SKILL.md de .agents/skills ganham a seção Recomendação comprovada (L8): só recomenda como comprovada a solução com acertos acima de 51% e ao menos 10 usos conferidos; o resto vai como não comprovada, sem descarte.
+Modelo: Claude Opus 5.5 com Haiku 5.5 · vetor: p8_verificar, CI local · Autorização: Humano — assinatura APROVADO
+
 (1052) DIÁRIO — 18/11/2026 · **Proposta skills-51-18-11: regra dos 51% dentro de 9 skills (lacuna L1 do lote 8).** Antes de recomendar, a skill consulta skills_ledger.py recalcular; comprovada só com acertos >51% e ≥10 usos conferidos, o resto vai como "não comprovada". Modelo: Haiku orquestrado pelo Opus. Medido: lint de skills, saída 0; ledger em HOME descartável. Não medido: aplicação. Assinatura pendente: bash scripts/aprovar.sh skills-51-18-11.
 
 (1051) DIÁRIO — 18/11/2026 · **Aplicada agentes-skills-18-11b: agentes permanentes com memória própria e skills que só recomendam o comprovado.** Assinada pelo Humano. Comprovada só com mais de 51% de acerto e pelo menos 10 usos; memória por agente fora do reinício de 15 dias; o coordenador registra pelos seis agentes só de leitura.

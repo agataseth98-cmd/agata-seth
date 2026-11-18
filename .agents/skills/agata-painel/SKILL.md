@@ -51,3 +51,13 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
 ## Pendências conhecidas
 - Medido em 16/11/2026 (deixa de ser pendência): fotos em oito larguras, de 360 a 2560 px (360, 480, 768, 1024, 1280, 1440, 1920 e 2560 px), com navegador sem janela e só GET, de panorama, conversa, conhecimento e sistema; e rolagem horizontal da página nas 64 combinações (8 larguras x 8 seções) pelo CDP, com 0 pedidos não-GET abertos. Resultado: nenhuma combinação com rolagem horizontal da página. Em celular, a gaveta e os mosaicos foram vistos em foto; o toque em alvo de 360 px não foi medido.
 - O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-fluxo` (memória comum) e `agata-equipe` (canal).
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-painel
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.

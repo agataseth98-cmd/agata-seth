@@ -163,3 +163,13 @@ Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte uma linha que con
 - Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos, PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
 - Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
 - A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-equipe
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
