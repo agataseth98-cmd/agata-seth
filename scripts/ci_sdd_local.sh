@@ -113,6 +113,7 @@ passo "suite adversarial: selftest Conselho remoto" env SETH_REPO="$RAIZ" "$PY_S
 passo "suite adversarial: selftest registro de pedidos" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/registro_pedidos.py --selftest
 passo "suite adversarial: selftest benchmark de roteamento" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/benchmark_roteamento.py --selftest
 passo "suite adversarial: benchmark: locais e privacidade (testes)" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/testar_benchmark_roteamento.py
+passo "suite adversarial: porta de entrada de modelo (testes)" "$PYTEST" -q -p no:cacheprovider scripts/testar_porta_entrada.py
 passo "suite adversarial: selftest queda por elo" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I scripts/queda_por_elo.py --selftest
 passo "suite adversarial: selftest sombra de capacidade" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_capacidade.py --selftest
 passo "suite adversarial: selftest sombra nova versão" env SETH_REPO="$RAIZ" "$PY_SISTEMA" -I redesign/router/sombra_nova_versao.py --selftest
