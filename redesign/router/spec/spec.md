@@ -127,3 +127,5 @@ Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DO
 - `auditoria_turno.py` (verificação de divergência: `divergencia_turno` e `--verificar --sessao`)
 - `test_seth_base.py` (testes da base do roteador, 17/11/2026: ferramenta escrita como texto vira tool_calls, cabeçalho sem duplicata, served_by no log e modo do roteador; sem rede)
 - `test_verificar_refazer.py` (verificar e refazer, 18/11/2026: gateway real com upstream falso em HTTP local; teto de tentativas e de segundos, canário, chave SETH_REFAZER=0, legado intacto, stream, escalada de fila; sem rede)
+- `skills_ledger.py` (desfechos das skills, L8, 18/11/2026: registrar, conferir e recalcular; só solução com taxa acima de 51% e n >= 10 usos conferidos é comprovada; as demais ficam como não comprovada, sem sumir)
+- `test_skills_ledger.py` (testes do L8, 18/11/2026: memória do agente fora da pasta do cache, reinício simulado, cache por variável, segredo recusado, definições dos agentes; critérios AC1 a AC13 do L8; HOME temporário)
