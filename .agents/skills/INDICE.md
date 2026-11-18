@@ -10,6 +10,7 @@ Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`): de 21 pastas p
 |---|---|---|
 | `agata-fluxo` | entrada de qualquer tarefa (guia Ma'at): medir o estado, conduta, escolha da skill, regras de lote, mudança no runtime da Máquina, afirmar com prova | agata-spec (dono); revisor agata-revisor (D4, 07/11/2026) |
 | `agata-aplicar-proposta` | criar, verificar, propor e aplicar uma proposta P-8 ou um lote (CI local, âncora, assinatura, registro) | Claude |
+| `agata-adotar-skill` | adotar uma skill de terceiro comprovada no ledger (acima de 51%, ao menos 10 usos): reescrever em .agents/skills com licença e origem, por P-8 | Claude |
 | `agata-equipe` | trabalhar em Equipe, qualquer membro do Conselho (papéis, canal MSG, vigia, fila, fallback, cota) | Claude |
 | `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
 | `agata-voz` | ler em voz alta, falar, conversa falada e debate; todo modelo que fala usa a voz do Agata | Claude |

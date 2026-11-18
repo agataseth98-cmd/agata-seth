@@ -134,6 +134,12 @@ class TestLedger(_HomeTemporario):
         patch_skills.start()
         self.addCleanup(patch_skills.stop)
         self.arq = self.ledger / "agata-fluxo.jsonl"
+        self.terceiros = self.raiz / "terceiros"
+        (self.terceiros / "defuddle").mkdir(parents=True)
+        (self.terceiros / "defuddle" / "SKILL.md").write_text("# terceiro\n", encoding="utf-8")
+        patch_terc = mock.patch.object(sl, "TERCEIROS", self.terceiros)
+        patch_terc.start()
+        self.addCleanup(patch_terc.stop)
 
     def _registrar(self, skill, erro, solucao, acertos, falhas, prefixo):
         ids = []
@@ -252,6 +258,64 @@ class TestLedger(_HomeTemporario):
         self.assertEqual(saida.getvalue(), "")  # sem tabela parcial
         self.assertIn("linha 2", erro.getvalue())
         self.assertEqual(len(self._linhas()), 2)  # nada foi gravado sobre o ledger ruim
+
+    def test_terceiro_grava_em_arquivo_separado_e_vira_candidata(self):
+        ids = self._registrar("terceiro:defuddle", "e-t", "s-t", 8, 2, "tt")
+        arq = self.ledger / "terceiros" / "defuddle.jsonl"
+        self.assertTrue(arq.exists())
+        self.assertFalse((self.ledger / "defuddle.jsonl").exists())
+        rows, pend = sl.recalcular("terceiro:defuddle")
+        self.assertEqual((rows[0]["skill"], rows[0]["usos"], rows[0]["status"]), ("terceiro:defuddle", 0, "não comprovada"))
+        self.assertEqual(pend, 10)
+        self._conferir(ids)
+        rows, pend = sl.recalcular()
+        self.assertEqual(pend, 0)
+        self.assertEqual(rows[0]["status"], "candidata a adoção")
+        self.assertIn("candidata a adoção", sl.formatar(rows, pend))
+
+    def test_terceiro_nao_colide_com_skill_local_de_mesmo_nome(self):
+        (self.skills / "defuddle").mkdir()
+        (self.skills / "defuddle" / "SKILL.md").write_text("# local\n", encoding="utf-8")
+        self._conferir(self._registrar("defuddle", "e", "s", 10, 0, "tl"))
+        self._conferir(self._registrar("terceiro:defuddle", "e", "s", 10, 0, "tl"))  # mesma tarefa, solução e agente
+        self.assertTrue((self.ledger / "defuddle.jsonl").exists())
+        self.assertTrue((self.ledger / "terceiros" / "defuddle.jsonl").exists())
+        rows, _ = sl.recalcular()
+        por = {r["skill"]: r for r in rows}
+        self.assertEqual(por["defuddle"]["status"], "comprovada")
+        self.assertEqual(por["terceiro:defuddle"]["status"], "candidata a adoção")
+        self.assertEqual((por["defuddle"]["usos"], por["terceiro:defuddle"]["usos"]), (10, 10))
+
+    def test_conferir_terceiro_devolve_nome_com_prefixo(self):
+        id_ = self._registrar("terceiro:defuddle", "e", "s", 1, 0, "tc")[0]
+        self.assertEqual(sl.conferir(ref=id_, por="coordenador")["skill"], "terceiro:defuddle")
+        id2 = self._registrar("agata-fluxo", "e", "s", 1, 0, "tc")[0]
+        self.assertEqual(sl.conferir(ref=id2, por="coordenador")["skill"], "agata-fluxo")
+
+    def test_terceiro_fronteira_do_limiar(self):
+        casos = [("e9", 9, 0, "não comprovada"), ("e10", 10, 0, "candidata a adoção"),
+                 ("e51", 51, 49, "não comprovada"), ("e52", 52, 48, "candidata a adoção")]
+        for erro, acertos, falhas, _ in casos:
+            self._conferir(self._registrar("terceiro:defuddle", erro, "s", acertos, falhas, f"f-{erro}"))
+        rows, _ = sl.recalcular("terceiro:defuddle")
+        por = {r["erro"]: r["status"] for r in rows}
+        for erro, _, _, esperado in casos:
+            with self.subTest(erro=erro):
+                self.assertEqual(por[erro], esperado)
+
+    def test_terceiro_abaixo_do_limiar_segue_nao_comprovada(self):
+        self._conferir(self._registrar("terceiro:defuddle", "e-t", "s-t", 5, 5, "tu"))
+        rows, _ = sl.recalcular()
+        self.assertEqual(rows[0]["status"], "não comprovada")
+
+    def test_terceiro_recusa_sem_skill_md_e_nao_afeta_agents(self):
+        base = dict(erro="e", solucao="s", resultado="acerto", agente="agata-dev", tarefa="t-1")
+        for nome in ("terceiro:inexistente", "terceiro:", "terceiro:Maiuscula"):
+            with self.subTest(nome=nome), self.assertRaises(sl.LedgerRecusado):
+                sl.registrar(skill=nome, **base)
+        self._conferir(self._registrar("agata-fluxo", "e-a", "s-a", 10, 0, "ta"))
+        rows, _ = sl.recalcular()
+        self.assertEqual(rows[0]["status"], "comprovada")  # skill de .agents/skills nunca vira candidata
 
     def test_registrar_concorrente_nao_perde_linha(self):
         env = self._env_filho()

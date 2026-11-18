@@ -11,6 +11,11 @@ e não some.
   - guarda só slugs, ids e marcas de tempo: sem texto livre, por isso não passa pelo sanitizador;
   - linha inválida: registrar, conferir e recalcular recusam e avisam; recalcular não pula linha.
 
+Skill de terceiro (18/11/2026, "porta de entrada"): `--skill terceiro:<nome>` vale quando existe
+`.claude/skills/<nome>/SKILL.md`; o ledger vai para `terceiros/<nome>.jsonl`, subpasta própria (sem colisão com
+skill local de mesmo nome; o id leva o espaço "terceiro:"), mesmas regras. Terceiro com
+status comprovada aparece como "candidata a adoção" (ver .agents/skills/agata-adotar-skill).
+
   skills_ledger.py registrar --skill S --erro E --solucao X --resultado acerto|falha --agente A --tarefa T
   skills_ledger.py conferir --ref ID --por COORD
   skills_ledger.py recalcular [--skill S]
@@ -34,6 +39,8 @@ from zoneinfo import ZoneInfo
 
 REPO = Path(__file__).resolve().parents[2]
 SKILLS = REPO / ".agents" / "skills"  # pasta das skills; os testes trocam por uma temporária
+TERCEIROS = REPO / ".claude" / "skills"  # skills de terceiros; os testes trocam por uma temporária
+SUBPASTA_TERCEIROS = "terceiros"  # ledger dos terceiros: <pasta>/terceiros/<nome>.jsonl; na CLI, "terceiro:<nome>"
 TZ = ZoneInfo("America/Sao_Paulo")
 SLUG = re.compile(r"[a-z0-9][a-z0-9._-]{0,63}")
 ID = re.compile(r"[0-9a-f]{16}")
@@ -75,11 +82,36 @@ def _slug(valor, campo: str) -> str:
     return valor
 
 
-def _status(acertos: int, usos: int) -> str:
-    return "comprovada" if usos >= MIN_USOS and acertos * 100 > LIMIAR_PCT * usos else "não comprovada"
+def _alvo(skill: str, campo: str = "--skill") -> tuple[str, bool]:
+    """(nome, terceiro). 'terceiro:<nome>' vira ('<nome>', True); o resto passa como estava."""
+    if isinstance(skill, str) and skill.startswith("terceiro:"):
+        return _slug(skill[len("terceiro:"):], campo), True
+    return skill, False
 
 
-def _motivo(reg, skill: str, desfechos: dict, conferidos: set) -> str | None:
+def _exibe(nome: str, terceiro: bool) -> str:
+    return "terceiro:" + nome if terceiro else nome
+
+
+def _arquivo(pasta: Path, nome: str, terceiro: bool) -> Path:
+    return (pasta / SUBPASTA_TERCEIROS / f"{nome}.jsonl") if terceiro else (pasta / f"{nome}.jsonl")
+
+
+def _todos(pasta: Path) -> list[Path]:
+    return sorted(pasta.glob("*.jsonl")) + sorted((pasta / SUBPASTA_TERCEIROS).glob("*.jsonl"))
+
+
+def _eh_terceiro(arq: Path) -> bool:
+    return arq.parent.name == SUBPASTA_TERCEIROS
+
+
+def _status(acertos: int, usos: int, terceiro: bool = False) -> str:
+    if usos >= MIN_USOS and acertos * 100 > LIMIAR_PCT * usos:
+        return "candidata a adoção" if terceiro else "comprovada"
+    return "não comprovada"
+
+
+def _motivo(reg, skill: str, desfechos: dict, conferidos: set, terceiro: bool = False) -> str | None:
     """Motivo da linha ser inválida, ou None. Confere esquema, slugs, id, ordem e duplicidade."""
     if not isinstance(reg, dict):
         return "não é objeto JSON"
@@ -96,7 +128,7 @@ def _motivo(reg, skill: str, desfechos: dict, conferidos: set) -> str | None:
             return "resultado fora de acerto|falha"
         if not isinstance(reg["id"], str) or not ID.fullmatch(reg["id"]):
             return "id com formato inválido"
-        if reg["id"] != _id_de(reg["tarefa"], reg["skill"], reg["solucao"], reg["agente"]):
+        if reg["id"] != _id_de(reg["tarefa"], _exibe(reg["skill"], terceiro), reg["solucao"], reg["agente"]):
             return "id não bate com (tarefa, skill, solução, agente)"
         if reg["id"] in desfechos:
             return "id duplicado"
@@ -135,7 +167,7 @@ def _ler(arq: Path) -> tuple[list[dict], list[str]]:
         except ValueError:
             erros.append(f"{rotulo}: não é JSON")
             continue
-        motivo = _motivo(reg, arq.stem, desfechos, conferidos)
+        motivo = _motivo(reg, arq.stem, desfechos, conferidos, _eh_terceiro(arq))
         if motivo:
             erros.append(f"{rotulo}: {motivo}")
             continue
@@ -179,16 +211,22 @@ def _travado():
 
 def registrar(skill: str, erro: str, solucao: str, resultado: str, agente: str, tarefa: str) -> str:
     """Grava um desfecho pendente e devolve o id (16 hex, derivado de tarefa, skill, solução e agente)."""
+    skill, terceiro = _alvo(skill)
     for campo, valor in (("--skill", skill), ("--erro", erro), ("--solucao", solucao),
                          ("--agente", agente), ("--tarefa", tarefa)):
         _slug(valor, campo)
-    if not (SKILLS / skill).is_dir():
+    if terceiro:
+        if not (TERCEIROS / skill / "SKILL.md").is_file():
+            raise LedgerRecusado(f"skill de terceiro sem .claude/skills/{skill}/SKILL.md")
+    elif not (SKILLS / skill).is_dir():
         raise LedgerRecusado(f"skill sem pasta em .agents/skills/{skill}/")
     if resultado not in RESULTADOS:
         raise LedgerRecusado("--resultado deve ser acerto ou falha")
-    id_ = _id_de(tarefa, skill, solucao, agente)
+    id_ = _id_de(tarefa, _exibe(skill, terceiro), solucao, agente)
     with _travado() as pasta:
-        arq = pasta / f"{skill}.jsonl"
+        arq = _arquivo(pasta, skill, terceiro)
+        if terceiro:
+            arq.parent.mkdir(mode=0o700, exist_ok=True)
         validas, erros = _ler(arq)
         if erros:
             raise LedgerInvalido(erros)
@@ -205,7 +243,7 @@ def conferir(ref: str, por: str) -> dict:
     if not isinstance(ref, str) or not ID.fullmatch(ref):
         raise LedgerRecusado("--ref deve ser o id de 16 caracteres hexadecimais devolvido por registrar")
     with _travado() as pasta:
-        for arq in sorted(pasta.glob("*.jsonl")):
+        for arq in _todos(pasta):
             validas, erros = _ler(arq)
             if erros:
                 raise LedgerInvalido(erros)
@@ -215,31 +253,32 @@ def conferir(ref: str, por: str) -> dict:
             if any(r["tipo"] == "conferencia" and r["ref"] == ref for r in validas):
                 raise LedgerRecusado(f"id {ref} já conferido; cada desfecho é conferido uma vez")
             _acrescentar(arq, {"tipo": "conferencia", "ref": ref, "por": por, "ts": _agora()})
-            return {"ok": True, "ref": ref, "skill": achados[0]["skill"], "por": por}
+            return {"ok": True, "ref": ref, "skill": _exibe(achados[0]["skill"], _eh_terceiro(arq)), "por": por}
     raise LedgerRecusado(f"id inexistente no ledger: {ref}")
 
 
 def recalcular(skill: str | None = None) -> tuple[list[dict], int]:
     """Devolve (linhas da tabela, pendentes). Solução sem conferência entra com usos 0 e 'não comprovada'."""
     if skill is not None:
+        skill, terc_pedido = _alvo(skill)
         _slug(skill, "--skill")
     with _travado() as pasta:
-        arquivos = [pasta / f"{skill}.jsonl"] if skill else sorted(pasta.glob("*.jsonl"))
+        arquivos = [_arquivo(pasta, skill, terc_pedido)] if skill else _todos(pasta)
         lidos, erros = [], []
         for arq in arquivos:
             validas, errs = _ler(arq)
-            lidos.append(validas)
+            lidos.append((validas, _eh_terceiro(arq)))
             erros += errs
     if erros:
         raise LedgerInvalido(erros)
     contas: dict[tuple[str, str, str], dict] = {}
     pendentes = 0
-    for validas in lidos:
+    for validas, terc in lidos:
         conferidos = {r["ref"] for r in validas if r["tipo"] == "conferencia"}
         for r in validas:
             if r["tipo"] != "desfecho":
                 continue
-            conta = contas.setdefault((r["skill"], r["erro"], r["solucao"]), {"usos": 0, "acertos": 0})
+            conta = contas.setdefault((_exibe(r["skill"], terc), r["erro"], r["solucao"]), {"usos": 0, "acertos": 0})
             if r["id"] in conferidos:
                 conta["usos"] += 1
                 conta["acertos"] += int(r["resultado"] == "acerto")
@@ -249,7 +288,8 @@ def recalcular(skill: str | None = None) -> tuple[list[dict], int]:
     for (s, e, x), conta in sorted(contas.items()):
         usos, acertos = conta["usos"], conta["acertos"]
         rows.append({"skill": s, "erro": e, "solucao": x, "usos": usos, "acertos": acertos,
-                     "taxa": (100 * acertos / usos) if usos else None, "status": _status(acertos, usos)})
+                     "taxa": (100 * acertos / usos) if usos else None,
+                     "status": _status(acertos, usos, s.startswith("terceiro:"))})
     return rows, pendentes
 
 
