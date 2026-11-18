@@ -1,12 +1,18 @@
 [Unit]
 Description=Ágata — decisor local (Ollaya: modelos de decisão na CPU, PROTOCOLOS.md "Decisor local")
-# Só loopback. Quem usa (seth_gateway em sombra, inbox do vault, P-20,
+# Só loopback. Porta pública: :11435 (ollaya.socket); o contêiner publica só em 127.0.0.1:11445 (interna).
+# Quem usa (seth_gateway em sombra, inbox do vault, P-20,
 # consolidação) segue pela regra determinística se isto estiver fora do ar.
+# (17/11/2026, sob demanda) Sobe com a 1ª conexão ao ollaya.socket (pelo proxy) e cai quando o proxy
+# sai, após 15 min sem conexão (StopWhenUnneeded). Sem [Install]: quem fica no agata.target é o socket.
 After=docker.service
 PartOf=agata.target
+StopWhenUnneeded=yes
 
 [Service]
 Type=simple
+# 90 s > 60 s do prazo do ExecStartPost: o systemd não corta o probe antes do próprio prazo.
+TimeoutStartSec=90
 # Imagem CPU pinada por digest (0.13.0, 13/10/2026): projeto novo, versões
 # saindo a cada poucos dias -- atualizar é decisão explícita, nunca `latest`.
 # Teto de memória porque a Máquina está sem swap, e oom-score-adj=1000: se a
@@ -15,13 +21,16 @@ Type=simple
 # com o resto (winnow:e4b leva ~4 s por decisão com folga).
 ExecStartPre=-/usr/bin/docker rm -f ollaya
 ExecStart=/usr/bin/docker run --rm --name ollaya \
-  -p 127.0.0.1:11435:11435 \
+  -p 127.0.0.1:11445:11435 \
   -v %h/.cache/agata/ollaya:/home/ollaya/.ollaya \
   --memory=8g --cpus=8 --oom-score-adj=1000 \
   ghcr.io/ollaya-dev/ollaya@sha256:31f749def61165d7bbb15def4e3d799a403461e0b8b777f359a924bb9b845ce6
+# Espera o Ollaya responder HTTP na porta interna (não só TCP): o docker-proxy aceita a conexão antes de
+# o contêiner escutar, por isso o probe usa curl (qualquer resposta HTTP conta) e não /dev/tcp. Prazo global
+# de 60 s (timeout); cada tentativa tem curl -m 2.
+ExecStartPost=/usr/bin/timeout 60 /usr/bin/bash -c 'until /usr/bin/curl -s -m 2 --noproxy 127.0.0.1 -o /dev/null http://127.0.0.1:11445/; do sleep 0.5; done'
 ExecStop=/usr/bin/docker stop ollaya
+# Idempotente, com '-': se o ExecStartPost falhar, o ExecStop não roda; este garante que o contêiner não fica.
+ExecStopPost=-/usr/bin/docker stop ollaya
 Restart=on-failure
 RestartSec=15
-
-[Install]
-WantedBy=agata.target

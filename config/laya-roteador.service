@@ -1,20 +1,28 @@
 [Unit]
 Description=Ágata — Laya ajustado que escolhe a fila da Seth; o Jev fica em sombra (MEMÓRIAS (718)/(719))
-# Só loopback (:11436), CPU, ~70 ms por decisão. Mesmo protocolo do Ollaya
+# Só loopback, CPU, ~70 ms por decisão. Porta pública: :11436 (laya-roteador.socket). Esta unidade
+# escuta só em :11446 (interna, LAYA_PORT). Mesmo protocolo do Ollaya
 # (`POST /v1/systemone`). O seth_gateway pede a rota aqui com timeout de 1,5 s;
 # fora do ar, lento ou com confiança baixa = a regra por tamanho, como antes.
+# (17/11/2026, sob demanda) Não fica de pé à toa: sobe com a 1ª conexão ao socket (pelo proxy) e cai
+# quando o proxy sai, após 15 min sem conexão (StopWhenUnneeded). A 1ª chamada depois de ociosidade cai
+# na heurística: o gateway espera 1,5 s e o backend ainda carrega o modelo. Sem [Install]: quem fica no
+# agata.target é o laya-roteador.socket.
 # Ambiente e checkpoint FORA do repo: ~/.local/share/agata-laya/ (venv com
 # laya 0.4.8 do PyPI, Apache-2.0; modelo base convaiinnovations/laya
 # "multilingual" ajustado -- ver (718)). `roteador-atual` é um link para o
 # checkpoint em uso; só `scripts/laya_treino.py --promover` (o Humano) o troca.
 PartOf=agata.target
+StopWhenUnneeded=yes
 
 [Service]
 Type=simple
+# 90 s > 60 s do prazo do ExecStartPost: o systemd não corta o probe antes do próprio prazo.
+TimeoutStartSec=90
 Environment=HF_HOME=%h/.local/share/agata-laya/hf
 Environment=HF_HUB_OFFLINE=1
 Environment=LAYA_HOST=127.0.0.1
-Environment=LAYA_PORT=11436
+Environment=LAYA_PORT=11446
 Environment=LAYA_DEVICE=cpu
 Environment=LAYA_THREADS=4
 Environment=LAYA_MAX_LOADED=1
@@ -26,6 +34,9 @@ Environment=LAYA_LOG_LEVEL=warning
 # do JSON e o laya-serve recusa ("invalid LAYA_EXTRA_MODELS") -- caiu em loop na 1ª subida.
 Environment='LAYA_EXTRA_MODELS={"roteador":"%h/.local/share/agata-laya/modelos/roteador-atual"}'
 ExecStart=%h/.local/share/agata-laya/.venv/bin/laya-serve
+# Só aceita o proxy depois de a porta interna responder: sem isto, o systemd-socket-proxyd conecta
+# antes de o laya-serve escutar e a 1ª chamada cai. Prazo global de 60 s (timeout); passou disso, falha.
+ExecStartPost=/usr/bin/timeout 60 /usr/bin/bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/11446) 2>/dev/null; do sleep 0.5; done'
 Restart=on-failure
 RestartSec=15
 # Medido em 15/10/2026: ~1,9 GB residente com o checkpoint carregado. Sem swap
@@ -36,6 +47,3 @@ NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=read-only
-
-[Install]
-WantedBy=agata.target

@@ -28,10 +28,33 @@ systemctl() {
 docker() { printf '%s\\n' librechat librechat-mongodb librechat-meilisearch librechat-ponte-host; }
 _p9_ollama_na_gpu() { :; }
 '''
-for alvo, estado in [('agata-manutencao.timer', 'failed'), ('agata-manutencao.timer', 'inactive'), ('agata-manutencao.timer', 'unknown'), ('agata-manutencao.service', 'failed'), ('laya-roteador.service', 'failed')]:
+for alvo, estado in [('agata-manutencao.timer', 'failed'), ('agata-manutencao.timer', 'inactive'), ('agata-manutencao.timer', 'unknown'), ('agata-manutencao.service', 'failed'), ('laya-roteador.socket', 'failed'), ('laya-roteador.socket', 'inactive')]:
     r = shell(base + f'ALVO={alvo}; ESTADO={estado}; p9_servicos_declarados')
     assert r.returncode == 0 and alvo in r.stdout and 'AVISO (P-9)' in r.stdout, (alvo, estado, r.stdout, r.stderr)
     n += 1
+# (17/11/2026) p9=nao: 'failed' avisa mesmo sem p9=sim; parado em repouso não avisa.
+for alvo in ('laya-roteador.service', 'laya-roteador-proxy.service', 'ollaya.service', 'ollaya-proxy.service'):
+    r = shell(base + f'ALVO={alvo}; ESTADO=failed; p9_servicos_declarados')
+    assert r.returncode == 0 and alvo in r.stdout and 'AVISO (P-9)' in r.stdout, (alvo, r.stdout, r.stderr)
+    n += 1
+    r = shell(base + f'ALVO={alvo}; ESTADO=inactive; p9_servicos_declarados')
+    assert r.returncode == 0 and alvo not in r.stdout, (alvo, r.stdout, r.stderr)
+    n += 1
+r = shell(base + 'ALVO=laya-roteador.service; ESTADO=inactive; p9_servicos_declarados')
+assert r.returncode == 0 and 'laya-roteador.service' not in r.stdout, (r.stdout, r.stderr)  # backend parado é normal
+n += 1
+r = shell(base + '''systemctl() {
+  case "$*" in
+    *is-enabled*) echo enabled;;
+    *is-active*) case "${@: -1}" in
+      agata.target|seth-gateway.service|laya-roteador.socket) echo inactive;;
+      *) echo active;;
+    esac;;
+  esac
+}
+ALVO=nenhum; ESTADO=active; p9_servicos_declarados''')
+assert r.returncode == 0 and 'AVISO (P-9): unidade de usuário' not in r.stdout, (r.stdout, r.stderr)  # sistema desligado: socket parado não avisa
+n += 1
 r = shell(base + 'ALVO=nenhum; ESTADO=failed; p9_servicos_declarados')
 assert r.returncode == 0 and not r.stdout, (r.stdout, r.stderr)
 n += 1

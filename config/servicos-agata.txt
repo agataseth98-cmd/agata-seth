@@ -4,7 +4,7 @@
 #   unidade  nome da unidade systemd (ou do contêiner, com escopo docker)
 #   escopo   usuario = systemd --user | sistema = systemd | docker = contêiner
 #   porta    porta TCP declarada em config/portas-agata.txt, ou `-`
-#   p9       sim = scripts/perimetro/p09_servicos_declarados.sh avisa se cair | nao = listado, sem aviso
+#   p9       sim = scripts/perimetro/p09_servicos_declarados.sh avisa se cair | nao = listado; avisa só se 'failed'
 #   origem   arquivo do repositório que define a unidade, ou "fora do repo" com o motivo
 #
 # Quem lê este arquivo: scripts/perimetro.sh (P-9, carregado na fonte), scripts/gerar_estado.py
@@ -14,10 +14,16 @@
 # perímetro: é mudança protegida (P-8), não ajuste de texto.
 #
 # Ordem das linhas com p9=sim: a mesma das listas que estavam escritas à mão em perimetro.sh.
+#
+# Sob demanda (17/11/2026, decisão do Humano: subir conforme a necessidade e derrubar após um tempo seguro):
+# a unidade declarada com p9=sim é o .socket, que fica de pé com o agata.target. O proxy e o backend são
+# p9=nao: parados é o estado normal deles, mas 'failed' avisa mesmo assim. Porta do backend (11445/11446) em portas-agata.txt.
 
 agata-manutencao.timer|usuario|-|sim|config/systemd/agata-manutencao.timer
 agata-manutencao.service|usuario|-|sim|config/systemd/agata-manutencao.service
-laya-roteador.service|usuario|11436|sim|fora do repo (unidade do usuário; citada em redesign/systemd/seth)
+laya-roteador.socket|usuario|11436|sim|config/laya-roteador.socket (porta pública; sobe com o agata.target)
+laya-roteador-proxy.service|usuario|-|nao|config/laya-roteador-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+laya-roteador.service|usuario|11446|nao|config/laya-roteador.service (sob demanda, sem [Install]; só sobe pelo proxy)
 omniroute.service|usuario|20128|sim|fora do repo (unidade do OmniRoute; drop-ins em redesign/systemd/dropin-omniroute*.conf)
 omniroute-sanitizer.service|usuario|20127|sim|fora do repo (unidade do usuário; citada em redesign/systemd/README.md)
 openvino-whisper.service|usuario|20130|sim|redesign/systemd/openvino-whisper.service
@@ -27,10 +33,12 @@ seth-gateway.service|usuario|20126|sim|redesign/systemd/seth-gateway.service
 seth-escriba.service|usuario|20140|sim|redesign/systemd/seth-escriba.service
 seth-verificador.service|usuario|20141|sim|redesign/systemd/seth-verificador.service
 piper-tts.service|usuario|8890|sim|redesign/systemd/piper-tts.service
-ollaya.service|usuario|11435|sim|config/ollaya.service
+ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
+ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
 agata-vault-inbox.timer|usuario|-|sim|fora do repo (unidade do usuário)
 
-# Unidades com WantedBy/PartOf de agata.target fora do P-9. Listadas para o ESTADO conferir; sem aviso.
+# Unidades com WantedBy/PartOf de agata.target fora do P-9 (p9=nao). Listadas para o ESTADO conferir; avisam só se 'failed'.
 agata-drain.service|usuario|-|nao|redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
 obsidian-app.service|usuario|-|nao|redesign/systemd/obsidian-app.service (app Flatpak; fora do P-9 antes deste manifesto)
 ouvido-agata.service|usuario|20137|nao|redesign/systemd/ouvido-agata.service (entrada de voz; fora do P-9 antes deste manifesto)

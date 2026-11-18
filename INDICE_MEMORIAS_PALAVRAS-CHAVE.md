@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem na primeira chamada e caem após 15 minutos ociosos.** Sockets e proxies do systemd assinados pelo Humano entram no repositório; a instalação na Máquina segue a ordem do registro da proposta.
+  palavras-chave: aplicada, sob, demanda, laya, jev, sobem, primeira, chamada, caem, após, minutos, ociosos, sockets, proxies, systemd, assinados, humano, entram, repositório, instalação, máquina, segue, ordem, registro, proposta
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, para todos os modelos.** A regra entrou na lista Sempre do AGENTS.md, assinada pelo Humano; o teste de sincronia conta 16 regras.
   palavras-chave: aplicada, orquestra, caro, modelo, baratos, executam, modelos, regra, entrou, lista, sempre, agents, assinada, humano, teste, sincronia, conta, regras
 (1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando e segue as mesmas regras.** O comando configurar.py lista os provedores e acrescenta um novo com a tarifa, sem nunca gravar a chave, só o nome da variável. Toda chamada passa pelo mesmo caminho de orçamento, privacidade, custo e cofre. O Codex revisou quatro vezes e cada achado foi corrigido; a cota dele acabou antes do último veredito, e o revisor do Agata aprovou. 36 testes passam e o diff aplica em cópia limpa. Falta a assinatura.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicado, nucleo, desenvolvimento, assinatura, humano, núcleo, ptah, thoth, entra, agata, fluxo, consolidado, linha, processo, gateway, spec, testes
 (1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
   palavras-chave: proposta, nucleo, desenvolvimento, publicada, núcleo, ptah, thoth, refeito, main, mantendo, agata, fluxo, consolidado, decisão, humano, substitui, aplica, aplicada
-(1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura do Humano (14/11): o ESTADO.md deixa de contar as aplicadas.**
-  palavras-chave: aplicado, estado, aplicadas, assinatura, humano, deixa, contar
+(1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura …
+  palavras-chave: aplicado, estado, aplicadas, assinatura
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedid …
   palavras-chave: proposta, estado, aplicadas, publicada, pedid
 (1008) DIÁRIO — 14/11/2026 · **Aplicado hook-fi-14-11 com a assinatura do Humano …

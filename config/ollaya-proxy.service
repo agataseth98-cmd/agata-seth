@@ -1,0 +1,11 @@
+[Unit]
+Description=Ágata — proxy do Ollaya: encaminha :11435 para o contêiner em :11445; sai após 15 min ociosos
+# Ativado só pelo ollaya.socket (sem [Install]). Ver laya-roteador-proxy.service: o mesmo desenho, com o
+# contêiner Docker como backend. A 1ª chamada depois de ociosidade cai na regra determinística (fail-soft).
+PartOf=agata.target
+Requires=ollaya.service
+After=ollaya.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=15min 127.0.0.1:11445

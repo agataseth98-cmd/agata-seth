@@ -1,0 +1,18 @@
+[Unit]
+Description=Ágata — porta pública do Laya (:11436, só loopback); acorda o laya-roteador sob demanda
+# Sob demanda (decisão do Humano, 17/11/2026: "tudo no sistema deve ser subido de acordo com a necessidade e
+# derrubado após um tempo seguro pré-determinado"). Este socket fica de pé com o agata.target e recebe as
+# chamadas do gateway em 127.0.0.1:11436. A 1ª conexão sobe laya-roteador-proxy.service, que sobe o
+# laya-roteador.service (porta interna :11446). Sem conexão por 15 min, o proxy sai e o backend cai junto
+# (StopWhenUnneeded). O socket continua escutando; quem fica no agata.target é este arquivo, não o backend.
+# ANTES de instalar: o laya-roteador.service antigo tinha [Install] WantedBy=agata.target, e o link
+# em agata.target.wants mantém o backend de pé no target. Rodar `systemctl --user disable laya-roteador.service`
+# com o arquivo antigo ainda instalado, depois parar o backend (ver o procedimento de instalação).
+PartOf=agata.target
+
+[Socket]
+ListenStream=127.0.0.1:11436
+Service=laya-roteador-proxy.service
+
+[Install]
+WantedBy=agata.target

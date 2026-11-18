@@ -374,7 +374,9 @@ def encerrar(como: str) -> int:
         f.unlink()
     print(f"avaliação encerrada: {como}. Trechos de mensagem apagados.")
     if como == "removido":
-        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.service", "laya-roteador.service"])
+        # Sob demanda (17/11/2026): o socket é a porta pública; sem parar o socket, a próxima chamada acordava o backend.
+        subprocess.run(["systemctl", "--user", "disable", "--now", "ollaya.socket", "laya-roteador.socket",
+                        "ollaya-proxy.service", "laya-roteador-proxy.service", "ollaya.service", "laya-roteador.service"])
         print("ollaya e laya-roteador parados e desabilitados: todos os usos já caem na regra determinística. "
               "Falta a proposta P-8 que tira o código (o executor prepara).")
     else:
