@@ -214,7 +214,7 @@
   <p class="estado" data-estado="vazio" hidden>Sem leitura da Máquina ainda. Atualize a leitura em Estado operacional.</p>
   <p class="estado" data-estado="erro" hidden>Não medido: não foi possível ler agora. Valor antigo, se houver, aparece com a hora dele.</p>
 </div>
-<nav class="abas" aria-label="Subpainéis de Sistema"><button type="button" data-sub="operacao" aria-controls="sub-operacao" aria-selected="true">Estado operacional</button><button type="button" data-sub="integracoes" aria-controls="sub-integracoes" aria-selected="false">Integrações</button><button type="button" data-sub="modelos" aria-controls="sub-modelos" aria-selected="false">Modelos & rota</button><button type="button" data-sub="manutencao" aria-controls="sub-manutencao" aria-selected="false">Manutenção</button><button type="button" data-sub="nv-corpo" aria-controls="sub-nv-corpo" aria-selected="false">Corpo operacional</button><button type="button" data-sub="nv-metacognicao" aria-controls="sub-nv-metacognicao" aria-selected="false">Metacognição</button><button type="button" data-sub="nv-conexoes" aria-controls="sub-nv-conexoes" aria-selected="false">Conexões de modelos</button><button type="button" data-sub="equipe" aria-controls="sub-equipe" aria-selected="false">Equipe</button><button type="button" data-sub="backup" aria-controls="sub-backup" aria-selected="false">Backup</button><button type="button" data-sub="saida-rede" aria-controls="sub-saida-rede" aria-selected="false">Saída de rede</button></nav>
+<nav class="abas" aria-label="Subpainéis de Sistema"><button type="button" data-sub="operacao" aria-controls="sub-operacao" aria-selected="true">Estado operacional</button><button type="button" data-sub="integracoes" aria-controls="sub-integracoes" aria-selected="false">Integrações</button><button type="button" data-sub="modelos" aria-controls="sub-modelos" aria-selected="false">Modelos & rota</button><button type="button" data-sub="manutencao" aria-controls="sub-manutencao" aria-selected="false">Manutenção</button><button type="button" data-sub="catalogo-modelos" aria-controls="sub-catalogo-modelos" aria-selected="false">Catálogo de modelos</button><button type="button" data-sub="nv-corpo" aria-controls="sub-nv-corpo" aria-selected="false">Corpo operacional</button><button type="button" data-sub="nv-metacognicao" aria-controls="sub-nv-metacognicao" aria-selected="false">Metacognição</button><button type="button" data-sub="nv-conexoes" aria-controls="sub-nv-conexoes" aria-selected="false">Conexões de modelos</button><button type="button" data-sub="equipe" aria-controls="sub-equipe" aria-selected="false">Equipe</button><button type="button" data-sub="backup" aria-controls="sub-backup" aria-selected="false">Backup</button><button type="button" data-sub="saida-rede" aria-controls="sub-saida-rede" aria-selected="false">Saída de rede</button></nav>
 <div class="sub" id="sub-operacao" data-sub="operacao" data-secao="sistema">
 
 
@@ -269,6 +269,15 @@
     <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Janela configurada</div><h2 class="panel-title">Tarefas</h2></div></div><div class="service-list" id="maintenance-tasks"><p>Sem leitura.</p></div><p class="subnote">Consolidação produz proposta; promoção de modelo depende do Humano.</p></article></div>
 
 
+</div>
+<div class="sub" id="sub-catalogo-modelos" data-sub="catalogo-modelos" data-secao="sistema" hidden>
+  <div class="section-heading"><div><div class="eyebrow">Catálogo · decisão do Humano</div><h1>Modelos para liberar</h1><p>Cada modelo do catálogo por capacidade e estado, com o veredito da prova quando houver. Liberar ou voltar ao standby só registra a decisão num arquivo; nenhuma rota é alterada por aqui.</p></div><button class="btn secondary" id="mod-recarregar" type="button">Recarregar</button></div>
+  <div class="callout"><span id="mod-resumo" role="status" aria-live="polite">Sem leitura.</span><span class="right">REGISTRA DECISÃO · NÃO ALTERA ROTA</span></div>
+  <div class="mod-filtros"><label class="nv-campo"><span>capacidade</span><select id="mod-filtro-cap"><option value="">todas</option></select></label><label class="nv-campo"><span>provedor</span><select id="mod-filtro-prov"><option value="">todos</option></select></label><label class="nv-campo"><span>estado</span><select id="mod-filtro-estado"><option value="">todos</option></select></label><button class="btn secondary" id="mod-cadastrar" type="button" data-open-page="sistema" data-open-sub="nv-conexoes">Cadastrar provedor e chave</button></div>
+  <div class="nv-tabela-wrap"><table class="nv-tabela" id="mod-tabela"><thead><tr><th>modelo</th><th>provedor</th><th>capacidades</th><th>estado</th><th>acesso</th><th>veredito da prova</th><th>decisão</th></tr></thead><tbody id="mod-lista"></tbody></table></div>
+  <p class="nv-vazio" id="mod-vazio" hidden>Nenhum modelo com esse filtro.</p>
+  <p class="nv-nota" id="mod-nota" role="status" aria-live="polite">Para cadastrar um provedor novo, use Cadastrar provedor e chave (abre Conexões de modelos). A chave nunca volta para a tela.</p>
+  <dialog class="mod-confirma" id="mod-dialogo" aria-labelledby="mod-dialogo-titulo"><form method="dialog" class="dialog-inner"><h2 id="mod-dialogo-titulo">Confirmar decisão</h2><p id="mod-dialogo-texto"></p><label class="nv-campo largo"><span>seu nome (fica no registro)</span><input id="mod-quem" type="text" maxlength="60" autocomplete="off"></label><div class="nv-acoes"><button class="btn" id="mod-confirmar" value="ok">Confirmar</button><button class="btn secondary" id="mod-cancelar" value="cancelar">Cancelar</button></div></form></dialog>
 </div>
 <div class="sub nv-page" id="sub-nv-corpo" data-sub="nv-corpo" data-secao="sistema" hidden>
 <div class="section-heading"><div><div class="eyebrow">Nova versão · estado da Máquina</div><h1>Corpo operacional</h1><p>Fotografia datada, só leitura: serviços, portas, recursos e modelos. Saúde em cinco estados. Dado ausente aparece como não medido; serviço sob demanda parado não é falha.</p></div></div>
@@ -531,6 +540,7 @@
 <script src="abrir.js"></script>
 <script src="nova_versao.js"></script>
 <script src="historia.js" defer></script>
+<script src="modelos.js" defer></script>
 <script src="conselho-rede/app.js" defer></script>
 <script src="operator_console/app.js" defer></script>
 </body>

@@ -897,3 +897,17 @@ body:has(#conversa:not([hidden])) main{height:100vh;height:100dvh;overflow:hidde
 .resultado{margin:0 0 4px;font:600 var(--fs-4)/1.4 var(--sans);color:var(--ink)}
 .cap-estado{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 8px}
 .cap-hora{font-size:var(--fs-1);color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ===== Catálogo de modelos (18/11/2026) ===== */
+.mod-filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end;margin:12px 0}
+.mod-filtros .nv-campo select{width:100%}
+#mod-tabela td{vertical-align:top}
+.mod-nome{min-width:190px}
+.mod-id{margin-top:2px;font:var(--fs-1)/1.4 var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.mod-acoes{min-width:170px}
+.mod-acoes .btn{display:block;margin-bottom:6px;white-space:normal}
+.mod-fixo{display:block;margin-bottom:6px;font-size:var(--fs-2);color:var(--muted)}
+#mod-tabela .nv-selo{margin:0 4px 4px 0}
+.mod-confirma form{display:flex;flex-direction:column;gap:12px}
+.mod-acesso,.mod-ver{min-width:150px}
+.mod-acesso .mod-id{max-width:240px}
