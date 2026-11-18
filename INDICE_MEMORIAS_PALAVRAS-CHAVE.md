@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1042) DIÁRIO — 18/11/2026 · **Aplicada modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando.** Assinada pelo Humano. Nota: a entrada da aplicação de seth-base-17-11 registrou Claude Opus 5.5 como modelo, mas quem executou foi o agente Claude Haiku 5.5 orquestrado pelo Opus; esta nota corrige o registro. O roteiro de instalação de sob-demanda-17-11 omitiu o relink dos backends laya-roteador.service e ollaya.service, refeito na instalação.
+  palavras-chave: aplicada, modelos, pagos, modelo, inclusive, pago, entra, agata, comando, assinada, humano, nota, entrada, aplicação, seth, base, registrou, claude, opus, quem, executou, agente, haiku, orquestrado, corrige, registro, roteiro, instalação, sob, demanda, omitiu, relink, backends, laya, roteador, service, ollaya, refeito
 (1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth registra o modelo servido, mantém cabeçalho único e converte tool_call em texto só sob regra estrita.** Assinada pelo Humano; o seletor SETH_ROTEADOR fica no padrão legado e SETH_TOOLCALL_TEXTO=0 desliga o conversor.
   palavras-chave: aplicada, seth, base, gateway, registra, modelo, servido, mantém, cabeçalho, único, converte, tool, call, texto, sob, regra, estrita, assinada, humano, seletor, roteador, fica, padrão, legado, toolcall, desliga, conversor
 (1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem na primeira chamada e caem após 15 minutos ociosos.** Sockets e proxies do systemd assinados pelo Humano entram no repositório; a instalação na Máquina segue a ordem do registro da proposta.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicado, teste, comparativo, assinatura, humano, desenho, redesign, rodada, autorizada, ela, pede, aprovação, parte
 (1013) DIÁRIO — 14/11/2026 · **Proposta teste-comparativo-14-11 publicada: o desenho do teste comparativo (Agata, chat sem processo e spec leve) refeito e guardado em redesign/teste_comparativo/, por decisão do Humano de 14/11. Só documento; a rodada pede aprovação à parte.**
   palavras-chave: proposta, teste, comparativo, publicada, desenho, agata, chat, processo, spec, leve, refeito, guardado, redesign, decisão, humano, documento, rodada, pede, aprovação, parte
-(1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
-  palavras-chave: aplicado, nucleo, desenvolvimento, assinatura, humano, núcleo, ptah, thoth, entra, agata, fluxo, consolidado, linha, processo, gateway, spec, testes
+(1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a as …
+  palavras-chave: aplicado, nucleo, desenvolvimento
 (1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicad …
   palavras-chave: proposta, nucleo, desenvolvimento, publicad
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura …

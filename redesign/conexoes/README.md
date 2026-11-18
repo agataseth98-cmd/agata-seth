@@ -19,6 +19,19 @@ A nova versão do Agata fala com qualquer modelo pelo mesmo contrato. Claude e C
    - **outro provedor:** em "Adicionar pelo mesmo formato", informe id, nome, formato (`openai` serve para qualquer API compatível) e a URL `https` do endpoint de chat.
 3. Clique em **Testar rotas**. São três provas fixas (conversa, JSON, código), sem nenhum texto seu. O resultado diz qual rota passou em qual capacidade. Só a rota testada conta como redundância.
 
+## Adicionar um modelo pago em um comando
+
+```
+python3 redesign/conexoes/configurar.py adicionar --id meu-openai --base-url https://api.openai.com/v1 --chave-env OPENAI_API_KEY --modelos <modelo> --tarifa-entrada <USD> --tarifa-saida <USD> --cambio <BRL> --tarifa-fonte <pagina-de-precos> --tarifa-data AAAA-MM-DD
+```
+
+- `claude` e `chatgpt` já vêm no catálogo: para outro modelo, escolha outro `--id`. `--formato anthropic` serve à API da Anthropic (`--base-url https://api.anthropic.com/v1`).
+- `--base-url` também aceita o gateway local `http://127.0.0.1:20127/v1` (sanitizador na frente do OmniRoute).
+- `--chave-env` é o NOME da variável, nunca a chave: grave a chave no painel (aba Conexões) ou exporte a variável.
+- Tarifa em US$ por milhão de tokens, câmbio em R$ por US$, fonte e data: os cinco campos vão juntos. Sem tarifa, a chamada é recusada (`custo`); a tarifa também pode ser definida na aba Conexões do painel.
+- Sem a categoria `pago` ligada no painel, a chamada é recusada (`orcamento`).
+- `configurar.py listar` mostra os provedores, o endpoint e se a chave existe, só pelo nome.
+
 ## Ligar um provedor pelo catálogo (para quem mantém o repo)
 
 Acrescente um bloco em `provedores.json`, copiando o de `claude` ou `chatgpt`:
