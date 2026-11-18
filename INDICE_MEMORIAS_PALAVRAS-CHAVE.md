@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth registra o modelo servido, mantém cabeçalho único e converte tool_call em texto só sob regra estrita.** Assinada pelo Humano; o seletor SETH_ROTEADOR fica no padrão legado e SETH_TOOLCALL_TEXTO=0 desliga o conversor.
+  palavras-chave: aplicada, seth, base, gateway, registra, modelo, servido, mantém, cabeçalho, único, converte, tool, call, texto, sob, regra, estrita, assinada, humano, seletor, roteador, fica, padrão, legado, toolcall, desliga, conversor
 (1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem na primeira chamada e caem após 15 minutos ociosos.** Sockets e proxies do systemd assinados pelo Humano entram no repositório; a instalação na Máquina segue a ordem do registro da proposta.
   palavras-chave: aplicada, sob, demanda, laya, jev, sobem, primeira, chamada, caem, após, minutos, ociosos, sockets, proxies, systemd, assinados, humano, entram, repositório, instalação, máquina, segue, ordem, registro, proposta
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, para todos os modelos.** A regra entrou na lista Sempre do AGENTS.md, assinada pelo Humano; o teste de sincronia conta 16 regras.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, teste, comparativo, publicada, desenho, agata, chat, processo, spec, leve, refeito, guardado, redesign, decisão, humano, documento, rodada, pede, aprovação, parte
 (1012) DIÁRIO — 14/11/2026 · **Aplicado nucleo-desenvolvimento-v2-14-11 com a assinatura do Humano (14/11): o núcleo Ma'at, Ptah e Thoth entra no agata-fluxo consolidado, com a linha PROCESSO no gateway e a spec e os testes do núcleo no CI.**
   palavras-chave: aplicado, nucleo, desenvolvimento, assinatura, humano, núcleo, ptah, thoth, entra, agata, fluxo, consolidado, linha, processo, gateway, spec, testes
-(1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicada: o núcleo de desenvolvimento (Ma'at, Ptah, Thoth) refeito sobre o main, mantendo o agata-fluxo consolidado, por decisão do Humano de 14/11. Substitui nucleo-desenvolvimento-07-11, que não aplica mais. Não aplicada.**
-  palavras-chave: proposta, nucleo, desenvolvimento, publicada, núcleo, ptah, thoth, refeito, main, mantendo, agata, fluxo, consolidado, decisão, humano, substitui, aplica, aplicada
+(1011) DIÁRIO — 14/11/2026 · **Proposta nucleo-desenvolvimento-v2-14-11 publicad …
+  palavras-chave: proposta, nucleo, desenvolvimento, publicad
 (1010) DIÁRIO — 14/11/2026 · **Aplicado estado-aplicadas-14-11 com a assinatura …
   palavras-chave: aplicado, estado, aplicadas, assinatura
 (1009) DIÁRIO — 14/11/2026 · **Proposta estado-aplicadas-14-11 publicada a pedid …
