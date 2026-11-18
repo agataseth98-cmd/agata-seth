@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1050) DIÁRIO — 18/11/2026 · **Proposta agentes-skills-18-11b: rebase de agentes-skills-18-11 sobre o main atual; conteúdo idêntico.** A assinatura de 18/11 (10:08) não aplicava mais: verificar-refazer-18-11 acrescentou uma linha no mesmo trecho de redesign/router/spec/spec.md. Só o contexto desse trecho mudou; as linhas +/- são as mesmas (684 nos dois diffs). Modelo: Haiku orquestrado pelo Opus. Não medido: aplicação. Assinatura pendente: bash scripts/aprovar.sh agentes-skills-18-11b.
+  palavras-chave: proposta, agentes, skills, rebase, main, atual, conteúdo, idêntico, assinatura, aplicava, verificar, refazer, acrescentou, linha, mesmo, trecho, redesign, router, spec, contexto, desse, mudou, linhas, mesmas, diffs, modelo, haiku, orquestrado, opus, medido, aplicação, pendente, bash, scripts, aprovar
 (1049) DIÁRIO — 18/11/2026 · **Aplicada competicao-locais-18-11: o llama.cpp conta como local no gateway e no benchmark.** Assinada pelo Humano. Inclui a correção do roteiro de instalação do sob-demanda (relink dos backends).
   palavras-chave: aplicada, competicao, locais, llama, cpp, conta, local, gateway, benchmark, assinada, humano, inclui, correção, roteiro, instalação, sob, demanda, relink, backends
 (1048) DIÁRIO — 18/11/2026 · **Proposta competicao-locais-18-11: llama-cpp conta como local no benchmark e no gateway; roteiro de sob-demanda ganha os backends.** Atende a competição dos modelos locais (L6, "pode fazer" do Humano em 17/11). llama-cpp/ e llamacpp- entram na lista local do benchmark e do gateway: pedido sem classificação deixa de cair no 403 de dados externos. Passo novo no CI roda os testes do benchmark. Correção do roteiro: faltou relinkar laya-roteador.service e ollaya.service (os proxies de socket exigem o backend). Não medido: requisição real a llama-cpp pelo gateway. Assinatura pendente: bash scripts/aprovar.sh competicao-locais-18-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, painel, funcional, supera, assinada, entrou
 (1021) DIÁRIO — 16/11/2026 · **Proposta painel-funcional-16-11: painel sem o chat antigo, com estados honestos e estilo consolidado.**
   palavras-chave: proposta, painel, funcional, chat, antigo, estados, honestos, estilo, consolidado
-(1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
-  palavras-chave: aplicada, robustez, assinada, humano, aplicar, espera, checks, decidir, compilação, rust, nice, critério, dia
+(1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em …
+  palavras-chave: aplicada, robustez, assinada, humano
 (1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinad …
   palavras-chave: aplicada, teste, ponteiro, rastreados, assinad
 (1018) DIÁRIO — 16/11/2026 · **Aplicada socks5-rust-15-11 (assinada pelo Humano …
