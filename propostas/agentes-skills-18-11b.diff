@@ -1,0 +1,814 @@
+diff --git a/.claude/agents/agata-ci.md b/.claude/agents/agata-ci.md
+index 4e6e1e80..d12db904 100644
+--- a/.claude/agents/agata-ci.md
++++ b/.claude/agents/agata-ci.md
+@@ -16,6 +16,18 @@ Passos:
+ 
+ Resposta em texto: total de passos OK e com falha, causas agrupadas, correções mínimas, e o que você não conseguiu confirmar.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Antes de começar, leia a memória deste agente (fica fora do cache que reinicia):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-ci/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Ao terminar, para cada skill que usou, registre o desfecho. Ele fica pendente até o coordenador conferir, e pendente não conta para a taxa:
++`python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-ci --tarefa <tarefa>`
++Os nomes são slugs (minúsculas, números, `.`, `_`, `-`). Na resposta final, informe o id devolvido.
++
++Anote a lição, sem segredo nem dado pessoal:
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-ci/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-ci --tipo nota "<lição>"`
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-dev.md b/.claude/agents/agata-dev.md
+index 18296582..a973a7fe 100644
+--- a/.claude/agents/agata-dev.md
++++ b/.claude/agents/agata-dev.md
+@@ -19,6 +19,18 @@ Regras que não se negociam:
+ 
+ Resposta final, em texto: arquivos alterados (caminho), o que cada um faz, saída dos testes, e o que ficou de fora. Relatório é alegação: quem chamou vai conferir.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Antes de começar, leia a memória deste agente (fica fora do cache que reinicia):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-dev/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Ao terminar, para cada skill que usou, registre o desfecho. Ele fica pendente até o coordenador conferir, e pendente não conta para a taxa:
++`python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-dev --tarefa <tarefa>`
++Os nomes são slugs (minúsculas, números, `.`, `_`, `-`). Na resposta final, informe o id devolvido.
++
++Anote a lição, sem segredo nem dado pessoal:
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-dev/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-dev --tipo nota "<lição>"`
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-arquiteto.md b/.claude/agents/agata-inov-arquiteto.md
+index bffd59dc..d4263df6 100644
+--- a/.claude/agents/agata-inov-arquiteto.md
++++ b/.claude/agents/agata-inov-arquiteto.md
+@@ -23,6 +23,18 @@ Regras:
+ 
+ Resposta em texto: caminhos escritos, o que cada critério prova, e as lacunas.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Antes de começar, leia a memória deste agente (fica fora do cache que reinicia):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-arquiteto/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Ao terminar, para cada skill que usou, registre o desfecho. Ele fica pendente até o coordenador conferir, e pendente não conta para a taxa:
++`python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-inov-arquiteto --tarefa <tarefa>`
++Os nomes são slugs (minúsculas, números, `.`, `_`, `-`). Na resposta final, informe o id devolvido.
++
++Anote a lição, sem segredo nem dado pessoal:
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-arquiteto/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-inov-arquiteto --tipo nota "<lição>"`
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-critico.md b/.claude/agents/agata-inov-critico.md
+index 69a4adb9..880c4654 100644
+--- a/.claude/agents/agata-inov-critico.md
++++ b/.claude/agents/agata-inov-critico.md
+@@ -18,6 +18,15 @@ Confira, nesta ordem:
+ 
+ Resposta em texto, em português: veredito por item (ok, problema, não verificado), com arquivo:linha. Termine com uma linha: "recomendação ao Humano: avançar, reduzir escopo ou arquivar", com a razão. Você não decide.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-critico/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-inov-critico --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-critico/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-inov-critico --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-inov-pesquisa.md b/.claude/agents/agata-inov-pesquisa.md
+index 54679367..30938ea9 100644
+--- a/.claude/agents/agata-inov-pesquisa.md
++++ b/.claude/agents/agata-inov-pesquisa.md
+@@ -22,6 +22,15 @@ Para cada ideia (no máximo 5 por rodada), entregue:
+ 
+ Resposta em texto, em português, numerada. Não diga que uma ideia é boa; quem decide é o Humano após o crítico e o arquiteto.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-pesquisa/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-inov-pesquisa --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-pesquisa/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-inov-pesquisa --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-painel.md b/.claude/agents/agata-pesq-painel.md
+index aff3a1a9..14086086 100644
+--- a/.claude/agents/agata-pesq-painel.md
++++ b/.claude/agents/agata-pesq-painel.md
+@@ -35,6 +35,15 @@ Regras comuns:
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha); Evidência (arquivo:linha e comando), com uma linha por rota; Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-painel/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-pesq-painel --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-painel/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-pesq-painel --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-processo.md b/.claude/agents/agata-pesq-processo.md
+index b3200090..0cf102d0 100644
+--- a/.claude/agents/agata-pesq-processo.md
++++ b/.claude/agents/agata-pesq-processo.md
+@@ -35,6 +35,15 @@ Regras comuns:
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha com os totais); Evidência (tabela com regra, classe, arquivo:linha ou termos buscados); Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-processo/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-pesq-processo --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-processo/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-pesq-processo --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-pesq-rea.md b/.claude/agents/agata-pesq-rea.md
+index 7f17d295..618316eb 100644
+--- a/.claude/agents/agata-pesq-rea.md
++++ b/.claude/agents/agata-pesq-rea.md
+@@ -31,6 +31,15 @@ Regras comuns:
+ 
+ Formato da resposta, em português, curto: Resultado (uma linha); Evidência (arquivo:linha e comando); Não medido (lista); Próximo passo (uma linha). Declare o modelo que executou esta pesquisa.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-rea/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-pesq-rea --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-pesq-rea/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-pesq-rea --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-revisor.md b/.claude/agents/agata-revisor.md
+index 04abb2b0..113e6a3e 100644
+--- a/.claude/agents/agata-revisor.md
++++ b/.claude/agents/agata-revisor.md
+@@ -26,6 +26,15 @@ Use quando o pedido trouxer só três entradas: `spec.md`, `acceptance.json` e o
+ - Termine com uma linha de contagem: `conforme N, desvio N, não medido N`.
+ - Nunca escreva "aprovado", "pode aplicar" ou equivalente. O veredito é do Humano.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
++
++Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-revisor/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-revisor --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-revisor/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-revisor --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/.claude/agents/agata-spec.md b/.claude/agents/agata-spec.md
+index e0ff061d..26d4b544 100644
+--- a/.claude/agents/agata-spec.md
++++ b/.claude/agents/agata-spec.md
+@@ -18,6 +18,18 @@ Confira antes de responder: `python3 redesign/sdd_flow/anchor.py . redesign/<com
+ Lembre: spec.md é arquivo do P-8. Você não commita; quem propõe é outra etapa.
+ Resposta em texto: arquivos escritos, saída da âncora, e o que não foi possível confirmar.
+ 
++## Memória e desfecho (L8, 18/11/2026)
++
++Antes de começar, leia a memória deste agente (fica fora do cache que reinicia):
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-spec/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
++
++Ao terminar, para cada skill que usou, registre o desfecho. Ele fica pendente até o coordenador conferir, e pendente não conta para a taxa:
++`python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-spec --tarefa <tarefa>`
++Os nomes são slugs (minúsculas, números, `.`, `_`, `-`). Na resposta final, informe o id devolvido.
++
++Anote a lição, sem segredo nem dado pessoal:
++`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-spec/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-spec --tipo nota "<lição>"`
++
+ ## Pacote mínimo (decisão do Humano, 12/11/2026)
+ 
+ Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
+diff --git a/redesign/router/skills_ledger.py b/redesign/router/skills_ledger.py
+new file mode 100644
+index 00000000..2f047a72
+--- /dev/null
++++ b/redesign/router/skills_ledger.py
+@@ -0,0 +1,303 @@
++#!/usr/bin/env python3
++"""skills_ledger.py — desfechos das skills (L8, 18/11/2026): só solução comprovada é recomendada.
++
++Decisão do Humano (18/11/2026, decision.md da pasta l8-agentes-skills): uma skill recomenda solução só com
++taxa de acerto acima de 51% e n >= 10 usos CONFERIDOS. Abaixo disso a solução aparece como "não comprovada"
++e não some.
++
++  - arquivo: ~/.local/share/agata/skills-ledger/<skill>.jsonl (pasta 0700, arquivo 0600), fora do repositório;
++  - só acréscimo; trava flock no arquivo .lock da pasta; nada é apagado nem reescrito;
++  - o agente registra o desfecho (pendente); o coordenador confere (conta); sem conferência, não conta;
++  - guarda só slugs, ids e marcas de tempo: sem texto livre, por isso não passa pelo sanitizador;
++  - linha inválida: registrar, conferir e recalcular recusam e avisam; recalcular não pula linha.
++
++  skills_ledger.py registrar --skill S --erro E --solucao X --resultado acerto|falha --agente A --tarefa T
++  skills_ledger.py conferir --ref ID --por COORD
++  skills_ledger.py recalcular [--skill S]
++
++Saída: registrar e conferir devolvem JSON; recalcular, uma tabela e o total pendente. Código 2 em recusa
++ou linha inválida; 0 no resto (inclusive com solução "não comprovada").
++"""
++from __future__ import annotations
++
++import argparse
++import contextlib
++import fcntl
++import hashlib
++import json
++import os
++import re
++import sys
++from datetime import datetime
++from pathlib import Path
++from zoneinfo import ZoneInfo
++
++REPO = Path(__file__).resolve().parents[2]
++SKILLS = REPO / ".agents" / "skills"  # pasta das skills; os testes trocam por uma temporária
++TZ = ZoneInfo("America/Sao_Paulo")
++SLUG = re.compile(r"[a-z0-9][a-z0-9._-]{0,63}")
++ID = re.compile(r"[0-9a-f]{16}")
++RESULTADOS = ("acerto", "falha")
++LIMIAR_PCT = 51  # D1: acertos*100 > 51*usos
++MIN_USOS = 10    # D1: n >= 10 usos conferidos
++CHAVES_DESFECHO = frozenset({"tipo", "id", "skill", "erro", "solucao", "resultado", "agente", "tarefa", "ts"})
++CHAVES_CONFERENCIA = frozenset({"tipo", "ref", "por", "ts"})
++CAMPOS_SLUG = ("skill", "erro", "solucao", "agente", "tarefa")
++
++
++class LedgerRecusado(ValueError):
++    """Operação recusada: slug inválido, skill sem pasta, duplicata, id inexistente ou já conferido."""
++
++
++class LedgerInvalido(ValueError):
++    """Há linha inválida num ledger; nada é gravado nem calculado sobre ele."""
++
++    def __init__(self, erros: list[str]):
++        self.erros = erros
++        super().__init__(f"{len(erros)} linha(s) inválida(s)")
++
++
++def _pasta() -> Path:
++    return Path(os.path.expanduser("~/.local/share/agata/skills-ledger"))
++
++
++def _agora() -> str:
++    return datetime.now(TZ).strftime("%Y-%m-%dT%H:%M:%S%z")
++
++
++def _id_de(tarefa: str, skill: str, solucao: str, agente: str) -> str:
++    return hashlib.sha256(json.dumps([tarefa, skill, solucao, agente]).encode("utf-8")).hexdigest()[:16]
++
++
++def _slug(valor, campo: str) -> str:
++    if not isinstance(valor, str) or not SLUG.fullmatch(valor):
++        raise LedgerRecusado(f"{campo} inválido: use slug (minúsculas, números, '.', '_', '-'; até 64 caracteres)")
++    return valor
++
++
++def _status(acertos: int, usos: int) -> str:
++    return "comprovada" if usos >= MIN_USOS and acertos * 100 > LIMIAR_PCT * usos else "não comprovada"
++
++
++def _motivo(reg, skill: str, desfechos: dict, conferidos: set) -> str | None:
++    """Motivo da linha ser inválida, ou None. Confere esquema, slugs, id, ordem e duplicidade."""
++    if not isinstance(reg, dict):
++        return "não é objeto JSON"
++    tipo = reg.get("tipo")
++    if tipo == "desfecho":
++        if set(reg) != CHAVES_DESFECHO:
++            return "campos do desfecho não batem com o esquema"
++        for campo in CAMPOS_SLUG:
++            if not isinstance(reg[campo], str) or not SLUG.fullmatch(reg[campo]):
++                return f"{campo} não é slug"
++        if reg["skill"] != skill:
++            return "skill não bate com o nome do arquivo"
++        if reg["resultado"] not in RESULTADOS:
++            return "resultado fora de acerto|falha"
++        if not isinstance(reg["id"], str) or not ID.fullmatch(reg["id"]):
++            return "id com formato inválido"
++        if reg["id"] != _id_de(reg["tarefa"], reg["skill"], reg["solucao"], reg["agente"]):
++            return "id não bate com (tarefa, skill, solução, agente)"
++        if reg["id"] in desfechos:
++            return "id duplicado"
++        if not isinstance(reg["ts"], str):
++            return "ts inválido"
++        return None
++    if tipo == "conferencia":
++        if set(reg) != CHAVES_CONFERENCIA:
++            return "campos da conferência não batem com o esquema"
++        if not isinstance(reg["ref"], str) or reg["ref"] not in desfechos:
++            return "conferência de id inexistente antes dela neste ledger"
++        if reg["ref"] in conferidos:
++            return "id já conferido"
++        if not isinstance(reg["por"], str) or not SLUG.fullmatch(reg["por"]):
++            return "por não é slug"
++        if not isinstance(reg["ts"], str):
++            return "ts inválido"
++        return None
++    return f"tipo desconhecido: {tipo!r}"
++
++
++def _ler(arq: Path) -> tuple[list[dict], list[str]]:
++    """Devolve (linhas válidas, erros) de um ledger. Linha inválida vira erro; nunca some em silêncio."""
++    if not arq.exists():
++        return [], []
++    validas: list[dict] = []
++    erros: list[str] = []
++    desfechos: dict[str, dict] = {}
++    conferidos: set[str] = set()
++    for n, bruto in enumerate(arq.read_bytes().split(b"\n"), 1):
++        if not bruto.strip():
++            continue
++        rotulo = f"{arq.name} linha {n}"
++        try:
++            reg = json.loads(bruto)
++        except ValueError:
++            erros.append(f"{rotulo}: não é JSON")
++            continue
++        motivo = _motivo(reg, arq.stem, desfechos, conferidos)
++        if motivo:
++            erros.append(f"{rotulo}: {motivo}")
++            continue
++        if reg["tipo"] == "desfecho":
++            desfechos[reg["id"]] = reg
++        else:
++            conferidos.add(reg["ref"])
++        validas.append(reg)
++    return validas, erros
++
++
++def _acrescentar(arq: Path, reg: dict) -> None:
++    linha = json.dumps(reg, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
++    fd = os.open(arq, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
++    try:
++        while linha:
++            linha = linha[os.write(fd, linha):]
++        os.fsync(fd)
++    finally:
++        os.close(fd)
++    dfd = os.open(arq.parent, os.O_RDONLY)
++    try:
++        os.fsync(dfd)
++    finally:
++        os.close(dfd)
++
++
++@contextlib.contextmanager
++def _travado():
++    """Trava exclusiva da pasta do ledger (flock no .lock). Cria a pasta 0700 se faltar."""
++    pasta = _pasta()
++    pasta.mkdir(parents=True, exist_ok=True)
++    os.chmod(pasta, 0o700)
++    fd = os.open(pasta / ".lock", os.O_RDWR | os.O_CREAT, 0o600)
++    try:
++        fcntl.flock(fd, fcntl.LOCK_EX)
++        yield pasta
++    finally:
++        os.close(fd)
++
++
++def registrar(skill: str, erro: str, solucao: str, resultado: str, agente: str, tarefa: str) -> str:
++    """Grava um desfecho pendente e devolve o id (16 hex, derivado de tarefa, skill, solução e agente)."""
++    for campo, valor in (("--skill", skill), ("--erro", erro), ("--solucao", solucao),
++                         ("--agente", agente), ("--tarefa", tarefa)):
++        _slug(valor, campo)
++    if not (SKILLS / skill).is_dir():
++        raise LedgerRecusado(f"skill sem pasta em .agents/skills/{skill}/")
++    if resultado not in RESULTADOS:
++        raise LedgerRecusado("--resultado deve ser acerto ou falha")
++    id_ = _id_de(tarefa, skill, solucao, agente)
++    with _travado() as pasta:
++        arq = pasta / f"{skill}.jsonl"
++        validas, erros = _ler(arq)
++        if erros:
++            raise LedgerInvalido(erros)
++        if any(r["tipo"] == "desfecho" and r["id"] == id_ for r in validas):
++            raise LedgerRecusado(f"duplicata: (tarefa, skill, solução, agente) já registrada, id {id_}")
++        _acrescentar(arq, {"tipo": "desfecho", "id": id_, "skill": skill, "erro": erro, "solucao": solucao,
++                           "resultado": resultado, "agente": agente, "tarefa": tarefa, "ts": _agora()})
++    return id_
++
++
++def conferir(ref: str, por: str) -> dict:
++    """Acrescenta a conferência de um desfecho. Recusa id inexistente e id já conferido."""
++    _slug(por, "--por")
++    if not isinstance(ref, str) or not ID.fullmatch(ref):
++        raise LedgerRecusado("--ref deve ser o id de 16 caracteres hexadecimais devolvido por registrar")
++    with _travado() as pasta:
++        for arq in sorted(pasta.glob("*.jsonl")):
++            validas, erros = _ler(arq)
++            if erros:
++                raise LedgerInvalido(erros)
++            achados = [r for r in validas if r["tipo"] == "desfecho" and r["id"] == ref]
++            if not achados:
++                continue
++            if any(r["tipo"] == "conferencia" and r["ref"] == ref for r in validas):
++                raise LedgerRecusado(f"id {ref} já conferido; cada desfecho é conferido uma vez")
++            _acrescentar(arq, {"tipo": "conferencia", "ref": ref, "por": por, "ts": _agora()})
++            return {"ok": True, "ref": ref, "skill": achados[0]["skill"], "por": por}
++    raise LedgerRecusado(f"id inexistente no ledger: {ref}")
++
++
++def recalcular(skill: str | None = None) -> tuple[list[dict], int]:
++    """Devolve (linhas da tabela, pendentes). Solução sem conferência entra com usos 0 e 'não comprovada'."""
++    if skill is not None:
++        _slug(skill, "--skill")
++    with _travado() as pasta:
++        arquivos = [pasta / f"{skill}.jsonl"] if skill else sorted(pasta.glob("*.jsonl"))
++        lidos, erros = [], []
++        for arq in arquivos:
++            validas, errs = _ler(arq)
++            lidos.append(validas)
++            erros += errs
++    if erros:
++        raise LedgerInvalido(erros)
++    contas: dict[tuple[str, str, str], dict] = {}
++    pendentes = 0
++    for validas in lidos:
++        conferidos = {r["ref"] for r in validas if r["tipo"] == "conferencia"}
++        for r in validas:
++            if r["tipo"] != "desfecho":
++                continue
++            conta = contas.setdefault((r["skill"], r["erro"], r["solucao"]), {"usos": 0, "acertos": 0})
++            if r["id"] in conferidos:
++                conta["usos"] += 1
++                conta["acertos"] += int(r["resultado"] == "acerto")
++            else:
++                pendentes += 1
++    rows = []
++    for (s, e, x), conta in sorted(contas.items()):
++        usos, acertos = conta["usos"], conta["acertos"]
++        rows.append({"skill": s, "erro": e, "solucao": x, "usos": usos, "acertos": acertos,
++                     "taxa": (100 * acertos / usos) if usos else None, "status": _status(acertos, usos)})
++    return rows, pendentes
++
++
++def formatar(rows: list[dict], pendentes: int) -> str:
++    if not rows:
++        corpo = ["ledger sem desfechos registrados"]
++    else:
++        corpo = ["skill | erro | solução | usos | acertos | taxa | status"]
++        for r in rows:
++            taxa = "-" if r["taxa"] is None else f"{r['taxa']:.1f}%"
++            corpo.append(f"{r['skill']} | {r['erro']} | {r['solucao']} | {r['usos']} | {r['acertos']} | "
++                         f"{taxa} | {r['status']}")
++    corpo.append(f"pendentes sem conferência: {pendentes}")
++    return "\n".join(corpo)
++
++
++def main(argv: list[str] | None = None) -> int:
++    ap = argparse.ArgumentParser(description="Desfechos das skills: registrar, conferir, recalcular (L8)")
++    sub = ap.add_subparsers(dest="cmd", required=True)
++    r = sub.add_parser("registrar", help="grava desfecho pendente e devolve o id")
++    for flag in ("--skill", "--erro", "--solucao", "--agente", "--tarefa"):
++        r.add_argument(flag, required=True)
++    r.add_argument("--resultado", required=True, choices=RESULTADOS)
++    c = sub.add_parser("conferir", help="confere um desfecho (conta na taxa)")
++    c.add_argument("--ref", required=True)
++    c.add_argument("--por", required=True)
++    k = sub.add_parser("recalcular", help="tabela de taxa e status por solução")
++    k.add_argument("--skill", default=None)
++    a = ap.parse_args(argv)
++    try:
++        if a.cmd == "registrar":
++            id_ = registrar(a.skill, a.erro, a.solucao, a.resultado, a.agente, a.tarefa)
++            print(json.dumps({"ok": True, "id": id_, "pendente": True}, ensure_ascii=False))
++        elif a.cmd == "conferir":
++            print(json.dumps(conferir(a.ref, a.por), ensure_ascii=False))
++        else:
++            rows, pendentes = recalcular(a.skill)
++            print(formatar(rows, pendentes))
++        return 0
++    except LedgerInvalido as e:
++        print("recusado: ledger com linha inválida; corrija antes de gravar ou recalcular:", file=sys.stderr)
++        for m in e.erros:
++            print(f"  {m}", file=sys.stderr)
++        return 2
++    except LedgerRecusado as e:
++        print(f"recusado: {e}", file=sys.stderr)
++        return 2
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/redesign/router/spec/spec.md b/redesign/router/spec/spec.md
+index 67f16d4e..cfc8528f 100644
+--- a/redesign/router/spec/spec.md
++++ b/redesign/router/spec/spec.md
+@@ -127,3 +127,5 @@ Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DO
+ - `auditoria_turno.py` (verificação de divergência: `divergencia_turno` e `--verificar --sessao`)
+ - `test_seth_base.py` (testes da base do roteador, 17/11/2026: ferramenta escrita como texto vira tool_calls, cabeçalho sem duplicata, served_by no log e modo do roteador; sem rede)
+ - `test_verificar_refazer.py` (verificar e refazer, 18/11/2026: gateway real com upstream falso em HTTP local; teto de tentativas e de segundos, canário, chave SETH_REFAZER=0, legado intacto, stream, escalada de fila; sem rede)
++- `skills_ledger.py` (desfechos das skills, L8, 18/11/2026: registrar, conferir e recalcular; só solução com taxa acima de 51% e n >= 10 usos conferidos é comprovada; as demais ficam como não comprovada, sem sumir)
++- `test_skills_ledger.py` (testes do L8, 18/11/2026: memória do agente fora da pasta do cache, reinício simulado, cache por variável, segredo recusado, definições dos agentes; critérios AC1 a AC13 do L8; HOME temporário)
+diff --git a/redesign/router/test_skills_ledger.py b/redesign/router/test_skills_ledger.py
+new file mode 100644
+index 00000000..2ccc10a1
+--- /dev/null
++++ b/redesign/router/test_skills_ledger.py
+@@ -0,0 +1,277 @@
++"""Testes do L8 (18/11/2026): memória do agente, ledger de desfechos das skills e limiar de 51%.
++
++Os critérios AC1 a AC13 vêm da spec L8 (pasta roteador-capacidade-17-11/l8-agentes-skills, fora do repositório); este arquivo está listado em redesign/router/spec/spec.md (Código). Sem rede, sem provedor.
++Todo caminho é temporário: HOME aponta para uma pasta de teste; AGATA_CACHE_CONSELHO também. Nada toca
++~/.local/share/agata real, e a pasta .agents/skills do repositório é trocada por uma temporária.
++Rodar: pytest -q redesign/router/test_skills_ledger.py
++"""
++import io
++import json
++import os
++import shutil
++import stat
++import subprocess
++import sys
++import tempfile
++import unittest
++from contextlib import redirect_stderr, redirect_stdout
++from pathlib import Path
++from unittest import mock
++
++ROUTER = Path(__file__).resolve().parent
++REPO = ROUTER.parents[1]
++sys.path.insert(0, str(ROUTER))
++
++import skills_ledger as sl  # noqa: E402
++
++CACHE = ROUTER / "cache_conselho.py"
++AGENTES = REPO / ".claude" / "agents"
++# Só leitura no papel: quem registra e anota é o coordenador (decisão do orquestrador, 18/11/2026).
++SO_LEITURA = {"agata-revisor", "agata-inov-critico", "agata-inov-pesquisa",
++              "agata-pesq-painel", "agata-pesq-processo", "agata-pesq-rea"}
++# Montado em tempo de execução: o arquivo de teste não contém segredo literal.
++SEGREDO = "sk-ant-api03-" + "A" * 40
++# Roda main() de skills_ledger com a pasta de skills trocada; uma lista de argv por chamada.
++RUNNER = ("import json, sys; sys.path.insert(0, sys.argv[1]); import skills_ledger as sl; "
++          "from pathlib import Path; sl.SKILLS = Path(sys.argv[2]); "
++          "sys.exit(max(sl.main(a) for a in json.loads(sys.argv[3])))")
++
++
++class _HomeTemporario(unittest.TestCase):
++    def setUp(self):
++        tmp = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp.cleanup)
++        self.raiz = Path(tmp.name)
++        self.home = self.raiz / "home"
++        self.home.mkdir()
++        self.agata = self.home / ".local" / "share" / "agata"
++        self.cache_dir = self.agata / "cache-conselho"
++        self.memoria = self.agata / "agentes" / "agata-dev" / "memoria.jsonl"
++        self.ledger = self.agata / "skills-ledger"
++        patch_env = mock.patch.dict(os.environ, {"HOME": str(self.home)})
++        patch_env.start()
++        self.addCleanup(patch_env.stop)
++
++    def _env_filho(self, caminho=None) -> dict:
++        env = {"HOME": str(self.home), "PATH": os.environ.get("PATH", ""), "PYTHONIOENCODING": "utf-8"}
++        if caminho is not None:
++            env["AGATA_CACHE_CONSELHO"] = str(caminho)
++        return env
++
++    def _cc(self, *args, caminho=None):
++        return subprocess.run([sys.executable, str(CACHE), *args], env=self._env_filho(caminho),
++                              capture_output=True, text=True, encoding="utf-8")
++
++
++class TestMemoriaAgente(_HomeTemporario):
++    def test_memoria_agente_fora_da_pasta_do_cache(self):
++        r = self._cc("anotar", "--autor", "agata-dev", "--tipo", "nota", "lição de teste", caminho=self.memoria)
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertTrue(self.memoria.exists())
++        self.assertNotIn(self.cache_dir, self.memoria.parents)
++        self.assertFalse((self.cache_dir / "cache.jsonl").exists())
++
++    def test_memoria_agente_sobrevive_ao_reinicio_do_cache(self):
++        self.assertEqual(self._cc("anotar", "--autor", "agata-dev", "lição um", caminho=self.memoria).returncode, 0)
++        self.assertEqual(self._cc("anotar", "--autor", "agata-dev", "lição dois", caminho=self.memoria).returncode, 0)
++        # uso normal do cache, no caminho padrão (sem variável): é a pasta que reinicia
++        self.assertEqual(self._cc("anotar", "--autor", "Seth", "entrada do cache").returncode, 0)
++        self.assertTrue(self.cache_dir.exists())
++        antes = self.memoria.read_bytes()
++        shutil.rmtree(self.cache_dir)  # reinício simulado (M4)
++        self.assertFalse(self.cache_dir.exists())
++        self.assertEqual(self.memoria.read_bytes(), antes)
++        v = self._cc("verificar", caminho=self.memoria)
++        self.assertEqual(v.returncode, 0, v.stdout)
++        self.assertIn("OK", v.stdout)
++        lidas = self._cc("ler", "--n", "20", "--autor", "agata-dev", caminho=self.memoria)
++        self.assertIn("lição um", lidas.stdout)
++        self.assertIn("lição dois", lidas.stdout)
++
++    def test_cache_conselho_aceita_caminho_por_ambiente(self):
++        custom = self.raiz / "outro" / "lugar" / "cache.jsonl"
++        r = self._cc("anotar", "--autor", "agata-dev", "nota por ambiente", caminho=custom)
++        self.assertEqual(r.returncode, 0, r.stderr)
++        self.assertTrue(custom.exists())
++        self.assertIn("nota por ambiente", self._cc("ler", caminho=custom).stdout)
++        v = self._cc("verificar", caminho=custom)
++        self.assertEqual(v.returncode, 0)
++        self.assertIn("OK", v.stdout)
++        self.assertFalse(self.cache_dir.exists())
++
++    def test_memoria_agente_recusa_segredo(self):
++        r = self._cc("anotar", "--autor", "agata-dev", "--tipo", "nota", f"lição com chave {SEGREDO}",
++                     caminho=self.memoria)
++        self.assertEqual(r.returncode, 2)
++        self.assertIn("segredo", r.stderr)
++        self.assertFalse(self.memoria.exists())
++
++    def test_definicoes_de_agente_tem_memoria_e_registro(self):
++        arquivos = sorted(AGENTES.glob("agata-*.md"))
++        self.assertGreaterEqual(len(arquivos), 10)
++        for arq in arquivos:
++            stem = arq.stem
++            texto = arq.read_text(encoding="utf-8")
++            with self.subTest(agente=stem):
++                self.assertTrue(texto.startswith("---"))
++                self.assertIn(f"name: {stem}\n", texto)
++                self.assertIn(f"AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/{stem}/memoria.jsonl", texto)
++                self.assertIn("cache_conselho.py ler --n 20", texto)
++                self.assertIn(f"cache_conselho.py anotar --autor {stem}", texto)
++                self.assertIn("skills_ledger.py registrar", texto)
++                if stem in SO_LEITURA:
++                    self.assertIn("--por coordenador", texto)
++
++
++class TestLedger(_HomeTemporario):
++    def setUp(self):
++        super().setUp()
++        self.skills = self.raiz / "skills"
++        for nome in ("agata-fluxo", "agata-painel"):
++            (self.skills / nome).mkdir(parents=True)
++            (self.skills / nome / "SKILL.md").write_text("# teste\n", encoding="utf-8")
++        patch_skills = mock.patch.object(sl, "SKILLS", self.skills)
++        patch_skills.start()
++        self.addCleanup(patch_skills.stop)
++        self.arq = self.ledger / "agata-fluxo.jsonl"
++
++    def _registrar(self, skill, erro, solucao, acertos, falhas, prefixo):
++        ids = []
++        for i in range(acertos + falhas):
++            ids.append(sl.registrar(skill=skill, erro=erro, solucao=solucao,
++                                    resultado="acerto" if i < acertos else "falha",
++                                    agente="agata-dev", tarefa=f"{prefixo}-{i:03d}"))
++        return ids
++
++    def _conferir(self, ids):
++        for id_ in ids:
++            sl.conferir(ref=id_, por="coordenador")
++
++    def _linhas(self, arq=None):
++        return (arq or self.arq).read_text(encoding="utf-8").splitlines()
++
++    def test_registrar_grava_desfecho_pendente(self):
++        id_ = sl.registrar(skill="agata-fluxo", erro="erro-x", solucao="sol-y", resultado="acerto",
++                           agente="agata-dev", tarefa="t-1")
++        self.assertRegex(id_, r"^[0-9a-f]{16}$")
++        linhas = self._linhas()
++        self.assertEqual(len(linhas), 1)
++        reg = json.loads(linhas[0])
++        self.assertEqual((reg["tipo"], reg["id"], reg["resultado"]), ("desfecho", id_, "acerto"))
++        self.assertEqual(stat.S_IMODE(os.stat(self.arq).st_mode), 0o600)
++        rows, pendentes = sl.recalcular()
++        self.assertEqual(pendentes, 1)
++        self.assertEqual(rows[0]["usos"], 0)
++        self.assertEqual(rows[0]["status"], "não comprovada")
++
++    def test_registrar_recusa_skill_inexistente_slug_e_duplicata(self):
++        base = dict(erro="erro-x", solucao="sol-y", resultado="acerto", agente="agata-dev", tarefa="t-1")
++        with self.assertRaises(sl.LedgerRecusado):
++            sl.registrar(skill="skill-fantasma", **base)
++        for ruim in ("Agata Fluxo", "../agata-fluxo", "a/b", "-x", ""):
++            with self.subTest(skill=ruim), self.assertRaises(sl.LedgerRecusado):
++                sl.registrar(**{**base, "skill": ruim})
++        for campo, ruim in (("erro", "Erro Ruim"), ("solucao", "sol/x"), ("agente", ""), ("tarefa", "t 1")):
++            with self.subTest(campo=campo), self.assertRaises(sl.LedgerRecusado):
++                sl.registrar(**{**base, "skill": "agata-fluxo", campo: ruim})
++        sl.registrar(skill="agata-fluxo", **base)
++        with self.assertRaises(sl.LedgerRecusado):
++            sl.registrar(skill="agata-fluxo", **base)
++        with self.assertRaises(sl.LedgerRecusado):
++            sl.registrar(**{**base, "skill": "agata-fluxo", "resultado": "falha"})  # mesma chave, outro desfecho
++        self.assertEqual(len(self._linhas()), 1)
++
++    def test_conferir_so_acrescenta_e_exige_registro(self):
++        id_ = sl.registrar(skill="agata-fluxo", erro="erro-x", solucao="sol-y", resultado="acerto",
++                           agente="agata-dev", tarefa="t-1")
++        antes = self.arq.read_bytes()
++        with self.assertRaises(sl.LedgerRecusado):
++            sl.conferir(ref="0" * 16, por="coordenador")
++        self.assertEqual(self.arq.read_bytes(), antes)
++        sl.conferir(ref=id_, por="coordenador")
++        depois = self.arq.read_bytes()
++        self.assertTrue(depois.startswith(antes))
++        novas = depois[len(antes):].splitlines()
++        self.assertEqual(len(novas), 1)
++        reg = json.loads(novas[0])
++        self.assertEqual((reg["tipo"], reg["ref"], reg["por"]), ("conferencia", id_, "coordenador"))
++        with self.assertRaises(sl.LedgerRecusado):
++            sl.conferir(ref=id_, por="coordenador")  # já conferido: não acrescenta de novo
++        self.assertEqual(self.arq.read_bytes(), depois)
++
++    def test_recalculo_limiar_51_e_n_10(self):
++        casos = [("e-51", "s-51", 51, 49, "não comprovada"),
++                 ("e-52", "s-52", 52, 48, "comprovada"),
++                 ("e-9", "s-9", 9, 0, "não comprovada"),
++                 ("e-6", "s-6", 6, 4, "comprovada")]
++        for erro, sol, acertos, falhas, _ in casos:
++            self._conferir(self._registrar("agata-fluxo", erro, sol, acertos, falhas, f"t-{erro}"))
++        rows, _ = sl.recalcular()
++        por = {(r["erro"], r["solucao"]): r for r in rows}
++        for erro, sol, acertos, falhas, esperado in casos:
++            with self.subTest(caso=f"{acertos} de {acertos + falhas}"):
++                r = por[(erro, sol)]
++                self.assertEqual((r["usos"], r["acertos"]), (acertos + falhas, acertos))
++                self.assertEqual(r["status"], esperado)
++
++    def test_recalculo_ignora_nao_conferido(self):
++        ids = self._registrar("agata-fluxo", "e-10", "s-10", 10, 0, "t-e10")
++        self._conferir(ids[:9])
++        rows, pendentes = sl.recalcular()
++        self.assertEqual((rows[0]["usos"], rows[0]["acertos"], pendentes), (9, 9, 1))
++        self.assertEqual(rows[0]["status"], "não comprovada")
++        self._conferir(ids[9:])
++        rows, pendentes = sl.recalcular()
++        self.assertEqual((rows[0]["usos"], pendentes, rows[0]["status"]), (10, 0, "comprovada"))
++
++    def test_recalculo_mantem_nao_comprovada_na_saida(self):
++        self._conferir(self._registrar("agata-fluxo", "e-30", "s-30", 3, 7, "t-e30"))
++        rows, _ = sl.recalcular()
++        self.assertEqual(len(rows), 1)
++        self.assertEqual(rows[0]["status"], "não comprovada")
++        self.assertAlmostEqual(rows[0]["taxa"], 30.0)
++        saida = io.StringIO()
++        with redirect_stdout(saida):
++            self.assertEqual(sl.main(["recalcular"]), 0)
++        self.assertIn("agata-fluxo | e-30 | s-30 | 10 | 3 | 30.0% | não comprovada", saida.getvalue())
++
++    def test_recalculo_falha_com_linha_invalida(self):
++        sl.registrar(skill="agata-fluxo", erro="erro-x", solucao="sol-y", resultado="acerto",
++                     agente="agata-dev", tarefa="t-1")
++        with self.arq.open("ab") as f:
++            f.write(b"{isto nao e json\n")
++        with self.assertRaises(sl.LedgerInvalido):
++            sl.recalcular()
++        with self.assertRaises(sl.LedgerInvalido):
++            sl.registrar(skill="agata-fluxo", erro="erro-x", solucao="sol-y", resultado="falha",
++                         agente="agata-dev", tarefa="t-2")
++        saida, erro = io.StringIO(), io.StringIO()
++        with redirect_stdout(saida), redirect_stderr(erro):
++            rc = sl.main(["recalcular"])
++        self.assertEqual(rc, 2)
++        self.assertEqual(saida.getvalue(), "")  # sem tabela parcial
++        self.assertIn("linha 2", erro.getvalue())
++        self.assertEqual(len(self._linhas()), 2)  # nada foi gravado sobre o ledger ruim
++
++    def test_registrar_concorrente_nao_perde_linha(self):
++        env = self._env_filho()
++        procs = []
++        for p in range(8):
++            argvs = [["registrar", "--skill", "agata-fluxo", "--erro", "e-conc", "--solucao", "s-conc",
++                      "--resultado", "acerto", "--agente", f"agente-{p}", "--tarefa", f"t-p{p}-{i}"]
++                     for i in range(5)]
++            procs.append(subprocess.Popen([sys.executable, "-c", RUNNER, str(ROUTER), str(self.skills),
++                                           json.dumps(argvs)], env=env, stdout=subprocess.DEVNULL,
++                                          stderr=subprocess.PIPE, text=True))
++        for pr in procs:
++            _, err = pr.communicate(timeout=120)
++            self.assertEqual(pr.returncode, 0, err)
++        linhas = self._linhas()
++        self.assertEqual(len(linhas), 40)
++        self.assertEqual(len({json.loads(l)["id"] for l in linhas}), 40)
++        rows, pendentes = sl.recalcular()
++        self.assertEqual(pendentes, 40)
++
++
++if __name__ == "__main__":
++    unittest.main()
