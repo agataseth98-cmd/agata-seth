@@ -1,0 +1,1155 @@
+diff --git a/redesign/conexoes/README.md b/redesign/conexoes/README.md
+index 6ed8fac5..6b72997d 100644
+--- a/redesign/conexoes/README.md
++++ b/redesign/conexoes/README.md
+@@ -19,6 +19,19 @@ A nova versão do Agata fala com qualquer modelo pelo mesmo contrato. Claude e C
+    - **outro provedor:** em "Adicionar pelo mesmo formato", informe id, nome, formato (`openai` serve para qualquer API compatível) e a URL `https` do endpoint de chat.
+ 3. Clique em **Testar rotas**. São três provas fixas (conversa, JSON, código), sem nenhum texto seu. O resultado diz qual rota passou em qual capacidade. Só a rota testada conta como redundância.
+ 
++## Adicionar um modelo pago em um comando
++
++```
++python3 redesign/conexoes/configurar.py adicionar --id meu-openai --base-url https://api.openai.com/v1 --chave-env OPENAI_API_KEY --modelos <modelo> --tarifa-entrada <USD> --tarifa-saida <USD> --cambio <BRL> --tarifa-fonte <pagina-de-precos> --tarifa-data AAAA-MM-DD
++```
++
++- `claude` e `chatgpt` já vêm no catálogo: para outro modelo, escolha outro `--id`. `--formato anthropic` serve à API da Anthropic (`--base-url https://api.anthropic.com/v1`).
++- `--base-url` também aceita o gateway local `http://127.0.0.1:20127/v1` (sanitizador na frente do OmniRoute).
++- `--chave-env` é o NOME da variável, nunca a chave: grave a chave no painel (aba Conexões) ou exporte a variável.
++- Tarifa em US$ por milhão de tokens, câmbio em R$ por US$, fonte e data: os cinco campos vão juntos. Sem tarifa, a chamada é recusada (`custo`); a tarifa também pode ser definida na aba Conexões do painel.
++- Sem a categoria `pago` ligada no painel, a chamada é recusada (`orcamento`).
++- `configurar.py listar` mostra os provedores, o endpoint e se a chave existe, só pelo nome.
++
+ ## Ligar um provedor pelo catálogo (para quem mantém o repo)
+ 
+ Acrescente um bloco em `provedores.json`, copiando o de `claude` ou `chatgpt`:
+diff --git a/redesign/conexoes/configurar.py b/redesign/conexoes/configurar.py
+new file mode 100644
+index 00000000..3a82f97c
+--- /dev/null
++++ b/redesign/conexoes/configurar.py
+@@ -0,0 +1,445 @@
++#!/usr/bin/env python3
++"""Configurar modelos pela linha de comando: `listar` e `adicionar`.
++
++Decisão do Humano (17/11/2026): "todos os modelos, inclusive os pagos, devem ser usados por
++dentro do sistema Agata obedecendo as mesmas regras, e deve ser fácil configurar".
++
++- `listar`: provedores do catálogo e do cofre local, com o endpoint e se a chave existe.
++  A chave é checada só pelo NOME da variável (`segredos.estado_de`); nenhum valor é lido.
++- `adicionar`: acrescenta ao `provedores.json` um bloco só de API (sem `cli` e sem
++  `navegador`: comando nunca entra por aqui). Recusa id repetido, endpoint com esquema, host
++  ou porta inválidos (fora do gateway local), `--chave-env` que não seja nome de variável e
++  argumento desconhecido. Nenhuma mensagem de erro repete o valor recusado.
++  A leitura, a checagem de id, a gravação do catálogo e a tarifa ficam sob a mesma trava
++  (`flock` no cofre), para que duas adições não se percam. Com `--tarifa-*`, a tarifa é
++  gravada por `adaptadores.ajustar`, o mesmo caminho do painel; se qualquer passo falhar, o
++  o catálogo volta e só a tarifa deste id sai de ajustes, ainda sob a trava.
++
++Regra mecânica do nome de chave: maiúsculas, dígitos e `_`; bloco longo sem `_` é tratado
++como chave crua. Todo modelo adicionado sai por `adaptadores.chamar()`: orçamento,
++privacidade, custo e cofre valem igual para todos. O endpoint muda só o destino.
++
++Uso:
++  configurar.py listar [--json]
++  configurar.py adicionar --id ID --base-url URL --chave-env NOME --modelos a,b
++                          [--formato openai|anthropic] [--nome NOME]
++                          [--tarifa-entrada USD --tarifa-saida USD --cambio BRL
++                           --tarifa-fonte TEXTO --tarifa-data AAAA-MM-DD]
++"""
++from __future__ import annotations
++
++import argparse
++import contextlib
++import datetime
++import fcntl
++import json
++import math
++import os
++import re
++import stat
++import sys
++import tempfile
++from pathlib import Path
++
++AQUI = Path(__file__).resolve().parent
++REPO = AQUI.parents[1]
++for _p in (AQUI, REPO / "redesign" / "nova_versao"):
++    if str(_p) not in sys.path:
++        sys.path.insert(0, str(_p))
++import adaptadores  # noqa: E402
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++import segredos  # noqa: E402
++
++CATALOGO = AQUI / "provedores.json"
++SUFIXO = {"openai": "/chat/completions", "anthropic": "/messages"}
++# Casam com fullmatch. Host: rótulos DNS (sem ponto vazio, sem hífen na borda); porta: 1-65535 (checada à parte).
++RE_HTTPS = re.compile(r"https://([A-Za-z0-9.-]+)(?::(\d+))?(/[\w./%-]*)?")
++RE_LABEL = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
++# Gateway local: :20127 é o sanitizador (à frente); :20128 é o OmniRoute direto.
++RE_GATEWAY = re.compile(r"http://127\.0\.0\.1:(?:20127|20128)(?:/[\w./%-]*)?")
++RE_NOME_VAR = re.compile(r"[A-Z][A-Z0-9_]{2,60}")
++RE_DATA = re.compile(r"\d{4}-\d{2}-\d{2}")
++LOCK_NOME = "provedores.lock"
++MAX_MODELOS = 10
++MSG_URL = ("--base-url precisa ser https (provedor direto) ou o gateway local http://127.0.0.1:20127 "
++           "(sanitizador) ou http://127.0.0.1:20128 (OmniRoute); sem usuário, senha, parâmetros, "
++           "e com host e porta válidos.")
++MSG_CHAVE = ("--chave-env recebe o NOME da variável de ambiente (ex.: OPENAI_API_KEY), nunca a chave. "
++             "A chave é gravada pelo painel (aba Conexões) ou exportada no ambiente; o catálogo não guarda segredo.")
++MSG_TARIFA = ("tarifa: --tarifa-entrada, --tarifa-saida, --cambio, --tarifa-fonte e --tarifa-data vão juntos "
++              "(US$ por milhão de tokens, R$ por US$, fonte e data AAAA-MM-DD)")
++
++
++class _Parser(argparse.ArgumentParser):
++    """argparse repete o argumento desconhecido e o valor inválido na mensagem de erro. Aqui o erro
++    sai só com o uso, sem repetir nenhum valor digitado (um segredo colado no lugar errado não vaza)."""
++
++    def error(self, message: str):
++        self.print_usage(sys.stderr)
++        sys.stderr.write(f"{self.prog}: erro: argumentos inválidos (valores não são repetidos); veja o uso acima\n")
++        raise SystemExit(2)
++
++
++def _url_permitida(url: str) -> bool:
++    if RE_GATEWAY.fullmatch(url):
++        return True
++    m = RE_HTTPS.fullmatch(url)
++    if not m:
++        return False
++    host, porta = m.group(1), m.group(2)
++    if len(host) > 253 or not all(RE_LABEL.fullmatch(rotulo) for rotulo in host.split(".")):
++        return False
++    return porta is None or 1 <= int(porta) <= 65535
++
++
++def _modelo_ok(m) -> bool:
++    return isinstance(m, str) and bool(adaptadores.RE_MODELO.match(m))
++
++
++def validar_nome_var(nome) -> str:
++    """Só nome de variável. Recusa o que tem cara de chave: minúsculas, pontuação, espaço, ou
++    bloco longo sem `_` (chave crua em maiúsculas)."""
++    if not isinstance(nome, str) or not RE_NOME_VAR.fullmatch(nome) or ("_" not in nome and len(nome) > 20):
++        raise ValueError(MSG_CHAVE)
++    return nome
++
++
++def endereco(base_url, formato: str) -> str:
++    """Endpoint de chat a partir da base (…/v1). Se a base já traz o sufixo, não duplica."""
++    if formato not in adaptadores.FORMATOS:
++        raise ValueError("formato inválido: use openai ou anthropic")
++    if not isinstance(base_url, str):
++        raise ValueError(MSG_URL)
++    base = base_url.strip().rstrip("/")
++    url = base if base.endswith(SUFIXO[formato]) else base + SUFIXO[formato]
++    if not _url_permitida(url):
++        raise ValueError(MSG_URL)
++    return url
++
++
++def modelos_de(texto) -> list[str]:
++    if not isinstance(texto, str):
++        raise ValueError("--modelos recebe uma lista separada por vírgula")
++    itens = [m.strip() for m in texto.split(",") if m.strip()]
++    if not itens or len(itens) > MAX_MODELOS:
++        raise ValueError(f"--modelos precisa de 1 a {MAX_MODELOS} modelos, separados por vírgula")
++    if not all(_modelo_ok(m) for m in itens):
++        raise ValueError("modelo com caractere inválido: use letras, números e . _ : / @ -")
++    if len(set(itens)) != len(itens):
++        raise ValueError("modelo repetido em --modelos")
++    return itens
++
++
++def _numero(valor, nome: str, lo: float, hi: float, aberto: bool = False) -> float:
++    if isinstance(valor, str):
++        valor = valor.strip().replace(",", ".")
++    try:
++        x = float(valor)
++    except (TypeError, ValueError):
++        raise ValueError(f"{nome} precisa ser um número") from None
++    dentro = (lo < x if aberto else lo <= x) and x <= hi
++    if not math.isfinite(x) or not dentro:
++        raise ValueError(f"{nome} fora do limite")
++    return x
++
++
++def _tarifa(entrada, saida, cambio, fonte, data) -> dict | None:
++    """Mesmas regras de `adaptadores.ajustar`, validadas antes de qualquer gravação."""
++    campos = (entrada, saida, cambio, fonte, data)
++    if all(c is None for c in campos):
++        return None
++    if any(c is None for c in campos):
++        raise ValueError(MSG_TARIFA)
++    ent = _numero(entrada, "--tarifa-entrada", 0, 1000)
++    sai = _numero(saida, "--tarifa-saida", 0, 1000)
++    cb = _numero(cambio, "--cambio", 0, 100, aberto=True)
++    fonte_txt = str(fonte).strip()
++    if not fonte_txt or len(fonte_txt) > 200:
++        raise ValueError("--tarifa-fonte precisa de texto, até 200 caracteres")
++    data_txt = str(data).strip()
++    if not RE_DATA.fullmatch(data_txt):
++        raise ValueError("--tarifa-data precisa ser AAAA-MM-DD")
++    try:
++        datetime.datetime.strptime(data_txt, "%Y-%m-%d")
++    except ValueError:
++        raise ValueError("--tarifa-data precisa ser uma data real (AAAA-MM-DD)") from None
++    return {"entrada_usd_mtok": ent, "saida_usd_mtok": sai, "cambio_brl": cb, "fonte": fonte_txt, "data": data_txt}
++
++
++def _validar_api(api, pid: str) -> None:
++    erro = f"provedor {pid}: bloco api fora do schema"
++    if not isinstance(api, dict) or api.get("formato") not in adaptadores.FORMATOS:
++        raise ValueError(erro + " (formato)")
++    if not isinstance(api.get("url"), str) or not _url_permitida(api["url"]):
++        raise ValueError(erro + " (url)")
++    env = api.get("env")
++    if env is not None and (not isinstance(env, str) or not RE_NOME_VAR.fullmatch(env)):
++        raise ValueError(erro + " (env deve ser nome de variável)")
++    if api.get("prefixo_chave") is not None and not isinstance(api.get("prefixo_chave"), str):
++        raise ValueError(erro + " (prefixo_chave)")
++    if api.get("modelo") is not None and not _modelo_ok(api.get("modelo")):
++        raise ValueError(erro + " (modelo)")
++    mods = api.get("modelos")
++    if mods is not None and (not isinstance(mods, list) or not mods or not all(_modelo_ok(m) for m in mods)):
++        raise ValueError(erro + " (modelos)")
++
++
++def validar_provedor(p) -> dict:
++    if not isinstance(p, dict):
++        raise ValueError("provedor fora do schema: não é objeto")
++    pid = p.get("id")
++    if not isinstance(pid, str) or not segredos.RE_ID.fullmatch(pid):
++        raise ValueError("id de provedor inválido")
++    if not isinstance(p.get("nome"), str) or not p["nome"]:
++        raise ValueError(f"provedor {pid}: falta nome")
++    cat = p.get("categoria_orcamento")
++    if not isinstance(cat, dict) or not cat or set(cat) - {"api", "cli"} or any(v not in orcamento.PROVEDORES for v in cat.values()):
++        raise ValueError(f"provedor {pid}: categoria_orcamento fora do schema")
++    if not any(p.get(k) for k in ("navegador", "cli", "api")):
++        raise ValueError(f"provedor {pid}: sem caminho (navegador, cli ou api)")
++    if p.get("navegador") is not None and not isinstance(p["navegador"], dict):
++        raise ValueError(f"provedor {pid}: navegador fora do schema")
++    if p.get("cli") is not None and not isinstance(p["cli"], dict):
++        raise ValueError(f"provedor {pid}: cli fora do schema")
++    if p.get("api") is not None:
++        _validar_api(p["api"], pid)
++    return p
++
++
++def validar_catalogo(d) -> dict:
++    if not isinstance(d, dict) or d.get("schema_version") != 1 or not isinstance(d.get("provedores"), list):
++        raise ValueError("catálogo fora do schema 1 (falta schema_version 1 ou provedores)")
++    for p in d["provedores"]:
++        validar_provedor(p)
++    ids = [p["id"] for p in d["provedores"]]
++    if len(set(ids)) != len(ids):
++        raise ValueError("id repetido no catálogo")
++    return d
++
++
++def ler(caminho: Path | None = None) -> dict:
++    caminho = CATALOGO if caminho is None else caminho
++    try:
++        d = json.loads(caminho.read_text(encoding="utf-8"))
++    except (OSError, ValueError) as e:
++        raise ValueError(f"catálogo ilegível: {caminho.name}") from e
++    return validar_catalogo(d)
++
++
++def _locais() -> list[dict]:
++    """Provedores que o painel acrescentou (cofre). Ilegível vira erro: senão o id repetido passaria."""
++    caminho = segredos.pasta() / "provedores.local.json"
++    if not caminho.exists():
++        return []
++    try:
++        d = json.loads(caminho.read_text(encoding="utf-8"))
++    except (OSError, ValueError) as e:
++        raise ValueError("provedores.local.json ilegível: não dá para checar id repetido") from e
++    if not isinstance(d, list):
++        raise ValueError("provedores.local.json fora do schema")
++    return [validar_provedor(p) for p in d]
++
++
++def listar() -> list[dict]:
++    base = ler()["provedores"]
++    ids = {p["id"] for p in base}
++    todos = [(p, "catalogo") for p in base] + [(p, "local") for p in _locais() if p["id"] not in ids]
++    out = []
++    for p, origem in todos:
++        api = p.get("api") or {}
++        modelos = api.get("modelos") or ([api["modelo"]] if api.get("modelo") else [])
++        item = {"id": p["id"], "nome": p["nome"], "origem": origem,
++                "modos": [m for m in ("navegador", "cli", "api") if p.get(m)],
++                "endpoint": api.get("url"), "modelos": modelos,
++                "chave_env": api.get("env"), "chave": None}
++        if api:
++            st = segredos.estado_de(p["id"], api.get("env"))
++            item["chave"] = {"no_cofre": st["no_cofre"], "no_ambiente": st["no_ambiente"]}
++        out.append(item)
++    return out
++
++
++@contextlib.contextmanager
++def _trava():
++    """Trava exclusiva (flock) sobre ler, checar id e gravar o catálogo. Fica no cofre (0700, fora do
++    repo): `*.lock` não é ignorado no repositório, e a trava não deve virar arquivo rastreável."""
++    pasta = segredos.pasta()
++    pasta.mkdir(parents=True, exist_ok=True)
++    os.chmod(pasta, 0o700)
++    fd = os.open(pasta / LOCK_NOME, os.O_CREAT | os.O_RDWR, 0o600)
++    try:
++        fcntl.flock(fd, fcntl.LOCK_EX)
++        yield
++    finally:
++        fcntl.flock(fd, fcntl.LOCK_UN)
++        os.close(fd)
++
++
++def _gravar(caminho: Path, dado: dict) -> None:
++    modo = caminho.stat().st_mode & 0o777
++    fd, tmp = tempfile.mkstemp(dir=caminho.parent, prefix=".tmp-provedores-")
++    try:
++        with os.fdopen(fd, "w", encoding="utf-8") as f:
++            os.fchmod(f.fileno(), modo)
++            f.write(json.dumps(dado, ensure_ascii=False, indent=2) + "\n")
++        os.replace(tmp, caminho)
++    except BaseException:
++        if os.path.exists(tmp):
++            os.unlink(tmp)
++        raise
++
++
++def _ajustes_arquivo() -> Path:
++    """O mesmo arquivo que `adaptadores.ajustar` escreve."""
++    return segredos.pasta() / "ajustes.local.json"
++
++
++def _ler_ajustes() -> dict | None:
++    """ajustes.local.json como dict; None se o arquivo não existe. Ilegível conta como vazio,
++    como em adaptadores._ler_json."""
++    p = _ajustes_arquivo()
++    if not p.exists():
++        return None
++    try:
++        d = json.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return {}
++    return d if isinstance(d, dict) else {}
++
++
++def _snapshot_tarifa(pid: str) -> dict:
++    """O que havia em ajustes para o id antes da tarifa: se o arquivo existia, o modo dele e o valor da chave."""
++    aj = _ler_ajustes()
++    modo = stat.S_IMODE(_ajustes_arquivo().stat().st_mode) if aj is not None else None
++    return {"arquivo": aj is not None, "modo": modo, "tinha": pid in (aj or {}), "valor": (aj or {}).get(pid)}
++
++
++def _desfazer_tarifa(pid: str, snap: dict) -> None:
++    """Desfaz só a chave do id adicionado. Relê o arquivo atual, para não apagar o que o painel
++    gravou depois (outros ids). Remove o arquivo só se ficar vazio e ele não existia antes."""
++    p = _ajustes_arquivo()
++    aj = _ler_ajustes() or {}
++    if snap["tinha"]:
++        aj[pid] = snap["valor"]
++    else:
++        aj.pop(pid, None)
++    if not aj and not snap["arquivo"]:
++        if p.exists():
++            p.unlink()
++        return
++    modo = snap["modo"] if snap["arquivo"] else 0o600   # adaptadores.ajustar regrava com 0600
++    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=".tmp-ajustes-")
++    try:
++        with os.fdopen(fd, "w", encoding="utf-8") as f:
++            os.fchmod(f.fileno(), modo)
++            f.write(json.dumps(aj, ensure_ascii=False, indent=1))
++        os.replace(tmp, p)
++    except BaseException:
++        if os.path.exists(tmp):
++            os.unlink(tmp)
++        raise
++
++
++def adicionar(pid, base_url, chave_env, modelos, *, formato: str = "openai", nome=None,
++              tarifa_entrada=None, tarifa_saida=None, cambio=None, tarifa_fonte=None, tarifa_data=None,
++              actor: str = "humano-cli") -> dict:
++    """Acrescenta o provedor ao catálogo versionado. Com tarifa, grava também em ajustes (via
++    `adaptadores.ajustar`, que lê o catálogo de `adaptadores.AQUI`). Tudo é validado antes de gravar.
++    Catálogo, tarifa e registro de evento saem sob a mesma trava; se qualquer passo falhar depois da
++    primeira gravação, o catálogo volta e, em ajustes, só a chave deste id é desfeita (o ledger é append-only e guarda
++    o que foi tentado)."""
++    if not isinstance(pid, str) or not segredos.RE_ID.fullmatch(pid):
++        raise ValueError("id inválido: minúsculas, números, _ ou -, de 2 a 41 caracteres")
++    url = endereco(base_url, formato)
++    env = validar_nome_var(chave_env)
++    mods = modelos_de(modelos)
++    tarifa = _tarifa(tarifa_entrada, tarifa_saida, cambio, tarifa_fonte, tarifa_data)
++    with _trava():
++        doc = ler()
++        ocupados = {p["id"] for p in doc["provedores"]} | {p["id"] for p in _locais()}
++        if pid in ocupados:
++            raise ValueError("id já existe no catálogo ou nos provedores locais")
++        bloco = {"id": pid, "nome": str(nome or pid)[:60], "categoria_orcamento": {"api": "pago"},
++                 "api": {"formato": formato, "url": url, "env": env, "prefixo_chave": None,
++                         "modelo": mods[0], "modelos": mods}}
++        novo = {**doc, "provedores": [*doc["provedores"], bloco]}
++        validar_catalogo(novo)
++        snap_tarifa = _snapshot_tarifa(pid) if tarifa is not None else None
++        try:
++            _gravar(CATALOGO, novo)
++            if tarifa is not None:
++                adaptadores.ajustar(pid, tarifa=tarifa)
++            eventos.registrar("decision", "provedor_adicionado", f"conexao:{pid}", actor=actor,
++                              componente="conexoes", formato=formato, url=url, modelos=len(mods),
++                              tarifa=tarifa is not None)
++        except BaseException:
++            _gravar(CATALOGO, doc)               # ainda sob a trava: desfaz o provedor
++            if tarifa is not None:
++                _desfazer_tarifa(pid, snap_tarifa)  # só a chave deste id; o resto é do painel
++            raise
++    return bloco
++
++
++def _chave_txt(i: dict) -> str:
++    c = i["chave"]
++    if c is None:
++        return "-"
++    if c["no_cofre"]:
++        return "no cofre"
++    if c["no_ambiente"]:
++        return f"variável {i['chave_env']}"
++    return "ausente"
++
++
++def main(argv=None) -> int:
++    ap = _Parser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    sub = ap.add_subparsers(dest="comando", required=True)
++    li = sub.add_parser("listar", help="provedores, endpoint e se a chave existe (só pelo nome)")
++    li.add_argument("--json", action="store_true")
++    ad = sub.add_parser("adicionar", help="acrescenta um provedor de API ao catálogo")
++    ad.add_argument("--id", required=True)
++    ad.add_argument("--base-url", required=True, help="https do provedor, ou http://127.0.0.1:20127/v1 (gateway)")
++    ad.add_argument("--chave-env", required=True, help="NOME da variável (ex.: OPENAI_API_KEY), nunca a chave")
++    ad.add_argument("--modelos", required=True, help="a,b (o primeiro é o padrão)")
++    ad.add_argument("--formato", default="openai", choices=adaptadores.FORMATOS)
++    ad.add_argument("--nome")
++    ad.add_argument("--tarifa-entrada", help="US$ por milhão de tokens de entrada")
++    ad.add_argument("--tarifa-saida", help="US$ por milhão de tokens de saída")
++    ad.add_argument("--cambio", help="R$ por US$")
++    ad.add_argument("--tarifa-fonte", help="página oficial de preços (até 200 caracteres)")
++    ad.add_argument("--tarifa-data", help="data em que você conferiu a tarifa (AAAA-MM-DD)")
++    try:
++        a = ap.parse_args(argv)
++    except SystemExit as e:
++        return int(e.code or 0)
++    try:
++        if a.comando == "listar":
++            itens = listar()
++            if a.json:
++                print(json.dumps(itens, ensure_ascii=False, indent=1))
++            else:
++                for i in itens:
++                    print(f"{i['id']:<14} {i['origem']:<9} {','.join(i['modos']):<22} "
++                          f"chave: {_chave_txt(i):<26} {i['endpoint'] or '-'}")
++            return 0
++        bloco = adicionar(a.id, a.base_url, a.chave_env, a.modelos, formato=a.formato, nome=a.nome,
++                          tarifa_entrada=a.tarifa_entrada, tarifa_saida=a.tarifa_saida, cambio=a.cambio,
++                          tarifa_fonte=a.tarifa_fonte, tarifa_data=a.tarifa_data)
++    except ValueError as e:
++        print(f"recusado: {e}", file=sys.stderr)
++        return 2
++    estado = segredos.estado_de(bloco["id"], bloco["api"]["env"])
++    chave = "no cofre" if estado["no_cofre"] else (f"variável {bloco['api']['env']} presente" if estado["no_ambiente"]
++                                                  else f"ausente: grave a chave pelo painel ou exporte {bloco['api']['env']}")
++    if a.tarifa_entrada is not None:
++        tarifa = f"tarifa gravada (fonte {a.tarifa_fonte.strip()}, data {a.tarifa_data.strip()})"
++    else:
++        tarifa = "sem tarifa: a chamada é recusada (custo) até você definir a tarifa na aba Conexões do painel"
++    print(f"adicionado: {bloco['id']} · endpoint {bloco['api']['url']} · modelos {', '.join(bloco['api']['modelos'])}"
++          f" · chave: {chave} · {tarifa} · pago: ligue a categoria no painel")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/redesign/conexoes/spec/acceptance.json b/redesign/conexoes/spec/acceptance.json
+index 7e5623f2..a34cd81e 100644
+--- a/redesign/conexoes/spec/acceptance.json
++++ b/redesign/conexoes/spec/acceptance.json
+@@ -43,5 +43,75 @@
+       "redesign/conexoes/tests/test_conexoes.py::RedundanciaTests::test_testa_por_capacidade_sem_guardar_resposta_e_com_independencia"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "adicionar grava um provedor de API pago num comando, sem cli nem navegador",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_pago_openai_em_um_comando_so_api"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o provedor adicionado pela CLI passa pelas mesmas portas de chamada: orçamento, custo e cofre o barram antes de qualquer chamada de rede",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicionado_passa_pelas_mesmas_portas_de_chamada_sem_rede"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "configurar recusa id repetido, endpoint com esquema, host ou porta inválidos, chave que não seja nome de variável e argumento desconhecido, sem ecoar o valor",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_id_repetido_no_catalogo_e_no_local_e_recusado",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_id_repetido_cli_recusa_com_codigo_2",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_chave_inline_e_recusada_sem_ecoar_o_valor",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_base_url_fora_do_permitido_e_recusada_sem_eco",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_host_e_porta_validados_antes_de_gravar",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_argumento_desconhecido_com_segredo_nao_ecoa"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "listar mostra os provedores e se a chave existe só pelo nome, sem imprimir valor",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::ListarTests::test_lista_provedores_e_chave_so_pelo_nome",
++      "redesign/conexoes/tests/test_configurar.py::ListarTests::test_cli_listar_texto_e_json_nao_imprimem_valor"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "adições concorrentes ao catálogo não perdem entrada, com ou sem tarifa: leitura, checagem de id, gravação e tarifa ficam sob trava",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_trava_cobre_leitura_checagem_e_gravacao",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_duas_adicoes_sequenciais_persistem",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicoes_concorrentes_nao_perdem_entrada",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicoes_concorrentes_com_tarifa_persistem_todas",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_gravada_sob_a_mesma_trava"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a tarifa da CLI é gravada no formato do painel, com fonte e data; incompleta ou fora do limite, é recusada antes de gravar; se algum passo falhar, o catálogo volta e só a tarifa deste id sai de ajustes",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_pela_cli_grava_no_formato_do_painel",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_incompleta_ou_invalida_e_recusada_antes_de_gravar",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_na_tarifa_desfaz_o_provedor",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_no_registro_depois_da_tarifa_restaura_catalogo_e_ajustes",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_no_registro_sem_ajustes_previos_nao_deixa_arquivo",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_gravacao_do_painel_entre_a_tarifa_e_a_falha_sobrevive",
++      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_gravacao_do_painel_sem_ajustes_previos_mantem_o_arquivo"
++    ],
++    "cwd": null
+   }
+-]
+\ No newline at end of file
++]
+diff --git a/redesign/conexoes/spec/spec.md b/redesign/conexoes/spec/spec.md
+index 4c5f1cf1..4daed06e 100644
+--- a/redesign/conexoes/spec/spec.md
++++ b/redesign/conexoes/spec/spec.md
+@@ -13,6 +13,7 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C7).
+ - `provedores.json`: catálogo versionado com `claude` e `chatgpt` nos três caminhos (`navegador` via `relay_id`, `cli` com `argv`/`argv_modelo`/`saida`, `api` com `formato` `anthropic`|`openai`, `url`, `env`, `prefixo_chave`, `modelo`) e a `categoria_orcamento` de cada caminho (`cli` → `assinatura`, `api` → `pago`).
+ - `segredos.py`: cofre em `AGATA_CONEXOES_DIR` (padrão `~/.config/agata/conexoes/`, pasta 0700, `<id>.chave` 0600, gravação atômica). Valida id e formato da chave (20–300 caracteres, sem espaço, prefixo do provedor). `estado_de` diz só se existe, desde quando e se a permissão está fechada; `_para_chamada` é o único leitor. Gravar e remover viram evento `private` no ledger, sem valor. Não lê nem escreve `~/.config/agata/.env`.
+ - `adaptadores.py`: `catalogo()` junta o versionado com `provedores.local.json` (só API, só https, nunca comando) e `ajustes.local.json` (modelo, tarifa com fonte e data). `chamar(pid, modo, prompt)` nunca envia pelo navegador; antes de sair confere orçamento, privacidade (`sanitizar.varrer_pessoal`; sem a régua, trata como privado) e, na API, tarifa e teto em R$ pelo gasto acumulado em `gasto.jsonl`. CLI roda em pasta temporária vazia, com `stdin` fechado. Falha vira `falha_etapa`, nunca exceção.
++- `configurar.py` (17/11/2026): `listar` mostra provedores, endpoint e se a chave existe, só pelo nome (`segredos.estado_de`), sem valor. `adicionar --id --base-url --chave-env --modelos [--formato] [--nome]` acrescenta ao `provedores.json` só bloco de API (`categoria_orcamento` `api` → `pago`; sem `cli` nem `navegador`), com `api.modelos` (lista; o primeiro vira `api.modelo`). `--base-url` vira endpoint (`/chat/completions` ou `/messages`) e aceita `https` (host DNS válido, porta 1-65535) ou o gateway `http://127.0.0.1:20127` (sanitizador) e `:20128` (OmniRoute). Recusa id repetido (catálogo e `provedores.local.json`), `--chave-env` que não seja nome de variável e argumento desconhecido, sem repetir o valor digitado. Leitura, checagem, gravação do catálogo e tarifa ficam sob a mesma trava `flock` em `provedores.lock` no cofre; se qualquer passo depois da primeira gravação falhar (inclusive o registro do evento), o catálogo volta e só a chave deste id sai de ajustes; alterações do painel em outros ids sobrevivem. Com `--tarifa-entrada`, `--tarifa-saida`, `--cambio`, `--tarifa-fonte` e `--tarifa-data`, grava por `adaptadores.ajustar` (mesmo formato do painel, em `ajustes.local.json`); tarifa incompleta ou fora do limite é recusada antes de qualquer gravação. Toda chamada do bloco segue por `adaptadores.chamar()`.
+ - `testar_rotas.py`: rotas permitidas pelo orçamento (`local` = tags do Ollama sem embedding; `gratuito` = modelos `available` do OmniRoute, sem `/auto`; `assinatura` e `pago` = conexões prontas), três provas fixas e mecânicas (conversa, JSON, código), coordenadas por `redesign/nova_versao/tarefas.py` (GPU em fila única, remoto em paralelo, teto de chamadas, cancelamento). Guarda veredito, etapa de falha, latência, uso e independência; nunca guarda a resposta. Não altera filas do OmniRoute.
+ - O corpo (`redesign/corpo/fotografar.py`) preenche `testado` e `pronto` pelo último teste.
+ 
+@@ -23,6 +24,12 @@ Componente da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md` (C7).
+ - [ ] o programa da assinatura roda em pasta vazia, sem ferramentas e sem sessão
+ - [ ] provedor novo pelo painel é só API com https e sem id repetido
+ - [ ] o teste de rotas é por capacidade, descreve a independência e não guarda a resposta
++- [ ] adicionar grava um provedor de API pago num comando, sem cli nem navegador
++- [ ] o provedor adicionado pela CLI passa pelas mesmas portas de chamada: orçamento, custo e cofre o barram antes de qualquer chamada de rede
++- [ ] configurar recusa id repetido, endpoint com esquema, host ou porta inválidos, chave que não seja nome de variável e argumento desconhecido, sem ecoar o valor
++- [ ] listar mostra os provedores e se a chave existe só pelo nome, sem imprimir valor
++- [ ] adições concorrentes ao catálogo não perdem entrada, com ou sem tarifa: leitura, checagem de id, gravação e tarifa ficam sob trava
++- [ ] a tarifa da CLI é gravada no formato do painel, com fonte e data; incompleta ou fora do limite, é recusada antes de gravar; se algum passo falhar, o catálogo volta e só a tarifa deste id sai de ajustes
+ 
+ ## Desenho e alternativas
+ 
+@@ -30,7 +37,7 @@ Biblioteca padrão (`urllib`, `subprocess`), sem SDK de provedor. Descartados: c
+ 
+ ## Implementação e testes
+ 
+-`provedores.json`, `segredos.py`, `adaptadores.py`, `testar_rotas.py` e `README.md` (guia para outros usuários). Testes em `tests/test_conexoes.py`, sem rede: HTTP e programa substituídos.
++`provedores.json`, `segredos.py`, `adaptadores.py`, `testar_rotas.py` e `README.md` (guia para outros usuários). Testes em `tests/test_conexoes.py` e `tests/test_configurar.py`, sem rede: HTTP e programa substituídos; o `configurar.py` roda em catálogo temporário, nunca no `provedores.json` real.
+ 
+ ## Migração e reversão
+ 
+@@ -38,7 +45,7 @@ Nada no canon. Reversão por revert; apagar `~/.config/agata/conexoes/` remove c
+ 
+ ## Riscos e dependências
+ 
+-Login do CLI só se confirma no primeiro teste (`login: não medido`). O modelo padrão do ChatGPT ficou vazio de propósito: o identificador vigente não foi medido nesta sessão e é escolhido no painel. A tarifa é informada pelo Humano, com fonte; o custo é estimativa e não substitui a fatura.
++A trava `provedores.lock` cobre só a CLI; o painel grava `provedores.local.json` e `ajustes.local.json` sem essa trava. Uma gravação do painel no instante entre a leitura e a escrita de `ajustes.local.json` pode se perder (janela curta, não medida em concorrência real). Segredo colocado no caminho da URL (ex.: `/token/...`) ainda passa: a checagem barra usuário, senha, query e fragmento, não o caminho. Pela CLI (17/11), a base `https` vai direto ao provedor e sai sem o sanitizador `:20127`; o gateway local é a rota que passa por ele. Se o Humano quiser o gateway obrigatório para todo modelo, a mudança é em `endereco`/`_url_permitida` do `configurar.py`. Login do CLI só se confirma no primeiro teste (`login: não medido`). O modelo padrão do ChatGPT ficou vazio de propósito: o identificador vigente não foi medido nesta sessão e é escolhido no painel. A tarifa é informada pelo Humano, com fonte; o custo é estimativa e não substitui a fatura.
+ 
+ ## Código
+ 
+@@ -46,5 +53,7 @@ Login do CLI só se confirma no primeiro teste (`login: não medido`). O modelo
+ - `segredos.py`
+ - `adaptadores.py`
+ - `testar_rotas.py`
++- `configurar.py`
+ - `README.md`
+ - `tests/`
++- `tests/test_configurar.py`
+diff --git a/redesign/conexoes/tests/test_configurar.py b/redesign/conexoes/tests/test_configurar.py
+new file mode 100644
+index 00000000..bf92470e
+--- /dev/null
++++ b/redesign/conexoes/tests/test_configurar.py
+@@ -0,0 +1,541 @@
++"""Testes de configurar.py: listar, adicionar, id repetido, segredo inline, argumento desconhecido,
++host e porta, tarifa pela CLI, trava e portas de chamada sem rede. Nenhuma rede real: o transporte
++e urlopen são substituídos e contados."""
++import contextlib
++import fcntl
++import importlib
++import io
++import json
++import os
++import stat
++import sys
++import tempfile
++import threading
++import unittest
++from pathlib import Path
++from unittest import mock
++
++AQUI = Path(__file__).resolve().parent
++sys.path.insert(0, str(AQUI.parent))
++sys.path.insert(0, str(AQUI.parents[1] / "nova_versao"))
++import adaptadores  # noqa: E402
++import configurar  # noqa: E402
++import eventos  # noqa: E402
++import orcamento  # noqa: E402
++import segredos  # noqa: E402
++
++CATALOGO_REPO = AQUI.parent / "provedores.json"
++CHAVE_CRUA = "sk-proj-" + "Ab3dEf7hIj9kLm2nOp4qRs6tUv8w"        # chave colada no lugar do NOME
++SEGREDO_AMBIENTE = "valor-secreto-nao-pode-sair-9f8e7d6c"
++SEGREDO_ARG = "SEGREDO-ARG-FICTICIO-4471"                        # argumento desconhecido com segredo
++CHAVE_COFRE = "sk-" + "Q" * 30
++TARIFA = {"entrada_usd_mtok": 1.0, "saida_usd_mtok": 2.0, "cambio_brl": 5.5,
++          "fonte": "https://exemplo/precos", "data": "2026-11-17"}
++
++
++class Base(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        t = Path(self.tmp.name)
++        self.cat = t / "provedores.json"
++        self.cat.write_text(CATALOGO_REPO.read_text(encoding="utf-8"), encoding="utf-8")
++        self.cofre = t / "cofre"
++        self.modo_antes = stat.S_IMODE(self.cat.stat().st_mode)
++        self.pilha = contextlib.ExitStack()
++        self.pilha.enter_context(mock.patch.dict(os.environ, {"AGATA_CONEXOES_DIR": str(self.cofre),
++                                                              "AGATA_NV_DIR": str(t / "dados")}))
++        # catálogo de ensaio: o da CLI e o que adaptadores lê (ajustar/estado) apontam para a cópia
++        self.pilha.enter_context(mock.patch.object(configurar, "CATALOGO", self.cat))
++        self.pilha.enter_context(mock.patch.object(adaptadores, "AQUI", t))
++        for v in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENAI_X_KEY"):
++            os.environ.pop(v, None)
++
++    def tearDown(self):
++        self.pilha.close()
++        self.tmp.cleanup()
++
++    def texto(self) -> str:
++        return self.cat.read_text(encoding="utf-8")
++
++    def ledger(self) -> str:
++        p = Path(os.environ["AGATA_NV_DIR"]) / "eventos" / "ledger.jsonl"
++        return p.read_text(encoding="utf-8") if p.exists() else ""
++
++    def rodar(self, argv):
++        out, err = io.StringIO(), io.StringIO()
++        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
++            rc = configurar.main(argv)
++        return rc, out.getvalue(), err.getvalue()
++
++
++class ListarTests(Base):
++    def test_lista_provedores_e_chave_so_pelo_nome(self):
++        os.environ["ANTHROPIC_API_KEY"] = SEGREDO_AMBIENTE
++        itens = {i["id"]: i for i in configurar.listar()}
++        self.assertIn("claude", itens)
++        self.assertIn("chatgpt", itens)
++        self.assertEqual(itens["claude"]["chave"], {"no_cofre": False, "no_ambiente": True})
++        self.assertEqual(itens["claude"]["chave_env"], "ANTHROPIC_API_KEY")
++        self.assertEqual(itens["claude"]["endpoint"], "https://api.anthropic.com/v1/messages")
++        self.assertEqual(itens["chatgpt"]["chave"], {"no_cofre": False, "no_ambiente": False})
++        self.assertNotIn(SEGREDO_AMBIENTE, json.dumps(list(itens.values())))
++
++    def test_cli_listar_texto_e_json_nao_imprimem_valor(self):
++        os.environ["ANTHROPIC_API_KEY"] = SEGREDO_AMBIENTE
++        segredos.gravar("chatgpt", CHAVE_COFRE, "sk-")
++        rc, out, _ = self.rodar(["listar"])
++        self.assertEqual(rc, 0)
++        self.assertIn("variável ANTHROPIC_API_KEY", out)
++        self.assertIn("no cofre", out)
++        self.assertNotIn(SEGREDO_AMBIENTE, out)
++        self.assertNotIn("QQQQQ", out)
++        rc, out_json, _ = self.rodar(["listar", "--json"])
++        self.assertEqual(rc, 0)
++        self.assertNotIn(SEGREDO_AMBIENTE, out_json)
++        self.assertNotIn("QQQQQ", out_json)
++
++
++class AdicionarTests(Base):
++    def test_pago_openai_em_um_comando_so_api(self):
++        bloco = configurar.adicionar("meu-openai", "https://api.openai.com/v1", "OPENAI_X_KEY", "modelo-a,modelo-b")
++        self.assertEqual(bloco["api"]["url"], "https://api.openai.com/v1/chat/completions")
++        doc = json.loads(self.texto())
++        novo = doc["provedores"][-1]
++        self.assertEqual(novo["id"], "meu-openai")
++        self.assertEqual(novo["api"]["env"], "OPENAI_X_KEY")
++        self.assertEqual(novo["api"]["modelo"], "modelo-a")
++        self.assertEqual(novo["api"]["modelos"], ["modelo-a", "modelo-b"])
++        self.assertEqual(novo["categoria_orcamento"], {"api": "pago"})
++        self.assertNotIn("cli", novo)
++        self.assertNotIn("navegador", novo)
++        antes = json.loads(CATALOGO_REPO.read_text(encoding="utf-8"))["provedores"]
++        self.assertEqual(doc["provedores"][:-1], antes)
++        self.assertEqual(stat.S_IMODE(self.cat.stat().st_mode), self.modo_antes)
++        self.assertIn("provedor_adicionado", self.ledger())
++
++    def test_anthropic_com_formato_e_sufixo_nao_duplicado(self):
++        b = configurar.adicionar("anthropic-x", "https://api.anthropic.com/v1", "ANTHROPIC_X_KEY", "m1",
++                                 formato="anthropic")
++        self.assertEqual(b["api"]["url"], "https://api.anthropic.com/v1/messages")
++        self.assertEqual(b["api"]["formato"], "anthropic")
++        b2 = configurar.adicionar("gw-local", "http://127.0.0.1:20127/v1/chat/completions", "GW_KEY", "m1")
++        self.assertEqual(b2["api"]["url"], "http://127.0.0.1:20127/v1/chat/completions")
++
++    def test_adicionado_passa_pelas_mesmas_portas_de_chamada_sem_rede(self):
++        configurar.adicionar("meu-openai", "https://api.openai.com/v1", "OPENAI_X_KEY", "modelo-a")
++        sanitizar = importlib.import_module("sanitizar")   # a régua de privacidade real, não substituída
++        resposta = {"model": "modelo-a", "choices": [{"message": {"content": "pronto"}}],
++                    "usage": {"prompt_tokens": 3, "completion_tokens": 1}}
++        transporte = mock.Mock(return_value=resposta)
++        rede = mock.Mock(side_effect=AssertionError("chamada de rede antes do portão"))
++        with mock.patch.object(adaptadores, "_post", transporte), \
++                mock.patch("urllib.request.urlopen", rede), \
++                mock.patch("subprocess.run", rede), \
++                mock.patch.object(sanitizar, "_nomes_projeto", return_value=[]):
++            # 1) pago desligado: o orçamento barra antes de qualquer envio
++            self.assertEqual(adaptadores.chamar("meu-openai", "api", "oi")["falha_etapa"], "orcamento")
++            o = orcamento.ler(); o["provedores"]["pago"] = True; o["teto_reais"] = 1.0; orcamento.salvar(o)
++            # 2) ligado, sem tarifa datada: o custo barra
++            self.assertEqual(adaptadores.chamar("meu-openai", "api", "oi")["falha_etapa"], "custo")
++            adaptadores.ajustar("meu-openai", tarifa=TARIFA)
++            # 3) com tarifa, sem chave no cofre nem no ambiente: a configuração barra
++            self.assertEqual(adaptadores.chamar("meu-openai", "api", "oi")["falha_etapa"], "configuracao")
++            transporte.assert_not_called()
++            rede.assert_not_called()
++            # 4) controle positivo: com a chave no ambiente, o transporte é chamado uma vez
++            os.environ["OPENAI_X_KEY"] = SEGREDO_AMBIENTE
++            r = adaptadores.chamar("meu-openai", "api", "oi")
++            self.assertTrue(r["ok"], r)
++            transporte.assert_called_once()
++            self.assertEqual(transporte.call_args[0][0], "https://api.openai.com/v1/chat/completions")
++            rede.assert_not_called()
++
++    def test_tarifa_pela_cli_grava_no_formato_do_painel(self):
++        rc, out, err = self.rodar(["adicionar", "--id", "meu-openai", "--base-url", "https://api.openai.com/v1",
++                                   "--chave-env", "OPENAI_X_KEY", "--modelos", "m1",
++                                   "--tarifa-entrada", "0,15", "--tarifa-saida", "0.60", "--cambio", "5.5",
++                                   "--tarifa-fonte", "https://exemplo/precos", "--tarifa-data", "2026-11-17"])
++        self.assertEqual(rc, 0, err)
++        esperado = {"entrada_usd_mtok": 0.15, "saida_usd_mtok": 0.6, "cambio_brl": 5.5,
++                    "fonte": "https://exemplo/precos", "data": "2026-11-17"}
++        ajustes = json.loads((self.cofre / "ajustes.local.json").read_text(encoding="utf-8"))
++        self.assertEqual(ajustes["meu-openai"], {"tarifa": esperado})
++        self.assertEqual(adaptadores.provedor("meu-openai")["tarifa"], esperado)
++        self.assertIn('"ajuste"', self.ledger())
++        self.assertIn("tarifa gravada", out)
++
++    def test_tarifa_incompleta_ou_invalida_e_recusada_antes_de_gravar(self):
++        antes = self.texto()
++        base = {"tarifa_entrada": "1", "tarifa_saida": "2", "cambio": "5.5",
++                "tarifa_fonte": "https://exemplo/precos", "tarifa_data": "2026-11-17"}
++        casos = [
++            {"tarifa_entrada": "1"},                                       # incompleta
++            {**base, "tarifa_entrada": "-1"},
++            {**base, "tarifa_entrada": "abc"},
++            {**base, "tarifa_entrada": "1001"},
++            {**base, "tarifa_entrada": "nan"},
++            {**base, "cambio": "0"},
++            {**base, "cambio": "101"},
++            {**base, "tarifa_data": "17/11/2026"},
++            {**base, "tarifa_data": "2026-02-30"},
++            {**base, "tarifa_fonte": "   "},
++            {**base, "tarifa_fonte": "x" * 201},
++        ]
++        for extra in casos:
++            with self.subTest(caso=sorted(extra)):
++                with self.assertRaises(ValueError):
++                    configurar.adicionar("novo-x", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1", **extra)
++        self.assertEqual(self.texto(), antes)
++        self.assertFalse((self.cofre / "ajustes.local.json").exists())
++
++    def test_id_repetido_no_catalogo_e_no_local_e_recusado(self):
++        antes = self.texto()
++        with self.assertRaisesRegex(ValueError, "já existe"):
++            configurar.adicionar("claude", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++        self.assertEqual(self.texto(), antes)
++        local = self.cofre / "provedores.local.json"
++        local.parent.mkdir(parents=True, exist_ok=True)
++        local.write_text(json.dumps([{"id": "local-x", "nome": "L", "categoria_orcamento": {"api": "pago"},
++                                      "api": {"formato": "openai", "url": "https://a.b/v1/chat/completions",
++                                              "env": None, "prefixo_chave": None, "modelo": "m"}}]), encoding="utf-8")
++        with self.assertRaisesRegex(ValueError, "já existe"):
++            configurar.adicionar("local-x", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++        self.assertEqual(self.texto(), antes)
++
++    def test_id_repetido_cli_recusa_com_codigo_2(self):
++        antes = self.texto()
++        rc, out, err = self.rodar(["adicionar", "--id", "chatgpt", "--base-url", "https://api.openai.com/v1",
++                                   "--chave-env", "OPENAI_X_KEY", "--modelos", "m1"])
++        self.assertEqual(rc, 2)
++        self.assertIn("recusado", err)
++        self.assertEqual(self.texto(), antes)
++
++    def test_chave_inline_e_recusada_sem_ecoar_o_valor(self):
++        antes = self.texto()
++        ruins = [CHAVE_CRUA, "sk-ant-" + "x" * 40, "minha_chave_secreta", "OPENAI KEY",
++                 "AbCdEf1234567890GhIjKlMnOpQr", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "", "OPENAI_API_KEY=abc"]
++        for ruim in ruins:
++            with self.subTest(valor=ruim[:6]):
++                with self.assertRaises(ValueError) as cm:
++                    configurar.adicionar("novo-x", "https://api.exemplo.com/v1", ruim, "m1")
++                if ruim:
++                    self.assertNotIn(ruim, str(cm.exception))
++        self.assertEqual(self.texto(), antes)
++        rc, out, err = self.rodar(["adicionar", "--id", "novo-x", "--base-url", "https://api.openai.com/v1",
++                                   "--chave-env", CHAVE_CRUA, "--modelos", "m1"])
++        self.assertEqual(rc, 2)
++        self.assertNotIn(CHAVE_CRUA, out + err)
++        self.assertEqual(self.texto(), antes)
++
++    def test_argumento_desconhecido_com_segredo_nao_ecoa(self):
++        antes = self.texto()
++        base = ["adicionar", "--id", "novo-x", "--base-url", "https://api.exemplo.com/v1",
++                "--chave-env", "EXEMPLO_KEY", "--modelos", "m1"]
++        casos = [base + [SEGREDO_ARG], base + [f"--sem-nome={SEGREDO_ARG}"], base + ["--formato", SEGREDO_ARG],
++                 ["listar", SEGREDO_ARG], ["adicionar", "--id", SEGREDO_ARG]]
++        for argv in casos:
++            with self.subTest(argv=argv[-1][:12]):
++                rc, out, err = self.rodar(argv)
++                self.assertEqual(rc, 2)
++                self.assertIn("erro", err)
++                self.assertNotIn(SEGREDO_ARG, out + err)
++        self.assertEqual(self.texto(), antes)
++
++    def test_nome_de_variavel_valido_e_aceito(self):
++        for nome in ("OPENAI_X_KEY", "MISTRAL_API_KEY", "GW_KEY"):
++            with self.subTest(nome=nome):
++                b = configurar.adicionar(f"p-{nome.lower().replace('_', '-')}", "https://api.exemplo.com/v1",
++                                         nome, "m1")
++                self.assertEqual(b["api"]["env"], nome)
++
++    def test_base_url_fora_do_permitido_e_recusada_sem_eco(self):
++        antes = self.texto()
++        ruins = ["http://api.exemplo.com/v1", "https://user:SEGREDO-URL-123@api.exemplo.com/v1",
++                 "https://api.exemplo.com/v1?key=SEGREDO-URL-123", "https://api.exemplo.com/v1#frag",
++                 "http://127.0.0.1:9999/v1", "ftp://api.exemplo.com/v1", "http://localhost:20128/v1"]
++        for ruim in ruins:
++            with self.subTest(url=ruim):
++                with self.assertRaises(ValueError) as cm:
++                    configurar.adicionar("novo-x", ruim, "EXEMPLO_KEY", "m1")
++                self.assertNotIn("SEGREDO-URL-123", str(cm.exception))
++        self.assertEqual(self.texto(), antes)
++        self.assertEqual(configurar.endereco("http://127.0.0.1:20128/v1", "openai"),
++                         "http://127.0.0.1:20128/v1/chat/completions")
++
++    def test_host_e_porta_validados_antes_de_gravar(self):
++        antes = self.texto()
++        ruins = ["https://./v1", "https://api..exemplo.com/v1", "https://-api.exemplo.com/v1",
++                 "https://api-.exemplo.com/v1", "https://" + "a" * 64 + ".exemplo.com/v1",
++                 "https://api_x.exemplo.com/v1", "https://api.exemplo.com:99999/v1",
++                 "https://api.exemplo.com:0/v1", "https://api.exemplo.com:/v1"]
++        for ruim in ruins:
++            with self.subTest(url=ruim[:40]):
++                with self.assertRaises(ValueError):
++                    configurar.adicionar("novo-x", ruim, "EXEMPLO_KEY", "m1")
++        self.assertEqual(self.texto(), antes)
++        for ok in ("https://api.exemplo.com:443/v1", "https://api.exemplo.com:65535/v1"):
++            with self.subTest(url=ok):
++                self.assertTrue(configurar.endereco(ok, "openai").startswith(ok))
++        b = configurar.adicionar("porta-443", "https://api.exemplo.com:443/v1", "EXEMPLO_KEY", "m1")
++        self.assertEqual(b["api"]["url"], "https://api.exemplo.com:443/v1/chat/completions")
++
++    def test_modelos_e_formato_invalidos_sao_recusados(self):
++        antes = self.texto()
++        for modelos in ("", " , ", "a,a", "modelo com espaço"):
++            with self.subTest(modelos=modelos):
++                with self.assertRaises(ValueError):
++                    configurar.adicionar("novo-x", "https://api.exemplo.com/v1", "EXEMPLO_KEY", modelos)
++        with self.assertRaises(ValueError):
++            configurar.adicionar("novo-x", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1", formato="gemini")
++        self.assertEqual(self.texto(), antes)
++
++    def test_cli_adiciona_e_resume_sem_valor(self):
++        os.environ["OPENAI_X_KEY"] = SEGREDO_AMBIENTE
++        rc, out, err = self.rodar(["adicionar", "--id", "meu-openai", "--base-url", "https://api.openai.com/v1",
++                                   "--chave-env", "OPENAI_X_KEY", "--modelos", "m1,m2"])
++        self.assertEqual(rc, 0, err)
++        self.assertIn("adicionado: meu-openai", out)
++        self.assertIn("variável OPENAI_X_KEY presente", out)
++        self.assertIn("sem tarifa", out)
++        self.assertIn("aba Conexões do painel", out)
++        self.assertNotIn("repetir", out)
++        self.assertNotIn(SEGREDO_AMBIENTE, out + self.texto())
++
++    def test_trava_cobre_leitura_checagem_e_gravacao(self):
++        lock = self.cofre / "provedores.lock"
++        checado = []
++
++        def sob_trava_ou_falha(etapa):
++            fd = os.open(lock, os.O_RDWR)
++            try:
++                with self.assertRaises(BlockingIOError):   # outro descritor não consegue a trava
++                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
++                checado.append(etapa)
++            finally:
++                os.close(fd)
++
++        ler_original, gravar_original = configurar.ler, configurar._gravar
++
++        def ler_checando(caminho=None):
++            sob_trava_ou_falha("leitura")
++            return ler_original(caminho)
++
++        def gravar_checando(caminho, dado):
++            sob_trava_ou_falha("gravacao")
++            return gravar_original(caminho, dado)
++
++        with mock.patch.object(configurar, "ler", ler_checando), mock.patch.object(configurar, "_gravar", gravar_checando):
++            configurar.adicionar("primeiro", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++        self.assertEqual(checado, ["leitura", "gravacao"])
++        self.assertIn("primeiro", [p["id"] for p in json.loads(self.texto())["provedores"]])
++
++    def test_duas_adicoes_sequenciais_persistem(self):
++        configurar.adicionar("primeiro", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++        configurar.adicionar("segundo", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++        ids = [p["id"] for p in json.loads(self.texto())["provedores"]]
++        self.assertEqual(ids[-2:], ["primeiro", "segundo"])
++
++    def test_adicoes_concorrentes_nao_perdem_entrada(self):
++        pids = ["conc-a", "conc-b", "conc-c", "conc-d"]
++        barreira = threading.Barrier(len(pids))
++        erros = []
++
++        def adicionar(pid):
++            try:
++                barreira.wait(timeout=10)
++                configurar.adicionar(pid, "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1")
++            except Exception as e:  # noqa: BLE001 — o teste quer ver qualquer falha
++                erros.append(e)
++
++        ths = [threading.Thread(target=adicionar, args=(p,)) for p in pids]
++        for t in ths:
++            t.start()
++        for t in ths:
++            t.join(timeout=30)
++        self.assertEqual(erros, [])
++        ids = [p["id"] for p in json.loads(self.texto())["provedores"]]
++        for pid in pids:
++            self.assertIn(pid, ids)
++
++
++    def test_adicoes_concorrentes_com_tarifa_persistem_todas(self):
++        pids = ["tar-a", "tar-b", "tar-c", "tar-d"]
++        barreira = threading.Barrier(len(pids))
++        erros = []
++
++        def adicionar(i, pid):
++            try:
++                barreira.wait(timeout=10)
++                configurar.adicionar(pid, "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                     tarifa_entrada=str(1 + i), tarifa_saida="2", cambio="5.5",
++                                     tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++            except Exception as e:  # noqa: BLE001 — o teste quer ver qualquer falha
++                erros.append(e)
++
++        ths = [threading.Thread(target=adicionar, args=(i, p)) for i, p in enumerate(pids)]
++        for t in ths:
++            t.start()
++        for t in ths:
++            t.join(timeout=30)
++        self.assertEqual(erros, [])
++        ids = [p["id"] for p in json.loads(self.texto())["provedores"]]
++        ajustes = json.loads((self.cofre / "ajustes.local.json").read_text(encoding="utf-8"))
++        for i, pid in enumerate(pids):
++            self.assertIn(pid, ids)
++            self.assertEqual(ajustes[pid]["tarifa"]["entrada_usd_mtok"], 1.0 + i)
++
++    def test_tarifa_gravada_sob_a_mesma_trava(self):
++        lock = self.cofre / "provedores.lock"
++        visto = []
++        ajustar_original = adaptadores.ajustar
++
++        def ajustar_checando(pid, **kw):
++            fd = os.open(lock, os.O_RDWR)
++            try:
++                with self.assertRaises(BlockingIOError):   # a trava está segurada durante a tarifa
++                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
++                visto.append(pid)
++            finally:
++                os.close(fd)
++            return ajustar_original(pid, **kw)
++
++        with mock.patch.object(adaptadores, "ajustar", ajustar_checando):
++            configurar.adicionar("trava-tar", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                 tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                                 tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        self.assertEqual(visto, ["trava-tar"])
++
++    def test_falha_na_tarifa_desfaz_o_provedor(self):
++        antes = self.texto()
++        tarifa = {"tarifa_entrada": "1", "tarifa_saida": "2", "cambio": "5.5",
++                  "tarifa_fonte": "https://exemplo/precos", "tarifa_data": "2026-11-17"}
++        with mock.patch.object(adaptadores, "ajustar", side_effect=OSError("falha simulada na gravação")):
++            with self.assertRaises(OSError):
++                configurar.adicionar("tar-falha", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1", **tarifa)
++        self.assertEqual(self.texto(), antes)
++        # o id ficou livre: a mesma adição, agora sem a falha, passa
++        configurar.adicionar("tar-falha", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1", **tarifa)
++        self.assertIn("tar-falha", [p["id"] for p in json.loads(self.texto())["provedores"]])
++
++    def _falha_so_no_registro_do_provedor(self):
++        original = eventos.registrar
++
++        def registrar(kind, status, source, *a, **kw):
++            if status == "provedor_adicionado":
++                raise OSError("falha simulada no registro do evento")
++            return original(kind, status, source, *a, **kw)
++        return mock.patch.object(eventos, "registrar", registrar)
++
++    def test_falha_no_registro_depois_da_tarifa_restaura_catalogo_e_ajustes(self):
++        self.cofre.mkdir(parents=True, exist_ok=True)
++        ajustes = self.cofre / "ajustes.local.json"
++        outra = {"entrada_usd_mtok": 3.0, "saida_usd_mtok": 4.0, "cambio_brl": 5.0,
++                 "fonte": "https://exemplo/outra", "data": "2026-11-01"}
++        ajustes.write_text(json.dumps({"chatgpt": {"tarifa": outra}}, ensure_ascii=False), encoding="utf-8")
++        os.chmod(ajustes, 0o640)
++        antes_cat = self.texto()
++        modo_antes = stat.S_IMODE(ajustes.stat().st_mode)
++        gravou = []
++        ajustar_original = adaptadores.ajustar
++
++        def ajustar_gravando(pid, **kw):
++            r = ajustar_original(pid, **kw)
++            gravou.append(pid)               # a tarifa já está no arquivo quando o registro falha
++            return r
++
++        with mock.patch.object(adaptadores, "ajustar", ajustar_gravando), self._falha_so_no_registro_do_provedor():
++            with self.assertRaises(OSError):
++                configurar.adicionar("tar-ledger", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                     tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                                     tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        self.assertEqual(gravou, ["tar-ledger"])
++        self.assertEqual(self.texto(), antes_cat)
++        self.assertEqual(json.loads(ajustes.read_text(encoding="utf-8")), {"chatgpt": {"tarifa": outra}})
++        self.assertEqual(stat.S_IMODE(ajustes.stat().st_mode), modo_antes)
++        # sem a falha, a mesma adição passa e convive com a tarifa antiga
++        configurar.adicionar("tar-ledger", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                             tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                             tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        self.assertEqual(set(json.loads(ajustes.read_text(encoding="utf-8"))), {"chatgpt", "tar-ledger"})
++
++    def test_falha_no_registro_sem_ajustes_previos_nao_deixa_arquivo(self):
++        antes_cat = self.texto()
++        with self._falha_so_no_registro_do_provedor():
++            with self.assertRaises(OSError):
++                configurar.adicionar("tar-ledger", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                     tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                                     tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        self.assertEqual(self.texto(), antes_cat)
++        self.assertFalse((self.cofre / "ajustes.local.json").exists())
++
++
++    def test_gravacao_do_painel_entre_a_tarifa_e_a_falha_sobrevive(self):
++        self.cofre.mkdir(parents=True, exist_ok=True)
++        ajustes = self.cofre / "ajustes.local.json"
++        outra = {"entrada_usd_mtok": 3.0, "saida_usd_mtok": 4.0, "cambio_brl": 5.0,
++                 "fonte": "https://exemplo/outra", "data": "2026-11-01"}
++        ajustes.write_text(json.dumps({"chatgpt": {"tarifa": outra}}, ensure_ascii=False), encoding="utf-8")
++        antes_cat = self.texto()
++        painel = {"entrada_usd_mtok": 9.0, "saida_usd_mtok": 8.0, "cambio_brl": 5.2,
++                  "fonte": "https://exemplo/painel", "data": "2026-11-16"}
++        ajustar_original = adaptadores.ajustar
++
++        def ajustar_com_painel(pid, **kw):
++            r = ajustar_original(pid, **kw)               # tarifa do id novo gravada
++            ajustar_original("claude", tarifa=painel)      # o painel grava outro id no meio, sem trava
++            return r
++
++        with mock.patch.object(adaptadores, "ajustar", ajustar_com_painel), self._falha_so_no_registro_do_provedor():
++            with self.assertRaises(OSError):
++                configurar.adicionar("tar-painel", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                     tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                                     tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        aj = json.loads(ajustes.read_text(encoding="utf-8"))
++        self.assertEqual(aj["claude"], {"tarifa": painel})   # a gravação do painel sobreviveu
++        self.assertEqual(aj["chatgpt"], {"tarifa": outra})   # e o que já havia continua igual
++        self.assertNotIn("tar-painel", aj)                   # a tarifa do id novo sumiu
++        self.assertEqual(self.texto(), antes_cat)
++
++    def test_gravacao_do_painel_sem_ajustes_previos_mantem_o_arquivo(self):
++        antes_cat = self.texto()
++        painel = {"entrada_usd_mtok": 9.0, "saida_usd_mtok": 8.0, "cambio_brl": 5.2,
++                  "fonte": "https://exemplo/painel", "data": "2026-11-16"}
++        ajustar_original = adaptadores.ajustar
++
++        def ajustar_com_painel(pid, **kw):
++            r = ajustar_original(pid, **kw)
++            ajustar_original("claude", tarifa=painel)
++            return r
++
++        with mock.patch.object(adaptadores, "ajustar", ajustar_com_painel), self._falha_so_no_registro_do_provedor():
++            with self.assertRaises(OSError):
++                configurar.adicionar("tar-painel", "https://api.exemplo.com/v1", "EXEMPLO_KEY", "m1",
++                                     tarifa_entrada="1", tarifa_saida="2", cambio="5.5",
++                                     tarifa_fonte="https://exemplo/precos", tarifa_data="2026-11-17")
++        # o arquivo não existia antes, mas agora tem a gravação do painel: não é removido
++        self.assertEqual(json.loads((self.cofre / "ajustes.local.json").read_text(encoding="utf-8")),
++                         {"claude": {"tarifa": painel}})
++        self.assertEqual(self.texto(), antes_cat)
++
++
++class SchemaTests(Base):
++    def test_catalogo_versionado_passa_no_schema_e_formatacao_estavel(self):
++        t = CATALOGO_REPO.read_text(encoding="utf-8")
++        self.assertEqual(configurar.ler(CATALOGO_REPO)["schema_version"], 1)
++        self.assertEqual(json.dumps(json.loads(t), ensure_ascii=False, indent=2) + "\n", t)
++
++    def test_schema_recusa_api_remota_em_http_e_id_repetido(self):
++        d = json.loads(CATALOGO_REPO.read_text(encoding="utf-8"))
++        d["provedores"][0]["api"]["url"] = "http://api.exemplo.com/v1/messages"
++        with self.assertRaises(ValueError):
++            configurar.validar_catalogo(d)
++        d = json.loads(CATALOGO_REPO.read_text(encoding="utf-8"))
++        d["provedores"].append(dict(d["provedores"][0]))
++        with self.assertRaisesRegex(ValueError, "repetido"):
++            configurar.validar_catalogo(d)
++        with self.assertRaises(ValueError):
++            configurar.validar_catalogo({"provedores": []})
++
++
++if __name__ == "__main__":
++    unittest.main()
