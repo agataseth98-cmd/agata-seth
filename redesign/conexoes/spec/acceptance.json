@@ -43,5 +43,75 @@
       "redesign/conexoes/tests/test_conexoes.py::RedundanciaTests::test_testa_por_capacidade_sem_guardar_resposta_e_com_independencia"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "adicionar grava um provedor de API pago num comando, sem cli nem navegador",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_pago_openai_em_um_comando_so_api"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o provedor adicionado pela CLI passa pelas mesmas portas de chamada: orçamento, custo e cofre o barram antes de qualquer chamada de rede",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicionado_passa_pelas_mesmas_portas_de_chamada_sem_rede"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "configurar recusa id repetido, endpoint com esquema, host ou porta inválidos, chave que não seja nome de variável e argumento desconhecido, sem ecoar o valor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_id_repetido_no_catalogo_e_no_local_e_recusado",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_id_repetido_cli_recusa_com_codigo_2",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_chave_inline_e_recusada_sem_ecoar_o_valor",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_base_url_fora_do_permitido_e_recusada_sem_eco",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_host_e_porta_validados_antes_de_gravar",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_argumento_desconhecido_com_segredo_nao_ecoa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "listar mostra os provedores e se a chave existe só pelo nome, sem imprimir valor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::ListarTests::test_lista_provedores_e_chave_so_pelo_nome",
+      "redesign/conexoes/tests/test_configurar.py::ListarTests::test_cli_listar_texto_e_json_nao_imprimem_valor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "adições concorrentes ao catálogo não perdem entrada, com ou sem tarifa: leitura, checagem de id, gravação e tarifa ficam sob trava",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_trava_cobre_leitura_checagem_e_gravacao",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_duas_adicoes_sequenciais_persistem",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicoes_concorrentes_nao_perdem_entrada",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_adicoes_concorrentes_com_tarifa_persistem_todas",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_gravada_sob_a_mesma_trava"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tarifa da CLI é gravada no formato do painel, com fonte e data; incompleta ou fora do limite, é recusada antes de gravar; se algum passo falhar, o catálogo volta e só a tarifa deste id sai de ajustes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_pela_cli_grava_no_formato_do_painel",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_tarifa_incompleta_ou_invalida_e_recusada_antes_de_gravar",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_na_tarifa_desfaz_o_provedor",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_no_registro_depois_da_tarifa_restaura_catalogo_e_ajustes",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_falha_no_registro_sem_ajustes_previos_nao_deixa_arquivo",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_gravacao_do_painel_entre_a_tarifa_e_a_falha_sobrevive",
+      "redesign/conexoes/tests/test_configurar.py::AdicionarTests::test_gravacao_do_painel_sem_ajustes_previos_mantem_o_arquivo"
+    ],
+    "cwd": null
   }
 ]
