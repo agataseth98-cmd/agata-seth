@@ -120,6 +120,14 @@
   "resumo": "Use when creating new skills, editing existing skills, or verifying skills work before deployment"
  },
  {
+  "nome": "agata-adotar-skill",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-adotar-skill/SKILL.md",
+  "resumo": "Adotar no sistema uma skill de terceiros que resolveu problema real. Use quando o ledger mostrar uma skill de terceiro (terceiro:NOME) como "
+ },
+ {
   "nome": "agata-aplicar-proposta",
   "tipo": "skill",
   "fonte": "agata",
