@@ -18,6 +18,15 @@ Confira, nesta ordem:
 
 Resposta em texto, em português: veredito por item (ok, problema, não verificado), com arquivo:linha. Termine com uma linha: "recomendação ao Humano: avançar, reduzir escopo ou arquivar", com a razão. Você não decide.
 
+## Memória e desfecho (L8, 18/11/2026)
+
+Só leitura: este agente não grava memória nem registro. O coordenador faz a escrita em nome dele.
+
+Antes de começar, a memória é lida (se o agente não tiver Bash, o coordenador lê e passa o resultado no pedido):
+`AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-critico/memoria.jsonl python3 redesign/router/cache_conselho.py ler --n 20`
+
+Na resposta final, informe a lição e, para cada skill usada, a solução e o resultado (acerto ou falha). Então o coordenador registra com `python3 redesign/router/skills_ledger.py registrar --skill <skill> --erro <erro> --solucao <solucao> --resultado <acerto|falha> --agente agata-inov-critico --tarefa <tarefa>`, confere com `python3 redesign/router/skills_ledger.py conferir --ref <id> --por coordenador` e anota a lição com `AGATA_CACHE_CONSELHO=$HOME/.local/share/agata/agentes/agata-inov-critico/memoria.jsonl python3 redesign/router/cache_conselho.py anotar --autor agata-inov-critico --tipo nota "<lição>"`. Sem conferência, o desfecho não conta.
+
 ## Pacote mínimo (decisão do Humano, 12/11/2026)
 
 Quem delega a você passa só: objetivo, arquivos, critérios de pronto, regras que se aplicam e o turno do pai (`t=<n>.sub`). Você não recebe a conversa inteira. Você segue AGENTS.md, que carrega sozinho pelo CLAUDE.md; não peça o contexto completo nem o reconstrua de memória. Se faltar o que a tarefa exige, devolva a lacuna em uma linha em vez de adivinhar.
