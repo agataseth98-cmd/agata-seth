@@ -1,0 +1,162 @@
+diff --git a/.agents/skills/agata-aplicar-proposta/SKILL.md b/.agents/skills/agata-aplicar-proposta/SKILL.md
+index 50d03362..5b26533e 100644
+--- a/.agents/skills/agata-aplicar-proposta/SKILL.md
++++ b/.agents/skills/agata-aplicar-proposta/SKILL.md
+@@ -180,3 +180,13 @@ Cada lição tem a regra em uma frase e a fonte em uma linha. Quando a fonte é
+   Fonte: o `!` do chat não mostrou o prompt de senha (registro de 23/10); `sudo -n` falha e a senha não é do modelo (registro de 17/10).
+ - **o. Estado real antes de afirmar.** Antes de dizer que um serviço, container, branch ou PR está em certo estado, consulte com systemctl, docker inspect, git ls-remote ou gh pr view e cite a saída.
+   Fonte: divergências entre o relatório de um agente e o estado medido (relato, não conferido).
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-aplicar-proposta
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-conversar-com-seth/SKILL.md b/.agents/skills/agata-conversar-com-seth/SKILL.md
+index 28918043..5fde0aaa 100644
+--- a/.agents/skills/agata-conversar-com-seth/SKILL.md
++++ b/.agents/skills/agata-conversar-com-seth/SKILL.md
+@@ -47,3 +47,13 @@ Só com pedido explícito ("abra minha conversa e apresente-se"). Precisa de uma
+ - O áudio da voz: nenhum dos caminhos o ouve; só o Humano mede se ficou natural.
+ - Como o LibreChat fragmenta o texto que manda à voz.
+ - Sessões sem login no navegador: o caminho C não se aplica.
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-conversar-com-seth
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-equipe/SKILL.md b/.agents/skills/agata-equipe/SKILL.md
+index b211d655..4d458e1e 100644
+--- a/.agents/skills/agata-equipe/SKILL.md
++++ b/.agents/skills/agata-equipe/SKILL.md
+@@ -163,3 +163,13 @@ Gere pelo painel (`python3 scripts/painel_estado.py`) ou monte uma linha que con
+ - Seja sucinta sem perder o necessário para retomar: resultado e estado; arquivos, PR e SHA quando houver; testes e placar; pendências, limites e confirmação humana exigida.
+ - Diferencie proposta, diff, assinatura, aplicação e merge. Não diga que algo foi publicado ou aplicado quando não foi.
+ - A devolutiva é texto no fim da resposta; não envie mensagem para outro agente ou serviço sem autorização explícita.
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-equipe
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index 59045c24..0baf0559 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -159,3 +159,13 @@ bash scripts/aprovar.sh <nome-da-proposta>
+ ```
+ 
+ `<nome-da-proposta>` é o nome do `.diff` em `propostas/`, sem extensão. Antes, confirme que o arquivo existe (`ls propostas/<nome>.diff`). Se não existir, atualize o checkout com o comando acima.
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-fluxo
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-llm-fundamentos/SKILL.md b/.agents/skills/agata-llm-fundamentos/SKILL.md
+index 1722f1fc..52b70333 100644
+--- a/.agents/skills/agata-llm-fundamentos/SKILL.md
++++ b/.agents/skills/agata-llm-fundamentos/SKILL.md
+@@ -67,3 +67,13 @@ Aprender com acertos:
+ - Concordância entre modelos não é prova. Use-a como revisão e confirme o ponto com critério, fonte ou reprodução.
+ - Lições de método: reprodução isolada localiza causa mas não substitui validação ponta a ponta; revisor independente pode revelar decisão de política ainda não definida (resolva a semântica antes de afirmar que o sistema cumpre a regra); em investigação, confirme qual branch ou worktree o serviço usa de fato.
+ - A bateria semântica e os gates de confiabilidade são avaliações diferentes. Não combine resultados em uma nota única.
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-llm-fundamentos
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-painel/SKILL.md b/.agents/skills/agata-painel/SKILL.md
+index 160f29ca..d481a164 100644
+--- a/.agents/skills/agata-painel/SKILL.md
++++ b/.agents/skills/agata-painel/SKILL.md
+@@ -51,3 +51,13 @@ Números de contraste mudam entre medições por causa da quantidade de elemento
+ ## Pendências conhecidas
+ - Medido em 16/11/2026 (deixa de ser pendência): fotos em oito larguras, de 360 a 2560 px (360, 480, 768, 1024, 1280, 1440, 1920 e 2560 px), com navegador sem janela e só GET, de panorama, conversa, conhecimento e sistema; e rolagem horizontal da página nas 64 combinações (8 larguras x 8 seções) pelo CDP, com 0 pedidos não-GET abertos. Resultado: nenhuma combinação com rolagem horizontal da página. Em celular, a gaveta e os mosaicos foram vistos em foto; o toque em alvo de 360 px não foi medido.
+ - O painel do Conselho (extensão e endpoint) está fora deste repositório, na área de trabalho. Ver `agata-fluxo` (memória comum) e `agata-equipe` (canal).
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-painel
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-relay-provedores/SKILL.md b/.agents/skills/agata-relay-provedores/SKILL.md
+index a7a3bf61..03405b02 100644
+--- a/.agents/skills/agata-relay-provedores/SKILL.md
++++ b/.agents/skills/agata-relay-provedores/SKILL.md
+@@ -51,3 +51,13 @@ Quando o Humano pedir uma conversa entre modelos, envie a mesma pergunta de form
+ - [Mapa de hosts e estados registrados](references/estado-provedores.md).
+ - [Descobertas operacionais append-only](references/diario-descobertas.md).
+ - Fluxo P-8 e segurança: `agata-aplicar-proposta` e `agata-fluxo` (seção 4, mudança no runtime).
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-relay-provedores
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/agata-voz/SKILL.md b/.agents/skills/agata-voz/SKILL.md
+index cdb1b77c..18c10230 100644
+--- a/.agents/skills/agata-voz/SKILL.md
++++ b/.agents/skills/agata-voz/SKILL.md
+@@ -60,3 +60,13 @@ Escreve para ser falado, na voz comum: resultado primeiro, evidência (ou "não
+ 3. Texto falado com mais de 12.000 caracteres: fale o resumo e diga que é resumo.
+ 4. O serviço sobe e desce por conta de quem fala (o sistema é sob demanda). Medição e voz não ficam ligadas à toa.
+ 5. Mudar esta skill ou o script passa por proposta P-8.
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill agata-voz
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
+diff --git a/.agents/skills/design-taste-frontend/SKILL.md b/.agents/skills/design-taste-frontend/SKILL.md
+index d8444f13..7bbfc7ad 100644
+--- a/.agents/skills/design-taste-frontend/SKILL.md
++++ b/.agents/skills/design-taste-frontend/SKILL.md
+@@ -540,3 +540,13 @@ open collections could not be searched.
+ | `assets/scenes/` | The scroll scenes: the shared stage (`stage.js`, `stage.css`) and, for each scene in the library, its `.js`, `.css` and a working demo page in `demo/`. |
+ | `assets/app.css` · `assets/charts.js` | For app screens: a neutral shell, panels, tables and controls, and small SVG charts drawn to the app rules. |
+ | `library/` | The data the draw reads: directions, heroes, sections, type systems, palettes, photographs, studied sites, motions, scroll scenes (`scenes.json`), and the app styles, shells and screen patterns (`app.json`). Do not read it whole; use the script. |
++
++## Recomendação comprovada (L8)
++
++Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
++
++```bash
++python3 redesign/router/skills_ledger.py recalcular --skill design-taste-frontend
++```
++
++Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
