@@ -17,6 +17,7 @@ Só `agata.target` está em `default.target.wants/`; os membros só em `agata.ta
 | `dropin-omniroute-resilience.conf` | `omniroute.service.d/resiliencia.conf` | `Environment=RATE_LIMIT_MAX_WAIT_MS=45000` — reproduz o conserto de (363) sem UI, pra um clone que nasce com banco vazio. Achado do laboratório "Ensaio" (MEMÓRIAS 587), lido no código-fonte real do pacote. Nesta Máquina o banco já tem o valor (vence a variável); aplicar aqui não muda nada. |
 | `dropin-llamacpp.conf` | `llamacpp-agata.service.d/agata.conf` | **só** `PartOf=agata.target` (sem `WantedBy`): o MoE **para** com o `agata down` (libera a VRAM da 4060) mas **não sobe** junto — fica sob demanda (`agata up --moe`). |
 | `llamacpp-agata.service` | `~/.config/systemd/user/llamacpp-agata.service` | **unidade base** do MoE (versionada em 23/10/2026; antes só fora do git). `Restart=no` e **sem** `[Install]`: sob demanda, só à mão, nunca volta sozinho depois de um OOM na GPU (fecha a pendência de (652); mesma regra do `llamacpp@.service`). |
+| `ollama-agata.socket`, `ollama-agata-proxy.service`, `ollama-agata.service` | `~/.config/systemd/user/` (**sem sudo**, como links para `config/`) | **18/11/2026, sob demanda** (decisão do Humano: como o Laya e o Ollaya). O socket escuta `127.0.0.1:11434` e fica no `agata.target`; a 1ª conexão sobe o proxy (`systemd-socket-proxyd`, sai após 15 min ociosos) e o backend (`OLLAMA_HOST=127.0.0.1:11447`, `OLLAMA_MODELS=%h/.local/share/ollama/models`, `StopWhenUnneeded`, sem `[Install]`). Substitui o `ollama.service` do sistema, que precisa ficar desabilitado (o socket precisa da porta 11434). Migração, uma vez, com sudo: fim deste arquivo. |
 | `dropin-ollama-bind.conf` | `/etc/systemd/system/ollama.service.d/agata-bind.conf` (**sudo**, unit de `system`, não `--user`) | 2 variáveis invariantes (bind `127.0.0.1`, flash attention) — framework, igual em qualquer clone. Achado do laboratório "Ensaio" (MEMÓRIAS 567): antes, essas 2 viviam misturadas com hardware num `override.conf` único, só em prosa (`PROJETO.md`), sem template versionado. |
 | `dropin-ollama-gpu.exemplo.conf` | `/etc/systemd/system/ollama.service.d/agata-gpu.conf` (**sudo**) | **exemplo**, não instala direto — 3 variáveis de hardware (VRAM/GPU desta Máquina), ajustar antes de usar. Nunca versionado com valor real (mesmo tratamento de `CHAVES.env.exemplo`). |
 | `openvino-whisper.service` · `openvino-embeddings.service` · `obsidian-ro-proxy.service` | `~/.config/systemd/user/<nome>` | **unidades base** (Fase 2/6). Promovidas ao repo em 03/09 (chat 6, otimização B1) — antes só existiam fora do git. Trazem o fix do chat 5 (`After=default.target` removido, `[Install] WantedBy=agata.target`). |
@@ -67,3 +68,29 @@ rm ~/.config/systemd/user/{omniroute,omniroute-sanitizer,openvino-whisper,openvi
 systemctl --user daemon-reload
 ```
 Os serviços seguem sobíveis um a um como antes.
+
+## Migrar o Ollama do sistema para o usuário, sob demanda (18/11/2026, uma vez, com sudo)
+
+```
+sudo systemctl disable --now ollama.service
+sudo ls /usr/share/ollama/.ollama/models/manifests/registry.ollama.ai/library   # confere onde estão os modelos
+mkdir -p ~/.local/share/ollama/models
+sudo cp -a /usr/share/ollama/.ollama/models/. ~/.local/share/ollama/models/
+sudo chown -R "$USER": ~/.local/share/ollama
+ln -sf ~/agata/config/ollama-agata.socket ~/agata/config/ollama-agata-proxy.service \
+       ~/agata/config/ollama-agata.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now ollama-agata.socket       # só o socket; backend e proxy sobem pela 1ª conexão
+ollama list                                             # a 1ª chamada acorda o backend (alguns segundos)
+```
+
+Não rode `enable` no backend nem no proxy (sem `[Install]`). Sem o `disable --now` da 1ª linha, o socket
+não consegue a porta 11434. O `cp -a` leva os modelos que já existiam; o que sai do conjunto é decisão do
+Humano, tomada à parte. Conferido o `ollama list`, o diretório antigo pode ser apagado pelo Humano.
+
+**Partida a frio e o gateway.** O socket deixa a porta 11434 sempre aberta, então o teste de porta do gateway
+(`rotas_locais.ollama_no_ar`) passa a ver "no ar" mesmo com o backend parado. A 1ª chamada depois de ociosidade
+espera o backend subir (alguns segundos, o socket segura a conexão) e depois o modelo carregar, dentro do prazo
+da rota local (`SETH_ROTA_LOCAL_MS`, padrão 100,5 s). Se estourar, ou o backend não subir, o gateway cai na fila
+de sempre sem erro ao usuário. Efeito colateral: qualquer cliente que consulte :11434 (painel, `corpo`,
+inventário) acorda o Ollama e adia a parada por ociosidade.

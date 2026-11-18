@@ -15,6 +15,7 @@ CAMPOS = ("id", "provedor", "modelo", "categoria", "classes_permitidas", "treina
           "cota", "compartilhada_com_seth", "cota_medida", "conferida_em", "fonte")
 CATEGORIAS = ("local", "gratuito", "assinatura", "pago")
 CLASSES = ("publico", "sintetico", "pessoal", "segredo")
+TIPOS = ("codigo", "conversa", "ferramenta", "json", "contexto")
 TREINO = ("nao", "sim", "nao_conferido", "nao_aplica")
 RAIZ = Path(__file__).resolve().parents[2]
 PADRAO = RAIZ / "config" / "rotas-ficha.json"
@@ -40,6 +41,14 @@ def verificar(ficha: dict) -> tuple[list[str], list[str]]:
             erros.append(f"{rid}: segredo nunca pode sair para rota nenhuma (regra de segurança)")
         if "pessoal" in classes and r["categoria"] != "local":
             erros.append(f"{rid}: dado pessoal só em rota local (D2)")
+        tipos = r.get("tipos", [])
+        if tipos:
+            if r["categoria"] != "local":
+                erros.append(f"{rid}: rota por tipo só vale para rota local")
+            if any(t not in TIPOS for t in tipos):
+                erros.append(f"{rid}: tipo desconhecido em {tipos}")
+            if not isinstance(r.get("max_tokens_entrada"), int):
+                erros.append(f"{rid}: rota por tipo exige max_tokens_entrada (inteiro)")
         if r["compartilhada_com_seth"] and r["categoria"] != "local":
             avisos.append(f"{rid}: cota compartilhada com a Seth, sem teto (D3)")
         if not r["cota_medida"]:
