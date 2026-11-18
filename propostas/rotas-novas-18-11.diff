@@ -1,0 +1,1303 @@
+diff --git a/ESTADO.md b/ESTADO.md
+index 91dce908..80d359ee 100644
+--- a/ESTADO.md
++++ b/ESTADO.md
+@@ -20,6 +20,7 @@ Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade c
+ - `seth-escriba` (porta :20140) — unidade `seth-escriba.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-escriba.service
+ - `seth-verificador` (porta :20141) — unidade `seth-verificador.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-verificador.service
+ - `piper-tts` (porta :8890) — unidade `piper-tts.service`, escopo usuario, P-9 sim — origem: redesign/systemd/piper-tts.service
++- `ollama-agata` (porta :11434) — unidade `ollama-agata.service`, escopo usuario, P-9 nao — origem: redesign/systemd/ollama-agata.service
+ - `ollaya.socket` (porta :11435) — unidade `ollaya.socket`, escopo usuario, P-9 sim — origem: config/ollaya.socket (porta pública; sobe com o agata.target)
+ - `ollaya-proxy.service` — escopo usuario, P-9 nao — origem: config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+ - `ollaya` (porta :11445) — unidade `ollaya.service`, escopo usuario, P-9 nao — origem: config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
+diff --git a/config/rotas-ficha.json b/config/rotas-ficha.json
+index 830994ac..1c8f70e4 100644
+--- a/config/rotas-ficha.json
++++ b/config/rotas-ficha.json
+@@ -2,7 +2,8 @@
+   "schema_version": 1,
+   "decisoes": {
+     "D2": "dado pessoal só em rota local nas rotas novas",
+-    "D3": "cota gratuita compartilhada sem teto, com aviso"
++    "D3": "cota gratuita compartilhada sem teto, com aviso",
++    "D4": "rota local por tipo: so o modelo que ganhou na auditoria de conteudo (qwen3-30b: json, codigo, contexto); os demais ficam catalogados com tipos vazios; o painel so restringe; Ollama fora = regra de sempre"
+   },
+   "rotas": [
+     {
+@@ -20,7 +21,96 @@
+       "compartilhada_com_seth": false,
+       "cota_medida": false,
+       "conferida_em": "2026-11-06",
+-      "fonte": "PROJETO.md (fundo local da cadeia da Seth)"
++      "fonte": "PROJETO.md (fundo local da cadeia da Seth)",
++      "tipos": [],
++      "papel": "reserva (fim das filas; não é escolhida por tipo)"
++    },
++    {
++      "id": "local-lfm3",
++      "provedor": "ollama",
++      "modelo": "lfm3:1.7b",
++      "categoria": "local",
++      "classes_permitidas": [
++        "publico",
++        "sintetico",
++        "pessoal"
++      ],
++      "tipos": [],
++      "prioridade": 10,
++      "max_tokens_entrada": 6000,
++      "treina_com_prompts": "nao_aplica",
++      "cota": "sem cota (hardware local)",
++      "compartilhada_com_seth": false,
++      "cota_medida": false,
++      "conferida_em": "2026-11-18",
++      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); vazio em contexto longo e pediu segredo",
++      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
++    },
++    {
++      "id": "local-qwen3-30b",
++      "provedor": "ollama",
++      "modelo": "qwen3-30b-a3b-64k:latest",
++      "categoria": "local",
++      "classes_permitidas": [
++        "publico",
++        "sintetico",
++        "pessoal"
++      ],
++      "tipos": [
++        "json",
++        "codigo",
++        "contexto"
++      ],
++      "prioridade": 20,
++      "max_tokens_entrada": 48000,
++      "treina_com_prompts": "nao_aplica",
++      "cota": "sem cota (hardware local)",
++      "compartilhada_com_seth": false,
++      "cota_medida": false,
++      "conferida_em": "2026-11-18",
++      "fonte": "porta_entrada + auditoria de conteudo 18/11/2026: json 5/0/1, codigo 4/1/1, contexto 3/1/0 (melhor nos tres)"
++    },
++    {
++      "id": "local-rlm",
++      "provedor": "ollama",
++      "modelo": "rlm-qwen3-8b-teste:latest",
++      "categoria": "local",
++      "classes_permitidas": [
++        "publico",
++        "sintetico",
++        "pessoal"
++      ],
++      "tipos": [],
++      "prioridade": 10,
++      "max_tokens_entrada": 12000,
++      "treina_com_prompts": "nao_aplica",
++      "cota": "sem cota (hardware local)",
++      "compartilhada_com_seth": false,
++      "cota_medida": false,
++      "conferida_em": "2026-11-18",
++      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); 1/5 em ferramenta e vaza </think>",
++      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
++    },
++    {
++      "id": "local-lumi",
++      "provedor": "ollama",
++      "modelo": "lumi-4b:latest",
++      "categoria": "local",
++      "classes_permitidas": [
++        "publico",
++        "sintetico",
++        "pessoal"
++      ],
++      "tipos": [],
++      "prioridade": 10,
++      "max_tokens_entrada": 24000,
++      "treina_com_prompts": "nao_aplica",
++      "cota": "sem cota (hardware local)",
++      "compartilhada_com_seth": false,
++      "cota_medida": false,
++      "conferida_em": "2026-11-18",
++      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); repete texto em contexto",
++      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
+     },
+     {
+       "id": "gemini-flash",
+diff --git a/config/servicos-agata.txt b/config/servicos-agata.txt
+index 83a58e59..95e5821b 100644
+--- a/config/servicos-agata.txt
++++ b/config/servicos-agata.txt
+@@ -33,6 +33,7 @@ seth-gateway.service|usuario|20126|sim|redesign/systemd/seth-gateway.service
+ seth-escriba.service|usuario|20140|sim|redesign/systemd/seth-escriba.service
+ seth-verificador.service|usuario|20141|sim|redesign/systemd/seth-verificador.service
+ piper-tts.service|usuario|8890|sim|redesign/systemd/piper-tts.service
++ollama-agata.service|usuario|11434|nao|redesign/systemd/ollama-agata.service
+ ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
+ ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+ ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
+diff --git a/redesign/rotas/ficha.py b/redesign/rotas/ficha.py
+index 37d5c365..32268a41 100644
+--- a/redesign/rotas/ficha.py
++++ b/redesign/rotas/ficha.py
+@@ -15,6 +15,7 @@ CAMPOS = ("id", "provedor", "modelo", "categoria", "classes_permitidas", "treina
+           "cota", "compartilhada_com_seth", "cota_medida", "conferida_em", "fonte")
+ CATEGORIAS = ("local", "gratuito", "assinatura", "pago")
+ CLASSES = ("publico", "sintetico", "pessoal", "segredo")
++TIPOS = ("codigo", "conversa", "ferramenta", "json", "contexto")
+ TREINO = ("nao", "sim", "nao_conferido", "nao_aplica")
+ RAIZ = Path(__file__).resolve().parents[2]
+ PADRAO = RAIZ / "config" / "rotas-ficha.json"
+@@ -40,6 +41,14 @@ def verificar(ficha: dict) -> tuple[list[str], list[str]]:
+             erros.append(f"{rid}: segredo nunca pode sair para rota nenhuma (regra de segurança)")
+         if "pessoal" in classes and r["categoria"] != "local":
+             erros.append(f"{rid}: dado pessoal só em rota local (D2)")
++        tipos = r.get("tipos", [])
++        if tipos:
++            if r["categoria"] != "local":
++                erros.append(f"{rid}: rota por tipo só vale para rota local")
++            if any(t not in TIPOS for t in tipos):
++                erros.append(f"{rid}: tipo desconhecido em {tipos}")
++            if not isinstance(r.get("max_tokens_entrada"), int):
++                erros.append(f"{rid}: rota por tipo exige max_tokens_entrada (inteiro)")
+         if r["compartilhada_com_seth"] and r["categoria"] != "local":
+             avisos.append(f"{rid}: cota compartilhada com a Seth, sem teto (D3)")
+         if not r["cota_medida"]:
+diff --git a/redesign/router/rotas_locais.py b/redesign/router/rotas_locais.py
+new file mode 100644
+index 00000000..8aee7ce0
+--- /dev/null
++++ b/redesign/router/rotas_locais.py
+@@ -0,0 +1,196 @@
++#!/usr/bin/env python3
++"""Rotas locais por tipo de pedido (18/11/2026), lidas da ficha assinada config/rotas-ficha.json.
++
++Regra determinística, sem modelo e sem rede além de um teste de porta:
++- a ficha assinada manda: só uma rota com categoria `local` e com `tipos` pode ser escolhida, só para o tipo
++  em que ganhou na prova de porta de entrada, e só se a classe do pedido estiver em `classes_permitidas`;
++- o painel (decisoes.jsonl) SÓ RESTRINGE: modelo cuja última decisão é `standby` sai da escolha. `liberado` não
++  acrescenta nada que a ficha não tenha. Arquivo ausente ou ilegível = comportamento da ficha, sem painel;
++- Ollama fora do ar (porta fechada) = nenhuma rota local; o gateway segue pela regra de sempre.
++Nada aqui chama modelo. Quem usa é o seth_gateway (e o teste).
++"""
++from __future__ import annotations
++
++import json
++import os
++import socket
++import time
++from pathlib import Path
++
++RAIZ = Path(__file__).resolve().parents[2]
++FICHA_PADRAO = RAIZ / "config" / "rotas-ficha.json"
++PREFIXO_GATEWAY = "ollama-local/"  # nome do modelo no OmniRoute
++TIPOS = ("codigo", "conversa", "ferramenta", "json", "contexto")
++# acima disto (tokens estimados do pedido do usuário, caracteres ÷ 3) o pedido é "contexto"
++LIMIAR_CONTEXTO_TOKENS = 6000
++_CACHE_FICHA: dict = {"mtime": None, "caminho": None, "rotas": []}
++_CACHE_PAINEL: dict = {"mtime": None, "caminho": None, "estado": {}}
++_CACHE_PORTA: dict = {"quando": 0.0, "caminho": None, "ok": False}
++
++
++def ligado() -> bool:
++    """SETH_ROTAS_LOCAIS=0 desliga tudo (volta ao comportamento anterior)."""
++    return os.environ.get("SETH_ROTAS_LOCAIS") != "0"
++
++
++def caminho_painel() -> Path:
++    env = os.environ.get("AGATA_DECISOES_MODELOS")
++    if env:
++        return Path(env)
++    return Path.home() / ".local" / "share" / "agata" / "catalogo-modelos" / "decisoes.jsonl"
++
++
++def carregar_rotas(caminho: Path | None = None) -> list[dict]:
++    """Rotas locais com tipos, da ficha. Ficha ausente ou quebrada = []."""
++    caminho = Path(caminho or FICHA_PADRAO)
++    try:
++        mt = caminho.stat().st_mtime
++        if _CACHE_FICHA["mtime"] == mt and _CACHE_FICHA["caminho"] == str(caminho):
++            return _CACHE_FICHA["rotas"]
++        dados = json.loads(caminho.read_text(encoding="utf-8"))
++        rotas = [r for r in dados.get("rotas", [])
++                 if isinstance(r, dict) and r.get("categoria") == "local" and r.get("tipos")
++                 and isinstance(r.get("modelo"), str) and r.get("provedor") == "ollama"]
++    except (OSError, ValueError, AttributeError):
++        return []
++    _CACHE_FICHA.update(mtime=mt, caminho=str(caminho), rotas=rotas)
++    return rotas
++
++
++def estado_painel(caminho: Path | None = None) -> dict[str, str]:
++    """id -> última ação ('liberar' ou 'standby') do painel. Ausente ou ilegível = {} (sem restrição)."""
++    caminho = Path(caminho or caminho_painel())
++    try:
++        mt = caminho.stat().st_mtime
++        if _CACHE_PAINEL["mtime"] == mt and _CACHE_PAINEL["caminho"] == str(caminho):
++            return _CACHE_PAINEL["estado"]
++        estado: dict[str, str] = {}
++        for linha in caminho.read_text(encoding="utf-8").splitlines():
++            try:
++                d = json.loads(linha)
++            except ValueError:
++                continue  # linha quebrada não derruba a leitura
++            if isinstance(d, dict) and isinstance(d.get("id"), str) and d.get("acao") in ("liberar", "standby"):
++                estado[d["id"]] = d["acao"]  # append-only: a última linha do id vale
++    except (OSError, ValueError):
++        return {}
++    _CACHE_PAINEL.update(mtime=mt, caminho=str(caminho), estado=estado)
++    return estado
++
++
++def em_standby(rota: dict, estado: dict[str, str]) -> bool:
++    ident = {rota.get("modelo", ""), PREFIXO_GATEWAY + rota.get("modelo", ""), "ollama/" + rota.get("modelo", ""),
++             rota.get("id", "")}
++    return any(estado.get(i) == "standby" for i in ident if i)
++
++
++def ollama_no_ar(endereco: tuple[str, int] | None = None, validade: float = 5.0) -> bool:
++    """Teste de porta (0,2 s), lembrado por `validade` segundos. Porta fechada = Ollama fora (parado sob demanda)."""
++    if endereco is None:
++        env = os.environ.get("SETH_OLLAMA_ADDR", "127.0.0.1:11434")
++        host, _, porta = env.rpartition(":")
++        try:
++            endereco = (host or "127.0.0.1", int(porta))
++        except ValueError:
++            return False
++    agora = time.monotonic()
++    chave = f"{endereco[0]}:{endereco[1]}"
++    if _CACHE_PORTA["caminho"] == chave and agora - _CACHE_PORTA["quando"] < validade:
++        return _CACHE_PORTA["ok"]
++    try:
++        with socket.create_connection(endereco, timeout=0.2):
++            ok = True
++    except OSError:
++        ok = False
++    _CACHE_PORTA.update(quando=agora, caminho=chave, ok=ok)
++    return ok
++
++
++def _texto(c) -> str:
++    if isinstance(c, str):
++        return c
++    if isinstance(c, list):
++        return " ".join(p.get("text", "") for p in c if isinstance(p, dict) and isinstance(p.get("text"), str))
++    return ""
++
++
++def tipo_do_pedido(payload: dict) -> str:
++    """codigo | conversa | ferramenta | json | contexto, por regra sobre o pedido atual do usuário."""
++    msgs = payload.get("messages") if isinstance(payload.get("messages"), list) else []
++    ult = ""
++    for m in reversed(msgs):
++        if isinstance(m, dict) and m.get("role") == "user":
++            ult = _texto(m.get("content"))
++            break
++    if payload.get("tools"):
++        return "ferramenta"
++    rf = payload.get("response_format")
++    if isinstance(rf, dict) and str(rf.get("type", "")).startswith("json"):
++        return "json"
++    if len(ult) // 3 > LIMIAR_CONTEXTO_TOKENS:
++        return "contexto"
++    if "```" in ult:
++        return "codigo"
++    return "conversa"
++
++
++def tokens_estimados(payload: dict) -> int:
++    """Caracteres ÷ 3 do que vai ao modelo (mensagens e esquema de ferramentas): conservador para português."""
++    total = 0
++    for m in payload.get("messages") or []:
++        if isinstance(m, dict):
++            total += len(_texto(m.get("content")))
++    if payload.get("tools"):
++        try:
++            total += len(json.dumps(payload["tools"], ensure_ascii=False))
++        except (TypeError, ValueError):
++            total += 20000
++    return total // 3
++
++
++def tem_segredo(payload: dict) -> bool:
++    """Classe 'segredo': a régua de segredo da Máquina (sanitizar.varrer) acha algo no que vai ao modelo.
++    Segredo nunca vai a rota nenhuma, nem local: o pedido segue como hoje. Régua indisponível = trata como segredo."""
++    try:
++        import sanitizar  # mesmo diretório
++        partes = [_texto(m.get("content")) for m in payload.get("messages") or [] if isinstance(m, dict)]
++        return bool(sanitizar.varrer("\n".join(partes)))
++    except Exception:  # noqa: BLE001 -- falha fechada
++        return True
++
++
++def classe_do_pedido(publico: bool) -> str:
++    """Pedido explicitamente público = 'publico'. Qualquer outro = 'pessoal' (o mais restrito que a ficha admite
++    em rota local), então só rota que a ficha liberou para dado pessoal pode atendê-lo."""
++    return "publico" if publico else "pessoal"
++
++
++def escolher(payload: dict, tipo: str, publico: bool, ficha: Path | None = None, painel: Path | None = None,
++             checar_ollama: bool = True) -> dict | None:
++    """Rota local da ficha para este tipo, ou None (= regra de sempre). A ficha decide; o painel só tira."""
++    if not ligado() or tipo not in TIPOS:
++        return None
++    if tem_segredo(payload):
++        return None
++    estado = estado_painel(painel)
++    classe = classe_do_pedido(publico)
++    est = tokens_estimados(payload)
++    candidatas = []
++    for r in carregar_rotas(ficha):
++        if tipo not in r["tipos"] or classe not in r.get("classes_permitidas", []):
++            continue
++        if em_standby(r, estado):
++            continue
++        limite = r.get("max_tokens_entrada")
++        if isinstance(limite, int) and est > limite:
++            continue
++        candidatas.append(r)
++    if not candidatas:
++        return None
++    if checar_ollama and not ollama_no_ar():
++        return None
++    return sorted(candidatas, key=lambda r: (r.get("prioridade", 100), r["id"]))[0]
++
++
++def modelo_no_gateway(rota: dict) -> str:
++    return PREFIXO_GATEWAY + rota["modelo"]
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index b3509a7e..deb5e4d4 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -43,6 +43,7 @@ Env:
+ from __future__ import annotations
+ 
+ import hashlib
++import http.client
+ import io
+ import json
+ import queue
+@@ -513,6 +514,21 @@ _ALIAS_PUBLICO = "seth-public"
+ _ROTAS_LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
+ 
+ 
++# Prazo da rota local (1º byte e cada leitura) = maior tempo de resposta COM SUCESSO medido para o modelo roteado
++# + 30 s de folga (ordem do Humano, 18/11/2026). O modelo roteado é o qwen3-30b-a3b-64k: maior sucesso medido
++# 70,5 s no benchmark 20261118-144845 (competicao-locais, 18/11/2026) -> 100,5 s. Muda com SETH_ROTA_LOCAL_MS.
++_ROTA_LOCAL_MS_PADRAO = 100500
++
++
++def _rota_local_seg() -> float:
++    """Prazo da rota local em segundos (SETH_ROTA_LOCAL_MS em milissegundos, padrão 100500). Passou, cai na fila
++    de sempre: o pior caso fica 100,5 + 180 s, não 180 + 180."""
++    try:
++        return max(1.0, float(os.environ.get("SETH_ROTA_LOCAL_MS", str(_ROTA_LOCAL_MS_PADRAO))) / 1000.0)
++    except ValueError:
++        return _ROTA_LOCAL_MS_PADRAO / 1000.0
++
++
+ class DadosExternosSemClassificacao(ValueError):
+     pass
+ 
+@@ -609,6 +625,7 @@ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteament
+ import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
+ import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
+ import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
++import rotas_locais  # noqa: E402  (mesmo diretório; rotas locais por tipo, ficha assinada + painel que só restringe, 18/11/2026)
+ 
+ _PERFIS = {"mtime": None, "dados": {}}
+ 
+@@ -1749,14 +1766,17 @@ class _Handler(BaseHTTPRequestHandler):
+     _cab_estados = None
+     _served_by = None  # (17/11, item 1) campo "model" do upstream nesta resposta; "?" no log se não houve
+     _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
++    _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
+ 
+     def log_message(self, fmt, *args):
+         pass
+ 
+     def do_GET(self):
++        self._fallback_corpo = None  # keep-alive: um POST anterior nunca deixa corpo guardado para este pedido
+         self._passar(b"", "GET")
+ 
+     def do_HEAD(self):
++        self._fallback_corpo = None
+         self._passar(b"", "HEAD")
+ 
+     def do_POST(self):
+@@ -1770,6 +1790,7 @@ class _Handler(BaseHTTPRequestHandler):
+         self._texto_maquina = ""
+         self._cab_injetado = None
+         self._nomes_tools = frozenset()
++        self._fallback_corpo = None
+         self._data_classification = None
+         self._public_only_lane = False
+         self._reg = None
+@@ -1785,6 +1806,7 @@ class _Handler(BaseHTTPRequestHandler):
+                 return self._erro(400, "corpo marcado como JSON mas não parseia")
+             if isinstance(payload, dict):
+                 try:
++                    agent_padrao = payload.get("model") == _ROTA_BASE  # só o alvo padrão do Agent pode ir a rota local
+                     alias_publico = payload.get("model") == _ALIAS_PUBLICO
+                     classificacao = self.headers.get("X-Agata-Data-Classification")
+                     if classificacao is None:
+@@ -1861,6 +1883,23 @@ class _Handler(BaseHTTPRequestHandler):
+                     payload["model"] = longa
+                     self._rota = longa
+                 corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
++                # Decisão do coordenador (18/11): a queda segura de pedido pessoal volta para a fila de sempre, que é a
++                # regra de hoje (seth-livre sanitiza segredo, dado pessoal e nomes de projeto antes de sair). Segredo
++                # nem chega a rota local (rotas_locais.tem_segredo).
++                # (18/11/2026) rota local por tipo: a ficha assinada manda, o painel só restringe, Ollama fora = regra
++                # de sempre. Guarda o corpo com a fila original para a queda segura em _passar.
++                if agent_padrao and not self._public_only_lane and not _e_chamada_utilitaria(payload):
++                    try:
++                        local = rotas_locais.escolher(payload, rotas_locais.tipo_do_pedido(payload),
++                                                      self._data_classification == "public")
++                    except Exception:  # noqa: BLE001 -- escolha quebrada nunca derruba o pedido: regra de sempre
++                        local = None
++                    if local:
++                        self._fallback_corpo = corpo
++                        corpo = json.dumps(dict(payload, model=rotas_locais.modelo_no_gateway(local)),
++                                           ensure_ascii=False).encode("utf-8")
++                        print(f"rota local por tipo: {self._rota} -> {rotas_locais.modelo_no_gateway(local)}",
++                              file=sys.stderr, flush=True)
+         self._passar(corpo, "POST")
+ 
+     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
+@@ -2014,6 +2053,8 @@ class _Handler(BaseHTTPRequestHandler):
+ 
+     def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
+         t0 = time.monotonic()
++        if metodo != "POST":
++            self._fallback_corpo = None
+         self._served_by = None  # (17/11, item 1) por tentativa: a nova tentativa põe o modelo da sua resposta
+         url = UPSTREAM + self.path
+         headers = {k: v for k, v in self.headers.items()
+@@ -2023,7 +2064,7 @@ class _Handler(BaseHTTPRequestHandler):
+             headers["X-Agata-Data-Classification"] = self._data_classification
+         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
+         try:
+-            up = urllib.request.urlopen(req, timeout=180)
++            up = urllib.request.urlopen(req, timeout=_rota_local_seg() if self._fallback_corpo is not None else 180)
+         except urllib.error.HTTPError as e:
+             up = e
+             # (17/11, item 4) o 429 nasce no OmniRoute (cota e circuit breaker de cada provedor), não numa escolha do
+@@ -2033,8 +2074,17 @@ class _Handler(BaseHTTPRequestHandler):
+             self._log(f"upstream HTTP {e.code}{marca}", t0)
+         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+             self._log(f"upstream inacessível ({e})", t0)
++            if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local sem conexão/timeout: fila de sempre
++                fb, self._fallback_corpo = self._fallback_corpo, None
++                return self._passar(fb, metodo, tentativa)
+             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
+                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
++        if up.status >= 400 and self._fallback_corpo is not None and metodo == "POST":
++            # (18/11/2026) queda segura: a rota local falhou (modelo ausente, Ollama parou no meio): fila de sempre
++            fb, self._fallback_corpo = self._fallback_corpo, None
++            self._log(f"rota local falhou (HTTP {up.status}) -> fila de sempre", t0)
++            _derrubar(up)
++            return self._passar(fb, metodo, tentativa)
+         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
+         modelo_real = None
+         buf_pre = b""
+@@ -2073,6 +2123,11 @@ class _Handler(BaseHTTPRequestHandler):
+                 modelo_real = self._modelo_de_bytes(buf_pre)
+                 vazio = up.status == 200 and not self._tem_conteudo(buf_pre, False)
+             self._served_by = modelo_real  # (17/11, item 1)
++            if vazio and self._fallback_corpo is not None and metodo == "POST":
++                fb, self._fallback_corpo = self._fallback_corpo, None
++                self._log(f"rota local sem conteúdo (modelo {modelo_real or '?'}) -> fila de sempre", t0)
++                _derrubar(up)
++                return self._passar(fb, metodo, tentativa)
+             if vazio and tentativa == 0 and self._rota in self._SUBIR_FILA:
+                 try:
+                     pl = json.loads(corpo)
+@@ -2091,9 +2146,12 @@ class _Handler(BaseHTTPRequestHandler):
+             self.close_connection = True
+             up.close()
+             return
+-        except (TimeoutError, OSError) as e:
++        except (TimeoutError, OSError, http.client.HTTPException) as e:  # HTTPException: IncompleteRead (corpo cortado)
+             self._log(f"upstream parou de responder ({e})", t0)
+             up.close()
++            if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local pendurada: fila de sempre
++                fb, self._fallback_corpo = self._fallback_corpo, None
++                return self._passar(fb, metodo, tentativa)
+             return self._erro(504, f"upstream parou de responder: {e}")
+         # (18/11/2026, verificar e refazer) antes de qualquer byte ao cliente: lê a resposta inteira, confere e, com
+         # achado, refaz (SETH_REFAZER). Desligado, segue o caminho de sempre, abaixo.
+@@ -2186,6 +2244,7 @@ class _Handler(BaseHTTPRequestHandler):
+             self.close_connection = True
+         finally:
+             up.close()
++        self._fallback_corpo = None  # resposta entregue: nada guardado para o próximo pedido da conexão
+         reg = getattr(self, "_reg", None)
+         if reg is not None and up.status == 200:
+             resposta = reg.get("resposta", "") if sse else registro_pedidos.resposta_json(buf_pre)
+diff --git a/redesign/router/test_rotas_locais.py b/redesign/router/test_rotas_locais.py
+new file mode 100644
+index 00000000..114737ff
+--- /dev/null
++++ b/redesign/router/test_rotas_locais.py
+@@ -0,0 +1,589 @@
++"""Testes das rotas locais por tipo (18/11/2026): rotas_locais.py e o gancho no seth_gateway. Sem rede e sem provedor.
++
++Cobre: tipo do pedido; escolha pela ficha (tipo certo, classe, teto de entrada, prioridade); painel que SÓ
++RESTRINGE (standby tira, liberado não acrescenta, arquivo ausente ou ilegível = sem efeito); Ollama fora = regra
++de sempre; chave SETH_ROTAS_LOCAIS=0; a ficha real passa na validação; e o gateway de verdade, POST e GET:
++rota local usada, queda segura (HTTP 500, resposta vazia, Ollama fora, standby) e GET intacto.
++Rodar: pytest -q redesign/router/test_rotas_locais.py
++"""
++import json
++import os
++import sys
++import threading
++import urllib.request
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++import pytest
++
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rotas"))
++
++import seth_gateway as g  # noqa: E402
++import rotas_locais as rl  # noqa: E402
++import ficha as ficha_mod  # noqa: E402
++
++TOKEN = "TOKEN-" + "DE-TESTE-NAO-E-SEGREDO"
++
++
++def _rota(id, modelo, tipos, prio=10, maxt=6000, classes=("publico", "sintetico", "pessoal")):
++    return {"id": id, "provedor": "ollama", "modelo": modelo, "categoria": "local",
++            "classes_permitidas": list(classes), "tipos": list(tipos), "prioridade": prio,
++            "max_tokens_entrada": maxt, "treina_com_prompts": "nao_aplica", "cota": "-",
++            "compartilhada_com_seth": False, "cota_medida": False, "conferida_em": "2026-11-18", "fonte": "teste"}
++
++
++@pytest.fixture
++def ficha(tmp_path, monkeypatch):
++    f = tmp_path / "ficha.json"
++    f.write_text(json.dumps({"schema_version": 1, "decisoes": {}, "rotas": [
++        _rota("local-a", "a:1b", ["codigo", "conversa"], 10),
++        _rota("local-b", "b:30b", ["json", "conversa"], 20, 16000),
++        _rota("local-c", "c:8b", ["ferramenta"], 10, 12000, classes=("publico",)),
++        {"id": "reserva", "provedor": "ollama", "modelo": "r:9b", "categoria": "local", "tipos": [],
++         "classes_permitidas": ["publico", "pessoal"], "treina_com_prompts": "nao_aplica", "cota": "-",
++         "compartilhada_com_seth": False, "cota_medida": False, "conferida_em": "x", "fonte": "t"},
++        {"id": "nuvem", "provedor": "gemini", "modelo": "g", "categoria": "gratuito", "tipos": ["conversa"],
++         "classes_permitidas": ["publico"], "treina_com_prompts": "nao_conferido", "cota": "-",
++         "compartilhada_com_seth": True, "cota_medida": False, "conferida_em": "x", "fonte": "t"},
++    ]}), encoding="utf-8")
++    monkeypatch.setattr(rl, "FICHA_PADRAO", f)
++    monkeypatch.setenv("AGATA_DECISOES_MODELOS", str(tmp_path / "decisoes.jsonl"))
++    monkeypatch.delenv("SETH_ROTAS_LOCAIS", raising=False)
++    for c in (rl._CACHE_FICHA, rl._CACHE_PAINEL):
++        c["mtime"] = None
++    return f
++
++
++def _dec(tmp_path, *linhas):
++    (tmp_path / "decisoes.jsonl").write_text("\n".join(json.dumps(x) if isinstance(x, dict) else x for x in linhas)
++                                             + "\n", encoding="utf-8")
++    rl._CACHE_PAINEL["mtime"] = None
++
++
++def _p(texto="oi", **extra):
++    return dict({"model": "seth-livre", "messages": [{"role": "user", "content": texto}]}, **extra)
++
++
++# --- funções puras -------------------------------------------------------------------------------------------
++
++def test_tipo_do_pedido():
++    assert rl.tipo_do_pedido(_p("bom dia")) == "conversa"
++    assert rl.tipo_do_pedido(_p("```py\nx=1\n```")) == "codigo"
++    assert rl.tipo_do_pedido(_p("x", tools=[{"type": "function"}])) == "ferramenta"
++    assert rl.tipo_do_pedido(_p("x", response_format={"type": "json_object"})) == "json"
++    assert rl.tipo_do_pedido(_p("a" * 30000)) == "contexto"
++    assert rl.tipo_do_pedido({"messages": "quebrado"}) == "conversa"
++
++
++def test_escolha_pelo_tipo_e_prioridade(ficha):
++    e = lambda p, t, pub=False: rl.escolher(p, t, pub, checar_ollama=False)  # noqa: E731
++    assert e(_p(), "codigo")["id"] == "local-a"
++    assert e(_p(), "conversa")["id"] == "local-a"  # prioridade 10 vence a 20
++    assert e(_p(), "json")["id"] == "local-b"
++    assert e(_p(), "contexto") is None  # ninguém ganhou contexto nesta ficha
++    assert e(_p(), "inexistente") is None
++
++
++def test_so_rota_local_com_tipos(ficha):
++    ids = {r["id"] for r in rl.carregar_rotas(ficha)}
++    assert ids == {"local-a", "local-b", "local-c"}  # reserva (sem tipos) e nuvem nunca entram
++
++
++def test_classe_e_teto_de_entrada(ficha):
++    assert rl.escolher(_p(), "ferramenta", False, checar_ollama=False) is None  # c só aceita público
++    assert rl.escolher(_p(), "ferramenta", True, checar_ollama=False)["id"] == "local-c"
++    grande = _p("a" * 20000)  # ~6666 tokens > teto de local-a (6000)
++    assert rl.escolher(grande, "conversa", False, checar_ollama=False)["id"] == "local-b"
++
++
++def test_painel_standby_tira(ficha, tmp_path):
++    _dec(tmp_path, {"id": "ollama-local/a:1b", "acao": "standby"})
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-b"
++    _dec(tmp_path, {"id": "ollama-local/a:1b", "acao": "standby"}, {"id": "ollama-local/a:1b", "acao": "liberar"})
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-a"  # última decisão vale
++    _dec(tmp_path, {"id": "local-a", "acao": "standby"}, {"id": "b:30b", "acao": "standby"})
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False) is None
++
++
++def test_painel_liberado_nao_acrescenta(ficha, tmp_path):
++    _dec(tmp_path, {"id": "ollama-local/qualquer:7b", "acao": "liberar"}, {"id": "nuvem", "acao": "liberar"})
++    assert rl.escolher(_p(), "contexto", False, checar_ollama=False) is None
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-a"
++
++
++@pytest.mark.parametrize("conteudo", [None, "isto nao e json\n{{{\n", b"\xff\xfe\x00lixo"])
++def test_painel_ausente_ou_ilegivel_nao_restringe(ficha, tmp_path, conteudo):
++    arq = tmp_path / "decisoes.jsonl"
++    if isinstance(conteudo, bytes):
++        arq.write_bytes(conteudo)
++    elif conteudo:
++        arq.write_text(conteudo, encoding="utf-8")
++    rl._CACHE_PAINEL["mtime"] = None
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-a"
++
++
++def test_painel_caminho_e_pasta_nao_quebra(ficha, tmp_path, monkeypatch):
++    monkeypatch.setenv("AGATA_DECISOES_MODELOS", str(tmp_path))  # diretório no lugar do arquivo
++    assert rl.estado_painel() == {}
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-a"
++
++
++def test_ollama_fora_nao_escolhe(ficha, monkeypatch):
++    monkeypatch.setattr(rl, "ollama_no_ar", lambda *a, **k: False)
++    assert rl.escolher(_p(), "conversa", False) is None
++    monkeypatch.setattr(rl, "ollama_no_ar", lambda *a, **k: True)
++    assert rl.escolher(_p(), "conversa", False)["id"] == "local-a"
++
++
++def test_teste_de_porta_real_fechada():
++    import socket
++    s = socket.socket()
++    s.bind(("127.0.0.1", 0))
++    porta = s.getsockname()[1]
++    s.close()  # porta livre e fechada
++    assert rl.ollama_no_ar(("127.0.0.1", porta), validade=0) is False
++
++
++def test_chave_desliga(ficha, monkeypatch):
++    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False) is None
++
++
++def test_ficha_ausente_ou_quebrada(tmp_path):
++    assert rl.carregar_rotas(tmp_path / "nao-existe.json") == []
++    q = tmp_path / "q.json"
++    q.write_text("{{", encoding="utf-8")
++    assert rl.carregar_rotas(q) == []
++
++
++def test_ficha_real_valida_e_cobre_os_tipos():
++    dados = json.loads(ficha_mod.PADRAO.read_text(encoding="utf-8"))
++    erros, _ = ficha_mod.verificar(dados)
++    assert erros == []
++    por_id = {r["id"]: r for r in rl.carregar_rotas(ficha_mod.PADRAO)}
++    assert {i: set(r["tipos"]) for i, r in por_id.items()} == {"local-qwen3-30b": {"json", "codigo", "contexto"}}
++    todas = {r["id"]: r for r in dados["rotas"]}
++    for ident in ("local-lfm3", "local-rlm", "local-lumi"):  # catalogados, não roteados
++        assert todas[ident]["tipos"] == []
++    # o qwen3.5-9b continua na ficha como reserva, sem tipo
++    assert any(r["modelo"] == "qwen3.5-9b-64k" for r in dados["rotas"])
++    assert "qwen3.5-9b-64k" not in {r["modelo"] for r in por_id.values()}
++    # nuvem nunca recebe dado pessoal e nenhuma rota por tipo é de nuvem
++    assert all(r["categoria"] == "local" for r in por_id.values())
++
++
++def test_ficha_rejeita_tipo_em_nuvem_e_sem_teto():
++    erros, _ = ficha_mod.verificar({"rotas": [dict(_rota("x", "m", ["codigo"]), categoria="gratuito",
++                                                   classes_permitidas=["publico"])]})
++    assert any("só vale para rota local" in e for e in erros)
++    sem_teto = _rota("y", "m", ["codigo"])
++    del sem_teto["max_tokens_entrada"]
++    erros, _ = ficha_mod.verificar({"rotas": [sem_teto]})
++    assert any("max_tokens_entrada" in e for e in erros)
++
++
++# --- gateway de verdade (POST e GET) -------------------------------------------------------------------------
++
++class _Up(BaseHTTPRequestHandler):
++    def log_message(self, *a):
++        pass
++
++    def _enviar(self, status, corpo, ctype="application/json"):
++        self.send_response(status)
++        self.send_header("Content-Type", ctype)
++        self.send_header("Content-Length", str(len(corpo)))
++        self.end_headers()
++        self.wfile.write(corpo)
++
++    def do_GET(self):
++        self.server.gets.append(self.path)
++        self._enviar(200, json.dumps({"object": "list", "data": [{"id": "seth-livre"}]}).encode())
++
++    def do_POST(self):
++        corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++        self.server.chamadas.append(corpo.get("model"))
++        local = str(corpo.get("model", "")).startswith("ollama-local/")
++        if local and self.server.local == "500":
++            return self._enviar(500, b'{"error":"modelo local indisponivel"}')
++        texto = "" if (local and self.server.local == "vazio") else ("local ok" if local else "fila ok")
++        self._enviar(200, json.dumps({"model": "m-falso", "choices": [{"message": {"role": "assistant",
++                                                                                   "content": texto}}]}).encode())
++
++
++class _Cen:
++    def __init__(self, mp, local="ok"):
++        self.up = ThreadingHTTPServer(("127.0.0.1", 0), _Up)
++        self.up.chamadas, self.up.gets, self.up.local = [], [], local
++        threading.Thread(target=self.up.serve_forever, daemon=True).start()
++        mp.setattr(g, "UPSTREAM", f"http://127.0.0.1:{self.up.server_address[1]}")
++        self.gw = g.ServidorConcorrenciaLimitada(("127.0.0.1", 0), g._Handler)
++        threading.Thread(target=self.gw.serve_forever, daemon=True).start()
++        self.base = f"http://127.0.0.1:{self.gw.server_address[1]}"
++
++    def post(self, pergunta="explique o que é um ponteiro", modelo="seth-livre", publico=False, extra=None):
++        corpo = dict({"model": modelo, "messages": [{"role": "user", "content": pergunta}]}, **(extra or {}))
++        h = {"Content-Type": "application/json"}
++        if publico:
++            h["X-Agata-Data-Classification"] = "public"
++        r = urllib.request.Request(self.base + "/v1/chat/completions", data=json.dumps(corpo).encode(),
++                                   method="POST", headers=h)
++        with urllib.request.urlopen(r, timeout=30) as x:
++            return x.status, json.loads(x.read())["choices"][0]["message"]["content"]
++
++    def get(self, caminho="/v1/models"):
++        with urllib.request.urlopen(self.base + caminho, timeout=30) as x:
++            return x.status, json.loads(x.read())
++
++    def fechar(self):
++        for s in (self.gw, self.up):
++            s.shutdown()
++            s.server_close()
++
++
++@pytest.fixture
++def gw(ficha, monkeypatch, tmp_path):
++    monkeypatch.setenv("AGATA_EMOJI_LOG", str(tmp_path / "emoji.jsonl"))
++    monkeypatch.setenv("AGATA_LACO_LOG", str(tmp_path / "laco.jsonl"))
++    monkeypatch.setenv("AGATA_CABECALHO_LOG", str(tmp_path / "cabecalho.jsonl"))
++    monkeypatch.setattr(g, "MODELO_REAL_PATH", tmp_path / "modelo-real.txt")
++    monkeypatch.setattr(g, "_token_interno", lambda: TOKEN)
++    monkeypatch.setattr(g, "_estado", lambda: "sync: PASS")
++    monkeypatch.setattr(g, "_injeta", lambda payload: payload)
++    monkeypatch.setattr(g, "_rota_laya", lambda payload: ("seth-livre", {}))  # sem Laya (rede)
++    monkeypatch.setattr(g, "_sombra_rota", lambda *a, **k: None)
++    monkeypatch.setattr(g.auditoria_turno, "verificar_resposta_atual", lambda t, m: [])
++    monkeypatch.setattr(rl, "ollama_no_ar", lambda *a, **k: True)
++    cenarios = []
++
++    def novo(local="ok"):
++        c = _Cen(monkeypatch, local)
++        cenarios.append(c)
++        return c
++    yield novo
++    for c in cenarios:
++        c.fechar()
++
++
++def test_post_usa_a_rota_local_do_tipo(gw):
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "local ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b"]
++
++
++def test_post_tipo_sem_dono_segue_a_fila(gw):
++    c = gw()
++    c.post("a" * 30000)  # contexto: ninguém na ficha de teste
++    assert c.up.chamadas == ["seth-pesado"] or c.up.chamadas[0].startswith("seth-")
++
++
++def test_post_fila_explicita_nao_e_tocada(gw):
++    c = gw()
++    c.post(modelo="seth-pesado", publico=True)
++    assert c.up.chamadas == ["seth-pesado"]
++
++
++def test_post_faixa_publica_nao_e_tocada(gw):
++    c = gw()
++    c.post(modelo="seth-public")
++    assert c.up.chamadas and c.up.chamadas[0].startswith("seth-")
++
++
++def test_queda_segura_http_500(gw):
++    c = gw(local="500")
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]  # a fila ORIGINAL, não qualquer seth-*
++
++
++def test_queda_segura_resposta_vazia(gw):
++    c = gw(local="vazio")
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]
++
++
++def test_ollama_fora_vai_direto_para_a_fila(gw, monkeypatch):
++    monkeypatch.setattr(rl, "ollama_no_ar", lambda *a, **k: False)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert len(c.up.chamadas) == 1 and c.up.chamadas[0].startswith("seth-")
++
++
++def test_standby_do_painel_vai_para_a_fila(gw, tmp_path):
++    _dec(tmp_path, {"id": "ollama-local/a:1b", "acao": "standby"}, {"id": "ollama-local/b:30b", "acao": "standby"})
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and len(c.up.chamadas) == 1 and c.up.chamadas[0].startswith("seth-")
++
++
++def test_painel_ilegivel_nao_muda_nada(gw, tmp_path):
++    (tmp_path / "decisoes.jsonl").write_bytes(b"\xff\xfe lixo")
++    c = gw()
++    c.post()
++    assert c.up.chamadas == ["ollama-local/a:1b"]
++
++
++def test_ferramenta_com_dado_pessoal_nao_vai_a_rota_que_so_aceita_publico(gw):
++    c = gw()
++    c.post(extra={"tools": [{"type": "function", "function": {"name": "f", "parameters": {}}}]})
++    assert c.up.chamadas[0].startswith("seth-")  # local-c só aceita 'publico' nesta ficha de teste
++
++
++def test_get_passa_sem_erro_e_sem_rota_local(gw):
++    c = gw()
++    status, corpo = c.get()
++    assert status == 200 and corpo["data"][0]["id"] == "seth-livre"
++    assert c.up.gets == ["/v1/models"] and c.up.chamadas == []
++
++
++# --- revisão 18/11: keep-alive, quedas de conexão, segredo, faixas não tocadas --------------------------------
++
++import http.client  # noqa: E402
++import socket  # noqa: E402
++import urllib.error  # noqa: E402
++
++PERGUNTA = "explique o que é um ponteiro"
++
++
++def _conn(c):
++    return http.client.HTTPConnection("127.0.0.1", c.gw.server_address[1], timeout=30)
++
++
++def _post_conn(conn, modelo="seth-livre", pergunta=PERGUNTA, headers=None):
++    corpo = json.dumps({"model": modelo, "messages": [{"role": "user", "content": pergunta}]})
++    conn.request("POST", "/v1/chat/completions", body=corpo,
++                 headers=dict({"Content-Type": "application/json"}, **(headers or {})))
++    r = conn.getresponse()
++    return r.status, r.read()
++
++
++@pytest.mark.parametrize("local", ["ok", "500", "vazio"])
++def test_keepalive_post_local_e_depois_get_na_mesma_conexao(gw, local):
++    c = gw(local=local)
++    conn = _conn(c)
++    status, txt = _post_conn(conn)
++    assert status == 200
++    n_posts = len(c.up.chamadas)
++    conn.request("GET", "/v1/models")
++    r = conn.getresponse()
++    corpo = r.read()
++    conn.close()
++    assert r.status == 200 and json.loads(corpo)["data"][0]["id"] == "seth-livre"
++    assert c.up.gets == ["/v1/models"]            # uma chamada upstream, sem refazer nada
++    assert len(c.up.chamadas) == n_posts          # o GET não reenviou corpo de POST
++
++
++def test_get_404_na_mesma_conexao_nao_dispara_fallback(gw, monkeypatch):
++    c = gw()
++    conn = _conn(c)
++    _post_conn(conn)
++    antes = list(c.up.chamadas)
++    monkeypatch.setattr(_Up, "do_GET", lambda self: self._enviar(404, b'{"error":"x"}'))
++    conn.request("GET", "/v1/models")
++    r = conn.getresponse()
++    r.read()
++    conn.close()
++    assert r.status == 404 and c.up.chamadas == antes
++
++
++def _urlopen_que_falha_na_local(monkeypatch, erro):
++    real = urllib.request.urlopen
++
++    def falso(req, *a, **k):
++        corpo = getattr(req, "data", None) or b""
++        if b"ollama-local/" in corpo:
++            raise erro
++        return real(req, *a, **k)
++    monkeypatch.setattr(g.urllib.request, "urlopen", falso)
++
++
++@pytest.mark.parametrize("erro", [urllib.error.URLError("conexão recusada"), ConnectionResetError("reset"),
++                                  socket.timeout("timed out"), TimeoutError("timeout")])
++def test_queda_de_conexao_ou_timeout_da_rota_local_cai_na_fila(gw, monkeypatch, erro):
++    _urlopen_que_falha_na_local(monkeypatch, erro)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["seth-livre"]  # a local nem chegou ao upstream; a fila de sempre respondeu
++
++
++def test_timeout_na_leitura_da_rota_local_cai_na_fila(gw, monkeypatch):
++    """O upstream aceita e não responde: com o prazo curto, a rota local estoura e a fila original responde."""
++    real = urllib.request.urlopen
++    monkeypatch.setattr(g.urllib.request, "urlopen", lambda req, *a, **k: real(req, timeout=1) if getattr(
++        req, "full_url", "").startswith(g.UPSTREAM) else real(req, *a, **k))
++
++    class Lento(_Up):
++        def do_POST(self):
++            corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++            self.server.chamadas.append(corpo.get("model"))
++            if str(corpo.get("model")).startswith("ollama-local/"):
++                import time
++                time.sleep(3)
++                return
++            self._enviar(200, json.dumps({"model": "m", "choices": [{"message": {"role": "assistant",
++                                                                                 "content": "fila ok"}}]}).encode())
++    monkeypatch.setattr(sys.modules[__name__], "_Up", Lento)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]
++
++
++def test_segredo_nunca_vai_a_rota_local(gw):
++    c = gw()
++    segredo = "sk" + "-" + "TESTEsintetico0123456789abcdefGHIJ"
++    c.post(f"explique o que é um ponteiro; minha chave é {segredo}")
++    assert c.up.chamadas == ["seth-livre"]  # comportamento de hoje, sem rota local
++
++
++def test_escolher_recusa_segredo_e_regua_quebrada(ficha, monkeypatch):
++    segredo = "sk" + "-" + "TESTEsintetico0123456789abcdefGHIJ"
++    assert rl.escolher(_p(f"chave {segredo}"), "conversa", False, checar_ollama=False) is None
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False)["id"] == "local-a"
++    import sanitizar
++    monkeypatch.setattr(sanitizar, "varrer", lambda t: (_ for _ in ()).throw(RuntimeError("régua fora")))
++    assert rl.escolher(_p(), "conversa", False, checar_ollama=False) is None  # falha fechada
++
++
++def test_seth_livre_com_cabecalho_public_nao_vai_a_local(gw):
++    c = gw()
++    c.post(publico=True)
++    assert c.up.chamadas and not c.up.chamadas[0].startswith("ollama-local/")
++
++
++def test_seth_pesado_nao_publico_nem_chega_ao_upstream(gw):
++    c = gw()
++    with pytest.raises(urllib.error.HTTPError) as e:
++        c.post(modelo="seth-pesado")  # política atual: modelo externo exige classificação pública
++    assert e.value.code == 403 and c.up.chamadas == []
++
++
++# --- sondas da revisão 2 (do revisor, copiadas para o repositório) -----------------------------------------------
++def test_probe_modelo_local_explicito_nao_e_reroteado(gw):
++    c = gw()
++    c.post(modelo="ollama-local/x")
++    assert c.up.chamadas == ["ollama-local/x"]
++
++
++def test_probe_corpo_incompleto_cai_na_fila(gw, monkeypatch):
++    class Cortado(_Up):
++        def do_POST(self):
++            corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++            self.server.chamadas.append(corpo.get("model"))
++            if str(corpo.get("model", "")).startswith("ollama-local/"):
++                self.send_response(200)
++                self.send_header("Content-Type", "application/json")
++                self.send_header("Content-Length", "500")
++                self.end_headers()
++                self.wfile.write(b"0123456789")
++                self.wfile.flush()
++                return
++            self._enviar(200, json.dumps({"model": "m", "choices": [{"message": {"role": "assistant",
++                                          "content": "fila ok"}}]}).encode())
++    monkeypatch.setattr(sys.modules[__name__], "_Up", Cortado)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]
++
++
++def test_probe_timeout_no_corpo_cai_na_fila(gw, monkeypatch):
++    real = urllib.request.urlopen
++    monkeypatch.setattr(g.urllib.request, "urlopen", lambda req, *a, **k: real(req, timeout=1) if getattr(
++        req, "full_url", "").startswith(g.UPSTREAM) else real(req, *a, **k))
++
++    class Pendura(_Up):
++        def do_POST(self):
++            corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++            self.server.chamadas.append(corpo.get("model"))
++            if str(corpo.get("model", "")).startswith("ollama-local/"):
++                self.send_response(200)
++                self.send_header("Content-Type", "application/json")
++                self.send_header("Content-Length", "500")
++                self.end_headers()
++                self.wfile.write(b"{")
++                self.wfile.flush()
++                import time
++                time.sleep(3)
++                return
++            self._enviar(200, json.dumps({"model": "m", "choices": [{"message": {"role": "assistant",
++                                          "content": "fila ok"}}]}).encode())
++    monkeypatch.setattr(sys.modules[__name__], "_Up", Pendura)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and "fila ok" in texto
++    assert c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]
++
++
++# --- revisão r2: reuso real da conexão, prazo próprio, segredo após a injeção real -------------------------------
++
++_INJETA_REAL = g._injeta  # guardado na importação, antes de o fixture trocá-lo por identidade
++
++
++def test_handler_e_http11():
++    assert g._Handler.protocol_version == "HTTP/1.1"
++
++
++@pytest.mark.parametrize("local", ["ok", "500", "vazio"])
++def test_keepalive_reusa_a_mesma_conexao(gw, monkeypatch, local):
++    aceitas = []
++    setup_orig = g._Handler.setup
++    monkeypatch.setattr(g._Handler, "setup", lambda self: (aceitas.append(1), setup_orig(self))[1])
++    c = gw(local=local)
++    conn = _conn(c)
++    status, _ = _post_conn(conn)
++    sock = conn.sock
++    conn.request("GET", "/v1/models")
++    r = conn.getresponse()
++    r.read()
++    assert status == 200 and r.status == 200
++    assert not r.will_close and conn.sock is sock  # a conexão não foi fechada nem refeita
++    assert len(aceitas) == 1                       # uma só conexão aceita pelo gateway para os dois pedidos
++    assert c.up.gets == ["/v1/models"]
++    conn.close()
++
++
++def test_prazo_proprio_da_rota_local(gw, monkeypatch):
++    monkeypatch.setenv("SETH_ROTA_LOCAL_MS", "7000")
++    prazos = []
++    real = urllib.request.urlopen
++
++    def espia(req, *a, **k):
++        if getattr(req, "full_url", "").startswith(g.UPSTREAM):
++            prazos.append((b"ollama-local/" in (req.data or b""), k.get("timeout")))
++        return real(req, *a, **k)
++    monkeypatch.setattr(g.urllib.request, "urlopen", espia)
++    c = gw(local="500")
++    c.post()
++    assert prazos == [(True, 7.0), (False, 180)]  # local com prazo curto; a fila de sempre mantém o teto antigo
++
++
++def test_prazo_padrao_e_100_5_segundos_e_invalido_volta_ao_padrao(monkeypatch):
++    # maior sucesso medido do qwen3-30b-a3b-64k (70,5 s) + 30 s de folga
++    monkeypatch.delenv("SETH_ROTA_LOCAL_MS", raising=False)
++    assert g._ROTA_LOCAL_MS_PADRAO == 100500 and g._rota_local_seg() == 100.5
++    monkeypatch.setenv("SETH_ROTA_LOCAL_MS", "lixo")
++    assert g._rota_local_seg() == 100.5
++    monkeypatch.setenv("SETH_ROTA_LOCAL_MS", "20000")
++    assert g._rota_local_seg() == 20.0
++
++
++def test_injecao_real_nao_desliga_a_rota_local(ficha, monkeypatch):
++    """A hidratação injeta a doutrina (que cita segredo, chave, token): a régua de segredo olhando o payload
++    depois do _injeta REAL não pode barrar todo pedido. Sem trocar o _injeta por identidade."""
++    monkeypatch.setattr(g, "_estado", lambda: "sync: PASS")
++    payload = _INJETA_REAL(_p())
++    injetado = [m for m in payload["messages"] if m.get("role") == "system"]
++    assert injetado and len(json.dumps(payload)) > 2000  # houve injeção de verdade
++    assert rl.tem_segredo(payload) is False
++    assert rl.escolher(payload, "conversa", False, checar_ollama=False)["id"] == "local-a"
++
++
++def test_gateway_com_injecao_real_ainda_usa_a_rota_local(gw, monkeypatch):
++    monkeypatch.setattr(g, "_injeta", _INJETA_REAL)
++    c = gw()
++    status, texto = c.post()
++    assert status == 200 and c.up.chamadas[0] == "ollama-local/a:1b"
+diff --git a/redesign/router/test_unit_ollama.py b/redesign/router/test_unit_ollama.py
+new file mode 100644
+index 00000000..c6d6a5f3
+--- /dev/null
++++ b/redesign/router/test_unit_ollama.py
+@@ -0,0 +1,57 @@
++"""Testes da unit de usuário do Ollama (18/11/2026): presa ao agata.target como as outras, bind só local, modelos
++no diretório do usuário, sem User= e sem sudo; seth e seth-parar sobem e descem a unit. Só lê arquivos.
++Rodar: pytest -q redesign/router/test_unit_ollama.py
++"""
++import configparser
++from pathlib import Path
++
++SYSTEMD = Path(__file__).resolve().parents[1] / "systemd"
++UNIT = SYSTEMD / "ollama-agata.service"
++
++
++def _ler():
++    cp = configparser.ConfigParser(strict=False, interpolation=None)
++    cp.optionxform = str
++    # Environment= repetido: configparser (strict=False) guarda a última; as linhas cruas são conferidas à parte
++    cp.read_string(UNIT.read_text(encoding="utf-8"))
++    return cp
++
++
++def test_presa_ao_target_como_as_outras():
++    cp = _ler()
++    assert cp["Unit"]["PartOf"] == "agata.target"
++    assert cp["Install"]["WantedBy"] == "agata.target"
++    outra = (SYSTEMD / "piper-tts.service").read_text(encoding="utf-8")
++    assert "PartOf=agata.target" in outra and "WantedBy=agata.target" in outra
++
++
++def test_exec_bind_e_modelos_do_usuario():
++    texto = UNIT.read_text(encoding="utf-8")
++    assert _ler()["Service"]["ExecStart"] == "/usr/local/bin/ollama serve"
++    assert "Environment=OLLAMA_HOST=127.0.0.1:11434" in texto
++    assert "0.0.0.0" not in texto
++    assert "Environment=OLLAMA_MODELS=%h/.local/share/ollama/models" in texto
++    assert "ReadWritePaths=-%h/.local/share/ollama" in texto  # "-": não falha se o diretório ainda não existe
++    ativas = [l.strip() for l in texto.splitlines() if l.strip() and not l.lstrip().startswith("#")]
++    path = [l for l in ativas if l.startswith("Environment=PATH=")]
++    assert len(path) == 1 and "/opt/cuda/bin" in path[0].split(":") and "/usr/local/bin" in path[0]
++    assert "ReadWritePaths=-%h/.ollama" in ativas  # ollama grava a chave em ~/.ollama
++
++
++def test_unit_de_usuario_sem_user_nem_sudo():
++    ativas = "\n".join(l for l in UNIT.read_text(encoding="utf-8").splitlines() if not l.lstrip().startswith("#"))
++    assert "User=" not in ativas and "sudo" not in ativas  # só as linhas ativas; os comentários explicam
++    assert "default.target" not in ativas  # sobe pelo agata.target, não solto no boot
++
++
++def test_seth_sobe_e_seth_parar_desce():
++    assert "systemctl --user start ollama-agata.service" in (SYSTEMD / "seth").read_text(encoding="utf-8")
++    parar = (SYSTEMD / "seth-parar").read_text(encoding="utf-8")
++    assert "systemctl --user stop ollama-agata.service" in parar
++    # os modelos são descarregados (ollama stop) ANTES de a unit descer
++    assert parar.index('ollama stop "$_m"') < parar.index("systemctl --user stop ollama-agata.service")
++
++
++def test_readme_documenta_a_migracao():
++    r = (SYSTEMD / "README.md").read_text(encoding="utf-8")
++    assert "ollama-agata.service" in r and "disable --now ollama.service" in r and "ollama rm" not in r
+diff --git a/redesign/systemd/README.md b/redesign/systemd/README.md
+index e7daf035..d58ed115 100644
+--- a/redesign/systemd/README.md
++++ b/redesign/systemd/README.md
+@@ -17,6 +17,7 @@ Só `agata.target` está em `default.target.wants/`; os membros só em `agata.ta
+ | `dropin-omniroute-resilience.conf` | `omniroute.service.d/resiliencia.conf` | `Environment=RATE_LIMIT_MAX_WAIT_MS=45000` — reproduz o conserto de (363) sem UI, pra um clone que nasce com banco vazio. Achado do laboratório "Ensaio" (MEMÓRIAS 587), lido no código-fonte real do pacote. Nesta Máquina o banco já tem o valor (vence a variável); aplicar aqui não muda nada. |
+ | `dropin-llamacpp.conf` | `llamacpp-agata.service.d/agata.conf` | **só** `PartOf=agata.target` (sem `WantedBy`): o MoE **para** com o `agata down` (libera a VRAM da 4060) mas **não sobe** junto — fica sob demanda (`agata up --moe`). |
+ | `llamacpp-agata.service` | `~/.config/systemd/user/llamacpp-agata.service` | **unidade base** do MoE (versionada em 23/10/2026; antes só fora do git). `Restart=no` e **sem** `[Install]`: sob demanda, só à mão, nunca volta sozinho depois de um OOM na GPU (fecha a pendência de (652); mesma regra do `llamacpp@.service`). |
++| `ollama-agata.service` | `~/.config/systemd/user/ollama-agata.service` (**sem sudo**) | **18/11/2026.** Ollama como unit de usuário: `PartOf` e `WantedBy=agata.target`, sobe e desce com a Seth (`seth`/`seth-parar` também dão start/stop). `OLLAMA_HOST=127.0.0.1:11434`, `OLLAMA_MODELS=%h/.local/share/ollama/models`. Substitui o `ollama.service` do sistema, que precisa ficar desabilitado (mesma porta). Migração dos modelos, uma vez, com sudo: ver o fim deste arquivo. |
+ | `dropin-ollama-bind.conf` | `/etc/systemd/system/ollama.service.d/agata-bind.conf` (**sudo**, unit de `system`, não `--user`) | 2 variáveis invariantes (bind `127.0.0.1`, flash attention) — framework, igual em qualquer clone. Achado do laboratório "Ensaio" (MEMÓRIAS 567): antes, essas 2 viviam misturadas com hardware num `override.conf` único, só em prosa (`PROJETO.md`), sem template versionado. |
+ | `dropin-ollama-gpu.exemplo.conf` | `/etc/systemd/system/ollama.service.d/agata-gpu.conf` (**sudo**) | **exemplo**, não instala direto — 3 variáveis de hardware (VRAM/GPU desta Máquina), ajustar antes de usar. Nunca versionado com valor real (mesmo tratamento de `CHAVES.env.exemplo`). |
+ | `openvino-whisper.service` · `openvino-embeddings.service` · `obsidian-ro-proxy.service` | `~/.config/systemd/user/<nome>` | **unidades base** (Fase 2/6). Promovidas ao repo em 03/09 (chat 6, otimização B1) — antes só existiam fora do git. Trazem o fix do chat 5 (`After=default.target` removido, `[Install] WantedBy=agata.target`). |
+@@ -67,3 +68,20 @@ rm ~/.config/systemd/user/{omniroute,omniroute-sanitizer,openvino-whisper,openvi
+ systemctl --user daemon-reload
+ ```
+ Os serviços seguem sobíveis um a um como antes.
++
++## Migrar o Ollama do sistema para o usuário (18/11/2026, uma vez, com sudo)
++
++```
++sudo systemctl disable --now ollama.service
++sudo ls /usr/share/ollama/.ollama/models/manifests/registry.ollama.ai/library   # confere onde estão os modelos
++mkdir -p ~/.local/share/ollama/models
++sudo cp -a /usr/share/ollama/.ollama/models/. ~/.local/share/ollama/models/
++sudo chown -R "$USER": ~/.local/share/ollama
++cp ~/agata/redesign/systemd/ollama-agata.service ~/.config/systemd/user/
++systemctl --user daemon-reload && systemctl --user enable ollama-agata.service
++systemctl --user start ollama-agata.service
++ollama list
++```
++
++O `cp -a` leva todos os modelos que já existiam; o que sai do conjunto (qwen3:4b) é decisão do Humano, tomada à parte.
++Conferido o `ollama list`, o diretório antigo pode ser apagado pelo Humano.
+diff --git a/redesign/systemd/ollama-agata.service b/redesign/systemd/ollama-agata.service
+new file mode 100644
+index 00000000..c4946cee
+--- /dev/null
++++ b/redesign/systemd/ollama-agata.service
+@@ -0,0 +1,38 @@
++# Agata -- Ollama como unit de USUARIO, preso ao agata.target (18/11/2026, decisao do Humano:
++# "tem que estar ligado quando o sistema for ligado e desligado quando o sistema for desligado").
++# Substitui o ollama.service do sistema (User=ollama, exige sudo), que deve ficar desabilitado:
++# as duas units disputam a porta 11434. Os modelos ficam em %h/.local/share/ollama/models.
++# Instala com: cp ollama-agata.service ~/.config/systemd/user/ && systemctl --user daemon-reload &&
++# systemctl --user enable ollama-agata.service   (a migracao dos modelos e a unit do sistema: README.md).
++# Bind so em 127.0.0.1 (invariante do P-4, config/portas-agata.txt). Variaveis de hardware = as do override
++# atual da Maquina (RTX 4060 8 GB); em outro clone, ajustar.
++[Unit]
++Description=Ollama (Agata, usuario, preso ao agata.target)
++Documentation=file:///home/orusoua/agata/redesign/router/rotas_locais.py
++PartOf=agata.target
++
++[Service]
++Type=simple
++ExecStart=/usr/local/bin/ollama serve
++Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/cuda/bin
++Environment=OLLAMA_HOST=127.0.0.1:11434
++Environment=OLLAMA_MODELS=%h/.local/share/ollama/models
++Environment=OLLAMA_NUM_GPU=999
++Environment=OLLAMA_KV_CACHE_TYPE=q4_0
++Environment=OLLAMA_FLASH_ATTENTION=1
++Environment=CUDA_VISIBLE_DEVICES=0
++ExecStartPre=+/usr/bin/mkdir -p %h/.local/share/ollama/models
++Restart=on-failure
++RestartSec=3
++Nice=5
++NoNewPrivileges=yes
++PrivateTmp=yes
++ProtectSystem=strict
++ProtectKernelTunables=yes
++ProtectControlGroups=yes
++RestrictSUIDSGID=yes
++ReadWritePaths=-%h/.local/share/ollama
++ReadWritePaths=-%h/.ollama
++
++[Install]
++WantedBy=agata.target
+diff --git a/redesign/systemd/seth b/redesign/systemd/seth
+index f48af0dd..72987bee 100755
+--- a/redesign/systemd/seth
++++ b/redesign/systemd/seth
+@@ -22,6 +22,8 @@ systemctl --user start discord-mcp.service navegador-mcp.service 2>/dev/null ||
+ # Voz: Piper pt-BR (shim OpenAI-compat :8890, MEMÓRIAS (387)). Kokoro (:8880)
+ # fica de pe pra ingles -- ver comentario no librechat.yaml.
+ systemctl --user start piper-tts.service 2>/dev/null || true
++# Ollama (unit de usuario, 18/11/2026): sobe com a Seth, ja que a rota local por tipo depende dele.
++systemctl --user start ollama-agata.service 2>/dev/null || true
+ # Vigias da Equipe (Claude e Codex): sobem com a Seth e param com ela.
+ # Membros listados em config/equipe-ausentes.txt (um por linha) ficam sem vigia: offline até ordem do Humano.
+ _ausentes=~/agata/config/equipe-ausentes.txt
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index 3bd7257e..b15d9565 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -30,6 +30,8 @@ if command -v ollama >/dev/null 2>&1; then
+ fi
+ # espinha: no stop o agata-drain roda antes e drena o WAL -> nunca corta no meio
+ # de um commit. Derruba os servicos + o MoE :20129 (libera a VRAM).
++# Ollama de usuario (18/11/2026): os modelos foram descarregados acima; agora a unit desce.
++systemctl --user stop ollama-agata.service 2>/dev/null || true
+ systemctl --user stop agata.target 2>/dev/null || true
+ 
+ # Notificação por componente (Humano, 06/11/2026: "deve ter notificação em todos").
+@@ -40,5 +42,5 @@ _notifica_unidades() {
+     notify-send -a Seth "$_u" "${_st:-desconhecido}" 2>/dev/null || true
+   done
+ }
+-_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service agata.target
++_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service ollama-agata.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service agata.target
+ notify-send -a Seth "Seth" "parada por completo" 2>/dev/null || true
