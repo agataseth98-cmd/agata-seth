@@ -159,3 +159,13 @@ bash scripts/aprovar.sh <nome-da-proposta>
 ```
 
 `<nome-da-proposta>` é o nome do `.diff` em `propostas/`, sem extensão. Antes, confirme que o arquivo existe (`ls propostas/<nome>.diff`). Se não existir, atualize o checkout com o comando acima.
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-fluxo
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.

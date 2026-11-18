@@ -67,3 +67,13 @@ Aprender com acertos:
 - Concordância entre modelos não é prova. Use-a como revisão e confirme o ponto com critério, fonte ou reprodução.
 - Lições de método: reprodução isolada localiza causa mas não substitui validação ponta a ponta; revisor independente pode revelar decisão de política ainda não definida (resolva a semântica antes de afirmar que o sistema cumpre a regra); em investigação, confirme qual branch ou worktree o serviço usa de fato.
 - A bateria semântica e os gates de confiabilidade são avaliações diferentes. Não combine resultados em uma nota única.
+
+## Recomendação comprovada (L8)
+
+Antes de recomendar uma solução para um erro desta skill, confira o desfecho registrado:
+
+```bash
+python3 redesign/router/skills_ledger.py recalcular --skill agata-llm-fundamentos
+```
+
+Procure a linha do erro e da solução na tabela (colunas: skill, erro, solução, usos, acertos, taxa, status). Recomende a solução como comprovada só com status `comprovada`: acertos acima de 51% e pelo menos 10 usos conferidos. Com status `não comprovada`, sem linha ou com código de saída 2, apresente a solução como "não comprovada", com os usos e a taxa quando houver, e não a descarte. Só conta o desfecho que o coordenador conferiu.
