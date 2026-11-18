@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1049) DIÁRIO — 18/11/2026 · **Aplicada competicao-locais-18-11: o llama.cpp conta como local no gateway e no benchmark.** Assinada pelo Humano. Inclui a correção do roteiro de instalação do sob-demanda (relink dos backends).
+  palavras-chave: aplicada, competicao, locais, llama, cpp, conta, local, gateway, benchmark, assinada, humano, inclui, correção, roteiro, instalação, sob, demanda, relink, backends
 (1048) DIÁRIO — 18/11/2026 · **Proposta competicao-locais-18-11: llama-cpp conta como local no benchmark e no gateway; roteiro de sob-demanda ganha os backends.** Atende a competição dos modelos locais (L6, "pode fazer" do Humano em 17/11). llama-cpp/ e llamacpp- entram na lista local do benchmark e do gateway: pedido sem classificação deixa de cair no 403 de dados externos. Passo novo no CI roda os testes do benchmark. Correção do roteiro: faltou relinkar laya-roteador.service e ollaya.service (os proxies de socket exigem o backend). Não medido: requisição real a llama-cpp pelo gateway. Assinatura pendente: bash scripts/aprovar.sh competicao-locais-18-11.
   palavras-chave: proposta, competicao, locais, llama, cpp, conta, local, benchmark, gateway, roteiro, sob, demanda, ganha, backends, atende, competição, modelos, pode, fazer, humano, llamacpp, entram, lista, pedido, classificação, deixa, cair, dados, externos, passo, novo, roda, testes, correção, faltou, relinkar, laya, roteador, service, ollaya, proxies, socket, exigem, backend, medido, requisição, real, assinatura, pendente, bash, scripts, aprovar
 (1047) DIÁRIO — 18/11/2026 · **Aplicada refazer-get-18-11: o GET do gateway da Seth volta a responder.** Assinada pelo Humano. Valor padrão de classe para _refazer e _verificar; teste de regressão.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, painel, funcional, chat, antigo, estados, honestos, estilo, consolidado
 (1020) DIÁRIO — 16/11/2026 · **Aplicada robustez-16-11 (assinada pelo Humano em 16/11, 10:15): aplicar.py espera os checks antes de decidir; compilação Rust com nice e critério de em dia.**
   palavras-chave: aplicada, robustez, assinada, humano, aplicar, espera, checks, decidir, compilação, rust, nice, critério, dia
-(1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinada pelo Humano em 16/11, 09:03): o teste de ponteiros lê só os arquivos rastreados pelo git.** O teste `test_nenhum_ponteiro_vivo_para_secao_que_saiu` deixa de percorrer o disco com `os.walk` quando há git: a lista vem de `git ls-files`, e arquivo solto fora do git (log, patch, cache) fica de fora. Sem git, volta ao percurso antigo. Só o arquivo `redesign/projeto_indice/tests/test_projeto_indice.py` muda.
-  palavras-chave: aplicada, teste, ponteiro, rastreados, assinada, humano, ponteiros, arquivos, git, test, vivo, secao, saiu, deixa, percorrer, disco, walk, lista, vem, files, arquivo, solto, fora, log, patch, cache, fica, volta, percurso, antigo, redesign, projeto, indice, tests, muda
+(1019) DIÁRIO — 16/11/2026 · **Aplicada teste-ponteiro-rastreados-16-11 (assinad …
+  palavras-chave: aplicada, teste, ponteiro, rastreados, assinad
 (1018) DIÁRIO — 16/11/2026 · **Aplicada socks5-rust-15-11 (assinada pelo Humano …
   palavras-chave: aplicada, socks, rust, assinada, humano
 (1017) DIÁRIO — 15/11/2026 · **Proposta socks5-rust-15-11: SOCKS5 do navegador e …
