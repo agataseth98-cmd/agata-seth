@@ -1,0 +1,1034 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 25d0b633..c5001a0e 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -33,6 +33,12 @@ Env:
+                     p/ query_canon. Rápido, sem estourar o deadline do OmniRoute.
+         full     -> injeta o .hidrata-seth.md inteiro (~45k tokens). Só com um
+                     modelo de janela grande E o deadline do OmniRoute folgado.
++    SETH_REFAZER         1 liga verificar e refazer (18/11/2026); 0 desliga sempre.
++                         Sem ela: SETH_ROTEADOR=capacidade:N liga N% dos pedidos.
++    SETH_REFAZER_MAX     novas tentativas por resposta (default 2)
++    SETH_REFAZER_SEG     teto, em segundos, para as novas tentativas (default 60)
++    SETH_REFAZER_1A_SEG  prazo para a 1ª resposta chegar inteira (default 180); passou, segue sem refazer
++    SETH_REFAZER_BYTES   teto de bytes por coleta de resposta (default 4 MiB); passou, idem
+ """
+ from __future__ import annotations
+ 
+@@ -41,6 +47,7 @@ import io
+ import json
+ import queue
+ import os
++import random
+ import re
+ import socket
+ import sys
+@@ -1184,6 +1191,207 @@ def _modo_roteador() -> str:
+     return (os.environ.get("SETH_ROTEADOR") or "legado").strip().lower() or "legado"
+ 
+ 
++# --- verificar e refazer (18/11/2026) -------------------------------------------------------------------------
++# Decisão do Humano (17/11): "os mecanismos de checagem de fatos e correções devem agir antes de a resposta do
++# modelo ser apresentada, o que pode ser refeito embaixo do capô quantas vezes forem necessárias até a resposta
++# ser confiável". Sem isto, a Máquina confere a resposta e só anexa a "Verificação da Máquina". Com isto, a
++# resposta inteira é lida, conferida, e enquanto houver achado o upstream é chamado de novo com o mesmo pedido,
++# mais a resposta ruim e uma nota com os achados. Para no 1º texto sem achado, em SETH_REFAZER_MAX novas
++# tentativas ou em SETH_REFAZER_SEG segundos. Entrega a de menos achados; se ainda sobrar algum, o gate de
++# entrega põe a "Verificação da Máquina" como antes. Só nas rotas seth-* com verificação ligada.
++_REFAZER_ORDEM = ("seth-rapido", "seth-livre", "seth-pesado")
++
++
++def _refazer_ligado_neste_pedido() -> bool:
++    """Decidido por pedido. SETH_REFAZER=0 desliga sempre; =1 liga sempre. Senão, SETH_ROTEADOR=capacidade:N
++    liga N% dos pedidos (sorteio por pedido); capacidade sem N fica desligada. Padrão (legado): desligada."""
++    chave = (os.environ.get("SETH_REFAZER") or "").strip()
++    if chave == "0":
++        return False
++    if chave == "1":
++        return True
++    modo = _modo_roteador()
++    if not modo.startswith("capacidade"):
++        return False
++    try:
++        pct = float(modo.partition(":")[2] or 0)
++    except ValueError:
++        return False
++    return random.random() * 100 < pct
++
++
++def _refazer_max() -> int:
++    try:
++        return max(0, int(os.environ.get("SETH_REFAZER_MAX", "2")))
++    except ValueError:
++        return 2
++
++
++def _refazer_seg() -> float:
++    """Teto, em segundos, das NOVAS tentativas (a partir do fim da 1ª resposta). Não conta a 1ª resposta."""
++    try:
++        return max(0.0, float(os.environ.get("SETH_REFAZER_SEG", "60")))
++    except ValueError:
++        return 60.0
++
++
++def _refazer_1a_seg() -> float:
++    """Prazo absoluto para a 1ª resposta chegar inteira (180 s é o mesmo teto por pedaço do stream normal)."""
++    try:
++        return max(0.0, float(os.environ.get("SETH_REFAZER_1A_SEG", "180")))
++    except ValueError:
++        return 180.0
++
++
++_REFAZER_BYTES_PADRAO = 4 * 1024 * 1024
++
++
++def _refazer_bytes() -> int:
++    """Teto de bytes por coleta de resposta (1ª e novas tentativas). Passou disso, a coleta para."""
++    try:
++        return max(0, int(os.environ.get("SETH_REFAZER_BYTES", str(_REFAZER_BYTES_PADRAO))))
++    except ValueError:
++        return _REFAZER_BYTES_PADRAO
++
++
++def _proxima_fila_refazer(rota: str) -> str:
++    """Escalada da nova tentativa: sobe uma fila pelo mapa _SUBIR_FILA (rapido -> livre -> pesado). Esse mapa, do
++    resgate de resposta vazia, dá a volta (pesado -> livre); para refazer isso seria rebaixar, então o topo fica."""
++    alvo = _Handler._SUBIR_FILA.get(rota)
++    if rota in _REFAZER_ORDEM and alvo in _REFAZER_ORDEM and _REFAZER_ORDEM.index(alvo) > _REFAZER_ORDEM.index(rota):
++        return alvo
++    return rota
++
++
++_RE_AUTORIZACAO = re.compile(r"(?i)\bauthorization\s*:[^\n|]*")
++_RE_BEARER = re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{8,}")
++
++
++def _sem_segredo(texto: str) -> str:
++    """O achado sem segredo, para a nota: as réguas de segredo do sanitizador (a mesma lista de
++    scripts/varredura_segredo.sh) e os cabeçalhos Authorization e Bearer, que a régua não cobre. Falha fechada: sem a
++    régua, o detalhe do achado sai da nota."""
++    try:
++        import sanitizar  # noqa: E402  (redesign/router, mesmo diretório)
++        regras = sanitizar._regras()
++    except Exception:  # noqa: BLE001 -- sem a régua, nada do achado vai à nota
++        return "[detalhe omitido: régua de segredo indisponível]"
++    for _rotulo, _bruto, rx in regras:
++        texto = rx.sub("[segredo removido]", texto)
++    texto = _RE_AUTORIZACAO.sub("Authorization: [segredo removido]", texto)
++    return _RE_BEARER.sub("Bearer [segredo removido]", texto)
++
++
++def _nota_refazer(achados: list[str]) -> str:
++    """A nota à nova tentativa: texto fixo e os achados da Máquina (curtos, sem segredo). Não leva a resposta
++    nem o cabeçalho."""
++    itens = " | ".join(_sem_segredo(a.strip())[:300] for a in achados[:8] if a.strip())
++    return ("[Máquina, antes de entregar ao Humano: a sua resposta anterior foi conferida mecanicamente e tem estes "
++            f"achados: {itens}. Refaça a resposta inteira corrigindo cada achado. Não cite esta nota e não peça "
++            "desculpas. Se um achado não puder ser corrigido com o que está no contexto, diga isso em uma frase e "
++            "escreva \"não medido\" onde faltar medição.]")
++
++
++def _pedido_refazer(corpo: bytes, texto_ruim: str, achados: list[str], rota: str) -> bytes:
++    """O mesmo pedido, com a resposta ruim e a nota no fim, na fila `rota`."""
++    pl = json.loads(corpo)
++    pl["messages"] = list(pl.get("messages") or []) + [
++        {"role": "assistant", "content": texto_ruim},
++        {"role": "user", "content": _nota_refazer(achados)}]
++    pl["model"] = rota
++    return json.dumps(pl, ensure_ascii=False).encode("utf-8")
++
++
++def _texto_auditavel(bruto: bytes, sse: bool, nomes) -> str:
++    """O texto que a verificação confere, como a entrega o mostraria: ferramenta escrita como texto vira chamada
++    (então não sobra texto) e raciocínio sem resposta vira texto. Os mesmos passos do gateway, na mesma ordem."""
++    if not sse:
++        b = _resgate_json(bruto) if _resgate_ligado() else bruto
++        if nomes:
++            b = _tool_calls_do_json(b, nomes)
++        try:
++            return str(json.loads(b)["choices"][0]["message"].get("content") or "")
++        except (ValueError, KeyError, IndexError, TypeError, AttributeError):
++            return ""
++    if nomes and (conv := _sse_tool_calls(bruto, nomes)) is not None:
++        bruto = conv
++    texto = _texto_do_sse([bruto])
++    if not texto.strip() and _resgate_ligado():
++        estado: dict = {}
++        for linha in bruto.split(b"\n"):
++            _resgate_observar(linha, estado)
++        resgate = _resgate_chunk(estado)
++        if resgate:
++            texto = _texto_do_sse([resgate])
++    return texto
++
++
++def _achados_do_texto(texto: str, msgs: list) -> list[str]:
++    """Achados mecânicos de um texto (sem texto, sem achado). Verificação quebrada nunca segura a resposta."""
++    if not texto.strip():
++        return []
++    try:
++        return list(auditoria_turno.verificar_resposta_atual(texto, msgs) or [])
++    except Exception:  # noqa: BLE001 -- como na entrega: falha da verificação não segura a resposta
++        return []
++
++
++def _consumir(leitor, prazo: float | None = None, limite: int | None = None) -> tuple[bytes, str]:
++    """Lê o upstream até o fim. Devolve (o lido, motivo): "fim" (pedaço vazio); "prazo" (o prazo absoluto, em
++    time.monotonic, chegou: para antes de ler de novo, mesmo com dados prontos, ou um pedaço não veio a tempo);
++    "limite" (passou de `limite` bytes); "erro" (upstream caído). Sem prazo, cada pedaço espera até 180 s."""
++    partes: list[bytes] = []
++    total = 0
++    while True:
++        if prazo is None:
++            espera = 180.0
++        else:
++            espera = prazo - time.monotonic()
++            if espera <= 0:
++                return b"".join(partes), "prazo"
++        if limite is not None and total > limite:
++            return b"".join(partes), "limite"
++        try:
++            pedaco = leitor.ler(min(espera, 180.0))
++        except queue.Empty:
++            return b"".join(partes), "prazo"
++        except Exception:  # noqa: BLE001 -- upstream caído: a resposta não está completa
++            return b"".join(partes), "erro"
++        if not pedaco:
++            return b"".join(partes), "fim"
++        partes.append(pedaco)
++        total += len(pedaco)
++
++
++def _resposta_valida(bruto: bytes, sse: bool) -> bool:
++    """Estrutura mínima para a resposta entrar na escolha: nunca uma candidata truncada ou malformada vence.
++    JSON: parseia e tem choices[0].message com conteúdo, ferramenta ou raciocínio. SSE: termina de forma normal,
++    com [DONE] ou com finish_reason de algum pedaço."""
++    if not sse:
++        try:
++            m = json.loads(bruto)["choices"][0]["message"]
++        except (ValueError, KeyError, IndexError, TypeError):
++            return False
++        if not isinstance(m, dict):
++            return False
++        c = m.get("content")
++        r = m.get("reasoning") or m.get("reasoning_content")
++        return ((isinstance(c, str) and c.strip() != "") or bool(m.get("tool_calls"))
++                or (isinstance(r, str) and r.strip() != ""))
++    for linha in bruto.split(b"\n"):
++        if linha.strip() == b"data: [DONE]":
++            return True
++        if not linha.startswith(b"data:"):
++            continue
++        try:
++            escolhas = json.loads(linha[5:]).get("choices") or []
++        except (ValueError, AttributeError):
++            continue
++        if any(isinstance(ch, dict) and ch.get("finish_reason") for ch in escolhas):
++            return True
++    return False
++
++
+ _RE_CAB_LINHA = re.compile(r"^(?:\*\*)?agata(?:-seth)? · ", re.I)
+ _RE_CAB_RODAPE = re.compile(r"^\s*(?:\*\*)?\s*(?:última entrada\s*:|pronto\.|quebrado\s*:)", re.I)
+ 
+@@ -1551,6 +1759,7 @@ class _Handler(BaseHTTPRequestHandler):
+         self._rota = ""
+         self._cab_ctx = None
+         self._verificar = False
++        self._refazer = False
+         self._msgs_pedido = []
+         self._texto_maquina = ""
+         self._cab_injetado = None
+@@ -1611,6 +1820,8 @@ class _Handler(BaseHTTPRequestHandler):
+                 self._msgs_pedido = list(msgs0)
+                 self._verificar = (not self._public_only_lane and str(payload.get("model", "")).startswith("seth-")
+                                    and not _e_chamada_utilitaria(payload))
++                # (18/11/2026) decidido uma vez por pedido: o sorteio do canário não muda no meio da resposta
++                self._refazer = bool(self._verificar and _refazer_ligado_neste_pedido())
+                 if (not self._public_only_lane and str(payload.get("model", "")).startswith("seth-")
+                         and not _e_chamada_utilitaria(payload)
+                         and not auditoria_turno._em_andamento(msgs0).strip()):
+@@ -1707,6 +1918,94 @@ class _Handler(BaseHTTPRequestHandler):
+                     continue
+         return False
+ 
++    def _cabecalhos_upstream(self) -> dict:
++        """Cabeçalhos da chamada ao sanitizador, como em _passar. Sem Content-Length: o corpo pode ter mudado."""
++        headers = {k: v for k, v in self.headers.items() if k.lower() not in _HOP_BY_HOP}
++        headers["X-Agata-Token"] = _token_interno()
++        if getattr(self, "_data_classification", None) in ("public", "sanitizado-cascata"):
++            headers["X-Agata-Data-Classification"] = self._data_classification
++        return headers
++
++    def _refazer_chamada(self, corpo: bytes, sse: bool, prazo: float):
++        """Uma nova tentativa ao upstream, pelo mesmo caminho. Devolve (bytes, modelo) da resposta completa e com
++        conteúdo, ou None: erro, HTTP diferente de 200, tipo de resposta diferente, vazia ou prazo estourado."""
++        restante = prazo - time.monotonic()
++        if restante <= 0:
++            return None
++        try:
++            req = urllib.request.Request(UPSTREAM + self.path, data=corpo, method="POST",
++                                         headers=self._cabecalhos_upstream())
++            up = urllib.request.urlopen(req, timeout=min(180.0, restante))  # nem a conexão passa do teto
++        except Exception:  # noqa: BLE001 -- falha da nova tentativa: fica a melhor resposta até aqui
++            return None
++        try:
++            e_sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
++            if up.status != 200 or e_sse != sse:
++                return None
++            bruto, motivo = _consumir(_Leitor(up), prazo, _refazer_bytes())
++            # candidata só entra se chegou ao fim, tem conteúdo e estrutura válida (truncada ou malformada não vence)
++            if motivo != "fim" or not self._tem_conteudo(bruto, sse) or not _resposta_valida(bruto, sse):
++                return None
++            return bruto, self._modelo_de_bytes(bruto)
++        except Exception:  # noqa: BLE001 -- uma tentativa ruim nunca derruba a resposta
++            return None
++        finally:
++            _derrubar(up)
++
++    def _refazer_antes_de_entregar(self, corpo: bytes, buf: bytes, leitor, sse: bool, modelo, t0: float):
++        """Verificar e refazer ANTES de a resposta sair (18/11/2026). Lê a 1ª resposta até o fim e confere o texto
++        que a entrega conferiria. Enquanto houver achado, chama o upstream de novo (até SETH_REFAZER_MAX tentativas
++        ou SETH_REFAZER_SEG segundos, contados daqui) com o mesmo pedido mais a resposta ruim e a nota dos achados,
++        numa fila acima quando houver (_proxima_fila_refazer). Devolve (bytes, leitor, modelo) da resposta a
++        entregar: a de menos achados. O gate de entrega confere de novo e põe a Verificação da Máquina se sobrar."""
++        # o teto de bytes vale para a resposta inteira: a pré-leitura (espreita do stream, ou o corpo do JSON) conta,
++        # e a coleta seguinte só recebe o que sobra (r2, achado 1). Passou: não audita nem refaz.
++        limite = _refazer_bytes()
++        if len(buf) > limite:
++            self._log("verificar e refazer: 1ª resposta passou do limite (limite), seguiu sem refazer", t0)
++            return buf, leitor, modelo
++        if sse:
++            # a 1ª coleta tem prazo absoluto próprio (não o da refazer): quem manda keepalive sem parar não prende o
++            # pedido nem enche a memória
++            resto, motivo = _consumir(leitor, time.monotonic() + _refazer_1a_seg(), limite - len(buf))
++            buf = buf + resto
++            if motivo == "erro":
++                self._log("verificar e refazer: 1ª resposta com erro no upstream, entregue como veio", t0)
++                return buf, _LeitorVazio(), modelo
++            if motivo != "fim":
++                # prazo ou bytes estourados: a coleta para aqui e o resto segue pelo caminho legado, sem refazer
++                self._log(f"verificar e refazer: 1ª resposta passou do limite ({motivo}), seguiu sem refazer", t0)
++                return buf, leitor, modelo
++            leitor = _LeitorVazio()
++        if not _resposta_valida(buf, sse):
++            self._log("verificar e refazer: 1ª resposta sem estrutura válida, entregue como veio", t0)
++            return buf, leitor, modelo
++        try:
++            rota0 = str(json.loads(corpo).get("model") or "")
++        except (ValueError, AttributeError):
++            return buf, leitor, modelo
++        nomes, msgs = self._nomes_tools, self._msgs_pedido
++        texto = _texto_auditavel(buf, sse, nomes)
++        cands = [(buf, rota0, modelo, texto, _achados_do_texto(texto, msgs))]
++        inicio, teto, maximo, n = time.monotonic(), _refazer_seg(), _refazer_max(), 0
++        atual = cands[0]
++        while atual[4] and n < maximo and time.monotonic() - inicio < teto:
++            n += 1
++            rota = _proxima_fila_refazer(atual[1])
++            nova = self._refazer_chamada(_pedido_refazer(corpo, atual[3], atual[4], rota), sse, inicio + teto)
++            if nova is None:
++                break
++            bruto, modelo_n = nova
++            texto_n = _texto_auditavel(bruto, sse, nomes)
++            atual = (bruto, rota, modelo_n, texto_n, _achados_do_texto(texto_n, msgs))
++            cands.append(atual)
++        melhor = min(cands, key=lambda c: len(c[4]))  # empate: a mais antiga, a 1ª resposta
++        if melhor[1] != rota0:
++            self._rota = melhor[1]
++        self._served_by = melhor[2]
++        self._log(f"refazer_tentativas={n} achados_inicio={len(cands[0][4])} achados_fim={len(melhor[4])}", t0)
++        return melhor[0], leitor, melhor[2]
++
+     def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
+         t0 = time.monotonic()
+         self._served_by = None  # (17/11, item 1) por tentativa: a nova tentativa põe o modelo da sua resposta
+@@ -1757,6 +2056,11 @@ class _Handler(BaseHTTPRequestHandler):
+                     modelo_real = modelo_real or self._modelo_de_bytes(buf_pre)
+                     if modelo_real and self._tem_conteudo(buf_pre, True):
+                         break
++                    if self._refazer and time.monotonic() >= prazo:
++                        # (18/11/2026) keepalive sem parar: com dados sempre prontos o Empty nunca vem e o prazo
++                        # acima não sai. Só no caminho de refazer; o legado segue como estava.
++                        sem_conteudo = up.status == 200
++                        break
+                 vazio = (fim and up.status == 200 and not self._tem_conteudo(buf_pre, True)) or sem_conteudo
+             else:
+                 buf_pre = up.read()
+@@ -1785,6 +2089,13 @@ class _Handler(BaseHTTPRequestHandler):
+             self._log(f"upstream parou de responder ({e})", t0)
+             up.close()
+             return self._erro(504, f"upstream parou de responder: {e}")
++        # (18/11/2026, verificar e refazer) antes de qualquer byte ao cliente: lê a resposta inteira, confere e, com
++        # achado, refaz (SETH_REFAZER). Desligado, segue o caminho de sempre, abaixo.
++        if self._refazer and self._verificar and metodo == "POST" and up.status == 200 and _verificacao_ligada():
++            # (r4) se a espreita já leu o EOF (fim), o leitor não tem mais nada e não manda outro: a coleta não pode
++            # esperar nele (180 s por padrão) nem registrar um limite de prazo falso. Vale um leitor vazio.
++            buf_pre, leitor, modelo_real = self._refazer_antes_de_entregar(
++                corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
+         if sse and up.status == 200 and self._nomes_tools and leitor is not None:
+             # (17/11, item 3, SSE) decide, lê até o fim se for ferramenta em texto, e só converte com o stream
+             # terminado: senão o stream passa como chegou
+diff --git a/redesign/router/spec/spec.md b/redesign/router/spec/spec.md
+index 295480c8..67f16d4e 100644
+--- a/redesign/router/spec/spec.md
++++ b/redesign/router/spec/spec.md
+@@ -126,3 +126,4 @@ Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DO
+ 
+ - `auditoria_turno.py` (verificação de divergência: `divergencia_turno` e `--verificar --sessao`)
+ - `test_seth_base.py` (testes da base do roteador, 17/11/2026: ferramenta escrita como texto vira tool_calls, cabeçalho sem duplicata, served_by no log e modo do roteador; sem rede)
++- `test_verificar_refazer.py` (verificar e refazer, 18/11/2026: gateway real com upstream falso em HTTP local; teto de tentativas e de segundos, canário, chave SETH_REFAZER=0, legado intacto, stream, escalada de fila; sem rede)
+diff --git a/redesign/router/test_verificar_refazer.py b/redesign/router/test_verificar_refazer.py
+new file mode 100644
+index 00000000..3048be21
+--- /dev/null
++++ b/redesign/router/test_verificar_refazer.py
+@@ -0,0 +1,648 @@
++"""Testes de verificar e refazer (18/11/2026, seth_gateway). Sem rede e sem provedor.
++
++O gateway real sobe numa porta livre e fala com um upstream falso (HTTP em 127.0.0.1, também numa porta livre).
++Cada caso conta quantas chamadas o upstream recebeu e confere o que o cliente recebe. A verificação é falsa
++(um achado por marca RUIM no texto), salvo nos casos que usam a real ou um achado com segredo sintético. O token
++interno e o estado do repositório são trocados por valores de teste; nada disso lê ~/.config/agata.
++
++Cobre: resposta limpa (1 chamada), ruim e depois boa (2 chamadas, sem bloco), sempre ruim (teto de tentativas e
++melhor resposta com o bloco), teto de segundos, legado intacto, chave SETH_REFAZER=0, canário capacidade:N,
++stream, escalada de fila, verificação real; a 1ª resposta com prazo e teto de bytes (fluxo infinito, keepalive
++para sempre, gotejo); candidata inválida que nunca vence; segredo no achado que não vai para a nota; e as funções
++puras (leitura com prazo, estrutura válida, escalada, nota, texto conferido).
++Rodar: pytest -q redesign/router/test_verificar_refazer.py
++"""
++import json
++import os
++import queue
++import sys
++import threading
++import time
++import urllib.request
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++import pytest
++
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++
++import seth_gateway as g  # noqa: E402
++
++REAL_VERIFICAR = g.auditoria_turno.verificar_resposta_atual
++VARS = ("SETH_REFAZER", "SETH_REFAZER_MAX", "SETH_REFAZER_SEG", "SETH_REFAZER_1A_SEG", "SETH_REFAZER_BYTES",
++        "SETH_ROTEADOR", "SETH_VERIFICACAO_BLOQUEIA")
++TOKEN = "TOKEN-" + "DE-TESTE-NAO-E-SEGREDO"
++BLOCO_TOOL = '<tool_call>{"name": "buscar", "arguments": {"q": "agata"}}</tool_call>'
++# segredos sintéticos, montados em tempo de execução: o literal inteiro casaria a varredura de segredo do pré-commit
++SEGREDO = "sk" + "-" + "TESTEsintetico0123456789abcdefGHIJ"
++PORTADOR = "abcDEF123tokenFALSO999"
++KEEPALIVE = (b'data: {"id":"chatcmpl-keepalive","model":"keepalive",'
++             b'"choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n')
++
++
++class Bruto:
++    """Corpo cru para o upstream falso: resposta malformada, truncada ou sem fim."""
++
++    def __init__(self, corpo: bytes, ctype: str = "application/json"):
++        self.corpo, self.ctype = corpo, ctype
++
++
++def _achados_ruins(texto, msgs_pedido):
++    """Verificação falsa e contável: um achado por marca RUIM. Assim dá para escolher a resposta com menos achados."""
++    return [f"achado {i + 1}: marca RUIM" for i in range(texto.count("RUIM"))]
++
++
++def _achados_com_segredo(texto, msgs_pedido):
++    """Verificação falsa que devolve segredo sintético dentro do achado (o caso que a nota não pode levar)."""
++    if "RUIM" in texto:
++        return [f"achado: chave {SEGREDO} na saída e Authorization: Bearer {PORTADOR}"]
++    return []
++
++
++def _sse(texto):
++    a = {"id": "f", "model": "modelo-falso",
++         "choices": [{"index": 0, "delta": {"content": texto}, "finish_reason": None}]}
++    b = {"id": "f", "model": "modelo-falso", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]}
++    return (f"data: {json.dumps(a, ensure_ascii=False)}\n\ndata: {json.dumps(b)}\n\ndata: [DONE]\n\n").encode("utf-8")
++
++
++def _sse_truncado(texto):
++    """Stream que acaba no meio: sem [DONE] e sem finish_reason."""
++    a = {"id": "f", "model": "modelo-falso",
++         "choices": [{"index": 0, "delta": {"content": texto}, "finish_reason": None}]}
++    return f"data: {json.dumps(a, ensure_ascii=False)}\n\n".encode("utf-8")
++
++
++def _json_resposta(content, tool_calls=None):
++    m = {"role": "assistant", "content": content}
++    if tool_calls is not None:
++        m["tool_calls"] = tool_calls
++    return json.dumps({"model": "modelo-falso", "choices": [{"message": m}]}).encode("utf-8")
++
++
++def _conteudo(corpo: str, stream: bool) -> str:
++    """O texto que o cliente recebeu: `content` no JSON, ou a soma dos deltas no SSE."""
++    if not stream:
++        return json.loads(corpo)["choices"][0]["message"]["content"]
++    partes = []
++    for linha in corpo.split("\n"):
++        if linha.startswith("data:") and linha.strip() != "data: [DONE]":
++            for c in json.loads(linha[5:]).get("choices") or []:
++                partes.append((c.get("delta") or {}).get("content") or "")
++    return "".join(partes)
++
++
++class _Upstream(BaseHTTPRequestHandler):
++    def log_message(self, *a):
++        pass
++
++    def do_POST(self):
++        fake = self.server.fake
++        corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
++        fake.chamadas.append(corpo)
++        if fake.atraso:
++            time.sleep(fake.atraso)
++        if fake.modo in ("keepalive", "gotejo"):
++            return self._fluxo_sem_fim(fake.modo)
++        texto = fake.textos[min(len(fake.chamadas) - 1, len(fake.textos) - 1)]
++        if isinstance(texto, Bruto):
++            body, ctype = texto.corpo, texto.ctype
++        elif fake.sse:
++            body, ctype = _sse(texto), "text/event-stream"
++        else:
++            resposta = {"model": "modelo-falso", "choices": [{"message": {"role": "assistant", "content": texto}}]}
++            body, ctype = json.dumps(resposta, ensure_ascii=False).encode("utf-8"), "application/json"
++        try:
++            self.send_response(200)
++            self.send_header("Content-Type", ctype)
++            self.send_header("Content-Length", str(len(body)))
++            self.end_headers()
++            self.wfile.write(body)
++        except (BrokenPipeError, ConnectionResetError):
++            pass  # o gateway já desistiu desta tentativa (teto): nada a fazer
++
++    def _fluxo_sem_fim(self, modo):
++        """Stream que não acaba: keepalive para sempre ('gotejo' espaça os pedaços)."""
++        try:
++            self.send_response(200)
++            self.send_header("Content-Type", "text/event-stream")
++            self.end_headers()
++            while True:
++                self.wfile.write(KEEPALIVE)
++                self.wfile.flush()
++                time.sleep(0.01 if modo == "gotejo" else 0.002)
++        except (BrokenPipeError, ConnectionResetError, OSError):
++            pass
++
++
++class _FakeUpstream:
++    """Upstream falso: devolve a lista de textos, uma por chamada (repete a última). Guarda cada corpo recebido."""
++
++    def __init__(self, textos, sse=False, atraso=0.0, modo="normal"):
++        self.textos, self.sse, self.atraso, self.modo = list(textos), sse, atraso, modo
++        self.chamadas = []
++        self.srv = ThreadingHTTPServer(("127.0.0.1", 0), _Upstream)
++        self.srv.fake = self
++        self.url = f"http://127.0.0.1:{self.srv.server_address[1]}"
++        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
++
++
++class _Cenario:
++    def __init__(self, monkeypatch):
++        self._mp = monkeypatch
++        self.up = None
++        self.gw = None
++
++    def subir(self, textos, sse=False, atraso=0.0, modo="normal"):
++        self.up = _FakeUpstream(textos, sse, atraso, modo)
++        self._mp.setattr(g, "UPSTREAM", self.up.url)
++        self.gw = g.ServidorConcorrenciaLimitada(("127.0.0.1", 0), g._Handler)
++        self.gw._selftest_allow_context = True  # fora da faixa pública: o pedido segue o caminho seth-*
++        threading.Thread(target=self.gw.serve_forever, daemon=True).start()
++        return self
++
++    def _requisicao(self, modelo, stream, pergunta):
++        corpo = {"model": modelo, "stream": stream, "messages": [{"role": "user", "content": pergunta}]}
++        return urllib.request.Request(
++            f"http://127.0.0.1:{self.gw.server_address[1]}/v1/chat/completions",
++            data=json.dumps(corpo).encode("utf-8"), method="POST",
++            headers={"Content-Type": "application/json", "X-Agata-Data-Classification": "public"})
++
++    def pedir(self, modelo="seth-pesado", stream=False, pergunta="Qual é o estado?"):
++        with urllib.request.urlopen(self._requisicao(modelo, stream, pergunta), timeout=30) as r:
++            return r.status, dict(r.headers.items()), r.read().decode("utf-8")
++
++    def pedir_parcial(self, n, modelo="seth-pesado"):
++        """Lê só `n` bytes do stream e fecha: para os casos em que o upstream nunca termina."""
++        with urllib.request.urlopen(self._requisicao(modelo, True, "Qual é o estado?"), timeout=30) as r:
++            return r.status, r.read(n).decode("utf-8", "replace")
++
++    def fechar(self):
++        for s in (self.gw, self.up.srv if self.up else None):
++            if s is not None:
++                s.shutdown()
++                s.server_close()
++
++
++@pytest.fixture(autouse=True)
++def ambiente(monkeypatch, tmp_path):
++    for var in VARS:
++        monkeypatch.delenv(var, raising=False)
++    monkeypatch.setenv("AGATA_EMOJI_LOG", str(tmp_path / "emoji.jsonl"))
++    monkeypatch.setenv("AGATA_LACO_LOG", str(tmp_path / "laco.jsonl"))
++    monkeypatch.setenv("AGATA_CABECALHO_LOG", str(tmp_path / "cabecalho.jsonl"))
++    monkeypatch.setattr(g, "MODELO_REAL_PATH", tmp_path / "modelo-real.txt")
++    monkeypatch.setattr(g, "_token_interno", lambda: TOKEN)
++    monkeypatch.setattr(g, "_estado", lambda: "sync: PASS")
++    monkeypatch.setattr(g, "_injeta", lambda payload: payload)  # sem hidratação: o caso não depende do repositório
++    monkeypatch.setattr(g.auditoria_turno, "verificar_resposta_atual", _achados_ruins)
++
++
++@pytest.fixture
++def cenario(monkeypatch):
++    criados = []
++
++    def subir(textos, sse=False, atraso=0.0, modo="normal"):
++        c = _Cenario(monkeypatch).subir(textos, sse, atraso, modo)
++        criados.append(c)
++        return c
++
++    yield subir
++    for c in criados:
++        c.fechar()
++
++
++# --- casos de ponta a ponta (gateway real, upstream falso) ------------------------------------------------
++
++def test_resposta_limpa_faz_uma_chamada(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["resposta boa"])
++    status, _, corpo = c.pedir()
++    texto = _conteudo(corpo, False)
++    assert status == 200 and len(c.up.chamadas) == 1
++    assert "resposta boa" in texto and "Verificação da Máquina" not in texto
++    assert "refazer_tentativas=0 achados_inicio=0 achados_fim=0" in capsys.readouterr().err
++
++
++def test_ruim_depois_boa_entrega_a_boa_sem_bloco(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM", "resposta boa"])
++    _, _, corpo = c.pedir()
++    texto = _conteudo(corpo, False)
++    assert len(c.up.chamadas) == 2
++    assert "resposta boa" in texto and "Verificação da Máquina" not in texto and "RUIM" not in texto
++    segunda = c.up.chamadas[1]["messages"]
++    assert segunda[-2] == {"role": "assistant", "content": "RUIM"}
++    assert segunda[-1]["role"] == "user" and "achado 1: marca RUIM" in segunda[-1]["content"]
++    assert TOKEN not in json.dumps(c.up.chamadas, ensure_ascii=False)  # o token vai no cabeçalho, nunca no corpo
++    assert "refazer_tentativas=1 achados_inicio=1 achados_fim=0" in capsys.readouterr().err
++
++
++def test_sempre_ruim_respeita_o_teto_e_entrega_a_melhor(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM RUIM RUIM", "RUIM", "RUIM RUIM"])  # 3, 1 e 2 achados: a melhor é a do meio
++    _, _, corpo = c.pedir()
++    texto = _conteudo(corpo, False)
++    assert len(c.up.chamadas) == 3  # 1 + SETH_REFAZER_MAX (2)
++    assert "RUIM RUIM" not in texto  # a de 3 achados não foi a entregue
++    assert "Verificação da Máquina" in texto and texto.count("- achado") == 1
++    assert "- achado 1: marca RUIM" in texto
++    assert "refazer_tentativas=2 achados_inicio=3 achados_fim=1" in capsys.readouterr().err
++
++
++def test_maximo_de_tentativas_pela_variavel(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_MAX", "1")
++    c = cenario(["RUIM", "RUIM", "RUIM"])
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 2
++    assert "Verificação da Máquina" in _conteudo(corpo, False)
++    assert "refazer_tentativas=1" in capsys.readouterr().err
++
++
++def test_teto_de_segundos_corta_a_nova_tentativa(cenario, monkeypatch, capsys):
++    # cada chamada leva 0,5 s; o teto das novas tentativas é 0,2 s: a 1ª tentativa nova não chega no prazo
++    # e o gateway para
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_MAX", "5")
++    monkeypatch.setenv("SETH_REFAZER_SEG", "0.2")
++    c = cenario(["RUIM", "RUIM", "RUIM"], atraso=0.5)
++    t0 = time.monotonic()
++    _, _, corpo = c.pedir()
++    assert time.monotonic() - t0 < 5
++    assert len(c.up.chamadas) == 2
++    assert "Verificação da Máquina" in _conteudo(corpo, False)  # entregue a melhor até ali, com o bloco
++    assert "refazer_tentativas=1 achados_inicio=1 achados_fim=1" in capsys.readouterr().err
++
++
++def test_legado_nao_refaz_e_anexa_o_bloco(cenario, capsys):
++    c = cenario(["RUIM", "resposta boa"])  # sem nenhuma variável: padrão legado
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 1
++    assert "RUIM" in _conteudo(corpo, False) and "Verificação da Máquina" in _conteudo(corpo, False)
++    assert "refazer_tentativas" not in capsys.readouterr().err
++
++
++def test_chave_zero_desliga_mesmo_com_canario_em_100(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "0")
++    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
++    c = cenario(["RUIM", "resposta boa"])
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 1
++    assert "Verificação da Máquina" in _conteudo(corpo, False)
++    assert "refazer_tentativas" not in capsys.readouterr().err
++
++
++@pytest.mark.parametrize("roteador, chamadas", [("capacidade:100", 2), ("capacidade:0", 1), ("capacidade", 1),
++                                                ("sombra", 1)])
++def test_canario_capacidade_decide_por_pedido(cenario, monkeypatch, roteador, chamadas):
++    monkeypatch.setenv("SETH_ROTEADOR", roteador)
++    c = cenario(["RUIM", "resposta boa"])
++    c.pedir()
++    assert len(c.up.chamadas) == chamadas
++
++
++def test_stream_ruim_depois_boa(cenario, monkeypatch):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM", "resposta boa"], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    texto = _conteudo(corpo, True)
++    assert len(c.up.chamadas) == 2
++    assert "resposta boa" in texto and "Verificação da Máquina" not in texto and "RUIM" not in texto
++
++
++def test_stream_limpo_faz_uma_chamada(cenario, monkeypatch):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["resposta boa"], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    assert len(c.up.chamadas) == 1 and "resposta boa" in _conteudo(corpo, True)
++
++
++def test_stream_sempre_ruim_entrega_a_melhor_com_bloco(cenario, monkeypatch):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_MAX", "1")
++    c = cenario(["RUIM RUIM", "RUIM"], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    texto = _conteudo(corpo, True)
++    assert len(c.up.chamadas) == 2
++    assert "Verificação da Máquina" in texto and "- achado 1: marca RUIM" in texto
++    assert texto.count("- achado") == 1
++
++
++def test_escala_a_fila_a_cada_tentativa(cenario, monkeypatch):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM", "RUIM", "resposta boa"])
++    _, headers, corpo = c.pedir(modelo="seth-rapido")
++    assert [x["model"] for x in c.up.chamadas] == ["seth-rapido", "seth-livre", "seth-pesado"]
++    assert headers.get("X-Seth-Rota") == "seth-pesado"
++    assert "resposta boa" in _conteudo(corpo, False)
++
++
++def test_auditoria_real_confere_caminho_inexistente(cenario, monkeypatch):
++    # sem a verificação falsa: a checagem real de caminho de arquivo é que manda refazer
++    monkeypatch.setattr(g.auditoria_turno, "verificar_resposta_atual", REAL_VERIFICAR)
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["Veja `scripts/nao_existe_refazer_18_11.py` para o detalhe.",
++                 "Veja `scripts/turno.py` para o detalhe."])
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 2
++    assert "cita caminho que não existe" in json.dumps(c.up.chamadas[1]["messages"], ensure_ascii=False)
++    assert "Verificação da Máquina" not in _conteudo(corpo, False)
++
++
++# --- 1ª resposta: prazo absoluto e teto de bytes (upstream que nunca termina) ------------------------------
++
++def test_primeira_sse_com_keepalive_sem_fim_para_no_limite_de_bytes(cenario, monkeypatch, capsys):
++    # O upstream manda keepalive para sempre e nenhum conteúdo. A espreita (0,2 s) junta uns 11 KB; a coleta da 1ª
++    # resposta para no teto de 50 KB, sem prazo. Prova: o pedido não fica preso e o keepalive chega ao cliente pelo
++    # caminho legado (convertido em comentário, o JSON cru não sai).
++    # Por que é 1 chamada (medido, não suposto): o pedido vai direto a seth-pesado, sem passar pela rota. self._rota
++    # fica vazio (o log do refazer mostra rota=-), e o resgate do 709 só age com self._rota definido (rota seth-livre
++    # pelo Laya). O mapa _FILA_RAPIDA (seth-pesado -> seth-rapido) não chega a ser consultado. O controle
++    # test_livre_via_laya_pesado_faz_a_nova_tentativa_709 faz as duas chamadas quando a rota existe.
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "50000")
++    monkeypatch.setattr(g, "PRAZO_1O_CONTEUDO", 0.2)  # o espreita do stream não espera 40 s por conteúdo
++    c = cenario([], modo="keepalive")
++    t0 = time.monotonic()
++    status, trecho = c.pedir_parcial(300)
++    err = capsys.readouterr().err
++    assert status == 200 and time.monotonic() - t0 < 20
++    assert ": ka" in trecho and "chatcmpl-keepalive" not in trecho
++    assert len(c.up.chamadas) == 1
++    assert "passou do limite (limite)" in err  # a causa: a coleta parou no teto de bytes
++    assert "nova tentativa" not in err         # o 709 não disparou
++    assert "rota=-" in err                     # o pedido não tem rota
++
++
++def test_keepalive_sem_conteudo_na_rota_livre_segue_a_fila_rapida(cenario, monkeypatch, capsys):
++    # Rota seth-livre: o 709 manda o pedido à fila mais rápida quando não chega conteúdo no prazo. Duas chamadas
++    # (seth-livre e seth-rapido), e a 2ª é a que a entrega. O Laya é trocado por uma escolha fixa (sem rede) e a
++    # sombra fica desligada.
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "50000")
++    monkeypatch.setattr(g, "PRAZO_1O_CONTEUDO", 0.2)
++    monkeypatch.setattr(g, "_rota_laya", lambda payload: ("seth-livre", {}))
++    monkeypatch.setattr(g, "_sombra_rota", lambda *a, **k: None)
++    c = cenario([], modo="keepalive")
++    status, trecho = c.pedir_parcial(300, modelo="seth-livre")
++    assert status == 200 and ": ka" in trecho
++    assert [x["model"] for x in c.up.chamadas] == ["seth-livre", "seth-rapido"]
++    assert "passou do limite (limite)" in capsys.readouterr().err
++
++
++def test_livre_via_laya_pesado_faz_a_nova_tentativa_709(cenario, monkeypatch, capsys):
++    # Controle do caso de seth-pesado direto: a rota seth-livre escolhe seth-pesado pelo Laya (trocado por escolha
++    # fixa, sem rede). Aí self._rota é seth-pesado, o resgate do 709 age e o mapa _FILA_RAPIDA leva a seth-rapido.
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "50000")
++    monkeypatch.setattr(g, "PRAZO_1O_CONTEUDO", 0.2)
++    monkeypatch.setattr(g, "_rota_laya", lambda payload: ("seth-pesado", {}))
++    monkeypatch.setattr(g, "_sombra_rota", lambda *a, **k: None)
++    c = cenario([], modo="keepalive")
++    status, trecho = c.pedir_parcial(300, modelo="seth-livre")
++    err = capsys.readouterr().err
++    assert status == 200 and ": ka" in trecho
++    assert [x["model"] for x in c.up.chamadas] == ["seth-pesado", "seth-rapido"]
++    assert "nova tentativa" in err and "passou do limite (limite)" in err
++
++
++def test_pre_leitura_acima_do_teto_nao_vai_a_auditoria_nem_a_refazer(cenario, monkeypatch, capsys):
++    # r2, achado 1: 300 keepalives e depois um achado (RUIM), num corpo só. A espreita já leu tudo (uns 33 KB) com teto
++    # de 1000 bytes. Antes da correção, a coleta seguinte recebia o teto cheio e a resposta ia à auditoria e refazia.
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "1000")
++    c = cenario([Bruto(KEEPALIVE * 300 + _sse("RUIM"), "text/event-stream")], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    assert len(c.up.chamadas) == 1
++    assert "passou do limite (limite)" in capsys.readouterr().err
++    assert "RUIM" in _conteudo(corpo, True) and "Verificação da Máquina" in _conteudo(corpo, True)  # caminho legado
++
++
++def test_corpo_json_acima_do_teto_nao_vai_a_refazer(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "10")
++    c = cenario(["RUIM", "resposta boa"])
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 1
++    assert "passou do limite (limite)" in capsys.readouterr().err
++    assert "RUIM" in _conteudo(corpo, False)
++
++
++def test_primeira_sse_gotejando_para_no_prazo(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_1A_SEG", "0.3")
++    monkeypatch.setattr(g, "PRAZO_1O_CONTEUDO", 0.2)
++    c = cenario([], modo="gotejo")
++    t0 = time.monotonic()
++    status, trecho = c.pedir_parcial(300)
++    err = capsys.readouterr().err
++    assert status == 200 and ": ka" in trecho and time.monotonic() - t0 < 10
++    # Por que é 1 chamada (medido): seth-pesado direto, sem rota (rota=- no log), e o 709 só age com rota definida.
++    assert len(c.up.chamadas) == 1
++    assert "passou do limite (prazo)" in err   # a causa: a coleta parou no prazo
++    assert "nova tentativa" not in err         # o 709 não disparou
++    assert "rota=-" in err
++
++
++def test_primeira_sse_truncada_nao_refaz(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario([Bruto(_sse_truncado("RUIM parcial"), "text/event-stream")], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    assert len(c.up.chamadas) == 1
++    assert "sem estrutura válida" in capsys.readouterr().err
++
++
++# --- candidata inválida nunca vence -----------------------------------------------------------------------
++
++@pytest.mark.parametrize("corpo", [
++    # sem o campo model a espreita não para no conteúdo: lê o EOF antes da coleta (r4)
++    b'data: {"choices":[{"delta":{"content":"oi"},"finish_reason":null}]}\n\n'
++    b'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n',
++    b"data: [DONE]\n\n",  # SSE vazio: o EOF também cai na espreita
++], ids=["com-texto", "so-done"])
++def test_sse_curto_que_termina_na_pre_leitura_nao_espera_o_prazo(cenario, monkeypatch, capsys, corpo):
++    # Com teto de 5 s para a 1ª coleta, a resposta tem de sair em menos de 1 s e sem o registro de prazo: o EOF já foi
++    # lido, então o leitor não tem o que dar. Antes da correção, a coleta esperava o teto inteiro no leitor esgotado.
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setenv("SETH_REFAZER_1A_SEG", "5")
++    c = cenario([Bruto(corpo, "text/event-stream")], sse=True)
++    t0 = time.monotonic()
++    _, _, texto = c.pedir(stream=True)
++    decorrido = time.monotonic() - t0
++    err = capsys.readouterr().err
++    assert decorrido < 1, decorrido
++    assert "passou do limite" not in err and "nova tentativa" not in err
++    assert len(c.up.chamadas) == 1
++
++
++@pytest.mark.parametrize("bruto", [
++    Bruto(b'{"choices":[{"message":{"content":"PARCIAL-SEM-FIM"'),  # JSON cortado
++    Bruto(b'{"resposta": "PARCIAL-SEM-FIM"}'),                       # sem choices
++])
++def test_retry_json_invalido_nunca_vence(cenario, monkeypatch, capsys, bruto):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM", bruto])  # a candidata inválida teria 0 achados e venceria a seleção
++    _, _, corpo = c.pedir()
++    texto = _conteudo(corpo, False)
++    assert len(c.up.chamadas) == 2
++    assert "RUIM" in texto and "Verificação da Máquina" in texto and "PARCIAL-SEM-FIM" not in texto
++    assert "refazer_tentativas=1 achados_inicio=1 achados_fim=1" in capsys.readouterr().err
++
++
++def test_retry_sse_sem_fim_nao_vence(cenario, monkeypatch, capsys):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    c = cenario(["RUIM", Bruto(_sse_truncado("PARCIAL-SEM-FIM"), "text/event-stream")], sse=True)
++    _, _, corpo = c.pedir(stream=True)
++    texto = _conteudo(corpo, True)
++    assert len(c.up.chamadas) == 2
++    assert "RUIM" in texto and "Verificação da Máquina" in texto and "PARCIAL-SEM-FIM" not in texto
++    assert "refazer_tentativas=1 achados_inicio=1 achados_fim=1" in capsys.readouterr().err
++
++
++# --- segredo no achado não vai para a nota -----------------------------------------------------------------
++
++def test_retry_nao_leva_segredo_do_achado(cenario, monkeypatch):
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    monkeypatch.setattr(g.auditoria_turno, "verificar_resposta_atual", _achados_com_segredo)
++    c = cenario(["RUIM", "resposta boa"])
++    _, _, corpo = c.pedir()
++    assert len(c.up.chamadas) == 2
++    enviado = json.dumps(c.up.chamadas, ensure_ascii=False)
++    assert SEGREDO not in enviado and PORTADOR not in enviado  # nem a nota nem o resto do corpo levam o segredo
++    assert "[segredo removido]" in enviado
++    assert "resposta boa" in _conteudo(corpo, False) and "Verificação da Máquina" not in _conteudo(corpo, False)
++
++
++# --- funções puras --------------------------------------------------------------------------------------
++
++def test_escalada_sobe_uma_fila_e_para_no_topo():
++    assert g._proxima_fila_refazer("seth-rapido") == "seth-livre"
++    assert g._proxima_fila_refazer("seth-livre") == "seth-pesado"
++    assert g._proxima_fila_refazer("seth-pesado") == "seth-pesado"  # o mapa do resgate daria seth-livre: rebaixar não
++    assert g._proxima_fila_refazer("seth-livre-longo") == "seth-livre-longo"
++    assert g._proxima_fila_refazer("") == ""
++
++
++def test_decisao_do_canario_e_da_chave(monkeypatch):
++    for var in VARS:
++        monkeypatch.delenv(var, raising=False)
++    assert g._refazer_ligado_neste_pedido() is False  # legado
++    monkeypatch.setenv("SETH_REFAZER", "1")
++    assert g._refazer_ligado_neste_pedido() is True
++    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
++    monkeypatch.setenv("SETH_REFAZER", "0")
++    assert g._refazer_ligado_neste_pedido() is False  # a chave 0 vence o canário
++    monkeypatch.delenv("SETH_REFAZER")
++    for modo in ("capacidade:0", "capacidade", "capacidade:abc", "sombra"):
++        monkeypatch.setenv("SETH_ROTEADOR", modo)
++        assert g._refazer_ligado_neste_pedido() is False, modo
++    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
++    assert g._refazer_ligado_neste_pedido() is True
++
++
++def test_limites_com_padrao_e_valor_invalido(monkeypatch):
++    for var in VARS:
++        monkeypatch.delenv(var, raising=False)
++    assert g._refazer_max() == 2 and g._refazer_seg() == 60.0
++    assert g._refazer_1a_seg() == 180.0 and g._refazer_bytes() == 4 * 1024 * 1024
++    monkeypatch.setenv("SETH_REFAZER_MAX", "5")
++    monkeypatch.setenv("SETH_REFAZER_SEG", "0.5")
++    monkeypatch.setenv("SETH_REFAZER_1A_SEG", "2")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "1000")
++    assert g._refazer_max() == 5 and g._refazer_seg() == 0.5
++    assert g._refazer_1a_seg() == 2.0 and g._refazer_bytes() == 1000
++    monkeypatch.setenv("SETH_REFAZER_MAX", "-3")
++    monkeypatch.setenv("SETH_REFAZER_SEG", "x")
++    monkeypatch.setenv("SETH_REFAZER_1A_SEG", "x")
++    monkeypatch.setenv("SETH_REFAZER_BYTES", "-5")
++    assert g._refazer_max() == 0 and g._refazer_seg() == 60.0
++    assert g._refazer_1a_seg() == 180.0 and g._refazer_bytes() == 0
++
++
++class _LeitorFalso:
++    def __init__(self, itens):
++        self._itens = list(itens)
++
++    def ler(self, timeout):
++        item = self._itens.pop(0)
++        if isinstance(item, BaseException):
++            raise item
++        return item
++
++
++class _LeitorInfinito:
++    """Upstream que nunca acaba: tem dados prontos a cada leitura (o caso que o revisor reproduziu)."""
++
++    def __init__(self, pausa=0.0):
++        self.lidos, self.pausa = 0, pausa
++
++    def ler(self, timeout):
++        self.lidos += 1
++        if self.pausa:
++            time.sleep(self.pausa)
++        return b"x" * 100
++
++
++def test_consumir_le_ate_o_fim_erro_ou_prazo():
++    assert g._consumir(_LeitorFalso([b"a", b"b", b""])) == (b"ab", "fim")
++    assert g._consumir(_LeitorFalso([b"a", RuntimeError("caiu")])) == (b"a", "erro")
++    assert g._consumir(_LeitorFalso([b"a", queue.Empty()]), time.monotonic() + 5) == (b"a", "prazo")
++
++
++def test_consumir_para_no_prazo_mesmo_com_dados_prontos():
++    # prazo já vencido: não lê nada, nem com dados prontos (antes lia até o fim do fluxo)
++    l = _LeitorInfinito()
++    assert g._consumir(l, time.monotonic() - 1) == (b"", "prazo")
++    assert l.lidos == 0
++    # prazo no futuro, fluxo infinito: para no prazo
++    t0 = time.monotonic()
++    dados, motivo = g._consumir(_LeitorInfinito(pausa=0.001), time.monotonic() + 0.1)
++    assert motivo == "prazo" and dados and time.monotonic() - t0 < 5
++
++
++def test_consumir_para_no_limite_de_bytes():
++    dados, motivo = g._consumir(_LeitorInfinito(), None, limite=1000)
++    assert motivo == "limite" and 1000 < len(dados) <= 1100
++
++
++def test_resposta_valida_so_com_estrutura_minima():
++    assert g._resposta_valida(_json_resposta("oi"), False)
++    assert g._resposta_valida(_json_resposta("", tool_calls=[{"id": "x"}]), False)
++    assert not g._resposta_valida(b'{"choices":[{"message":{"content":"PARCIAL', False)  # JSON cortado
++    assert not g._resposta_valida(b'{"x": "PARCIAL"}', False)                          # sem choices
++    assert not g._resposta_valida(_json_resposta(""), False)                           # vazia
++    assert g._resposta_valida(_sse("oi"), True)                                        # [DONE] e finish
++    assert g._resposta_valida(b'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n', True)  # só finish
++    assert not g._resposta_valida(_sse_truncado("PARCIAL"), True)                      # sem fim
++    assert not g._resposta_valida(KEEPALIVE, True)                                     # só keepalive
++
++
++def test_texto_conferido_e_o_que_a_entrega_mostraria():
++    json_texto = json.dumps({"choices": [{"message": {"content": "oi"}}]}).encode()
++    assert g._texto_auditavel(json_texto, False, frozenset()) == "oi"
++    ferramenta = json.dumps({"choices": [{"message": {"content": BLOCO_TOOL}}]}).encode()
++    # ferramenta escrita como texto vira chamada: sobra texto nenhum para conferir
++    assert g._texto_auditavel(ferramenta, False, frozenset({"buscar"})) == ""
++    sse = _sse("olá")
++    assert g._texto_auditavel(sse, True, frozenset()) == "olá"
++
++
++def test_nota_nao_leva_segredo_sintetico():
++    nota = g._nota_refazer([f"achado: chave {SEGREDO} na saída", f"Authorization: Bearer {PORTADOR}"])
++    assert SEGREDO not in nota and PORTADOR not in nota and "Bearer" not in nota
++    assert "[segredo removido]" in nota and "Authorization: [segredo removido]" in nota
++    assert "achado 1: marca RUIM" in g._nota_refazer(["achado 1: marca RUIM"])  # o que não é segredo fica
++
++
++def test_sem_regua_de_segredo_o_detalhe_do_achado_nao_vai_a_nota(monkeypatch):
++    monkeypatch.setitem(sys.modules, "sanitizar", None)  # a importação falha: a régua não está disponível
++    nota = g._nota_refazer([f"achado: chave {SEGREDO}"])
++    assert SEGREDO not in nota and "régua de segredo indisponível" in nota
++
++
++def test_pedido_leva_so_a_resposta_ruim_e_a_nota():
++    corpo = json.dumps({"model": "seth-rapido", "messages": [{"role": "user", "content": "oi"}]}).encode()
++    pedido = json.loads(g._pedido_refazer(corpo, "RUIM", ["achado A"], "seth-livre"))
++    assert pedido["model"] == "seth-livre"
++    assert pedido["messages"][1:] == [{"role": "assistant", "content": "RUIM"},
++                                      {"role": "user", "content": g._nota_refazer(["achado A"])}]
