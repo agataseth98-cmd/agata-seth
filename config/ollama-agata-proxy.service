@@ -1,0 +1,14 @@
+[Unit]
+Description=Agata -- proxy do Ollama: encaminha :11434 para o ollama-agata em :11447; sai após 15 min ociosos
+# Ativado só pelo ollama-agata.socket (sem [Install]). Ver laya-roteador-proxy.service: o mesmo desenho.
+# Requires/After: o backend sobe antes deste proxy aceitar a conexão, porque o ExecStartPost do backend só
+# termina quando a porta interna responde HTTP.
+# Cold start: a 1ª chamada depois de ociosidade espera o backend subir (o socket segura a conexão); o seth_gateway
+# dá a essa rota o prazo de SETH_ROTA_LOCAL_MS (100,5 s) e, se passar, cai na fila de sempre.
+PartOf=agata.target
+Requires=ollama-agata.service
+After=ollama-agata.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=15min 127.0.0.1:11447

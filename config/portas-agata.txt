@@ -62,3 +62,5 @@
 # Portas internas do sob demanda (17/11/2026): o backend e o contêiner. Quem fala com o sistema usa 11435/11436.
 11445|ollaya-interna|127.0.0.1
 11446|laya-roteador-interna|127.0.0.1
+# 18/11/2026: backend do Ollama sob demanda; a porta pública continua 11434 (ollama-agata.socket).
+11447|ollama-agata-interna|127.0.0.1

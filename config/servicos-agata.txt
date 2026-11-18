@@ -33,6 +33,9 @@ seth-gateway.service|usuario|20126|sim|redesign/systemd/seth-gateway.service
 seth-escriba.service|usuario|20140|sim|redesign/systemd/seth-escriba.service
 seth-verificador.service|usuario|20141|sim|redesign/systemd/seth-verificador.service
 piper-tts.service|usuario|8890|sim|redesign/systemd/piper-tts.service
+ollama-agata.socket|usuario|11434|sim|config/ollama-agata.socket (porta pública; sobe com o agata.target)
+ollama-agata-proxy.service|usuario|-|nao|config/ollama-agata-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+ollama-agata.service|usuario|11447|nao|config/ollama-agata.service (sob demanda, sem [Install]; só sobe pelo proxy)
 ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
 ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
 ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)

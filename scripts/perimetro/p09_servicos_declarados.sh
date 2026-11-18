@@ -102,6 +102,11 @@ p9_servicos_declarados() {
 # P9_OLLAMA_PS_URL existe só para o teste isolado apontar um servidor falso.
 _p9_ollama_na_gpu() {
   local url="${P9_OLLAMA_PS_URL:-http://127.0.0.1:11434/api/ps}" saida
+  # (18/11/2026) O Ollama é sob demanda (ollama-agata.socket): consultar :11434 o ACORDARIA a cada perímetro.
+  # Backend parado = repouso normal, silêncio. P9_OLLAMA_PS_URL (teste) pula a guarda.
+  if [ -z "${P9_OLLAMA_PS_URL:-}" ] && ! systemctl --user is-active --quiet ollama-agata.service 2>/dev/null; then
+    return 0
+  fi
   # (24/10/2026) modelo maior que a GPU (o MoE de 19,8 GB numa 4060 de 8 GB) nunca cabe inteiro:
   # dividido é o normal dele. Só avisa se ele usa menos que P9_GPU_FRACAO da VRAM total da placa.
   local gpu_mib="${P9_GPU_TOTAL_MIB:-}"

@@ -43,6 +43,7 @@ Env:
 from __future__ import annotations
 
 import hashlib
+import http.client
 import io
 import json
 import queue
@@ -513,6 +514,21 @@ _ALIAS_PUBLICO = "seth-public"
 _ROTAS_LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
 
 
+# Prazo da rota local (1º byte e cada leitura) = maior tempo de resposta COM SUCESSO medido para o modelo roteado
+# + 30 s de folga (ordem do Humano, 18/11/2026). O modelo roteado é o qwen3-30b-a3b-64k: maior sucesso medido
+# 70,5 s no benchmark 20261118-144845 (competicao-locais, 18/11/2026) -> 100,5 s. Muda com SETH_ROTA_LOCAL_MS.
+_ROTA_LOCAL_MS_PADRAO = 100500
+
+
+def _rota_local_seg() -> float:
+    """Prazo da rota local em segundos (SETH_ROTA_LOCAL_MS em milissegundos, padrão 100500). Passou, cai na fila
+    de sempre: o pior caso fica 100,5 + 180 s, não 180 + 180."""
+    try:
+        return max(1.0, float(os.environ.get("SETH_ROTA_LOCAL_MS", str(_ROTA_LOCAL_MS_PADRAO))) / 1000.0)
+    except ValueError:
+        return _ROTA_LOCAL_MS_PADRAO / 1000.0
+
+
 class DadosExternosSemClassificacao(ValueError):
     pass
 
@@ -609,6 +625,7 @@ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteament
 import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
 import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+import rotas_locais  # noqa: E402  (mesmo diretório; rotas locais por tipo, ficha assinada + painel que só restringe, 18/11/2026)
 
 _PERFIS = {"mtime": None, "dados": {}}
 
@@ -1749,14 +1766,17 @@ class _Handler(BaseHTTPRequestHandler):
     _cab_estados = None
     _served_by = None  # (17/11, item 1) campo "model" do upstream nesta resposta; "?" no log se não houve
     _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
+    _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
 
     def log_message(self, fmt, *args):
         pass
 
     def do_GET(self):
+        self._fallback_corpo = None  # keep-alive: um POST anterior nunca deixa corpo guardado para este pedido
         self._passar(b"", "GET")
 
     def do_HEAD(self):
+        self._fallback_corpo = None
         self._passar(b"", "HEAD")
 
     def do_POST(self):
@@ -1770,6 +1790,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._texto_maquina = ""
         self._cab_injetado = None
         self._nomes_tools = frozenset()
+        self._fallback_corpo = None
         self._data_classification = None
         self._public_only_lane = False
         self._reg = None
@@ -1785,6 +1806,7 @@ class _Handler(BaseHTTPRequestHandler):
                 return self._erro(400, "corpo marcado como JSON mas não parseia")
             if isinstance(payload, dict):
                 try:
+                    agent_padrao = payload.get("model") == _ROTA_BASE  # só o alvo padrão do Agent pode ir a rota local
                     alias_publico = payload.get("model") == _ALIAS_PUBLICO
                     classificacao = self.headers.get("X-Agata-Data-Classification")
                     if classificacao is None:
@@ -1861,6 +1883,23 @@ class _Handler(BaseHTTPRequestHandler):
                     payload["model"] = longa
                     self._rota = longa
                 corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+                # Decisão do coordenador (18/11): a queda segura de pedido pessoal volta para a fila de sempre, que é a
+                # regra de hoje (seth-livre sanitiza segredo, dado pessoal e nomes de projeto antes de sair). Segredo
+                # nem chega a rota local (rotas_locais.tem_segredo).
+                # (18/11/2026) rota local por tipo: a ficha assinada manda, o painel só restringe, Ollama fora = regra
+                # de sempre. Guarda o corpo com a fila original para a queda segura em _passar.
+                if agent_padrao and not self._public_only_lane and not _e_chamada_utilitaria(payload):
+                    try:
+                        local = rotas_locais.escolher(payload, rotas_locais.tipo_do_pedido(payload),
+                                                      self._data_classification == "public")
+                    except Exception:  # noqa: BLE001 -- escolha quebrada nunca derruba o pedido: regra de sempre
+                        local = None
+                    if local:
+                        self._fallback_corpo = corpo
+                        corpo = json.dumps(dict(payload, model=rotas_locais.modelo_no_gateway(local)),
+                                           ensure_ascii=False).encode("utf-8")
+                        print(f"rota local por tipo: {self._rota} -> {rotas_locais.modelo_no_gateway(local)}",
+                              file=sys.stderr, flush=True)
         self._passar(corpo, "POST")
 
     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
@@ -2014,6 +2053,8 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
         t0 = time.monotonic()
+        if metodo != "POST":
+            self._fallback_corpo = None
         self._served_by = None  # (17/11, item 1) por tentativa: a nova tentativa põe o modelo da sua resposta
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
@@ -2023,7 +2064,7 @@ class _Handler(BaseHTTPRequestHandler):
             headers["X-Agata-Data-Classification"] = self._data_classification
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
-            up = urllib.request.urlopen(req, timeout=180)
+            up = urllib.request.urlopen(req, timeout=_rota_local_seg() if self._fallback_corpo is not None else 180)
         except urllib.error.HTTPError as e:
             up = e
             # (17/11, item 4) o 429 nasce no OmniRoute (cota e circuit breaker de cada provedor), não numa escolha do
@@ -2033,8 +2074,17 @@ class _Handler(BaseHTTPRequestHandler):
             self._log(f"upstream HTTP {e.code}{marca}", t0)
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             self._log(f"upstream inacessível ({e})", t0)
+            if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local sem conexão/timeout: fila de sempre
+                fb, self._fallback_corpo = self._fallback_corpo, None
+                return self._passar(fb, metodo, tentativa)
             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
+        if up.status >= 400 and self._fallback_corpo is not None and metodo == "POST":
+            # (18/11/2026) queda segura: a rota local falhou (modelo ausente, Ollama parou no meio): fila de sempre
+            fb, self._fallback_corpo = self._fallback_corpo, None
+            self._log(f"rota local falhou (HTTP {up.status}) -> fila de sempre", t0)
+            _derrubar(up)
+            return self._passar(fb, metodo, tentativa)
         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
         modelo_real = None
         buf_pre = b""
@@ -2073,6 +2123,11 @@ class _Handler(BaseHTTPRequestHandler):
                 modelo_real = self._modelo_de_bytes(buf_pre)
                 vazio = up.status == 200 and not self._tem_conteudo(buf_pre, False)
             self._served_by = modelo_real  # (17/11, item 1)
+            if vazio and self._fallback_corpo is not None and metodo == "POST":
+                fb, self._fallback_corpo = self._fallback_corpo, None
+                self._log(f"rota local sem conteúdo (modelo {modelo_real or '?'}) -> fila de sempre", t0)
+                _derrubar(up)
+                return self._passar(fb, metodo, tentativa)
             if vazio and tentativa == 0 and self._rota in self._SUBIR_FILA:
                 try:
                     pl = json.loads(corpo)
@@ -2091,9 +2146,12 @@ class _Handler(BaseHTTPRequestHandler):
             self.close_connection = True
             up.close()
             return
-        except (TimeoutError, OSError) as e:
+        except (TimeoutError, OSError, http.client.HTTPException) as e:  # HTTPException: IncompleteRead (corpo cortado)
             self._log(f"upstream parou de responder ({e})", t0)
             up.close()
+            if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local pendurada: fila de sempre
+                fb, self._fallback_corpo = self._fallback_corpo, None
+                return self._passar(fb, metodo, tentativa)
             return self._erro(504, f"upstream parou de responder: {e}")
         # (18/11/2026, verificar e refazer) antes de qualquer byte ao cliente: lê a resposta inteira, confere e, com
         # achado, refaz (SETH_REFAZER). Desligado, segue o caminho de sempre, abaixo.
@@ -2186,6 +2244,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.close_connection = True
         finally:
             up.close()
+        self._fallback_corpo = None  # resposta entregue: nada guardado para o próximo pedido da conexão
         reg = getattr(self, "_reg", None)
         if reg is not None and up.status == 200:
             resposta = reg.get("resposta", "") if sse else registro_pedidos.resposta_json(buf_pre)
