@@ -2,7 +2,8 @@
   "schema_version": 1,
   "decisoes": {
     "D2": "dado pessoal só em rota local nas rotas novas",
-    "D3": "cota gratuita compartilhada sem teto, com aviso"
+    "D3": "cota gratuita compartilhada sem teto, com aviso",
+    "D4": "rota local por tipo: so o modelo que ganhou na auditoria de conteudo (qwen3-30b: json, codigo, contexto); os demais ficam catalogados com tipos vazios; o painel so restringe; Ollama fora = regra de sempre"
   },
   "rotas": [
     {
@@ -20,7 +21,96 @@
       "compartilhada_com_seth": false,
       "cota_medida": false,
       "conferida_em": "2026-11-06",
-      "fonte": "PROJETO.md (fundo local da cadeia da Seth)"
+      "fonte": "PROJETO.md (fundo local da cadeia da Seth)",
+      "tipos": [],
+      "papel": "reserva (fim das filas; não é escolhida por tipo)"
+    },
+    {
+      "id": "local-lfm3",
+      "provedor": "ollama",
+      "modelo": "lfm3:1.7b",
+      "categoria": "local",
+      "classes_permitidas": [
+        "publico",
+        "sintetico",
+        "pessoal"
+      ],
+      "tipos": [],
+      "prioridade": 10,
+      "max_tokens_entrada": 6000,
+      "treina_com_prompts": "nao_aplica",
+      "cota": "sem cota (hardware local)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-18",
+      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); vazio em contexto longo e pediu segredo",
+      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
+    },
+    {
+      "id": "local-qwen3-30b",
+      "provedor": "ollama",
+      "modelo": "qwen3-30b-a3b-64k:latest",
+      "categoria": "local",
+      "classes_permitidas": [
+        "publico",
+        "sintetico",
+        "pessoal"
+      ],
+      "tipos": [
+        "json",
+        "codigo",
+        "contexto"
+      ],
+      "prioridade": 20,
+      "max_tokens_entrada": 48000,
+      "treina_com_prompts": "nao_aplica",
+      "cota": "sem cota (hardware local)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-18",
+      "fonte": "porta_entrada + auditoria de conteudo 18/11/2026: json 5/0/1, codigo 4/1/1, contexto 3/1/0 (melhor nos tres)"
+    },
+    {
+      "id": "local-rlm",
+      "provedor": "ollama",
+      "modelo": "rlm-qwen3-8b-teste:latest",
+      "categoria": "local",
+      "classes_permitidas": [
+        "publico",
+        "sintetico",
+        "pessoal"
+      ],
+      "tipos": [],
+      "prioridade": 10,
+      "max_tokens_entrada": 12000,
+      "treina_com_prompts": "nao_aplica",
+      "cota": "sem cota (hardware local)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-18",
+      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); 1/5 em ferramenta e vaza </think>",
+      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
+    },
+    {
+      "id": "local-lumi",
+      "provedor": "ollama",
+      "modelo": "lumi-4b:latest",
+      "categoria": "local",
+      "classes_permitidas": [
+        "publico",
+        "sintetico",
+        "pessoal"
+      ],
+      "tipos": [],
+      "prioridade": 10,
+      "max_tokens_entrada": 24000,
+      "treina_com_prompts": "nao_aplica",
+      "cota": "sem cota (hardware local)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-18",
+      "fonte": "porta_entrada 18/11/2026 (competicao-locais-18-11); repete texto em contexto",
+      "papel": "catalogado, nao roteado (auditoria de conteudo 18/11/2026)"
     },
     {
       "id": "gemini-flash",

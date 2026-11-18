@@ -1,0 +1,42 @@
+# Agata -- Ollama como unit de USUARIO, SOB DEMANDA (18/11/2026, decisão do Humano: "o Ollama não fica ligado
+# junto com o sistema, é sob demanda, como o Laya e o Ollaya"). Só loopback. Porta pública :11434
+# (ollama-agata.socket); esta unit escuta só em :11447 (interna, OLLAMA_HOST). Sobe com a 1ª conexão ao socket
+# (pelo proxy) e cai quando o proxy sai, após 15 min sem conexão (StopWhenUnneeded). Sem [Install]: quem fica
+# no agata.target é o socket. Substitui o ollama.service do sistema (User=ollama, exige sudo), que deve ficar
+# desabilitado: o socket precisa da porta 11434. Os modelos ficam em %h/.local/share/ollama/models.
+# Instala com links, como as outras: ln -sf ~/agata/config/ollama-agata.{socket,service} (e -proxy.service)
+# ~/.config/systemd/user/ (README de redesign/systemd). Variáveis de hardware = as do override atual da
+# Máquina (RTX 4060 8 GB); em outro clone, ajustar.
+[Unit]
+Description=Ollama (Agata, usuário, sob demanda, porta interna :11447)
+Documentation=file:///home/orusoua/agata/redesign/router/rotas_locais.py
+PartOf=agata.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=simple
+# 90 s > 60 s do prazo do ExecStartPost: o systemd não corta o probe antes do próprio prazo.
+TimeoutStartSec=90
+ExecStart=/usr/local/bin/ollama serve
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/cuda/bin
+Environment=OLLAMA_HOST=127.0.0.1:11447
+Environment=OLLAMA_MODELS=%h/.local/share/ollama/models
+Environment=OLLAMA_NUM_GPU=999
+Environment=OLLAMA_KV_CACHE_TYPE=q4_0
+Environment=OLLAMA_FLASH_ATTENTION=1
+Environment=CUDA_VISIBLE_DEVICES=0
+ExecStartPre=+/usr/bin/mkdir -p %h/.local/share/ollama/models
+# Só aceita o proxy depois de a porta interna responder HTTP (o Ollama responde 200 em /): sem isto o
+# systemd-socket-proxyd conecta antes de o servidor escutar. Prazo global de 60 s; passou disso, falha.
+ExecStartPost=/usr/bin/timeout 60 /usr/bin/bash -c 'until /usr/bin/curl -s -m 2 --noproxy 127.0.0.1 -o /dev/null http://127.0.0.1:11447/; do sleep 0.5; done'
+Restart=on-failure
+RestartSec=15
+Nice=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadWritePaths=-%h/.local/share/ollama
+ReadWritePaths=-%h/.ollama

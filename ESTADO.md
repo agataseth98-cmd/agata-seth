@@ -20,6 +20,9 @@ Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade c
 - `seth-escriba` (porta :20140) — unidade `seth-escriba.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-escriba.service
 - `seth-verificador` (porta :20141) — unidade `seth-verificador.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-verificador.service
 - `piper-tts` (porta :8890) — unidade `piper-tts.service`, escopo usuario, P-9 sim — origem: redesign/systemd/piper-tts.service
+- `ollama-agata.socket` (porta :11434) — unidade `ollama-agata.socket`, escopo usuario, P-9 sim — origem: config/ollama-agata.socket (porta pública; sobe com o agata.target)
+- `ollama-agata-proxy.service` — escopo usuario, P-9 nao — origem: config/ollama-agata-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+- `ollama-agata` (porta :11447) — unidade `ollama-agata.service`, escopo usuario, P-9 nao — origem: config/ollama-agata.service (sob demanda, sem [Install]; só sobe pelo proxy)
 - `ollaya.socket` (porta :11435) — unidade `ollaya.socket`, escopo usuario, P-9 sim — origem: config/ollaya.socket (porta pública; sobe com o agata.target)
 - `ollaya-proxy.service` — escopo usuario, P-9 nao — origem: config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
 - `ollaya` (porta :11445) — unidade `ollaya.service`, escopo usuario, P-9 nao — origem: config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
@@ -40,6 +43,7 @@ Conferência: toda unidade do repo com WantedBy/PartOf de agata.target está no 
 - `11436` laya-roteador (bind 127.0.0.1)
 - `11445` ollaya-interna (bind 127.0.0.1)
 - `11446` laya-roteador-interna (bind 127.0.0.1)
+- `11447` ollama-agata-interna (bind 127.0.0.1)
 - `20126` seth-gateway (bind 127.0.0.1,172.29.7.1)
 - `20127` omniroute-sanitizer (bind 127.0.0.1)
 - `20128` omniroute (bind 127.0.0.1)
@@ -73,11 +77,10 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 4.
+Abertas (sem APROVADO-): 3.
 - `agentes-skills-18-11`
 - `rotas-novas-18-11`
 - `rotas-novas-18-11b`
-- `rotas-novas-18-11c`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)

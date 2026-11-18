@@ -34,6 +34,7 @@ TIMEOUT_START_S = 90  # TimeoutStartSec do backend: tem de passar do prazo do pr
 SERVICOS = (
     ("laya-roteador.socket", "laya-roteador-proxy.service", "laya-roteador.service", 11436, 11446),
     ("ollaya.socket", "ollaya-proxy.service", "ollaya.service", 11435, 11445),
+    ("ollama-agata.socket", "ollama-agata-proxy.service", "ollama-agata.service", 11434, 11447),
 )
 
 
@@ -142,6 +143,17 @@ class UnidadesTest(unittest.TestCase):
         self.assertIn("-p 127.0.0.1:11445:11435", exec_start)
         self.assertNotIn("127.0.0.1:11435:11435", exec_start)
 
+    def test_ollama_escuta_so_na_porta_interna_com_modelos_do_usuario(self):
+        o = ler_unidade(CONFIG / "ollama-agata.service")
+        env = o["Service"]["Environment"]
+        self.assertIn("OLLAMA_HOST=127.0.0.1:11447", env)
+        self.assertNotIn("OLLAMA_HOST=127.0.0.1:11434", env)
+        self.assertNotIn("User", o["Service"], "unit de usuário, sem User=")
+        self.assertIn("OLLAMA_MODELS=%h/.local/share/ollama/models", env)
+        self.assertEqual(o["Service"]["ExecStart"], ["/usr/local/bin/ollama serve"])
+        self.assertIn("ReadWritePaths", o["Service"])
+        self.assertFalse(any("0.0.0.0" in v for vs in o["Service"].values() for v in vs))
+
     def test_ollaya_derruba_o_conteiner_mesmo_se_o_probe_falhar(self):
         ollaya = ler_unidade(CONFIG / "ollaya.service")
         self.assertEqual(ollaya["Service"]["ExecStop"], ["/usr/bin/docker stop ollaya"])
@@ -203,6 +215,30 @@ class ProbeTest(unittest.TestCase):
             srv.bind(("127.0.0.1", 0))
             srv.listen(4)
             self.assertEqual(rodar_probe(argv, 11446, srv.getsockname()[1]), 0)
+
+    def test_probe_do_ollama_passa_com_qualquer_resposta_http_e_falha_sem_servidor(self):
+        if not os.path.exists(CURL_BIN):
+            self.skipTest("sem /usr/bin/curl")
+        argv = comando_do_probe(CONFIG / "ollama-agata.service")
+        self.assertIn("-m 2", argv[4])
+
+        class Ok(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"Ollama is running")
+
+            def log_message(self, *args):
+                pass
+
+        http = HTTPServer(("127.0.0.1", 0), Ok)
+        threading.Thread(target=http.serve_forever, daemon=True).start()
+        try:
+            self.assertEqual(rodar_probe(argv, 11447, http.server_address[1]), 0)
+        finally:
+            http.shutdown()
+            http.server_close()
+        self.assertNotEqual(rodar_probe(argv, 11447, porta_livre()), 0)
 
     def test_probe_do_ollaya_exige_resposta_http_e_nao_so_tcp(self):
         if not os.path.exists(CURL_BIN):

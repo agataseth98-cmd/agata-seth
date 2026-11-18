@@ -1,0 +1,18 @@
+[Unit]
+Description=Agata -- porta pública do Ollama (:11434, só loopback); acorda o ollama-agata sob demanda
+# Sob demanda (decisão do Humano, 18/11/2026: o Ollama sobe quando é preciso e cai após um tempo seguro, como
+# o Laya e o Ollaya; padrão de laya-roteador.socket). Este socket fica de pé com o agata.target e recebe as
+# chamadas em 127.0.0.1:11434 (quem fala com o Ollama continua usando essa porta). A 1ª conexão sobe
+# ollama-agata-proxy.service, que sobe o ollama-agata.service (porta interna :11447). Sem conexão por 15 min,
+# o proxy sai e o backend cai junto (StopWhenUnneeded), liberando a VRAM. Quem fica no agata.target é este
+# arquivo, não o backend.
+# ANTES de instalar: o ollama.service do SISTEMA (User=ollama) escuta em :11434 e precisa estar parado e
+# desabilitado, senão o socket não consegue a porta (procedimento em redesign/systemd/README.md).
+PartOf=agata.target
+
+[Socket]
+ListenStream=127.0.0.1:11434
+Service=ollama-agata-proxy.service
+
+[Install]
+WantedBy=agata.target

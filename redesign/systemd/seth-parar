@@ -23,7 +23,10 @@ systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador
 systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
 # descarrega os modelos ativos do Ollama de producao (:11434) -- sem sudo, nao
 # mexe no ollama.service
-if command -v ollama >/dev/null 2>&1; then
+# (18/11/2026) O Ollama é sob demanda (ollama-agata.socket em :11434): `ollama ps` ACORDARIA o backend só para
+# descarregá-lo. Só pergunta se o backend já está ativo; parado, não há o que descarregar. O socket e o backend
+# descem com o agata.target (PartOf), mais abaixo.
+if command -v ollama >/dev/null 2>&1 && systemctl --user is-active --quiet ollama-agata.service; then
   ollama ps 2>/dev/null | awk 'NR>1 && $1 != "" {print $1}' | while read -r _m; do
     [ -n "$_m" ] && ollama stop "$_m" 2>/dev/null || true
   done
@@ -40,5 +43,5 @@ _notifica_unidades() {
     notify-send -a Seth "$_u" "${_st:-desconhecido}" 2>/dev/null || true
   done
 }
-_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service agata.target
+_notifica_unidades seth-gateway.service seth-escriba.service seth-verificador.service painel-operacional.service piper-tts.service discord-mcp.service navegador-mcp.service ouvido-agata.service ollama-agata.service omniroute.service omniroute-sanitizer.service openvino-embeddings.service openvino-whisper.service laya-roteador.service ollaya.service obsidian-ro-proxy.service agata.target
 notify-send -a Seth "Seth" "parada por completo" 2>/dev/null || true
