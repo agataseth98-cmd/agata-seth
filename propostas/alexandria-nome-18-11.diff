@@ -1,0 +1,15 @@
+diff --git a/redesign/alexandria/spec/spec.md b/redesign/alexandria/spec/spec.md
+index 73e08edf..9a508bf2 100644
+--- a/redesign/alexandria/spec/spec.md
++++ b/redesign/alexandria/spec/spec.md
+@@ -2,6 +2,10 @@
+ 
+ Subsistema de conhecimento da nova versão. Spec-mãe: `redesign/nova_versao/spec/spec.md`. Origem: Experimento GPT, `proposta-tecnica-alexandria-editorial.md` §4–§9 e (068)–(075). Não tem autoridade normativa: organiza e recupera, não decide.
+ 
++## Nome e origem (decisão do Humano, 18/11/2026)
++
++Alexandria tem o nome da Biblioteca de Alexandria. O primeiro catálogo conhecido de livros, as *Pínakes*, foi feito ali por um poeta, Calímaco, que ordenou o acervo por autor e gênero: a arte de catalogar nasceu nas mãos da poesia. Alexandria também deu nome à poesia alexandrina, erudita e cuidadosa com cada palavra. Este subsistema herda as duas coisas: organiza e encontra com rigor, e trata cada trecho com o cuidado de quem escreve. Registro do Humano, por voz, no canal de voz de 18/11/2026 19:57: "foi exatamente isso que eu pensei".
++
+ ## Jornadas críticas
+ 
+ 1. Um modelo ou o Humano consulta o acervo e recebe pacote de evidência com objeto, trecho, linha, commit e sha.
