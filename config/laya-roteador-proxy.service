@@ -1,0 +1,14 @@
+[Unit]
+Description=Ágata — proxy do Laya: encaminha :11436 para o laya-roteador em :11446; sai após 15 min ociosos
+# Ativado só pelo laya-roteador.socket (sem [Install]). Requires/After: o backend sobe antes deste proxy
+# aceitar a conexão, porque o ExecStartPost do backend só termina quando a porta interna responde.
+# Cold start: a 1ª chamada depois de ociosidade espera o backend subir (o socket segura a conexão). Como o
+# gateway desiste em 1,5 s, essa chamada cai na heurística da regra por tamanho (fail-soft), como fora do ar.
+# Sem conexão por --exit-idle-time, o proxy sai; com ele, o laya-roteador.service também cai (StopWhenUnneeded).
+PartOf=agata.target
+Requires=laya-roteador.service
+After=laya-roteador.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=15min 127.0.0.1:11446

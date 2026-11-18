@@ -10,11 +10,15 @@
 p9_carregar_fonte() {
   local arq="${P9_FONTE:-${_PERIMETRO_DIR:-$(dirname "${BASH_SOURCE[0]}")/..}/../config/servicos-agata.txt}"
   local u esc porta p9 origem
-  P9_UNIDADES_SISTEMA=(); P9_UNIDADES_USUARIO=(); P9_CONTAINERS_DOCKER=()
+  P9_UNIDADES_SISTEMA=(); P9_UNIDADES_USUARIO=(); P9_UNIDADES_USUARIO_NAO=(); P9_CONTAINERS_DOCKER=()
   [ -f "$arq" ] || return 0
   while IFS='|' read -r u esc porta p9 origem; do
     case "$u" in ''|\#*) continue ;; esac
-    [ "$p9" = "sim" ] || continue
+    # (17/11/2026) p9=nao: listado, sem aviso de parado. Só 'failed' avisa (ver o fim de p9_servicos_declarados).
+    if [ "$p9" != "sim" ]; then
+      if [ "$esc" = "usuario" ]; then P9_UNIDADES_USUARIO_NAO+=("$u"); fi
+      continue
+    fi
     case "$esc" in
       usuario) P9_UNIDADES_USUARIO+=("$u") ;;
       sistema) P9_UNIDADES_SISTEMA+=("$u") ;;
@@ -53,8 +57,10 @@ p9_servicos_declarados() {
     # (24/10/2026) serviço parado do jeito normal fica 'inactive', não 'failed': no teste de queda
     # e volta o gateway, o OmniRoute e o Laya caíram e o P-9 não disse nada. Agora 'inactive' também
     # avisa, menos o oneshot (termina sozinho e fica parado de propósito, ex.: agata-manutencao.service).
+    # (17/11/2026, sob demanda) O .socket do Laya e do Ollaya é a porta pública: parado com o sistema ligado
+    # avisa como serviço. O backend e o proxy ficam p9=nao, porque parados é o normal deles.
     if [ "$estado" = "failed" ] || { [[ "$u" == *.timer ]] && [ "$estado" != "active" ]; } \
-        || { [[ "$u" == *.service ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
+        || { [[ "$u" == *.service || "$u" == *.socket ]] && [ "$estado" = "inactive" ] && [ "$desligado" = 0 ] \
              && [ "$(systemctl --user show "$u" -p Type --value 2>/dev/null)" != "oneshot" ]; }; then
       echo "AVISO (P-9): unidade de usuário '$u', declarada em config/servicos-agata.txt, está '$estado' -- o que fazer: 'systemctl --user status $u' antes de confiar que ela roda."
       avisos=1
@@ -62,6 +68,13 @@ p9_servicos_declarados() {
     habilitada="$(systemctl --user is-enabled "$u" 2>/dev/null)"
     if [ "$habilitada" = "disabled" ] || [ "$habilitada" = "masked" ]; then
       echo "AVISO (P-9): unidade de usuário '$u' está '$habilitada' -- o que fazer: não volta sozinha na próxima sessão, decida se isso é intencional."
+      avisos=1
+    fi
+  done
+  # (17/11/2026, sob demanda) Unidade de usuário com p9=nao: parada em repouso é o normal dela, mas 'failed' avisa.
+  for u in "${P9_UNIDADES_USUARIO_NAO[@]}"; do
+    if [ "$(systemctl --user is-active "$u" 2>/dev/null)" = "failed" ]; then
+      echo "AVISO (P-9): unidade de usuário '$u', listada em config/servicos-agata.txt com p9=nao, está 'failed' -- o que fazer: 'systemctl --user status $u'."
       avisos=1
     fi
   done

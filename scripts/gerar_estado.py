@@ -166,7 +166,7 @@ def conferencia(raiz: Path) -> list[str]:
 def renderizar(raiz: Path = RAIZ) -> str:
     partes = [CABECALHO]
     partes.append("## Serviços (boot)\n")
-    partes.append("Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada, sem aviso.\n")
+    partes.append("Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada; avisa só se 'failed'.\n")
     for s in servicos(raiz):
         u, esc, porta, p9, origem = s["unidade"], s["escopo"], s["porta"], s["p9"], s["origem"]
         if porta != "-":

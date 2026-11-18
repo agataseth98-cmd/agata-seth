@@ -1,0 +1,15 @@
+[Unit]
+Description=Ágata — porta pública do decisor local Ollaya (:11435, só loopback); acorda o ollaya sob demanda
+# Sob demanda (decisão do Humano, 17/11/2026): ver laya-roteador.socket. O contêiner publica só em
+# 127.0.0.1:11445 (interna); quem fala com o decisor continua usando :11435, este socket.
+# ANTES de instalar: o ollaya.service antigo tinha [Install] WantedBy=agata.target, e o link
+# em agata.target.wants mantém o backend de pé no target. Rodar `systemctl --user disable ollaya.service`
+# com o arquivo antigo ainda instalado, depois parar o backend (ver o procedimento de instalação).
+PartOf=agata.target
+
+[Socket]
+ListenStream=127.0.0.1:11435
+Service=ollaya-proxy.service
+
+[Install]
+WantedBy=agata.target

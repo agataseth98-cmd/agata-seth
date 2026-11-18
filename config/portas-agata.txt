@@ -59,3 +59,6 @@
 20132|omniroute-live-ws|127.0.0.1
 11435|ollaya|127.0.0.1
 11436|laya-roteador|127.0.0.1
+# Portas internas do sob demanda (17/11/2026): o backend e o contêiner. Quem fala com o sistema usa 11435/11436.
+11445|ollaya-interna|127.0.0.1
+11446|laya-roteador-interna|127.0.0.1

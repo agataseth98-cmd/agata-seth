@@ -4,11 +4,13 @@
 
 ## Serviços (boot)
 
-Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada, sem aviso.
+Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade cair; P-9 não: listada; avisa só se 'failed'.
 
 - `agata-manutencao.timer` — escopo usuario, P-9 sim — origem: config/systemd/agata-manutencao.timer
 - `agata-manutencao.service` — escopo usuario, P-9 sim — origem: config/systemd/agata-manutencao.service
-- `laya-roteador` (porta :11436) — unidade `laya-roteador.service`, escopo usuario, P-9 sim — origem: fora do repo (unidade do usuário; citada em redesign/systemd/seth)
+- `laya-roteador.socket` (porta :11436) — unidade `laya-roteador.socket`, escopo usuario, P-9 sim — origem: config/laya-roteador.socket (porta pública; sobe com o agata.target)
+- `laya-roteador-proxy.service` — escopo usuario, P-9 nao — origem: config/laya-roteador-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+- `laya-roteador` (porta :11446) — unidade `laya-roteador.service`, escopo usuario, P-9 nao — origem: config/laya-roteador.service (sob demanda, sem [Install]; só sobe pelo proxy)
 - `omniroute` (porta :20128) — unidade `omniroute.service`, escopo usuario, P-9 sim — origem: fora do repo (unidade do OmniRoute; drop-ins em redesign/systemd/dropin-omniroute*.conf)
 - `omniroute-sanitizer` (porta :20127) — unidade `omniroute-sanitizer.service`, escopo usuario, P-9 sim — origem: fora do repo (unidade do usuário; citada em redesign/systemd/README.md)
 - `openvino-whisper` (porta :20130) — unidade `openvino-whisper.service`, escopo usuario, P-9 sim — origem: redesign/systemd/openvino-whisper.service
@@ -18,7 +20,9 @@ Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade c
 - `seth-escriba` (porta :20140) — unidade `seth-escriba.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-escriba.service
 - `seth-verificador` (porta :20141) — unidade `seth-verificador.service`, escopo usuario, P-9 sim — origem: redesign/systemd/seth-verificador.service
 - `piper-tts` (porta :8890) — unidade `piper-tts.service`, escopo usuario, P-9 sim — origem: redesign/systemd/piper-tts.service
-- `ollaya` (porta :11435) — unidade `ollaya.service`, escopo usuario, P-9 sim — origem: config/ollaya.service
+- `ollaya.socket` (porta :11435) — unidade `ollaya.socket`, escopo usuario, P-9 sim — origem: config/ollaya.socket (porta pública; sobe com o agata.target)
+- `ollaya-proxy.service` — escopo usuario, P-9 nao — origem: config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+- `ollaya` (porta :11445) — unidade `ollaya.service`, escopo usuario, P-9 nao — origem: config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
 - `agata-vault-inbox.timer` — escopo usuario, P-9 sim — origem: fora do repo (unidade do usuário)
 - `agata-drain.service` — escopo usuario, P-9 nao — origem: redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
 - `obsidian-app.service` — escopo usuario, P-9 nao — origem: redesign/systemd/obsidian-app.service (app Flatpak; fora do P-9 antes deste manifesto)
@@ -34,6 +38,8 @@ Conferência: toda unidade do repo com WantedBy/PartOf de agata.target está no 
 - `11434` ollama (bind 127.0.0.1)
 - `11435` ollaya (bind 127.0.0.1)
 - `11436` laya-roteador (bind 127.0.0.1)
+- `11445` ollaya-interna (bind 127.0.0.1)
+- `11446` laya-roteador-interna (bind 127.0.0.1)
 - `20126` seth-gateway (bind 127.0.0.1,172.29.7.1)
 - `20127` omniroute-sanitizer (bind 127.0.0.1)
 - `20128` omniroute (bind 127.0.0.1)
@@ -67,10 +73,9 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 3.
+Abertas (sem APROVADO-): 2.
 - `modelos-pagos-17-11`
 - `seth-base-17-11`
-- `sob-demanda-17-11`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)

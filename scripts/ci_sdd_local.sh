@@ -88,6 +88,7 @@ fi
 passo "workflows: YAML válido e sem chave repetida (selftest)" "$PY_YAML" -I scripts/verificar_workflows.py --selftest
 passo "workflows: .github/workflows do repositório" "$PY_YAML" -I scripts/verificar_workflows.py
 passo "sincronia: testes (fonte única, porquês, início de sessão, maxTurns)" python3 scripts/testar_sincronia.py
+passo "sob demanda: socket, proxy e backend (Laya, Ollaya)" python3 scripts/testar_sob_demanda.py
 passo "sincronia: contexto de início de sessão (selftest)" python3 -I scripts/sessao_contexto.py --selftest
 passo "sincronia: porquês (selftest)" python3 -I scripts/porques.py --selftest
 passo "sincronia: verificador de porquês (aviso na 1ª versão, sai 0)" python3 scripts/porques.py --verificar
