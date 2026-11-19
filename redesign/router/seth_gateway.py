@@ -518,6 +518,16 @@ _ROTAS_LOCAIS = ("ollama-local/", "llamacpp-", "llama-cpp/", "local/")
 # + 30 s de folga (ordem do Humano, 18/11/2026). O modelo roteado é o qwen3-30b-a3b-64k: maior sucesso medido
 # 70,5 s no benchmark 20261118-144845 (competicao-locais, 18/11/2026) -> 100,5 s. Muda com SETH_ROTA_LOCAL_MS.
 _ROTA_LOCAL_MS_PADRAO = 100500
+# Prazo da rota de nuvem por tipo (19/11/2026): p50 medido 1,6 a 6,5 s na prova NVIDIA; o pior caso não foi medido,
+# então 30 s (SETH_ROTA_NUVEM_MS). Passou, cai na fila de sempre.
+_ROTA_NUVEM_MS_PADRAO = 30000
+
+
+def _rota_nuvem_seg() -> float:
+    try:
+        return max(1.0, float(os.environ.get("SETH_ROTA_NUVEM_MS", str(_ROTA_NUVEM_MS_PADRAO))) / 1000.0)
+    except ValueError:
+        return _ROTA_NUVEM_MS_PADRAO / 1000.0
 
 
 def _rota_local_seg() -> float:
@@ -1779,6 +1789,7 @@ class _Handler(BaseHTTPRequestHandler):
     _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
     _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
     _nao_registrar = False  # (19/11) por pedido: X-Agata-Nao-Registrar: 1 vindo de loopback; o GET lê só este padrão
+    _prazo_nuvem = False  # (19/11) o pedido foi para uma rota de nuvem por tipo: prazo próprio, não o da rota local
 
     def log_message(self, fmt, *args):
         pass
@@ -1786,11 +1797,13 @@ class _Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._fallback_corpo = None  # keep-alive: um POST anterior nunca deixa corpo guardado para este pedido
         self._nao_registrar = False  # idem: o GET nunca herda o "não registrar" do POST anterior
+        self._prazo_nuvem = False  # idem: nem o prazo de nuvem
         self._passar(b"", "GET")
 
     def do_HEAD(self):
         self._fallback_corpo = None
         self._nao_registrar = False
+        self._prazo_nuvem = False
         self._passar(b"", "HEAD")
 
     def do_POST(self):
@@ -1805,6 +1818,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._cab_injetado = None
         self._nomes_tools = frozenset()
         self._fallback_corpo = None
+        self._prazo_nuvem = False
         self._data_classification = None
         self._public_only_lane = False
         self._reg = None
@@ -1914,6 +1928,20 @@ class _Handler(BaseHTTPRequestHandler):
                         corpo = json.dumps(dict(payload, model=rotas_locais.modelo_no_gateway(local)),
                                            ensure_ascii=False).encode("utf-8")
                         print(f"rota local por tipo: {self._rota} -> {rotas_locais.modelo_no_gateway(local)}",
+                              file=sys.stderr, flush=True)
+                # (19/11/2026) rota de nuvem por tipo, SÓ na faixa pública (texto, sem ferramentas, sem segredo, pelo mesmo
+                # sanitizador). A ficha assinada manda, o painel só restringe; falha de qualquer tipo = fila de sempre.
+                if (self._public_only_lane and (agent_padrao or alias_publico) and rotas_locais.nuvem_ligada()
+                        and not _e_chamada_utilitaria(payload) and self._fallback_corpo is None):
+                    try:  # o tipo é do payload já público (sem ferramentas): "ferramenta" não existe aqui
+                        nuvem = rotas_locais.escolher_nuvem(payload, rotas_locais.tipo_do_pedido(payload))
+                    except Exception:  # noqa: BLE001 -- escolha quebrada nunca derruba o pedido
+                        nuvem = None
+                    if nuvem:
+                        self._fallback_corpo, self._prazo_nuvem = corpo, True
+                        corpo = json.dumps(dict(payload, model=rotas_locais.nome_nuvem(nuvem)),
+                                           ensure_ascii=False).encode("utf-8")
+                        print(f"rota de nuvem por tipo: {self._rota} -> {rotas_locais.nome_nuvem(nuvem)}",
                               file=sys.stderr, flush=True)
         self._passar(corpo, "POST")
 
@@ -2079,7 +2107,14 @@ class _Handler(BaseHTTPRequestHandler):
             headers["X-Agata-Data-Classification"] = self._data_classification
         req = urllib.request.Request(url, data=corpo or None, method=metodo, headers=headers)
         try:
-            up = urllib.request.urlopen(req, timeout=_rota_local_seg() if self._fallback_corpo is not None else 180)
+            # (19/11/2026) rota de nuvem: prazo ABSOLUTO contado daqui (headers, 1º conteúdo e corpo JSON dentro dele)
+            if self._prazo_nuvem and self._fallback_corpo is not None:
+                limite_nuvem = t0 + _rota_nuvem_seg()
+                tmo = max(0.05, limite_nuvem - time.monotonic())
+            else:
+                limite_nuvem = None
+                tmo = _rota_local_seg() if self._fallback_corpo is not None else 180
+            up = urllib.request.urlopen(req, timeout=tmo)
         except urllib.error.HTTPError as e:
             up = e
             # (17/11, item 4) o 429 nasce no OmniRoute (cota e circuit breaker de cada provedor), não numa escolha do
@@ -2087,7 +2122,7 @@ class _Handler(BaseHTTPRequestHandler):
             marca = (f" · 429_pausaria={self._rota} · roteador={_modo_roteador()}"
                      if e.code == 429 and self._rota in self._SUBIR_FILA else "")
             self._log(f"upstream HTTP {e.code}{marca}", t0)
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException) as e:
             self._log(f"upstream inacessível ({e})", t0)
             if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local sem conexão/timeout: fila de sempre
                 fb, self._fallback_corpo = self._fallback_corpo, None
@@ -2113,7 +2148,10 @@ class _Handler(BaseHTTPRequestHandler):
                 # não dá para saber, antes de responder, se a resposta veio vazia.
                 fim = sem_conteudo = False
                 leitor = _Leitor(up)
-                prazo = time.monotonic() + PRAZO_1O_CONTEUDO
+                # (19/11/2026) rota de nuvem por tipo: prazo ABSOLUTO até o 1º conteúdo útil (keep-alives não o renovam);
+                # estourou = sem conteúdo = queda segura para a fila de sempre.
+                nuvem_ativa = limite_nuvem is not None
+                prazo = limite_nuvem if nuvem_ativa else time.monotonic() + PRAZO_1O_CONTEUDO
                 while True:
                     try:
                         pedaco = leitor.ler(prazo - time.monotonic())
@@ -2127,14 +2165,26 @@ class _Handler(BaseHTTPRequestHandler):
                     modelo_real = modelo_real or self._modelo_de_bytes(buf_pre)
                     if modelo_real and self._tem_conteudo(buf_pre, True):
                         break
-                    if self._refazer and time.monotonic() >= prazo:
+                    if (self._refazer or nuvem_ativa) and time.monotonic() >= prazo:
                         # (18/11/2026) keepalive sem parar: com dados sempre prontos o Empty nunca vem e o prazo
                         # acima não sai. Só no caminho de refazer; o legado segue como estava.
                         sem_conteudo = up.status == 200
                         break
                 vazio = (fim and up.status == 200 and not self._tem_conteudo(buf_pre, True)) or sem_conteudo
             else:
-                buf_pre = up.read()
+                if limite_nuvem is not None:  # JSON devagar: leitura com prazo absoluto; estourou = queda segura
+                    lei, buf_pre = _Leitor(up), b""
+                    while True:
+                        try:
+                            ped = lei.ler(limite_nuvem - time.monotonic())
+                        except queue.Empty:
+                            _derrubar(up)  # a thread do _Leitor volta na hora; close() esperaria a leitura presa
+                            raise TimeoutError("rota de nuvem estourou o prazo no corpo") from None
+                        if not ped:
+                            break
+                        buf_pre += ped
+                else:
+                    buf_pre = up.read()
                 modelo_real = self._modelo_de_bytes(buf_pre)
                 vazio = up.status == 200 and not self._tem_conteudo(buf_pre, False)
             self._served_by = modelo_real  # (17/11, item 1)
@@ -2163,7 +2213,10 @@ class _Handler(BaseHTTPRequestHandler):
             return
         except (TimeoutError, OSError, http.client.HTTPException) as e:  # HTTPException: IncompleteRead (corpo cortado)
             self._log(f"upstream parou de responder ({e})", t0)
-            up.close()
+            if limite_nuvem is not None:
+                _derrubar(up)  # nuvem: nunca esperar a leitura presa
+            else:
+                up.close()
             if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local pendurada: fila de sempre
                 fb, self._fallback_corpo = self._fallback_corpo, None
                 return self._passar(fb, metodo, tentativa)

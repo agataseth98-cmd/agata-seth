@@ -3,7 +3,8 @@
   "decisoes": {
     "D2": "dado pessoal só em rota local nas rotas novas",
     "D3": "cota gratuita compartilhada sem teto, com aviso",
-    "D4": "rota local por tipo: so o modelo que ganhou na auditoria de conteudo (qwen3-30b: json, codigo, contexto); os demais ficam catalogados com tipos vazios; o painel so restringe; Ollama fora = regra de sempre"
+    "D4": "rota local por tipo: so o modelo que ganhou na auditoria de conteudo (qwen3-30b: json, codigo, contexto); os demais ficam catalogados com tipos vazios; o painel so restringe; Ollama fora = regra de sempre",
+    "D5": "rota de nuvem gratuita por tipo (19/11/2026, ordem do Humano): so classe publica (nunca pessoal nem segredo; sai pelo sanitizador), so na faixa publica do gateway, queda segura para a fila de sempre; o painel so restringe"
   },
   "rotas": [
     {
@@ -188,6 +189,66 @@
       "cota_medida": true,
       "conferida_em": "2026-11-06",
       "fonte": "medição do Conselho Remoto em 06/11/2026 (registro privado, não citado aqui)"
+    },
+    {
+      "id": "nvidia-laguna-xs",
+      "provedor": "nvidia",
+      "modelo": "poolside/laguna-xs-2.1",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico"
+      ],
+      "tipos": [],
+      "prioridade": 10,
+      "max_tokens_entrada": 6000,
+      "treina_com_prompts": "nao_conferido_aceito_pelo_humano",
+      "cota": "nao medida (NVIDIA NIM gratuito, conexao nvidia no OmniRoute)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-19",
+      "fonte": "prova NVIDIA 18-19/11/2026 (porta de entrada), comparacao-19-11.txt; liberado pelo Humano no painel em 19/11 08:19: ferramenta 1.00, p50 2,12 s; escreveu sem portao (aviso); treino: o Humano aceitou em 19/11/2026 09:06 o uso possivel dos pedidos publicos para treino pela NVIDIA; termos especificos da API trial deram 404; termos gerais v. 15/07/2026 e privacidade 22/09/2025 nao tratam de prompts de API",
+      "papel": "catalogado e liberado no painel, sem rota (19/11/2026): a rota de nuvem so existe na faixa publica, que retira as ferramentas antes de sair; o tipo ferramenta nunca chega aqui. Provou ferramenta 1.00, p50 2,12 s (aviso: escreveu sem portao)"
+    },
+    {
+      "id": "nvidia-nemotron-super-vl",
+      "provedor": "nvidia",
+      "modelo": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico"
+      ],
+      "tipos": [
+        "conversa"
+      ],
+      "prioridade": 10,
+      "max_tokens_entrada": 6000,
+      "treina_com_prompts": "nao_conferido_aceito_pelo_humano",
+      "cota": "nao medida (NVIDIA NIM gratuito, conexao nvidia no OmniRoute)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-19",
+      "fonte": "prova NVIDIA 18-19/11/2026 (porta de entrada), comparacao-19-11.txt; liberado pelo Humano no painel em 19/11 08:19: conversa 1.00, p50 6,51 s; treino: o Humano aceitou em 19/11/2026 09:06 o uso possivel dos pedidos publicos para treino pela NVIDIA; termos especificos da API trial deram 404; termos gerais v. 15/07/2026 e privacidade 22/09/2025 nao tratam de prompts de API"
+    },
+    {
+      "id": "nvidia-nemotron-bolt",
+      "provedor": "nvidia",
+      "modelo": "nvidia/nemotron-3.5-bolt-e4b",
+      "categoria": "gratuito",
+      "classes_permitidas": [
+        "publico"
+      ],
+      "tipos": [
+        "codigo",
+        "json"
+      ],
+      "prioridade": 10,
+      "max_tokens_entrada": 6000,
+      "treina_com_prompts": "nao_conferido_aceito_pelo_humano",
+      "cota": "nao medida (NVIDIA NIM gratuito, conexao nvidia no OmniRoute)",
+      "compartilhada_com_seth": false,
+      "cota_medida": false,
+      "conferida_em": "2026-11-19",
+      "fonte": "prova NVIDIA 18-19/11/2026 (porta de entrada), comparacao-19-11.txt; liberado pelo Humano no painel em 19/11 08:19: codigo 1.00 e json 1.00, p50 1,56 s; treino: o Humano aceitou em 19/11/2026 09:06 o uso possivel dos pedidos publicos para treino pela NVIDIA; termos especificos da API trial deram 404; termos gerais v. 15/07/2026 e privacidade 22/09/2025 nao tratam de prompts de API"
     }
   ]
 }

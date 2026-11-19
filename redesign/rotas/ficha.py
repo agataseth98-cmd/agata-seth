@@ -2,6 +2,7 @@
 """Ficha de rotas (P7): valida config/rotas-ficha.json contra as decisões D2 e D3.
 
 D2: dado pessoal só entra em rota local. Segredo nunca entra em rota nenhuma.
+Rota por tipo: local, ou gratuita só com classe pública/sintética (nuvem, 19/11/2026; sempre pelo sanitizador).
 D3: cota gratuita compartilhada com a Seth é permitida sem teto; o aviso aparece na ficha.
 Não chama nenhum provedor. Só lê o arquivo.
 """
@@ -16,7 +17,7 @@ CAMPOS = ("id", "provedor", "modelo", "categoria", "classes_permitidas", "treina
 CATEGORIAS = ("local", "gratuito", "assinatura", "pago")
 CLASSES = ("publico", "sintetico", "pessoal", "segredo")
 TIPOS = ("codigo", "conversa", "ferramenta", "json", "contexto")
-TREINO = ("nao", "sim", "nao_conferido", "nao_aplica")
+TREINO = ("nao", "sim", "nao_conferido", "nao_aplica", "nao_conferido_aceito_pelo_humano")
 RAIZ = Path(__file__).resolve().parents[2]
 PADRAO = RAIZ / "config" / "rotas-ficha.json"
 
@@ -43,8 +44,10 @@ def verificar(ficha: dict) -> tuple[list[str], list[str]]:
             erros.append(f"{rid}: dado pessoal só em rota local (D2)")
         tipos = r.get("tipos", [])
         if tipos:
-            if r["categoria"] != "local":
-                erros.append(f"{rid}: rota por tipo só vale para rota local")
+            if r["categoria"] not in ("local", "gratuito"):
+                erros.append(f"{rid}: rota por tipo só vale para rota local ou gratuita")
+            if r["categoria"] == "gratuito" and (not classes or set(classes) - {"publico", "sintetico"}):
+                erros.append(f"{rid}: rota gratuita por tipo só aceita classe pública ou sintética (19/11/2026)")
             if any(t not in TIPOS for t in tipos):
                 erros.append(f"{rid}: tipo desconhecido em {tipos}")
             if not isinstance(r.get("max_tokens_entrada"), int):
@@ -55,6 +58,8 @@ def verificar(ficha: dict) -> tuple[list[str], list[str]]:
             avisos.append(f"{rid}: cota não medida")
         if r["treina_com_prompts"] == "nao_conferido":
             avisos.append(f"{rid}: política de treino não conferida")
+        if r["treina_com_prompts"] == "nao_conferido_aceito_pelo_humano":
+            avisos.append(f"{rid}: treino não conferido, uso possível aceito pelo Humano (ver fonte)")
     return erros, avisos
 
 
