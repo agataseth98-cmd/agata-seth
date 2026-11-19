@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import threading
+import time
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -168,14 +169,31 @@ def test_ficha_real_valida_e_cobre_os_tipos():
     # o qwen3.5-9b continua na ficha como reserva, sem tipo
     assert any(r["modelo"] == "qwen3.5-9b-64k" for r in dados["rotas"])
     assert "qwen3.5-9b-64k" not in {r["modelo"] for r in por_id.values()}
-    # nuvem nunca recebe dado pessoal e nenhuma rota por tipo é de nuvem
+    # as rotas locais por tipo continuam só locais; a nuvem tem a sua lista, só pública
     assert all(r["categoria"] == "local" for r in por_id.values())
+    nuv = {r["id"]: r for r in rl.carregar_rotas_nuvem(ficha_mod.PADRAO)}
+    assert {i: set(r["tipos"]) for i, r in nuv.items()} == {
+        "nvidia-nemotron-super-vl": {"conversa"}, "nvidia-nemotron-bolt": {"codigo", "json"}}
+    assert {rl.nome_nuvem(r) for r in nuv.values()} == {
+        "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b", "nvidia/nvidia/nemotron-3.5-bolt-e4b"}
+    laguna = {r["id"]: r for r in dados["rotas"]}["nvidia-laguna-xs"]  # catalogada, liberada no painel, sem rota
+    assert laguna["tipos"] == [] and "faixa publica" in laguna["papel"] and laguna["classes_permitidas"] == ["publico"]
+    for r in nuv.values():
+        assert r["classes_permitidas"] == ["publico"] and r["cota_medida"] is False
+        assert r["treina_com_prompts"] == "nao_conferido_aceito_pelo_humano" and "19/11/2026 09:06" in r["fonte"]
+    assert len(dados["rotas"]) >= 12  # nenhuma rota atual saiu
 
 
-def test_ficha_rejeita_tipo_em_nuvem_e_sem_teto():
+def test_ficha_rejeita_tipo_em_nuvem_paga_ou_com_dado_pessoal_e_sem_teto():
+    erros, _ = ficha_mod.verificar({"rotas": [dict(_rota("x", "m", ["codigo"]), categoria="pago",
+                                                   classes_permitidas=["publico"])]})
+    assert any("só vale para rota local ou gratuita" in e for e in erros)
+    erros, _ = ficha_mod.verificar({"rotas": [dict(_rota("x", "m", ["codigo"]), categoria="gratuito",
+                                                   classes_permitidas=["publico", "pessoal"])]})
+    assert any("D2" in e for e in erros) and any("classe pública" in e for e in erros)
     erros, _ = ficha_mod.verificar({"rotas": [dict(_rota("x", "m", ["codigo"]), categoria="gratuito",
                                                    classes_permitidas=["publico"])]})
-    assert any("só vale para rota local" in e for e in erros)
+    assert erros == []
     sem_teto = _rota("y", "m", ["codigo"])
     del sem_teto["max_tokens_entrada"]
     erros, _ = ficha_mod.verificar({"rotas": [sem_teto]})
@@ -202,6 +220,61 @@ class _Up(BaseHTTPRequestHandler):
     def do_POST(self):
         corpo = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)))
         self.server.chamadas.append(corpo.get("model"))
+        nuvem = str(corpo.get("model", "")).startswith("nvidia/")
+        self.server.corpos.append(corpo)
+        if nuvem and self.server.nuvem == "500":
+            return self._enviar(500, b'{"error":"cota"}')
+        if nuvem and self.server.nuvem == "keepalive":  # SSE que só manda keep-alives (nunca conteúdo)
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            try:
+                for _ in range(80):
+                    self.wfile.write(b": keepalive\n\n")
+                    self.wfile.flush()
+                    time.sleep(0.1)
+            except OSError:
+                pass
+            self.close_connection = True
+            return
+        if nuvem and self.server.nuvem == "headers_lentos":  # demora nos headers além do prazo
+            time.sleep(2.5)
+        if nuvem and self.server.nuvem == "json_pingo":  # headers em t=0, 1 pedaço aos 2,5 s e silêncio
+            corpo_j = json.dumps({"model": "m", "choices": [{"message": {"content": "x" * 30}}]}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(corpo_j)))
+            self.end_headers()
+            try:
+                self.wfile.flush()
+                time.sleep(2.5)
+                self.wfile.write(corpo_j[:8])
+                self.wfile.flush()
+                time.sleep(6)
+            except OSError:
+                pass
+            self.close_connection = True
+            return
+        if nuvem and self.server.nuvem == "json_lento":  # headers logo, corpo JSON pingado devagar
+            corpo_j = json.dumps({"model": "m", "choices": [{"message": {"content": "x" * 30}}]}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(corpo_j)))
+            self.end_headers()
+            try:
+                for i in range(0, len(corpo_j), 8):
+                    self.wfile.write(corpo_j[i:i + 8])
+                    self.wfile.flush()
+                    time.sleep(0.3)
+            except OSError:
+                pass
+            self.close_connection = True
+            return
+        if nuvem and self.server.nuvem == "vazio":
+            return self._enviar(200, json.dumps({"model": "m", "choices": [{"message": {"content": ""}}]}).encode())
+        if nuvem:
+            return self._enviar(200, json.dumps({"model": "m-nuvem", "choices": [{"message": {
+                "role": "assistant", "content": "nuvem ok"}}]}).encode())
         local = str(corpo.get("model", "")).startswith("ollama-local/")
         if local and self.server.local == "500":
             return self._enviar(500, b'{"error":"modelo local indisponivel"}')
@@ -214,6 +287,7 @@ class _Cen:
     def __init__(self, mp, local="ok"):
         self.up = ThreadingHTTPServer(("127.0.0.1", 0), _Up)
         self.up.chamadas, self.up.gets, self.up.local = [], [], local
+        self.up.corpos, self.up.nuvem = [], "ok"
         threading.Thread(target=self.up.serve_forever, daemon=True).start()
         mp.setattr(g, "UPSTREAM", f"http://127.0.0.1:{self.up.server_address[1]}")
         self.gw = g.ServidorConcorrenciaLimitada(("127.0.0.1", 0), g._Handler)
@@ -652,8 +726,15 @@ def pedidos(monkeypatch, tmp_path):
     return tmp_path / "pedidos"
 
 
-def _gravado(pasta):
-    return "".join(p.read_text() for p in pasta.glob("*.jsonl")) if pasta.exists() else ""
+def _gravado(pasta, espera=1.5):
+    """O gateway grava DEPOIS de entregar a resposta (corrida, vista em 19/11/2026): espera até aparecer algo, no máximo
+    `espera` s; quem afirma 'não gravou' paga a espera inteira, de propósito."""
+    deadline = time.monotonic() + espera
+    while True:
+        txt = "".join(p.read_text() for p in pasta.glob("*.jsonl")) if pasta.exists() else ""
+        if txt or time.monotonic() >= deadline:
+            return txt
+        time.sleep(0.05)
 
 
 def test_sem_cabecalho_grava_como_hoje(gw, pedidos):
@@ -716,3 +797,298 @@ def test_canal_de_voz_contra_o_gateway_real_nao_grava_e_recebe_a_confirmacao(gw,
     resp = canal_voz.enviar_ao_modelo("fala-do-canal-fff", url=c.base + "/v1/chat/completions")
     assert resp
     assert "fala-do-canal-fff" not in _gravado(pedidos)
+
+
+# --- rota de nuvem por tipo (19/11/2026): só faixa pública, ficha manda, painel só restringe, queda segura -----
+
+def _ficha_nuvem(ficha):
+    d = json.loads(ficha.read_text(encoding="utf-8"))
+    for i, (modelo, tipos) in enumerate((("poolside/laguna-xs-2.1", []),  # como a ficha real: sem rota (sem ferramentas na faixa pública)
+                                         ("nvidia/nemotron-3.5-super-vl-120b-a12b", ["conversa"]),
+                                         ("nvidia/nemotron-3.5-bolt-e4b", ["codigo", "json"]))):
+        d["rotas"].append({"id": f"nv{i}", "provedor": "nvidia", "modelo": modelo, "categoria": "gratuito",
+                           "classes_permitidas": ["publico"], "tipos": tipos, "prioridade": 10,
+                           "max_tokens_entrada": 6000, "treina_com_prompts": "nao_conferido", "cota": "-",
+                           "compartilhada_com_seth": True, "cota_medida": False, "conferida_em": "x", "fonte": "t"})
+    # a rota de nuvem do tipo "conversa" antiga (g) não conta: só as nv*
+    d["rotas"] = [r for r in d["rotas"] if r["id"] != "nuvem"]
+    ficha.write_text(json.dumps(d), encoding="utf-8")
+    rl._CACHE_FICHA["mtime"] = None
+    rl._CACHE_NUVEM["mtime"] = None
+
+
+def test_escolher_nuvem_pelo_tipo(ficha):
+    _ficha_nuvem(ficha)
+    e = lambda t, p=None: rl.escolher_nuvem(p or _p(), t)  # noqa: E731
+    assert rl.nome_nuvem(e("conversa")) == "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
+    assert rl.nome_nuvem(e("codigo")) == "nvidia/nvidia/nemotron-3.5-bolt-e4b"
+    assert rl.nome_nuvem(e("json")) == "nvidia/nvidia/nemotron-3.5-bolt-e4b"
+    assert e("ferramenta") is None  # Laguna: catalogada, sem rota (a faixa pública não tem ferramentas)
+    assert e("contexto") is None
+    assert e("conversa", _p("a" * 30000)) is None  # acima do teto conservador
+
+
+def test_escolher_nuvem_painel_so_tira_e_liga_desliga(ficha, tmp_path, monkeypatch):
+    _ficha_nuvem(ficha)
+    _dec(tmp_path, {"id": "nvidia/nvidia/nemotron-3.5-bolt-e4b", "acao": "standby"})
+    assert rl.escolher_nuvem(_p(), "codigo") is None
+    _dec(tmp_path, {"id": "nvidia/nvidia/nemotron-3.5-bolt-e4b", "acao": "standby"},
+         {"id": "nvidia/nvidia/nemotron-3.5-bolt-e4b", "acao": "liberar"})
+    assert rl.escolher_nuvem(_p(), "codigo")
+    _dec(tmp_path, {"id": "nvidia/zzz-que-nao-esta-na-ficha", "acao": "liberar"})
+    assert rl.escolher_nuvem(_p(), "contexto") is None  # liberar não acrescenta
+    monkeypatch.setenv("SETH_ROTAS_NUVEM", "0")
+    assert rl.escolher_nuvem(_p(), "codigo") is None
+    monkeypatch.delenv("SETH_ROTAS_NUVEM")
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    assert rl.escolher_nuvem(_p(), "codigo") is None
+
+
+def test_escolher_nuvem_nunca_com_segredo_ou_classe_pessoal(ficha, monkeypatch):
+    _ficha_nuvem(ficha)
+    chave = "sk-" + "proj-" + "A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6"
+    assert rl.escolher_nuvem(_p("use " + chave), "conversa") is None
+    monkeypatch.setattr(rl, "tem_segredo", lambda p: True)
+    assert rl.escolher_nuvem(_p(), "conversa") is None
+    # nuvem com classe pessoal na ficha é ignorada pelo carregador
+    d = json.loads(ficha.read_text(encoding="utf-8"))
+    for r in d["rotas"]:
+        if r["id"] == "nv1":
+            r["classes_permitidas"] = ["publico", "pessoal"]
+    ficha.write_text(json.dumps(d), encoding="utf-8")
+    rl._CACHE_FICHA["mtime"] = None
+    assert "nv1" not in {r["id"] for r in rl.carregar_rotas_nuvem(ficha)}
+
+
+def test_gateway_publico_vai_a_nuvem_pelo_tipo_sem_ferramentas(gw, ficha):
+    _ficha_nuvem(ficha)
+    c = gw()
+    assert c.post(publico=True) == (200, "nuvem ok")
+    assert c.up.chamadas == ["nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"]
+    c.post("```py\nx=1\n```", publico=True)
+    assert c.up.chamadas[-1] == "nvidia/nvidia/nemotron-3.5-bolt-e4b"
+    # pedido com ferramenta de escrita: a faixa pública retira as ferramentas ANTES de escolher o tipo; vira conversa
+    c.post("anote isto no diário", publico=True,
+           extra={"tools": [{"type": "function", "function": {"name": "diario_anotar"}}], "tool_choice": "auto"})
+    assert c.up.chamadas[-1] == "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
+    enviado = c.up.corpos[-1]
+    assert "tools" not in enviado and "tool_choice" not in enviado and "functions" not in enviado
+
+
+def test_gateway_alias_publico_tambem_vai_a_nuvem(gw, ficha):
+    _ficha_nuvem(ficha)
+    c = gw()
+    c.post(modelo="seth-public")
+    assert c.up.chamadas[0].startswith("nvidia/")
+
+
+def test_gateway_nao_publico_nunca_vai_a_nuvem(gw, ficha):
+    _ficha_nuvem(ficha)
+    c = gw()
+    c.post("a" * 30000)  # sem cabeçalho público: cascata de sempre (nem local, nem nuvem)
+    assert not any(m.startswith("nvidia/") for m in c.up.chamadas)
+    c.post(modelo="seth-pesado", publico=True)  # fila explícita não é tocada
+    assert c.up.chamadas[-1] == "seth-pesado"
+
+
+@pytest.mark.parametrize("modo", ["500", "vazio"])
+def test_queda_segura_da_nuvem_volta_a_fila_de_sempre(gw, ficha, modo):
+    _ficha_nuvem(ficha)
+    c = gw()
+    c.up.nuvem = modo
+    status, texto = c.post(publico=True)
+    assert status == 200 and texto == "fila ok"
+    assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[1].startswith("seth-")
+
+
+def test_nuvem_standby_ou_desligada_vai_direto_a_fila(gw, ficha, tmp_path, monkeypatch):
+    _ficha_nuvem(ficha)
+    c = gw()
+    _dec(tmp_path, {"id": "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b", "acao": "standby"})
+    c.post(publico=True)
+    assert c.up.chamadas == ["seth-livre"] or c.up.chamadas[0].startswith("seth-")
+    _dec(tmp_path, {"id": "x", "acao": "liberar"})
+    monkeypatch.setenv("SETH_ROTAS_NUVEM", "0")
+    c.post(publico=True)
+    assert not any(m.startswith("nvidia/") for m in c.up.chamadas)
+
+
+def test_nuvem_get_passa_intacto_na_mesma_conexao(gw, ficha):
+    _ficha_nuvem(ficha)
+    c = gw()
+    c.post(publico=True)
+    status, dados = c.get()
+    assert status == 200 and dados["data"][0]["id"] == "seth-livre"
+    assert c.up.gets == ["/v1/models"]
+
+
+def test_nuvem_pelo_prazo_proprio(gw, ficha, monkeypatch):
+    _ficha_nuvem(ficha)
+    visto = []
+    orig = g.urllib.request.urlopen
+    monkeypatch.setattr(g.urllib.request, "urlopen", lambda req, timeout=None: (visto.append(timeout), orig(req, timeout=timeout))[1])
+    c = gw()
+    c.post(publico=True)
+    assert visto and visto[0] == g._rota_nuvem_seg() == 30.0
+    monkeypatch.setenv("SETH_ROTA_NUVEM_MS", "lixo")
+    assert g._rota_nuvem_seg() == 30.0
+
+
+def test_prazo_absoluto_da_nuvem_com_so_keepalives_cai_na_fila(gw, ficha, monkeypatch):
+    """P1: keep-alives a cada 0,1 s não renovam o prazo; estourou o prazo total, a fila de sempre responde."""
+    _ficha_nuvem(ficha)
+    monkeypatch.setenv("SETH_ROTA_NUVEM_MS", "1000")
+    c = gw()
+    c.up.nuvem = "keepalive"
+    t0 = time.monotonic()
+    status, texto = c.post(publico=True)
+    dt = time.monotonic() - t0
+    assert status == 200 and texto == "fila ok"
+    assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[1].startswith("seth-")
+    assert len(c.up.chamadas) == 2          # sem resposta duplicada
+    assert 0.9 <= dt < 5.0, dt              # ~1 s, nunca os 40 s do prazo padrão nem os 8 s dos keep-alives
+
+
+def test_keepalive_real_post_nuvem_e_depois_get_na_mesma_conexao(gw, ficha):
+    """P2: http.client, mesma conexão, mesmo socket, POST de sucesso na nuvem e depois GET."""
+    _ficha_nuvem(ficha)
+    c = gw()
+    conn = _conn(c)
+    conn.request("POST", "/v1/chat/completions", headers={"Content-Type": "application/json",
+                                                          "X-Agata-Data-Classification": "public"},
+                 body=json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}))
+    r = conn.getresponse()
+    corpo = r.read()
+    assert r.status == 200 and b"nuvem ok" in corpo and not r.will_close
+    assert c.up.chamadas[0].startswith("nvidia/")
+    sock = conn.sock
+    assert sock is not None
+    conn.request("GET", "/v1/models")
+    r2 = conn.getresponse()
+    corpo2 = r2.read()
+    assert conn.sock is sock                       # o mesmo socket: a conexão foi reaproveitada
+    conn.close()
+    assert r2.status == 200 and json.loads(corpo2)["data"][0]["id"] == "seth-livre"
+    assert c.up.gets == ["/v1/models"] and len(c.up.chamadas) == 1
+
+
+def test_segredo_com_cabecalho_publico_nunca_vai_a_nuvem_no_gateway(gw, ficha):
+    """P3: pelo gateway real, com a régua de segredo real (não trocada), nem pelo nome seth-public."""
+    _ficha_nuvem(ficha)
+    c = gw()
+    segredo = "sk" + "-" + "TESTEsintetico0123456789abcdefGHIJ"
+    for modelo in ("seth-livre", "seth-public"):
+        c.post(f"explique o que é um ponteiro; minha chave é {segredo}", modelo=modelo, publico=True)
+    assert c.up.chamadas and not any(m.startswith("nvidia/") for m in c.up.chamadas)
+    assert all(segredo not in json.dumps(b) for b in c.up.corpos if str(b.get("model", "")).startswith("nvidia/"))
+
+
+def test_pedido_nao_publico_nunca_vai_a_nuvem_em_nenhum_tipo(gw, ficha):
+    """P3: sem cabeçalho público, qualquer tipo (conversa, código, json, ferramenta) fica fora da nuvem."""
+    _ficha_nuvem(ficha)
+    c = gw()
+    c.post("oi")
+    c.post("```py\nx=1\n```")
+    c.post("dê json", extra={"response_format": {"type": "json_object"}})
+    c.post("use a ferramenta", extra={"tools": [{"type": "function", "function": {"name": "f"}}]})
+    assert len(c.up.chamadas) >= 4 and not any(m.startswith("nvidia/") for m in c.up.chamadas)
+
+
+def test_nuvem_cache_por_mtime(ficha):
+    _ficha_nuvem(ficha)
+    a = rl.carregar_rotas_nuvem(ficha)
+    assert rl.carregar_rotas_nuvem(ficha) is a  # mesma lista: não releu o arquivo
+    assert rl.carregar_rotas_nuvem(ficha.parent / "nao-existe.json") == []
+
+
+def test_http_exception_do_upstream_na_nuvem_cai_na_fila(gw, ficha, monkeypatch):
+    """r3 (4): resposta malformada (BadStatusLine/RemoteDisconnected) do upstream na nuvem = fila de sempre."""
+    import http.client as hc
+    _ficha_nuvem(ficha)
+    c = gw()
+    orig = g.urllib.request.urlopen
+    vistos = []
+
+    def falso(req, timeout=None):
+        vistos.append(json.loads(req.data)["model"])
+        if vistos[-1].startswith("nvidia/"):
+            raise hc.BadStatusLine("lixo")
+        return orig(req, timeout=timeout)
+    monkeypatch.setattr(g.urllib.request, "urlopen", falso)
+    status, texto = c.post(publico=True)
+    assert status == 200 and texto == "fila ok" and vistos[-2:] == ["nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b", "seth-livre"], vistos
+
+
+def test_get_zera_o_prazo_da_nuvem(gw, ficha):
+    """r3 (6): do_GET/do_HEAD não herdam o prazo de nuvem de um POST anterior (atributo do handler, keep-alive)."""
+    _ficha_nuvem(ficha)
+    c = gw()
+    conn = _conn(c)
+    _post_conn(conn, headers={"X-Agata-Data-Classification": "public"})
+    assert c.up.chamadas[0].startswith("nvidia/")
+    conn.request("GET", "/v1/models")
+    conn.getresponse().read()
+    conn.request("HEAD", "/v1/models")
+    conn.getresponse().read()
+    conn.close()
+    import inspect
+    for nome in ("do_GET", "do_HEAD"):
+        assert "_prazo_nuvem = False" in inspect.getsource(getattr(g._Handler, nome))
+
+
+@pytest.mark.parametrize("modo,teto", [("headers_lentos", 2.4), ("json_lento", 2.4)])
+def test_prazo_absoluto_da_nuvem_headers_e_json_lentos(gw, ficha, monkeypatch, modo, teto):
+    """P1 r2: o prazo conta desde antes do pedido (headers incluídos) e vale para JSON não-SSE lido devagar."""
+    _ficha_nuvem(ficha)
+    monkeypatch.setenv("SETH_ROTA_NUVEM_MS", "1000")
+    c = gw()
+    c.up.nuvem = modo
+    t0 = time.monotonic()
+    status, texto = c.post(publico=True)
+    dt = time.monotonic() - t0
+    assert status == 200 and texto == "fila ok"
+    assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[-1].startswith("seth-")
+    assert 0.9 <= dt < teto, dt   # ~1 s: nem os 2,5 s dos headers nem a leitura inteira do JSON (~3 s)
+
+
+def test_json_pingo_e_silencio_responde_pela_fila_antes_do_prazo_mais_meio_segundo(gw, ficha, monkeypatch):
+    """r3 (1): headers em t=0, um pedaço aos 2,5 s e silêncio; prazo 3 s -> a fila responde em < 3,5 s (o _derrubar
+    libera a thread da leitura; close() esperaria o silêncio acabar)."""
+    _ficha_nuvem(ficha)
+    monkeypatch.setenv("SETH_ROTA_NUVEM_MS", "3000")
+    c = gw()
+    c.up.nuvem = "json_pingo"
+    t0 = time.monotonic()
+    status, texto = c.post(publico=True)
+    dt = time.monotonic() - t0
+    assert status == 200 and texto == "fila ok" and len(c.up.chamadas) == 2
+    assert 2.9 <= dt < 3.5, dt
+
+
+@pytest.mark.parametrize("modo", ["500", "vazio", "keepalive", "headers_lentos", "json_lento", "json_pingo"])
+def test_keepalive_depois_de_queda_da_nuvem_post_fila_e_get_na_mesma_conexao(gw, ficha, monkeypatch, modo):
+    """P2 r2: POST com falha na nuvem -> fila responde -> GET e novo POST não público na MESMA conexão, sem herança."""
+    _ficha_nuvem(ficha)
+    monkeypatch.setenv("SETH_ROTA_NUVEM_MS", "1000")
+    c = gw()
+    c.up.nuvem = modo
+    conn = _conn(c)
+    t0 = time.monotonic()
+    conn.request("POST", "/v1/chat/completions", headers={"Content-Type": "application/json",
+                                                          "X-Agata-Data-Classification": "public"},
+                 body=json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}]}))
+    r = conn.getresponse()
+    corpo = r.read()
+    assert time.monotonic() - t0 < 2.4  # prazo 1 s: nenhuma queda espera o upstream (2,5 s, ~3 s ou 8 s)
+    assert r.status == 200 and b"fila ok" in corpo and not r.will_close
+    assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[1].startswith("seth-")
+    n = len(c.up.chamadas)
+    sock = conn.sock
+    conn.request("GET", "/v1/models")
+    r2 = conn.getresponse()
+    corpo2 = r2.read()
+    assert conn.sock is sock and r2.status == 200 and json.loads(corpo2)["data"][0]["id"] == "seth-livre"
+    assert c.up.gets == ["/v1/models"] and len(c.up.chamadas) == n   # o GET não reenviou nada
+    status, txt = _post_conn(conn, pergunta="oi de novo")           # não público: fila, sem nuvem herdada
+    conn.close()
+    assert status == 200 and len(c.up.chamadas) == n + 1 and c.up.chamadas[-1].startswith(("seth-", "ollama-local/"))

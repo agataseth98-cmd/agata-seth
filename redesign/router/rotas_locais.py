@@ -7,6 +7,9 @@ Regra determinística, sem modelo e sem rede além de um teste de porta:
 - o painel (decisoes.jsonl) SÓ RESTRINGE: modelo cuja última decisão é `standby` sai da escolha. `liberado` não
   acrescenta nada que a ficha não tenha. Arquivo ausente ou ilegível = comportamento da ficha, sem painel;
 - Ollama fora do ar (porta fechada) = nenhuma rota local; o gateway segue pela regra de sempre.
+- nuvem (19/11/2026, ordem do Humano): rota `gratuito` da ficha com `tipos`, SÓ na faixa pública do gateway (classe
+  pública; nunca pessoal nem segredo), pelo mesmo sanitizador, com queda segura para a fila de sempre. O painel só
+  restringe. SETH_ROTAS_NUVEM=0 desliga só a nuvem.
 Nada aqui chama modelo. Quem usa é o seth_gateway (e o teste).
 """
 from __future__ import annotations
@@ -24,6 +27,7 @@ TIPOS = ("codigo", "conversa", "ferramenta", "json", "contexto")
 # acima disto (tokens estimados do pedido do usuário, caracteres ÷ 3) o pedido é "contexto"
 LIMIAR_CONTEXTO_TOKENS = 6000
 _CACHE_FICHA: dict = {"mtime": None, "caminho": None, "rotas": []}
+_CACHE_NUVEM: dict = {"mtime": None, "caminho": None, "rotas": []}
 _CACHE_PAINEL: dict = {"mtime": None, "caminho": None, "estado": {}}
 _CACHE_PORTA: dict = {"quando": 0.0, "caminho": None, "ok": False}
 
@@ -38,6 +42,11 @@ def caminho_painel() -> Path:
     if env:
         return Path(env)
     return Path.home() / ".local" / "share" / "agata" / "catalogo-modelos" / "decisoes.jsonl"
+
+
+def nuvem_ligada() -> bool:
+    """SETH_ROTAS_NUVEM=0 desliga só as rotas de nuvem por tipo (SETH_ROTAS_LOCAIS=0 desliga as duas)."""
+    return ligado() and os.environ.get("SETH_ROTAS_NUVEM") != "0"
 
 
 def carregar_rotas(caminho: Path | None = None) -> list[dict]:
@@ -199,3 +208,47 @@ def escolher(payload: dict, tipo: str, publico: bool, ficha: Path | None = None,
 
 def modelo_no_gateway(rota: dict) -> str:
     return PREFIXO_GATEWAY + rota["modelo"]
+
+
+def nome_nuvem(rota: dict) -> str:
+    """Nome da rota de nuvem no OmniRoute (provedor/modelo, ex.: nvidia/poolside/laguna-xs-2.1) e no painel."""
+    return f"{rota['provedor']}/{rota['modelo']}"
+
+
+def carregar_rotas_nuvem(caminho: Path | None = None) -> list[dict]:
+    """Rotas gratuitas com tipos, da ficha, só com classe pública/sintética. Ficha ausente ou quebrada = [].
+    Lembrada por mtime (como as rotas locais)."""
+    caminho = Path(caminho or FICHA_PADRAO)
+    try:
+        mt = caminho.stat().st_mtime
+        if _CACHE_NUVEM["mtime"] == mt and _CACHE_NUVEM["caminho"] == str(caminho):
+            return _CACHE_NUVEM["rotas"]
+        dados = json.loads(caminho.read_text(encoding="utf-8"))
+        rotas = [r for r in dados.get("rotas", [])
+                if isinstance(r, dict) and r.get("categoria") == "gratuito" and r.get("tipos")
+                and isinstance(r.get("modelo"), str) and isinstance(r.get("provedor"), str)
+                and r.get("classes_permitidas") and set(r["classes_permitidas"]) <= {"publico", "sintetico"}]
+    except (OSError, ValueError, AttributeError, TypeError):
+        return []
+    _CACHE_NUVEM.update(mtime=mt, caminho=str(caminho), rotas=rotas)
+    return rotas
+
+
+def escolher_nuvem(payload: dict, tipo: str, ficha: Path | None = None, painel: Path | None = None) -> dict | None:
+    """Rota de nuvem da ficha para este tipo, ou None (= fila de sempre). Só chamar na faixa pública: a classe do
+    pedido é 'publico'. A ficha decide; o painel só tira (standby)."""
+    if not nuvem_ligada() or tipo not in TIPOS or tem_segredo(payload):
+        return None
+    estado = estado_painel(painel)
+    est = tokens_estimados(payload)
+    candidatas = []
+    for r in carregar_rotas_nuvem(ficha):
+        if tipo not in r["tipos"] or "publico" not in r["classes_permitidas"]:
+            continue
+        if any(estado.get(i) == "standby" for i in (nome_nuvem(r), r["modelo"], r.get("id", "")) if i):
+            continue
+        limite = r.get("max_tokens_entrada")
+        if not isinstance(limite, int) or est > limite:
+            continue
+        candidatas.append(r)
+    return sorted(candidatas, key=lambda r: (r.get("prioridade", 100), r.get("id", "")))[0] if candidatas else None
