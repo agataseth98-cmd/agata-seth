@@ -230,13 +230,33 @@ def transcrever_pcm(pcm: bytes) -> str:
     return (r.get("text") or "").strip()
 
 
-def enviar_ao_modelo(texto: str, *, url: str | None = None, post=None, historico=None) -> str:
+TURNO = RAIZ / "scripts" / "turno.py"
+
+
+def contar_turno(sessao: str | None = None, modelo: str | None = None, *, rodar=subprocess.run, saida=print) -> str:
+    """Avanca o contador de turnos (turno.py proximo) e devolve a linha de cabecalho; '' sem sessao ou em falha (so aviso)."""
+    sessao = sessao if sessao is not None else os.environ.get("AGATA_CANAL_VOZ_SESSAO", "")
+    if not sessao:
+        return ""
+    modelo = modelo or os.environ.get("AGATA_CANAL_VOZ_MODELO_TURNO", MODELO)
+    try:
+        r = rodar([sys.executable, str(TURNO), "proximo", "--sessao", sessao, "--modelo", modelo],
+                  capture_output=True, text=True, timeout=10)
+        if r.returncode != 0:
+            raise RuntimeError(f"codigo {r.returncode}")
+        return (r.stdout or "").strip().splitlines()[0] if (r.stdout or "").strip() else ""
+    except Exception as e:  # noqa: BLE001 - o contador nunca derruba o canal
+        saida(f"[canal-voz] aviso: contador de turnos indisponivel ({e.__class__.__name__})")
+        return ""
+
+
+def enviar_ao_modelo(texto: str, *, url: str | None = None, post=None, historico=None, cabecalho: str = "") -> str:
     url = url or GATEWAY
     host = urllib.parse.urlparse(url).hostname
     if host not in ("127.0.0.1", "localhost", "::1"):
         raise ValueError("destino fora da Máquina recusado")
     corpo = {"model": MODELO, "stream": False,
-             "messages": [{"role": "system", "content": AVISO_SISTEMA}]
+             "messages": [{"role": "system", "content": AVISO_SISTEMA + (f" Cabecalho deste turno: {cabecalho}" if cabecalho else "")}]
              + [{"role": r, "content": t} for par in (historico or []) for r, t in zip(("user", "assistant"), par)]
              + [{"role": "user", "content": texto}]}
     cab = {"Content-Type": "application/json", "X-Agata-Nao-Registrar": "1"}
@@ -297,9 +317,10 @@ def _matar_grupo(p) -> None:
 # --- o canal ------------------------------------------------------------------------------------------------
 class Canal:
     def __init__(self, captura, *, transcrever=transcrever_pcm, enviar=enviar_ao_modelo, falar=falar_texto,
-                 verificar=locutor.verificar, relogio=time.monotonic, saida=print, inatividade_ms=None, gravar=True, ciclo_ms=None):
+                 verificar=locutor.verificar, relogio=time.monotonic, saida=print, inatividade_ms=None, gravar=True, ciclo_ms=None, turno=contar_turno):
         self.cap, self.transcrever, self.enviar, self.falar, self.verificar = captura, transcrever, enviar, falar, verificar
         self.relogio, self.saida, self.gravar = relogio, saida, gravar
+        self.turno = turno
         self.inatividade_ms = INATIVIDADE_MS if inatividade_ms is None else inatividade_ms
         self.ciclo_ms = CICLO_MS if ciclo_ms is None else ciclo_ms
         self.ciclo = False                                  # janela de conversa aberta
@@ -391,8 +412,12 @@ class Canal:
         if tem_efeito(texto):
             self.saida(f"[canal-voz] {FRASE_EFEITO}")
             return self._falar_e_voltar(FRASE_EFEITO, lat, seg, quem, "efeito_pede_confirmacao")
+        cab = self.turno()                                   # 1 fala entregue ao modelo = +1 no contador
+        if cab:
+            self.saida(f"[canal-voz] {cab}")
+        extra = {"cabecalho": cab} if cab else {}
         try:
-            resposta = self._cronometrar(lat, "resposta_ms", self.enviar, texto, historico=list(self.historico))
+            resposta = self._cronometrar(lat, "resposta_ms", self.enviar, texto, historico=list(self.historico), **extra)
         except SemConfirmacao:
             self.parar = True                               # sem a confirmação do gateway, a sessão não continua
             return self._erro("registro", "o gateway não confirmou que não registra o pedido; sessão encerrada", lat, seg)

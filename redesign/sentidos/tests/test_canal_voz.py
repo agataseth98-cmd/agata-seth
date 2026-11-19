@@ -650,5 +650,68 @@ class VezECicloTests(Base):
         self.assertIn("curto", canal_voz.AVISO_SISTEMA)
 
 
+class ContadorDeTurnoTests(Base):
+    FALA = CanalTests.FALA
+
+    def rodar(self, **kw):
+        n, vistos = [], []
+        def turno():
+            n.append(1)
+            return f"agata · t={len(n)}"
+        def enviar(t, **k):
+            vistos.append(k.get("cabecalho"))
+            return "ok"
+        c, _ = self.canal(self.FALA, inatividade_ms=1500, turno=turno, enviar=enviar, **kw)
+        c.run()
+        return n, vistos
+
+    def test_uma_fala_entregue_avanca_uma_vez_e_leva_o_cabecalho(self):
+        n, vistos = self.rodar()
+        self.assertEqual(len(n), 1)
+        self.assertEqual(vistos, ["agata · t=1"])
+        self.assertTrue(any("t=1" in l for l in self.out))
+
+    def test_fala_vazia_nao_avanca(self):
+        n, vistos = self.rodar(transcrever=lambda p: "")
+        self.assertEqual((n, vistos), ([], []))
+
+    def test_eco_da_propria_voz_rejeitado_nao_avanca(self):
+        n, vistos = self.rodar(verificar=lambda p: locutor.REJEITADO)
+        self.assertEqual((n, vistos), ([], []))
+
+    def test_sem_a_palavra_de_vez_nao_avanca(self):
+        n, _ = self.rodar(transcrever=lambda p: "conversa de fundo")
+        self.assertEqual(n, [])
+
+    def test_contar_turno_roda_proximo_com_a_sessao(self):
+        chamadas = []
+        def rodar(cmd, **k):
+            chamadas.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, stdout="agata · m · t=7\n", stderr="")
+        self.assertEqual(canal_voz.contar_turno("s1", "m", rodar=rodar), "agata · m · t=7")
+        self.assertIn("proximo", chamadas[0])
+        self.assertIn("s1", chamadas[0])
+
+    def test_sem_sessao_nao_chama_nada(self):
+        os.environ.pop("AGATA_CANAL_VOZ_SESSAO", None)
+        self.assertEqual(canal_voz.contar_turno(rodar=lambda *a, **k: 1 / 0), "")
+
+    def test_turno_ausente_ou_falhando_so_avisa(self):
+        avisos = []
+        def falha(cmd, **k):
+            raise FileNotFoundError("sem turno.py")
+        self.assertEqual(canal_voz.contar_turno("s1", rodar=falha, saida=avisos.append), "")
+        self.assertIn("aviso", avisos[0])
+        ruim = lambda cmd, **k: subprocess.CompletedProcess(cmd, 2, stdout="", stderr="x")
+        self.assertEqual(canal_voz.contar_turno("s1", rodar=ruim, saida=avisos.append), "")
+        self.assertEqual(len(avisos), 2)
+
+    def test_canal_segue_quando_contador_devolve_vazio(self):
+        falado = []
+        c, _ = self.canal(self.FALA, inatividade_ms=1500, turno=lambda: "", falar=falado.append)
+        c.run()
+        self.assertEqual(falado, ["são três horas"])
+
+
 if __name__ == "__main__":
     unittest.main()

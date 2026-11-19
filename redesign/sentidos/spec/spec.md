@@ -67,6 +67,8 @@ Palavra de vez e ciclo de conversa (Humano, 18/11 19:54): a fala só segue com "
 
 Revisão do Codex (18/11) e decisão A do Humano (19/11): o canal não executa nada. Todo envio ao gateway leva `X-Agata-Nao-Registrar: 1`; o gateway (aceita só de loopback, por pedido, sem herdar em keep-alive) não chama o registro de pedidos e responde `X-Agata-Registro: nao`; sem essa confirmação o canal descarta a resposta, avisa na tela e encerra a sessão. A checagem por processo e a recusa de abrir por `SETH_REGISTRO_PEDIDOS` saíram. O filtro de efeitos (criar, abrir, limpar, "preciso que", "por gentileza", "faça um...") é AVISO DE INTERFACE: pede confirmação pela tela e não é fronteira de segurança, porque o canal não executa nada (a fronteira é o canal só ouvir, perguntar e falar texto). A fala usa TMPDIR próprio removido no fim; sinais interrompem leitura, HTTP e TTS; o lock é `flock` mantido aberto.
 
+Contador de turnos (Humano, 19/11): com `AGATA_CANAL_VOZ_SESSAO=<id>` (modelo em `AGATA_CANAL_VOZ_MODELO_TURNO`), cada fala transcrita entregue ao modelo roda `scripts/turno.py proximo` uma vez; a linha de cabeçalho vai à tela e ao gateway (mensagem de sistema). Fala vazia, descartada, eco rejeitado, sem palavra de vez ou com efeito não contam; sem sessão, ou turno.py ausente/falhando, só aviso.
+
 Uso: `python3 redesign/sentidos/canal_voz.py abrir` (primeiro plano; Ctrl+C ou `fechar` encerra), `fechar`, `estado`, `--selftest`.
 
 ### Critérios de aceite do canal de voz
@@ -114,6 +116,9 @@ Uso: `python3 redesign/sentidos/canal_voz.py abrir` (primeiro plano; Ctrl+C ou `
 - [ ] a confirmação do gateway é conferida também em HTTP de erro e JSON inválido
 - [ ] HTTP 500 sem confirmação encerra a sessão
 - [ ] o filtro de efeitos cobre criar, reiniciar, alterar, configurar, instalar, desligar, mover, executar, rodar, mandar
+- [ ] cada fala entregue ao modelo avança o contador de turnos uma vez e leva o cabeçalho
+- [ ] fala vazia ou eco da própria voz não avança o contador
+- [ ] turno.py ausente ou falhando só avisa e não derruba o canal
 
 ## Código
 

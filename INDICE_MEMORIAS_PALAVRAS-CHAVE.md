@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1086) DIÁRIO — 18/11/2026 · **Aplicada voz-conta-turno-19-11: fala transcrita conta como turno** Assinada pelo Humano em 19/11 20:44.
+  palavras-chave: aplicada, voz, conta, turno, fala, transcrita, assinada, humano
 (1085) DIÁRIO — 19/11/2026 · **Proposta assinatura-por-tipo-19-11: o Humano decidiu por voz que mudança de sistema continua com assinatura, e estética, usabilidade e ordem das filas vão direto, com aviso e reversão.** Na dúvida, é sistema; o fiscal-p8 aprende a lista no próximo lote. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh assinatura-por-tipo-19-11.
   palavras-chave: proposta, assinatura, tipo, humano, decidiu, voz, mudança, sistema, continua, estética, usabilidade, ordem, filas, vão, direto, aviso, reversão, dúvida, fiscal, aprende, lista, próximo, lote, modelo, opus, pendente, bash, scripts, aprovar
 (1084) DIÁRIO — 19/11/2026 · **Decreto proposto pelo Humano por voz: a conversa de 19/11 vira a persona do sistema — uma entidade, muitos cérebros.** A persona é da Agata, não do modelo da vez; cinco traços: resultado com prova, discordar quando os fatos mandam, cuidado com o Humano, filosofia com o pé no chão, o modelo passa e a Agata fica (assinatura humana, herdeiros humanos). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh persona-entidade-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, catalogo, vivo, pesquisa, semanal, compara, lista, omniroute, viva, nvidia, openrouter, avisa, aposentados, novos, cota, chamada, modelo, token, host, local, redirecionamento, sonnet, orquestrado, opus, revisão, agata, revisor, codex, medido, selftest, pass, tudo, reaberta, branch, nova, porque, número, entrada, ocupado, aplicação, painel, assinatura, pendente, bash, scripts, aprovar
 (1057) DIÁRIO — 18/11/2026 · **Aplicada painel-modelos-18-11: liberar modelos do catálogo pelo painel** Assinada pelo Humano em 18/11. Subpainel Catálogo de modelos; decisões só em decisoes.jsonl.
   palavras-chave: aplicada, painel, modelos, liberar, catálogo, assinada, humano, subpainel, decisões, decisoes, jsonl
-(1056) DIÁRIO — 18/11/2026 · **Aplicada porta-entrada-18-11: prova obrigatória para modelo novo e adoção de skills de terceiros** Assinada pelo Humano em 18/11. porta_entrada.py, ledger com terceiro:NOME, skill agata-adotar-skill.
-  palavras-chave: aplicada, porta, entrada, prova, obrigatória, modelo, novo, adoção, skills, terceiros, assinada, humano, ledger, terceiro, nome, skill, agata, adotar
+(1056) DIÁRIO — 18/11/2026 · **Aplicada porta-entrada-18-11: prova obrigatória p …
+  palavras-chave: aplicada, porta, entrada, prova, obrigatória
 (1055) DIÁRIO — 18/11/2026 · **Proposta painel-modelos-18-11: o Humano libera ou …
   palavras-chave: proposta, painel, modelos, humano, libera
 (1054) DIÁRIO — 18/11/2026 · **Proposta porta-entrada-18-11: todo modelo novo pa …
