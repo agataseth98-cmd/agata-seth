@@ -367,7 +367,7 @@ def test_primeira_sse_com_keepalive_sem_fim_para_no_limite_de_bytes(cenario, mon
     status, trecho = c.pedir_parcial(300)
     err = capsys.readouterr().err
     assert status == 200 and time.monotonic() - t0 < 20
-    assert ": ka" in trecho and "chatcmpl-keepalive" not in trecho
+    assert "seth-verificacao" in trecho and "chatcmpl-keepalive" not in trecho  # 19/11: falha fechada, resposta mínima
     assert len(c.up.chamadas) == 1
     assert "passou do limite (limite)" in err  # a causa: a coleta parou no teto de bytes
     assert "nova tentativa" not in err         # o 709 não disparou
@@ -385,7 +385,7 @@ def test_keepalive_sem_conteudo_na_rota_livre_segue_a_fila_rapida(cenario, monke
     monkeypatch.setattr(g, "_sombra_rota", lambda *a, **k: None)
     c = cenario([], modo="keepalive")
     status, trecho = c.pedir_parcial(300, modelo="seth-livre")
-    assert status == 200 and ": ka" in trecho
+    assert status == 200 and "seth-verificacao" in trecho  # 19/11 (Codex): não conferida = resposta mínima
     assert [x["model"] for x in c.up.chamadas] == ["seth-livre", "seth-rapido"]
     assert "passou do limite (limite)" in capsys.readouterr().err
 
@@ -401,7 +401,7 @@ def test_livre_via_laya_pesado_faz_a_nova_tentativa_709(cenario, monkeypatch, ca
     c = cenario([], modo="keepalive")
     status, trecho = c.pedir_parcial(300, modelo="seth-livre")
     err = capsys.readouterr().err
-    assert status == 200 and ": ka" in trecho
+    assert status == 200 and "seth-verificacao" in trecho  # 19/11 (Codex): não conferida = resposta mínima
     assert [x["model"] for x in c.up.chamadas] == ["seth-pesado", "seth-rapido"]
     assert "nova tentativa" in err and "passou do limite (limite)" in err
 
@@ -415,7 +415,8 @@ def test_pre_leitura_acima_do_teto_nao_vai_a_auditoria_nem_a_refazer(cenario, mo
     _, _, corpo = c.pedir(stream=True)
     assert len(c.up.chamadas) == 1
     assert "passou do limite (limite)" in capsys.readouterr().err
-    assert "RUIM" in _conteudo(corpo, True) and "Verificação da Máquina" in _conteudo(corpo, True)  # caminho legado
+    # 19/11 (revisão do Codex): acima do teto NÃO sai sem checagem; sai a resposta mínima honesta, sem o texto do modelo
+    assert "RUIM" not in _conteudo(corpo, True) and "longa demais para conferir" in _conteudo(corpo, True)
 
 
 def test_corpo_json_acima_do_teto_nao_vai_a_refazer(cenario, monkeypatch, capsys):
@@ -425,7 +426,7 @@ def test_corpo_json_acima_do_teto_nao_vai_a_refazer(cenario, monkeypatch, capsys
     _, _, corpo = c.pedir()
     assert len(c.up.chamadas) == 1
     assert "passou do limite (limite)" in capsys.readouterr().err
-    assert "RUIM" in _conteudo(corpo, False)
+    assert "RUIM" not in _conteudo(corpo, False) and "longa demais para conferir" in _conteudo(corpo, False)  # 19/11
 
 
 def test_primeira_sse_gotejando_para_no_prazo(cenario, monkeypatch, capsys):
@@ -436,7 +437,7 @@ def test_primeira_sse_gotejando_para_no_prazo(cenario, monkeypatch, capsys):
     t0 = time.monotonic()
     status, trecho = c.pedir_parcial(300)
     err = capsys.readouterr().err
-    assert status == 200 and ": ka" in trecho and time.monotonic() - t0 < 10
+    assert status == 200 and "seth-verificacao" in trecho  # 19/11 (Codex): não conferida = resposta mínima and time.monotonic() - t0 < 10
     # Por que é 1 chamada (medido): seth-pesado direto, sem rota (rota=- no log), e o 709 só age com rota definida.
     assert len(c.up.chamadas) == 1
     assert "passou do limite (prazo)" in err   # a causa: a coleta parou no prazo

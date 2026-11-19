@@ -563,16 +563,39 @@ def _politica_dados_externos(payload: dict, classification: str | None = None) -
 def _preparar_payload_publico(payload: dict) -> dict:
     """Retain only visible user/assistant history; never inject local canon.
 
-    The explicit public lane is text-only and has no MCP tools. Hidden system
-    prompts and prior tool results are removed before egress.
+    (19/11/2026, ferramentas-confianca) A faixa pública é de nível `gratuito`: só dado público. Ficam as ferramentas
+    cujo rótulo (config/ferramentas-rotulos.json) devolve dado público, com as suas chamadas e resultados pareados no
+    histórico; as demais, e todo resultado de ferramenta sem par ou acima do nível, saem antes de qualquer saída.
+    Mensagens `system` e `tool` ocultas continuam removidas.
     """
     mensagens = payload.get("messages")
-    visiveis = [m for m in mensagens if isinstance(m, dict)
-                and m.get("role") in ("user", "assistant")] if isinstance(mensagens, list) else []
+    maximo = ferramentas_confianca.dado_maximo(str(payload.get("model") or ""), True)
+    base = [m for m in mensagens if isinstance(m, dict)
+            and m.get("role") in ("user", "assistant", "tool")] if isinstance(mensagens, list) else []
+    visiveis, _recusadas = ferramentas_confianca.filtrar_historico(base, maximo, so_com_par=True)
     payload["messages"] = [{"role": "system", "content": _doutrina_publica()}, *visiveis]
-    for campo in ("tools", "tool_choice", "functions", "function_call"):
+    for campo in ("functions", "function_call"):
         payload.pop(campo, None)
+    ferramentas_confianca.filtrar_ferramentas(payload, maximo)
     return payload
+
+
+def _filtrar_por_confianca(payload: dict, publica: bool) -> tuple[list, list]:
+    """(19/11/2026) Fora da faixa pública: o pedido só leva as ferramentas cujo dado cabe no nível da rota, e o resultado
+    de ferramenta acima do nível (ou com segredo) é trocado por uma omissão antes de voltar ao modelo.
+    SETH_FERRAMENTAS_CONFIANCA=0 desliga (volta a oferecer tudo)."""
+    if os.environ.get("SETH_FERRAMENTAS_CONFIANCA") == "0":
+        return [], []
+    maximo = ferramentas_confianca.dado_maximo(str(payload.get("model") or ""), publica)
+    retiradas = ferramentas_confianca.filtrar_ferramentas(payload, maximo)
+    msgs = payload.get("messages")
+    recusadas: list = []
+    if isinstance(msgs, list):
+        payload["messages"], recusadas = ferramentas_confianca.filtrar_historico(msgs, maximo)
+    if retiradas or recusadas:
+        print(f"ferramentas-confianca: nível {maximo}; retiradas={retiradas} resultados_recusados={recusadas}",
+              file=sys.stderr, flush=True)
+    return retiradas, recusadas
 
 
 def _texto_e_sinais(msgs: list) -> tuple[int, int, bool]:
@@ -635,6 +658,8 @@ import registro_pedidos  # noqa: E402  (mesmo diretório; benchmark do roteament
 import sombra_capacidade  # noqa: E402  (mesmo diretório; roteamento por capacidade em sombra, 24/10/2026; desligado por padrão)
 import sombra_nova_versao  # noqa: E402  (mesmo diretório; nova versão do Experimento GPT em sombra, 04/11/2026; desligado por padrão)
 import capivara_perfis  # noqa: E402  (scripts/, já no sys.path: perfis de janela por modelo, (667))
+import ferramentas_confianca  # noqa: E402  (mesmo diretório; rótulos de ferramenta e confiança por provedor, 19/11/2026)
+import bloqueio_turno  # noqa: E402  (mesmo diretório; bloqueio no lugar de aviso na verificação do turno, 19/11/2026)
 import rotas_locais  # noqa: E402  (mesmo diretório; rotas locais por tipo, ficha assinada + painel que só restringe, 18/11/2026)
 
 _PERFIS = {"mtime": None, "dados": {}}
@@ -1091,6 +1116,10 @@ def _correcao_da_maquina(linha: str) -> str:
     não muda o prompt, então não mexe em ferramenta, e aparece sempre. SETH_CORRECAO_MAQUINA=0 desliga."""
     if os.environ.get("SETH_CORRECAO_MAQUINA") == "0":
         return ""
+    # (19/11/2026, decisão do Humano) a correção do turno anterior vai SÓ ao contexto do modelo (a nota perto da pergunta,
+    # abaixo), nunca ao Humano. SETH_CORRECAO_VISIVEL=1 restaura a linha visível de 25/10.
+    if os.environ.get("SETH_CORRECAO_VISIVEL") != "1":
+        return ""
     marca_cont = "AINDA FALTA corrigir o turno anterior: "   # passo final do modo Agent (auditoria_turno)
     if linha.startswith(_PREFIXO_AUDITORIA):
         resto = linha[len(_PREFIXO_AUDITORIA):]
@@ -1113,8 +1142,8 @@ def _correcao_perto_da_pergunta(msgs: list, linha: str) -> list:
                if a.strip() and a.strip() != "OK" and not a.strip().startswith("cabeçalho")]
     if not achados or not msgs or not isinstance(msgs[-1], dict) or msgs[-1].get("role") != "user":
         return msgs
-    aviso = ("[Máquina, antes da pergunta: a sua resposta anterior foi conferida e tem erro. Comece com "
-             "\"Correção do turno anterior: …\" e não repita o erro. " + " | ".join(achados) + "]\n\n")
+    aviso = ("[Máquina, só para você; não cite esta nota ao Humano: a sua resposta anterior foi conferida e tem erro. "
+             "Corrija sem repetir o erro e sem anunciar a correção. " + " | ".join(achados) + "]\n\n")
     ultima = dict(msgs[-1])
     c = ultima.get("content")
     if isinstance(c, str):
@@ -1367,6 +1396,59 @@ def _achados_do_texto(texto: str, msgs: list) -> list[str]:
         return []
 
 
+def _bloqueio_ligado() -> bool:
+    """SETH_BLOQUEIO_TURNO=0 desliga o bloqueio da verificação do turno (19/11/2026)."""
+    return os.environ.get("SETH_BLOQUEIO_TURNO") != "0"
+
+
+def _tem_tool_calls(bruto: bytes, sse: bool) -> bool:
+    """A resposta chama ferramenta (estrutura OpenAI)? Então o texto que a acompanha é passo do meio, não resposta."""
+    if not sse:
+        try:
+            return bool(json.loads(bruto)["choices"][0]["message"].get("tool_calls"))
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError):
+            return False
+    for linha in bruto.split(b"\n"):
+        if not linha.startswith(b"data:") or linha.strip() == b"data: [DONE]":
+            continue
+        try:
+            for c in json.loads(linha[5:]).get("choices") or []:
+                if (c.get("delta") or {}).get("tool_calls"):
+                    return True
+        except (ValueError, AttributeError, TypeError):
+            continue
+    return False
+
+
+def _resposta_com_texto(bruto: bytes, sse: bool, texto: str, modelo: str | None) -> bytes:
+    """A mesma resposta com o texto trocado (a resposta mínima honesta). No SSE: um chunk de texto, o fim e o [DONE]."""
+    if sse:
+        fim = {"id": "seth-verificacao", "object": "chat.completion.chunk", "created": 0, "model": modelo or "",
+               "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]}
+        return (_chunk_texto(texto, modelo or "") + b"data: " + json.dumps(fim).encode("utf-8") + b"\n\n"
+                + b"data: [DONE]\n\n")
+    try:
+        o = json.loads(bruto)
+        m = o["choices"][0]["message"]
+    except (ValueError, KeyError, IndexError, TypeError, AttributeError):
+        o = {"model": modelo or "", "choices": [{"index": 0, "message": {"role": "assistant"}}]}
+        m = o["choices"][0]["message"]
+    m["content"] = texto
+    for campo in ("tool_calls", "reasoning", "reasoning_content"):
+        m.pop(campo, None)
+    o["choices"][0]["finish_reason"] = "stop"
+    return json.dumps(o, ensure_ascii=False).encode("utf-8")
+
+
+def _pedido_correcao(corpo: bytes, texto_ruim: str, ach: list) -> bytes:
+    """O mesmo pedido com a resposta retida e a nota da Máquina (só contexto do modelo, nunca ao Humano)."""
+    pl = json.loads(corpo)
+    pl["messages"] = list(pl.get("messages") or []) + [
+        {"role": "assistant", "content": texto_ruim},
+        {"role": "user", "content": _sem_segredo(bloqueio_turno.nota_correcao(ach))}]
+    return json.dumps(pl, ensure_ascii=False).encode("utf-8")
+
+
 def _consumir(leitor, prazo: float | None = None, limite: int | None = None) -> tuple[bytes, str]:
     """Lê o upstream até o fim. Devolve (o lido, motivo): "fim" (pedaço vazio); "prazo" (o prazo absoluto, em
     time.monotonic, chegou: para antes de ler de novo, mesmo com dados prontos, ou um pedaço não veio a tempo);
@@ -1521,11 +1603,15 @@ def _toolcall_texto_ligado() -> bool:
 
 
 def _ferramentas_convertiveis(payload: dict, publica: bool) -> frozenset:
-    """Nomes que podem virar tool_calls neste pedido. Vazio com SETH_TOOLCALL_TEXTO=0, na faixa pública (sem
-    ferramentas) e com tool_choice none (o teto de rodadas não pode virar laço)."""
-    if not _toolcall_texto_ligado() or publica or payload.get("tool_choice") == "none":
+    """Nomes que podem virar tool_calls neste pedido. Vazio com SETH_TOOLCALL_TEXTO=0 e com tool_choice none (o teto de
+    rodadas não pode virar laço). Na faixa pública (19/11/2026) só as ferramentas de dado público; antes, nenhuma."""
+    if not _toolcall_texto_ligado() or payload.get("tool_choice") == "none":
         return frozenset()
-    return _nomes_de_tools(payload.get("tools"))
+    nomes = _nomes_de_tools(payload.get("tools"))
+    if publica:
+        maximo = ferramentas_confianca.dado_maximo(str(payload.get("model") or ""), True)
+        nomes = frozenset(n for n in nomes if ferramentas_confianca.ferramenta_cabe(n, maximo))
+    return nomes
 
 
 def _valor_parametro(bruto: str):
@@ -1787,6 +1873,7 @@ class _Handler(BaseHTTPRequestHandler):
     _cab_estados = None
     _served_by = None  # (17/11, item 1) campo "model" do upstream nesta resposta; "?" no log se não houve
     _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
+    _public_only_lane = False  # (19/11) default de classe: GET e HEAD frios não têm o atributo de instância
     _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
     _nao_registrar = False  # (19/11) por pedido: X-Agata-Nao-Registrar: 1 vindo de loopback; o GET lê só este padrão
     _prazo_nuvem = False  # (19/11) o pedido foi para uma rota de nuvem por tipo: prazo próprio, não o da rota local
@@ -1897,6 +1984,7 @@ class _Handler(BaseHTTPRequestHandler):
                         return self._erro(503, str(e))
                 else:
                     payload = _injeta(payload)
+                    _filtrar_por_confianca(payload, False)  # (19/11) só ferramenta cujo dado cabe no nível da rota
                 self._aud = payload.pop("_agata_aud", "")
                 # (17/11, item 3) ferramentas que podem virar tool_calls: nada na faixa pública, nada com tool_choice none
                 # (o teto de rodadas põe none aqui dentro, em _injeta, por isso a leitura é depois)
@@ -1931,9 +2019,11 @@ class _Handler(BaseHTTPRequestHandler):
                               file=sys.stderr, flush=True)
                 # (19/11/2026) rota de nuvem por tipo, SÓ na faixa pública (texto, sem ferramentas, sem segredo, pelo mesmo
                 # sanitizador). A ficha assinada manda, o painel só restringe; falha de qualquer tipo = fila de sempre.
+                # (19/11, ferramentas-confianca) a faixa pública mantém as ferramentas de dado público: com elas o tipo é
+                # "ferramenta" e só uma rota de nuvem da ficha com esse tipo é escolhida; o payload segue com as ferramentas.
                 if (self._public_only_lane and (agent_padrao or alias_publico) and rotas_locais.nuvem_ligada()
                         and not _e_chamada_utilitaria(payload) and self._fallback_corpo is None):
-                    try:  # o tipo é do payload já público (sem ferramentas): "ferramenta" não existe aqui
+                    try:  # o tipo é do payload já público (só com ferramentas de dado público, se houver)
                         nuvem = rotas_locais.escolher_nuvem(payload, rotas_locais.tipo_do_pedido(payload))
                     except Exception:  # noqa: BLE001 -- escolha quebrada nunca derruba o pedido
                         nuvem = None
@@ -2094,6 +2184,60 @@ class _Handler(BaseHTTPRequestHandler):
         self._log(f"refazer_tentativas={n} achados_inicio={len(cands[0][4])} achados_fim={len(melhor[4])}", t0)
         return melhor[0], leitor, melhor[2]
 
+    def _bloquear_antes_de_entregar(self, corpo: bytes, buf: bytes, leitor, sse: bool, modelo, t0: float):
+        """Bloqueio no lugar de aviso (19/11/2026). Lê a resposta inteira e aplica bloqueio_turno: escrita afirmada sem
+        ferramenta de escrita bem-sucedida, saída de ferramenta simulada, cabeçalho duplicado ou de outro modelo. Com
+        achado, devolve ao modelo UMA vez (nota só no contexto dele); se persistir, entrega a resposta mínima honesta.
+        Resposta que chama ferramenta passa. Devolve (bytes, leitor, modelo)."""
+        limite = _refazer_bytes()
+
+        def nao_conferida(motivo_):
+            # falha fechada (19/11, revisão do Codex): o que não deu para conferir inteiro NÃO sai. Resposta que chama
+            # ferramenta é passo do meio e passa; texto vira a resposta mínima honesta.
+            if _tem_tool_calls(buf, sse):
+                return buf, leitor, modelo
+            self._log(f"bloqueio_turno: resposta não conferida ({motivo_}) -> resposta mínima", t0)
+            return (_resposta_com_texto(buf, sse, bloqueio_turno.resposta_longa_demais(), modelo),
+                    _LeitorVazio(), modelo)
+
+        if len(buf) > limite:
+            return nao_conferida("limite")
+        if sse:
+            resto, motivo = _consumir(leitor, time.monotonic() + _refazer_1a_seg(), limite - len(buf))
+            buf = buf + resto
+            if motivo != "fim":
+                return nao_conferida(motivo)  # prazo, teto de bytes ou upstream caído no meio
+            leitor = _LeitorVazio()
+        if not _resposta_valida(buf, sse):
+            return buf, leitor, modelo
+        nomes, msgs = self._nomes_tools, self._msgs_pedido
+
+        def avaliar(bruto, mod):
+            if _tem_tool_calls(bruto, sse):
+                return "", []
+            texto = _texto_auditavel(bruto, sse, nomes)
+            return texto, bloqueio_turno.achados(texto, msgs, mod)
+
+        texto, ach = avaliar(buf, modelo)
+        if not ach:
+            return buf, leitor, modelo
+        cods = "".join(c for c, _ in ach)
+        nova = None
+        try:
+            nova = self._refazer_chamada(_pedido_correcao(corpo, texto, ach), sse, time.monotonic() + _refazer_seg())
+        except Exception:  # noqa: BLE001 -- a nova tentativa nunca derruba a resposta
+            nova = None
+        if nova is not None:
+            bruto_n, modelo_n = nova
+            texto_n, ach_n = avaliar(bruto_n, modelo_n)
+            if not ach_n:
+                self._served_by = modelo_n
+                self._log(f"bloqueio_turno: achados={cods} corrigido_na_2a", t0)
+                return bruto_n, leitor, modelo_n
+            ach, modelo = ach_n, modelo_n
+        self._log(f"bloqueio_turno: achados={cods} persistiu -> resposta mínima", t0)
+        return _resposta_com_texto(buf, sse, bloqueio_turno.resposta_minima(ach), modelo), leitor, modelo
+
     def _passar(self, corpo: bytes, metodo: str, tentativa: int = 0):
         t0 = time.monotonic()
         if metodo != "POST":
@@ -2227,6 +2371,13 @@ class _Handler(BaseHTTPRequestHandler):
             # (r4) se a espreita já leu o EOF (fim), o leitor não tem mais nada e não manda outro: a coleta não pode
             # esperar nele (180 s por padrão) nem registrar um limite de prazo falso. Vale um leitor vazio.
             buf_pre, leitor, modelo_real = self._refazer_antes_de_entregar(
+                corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
+        # (19/11/2026) bloqueio no lugar de aviso: vale com ou sem SETH_REFAZER, em toda rota seth-* verificada e na faixa
+        # pública (onde há ferramenta de dado público e nenhuma de escrita). SETH_BLOQUEIO_TURNO=0 desliga.
+        # (a ordem importa: GET e HEAD não passam por do_POST, que é quem põe _verificar e _public_only_lane)
+        if (metodo == "POST" and up.status == 200 and (self._verificar or self._public_only_lane)
+                and _bloqueio_ligado() and "/chat/completions" in self.path):
+            buf_pre, leitor, modelo_real = self._bloquear_antes_de_entregar(
                 corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
         if sse and up.status == 200 and self._nomes_tools and leitor is not None:
             # (17/11, item 3, SSE) decide, lê até o fim se for ferramenta em texto, e só converte com o stream
@@ -3395,6 +3546,9 @@ def _selftest() -> int:
          == b'{"choices":[{"message":{"content":"","tool_calls":[{}],"reasoning":"r"}}]}' and _resgate_json(b"nao") == b"nao"),
     ]
     _l2 = "AUDITORIA-TURNO-ANTERIOR: cabeçalho: x | evidência: cita 1 entrada(s) inexistente"
+    casos_corr.append(("correção da Máquina: por padrão nada vai ao Humano (só ao contexto do modelo)",
+                       _correcao_da_maquina(_l2) == ""))
+    os.environ["SETH_CORRECAO_VISIVEL"] = "1"
     casos_corr += [
         ("correção da Máquina: linha com o achado, sem o de cabeçalho",
          _correcao_da_maquina(_l2) == "Correção do turno anterior (pela Máquina): evidência: cita 1 entrada(s) inexistente\n\n"),
@@ -3408,6 +3562,7 @@ def _selftest() -> int:
     os.environ["SETH_CORRECAO_MAQUINA"] = "0"
     casos_corr.append(("correção da Máquina: SETH_CORRECAO_MAQUINA=0 desliga", _correcao_da_maquina(_l2) == ""))
     del os.environ["SETH_CORRECAO_MAQUINA"]
+    del os.environ["SETH_CORRECAO_VISIVEL"]
     for _n, _ok in casos_corr:
         print(f"{'PASS' if _ok else 'FALHA'}  correção perto da pergunta: {_n}")
         falhas += 0 if _ok else 1

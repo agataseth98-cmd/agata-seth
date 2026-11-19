@@ -63,6 +63,24 @@ O código do contador fica em `scripts/turno.py` e os testes em `scripts/testar_
 
 O cabeçalho `X-Agata-Nao-Registrar: 1` (só de loopback, por pedido) faz o gateway pular `registro_pedidos` (SETH_REGISTRO_PEDIDOS) e confirmar com `X-Agata-Registro: nao`. Usado pelo canal de voz (`redesign/sentidos`).
 
+## Ferramentas por confiança e bloqueio do turno (19/11/2026, decisão do Humano)
+
+- [ ] toda ferramenta oferecida hoje tem rótulo de dado e de efeito, e escrita nunca é de dado público
+- [ ] o nível de cada provedor bate com a ficha de rotas e segredo nunca cabe em nível nenhum
+- [ ] a faixa pública recebe só ferramenta de dado público, com a chamada e o resultado pareados no histórico
+- [ ] resultado de ferramenta acima do nível do provedor, ou com segredo, é recusado antes de voltar ao modelo
+- [ ] escrita afirmada sem ferramenta de escrita bem-sucedida neste turno é bloqueada, sem alarme falso em texto comum
+- [ ] saída de ferramenta simulada e cabeçalho duplicado ou de outro modelo são bloqueados
+- [ ] o bloqueio devolve ao modelo uma vez; persistindo, entrega a resposta mínima honesta, em JSON e em stream
+- [ ] a correção do turno anterior vai só ao contexto do modelo, nunca ao Humano
+- [ ] GET e POST depois de POST na mesma conexão não herdam o filtro nem o bloqueio
+- [ ] o resultado de ferramenta só é atribuído pelo tool_call_id da chamada do assistente; o campo name do cliente nunca é confiado e sem vínculo vale dado pessoal
+- [ ] escrita só conta como bem-sucedida com resultado positivo explícito; erro, falha, negado, não foi possível ou ambíguo não contam
+- [ ] resposta acima do teto de bytes ou que estoura o prazo não sai sem checagem: sai a resposta mínima honesta
+- [ ] a faixa pública mantém as ferramentas de dado público também nas rotas de nuvem, e a ficha assinada decide o tipo
+
+Segurança pelo dado e pelo efeito, não pelo lugar do modelo. `config/ferramentas-rotulos.json` (lido com cache por mtime) rotula cada ferramenta (`publico|pessoal|segredo` e `leitura|escrita`; desconhecida vale pessoal+escrita) e dá o nível por provedor (`local` e `pago_sem_treino` até pessoal, `gratuito` só público) e por faixa. O gateway só oferece a cada pedido as ferramentas cujo dado cabe no nível da rota (`SETH_FERRAMENTAS_CONFIANCA=0` desliga), e escrita segue pelo portão de aprovação do cliente. O bloqueio (`SETH_BLOQUEIO_TURNO=0` desliga) vale com ou sem `SETH_REFAZER`; a linha visível "Correção do turno anterior (pela Máquina)" só volta com `SETH_CORRECAO_VISIVEL=1`. Falha fechada (revisão do Codex, 19/11): o que não pôde ser conferido inteiro (acima de `SETH_REFAZER_BYTES`, prazo, upstream cortado) vira a resposta mínima; resposta que chama ferramenta passa. Os níveis por provedor e por faixa são proposta: o Humano confirma na assinatura. Não medido: efeito no uso real da Seth; o gateway filtra as ferramentas que o cliente manda e não injeta definições.
+
 ## Pacote mecânico (12/11/2026): pontos de entrada, fim de turno, negação do .env, subagentes
 
 Origem: decisões do Humano de 12/11/2026 (cache do Conselho): o que o Agata desenvolve vale para todos os modelos do Conselho por mecanismo da Máquina, não por instrução; todo modelo age segundo o mesmo sistema e as mesmas decisões; subagente recebe só o pacote mínimo. Código em `scripts/conselho_mecanismos.py`, `scripts/auditoria_stop.py` e `config/cli/`; testes em `scripts/testar_mecanismos.py`.
@@ -140,3 +158,7 @@ Pendência conhecida: `redesign/router/seth_gateway.py` mantém a constante `_DO
 - `test_verificar_refazer.py` (verificar e refazer, 18/11/2026: gateway real com upstream falso em HTTP local; teto de tentativas e de segundos, canário, chave SETH_REFAZER=0, legado intacto, stream, escalada de fila; sem rede)
 - `skills_ledger.py` (desfechos das skills, L8, 18/11/2026: registrar, conferir e recalcular; só solução com taxa acima de 51% e n >= 10 usos conferidos é comprovada; as demais ficam como não comprovada, sem sumir)
 - `test_skills_ledger.py` (testes do L8, 18/11/2026: memória do agente fora da pasta do cache, reinício simulado, cache por variável, segredo recusado, definições dos agentes; critérios AC1 a AC13 do L8; HOME temporário)
+- `ferramentas_confianca.py` (rótulos de ferramenta e nível de confiança por provedor, 19/11/2026: lê `config/ferramentas-rotulos.json` com cache por mtime; filtra as ferramentas oferecidas e recusa resultado acima do nível ou com segredo; sem rede)
+- `bloqueio_turno.py` (bloqueio no lugar de aviso, 19/11/2026: escrita afirmada sem ferramenta de escrita bem-sucedida, saída de ferramenta simulada, cabeçalho duplicado ou de outro modelo; nota de correção só ao contexto do modelo e resposta mínima honesta; sem rede)
+- `test_ferramentas_confianca.py` (rótulos, níveis, filtros e faixa pública; gateway real com upstream falso, GET e POST na mesma conexão; sem rede)
+- `test_bloqueio_turno.py` (checagens puras e gateway real: corrige na 2a, resposta mínima em JSON e stream, tool_call passa, chave de desligar, GET e POST na mesma conexão; sem rede)

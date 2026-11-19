@@ -1,0 +1,128 @@
+{
+ "schema_version": 1,
+ "descricao": "Rótulos de ferramenta (dado devolvido e efeito) e nível de confiança por provedor. A segurança é pelo DADO e pelo EFEITO, não pelo lugar do modelo (decisão do Humano, 19/11/2026). Na dúvida, o rótulo mais restrito. PROPOSTA: o Humano confirma na assinatura.",
+ "classes_de_dado": [
+  "publico",
+  "pessoal",
+  "segredo"
+ ],
+ "niveis": {
+  "local": {
+   "dado_maximo": "pessoal",
+   "nota": "modelo na própria Máquina (Ollama, llama.cpp)"
+  },
+  "pago_sem_treino": {
+   "dado_maximo": "pessoal",
+   "nota": "nuvem paga com contrato de não treinar com o prompt; só entra com treina_com_prompts = nao na ficha"
+  },
+  "gratuito": {
+   "dado_maximo": "publico",
+   "nota": "nuvem gratuita, sem garantia sobre treino"
+  }
+ },
+ "provedores": {
+  "ollama": "local",
+  "llamacpp": "local",
+  "gemini": "gratuito",
+  "openrouter": "gratuito",
+  "zai": "gratuito",
+  "mistral": "gratuito",
+  "nvidia": "gratuito",
+  "huggingface": "gratuito"
+ },
+ "padrao_provedor_desconhecido": "gratuito",
+ "faixas": {
+  "publica": "gratuito",
+  "seth-rapido": "pessoal_via_sanitizador",
+  "seth-livre": "pessoal_via_sanitizador",
+  "seth-pesado": "pessoal_via_sanitizador",
+  "seth-codigo": "pessoal_via_sanitizador",
+  "_nota": "As filas seth-* são cascatas do OmniRoute com provedor que o gateway não escolhe; hoje o proxy sanitizador tira segredo, dado pessoal e nomes de projeto antes de sair (P-8, 22/10/2026). 'pessoal_via_sanitizador' mantém o comportamento de hoje (as ferramentas seguem oferecidas). O Humano decide na assinatura se a fila passa a 'gratuito'."
+ },
+ "ferramentas": {
+  "query_canon": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "vault_buscar": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "vault_consultar": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "maquina_verificar": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "memoria_acrescentar": {
+   "dado": "pessoal",
+   "efeito": "escrita"
+  },
+  "diario_anotar": {
+   "dado": "pessoal",
+   "efeito": "escrita"
+  },
+  "ler_mensagens": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "enviar_mensagem": {
+   "dado": "pessoal",
+   "efeito": "escrita"
+  },
+  "navegar": {
+   "dado": "publico",
+   "efeito": "leitura"
+  },
+  "buscar_web": {
+   "dado": "publico",
+   "efeito": "leitura"
+  },
+  "ler_pagina": {
+   "dado": "publico",
+   "efeito": "leitura"
+  },
+  "fechar_navegador": {
+   "dado": "publico",
+   "efeito": "leitura"
+  },
+  "screenshot": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "clicar": {
+   "dado": "pessoal",
+   "efeito": "escrita"
+  },
+  "preencher": {
+   "dado": "pessoal",
+   "efeito": "escrita"
+  },
+  "tool_search": {
+   "dado": "publico",
+   "efeito": "leitura"
+  },
+  "git_sync": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "run_perimetro": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "check_citation": {
+   "dado": "pessoal",
+   "efeito": "leitura"
+  },
+  "lint_header": {
+   "dado": "publico",
+   "efeito": "leitura"
+  }
+ },
+ "padrao_ferramenta_desconhecida": {
+  "dado": "pessoal",
+  "efeito": "escrita"
+ }
+}
