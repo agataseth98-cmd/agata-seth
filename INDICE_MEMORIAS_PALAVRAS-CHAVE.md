@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no canon** Assinada pelo Humano em 19/11 09:14. Bom para todo mundo; progresso visível e confiável na espera.
+  palavras-chave: aplicada, regra, zero, entra, canon, assinada, humano, bom, mundo, progresso, visível, confiável, espera
 (1070) DIÁRIO — 18/11/2026 · **Aplicada canal-voz-18-11: canal de voz local e não-registro por pedido no gateway** Assinada pelo Humano em 19/11. Fase 1, sem reconhecer a voz; gateway honra X-Agata-Nao-Registrar só de loopback.
   palavras-chave: aplicada, canal, voz, local, registro, pedido, gateway, assinada, humano, fase, reconhecer, honra, agata, nao, registrar, loopback
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o chamado de voz do sistema** Assinada pelo Humano em 19/11. Agir naturalmente, responder sempre em voz, som de espera opcional.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, verificar, refazer, resposta, seth, conferida, chegar, humano, refeita, teto, traz, achado, atende, decisão, checagem, fatos, correções, agem, entrega, fica, atrás, canário, roteador, capacidade, desliga, caminho, legado, muda, testes, autoteste, gateway, passam, diff, aplica, cópia, limpa, codex, reprovou, quatro, primeiras, rodadas, achados, corrigidos, quinta, deu, veredito, cota, agata, revisor, aprovou, falta, assinatura
 (1042) DIÁRIO — 18/11/2026 · **Aplicada modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando.** Assinada pelo Humano. Nota: a entrada da aplicação de seth-base-17-11 registrou Claude Opus 5.5 como modelo, mas quem executou foi o agente Claude Haiku 5.5 orquestrado pelo Opus; esta nota corrige o registro. O roteiro de instalação de sob-demanda-17-11 omitiu o relink dos backends laya-roteador.service e ollaya.service, refeito na instalação.
   palavras-chave: aplicada, modelos, pagos, modelo, inclusive, pago, entra, agata, comando, assinada, humano, nota, entrada, aplicação, seth, base, registrou, claude, opus, quem, executou, agente, haiku, orquestrado, corrige, registro, roteiro, instalação, sob, demanda, omitiu, relink, backends, laya, roteador, service, ollaya, refeito
-(1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth registra o modelo servido, mantém cabeçalho único e converte tool_call em texto só sob regra estrita.** Assinada pelo Humano; o seletor SETH_ROTEADOR fica no padrão legado e SETH_TOOLCALL_TEXTO=0 desliga o conversor.
-  palavras-chave: aplicada, seth, base, gateway, registra, modelo, servido, mantém, cabeçalho, único, converte, tool, call, texto, sob, regra, estrita, assinada, humano, seletor, roteador, fica, padrão, legado, toolcall, desliga, conversor
+(1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth regis …
+  palavras-chave: aplicada, seth, base, gateway, regis
 (1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem …
   palavras-chave: aplicada, sob, demanda, laya, jev, sobem
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro …
