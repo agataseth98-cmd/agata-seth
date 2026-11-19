@@ -626,3 +626,93 @@ def test_partida_a_frio_estourando_o_prazo_cai_na_fila(gw, monkeypatch):
     c = gw()
     status, texto = c.post()
     assert status == 200 and "fila ok" in texto and c.up.chamadas == ["ollama-local/a:1b", "seth-livre"]
+
+
+# --- X-Agata-Nao-Registrar (19/11/2026, opção A do Humano): o canal de voz pede que o pedido não seja registrado ---
+
+def _conn(c):
+    import http.client
+    return http.client.HTTPConnection("127.0.0.1", int(c.base.rsplit(":", 1)[1]), timeout=30)
+
+
+def _post_raw(conn, pergunta, cab=None):
+    h = {"Content-Type": "application/json", **(cab or {})}
+    conn.request("POST", "/v1/chat/completions", json.dumps(
+        {"model": "seth-livre", "messages": [{"role": "user", "content": pergunta}]}), h)
+    r = conn.getresponse()
+    r.read()
+    return r
+
+
+@pytest.fixture
+def pedidos(monkeypatch, tmp_path):
+    import registro_pedidos
+    monkeypatch.setattr(registro_pedidos, "DIR", tmp_path / "pedidos")
+    monkeypatch.setenv("SETH_REGISTRO_PEDIDOS", "1")
+    return tmp_path / "pedidos"
+
+
+def _gravado(pasta):
+    return "".join(p.read_text() for p in pasta.glob("*.jsonl")) if pasta.exists() else ""
+
+
+def test_sem_cabecalho_grava_como_hoje(gw, pedidos):
+    c = gw()
+    r = _post_raw(_conn(c), "pergunta-visivel-aaa")
+    assert r.status == 200 and r.getheader("X-Agata-Registro") is None
+    assert "pergunta-visivel-aaa" in _gravado(pedidos)
+
+
+def test_com_cabecalho_nada_e_gravado_e_o_gateway_confirma(gw, pedidos):
+    c = gw()
+    r = _post_raw(_conn(c), "pergunta-secreta-bbb", {"X-Agata-Nao-Registrar": "1"})
+    assert r.status == 200 and r.getheader("X-Agata-Registro") == "nao"
+    gravado = _gravado(pedidos)
+    assert "pergunta-secreta-bbb" not in gravado and "fila ok" not in gravado and "local ok" not in gravado
+
+
+def test_outro_valor_do_cabecalho_e_comportamento_de_hoje(gw, pedidos):
+    c = gw()
+    for i, v in enumerate(("0", "true", "2", "")):
+        r = _post_raw(_conn(c), f"pergunta-ccc{i}", {"X-Agata-Nao-Registrar": v})
+        assert r.getheader("X-Agata-Registro") is None
+    assert all(f"pergunta-ccc{i}" in _gravado(pedidos) for i in range(4))
+
+
+def test_so_loopback_pode_pedir_para_nao_registrar():
+    class H:
+        def __init__(self, ip, v="1"):
+            self.client_address = (ip, 1)
+            self.headers = {"X-Agata-Nao-Registrar": v}
+    for ip in ("127.0.0.1", "::1"):
+        assert g._pede_nao_registrar(H(ip)) is True
+    for ip in ("10.0.0.5", "192.168.1.2", "8.8.8.8"):
+        assert g._pede_nao_registrar(H(ip)) is False
+    assert g._pede_nao_registrar(object()) is False
+
+
+def test_keep_alive_get_e_post_seguinte_nao_herdam(gw, pedidos):
+    c = gw()
+    conn = _conn(c)
+    r1 = _post_raw(conn, "primeira-ddd", {"X-Agata-Nao-Registrar": "1"})
+    assert r1.getheader("X-Agata-Registro") == "nao"
+    conn.request("GET", "/v1/models")                    # GET na mesma conexão, depois do POST
+    r2 = conn.getresponse()
+    corpo = r2.read()
+    assert r2.status == 200 and b"seth-livre" in corpo and r2.getheader("X-Agata-Registro") is None
+    r3 = _post_raw(conn, "terceira-eee")                 # POST sem o cabeçalho, mesma conexão
+    assert r3.getheader("X-Agata-Registro") is None
+    gravado = _gravado(pedidos)
+    assert "terceira-eee" in gravado and "primeira-ddd" not in gravado
+    conn2 = _conn(c)
+    conn2.request("GET", "/v1/models")                   # GET frio
+    assert conn2.getresponse().status == 200
+
+
+def test_canal_de_voz_contra_o_gateway_real_nao_grava_e_recebe_a_confirmacao(gw, pedidos):
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sentidos"))
+    import canal_voz
+    c = gw()
+    resp = canal_voz.enviar_ao_modelo("fala-do-canal-fff", url=c.base + "/v1/chat/completions")
+    assert resp
+    assert "fala-do-canal-fff" not in _gravado(pedidos)

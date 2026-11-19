@@ -52,6 +52,17 @@ O código do contador fica em `scripts/turno.py` e os testes em `scripts/testar_
 - [ ] REGRAS, PROTOCOLOS e AGENTS apontam o contador mecânico e o t=<n>.sub
 - [ ] .claude/settings.json registra o gancho UserPromptSubmit e preserva o SessionStart
 
+## Não registrar pedido (19/11/2026, decisão A do Humano)
+
+- [ ] sem X-Agata-Nao-Registrar o gateway registra o pedido como antes
+- [ ] com X-Agata-Nao-Registrar: 1 nada é gravado e o gateway devolve X-Agata-Registro: nao
+- [ ] outro valor de X-Agata-Nao-Registrar mantém o comportamento de hoje
+- [ ] só loopback pode pedir para não registrar
+- [ ] GET e POST seguinte na mesma conexão não herdam o não registrar
+- [ ] o canal de voz contra o gateway real não grava e recebe a confirmação
+
+O cabeçalho `X-Agata-Nao-Registrar: 1` (só de loopback, por pedido) faz o gateway pular `registro_pedidos` (SETH_REGISTRO_PEDIDOS) e confirmar com `X-Agata-Registro: nao`. Usado pelo canal de voz (`redesign/sentidos`).
+
 ## Pacote mecânico (12/11/2026): pontos de entrada, fim de turno, negação do .env, subagentes
 
 Origem: decisões do Humano de 12/11/2026 (cache do Conselho): o que o Agata desenvolve vale para todos os modelos do Conselho por mecanismo da Máquina, não por instrução; todo modelo age segundo o mesmo sistema e as mesmas decisões; subagente recebe só o pacote mínimo. Código em `scripts/conselho_mecanismos.py`, `scripts/auditoria_stop.py` e `config/cli/`; testes em `scripts/testar_mecanismos.py`.

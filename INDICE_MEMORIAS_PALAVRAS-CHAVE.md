@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1070) DIÁRIO — 18/11/2026 · **Aplicada canal-voz-18-11: canal de voz local e não-registro por pedido no gateway** Assinada pelo Humano em 19/11. Fase 1, sem reconhecer a voz; gateway honra X-Agata-Nao-Registrar só de loopback.
+  palavras-chave: aplicada, canal, voz, local, registro, pedido, gateway, assinada, humano, fase, reconhecer, honra, agata, nao, registrar, loopback
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o chamado de voz do sistema** Assinada pelo Humano em 19/11. Agir naturalmente, responder sempre em voz, som de espera opcional.
   palavras-chave: aplicada, voz, chamado, fale, comigo, abre, sistema, assinada, humano, agir, naturalmente, responder, sempre, som, espera, opcional
 (1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no canon — bom para todo mundo, e progresso visível e confiável na espera.** Decisão do Humano em 18/11 (18:42 e 19:16). Modelo: Opus. Medido: CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh regra-zero-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, modelos, pagos, modelo, inclusive, pago, entra, agata, comando, assinada, humano, nota, entrada, aplicação, seth, base, registrou, claude, opus, quem, executou, agente, haiku, orquestrado, corrige, registro, roteiro, instalação, sob, demanda, omitiu, relink, backends, laya, roteador, service, ollaya, refeito
 (1041) DIÁRIO — 18/11/2026 · **Aplicada seth-base-17-11: o gateway da Seth registra o modelo servido, mantém cabeçalho único e converte tool_call em texto só sob regra estrita.** Assinada pelo Humano; o seletor SETH_ROTEADOR fica no padrão legado e SETH_TOOLCALL_TEXTO=0 desliga o conversor.
   palavras-chave: aplicada, seth, base, gateway, registra, modelo, servido, mantém, cabeçalho, único, converte, tool, call, texto, sob, regra, estrita, assinada, humano, seletor, roteador, fica, padrão, legado, toolcall, desliga, conversor
-(1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem na primeira chamada e caem após 15 minutos ociosos.** Sockets e proxies do systemd assinados pelo Humano entram no repositório; a instalação na Máquina segue a ordem do registro da proposta.
-  palavras-chave: aplicada, sob, demanda, laya, jev, sobem, primeira, chamada, caem, após, minutos, ociosos, sockets, proxies, systemd, assinados, humano, entram, repositório, instalação, máquina, segue, ordem, registro, proposta
+(1040) DIÁRIO — 18/11/2026 · **Aplicada sob-demanda-17-11: o Laya e o Jev sobem …
+  palavras-chave: aplicada, sob, demanda, laya, jev, sobem
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro …
   palavras-chave: aplicada, orquestra, caro, modelo
 (1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, in …
