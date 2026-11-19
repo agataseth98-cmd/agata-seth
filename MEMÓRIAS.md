@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c678321e83ff5fe84ef40328af8bc9c5d19129f1
-  Escrito em: 19/11/2026 19:42 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 4e279015d860e899a8e7228781f30ed1d824bc66
+  Escrito em: 19/11/2026 19:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c678321e83ff5fe84ef40328af8bc9c5d19129f1/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c678321e83ff5fe84ef40328af8bc9c5d19129f1/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c678321e83ff5fe84ef40328af8bc9c5d19129f1/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c678321e83ff5fe84ef40328af8bc9c5d19129f1/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c678321e83ff5fe84ef40328af8bc9c5d19129f1/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e279015d860e899a8e7228781f30ed1d824bc66/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e279015d860e899a8e7228781f30ed1d824bc66/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e279015d860e899a8e7228781f30ed1d824bc66/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e279015d860e899a8e7228781f30ed1d824bc66/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/4e279015d860e899a8e7228781f30ed1d824bc66/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1084) DIÁRIO — 19/11/2026 · **Decreto proposto pelo Humano por voz: a conversa de 19/11 vira a persona do sistema — uma entidade, muitos cérebros.** A persona é da Agata, não do modelo da vez; cinco traços: resultado com prova, discordar quando os fatos mandam, cuidado com o Humano, filosofia com o pé no chão, o modelo passa e a Agata fica (assinatura humana, herdeiros humanos). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh persona-entidade-19-11.
+
 (1083) DIÁRIO — 19/11/2026 · **Proposta voz-conta-turno-19-11: cada fala transcrita do canal de voz passa a avançar o contador de turnos, como mensagem do Humano.** Falha achada pelo próprio Humano por voz às 18:58. Codex designado como orquestrador, mas sem cota até 24/11; implementação Sonnet, revisão Opus; 79 testes. Assinatura pendente: bash scripts/aprovar.sh voz-conta-turno-19-11.
 
 (1082) DIÁRIO — 19/11/2026 · **Proposta sandbox-fase2-19-11: o lançador agata-run abre qualquer plataforma (Claude Code, Codex, OpenCode, Gemini) com o mesmo estado, o mesmo turno e a contenção Landlock no processo filho.** Primeiro passo para o Codex e os demais terem a mesma funcionalidade que o Claude (pedido do Humano, 19/11). Plano da Seth (nemotron), código Sonnet, revisão Opus; 27 testes em processo real. Assinatura pendente: bash scripts/aprovar.sh sandbox-fase2-19-11.
