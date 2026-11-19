@@ -1,0 +1,56 @@
+[
+  {
+    "criterion": "dado pessoal fora de rota local é erro na ficha (`tests/test_ficha.py`)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_ficha.py::FichaTests::test_dado_pessoal_fora_de_rota_local_e_erro"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o placar agrega por modelo e tipo com n, p50 e p95, e grava 0600 (`tests/test_placar.py`)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::PlacarTests::test_agrega_por_modelo_e_tipo_com_n_p50_p95"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "classe pessoal só devolve modelo local; segredo devolve lista vazia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::PlacarTests::test_confianca_e_classe_pessoal_so_local"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "standby no painel tira o modelo; a decisão mais recente vence",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::PlacarTests::test_standby_tira_e_ultima_decisao_vence"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "amostra pequena traz aviso e peso menor, sem descartar o modelo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::PlacarTests::test_amostra_pequena_aviso_peso_menor_mas_nao_descartada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "fonte ausente ou resumo ilegível vira aviso, não falha",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::PlacarTests::test_fonte_ausente_e_resumo_quebrado_viram_aviso"
+    ],
+    "cwd": null
+  }
+]

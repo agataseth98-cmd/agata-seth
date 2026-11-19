@@ -1,0 +1,24 @@
+# Rotas: ficha e placar de modelos
+
+## Contrato
+
+1. A ficha (`config/rotas-ficha.json`) é validada por `ficha.py` contra D2 (dado pessoal só em rota local) e D3 (cota gratuita compartilhada com aviso). Não chama provedor.
+2. O placar (`placar.py`, 19/11/2026) agrega, por modelo e tipo de pedido (conversa, codigo, json, ferramenta, contexto), o que já foi medido: nota (a lógica de `scripts/porta_entrada.py`, importada, não duplicada), p50/p95, n, data, protocolo (`neutro` ou `prompt_real`, este quando o item termina em `_mcp_canon`), custo, confiança do provedor (`local`, `pago_sem_treino`, `gratuito`) e estado no painel (última decisão em `decisoes.jsonl`; standby, aposentado e vetado tiram o modelo).
+3. `placar.py gerar` grava `placar.json` com modo 0600. `placar.py melhores --tipo T --classe publico|pessoal` devolve os modelos elegíveis em ordem: publico aceita qualquer confiança, pessoal só `local`, segredo nenhum.
+4. Amostra pequena (n < 6) entra com aviso e peso menor (nota puxada para 0,5); nenhum modelo some por amostra pequena. De várias execuções vale a mais recente do par modelo × tipo.
+5. O placar só lê arquivos; não chama provedor, não altera o gateway. Tarifa e confiança `pago_sem_treino` só entram por `tarifas.json` na pasta do placar (a tarifa do cofre não é lida aqui). Nota é mecânica, não é juízo de qualidade.
+
+## Critérios de aceite
+
+- [ ] dado pessoal fora de rota local é erro na ficha (`tests/test_ficha.py`)
+- [ ] o placar agrega por modelo e tipo com n, p50 e p95, e grava 0600 (`tests/test_placar.py`)
+- [ ] classe pessoal só devolve modelo local; segredo devolve lista vazia
+- [ ] standby no painel tira o modelo; a decisão mais recente vence
+- [ ] amostra pequena traz aviso e peso menor, sem descartar o modelo
+- [ ] fonte ausente ou resumo ilegível vira aviso, não falha
+
+## Código
+
+- `ficha.py`
+- `placar.py`
+- `tests/`
