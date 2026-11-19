@@ -3,13 +3,26 @@ name: agata-voz
 description: >-
   Fazer um modelo falar com a voz do sistema Agata (piper-tts local, modelo pt_BR-agata-last), conduzir conversa
   falada e debate com escuta paciente, e orientar quem não emite áudio a escrever para ser falado nessa voz. Use
-  quando o Humano pedir para ler em voz alta, falar, narrar, ouvir uma resposta, voz do Agata, modo de voz, TTS,
+  quando o Humano pedir para ler em voz alta, falar, "fale comigo" (chamado de voz), narrar, ouvir uma resposta, voz do Agata, modo de voz, TTS,
   ou quando a fala vier fragmentada ou houver pausa ou ruído.
 ---
 
 # Voz do sistema
 
 Decisão do Humano, 03/11/2026, sem negociação: quando um modelo fala, a voz é a do sistema. Nenhum modelo usa outra voz nem serviço externo de voz, e texto do Agata nunca sai da Máquina para virar áudio. Falar sai da tela: só quando o Humano pede ou o modo de voz está ativo. Quem não tem como emitir áudio mimetiza a voz por escrito (voz comum, `AGENTS.md`, (685) e (686)), entrega o texto falável e diz que NÃO falou.
+
+## 0. Chamado de voz: "fale comigo" (Humano, 18/11/2026)
+
+Canônico: "fale comigo" abre o chamado de voz do sistema, em qualquer modelo. Enquanto o chamado está aberto, cada resposta também é falada pela voz do sistema, sem o Humano repetir o pedido.
+
+1. Ao receber "fale comigo", responda em uma linha que o chamado está aberto e fale essa linha.
+2. A cada resposta seguinte: escreva a resposta normal na tela e, junto, o texto falável dela (regras do item 1 abaixo), e fale com `python3 scripts/agata_falar.py --arquivo <arquivo>`.
+3. O chamado fecha com "encerrar chamado", "volte ao texto" ou "pare de falar". Confirme o fechamento em uma linha, por escrito.
+4. Quem não tem como emitir áudio diz que NÃO falou e entrega o texto falável, como no item 1.
+5. Segredo, token ou dado pessoal nunca são falados; diga por quê.
+6. Aja naturalmente, como numa conversa entre pessoas (Humano, 18/11 19:09): a fala é a própria resposta. Não narre que falou nem o mecanismo ("falei pela voz do sistema", código de saída). Só avise quando a voz falhar.
+7. Toda fala do Humano recebe resposta em voz, nem que seja curta ("entendido"); nunca silêncio (Humano, 18/11 20:38).
+8. Enquanto pensa, o canal pode tocar um som de espera próprio do sistema, gerado na Máquina, com entrada e saída suaves; ele para antes da fala (Regra 0: progresso visível e audível).
 
 ## 1. Falar para compreender (Humano, 11/11)
 
