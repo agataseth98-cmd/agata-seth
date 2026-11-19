@@ -1092,3 +1092,39 @@ def test_keepalive_depois_de_queda_da_nuvem_post_fila_e_get_na_mesma_conexao(gw,
     status, txt = _post_conn(conn, pergunta="oi de novo")           # não público: fila, sem nuvem herdada
     conn.close()
     assert status == 200 and len(c.up.chamadas) == n + 1 and c.up.chamadas[-1].startswith(("seth-", "ollama-local/"))
+
+
+# --- ferramentas de dado público valem também nas rotas de nuvem da faixa pública (19/11/2026, ferramentas-confianca) ---
+
+def _def_pub(nome):
+    return {"type": "function", "function": {"name": nome, "parameters": {}}}
+
+
+def test_gateway_publico_com_ferramenta_publica_vai_a_nuvem_que_tem_o_tipo_ferramenta(gw, ficha):
+    _ficha_nuvem(ficha)
+    d = json.loads(ficha.read_text(encoding="utf-8"))
+    for r in d["rotas"]:
+        if r["id"] == "nv0":  # Laguna: a ficha assinada é quem dá o tipo "ferramenta"; aqui, só no teste
+            r["tipos"] = ["ferramenta"]
+    ficha.write_text(json.dumps(d), encoding="utf-8")
+    rl._CACHE_FICHA["mtime"] = None
+    rl._CACHE_NUVEM["mtime"] = None
+    c = gw()
+    c.post("pesquise na web", publico=True, extra={"tools": [_def_pub("buscar_web_mcp_navegador"),
+                                                             _def_pub("vault_buscar_mcp_canon")]})
+    assert c.up.chamadas[-1] == "nvidia/poolside/laguna-xs-2.1"
+    assert [t["function"]["name"] for t in c.up.corpos[-1]["tools"]] == ["buscar_web_mcp_navegador"]  # só dado público
+
+
+def test_gateway_publico_com_ferramenta_publica_sem_rota_de_nuvem_do_tipo_segue_a_fila_com_a_ferramenta(gw, ficha):
+    _ficha_nuvem(ficha)  # como a ficha real: nenhuma rota de nuvem com o tipo "ferramenta"
+    c = gw()
+    c.post("pesquise na web", publico=True, extra={"tools": [_def_pub("buscar_web_mcp_navegador")]})
+    assert not c.up.chamadas[-1].startswith("nvidia/")
+    assert [t["function"]["name"] for t in c.up.corpos[-1]["tools"]] == ["buscar_web_mcp_navegador"]
+
+
+def test_nome_de_modelo_de_nuvem_nvidia_e_de_nivel_gratuito():
+    import ferramentas_confianca as fc
+    assert fc.dado_maximo("nvidia/nvidia/nemotron-3.5-bolt-e4b", False) == "publico"
+    assert fc.dado_maximo("nvidia/poolside/laguna-xs-2.1", True) == "publico"

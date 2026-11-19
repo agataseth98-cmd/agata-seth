@@ -547,5 +547,138 @@
       "redesign/router/test_rotas_locais.py::test_canal_de_voz_contra_o_gateway_real_nao_grava_e_recebe_a_confirmacao"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "toda ferramenta oferecida hoje tem rótulo de dado e de efeito, e escrita nunca é de dado público",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_toda_ferramenta_oferecida_tem_rotulo_valido",
+      "redesign/router/test_ferramentas_confianca.py::test_escrita_nunca_e_de_dado_publico_e_leitura_web_e_publica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o nível de cada provedor bate com a ficha de rotas e segredo nunca cabe em nível nenhum",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_provedores_batem_com_a_ficha_de_rotas",
+      "redesign/router/test_ferramentas_confianca.py::test_segredo_nunca_cabe"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a faixa pública recebe só ferramenta de dado público, com a chamada e o resultado pareados no histórico",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_gateway_faixa_publica_recebe_so_ferramenta_de_dado_publico",
+      "redesign/router/test_ferramentas_confianca.py::test_faixa_publica_mantem_so_o_par_de_ferramenta_publica"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "resultado de ferramenta acima do nível do provedor, ou com segredo, é recusado antes de voltar ao modelo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_resultado_acima_do_nivel_e_recusado_antes_de_voltar_ao_modelo",
+      "redesign/router/test_ferramentas_confianca.py::test_resultado_com_segredo_e_recusado_em_qualquer_nivel"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "escrita afirmada sem ferramenta de escrita bem-sucedida neste turno é bloqueada, sem alarme falso em texto comum",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_a_escrita_afirmada_sem_ferramenta_e_achado",
+      "redesign/router/test_bloqueio_turno.py::test_a_sem_alarme_falso_em_texto_comum"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "saída de ferramenta simulada e cabeçalho duplicado ou de outro modelo são bloqueados",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_b_saida_simulada",
+      "redesign/router/test_bloqueio_turno.py::test_c_cabecalho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o bloqueio devolve ao modelo uma vez; persistindo, entrega a resposta mínima honesta, em JSON e em stream",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_escrita_afirmada_e_corrigida_na_segunda",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_persistindo_entrega_a_resposta_minima",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_stream_persistindo_entrega_sse_valido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a correção do turno anterior vai só ao contexto do modelo, nunca ao Humano",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_correcao_da_maquina_nao_vai_ao_humano"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "GET e POST depois de POST na mesma conexão não herdam o filtro nem o bloqueio",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_gateway_get_e_post_seguinte_na_mesma_conexao_nao_herdam_o_filtro",
+      "redesign/router/test_bloqueio_turno.py::test_keepalive_post_bloqueado_get_e_post_seguinte_na_mesma_conexao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a faixa pública mantém as ferramentas de dado público também nas rotas de nuvem, e a ficha assinada decide o tipo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_gateway_publico_com_ferramenta_publica_vai_a_nuvem_que_tem_o_tipo_ferramenta",
+      "redesign/router/test_rotas_locais.py::test_gateway_publico_com_ferramenta_publica_sem_rota_de_nuvem_do_tipo_segue_a_fila_com_a_ferramenta",
+      "redesign/router/test_rotas_locais.py::test_nome_de_modelo_de_nuvem_nvidia_e_de_nivel_gratuito"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o resultado de ferramenta só é atribuído pelo tool_call_id da chamada do assistente; o campo name do cliente nunca é confiado e sem vínculo vale dado pessoal",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_ferramentas_confianca.py::test_campo_name_do_resultado_nunca_e_confiado",
+      "redesign/router/test_ferramentas_confianca.py::test_resultado_sem_vinculo_verificavel_vale_pessoal",
+      "redesign/router/test_bloqueio_turno.py::test_a_name_do_cliente_nao_faz_resultado_virar_escrita"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "escrita só conta como bem-sucedida com resultado positivo explícito; erro, falha, negado, não foi possível ou ambíguo não contam",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_a_escrita_que_falhou_ou_foi_negada_nao_libera",
+      "redesign/router/test_bloqueio_turno.py::test_a_so_resultado_positivo_explicito_conta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "resposta acima do teto de bytes ou que estoura o prazo não sai sem checagem: sai a resposta mínima honesta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_resposta_acima_do_limite_nao_sai_sem_checagem",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_resposta_que_estoura_o_prazo_nao_sai_sem_checagem",
+      "redesign/router/test_bloqueio_turno.py::test_gateway_resposta_longa_com_tool_call_passa"
+    ],
+    "cwd": null
   }
 ]

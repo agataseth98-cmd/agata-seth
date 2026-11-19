@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1081) DIÁRIO — 18/11/2026 · **Aplicada ferramentas-confianca-19-11: ferramentas por confiança e bloqueio do inventado** Assinada pelo Humano em 19/11. Níveis: local e pago até pessoal; gratuito só público. Correção da Máquina invisível ao Humano.
+  palavras-chave: aplicada, ferramentas, confianca, confiança, bloqueio, inventado, assinada, humano, níveis, local, pago, pessoal, gratuito, público, correção, máquina, invisível
 (1080) DIÁRIO — 18/11/2026 · **Aplicada sem-mistral-19-11: Mistral fora da ficha; filas unificadas registradas** Assinada pelo Humano em 19/11.
   palavras-chave: aplicada, mistral, fora, ficha, filas, unificadas, registradas, assinada, humano
 (1079) DIÁRIO — 19/11/2026 · **Proposta ferramentas-confianca-19-11: cada modelo recebe as ferramentas que o nível do provedor permite, e o gateway bloqueia escrita inventada, saída de ferramenta fabricada e modelo forjado antes de entregar.** Correção da Máquina invisível ao Humano. Base: auditoria da conversa da Seth de 18/11. Modelo: Sonnet orquestrado e revisado pelo Opus; Codex final reprovou 3 pontos, corrigidos. Medido: 388 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh ferramentas-confianca-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, skills, regra, dentro, assinada, humano, skill, agents, ganham, seção, recomendação, comprovada, recomenda, solução, acertos, acima, usos, conferidos, resto, vai, descarte
 (1052) DIÁRIO — 18/11/2026 · **Proposta skills-51-18-11: regra dos 51% dentro de 9 skills (lacuna L1 do lote 8).** Antes de recomendar, a skill consulta skills_ledger.py recalcular; comprovada só com acertos >51% e ≥10 usos conferidos, o resto vai como "não comprovada". Modelo: Haiku orquestrado pelo Opus. Medido: lint de skills, saída 0; ledger em HOME descartável. Não medido: aplicação. Assinatura pendente: bash scripts/aprovar.sh skills-51-18-11.
   palavras-chave: proposta, skills, regra, dentro, lacuna, lote, recomendar, skill, consulta, ledger, recalcular, comprovada, acertos, usos, conferidos, resto, vai, modelo, haiku, orquestrado, opus, medido, lint, saída, home, descartável, aplicação, assinatura, pendente, bash, scripts, aprovar
-(1051) DIÁRIO — 18/11/2026 · **Aplicada agentes-skills-18-11b: agentes permanentes com memória própria e skills que só recomendam o comprovado.** Assinada pelo Humano. Comprovada só com mais de 51% de acerto e pelo menos 10 usos; memória por agente fora do reinício de 15 dias; o coordenador registra pelos seis agentes só de leitura.
-  palavras-chave: aplicada, agentes, skills, permanentes, memória, própria, recomendam, comprovado, assinada, humano, comprovada, acerto, usos, agente, fora, reinício, dias, coordenador, registra, seis, leitura
+(1051) DIÁRIO — 18/11/2026 · **Aplicada agentes-skills-18-11b: agentes permanent …
+  palavras-chave: aplicada, agentes, skills, permanent
 (1050) DIÁRIO — 18/11/2026 · **Proposta agentes-skills-18-11b: rebase de agentes …
   palavras-chave: proposta, agentes, skills, rebase
 (1049) DIÁRIO — 18/11/2026 · **Aplicada competicao-locais-18-11: o llama.cpp con …
