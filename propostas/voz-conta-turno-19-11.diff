@@ -1,0 +1,199 @@
+diff --git a/redesign/sentidos/canal_voz.py b/redesign/sentidos/canal_voz.py
+index 025a6d58..24f658d8 100644
+--- a/redesign/sentidos/canal_voz.py
++++ b/redesign/sentidos/canal_voz.py
+@@ -230,13 +230,33 @@ def transcrever_pcm(pcm: bytes) -> str:
+     return (r.get("text") or "").strip()
+ 
+ 
+-def enviar_ao_modelo(texto: str, *, url: str | None = None, post=None, historico=None) -> str:
++TURNO = RAIZ / "scripts" / "turno.py"
++
++
++def contar_turno(sessao: str | None = None, modelo: str | None = None, *, rodar=subprocess.run, saida=print) -> str:
++    """Avanca o contador de turnos (turno.py proximo) e devolve a linha de cabecalho; '' sem sessao ou em falha (so aviso)."""
++    sessao = sessao if sessao is not None else os.environ.get("AGATA_CANAL_VOZ_SESSAO", "")
++    if not sessao:
++        return ""
++    modelo = modelo or os.environ.get("AGATA_CANAL_VOZ_MODELO_TURNO", MODELO)
++    try:
++        r = rodar([sys.executable, str(TURNO), "proximo", "--sessao", sessao, "--modelo", modelo],
++                  capture_output=True, text=True, timeout=10)
++        if r.returncode != 0:
++            raise RuntimeError(f"codigo {r.returncode}")
++        return (r.stdout or "").strip().splitlines()[0] if (r.stdout or "").strip() else ""
++    except Exception as e:  # noqa: BLE001 - o contador nunca derruba o canal
++        saida(f"[canal-voz] aviso: contador de turnos indisponivel ({e.__class__.__name__})")
++        return ""
++
++
++def enviar_ao_modelo(texto: str, *, url: str | None = None, post=None, historico=None, cabecalho: str = "") -> str:
+     url = url or GATEWAY
+     host = urllib.parse.urlparse(url).hostname
+     if host not in ("127.0.0.1", "localhost", "::1"):
+         raise ValueError("destino fora da Máquina recusado")
+     corpo = {"model": MODELO, "stream": False,
+-             "messages": [{"role": "system", "content": AVISO_SISTEMA}]
++             "messages": [{"role": "system", "content": AVISO_SISTEMA + (f" Cabecalho deste turno: {cabecalho}" if cabecalho else "")}]
+              + [{"role": r, "content": t} for par in (historico or []) for r, t in zip(("user", "assistant"), par)]
+              + [{"role": "user", "content": texto}]}
+     cab = {"Content-Type": "application/json", "X-Agata-Nao-Registrar": "1"}
+@@ -297,9 +317,10 @@ def _matar_grupo(p) -> None:
+ # --- o canal ------------------------------------------------------------------------------------------------
+ class Canal:
+     def __init__(self, captura, *, transcrever=transcrever_pcm, enviar=enviar_ao_modelo, falar=falar_texto,
+-                 verificar=locutor.verificar, relogio=time.monotonic, saida=print, inatividade_ms=None, gravar=True, ciclo_ms=None):
++                 verificar=locutor.verificar, relogio=time.monotonic, saida=print, inatividade_ms=None, gravar=True, ciclo_ms=None, turno=contar_turno):
+         self.cap, self.transcrever, self.enviar, self.falar, self.verificar = captura, transcrever, enviar, falar, verificar
+         self.relogio, self.saida, self.gravar = relogio, saida, gravar
++        self.turno = turno
+         self.inatividade_ms = INATIVIDADE_MS if inatividade_ms is None else inatividade_ms
+         self.ciclo_ms = CICLO_MS if ciclo_ms is None else ciclo_ms
+         self.ciclo = False                                  # janela de conversa aberta
+@@ -391,8 +412,12 @@ class Canal:
+         if tem_efeito(texto):
+             self.saida(f"[canal-voz] {FRASE_EFEITO}")
+             return self._falar_e_voltar(FRASE_EFEITO, lat, seg, quem, "efeito_pede_confirmacao")
++        cab = self.turno()                                   # 1 fala entregue ao modelo = +1 no contador
++        if cab:
++            self.saida(f"[canal-voz] {cab}")
++        extra = {"cabecalho": cab} if cab else {}
+         try:
+-            resposta = self._cronometrar(lat, "resposta_ms", self.enviar, texto, historico=list(self.historico))
++            resposta = self._cronometrar(lat, "resposta_ms", self.enviar, texto, historico=list(self.historico), **extra)
+         except SemConfirmacao:
+             self.parar = True                               # sem a confirmação do gateway, a sessão não continua
+             return self._erro("registro", "o gateway não confirmou que não registra o pedido; sessão encerrada", lat, seg)
+diff --git a/redesign/sentidos/spec/acceptance.json b/redesign/sentidos/spec/acceptance.json
+index ebdf6bfd..dd12e4e2 100644
+--- a/redesign/sentidos/spec/acceptance.json
++++ b/redesign/sentidos/spec/acceptance.json
+@@ -448,5 +448,32 @@
+       "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_http_500_sem_confirmacao_encerra_a_sessao"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "cada fala entregue ao modelo avança o contador de turnos uma vez e leva o cabeçalho",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_uma_fala_entregue_avanca_uma_vez_e_leva_o_cabecalho"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "fala vazia ou eco da própria voz não avança o contador",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_eco_da_propria_voz_rejeitado_nao_avanca"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "turno.py ausente ou falhando só avisa e não derruba o canal",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_turno_ausente_ou_falhando_so_avisa"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/sentidos/spec/spec.md b/redesign/sentidos/spec/spec.md
+index a0d7932a..fdeec9aa 100644
+--- a/redesign/sentidos/spec/spec.md
++++ b/redesign/sentidos/spec/spec.md
+@@ -67,6 +67,8 @@ Palavra de vez e ciclo de conversa (Humano, 18/11 19:54): a fala só segue com "
+ 
+ Revisão do Codex (18/11) e decisão A do Humano (19/11): o canal não executa nada. Todo envio ao gateway leva `X-Agata-Nao-Registrar: 1`; o gateway (aceita só de loopback, por pedido, sem herdar em keep-alive) não chama o registro de pedidos e responde `X-Agata-Registro: nao`; sem essa confirmação o canal descarta a resposta, avisa na tela e encerra a sessão. A checagem por processo e a recusa de abrir por `SETH_REGISTRO_PEDIDOS` saíram. O filtro de efeitos (criar, abrir, limpar, "preciso que", "por gentileza", "faça um...") é AVISO DE INTERFACE: pede confirmação pela tela e não é fronteira de segurança, porque o canal não executa nada (a fronteira é o canal só ouvir, perguntar e falar texto). A fala usa TMPDIR próprio removido no fim; sinais interrompem leitura, HTTP e TTS; o lock é `flock` mantido aberto.
+ 
++Contador de turnos (Humano, 19/11): com `AGATA_CANAL_VOZ_SESSAO=<id>` (modelo em `AGATA_CANAL_VOZ_MODELO_TURNO`), cada fala transcrita entregue ao modelo roda `scripts/turno.py proximo` uma vez; a linha de cabeçalho vai à tela e ao gateway (mensagem de sistema). Fala vazia, descartada, eco rejeitado, sem palavra de vez ou com efeito não contam; sem sessão, ou turno.py ausente/falhando, só aviso.
++
+ Uso: `python3 redesign/sentidos/canal_voz.py abrir` (primeiro plano; Ctrl+C ou `fechar` encerra), `fechar`, `estado`, `--selftest`.
+ 
+ ### Critérios de aceite do canal de voz
+@@ -114,6 +116,9 @@ Uso: `python3 redesign/sentidos/canal_voz.py abrir` (primeiro plano; Ctrl+C ou `
+ - [ ] a confirmação do gateway é conferida também em HTTP de erro e JSON inválido
+ - [ ] HTTP 500 sem confirmação encerra a sessão
+ - [ ] o filtro de efeitos cobre criar, reiniciar, alterar, configurar, instalar, desligar, mover, executar, rodar, mandar
++- [ ] cada fala entregue ao modelo avança o contador de turnos uma vez e leva o cabeçalho
++- [ ] fala vazia ou eco da própria voz não avança o contador
++- [ ] turno.py ausente ou falhando só avisa e não derruba o canal
+ 
+ ## Código
+ 
+diff --git a/redesign/sentidos/tests/test_canal_voz.py b/redesign/sentidos/tests/test_canal_voz.py
+index 70583066..a963ef16 100644
+--- a/redesign/sentidos/tests/test_canal_voz.py
++++ b/redesign/sentidos/tests/test_canal_voz.py
+@@ -650,5 +650,68 @@ class VezECicloTests(Base):
+         self.assertIn("curto", canal_voz.AVISO_SISTEMA)
+ 
+ 
++class ContadorDeTurnoTests(Base):
++    FALA = CanalTests.FALA
++
++    def rodar(self, **kw):
++        n, vistos = [], []
++        def turno():
++            n.append(1)
++            return f"agata · t={len(n)}"
++        def enviar(t, **k):
++            vistos.append(k.get("cabecalho"))
++            return "ok"
++        c, _ = self.canal(self.FALA, inatividade_ms=1500, turno=turno, enviar=enviar, **kw)
++        c.run()
++        return n, vistos
++
++    def test_uma_fala_entregue_avanca_uma_vez_e_leva_o_cabecalho(self):
++        n, vistos = self.rodar()
++        self.assertEqual(len(n), 1)
++        self.assertEqual(vistos, ["agata · t=1"])
++        self.assertTrue(any("t=1" in l for l in self.out))
++
++    def test_fala_vazia_nao_avanca(self):
++        n, vistos = self.rodar(transcrever=lambda p: "")
++        self.assertEqual((n, vistos), ([], []))
++
++    def test_eco_da_propria_voz_rejeitado_nao_avanca(self):
++        n, vistos = self.rodar(verificar=lambda p: locutor.REJEITADO)
++        self.assertEqual((n, vistos), ([], []))
++
++    def test_sem_a_palavra_de_vez_nao_avanca(self):
++        n, _ = self.rodar(transcrever=lambda p: "conversa de fundo")
++        self.assertEqual(n, [])
++
++    def test_contar_turno_roda_proximo_com_a_sessao(self):
++        chamadas = []
++        def rodar(cmd, **k):
++            chamadas.append(cmd)
++            return subprocess.CompletedProcess(cmd, 0, stdout="agata · m · t=7\n", stderr="")
++        self.assertEqual(canal_voz.contar_turno("s1", "m", rodar=rodar), "agata · m · t=7")
++        self.assertIn("proximo", chamadas[0])
++        self.assertIn("s1", chamadas[0])
++
++    def test_sem_sessao_nao_chama_nada(self):
++        os.environ.pop("AGATA_CANAL_VOZ_SESSAO", None)
++        self.assertEqual(canal_voz.contar_turno(rodar=lambda *a, **k: 1 / 0), "")
++
++    def test_turno_ausente_ou_falhando_so_avisa(self):
++        avisos = []
++        def falha(cmd, **k):
++            raise FileNotFoundError("sem turno.py")
++        self.assertEqual(canal_voz.contar_turno("s1", rodar=falha, saida=avisos.append), "")
++        self.assertIn("aviso", avisos[0])
++        ruim = lambda cmd, **k: subprocess.CompletedProcess(cmd, 2, stdout="", stderr="x")
++        self.assertEqual(canal_voz.contar_turno("s1", rodar=ruim, saida=avisos.append), "")
++        self.assertEqual(len(avisos), 2)
++
++    def test_canal_segue_quando_contador_devolve_vazio(self):
++        falado = []
++        c, _ = self.canal(self.FALA, inatividade_ms=1500, turno=lambda: "", falar=falado.append)
++        c.run()
++        self.assertEqual(falado, ["são três horas"])
++
++
+ if __name__ == "__main__":
+     unittest.main()
