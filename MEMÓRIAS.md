@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c7ed1f3b81b64899d3d084f778c53a3fd3507b0f
-  Escrito em: 19/11/2026 10:14 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 2ac4afbcdeee589b69d9f6788c4caae2a55b15b2
+  Escrito em: 19/11/2026 10:35 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7ed1f3b81b64899d3d084f778c53a3fd3507b0f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7ed1f3b81b64899d3d084f778c53a3fd3507b0f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7ed1f3b81b64899d3d084f778c53a3fd3507b0f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7ed1f3b81b64899d3d084f778c53a3fd3507b0f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c7ed1f3b81b64899d3d084f778c53a3fd3507b0f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ac4afbcdeee589b69d9f6788c4caae2a55b15b2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ac4afbcdeee589b69d9f6788c4caae2a55b15b2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ac4afbcdeee589b69d9f6788c4caae2a55b15b2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ac4afbcdeee589b69d9f6788c4caae2a55b15b2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/2ac4afbcdeee589b69d9f6788c4caae2a55b15b2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1072) DIÁRIO — 19/11/2026 · **Proposta rotas-nuvem-19-11: nemotron-3.5-super-vl (conversa) e nemotron-3.5-bolt (código e json), gratuitos da NVIDIA, entram na rota da Seth só para pedidos públicos, com prazo absoluto de 30 s e queda segura.** Laguna catalogada sem rota. Modelo: Sonnet orquestrado pelo Opus; revisão final pelo Opus com autorização do Humano. Medido: 294 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh rotas-nuvem-19-11.
+
 (1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no canon** Assinada pelo Humano em 19/11 09:14. Bom para todo mundo; progresso visível e confiável na espera.
 Modelo: Claude Opus 5.5 · vetor: p8_verificar, CI local · Autorização: Humano — assinatura APROVADO
 
