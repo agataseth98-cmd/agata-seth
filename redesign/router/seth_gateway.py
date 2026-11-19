@@ -1756,6 +1756,17 @@ class _LeitorVazio:
         return b""
 
 
+def _pede_nao_registrar(h) -> bool:
+    """(19/11/2026) `X-Agata-Nao-Registrar: 1` só vale vindo de loopback (canal de voz); qualquer outro valor ou origem
+    = comportamento de sempre. Decidido por pedido, no do_POST."""
+    try:
+        origem = h.client_address[0]
+    except (AttributeError, IndexError, TypeError):
+        return False
+    return (h.headers.get("X-Agata-Nao-Registrar") == "1"
+            and origem in ("127.0.0.1", "::1", "::ffff:127.0.0.1"))
+
+
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     _rota = ""   # rota escolhida pelo classificador nesta requisição (observabilidade)
@@ -1767,16 +1778,19 @@ class _Handler(BaseHTTPRequestHandler):
     _served_by = None  # (17/11, item 1) campo "model" do upstream nesta resposta; "?" no log se não houve
     _nomes_tools = frozenset()  # (17/11, item 3) ferramentas do pedido que podem virar tool_calls
     _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
+    _nao_registrar = False  # (19/11) por pedido: X-Agata-Nao-Registrar: 1 vindo de loopback; o GET lê só este padrão
 
     def log_message(self, fmt, *args):
         pass
 
     def do_GET(self):
         self._fallback_corpo = None  # keep-alive: um POST anterior nunca deixa corpo guardado para este pedido
+        self._nao_registrar = False  # idem: o GET nunca herda o "não registrar" do POST anterior
         self._passar(b"", "GET")
 
     def do_HEAD(self):
         self._fallback_corpo = None
+        self._nao_registrar = False
         self._passar(b"", "HEAD")
 
     def do_POST(self):
@@ -1795,6 +1809,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._public_only_lane = False
         self._reg = None
         self._aud = ""
+        self._nao_registrar = _pede_nao_registrar(self)
         corpo = ler_corpo_limitado(self)
         if corpo is None:
             return
@@ -1856,7 +1871,7 @@ class _Handler(BaseHTTPRequestHandler):
                     self._cab_ctx = list(msgs0)
                 # Benchmark do roteamento (23/10/2026): pergunta do Humano + resposta em texto,
                 # redigidas, fora do repositório, 30 dias. Só com SETH_REGISTRO_PEDIDOS=1.
-                if (registro_pedidos.ligado() and not self._public_only_lane
+                if (registro_pedidos.ligado() and not self._nao_registrar and not self._public_only_lane
                         and str(payload.get("model", "")).startswith("seth-")
                         and not _e_chamada_utilitaria(payload)):
                     self._reg = {"pergunta": registro_pedidos.ultima_pergunta(msgs0),
@@ -2217,6 +2232,8 @@ class _Handler(BaseHTTPRequestHandler):
                 self.send_header(k, v)
         if self._rota:
             self.send_header("X-Seth-Rota", self._rota)
+        if self._nao_registrar:
+            self.send_header("X-Agata-Registro", "nao")  # confirmação: este pedido não foi nem será registrado
         if modelo_real:
             self.send_header("X-Modelo-Real", modelo_real)
             _lembrar_modelo_real(modelo_real)

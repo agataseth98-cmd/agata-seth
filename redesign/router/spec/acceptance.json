@@ -493,5 +493,59 @@
       "TestSubagentes.test_prompt_carregamento_tem_o_contador"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "sem X-Agata-Nao-Registrar o gateway registra o pedido como antes",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_sem_cabecalho_grava_como_hoje"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com X-Agata-Nao-Registrar: 1 nada é gravado e o gateway devolve X-Agata-Registro: nao",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_com_cabecalho_nada_e_gravado_e_o_gateway_confirma"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "outro valor de X-Agata-Nao-Registrar mantém o comportamento de hoje",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_outro_valor_do_cabecalho_e_comportamento_de_hoje"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "só loopback pode pedir para não registrar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_so_loopback_pode_pedir_para_nao_registrar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "GET e POST seguinte na mesma conexão não herdam o não registrar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_keep_alive_get_e_post_seguinte_nao_herdam"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o canal de voz contra o gateway real não grava e recebe a confirmação",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/router/test_rotas_locais.py::test_canal_de_voz_contra_o_gateway_real_nao_grava_e_recebe_a_confirmacao"
+    ],
+    "cwd": null
   }
 ]

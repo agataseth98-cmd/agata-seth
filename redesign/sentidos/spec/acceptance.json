@@ -61,5 +61,392 @@
       "redesign/sentidos/tests/test_visao_revisao.py::VisaoTests::test_descreve_com_chamada_injetada"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o VAD abre ao falar e fecha no silêncio",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VadTests::test_vad_abre_e_fecha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o VAD ignora ruído contínuo e estalo curto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VadTests::test_vad_ignora_ruido_continuo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "fala longa tem teto de trecho",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VadTests::test_teto_de_trecho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "silêncio longo fecha a sessão do canal de voz",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_teto_de_trecho_e_inatividade"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o indicador segue os eventos reais na ordem ouvindo, processando, falando, ouvindo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_estado_segue_eventos_na_ordem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "etapa que falha gera estado erro com o nome da etapa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_estado_erro_quando_etapa_falha"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "microfone morto vira erro, nunca fica em ouvindo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_microfone_morto_vira_erro_e_nao_fica_ouvindo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "meia-duplex: o que soa durante a fala do sistema não entra no VAD",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_meia_duplex_descarta_captura_durante_fala"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a resposta é falada por scripts/agata_falar.py e falha dele vira NÃO falei",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_resposta_chama_agata_falar_sem_outra_voz"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o canal de voz só fala com destinos locais",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_nenhum_destino_fora_da_maquina"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o lock impede duas sessões do canal de voz",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_lock_impede_duas_sessoes"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "fechar a captura encerra o pw-record",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_captura_real_fecha_o_processo_filho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a latência é registrada por etapa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_latencia_registrada_por_etapa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o log não tem texto nem áudio e o diretório é 0700",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_log_sem_texto_e_sem_audio_em_disco"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "outro locutor não chama o modelo e só deixa metadado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_outro_locutor_nao_chama_modelo_e_so_anota_metadado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "pedido com efeito por voz não é executado e pede confirmação na tela",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_acao_com_efeito_pede_confirmacao_fora_da_voz"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a fase 1 devolve nao_verificado e opera só em modo conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_fase1_nao_verifica_locutor_e_opera_so_em_conversa"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a transcrição entra como dado, nunca como instrução",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_texto_transcrito_e_dado_nao_instrucao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a palavra de vez Agata (normalizada) é lida no começo da fala",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_palavra_de_vez_normalizada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem a palavra de vez e fora do ciclo a fala é ignorada, só com metadado no log",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_sem_palavra_e_fora_do_ciclo_e_ignorada_sem_texto"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "Agata sozinha responde Pode falar e abre o ciclo de conversa",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_agata_sozinha_responde_pode_falar_e_abre_ciclo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "dentro do ciclo a fala segue sem a palavra e leva o histórico ao gateway",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_ciclo_segue_sem_palavra_e_leva_historico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o histórico do ciclo guarda no máximo 6 trocas",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_historico_limitado_a_seis_trocas"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "encerrar, pode parar e tchau fecham o ciclo, falam Até já e apagam o histórico",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_encerrar_fecha_ciclo_fala_ate_ja_e_apaga_historico"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o ciclo fecha após silêncio e fala Até já",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_ciclo_fecha_por_silencio_e_fala_ate_ja"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o histórico fica só em memória, nunca em disco",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_historico_so_em_memoria"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o histórico vai ao modelo na ordem, antes da fala atual",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_enviar_ao_modelo_inclui_historico_na_ordem"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o aviso de sistema pede resposta curta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::VezECicloTests::test_aviso_pede_resposta_curta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "falha do TTS não deixa WAV: o canal usa diretório temporário próprio e o remove",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_falha_do_tts_nao_deixa_wav"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "SIGTERM solta a captura bloqueada e encerra o pw-record",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sigterm_solta_captura_bloqueada_e_mata_o_pw_record"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "SIGINT interrompe a chamada bloqueada ao modelo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sigterm_interrompe_chamada_bloqueada_ao_modelo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o lock é atômico: com 8 processos concorrentes só um abre",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_lock_concorrente_so_um_vence"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro de efeitos cobre criar, reiniciar, alterar, configurar, instalar, desligar, mover, executar, rodar, mandar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_filtro_de_efeitos_ampliado"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sinal na abertura da captura ainda chama fechar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sinal_na_abertura_da_captura_fecha_a_captura"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "timeout do TTS remove o WAV e mata o processo filho",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_timeout_do_tts_limpa_wav_e_mata_o_filho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sinal durante o TTS remove o WAV e mata o processo filho",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sinal_durante_o_tts_limpa_wav_e_mata_o_filho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sinal durante a limpeza do áudio fica pendente até a limpeza acabar",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sinal_durante_a_limpeza_nao_interrompe_a_limpeza"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro pega faça/fazer + objeto e verbo de efeito no início ou após por favor",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_filtro_faca_e_verbo_inicial"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "todo envio ao gateway leva X-Agata-Nao-Registrar e exige a confirmação X-Agata-Registro: nao",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_envio_leva_o_cabecalho_e_exige_a_confirmacao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem a confirmação do gateway o canal descarta a resposta, avisa e encerra a sessão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_sem_confirmacao_do_gateway_descarta_resposta_e_encerra_a_sessao"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o filtro de efeitos cobre preciso que, por gentileza, abra e limpe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_filtro_preciso_que_por_gentileza_abra_limpe"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a confirmação do gateway é conferida também em HTTP de erro e JSON inválido",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_confirmacao_e_conferida_em_erro_http_e_json_invalido"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "HTTP 500 sem confirmação encerra a sessão",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_http_500_sem_confirmacao_encerra_a_sessao"
+    ],
+    "cwd": null
   }
 ]

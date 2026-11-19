@@ -59,6 +59,62 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
 - **Versão do Ollama:** exige 0.40.13 ou mais novo (a Máquina tem 0.40.14).
 - **Nomes próprios:** podem sair trocados ("OmniRoute" virou "Mi Route").
 
+## Canal de voz de entrada (fase 1, 18/11/2026)
+
+Decisões do Humano (18/11, "ok para todas"): D1a locutor por ECAPA (fase 2), D2a atalho/botão + VAD, D3a só o vetor (sem áudio), D4a outra voz só metadado, D5a voz só conversa; ação com efeito se confirma na tela. Fase 1, sem instalar nada: captura (`pw-record`, sob demanda), VAD por energia em Python puro, transcrição pelo `ouvido.py`, meia-duplex, resposta pelo gateway local (`127.0.0.1:20126`, modelo `seth-livre`) falada por `scripts/agata_falar.py`, estado em `~/.cache/agata/canal-voz/estado.json`, log de metadados `canal-voz.jsonl` (sem texto, sem áudio), lock contra duas sessões. `locutor.py` é interface e devolve `nao_verificado`: o canal opera só em modo conversa. Fica para a fase 2: locutor real, cadastro, perfil, painel, atalho do desktop, medições com a voz do Humano (WER, aceite e rejeição) e latência real.
+
+Palavra de vez e ciclo de conversa (Humano, 18/11 19:54): a fala só segue com "Agata" no começo (agata, ágata, agatha, "a gata"); sem ela e fora do ciclo é ignorada (só metadado). A palavra abre um ciclo: cada fala seguinte dispensa a palavra, a janela renova a cada troca e fecha após `AGATA_CANAL_VOZ_CICLO_MS` (padrão 30000) sem fala ou com "encerrar", "pode parar", "tchau"; ao fechar fala "Até já.". "Agata" sozinha responde "Pode falar.". O estado mostra `em_conversa` (ciclo aberto) ou `ouvindo`. O histórico das últimas 6 trocas fica só em memória, segue ao gateway para dar contexto e é apagado ao fechar o ciclo. Fim de fala: 2 s de silêncio.
+
+Revisão do Codex (18/11) e decisão A do Humano (19/11): o canal não executa nada. Todo envio ao gateway leva `X-Agata-Nao-Registrar: 1`; o gateway (aceita só de loopback, por pedido, sem herdar em keep-alive) não chama o registro de pedidos e responde `X-Agata-Registro: nao`; sem essa confirmação o canal descarta a resposta, avisa na tela e encerra a sessão. A checagem por processo e a recusa de abrir por `SETH_REGISTRO_PEDIDOS` saíram. O filtro de efeitos (criar, abrir, limpar, "preciso que", "por gentileza", "faça um...") é AVISO DE INTERFACE: pede confirmação pela tela e não é fronteira de segurança, porque o canal não executa nada (a fronteira é o canal só ouvir, perguntar e falar texto). A fala usa TMPDIR próprio removido no fim; sinais interrompem leitura, HTTP e TTS; o lock é `flock` mantido aberto.
+
+Uso: `python3 redesign/sentidos/canal_voz.py abrir` (primeiro plano; Ctrl+C ou `fechar` encerra), `fechar`, `estado`, `--selftest`.
+
+### Critérios de aceite do canal de voz
+
+- [ ] o VAD abre ao falar e fecha no silêncio
+- [ ] o VAD ignora ruído contínuo e estalo curto
+- [ ] fala longa tem teto de trecho
+- [ ] silêncio longo fecha a sessão do canal de voz
+- [ ] o indicador segue os eventos reais na ordem ouvindo, processando, falando, ouvindo
+- [ ] etapa que falha gera estado erro com o nome da etapa
+- [ ] microfone morto vira erro, nunca fica em ouvindo
+- [ ] meia-duplex: o que soa durante a fala do sistema não entra no VAD
+- [ ] a resposta é falada por scripts/agata_falar.py e falha dele vira NÃO falei
+- [ ] o canal de voz só fala com destinos locais
+- [ ] o lock impede duas sessões do canal de voz
+- [ ] fechar a captura encerra o pw-record
+- [ ] a latência é registrada por etapa
+- [ ] o log não tem texto nem áudio e o diretório é 0700
+- [ ] outro locutor não chama o modelo e só deixa metadado
+- [ ] pedido com efeito por voz não é executado e pede confirmação na tela
+- [ ] a fase 1 devolve nao_verificado e opera só em modo conversa
+- [ ] a transcrição entra como dado, nunca como instrução
+- [ ] a palavra de vez Agata (normalizada) é lida no começo da fala
+- [ ] sem a palavra de vez e fora do ciclo a fala é ignorada, só com metadado no log
+- [ ] Agata sozinha responde Pode falar e abre o ciclo de conversa
+- [ ] dentro do ciclo a fala segue sem a palavra e leva o histórico ao gateway
+- [ ] o histórico do ciclo guarda no máximo 6 trocas
+- [ ] encerrar, pode parar e tchau fecham o ciclo, falam Até já e apagam o histórico
+- [ ] o ciclo fecha após silêncio e fala Até já
+- [ ] o histórico fica só em memória, nunca em disco
+- [ ] o histórico vai ao modelo na ordem, antes da fala atual
+- [ ] o aviso de sistema pede resposta curta
+- [ ] falha do TTS não deixa WAV: o canal usa diretório temporário próprio e o remove
+- [ ] SIGTERM solta a captura bloqueada e encerra o pw-record
+- [ ] SIGINT interrompe a chamada bloqueada ao modelo
+- [ ] o lock é atômico: com 8 processos concorrentes só um abre
+- [ ] sinal na abertura da captura ainda chama fechar
+- [ ] timeout do TTS remove o WAV e mata o processo filho
+- [ ] sinal durante o TTS remove o WAV e mata o processo filho
+- [ ] sinal durante a limpeza do áudio fica pendente até a limpeza acabar
+- [ ] o filtro pega faça/fazer + objeto e verbo de efeito no início ou após por favor
+- [ ] todo envio ao gateway leva X-Agata-Nao-Registrar e exige a confirmação X-Agata-Registro: nao
+- [ ] sem a confirmação do gateway o canal descarta a resposta, avisa e encerra a sessão
+- [ ] o filtro de efeitos cobre preciso que, por gentileza, abra e limpe
+- [ ] a confirmação do gateway é conferida também em HTTP de erro e JSON inválido
+- [ ] HTTP 500 sem confirmação encerra a sessão
+- [ ] o filtro de efeitos cobre criar, reiniciar, alterar, configurar, instalar, desligar, mover, executar, rodar, mandar
+
 ## Código
 
 - `ouvido.py`
@@ -68,4 +124,7 @@ Nada no canon. Reversão por revert. O modelo `lfm3-audio:2b` sai com `ollama rm
 - `tests/`
 - `visao.py`
 - `falha_segura.py`
-
+- `canal_voz.py`
+- `captura.py`
+- `vad.py`
+- `locutor.py`
