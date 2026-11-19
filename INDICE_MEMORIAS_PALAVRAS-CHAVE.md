@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no canon — bom para todo mundo, e progresso visível e confiável na espera.** Decisão do Humano em 18/11 (18:42 e 19:16). Modelo: Opus. Medido: CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh regra-zero-19-11.
+  palavras-chave: proposta, regra, zero, entra, canon, bom, mundo, progresso, visível, confiável, espera, decisão, humano, modelo, opus, medido, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (microfone, palavra de vez Agata, ciclo de conversa, transcrição e voz locais) e o gateway aprende a não gravar um pedido (opção A do Humano).** Fase 1 sem reconhecer a voz. Modelo: Sonnet orquestrado pelo Opus; revisão Codex em 4 rodadas. Medido: 259 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh canal-voz-18-11.
   palavras-chave: proposta, canal, voz, local, microfone, palavra, agata, ciclo, conversa, transcrição, locais, gateway, aprende, gravar, pedido, opção, humano, fase, reconhecer, modelo, sonnet, orquestrado, opus, revisão, codex, rodadas, medido, testes, tudo, assinatura, pendente, bash, scripts, aprovar
 (1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o chamado de voz do sistema; agir naturalmente, responder sempre em voz, som de espera opcional.** Ordem do Humano em 18/11 18:54, com os ajustes do uso real (19:09, 20:38). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh voz-chamado-18-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, sob, demanda, laya, jev, sobem, primeira, chamada, caem, após, minutos, ociosos, sockets, proxies, systemd, assinados, humano, entram, repositório, instalação, máquina, segue, ordem, registro, proposta
 (1039) DIÁRIO — 18/11/2026 · **Aplicada orquestra-caro-17-11: o modelo mais caro orquestra e os mais baratos executam, para todos os modelos.** A regra entrou na lista Sempre do AGENTS.md, assinada pelo Humano; o teste de sincronia conta 16 regras.
   palavras-chave: aplicada, orquestra, caro, modelo, baratos, executam, modelos, regra, entrou, lista, sempre, agents, assinada, humano, teste, sincronia, conta, regras
-(1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, inclusive pago, entra no Agata com um comando e segue as mesmas regras.** O comando configurar.py lista os provedores e acrescenta um novo com a tarifa, sem nunca gravar a chave, só o nome da variável. Toda chamada passa pelo mesmo caminho de orçamento, privacidade, custo e cofre. O Codex revisou quatro vezes e cada achado foi corrigido; a cota dele acabou antes do último veredito, e o revisor do Agata aprovou. 36 testes passam e o diff aplica em cópia limpa. Falta a assinatura.
-  palavras-chave: proposta, modelos, pagos, modelo, inclusive, pago, entra, agata, comando, segue, mesmas, regras, configurar, lista, provedores, acrescenta, novo, tarifa, nunca, gravar, chave, nome, variável, chamada, passa, mesmo, caminho, orçamento, privacidade, custo, cofre, codex, revisou, quatro, achado, corrigido, cota, dele, acabou, último, veredito, revisor, aprovou, testes, passam, diff, aplica, cópia, limpa, falta, assinatura
+(1038) DIÁRIO — 17/11/2026 · **Proposta modelos-pagos-17-11: qualquer modelo, in …
+  palavras-chave: proposta, modelos, pagos, modelo
 (1037) DIÁRIO — 17/11/2026 · **Proposta seth-base-17-11: o gateway da Seth regis …
   palavras-chave: proposta, seth, base, gateway, regis
 (1036) DIÁRIO — 17/11/2026 · **Proposta sob-demanda-17-11: o Laya e o Jev passam …
