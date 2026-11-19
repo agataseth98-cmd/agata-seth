@@ -162,22 +162,6 @@
       "fonte": "redesign/router/PROVEDORES.md"
     },
     {
-      "id": "mistral-8b",
-      "provedor": "mistral",
-      "modelo": "ministral-8b-latest",
-      "categoria": "gratuito",
-      "classes_permitidas": [
-        "publico",
-        "sintetico"
-      ],
-      "treina_com_prompts": "nao_conferido",
-      "cota": "mistral-small dá 429 nesta conta",
-      "compartilhada_com_seth": true,
-      "cota_medida": false,
-      "conferida_em": "2026-11-06",
-      "fonte": "medição do Conselho Remoto em 06/11/2026 (registro privado, não citado aqui)"
-    },
-    {
       "id": "huggingface-llama",
       "provedor": "huggingface",
       "modelo": "Llama-3.3-70B-Instruct",
