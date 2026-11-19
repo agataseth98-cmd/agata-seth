@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único modelo × tipo** Assinada pelo Humano em 19/11 13:13. Ainda não muda o gateway.
+  palavras-chave: aplicada, placar, modelos, único, modelo, tipo, assinada, humano, muda, gateway
 (1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos na rota pública da Seth** Assinada pelo Humano em 19/11 13:13. super-vl em conversa, bolt em código e json, só pedidos públicos, prazo absoluto de 30 s.
   palavras-chave: aplicada, rotas, nuvem, nvidia, gratuitos, rota, pública, seth, assinada, humano, super, conversa, bolt, código, json, pedidos, públicos, prazo, absoluto
 (1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de cada modelo por tipo de pedido, com nota, tempo, custo, confiança e estado no painel.** Princípio do Humano: todo modelo tem sua chance no que é bom. Ainda não muda o gateway. Modelo: Sonnet orquestrado pelo Opus. Medido: 18 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh placar-modelos-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, refazer, get, gateway, seth, volta, responder, assinada, humano, valor, padrão, classe, verificar, teste, regressão
 (1046) DIÁRIO — 18/11/2026 · **Incidente: a aplicação de verificar-refazer-18-11 quebrou todo GET do gateway da Seth; proposta refazer-get-18-11 corrige.** Depois do reinício às 10:22:52, /v1/models e /api/health ficaram sem resposta por AttributeError: o atributo _refazer só existia em pedidos POST, e os testes do lote só usavam POST; nem a revisão do Codex nem a do agata-revisor pegaram. A correção dá valor padrão de classe aos dois atributos e acrescenta um teste de regressão; 105 testes passam. Lição: lote que mexe no handler precisa de teste por GET.
   palavras-chave: incidente, aplicação, verificar, refazer, quebrou, get, gateway, seth, proposta, corrige, reinício, models, api, health, ficaram, resposta, attributeerror, atributo, existia, pedidos, post, testes, lote, usavam, nem, revisão, codex, agata, revisor, pegaram, correção, valor, padrão, classe, atributos, acrescenta, teste, regressão, passam, lição, mexe, handler, precisa
-(1045) DIÁRIO — 18/11/2026 · **Aplicada verificar-refazer-18-11: a resposta é conferida e refeita antes de chegar ao Humano.** Assinada pelo Humano. Desligado por padrão; liga no canário SETH_ROTEADOR=capacidade:N ou com SETH_REFAZER=1; SETH_REFAZER=0 desliga.
-  palavras-chave: aplicada, verificar, refazer, resposta, conferida, refeita, chegar, humano, assinada, desligado, padrão, liga, canário, seth, roteador, capacidade, desliga
+(1045) DIÁRIO — 18/11/2026 · **Aplicada verificar-refazer-18-11: a resposta é co …
+  palavras-chave: aplicada, verificar, refazer, resposta
 (1044) DIÁRIO — 18/11/2026 · **Proposta agentes-skills-18-11: agentes permanente …
   palavras-chave: proposta, agentes, skills, permanente
 (1043) DIÁRIO — 18/11/2026 · **Proposta verificar-refazer-18-11: a resposta da S …
