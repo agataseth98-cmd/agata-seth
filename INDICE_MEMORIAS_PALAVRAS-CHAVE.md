@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1076) DIÁRIO — 19/11/2026 · **Proposta sandbox-fase1-19-11: contenção Landlock por ctypes, allow-only, com prova em processo filho de que o .env e a escrita indevida ficam bloqueados.** Primeiro lote em que a Seth (nemotron via OpenCode) escreveu o plano e o código sob supervisão do Opus; ela afirmou falsamente que o kernel falhava, o Opus provou o contrário e um agente Sonnet consertou. Medido: 9 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh sandbox-fase1-19-11.
+  palavras-chave: proposta, sandbox, fase, contenção, landlock, ctypes, allow, only, prova, processo, filho, env, escrita, indevida, ficam, bloqueados, primeiro, lote, seth, nemotron, opencode, escreveu, plano, código, sob, supervisão, opus, ela, afirmou, falsamente, kernel, falhava, provou, contrário, agente, sonnet, consertou, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único modelo × tipo** Assinada pelo Humano em 19/11 13:13. Ainda não muda o gateway.
   palavras-chave: aplicada, placar, modelos, único, modelo, tipo, assinada, humano, muda, gateway
 (1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos na rota pública da Seth** Assinada pelo Humano em 19/11 13:13. super-vl em conversa, bolt em código e json, só pedidos públicos, prazo absoluto de 30 s.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, competicao, locais, llama, cpp, conta, local, benchmark, gateway, roteiro, sob, demanda, ganha, backends, atende, competição, modelos, pode, fazer, humano, llamacpp, entram, lista, pedido, classificação, deixa, cair, dados, externos, passo, novo, roda, testes, correção, faltou, relinkar, laya, roteador, service, ollaya, proxies, socket, exigem, backend, medido, requisição, real, assinatura, pendente, bash, scripts, aprovar
 (1047) DIÁRIO — 18/11/2026 · **Aplicada refazer-get-18-11: o GET do gateway da Seth volta a responder.** Assinada pelo Humano. Valor padrão de classe para _refazer e _verificar; teste de regressão.
   palavras-chave: aplicada, refazer, get, gateway, seth, volta, responder, assinada, humano, valor, padrão, classe, verificar, teste, regressão
-(1046) DIÁRIO — 18/11/2026 · **Incidente: a aplicação de verificar-refazer-18-11 quebrou todo GET do gateway da Seth; proposta refazer-get-18-11 corrige.** Depois do reinício às 10:22:52, /v1/models e /api/health ficaram sem resposta por AttributeError: o atributo _refazer só existia em pedidos POST, e os testes do lote só usavam POST; nem a revisão do Codex nem a do agata-revisor pegaram. A correção dá valor padrão de classe aos dois atributos e acrescenta um teste de regressão; 105 testes passam. Lição: lote que mexe no handler precisa de teste por GET.
-  palavras-chave: incidente, aplicação, verificar, refazer, quebrou, get, gateway, seth, proposta, corrige, reinício, models, api, health, ficaram, resposta, attributeerror, atributo, existia, pedidos, post, testes, lote, usavam, nem, revisão, codex, agata, revisor, pegaram, correção, valor, padrão, classe, atributos, acrescenta, teste, regressão, passam, lição, mexe, handler, precisa
+(1046) DIÁRIO — 18/11/2026 · **Incidente: a aplicação de verificar-refazer-18-11 …
+  palavras-chave: incidente, aplicação, verificar, refazer
 (1045) DIÁRIO — 18/11/2026 · **Aplicada verificar-refazer-18-11: a resposta é co …
   palavras-chave: aplicada, verificar, refazer, resposta
 (1044) DIÁRIO — 18/11/2026 · **Proposta agentes-skills-18-11: agentes permanente …
