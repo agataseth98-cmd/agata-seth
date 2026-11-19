@@ -1,0 +1,58 @@
+# Perfis de contencao Landlock (allow-only).
+# Landlock SO PERMITE: nao existe regra de negar. Um caminho nao listado eh
+# inacessivel por omissao.
+#
+# ~/.config/agata fica FORA de TODOS os perfis (incluindo .env). Nenhum perfil
+# lista nada dentro de ~/.config/agata como permitido.
+#
+# Formato:
+#   perfis:
+#     <nome>:
+#       raiz_agata: <caminho>        # opcional; default = /home/orusoua/agata
+#      regras:
+#        - caminho: <caminho>
+#          acesso: <direitos>         # veja FS_* / NET_* em landlock.py
+
+perfis:
+  default:
+    regras:
+      - caminho: /home/orusoua/agata
+        acesso: 12  # READ_DIR(1<<3) | READ_FILE(1<<2)
+      - caminho: /home/orusoua/agata/propostas
+        acesso: 446 # READ_DIR|READ_FILE|WRITE_FILE|MAKE_REG|MAKE_DIR|REMOVE_FILE|REMOVE_DIR
+      - caminho: /home/orusoua/agata/memoria
+        acesso: 446
+      - caminho: /home/orusoua/agata/logs
+        acesso: 446
+
+  bash_ro:
+    regras:
+      - caminho: /home/orusoua/agata
+        acesso: 12  # READ_DIR | READ_FILE
+
+  write:
+    regras:
+      - caminho: /home/orusoua/agata
+        acesso: 12
+      - caminho: /home/orusoua/agata/propostas
+        acesso: 446
+      - caminho: /home/orusoua/agata/memoria
+        acesso: 446
+      - caminho: /home/orusoua/agata/logs
+        acesso: 446
+
+  seth-livre:
+    regras:
+      - caminho: /home/orusoua/agata
+        acesso: 12
+
+  seth-codigo:
+    regras:
+      - caminho: /home/orusoua/agata
+        acesso: 12
+      - caminho: /home/orusoua/agata/propostas
+        acesso: 446
+      - caminho: /home/orusoua/agata/memoria
+        acesso: 446
+      - caminho: /home/orusoua/agata/logs
+        acesso: 446
