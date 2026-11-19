@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1085) DIÁRIO — 19/11/2026 · **Proposta assinatura-por-tipo-19-11: o Humano decidiu por voz que mudança de sistema continua com assinatura, e estética, usabilidade e ordem das filas vão direto, com aviso e reversão.** Na dúvida, é sistema; o fiscal-p8 aprende a lista no próximo lote. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh assinatura-por-tipo-19-11.
+  palavras-chave: proposta, assinatura, tipo, humano, decidiu, voz, mudança, sistema, continua, estética, usabilidade, ordem, filas, vão, direto, aviso, reversão, dúvida, fiscal, aprende, lista, próximo, lote, modelo, opus, pendente, bash, scripts, aprovar
 (1084) DIÁRIO — 19/11/2026 · **Decreto proposto pelo Humano por voz: a conversa de 19/11 vira a persona do sistema — uma entidade, muitos cérebros.** A persona é da Agata, não do modelo da vez; cinco traços: resultado com prova, discordar quando os fatos mandam, cuidado com o Humano, filosofia com o pé no chão, o modelo passa e a Agata fica (assinatura humana, herdeiros humanos). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh persona-entidade-19-11.
   palavras-chave: decreto, proposto, humano, voz, conversa, vira, persona, sistema, entidade, muitos, cérebros, agata, modelo, cinco, traços, resultado, prova, discordar, fatos, mandam, cuidado, filosofia, chão, passa, fica, assinatura, humana, herdeiros, humanos, opus, pendente, bash, scripts, aprovar
 (1083) DIÁRIO — 19/11/2026 · **Proposta voz-conta-turno-19-11: cada fala transcrita do canal de voz passa a avançar o contador de turnos, como mensagem do Humano.** Falha achada pelo próprio Humano por voz às 18:58. Codex designado como orquestrador, mas sem cota até 24/11; implementação Sonnet, revisão Opus; 79 testes. Assinatura pendente: bash scripts/aprovar.sh voz-conta-turno-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, painel, modelos, liberar, catálogo, assinada, humano, subpainel, decisões, decisoes, jsonl
 (1056) DIÁRIO — 18/11/2026 · **Aplicada porta-entrada-18-11: prova obrigatória para modelo novo e adoção de skills de terceiros** Assinada pelo Humano em 18/11. porta_entrada.py, ledger com terceiro:NOME, skill agata-adotar-skill.
   palavras-chave: aplicada, porta, entrada, prova, obrigatória, modelo, novo, adoção, skills, terceiros, assinada, humano, ledger, terceiro, nome, skill, agata, adotar
-(1055) DIÁRIO — 18/11/2026 · **Proposta painel-modelos-18-11: o Humano libera ou devolve ao standby cada modelo do catálogo pelo painel.** Subpainel Catálogo de modelos em Sistema; decisão só registrada em decisoes.jsonl, sob trava, sem mexer em rota; voz e aposentados não se liberam. Modelo: Sonnet orquestrado pelo Opus; revisão Codex r2 aprovou. Medido: 24 testes da página, CI local TUDO OK. Não medido: clique no navegador. Assinatura pendente: bash scripts/aprovar.sh painel-modelos-18-11.
-  palavras-chave: proposta, painel, modelos, humano, libera, devolve, standby, modelo, catálogo, subpainel, sistema, decisão, registrada, decisoes, jsonl, sob, trava, mexer, rota, voz, aposentados, liberam, sonnet, orquestrado, opus, revisão, codex, aprovou, medido, testes, página, local, tudo, clique, navegador, assinatura, pendente, bash, scripts, aprovar
+(1055) DIÁRIO — 18/11/2026 · **Proposta painel-modelos-18-11: o Humano libera ou …
+  palavras-chave: proposta, painel, modelos, humano, libera
 (1054) DIÁRIO — 18/11/2026 · **Proposta porta-entrada-18-11: todo modelo novo pa …
   palavras-chave: proposta, porta, entrada, modelo, novo
 (1053) DIÁRIO — 18/11/2026 · **Aplicada skills-51-18-11: regra dos 51% dentro de …
