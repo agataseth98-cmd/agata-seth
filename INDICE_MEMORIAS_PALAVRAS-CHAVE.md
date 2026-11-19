@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1082) DIÁRIO — 19/11/2026 · **Proposta sandbox-fase2-19-11: o lançador agata-run abre qualquer plataforma (Claude Code, Codex, OpenCode, Gemini) com o mesmo estado, o mesmo turno e a contenção Landlock no processo filho.** Primeiro passo para o Codex e os demais terem a mesma funcionalidade que o Claude (pedido do Humano, 19/11). Plano da Seth (nemotron), código Sonnet, revisão Opus; 27 testes em processo real. Assinatura pendente: bash scripts/aprovar.sh sandbox-fase2-19-11.
+  palavras-chave: proposta, sandbox, fase, lançador, agata, run, abre, plataforma, claude, code, codex, opencode, gemini, mesmo, estado, turno, contenção, landlock, processo, filho, primeiro, passo, demais, terem, mesma, funcionalidade, pedido, humano, plano, seth, nemotron, código, sonnet, revisão, opus, testes, real, assinatura, pendente, bash, scripts, aprovar
 (1081) DIÁRIO — 18/11/2026 · **Aplicada ferramentas-confianca-19-11: ferramentas por confiança e bloqueio do inventado** Assinada pelo Humano em 19/11. Níveis: local e pago até pessoal; gratuito só público. Correção da Máquina invisível ao Humano.
   palavras-chave: aplicada, ferramentas, confianca, confiança, bloqueio, inventado, assinada, humano, níveis, local, pago, pessoal, gratuito, público, correção, máquina, invisível
 (1080) DIÁRIO — 18/11/2026 · **Aplicada sem-mistral-19-11: Mistral fora da ficha; filas unificadas registradas** Assinada pelo Humano em 19/11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, porta, entrada, modelo, novo, passa, prova, rota, skills, terceiros, comprovadas, viram, candidatas, adoção, veredito, util, dominado, inutil, neutro, tipo, pedido, ledger, aceita, terceiro, nome, pasta, separada, skill, agata, adotar, sonnet, orquestrado, opus, revisão, codex, aprovou, medido, testes, local, tudo, aplicação, assinatura, pendente, bash, scripts, aprovar
 (1053) DIÁRIO — 18/11/2026 · **Aplicada skills-51-18-11: regra dos 51% dentro de 9 skills** Assinada pelo Humano em 18/11 13:09. 9 SKILL.md de .agents/skills ganham a seção Recomendação comprovada (L8): só recomenda como comprovada a solução com acertos acima de 51% e ao menos 10 usos conferidos; o resto vai como não comprovada, sem descarte.
   palavras-chave: aplicada, skills, regra, dentro, assinada, humano, skill, agents, ganham, seção, recomendação, comprovada, recomenda, solução, acertos, acima, usos, conferidos, resto, vai, descarte
-(1052) DIÁRIO — 18/11/2026 · **Proposta skills-51-18-11: regra dos 51% dentro de 9 skills (lacuna L1 do lote 8).** Antes de recomendar, a skill consulta skills_ledger.py recalcular; comprovada só com acertos >51% e ≥10 usos conferidos, o resto vai como "não comprovada". Modelo: Haiku orquestrado pelo Opus. Medido: lint de skills, saída 0; ledger em HOME descartável. Não medido: aplicação. Assinatura pendente: bash scripts/aprovar.sh skills-51-18-11.
-  palavras-chave: proposta, skills, regra, dentro, lacuna, lote, recomendar, skill, consulta, ledger, recalcular, comprovada, acertos, usos, conferidos, resto, vai, modelo, haiku, orquestrado, opus, medido, lint, saída, home, descartável, aplicação, assinatura, pendente, bash, scripts, aprovar
+(1052) DIÁRIO — 18/11/2026 · **Proposta skills-51-18-11: regra dos 51% dentro de …
+  palavras-chave: proposta, skills, regra, dentro
 (1051) DIÁRIO — 18/11/2026 · **Aplicada agentes-skills-18-11b: agentes permanent …
   palavras-chave: aplicada, agentes, skills, permanent
 (1050) DIÁRIO — 18/11/2026 · **Proposta agentes-skills-18-11b: rebase de agentes …
