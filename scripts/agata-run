@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Involucro do lancador agata-run (Fase 2 do sandbox). Resolve o link e chama o Python.
+DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+exec python3 "$DIR/agata_run.py" "$@"

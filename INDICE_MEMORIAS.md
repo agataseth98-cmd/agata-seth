@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1089) DIÁRIO — 18/11/2026 · **Aplicada correcoes-19-11: agata-run e assinatura por tipo** Assinada pelo Humano em 19/11 23:30. Substitui sandbox-fase2-19-11 e assinatura-por-tipo-19-11, que falharam no CI.
 (1088) DIÁRIO — 19/11/2026 · **As aplicações assinadas de sandbox-fase2 e assinatura-por-tipo falharam no CI local e não foram forçadas; a proposta correcoes-19-11 traz o lote completo das duas com as correções.** O agata-run barrava o próprio python do venv (cerca fechada demais); o teste de sincronia contava 16 regras e agora são 17. Modelo: Sonnet corrigiu, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh correcoes-19-11.
 (1087) DIÁRIO — 18/11/2026 · **Aplicada persona-entidade-19-11: uma entidade, muitos cérebros** Assinada pelo Humano em 19/11 20:44.
 (1086) DIÁRIO — 18/11/2026 · **Aplicada voz-conta-turno-19-11: fala transcrita conta como turno** Assinada pelo Humano em 19/11 20:44.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas-18-11b sem ESTADO.md, porque o hook regenera esse arquivo e o fiscal P-8 nunca casaria (PR #1051 fechado).** Lição: diff de proposta não leva arquivo gerado. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11c.
 (1061) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11b: substitui rotas-novas-18-11 (não assinar aquela); mesmas rotas da Seth, com o Ollama sob demanda (socket + proxy + 15 min ocioso), por correção do Humano às 18:15.** Modelo: Sonnet orquestrado pelo Opus. Medido: 190 testes, 16 de sob demanda, systemd verify OK, CI local TUDO OK. Não medido: partida a frio real do qwen3-30b. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11b.
 (1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal compara OmniRoute com a lista viva dos provedores** Assinada pelo Humano em 18/11. Avisa aposentados e novos sem cota; token só para host local, sem redirecionamento.
-(1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30b-a3b local em JSON, código e contexto longo, com queda segura para a regra de hoje; o Ollama passa a subir e descer com o sistema.** Segredo nunca vai a rota; painel só restringe; prazo da rota local 100,5 s (maior sucesso + 30 s, ordem do Humano). lfm3, rlm e lumi catalogados sem rota (Humano tem planos). Modelo: Sonnet orquestrado pelo Opus; revisão agata-revisor r1 e r2 reprovaram, tudo corrigido. Medido: 188 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11.
+(1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30 …
 (1058) DIÁRIO — 18/11/2026 · **Proposta catalogo-vivo-18-11: a pesquisa semanal …
 (1057) DIÁRIO — 18/11/2026 · **Aplicada painel-modelos-18-11: liberar modelos do …
 (1056) DIÁRIO — 18/11/2026 · **Aplicada porta-entrada-18-11: prova obrigatória p …
