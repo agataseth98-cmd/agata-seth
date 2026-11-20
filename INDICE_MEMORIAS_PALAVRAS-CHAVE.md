@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-cerebro no índice** Assinada pelo Humano em 20/11. Conversa por voz com o modelo da CLI como cérebro; verificador de skills sem problema.
+  palavras-chave: aplicada, voz, cerebro, cli, skill, agata, índice, assinada, humano, conversa, modelo, cérebro, verificador, skills, problema
 (1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-cerebro — conversa por voz em que o modelo da CLI é o cérebro (ouvido local, voz do sistema, som de espera), com as lições e ferramentas da conversa de 20/11.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-cerebro-cli-20-11.
   palavras-chave: proposta, voz, cerebro, cli, skill, agata, conversa, modelo, cérebro, ouvido, local, sistema, som, espera, lições, ferramentas, ordem, humano, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1093) DIÁRIO — 20/11/2026 · **Aplicada tool-call-json-20-11: chamada de ferramenta escrita como JSON passa a rodar no gateway** Assinada pelo Humano em 20/11 11:56. 64 testes em redesign/router/test_seth_base.py; prova no painel após reiniciar o seth-gateway.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, canal, voz, local, microfone, palavra, agata, ciclo, conversa, transcrição, locais, gateway, aprende, gravar, pedido, opção, humano, fase, reconhecer, modelo, sonnet, orquestrado, opus, revisão, codex, rodadas, medido, testes, tudo, assinatura, pendente, bash, scripts, aprovar
 (1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o chamado de voz do sistema; agir naturalmente, responder sempre em voz, som de espera opcional.** Ordem do Humano em 18/11 18:54, com os ajustes do uso real (19:09, 20:38). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh voz-chamado-18-11.
   palavras-chave: proposta, voz, chamado, fale, comigo, abre, sistema, agir, naturalmente, responder, sempre, som, espera, opcional, ordem, humano, ajustes, uso, real, modelo, opus, assinatura, pendente, bash, scripts, aprovar
-(1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética do nome Alexandria entra na spec** Assinada pelo Humano em 18/11 20:03. Calímaco, as Pínakes e a poesia alexandrina. Primeira proposta nascida de conversa por voz.
-  palavras-chave: aplicada, alexandria, nome, origem, poética, entra, spec, assinada, humano, calímaco, pínakes, poesia, alexandrina, primeira, proposta, nascida, conversa, voz
+(1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética …
+  palavras-chave: aplicada, alexandria, nome, origem, poética
 (1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética …
   palavras-chave: proposta, alexandria, nome, origem, poética
 (1063) DIÁRIO — 18/11/2026 · **Aplicada rotas-novas-18-11c: Seth usa o qwen3-30b …

@@ -208,6 +208,14 @@
   "resumo": "-"
  },
  {
+  "nome": "agata-voz-cerebro",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-voz-cerebro/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "design-taste-frontend",
   "tipo": "skill",
   "fonte": "agata",
