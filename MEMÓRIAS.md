@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): dbab7948cd554a69e85249af471ebb635f1fadc6
-  Escrito em: 19/11/2026 23:31 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): c0efa751d8260645f37d72926b98645c850e76b4
+  Escrito em: 19/11/2026 23:39 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dbab7948cd554a69e85249af471ebb635f1fadc6/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dbab7948cd554a69e85249af471ebb635f1fadc6/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dbab7948cd554a69e85249af471ebb635f1fadc6/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dbab7948cd554a69e85249af471ebb635f1fadc6/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/dbab7948cd554a69e85249af471ebb635f1fadc6/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c0efa751d8260645f37d72926b98645c850e76b4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c0efa751d8260645f37d72926b98645c850e76b4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c0efa751d8260645f37d72926b98645c850e76b4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c0efa751d8260645f37d72926b98645c850e76b4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/c0efa751d8260645f37d72926b98645c850e76b4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1090) DIÁRIO — 19/11/2026 · **Proposta placar-qualidade-19-11: o placar passa a pesar a qualidade do conteúdo, e modelo sem medida aparece como 'conteúdo não medido', nunca 1.00 silencioso.** Frente 3 das três escolhidas com o Humano. Sonnet implementou, Opus revisou; 23 testes. Assinatura pendente: bash scripts/aprovar.sh placar-qualidade-19-11.
+
 (1089) DIÁRIO — 18/11/2026 · **Aplicada correcoes-19-11: agata-run e assinatura por tipo** Assinada pelo Humano em 19/11 23:30. Substitui sandbox-fase2-19-11 e assinatura-por-tipo-19-11, que falharam no CI.
 Modelo: Claude Opus 5.5 com Sonnet 5.5 · vetor: p8_verificar, CI local · Autorização: Humano — assinatura APROVADO
 
