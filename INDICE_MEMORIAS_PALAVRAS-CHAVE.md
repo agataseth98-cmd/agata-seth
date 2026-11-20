@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (agente do OpenCode, mesmas regras, worktree descartável) e a Seth do painel passa a chamá-lo, com o trabalho visível sob demanda.** Lote 2 das decisões do Humano por voz de 20/11. Medição real: respeitou 'não altere', mas errou contagem (modelo gratuito). Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-20-11.
+  palavras-chave: proposta, agata, code, nasce, agente, opencode, mesmas, regras, worktree, descartável, seth, painel, passa, chamá, trabalho, visível, sob, demanda, lote, decisões, humano, voz, medição, real, respeitou, altere, errou, contagem, modelo, gratuito, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura e anota no cache do Conselho** Assinada pelo Humano em 20/11. Prova: pedido 4 repetido no painel após reiniciar painel-operacional.
   palavras-chave: aplicada, painel, ferramentas, seth, ganha, leitura, anota, cache, assinada, humano, prova, pedido, repetido, após, reiniciar, operacional
 (1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, canal, voz, local, registro, pedido, gateway, assinada, humano, fase, reconhecer, honra, agata, nao, registrar, loopback
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o chamado de voz do sistema** Assinada pelo Humano em 19/11. Agir naturalmente, responder sempre em voz, som de espera opcional.
   palavras-chave: aplicada, voz, chamado, fale, comigo, abre, sistema, assinada, humano, agir, naturalmente, responder, sempre, som, espera, opcional
-(1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no canon — bom para todo mundo, e progresso visível e confiável na espera.** Decisão do Humano em 18/11 (18:42 e 19:16). Modelo: Opus. Medido: CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh regra-zero-19-11.
-  palavras-chave: proposta, regra, zero, entra, canon, bom, mundo, progresso, visível, confiável, espera, decisão, humano, modelo, opus, medido, local, tudo, assinatura, pendente, bash, scripts, aprovar
+(1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no can …
+  palavras-chave: proposta, regra, zero, entra, can
 (1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (mic …
   palavras-chave: proposta, canal, voz, local, mic
 (1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o …
