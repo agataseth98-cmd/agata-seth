@@ -52,5 +52,23 @@
       "redesign/rotas/tests/test_placar.py::PlacarTests::test_fonte_ausente_e_resumo_quebrado_viram_aviso"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "modelo com nota mecânica 1.00 e bloqueios frequentes cai e fica marcado `ruim` (`tests/test_placar.py`)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::ConteudoTests::test_mecanico_1_com_bloqueios_frequentes_cai"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "modelo sem dado de conteúdo aparece `conteúdo não medido`, nunca 1.00",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/rotas/tests/test_placar.py::ConteudoTests::test_sem_dado_de_conteudo_aparece_nao_medido_e_nunca_1"
+    ],
+    "cwd": null
   }
 ]
