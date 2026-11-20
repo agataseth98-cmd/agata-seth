@@ -1,0 +1,366 @@
+diff --git a/redesign/rotas/placar.py b/redesign/rotas/placar.py
+index fd59dd4f..69ec0f71 100644
+--- a/redesign/rotas/placar.py
++++ b/redesign/rotas/placar.py
+@@ -12,7 +12,18 @@ Confiança: local (hardware da Máquina) | pago_sem_treino (só por override em
+ (sem garantia de não treinar). Classe publico aceita qualquer confiança; pessoal só local; segredo, nenhum.
+ Estado: última decisão em decisoes.jsonl do catálogo; standby (ou aposentado/vetado) tira o modelo.
+ Amostra pequena (n < 6) entra com aviso e peso menor (nota puxada para 0,5); nenhum modelo é descartado
+-por amostra pequena. Nota é mecânica, não é juízo de qualidade. Não chama provedor, só lê arquivos.
++por amostra pequena. Não chama provedor, só lê arquivos.
++
++Qualidade de CONTEÚDO (19/11/2026): a nota mecânica (responde, formato, latência) não vê conteúdo ruim; lfm3 tirava
++1.00 com auditoria ruim. Por modelo, três sinais já existentes (pior sinal manda; cada um vai de 0 a 1):
++  (a) bloqueios do gateway (escrita inventada, saída simulada, cabeçalho forjado): o gateway só loga no journal
++      ("gateway: bloqueio_turno: achados=... served_by=MODELO"). Fonte: --bloqueios ARQ (export desse journal em texto, ou
++      jsonl {"modelo","bloqueios"[,"turnos"]}). Sem "turnos", 5 bloqueios zeram o sinal; com "turnos", a taxa x4;
++  (b) vereditos manuais (vereditos-manuais.jsonl: inutil/indisponivel/ruim = 0; limitado = 0,5; bom = 1);
++  (c) experimento de escrita longa (experimento-seth-escrita.jsonl: nao_entregue = 0, entregue = 1; média).
++nota_final = 0,5 x nota mecânica ajustada + 0,5 x conteúdo. Sem nenhum sinal: "conteúdo não medido", nota_final limitada a
++0,9 (nunca 1.00 silencioso). Conteúdo < 0,5 marca "ruim" e o modelo não fica à frente de quem não é ruim em `melhores`.
++Sinal cujo nome de modelo não casa com nenhum do placar vira aviso (ex.: rota "seth" não é modelo).
+ """
+ from __future__ import annotations
+ 
+@@ -201,6 +212,109 @@ def _registros(modelo: str, ent: dict, linhas: list[dict], arq: Path, origem: st
+     return regs
+ 
+ 
++TETO_NAO_MEDIDO = 0.9
++BLOQUEIOS_ZERA = 5
++LIMIAR_RUIM = 0.5
++_VER = {"inutil": 0.0, "indisponivel": 0.0, "ruim": 0.0, "limitado": 0.5, "bom": 1.0}
++EXPERIMENTOS_PADRAO = [HOME / "agata-arquivo/roteador-capacidade-17-11/experimento-seth-escrita.jsonl"]
++BLOQUEIOS_PADRAO = [HOME / ".local/share/agata/placar/bloqueios.jsonl"]
++
++
++def _arquivos(fontes: list[Path], nome: str):
++    for f in fontes:
++        if f.is_file():
++            yield f
++        elif f.is_dir():
++            yield from sorted(f.rglob(nome))
++
++
++def _bloqueios(fontes: list[Path]) -> dict[str, dict]:
++    """{modelo: {"bloqueios": float, "turnos": int|None}} de journal em texto ou jsonl. 'persistiu' vale 1,
++    'corrigido_na_2a' vale 0,5; 'resposta não conferida' não é conteúdo e não conta."""
++    out: dict[str, dict] = {}
++
++    def somar(m, v, turnos=None):
++        e = out.setdefault(m, {"bloqueios": 0.0, "turnos": None})
++        e["bloqueios"] += v
++        if turnos:
++            e["turnos"] = (e["turnos"] or 0) + int(turnos)
++
++    for arq in _arquivos(fontes, "bloqueios*"):
++        try:
++            linhas = arq.read_text(encoding="utf-8", errors="replace").splitlines()
++        except OSError:
++            continue
++        for bruto in linhas:
++            if "bloqueio_turno: achados=" in bruto and "served_by=" in bruto:
++                m = bruto.split("served_by=", 1)[1].split()[0] if bruto.split("served_by=", 1)[1].split() else "?"
++                if m != "?":
++                    somar(m, 0.5 if "corrigido_na_2a" in bruto else 1.0)
++                continue
++            try:
++                d = json.loads(bruto)
++            except ValueError:
++                continue
++            if isinstance(d, dict) and d.get("modelo") and isinstance(d.get("bloqueios"), (int, float)):
++                somar(d["modelo"], float(d["bloqueios"]), d.get("turnos"))
++    return out
++
++
++def _experimentos(fontes: list[Path]) -> dict[str, list[float]]:
++    out: dict[str, list[float]] = {}
++    for arq in _arquivos(fontes, "experimento-*.jsonl"):
++        for d in _jsonl(arq):
++            r = d.get("resultado")
++            if d.get("modelo") and r in ("entregue", "nao_entregue"):
++                out.setdefault(d["modelo"], []).append(1.0 if r == "entregue" else 0.0)
++    return out
++
++
++def _casa(chave: str, modelo: str) -> bool:
++    """Nome de sinal casa com id do placar: igual, ou um é sufixo do outro após '/'. ' via X' e '(...)' são ignorados."""
++    k = chave.split(" via ")[0].split(" (")[0].strip().lower()
++    m = modelo.lower()
++    return bool(k) and (k == m or m.endswith("/" + k) or k.endswith("/" + m))
++
++
++def conteudo(modelos: list[str], vereditos: dict, bloqueios: dict, experimentos: dict) -> tuple[dict, list[str]]:
++    """{modelo: {"nota": float|None, "ruim": bool, "sinais": {...}}} e avisos de sinal sem modelo no placar."""
++    out = {m: {"nota": None, "ruim": False, "sinais": {}} for m in modelos}
++    avisos: list[str] = []
++
++    def pos(chave, nome, valor, detalhe):
++        alvos = [m for m in modelos if _casa(chave, m)]
++        if not alvos:
++            avisos.append(f"sinal de conteúdo ({nome}) sem modelo no placar: {chave}")
++        for m in alvos:
++            out[m]["sinais"][nome] = {"valor": round(valor, 3), "detalhe": detalhe}
++
++    for chave, e in bloqueios.items():
++        if e["turnos"]:
++            taxa = e["bloqueios"] / e["turnos"]
++            pos(chave, "bloqueios", max(0.0, 1 - min(1.0, taxa * 4)), f"{e['bloqueios']:g} em {e['turnos']} turnos")
++        else:
++            pos(chave, "bloqueios", max(0.0, 1 - min(1.0, e["bloqueios"] / BLOQUEIOS_ZERA)), f"{e['bloqueios']:g} bloqueios")
++    for chave, v in vereditos.items():
++        palavra = v.split(":", 1)[0].strip().lower()
++        if palavra in _VER:
++            pos(chave, "veredito", _VER[palavra], v)
++        else:
++            avisos.append(f"veredito sem escala conhecida ({palavra}): {chave}")
++    for chave, xs in experimentos.items():
++        pos(chave, "escrita_longa", sum(xs) / len(xs), f"{int(sum(xs))} entregue(s) em {len(xs)}")
++    for m, c in out.items():
++        if c["sinais"]:
++            c["nota"] = round(min(s["valor"] for s in c["sinais"].values()), 4)
++            c["ruim"] = c["nota"] < LIMIAR_RUIM
++    return out, avisos
++
++
++def nota_final(nota_ajustada: float, c: dict | None) -> float:
++    if not c or c.get("nota") is None:
++        return round(min(nota_ajustada, TETO_NAO_MEDIDO), 4)
++    return round(0.5 * nota_ajustada + 0.5 * c["nota"], 4)
++
++
+ def _vereditos(fontes: list[Path]) -> dict[str, str]:
+     out = {}
+     for f in fontes:
+@@ -211,11 +325,16 @@ def _vereditos(fontes: list[Path]) -> dict[str, str]:
+     return out
+ 
+ 
+-def gerar(fontes: list[Path], saida: Path, decisoes: Path | None = None, tarifas: dict | None = None) -> dict:
++def gerar(fontes: list[Path], saida: Path, decisoes: Path | None = None, tarifas: dict | None = None,
++          bloqueios: list[Path] | None = None, experimentos: list[Path] | None = None) -> dict:
+     tarifas = tarifas if tarifas is not None else _tarifas()
+     cru, avisos = coletar(fontes)
+     est = estados(decisoes or decisoes_arq())
+     ver = _vereditos(fontes)
++    cont, av_c = conteudo(sorted(cru), ver,
++                          _bloqueios(BLOQUEIOS_PADRAO if bloqueios is None else bloqueios),
++                          _experimentos(EXPERIMENTOS_PADRAO if experimentos is None else experimentos))
++    avisos = avisos + av_c
+     modelos = {}
+     for m, tipos in sorted(cru.items()):
+         for t, r in tipos.items():
+@@ -225,11 +344,11 @@ def gerar(fontes: list[Path], saida: Path, decisoes: Path | None = None, tarifas
+                 r["avisos"] = r["avisos"] + [f"amostra pequena (n={r['n']} < {N_MIN}): peso menor"]
+         e = est.get(m, {})
+         ent = {"confianca": confianca(m, tarifas), "custo": custo(m, tarifas), "tipos": tipos,
+-               "estado_painel": e.get("estado"), "estado_em": e.get("quando")}
++               "estado_painel": e.get("estado"), "estado_em": e.get("quando"), "conteudo": cont[m]}
+         if m in ver:
+             ent["veredito_manual"] = ver[m]
+         modelos[m] = ent
+-    doc = {"schema_version": 1, "n_modelos": len(modelos), "fontes": [str(f) for f in fontes], "avisos": avisos,
++    doc = {"schema_version": 2, "n_modelos": len(modelos), "fontes": [str(f) for f in fontes], "avisos": avisos,
+            "modelos": modelos}
+     saida.parent.mkdir(parents=True, exist_ok=True)
+     tmp = saida.with_suffix(".tmp")
+@@ -266,10 +385,15 @@ def melhores(doc: dict, tipo: str, classe: str) -> list[dict]:
+         r = ent["tipos"].get(tipo)
+         if r is None or not elegivel(ent, classe):
+             continue
+-        lista.append({"modelo": m, "nota": r["nota"], "nota_ajustada": r["nota_ajustada"], "n": r["n"],
++        c = ent.get("conteudo")  # placar antigo (schema 1) não tem: conteúdo não medido
++        medido = bool(c) and c.get("nota") is not None
++        status = ("ruim" if c.get("ruim") else "medido") if medido else "não medido"
++        lista.append({"modelo": m, "nota": r["nota"], "nota_ajustada": r["nota_ajustada"],
++                      "nota_final": nota_final(r["nota_ajustada"], c), "conteudo": c["nota"] if medido else None,
++                      "conteudo_status": status, "n": r["n"],
+                       "p50": r["p50"], "p95": r["p95"], "confianca": ent["confianca"], "custo": ent["custo"]["tipo"],
+                       "prompt": r["prompt"], "data": r["data"], "avisos": r["avisos"]})
+-    lista.sort(key=lambda x: (-x["nota_ajustada"], x["p50"] if x["p50"] is not None else float("inf"), x["modelo"]))
++    lista.sort(key=lambda x: (x["conteudo_status"] == "ruim", -x["nota_final"], x["p50"] if x["p50"] is not None else float("inf"), x["modelo"]))
+     return lista
+ 
+ 
+@@ -280,6 +404,8 @@ def main(argv: list[str] | None = None) -> int:
+     g.add_argument("--fontes", nargs="*", type=Path, default=None)
+     g.add_argument("--saida", type=Path, default=None)
+     g.add_argument("--decisoes", type=Path, default=None)
++    g.add_argument("--bloqueios", nargs="*", type=Path, default=None, help="export do journal do gateway ou jsonl")
++    g.add_argument("--experimentos", nargs="*", type=Path, default=None, help="experimento-*.jsonl de escrita longa")
+     m = sub.add_parser("melhores")
+     m.add_argument("--tipo", required=True)
+     m.add_argument("--classe", required=True)
+@@ -289,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
+     a = ap.parse_args(argv)
+     if a.cmd == "gerar":
+         saida = a.saida or pasta_saida() / "placar.json"
+-        doc = gerar(a.fontes or FONTES_PADRAO, saida, a.decisoes)
++        doc = gerar(a.fontes or FONTES_PADRAO, saida, a.decisoes, None, a.bloqueios, a.experimentos)
+         print(f"placar: {doc['n_modelos']} modelos, {len(doc['avisos'])} avisos -> {saida}")
+         return 0
+     arq = a.placar or pasta_saida() / "placar.json"
+@@ -306,7 +432,10 @@ def main(argv: list[str] | None = None) -> int:
+     else:
+         for i, x in enumerate(lista, 1):
+             av = " [amostra pequena]" if x["n"] < N_MIN else ""
+-            print(f"{i}. {x['modelo']} nota={x['nota']:.2f} n={x['n']} p50={x['p50']} {x['confianca']}/{x['custo']} "
++            ct = f"conteúdo={x['conteudo']:.2f}" if x["conteudo"] is not None else "conteúdo não medido"
++            if x["conteudo_status"] == "ruim":
++                ct += " [conteúdo ruim]"
++            print(f"{i}. {x['modelo']} final={x['nota_final']:.2f} mecânica={x['nota']:.2f} {ct} n={x['n']} p50={x['p50']} {x['confianca']}/{x['custo']} "
+                   f"{x['prompt']} {x['data']}{av}")
+     return 0
+ 
+diff --git a/redesign/rotas/spec/acceptance.json b/redesign/rotas/spec/acceptance.json
+index 679f7218..5a8a5f4c 100644
+--- a/redesign/rotas/spec/acceptance.json
++++ b/redesign/rotas/spec/acceptance.json
+@@ -52,5 +52,23 @@
+       "redesign/rotas/tests/test_placar.py::PlacarTests::test_fonte_ausente_e_resumo_quebrado_viram_aviso"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "modelo com nota mecânica 1.00 e bloqueios frequentes cai e fica marcado `ruim` (`tests/test_placar.py`)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/rotas/tests/test_placar.py::ConteudoTests::test_mecanico_1_com_bloqueios_frequentes_cai"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "modelo sem dado de conteúdo aparece `conteúdo não medido`, nunca 1.00",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/rotas/tests/test_placar.py::ConteudoTests::test_sem_dado_de_conteudo_aparece_nao_medido_e_nunca_1"
++    ],
++    "cwd": null
+   }
+-]
+\ No newline at end of file
++]
+diff --git a/redesign/rotas/spec/spec.md b/redesign/rotas/spec/spec.md
+index cadc1b1f..6923acf1 100644
+--- a/redesign/rotas/spec/spec.md
++++ b/redesign/rotas/spec/spec.md
+@@ -6,7 +6,8 @@
+ 2. O placar (`placar.py`, 19/11/2026) agrega, por modelo e tipo de pedido (conversa, codigo, json, ferramenta, contexto), o que já foi medido: nota (a lógica de `scripts/porta_entrada.py`, importada, não duplicada), p50/p95, n, data, protocolo (`neutro` ou `prompt_real`, este quando o item termina em `_mcp_canon`), custo, confiança do provedor (`local`, `pago_sem_treino`, `gratuito`) e estado no painel (última decisão em `decisoes.jsonl`; standby, aposentado e vetado tiram o modelo).
+ 3. `placar.py gerar` grava `placar.json` com modo 0600. `placar.py melhores --tipo T --classe publico|pessoal` devolve os modelos elegíveis em ordem: publico aceita qualquer confiança, pessoal só `local`, segredo nenhum.
+ 4. Amostra pequena (n < 6) entra com aviso e peso menor (nota puxada para 0,5); nenhum modelo some por amostra pequena. De várias execuções vale a mais recente do par modelo × tipo.
+-5. O placar só lê arquivos; não chama provedor, não altera o gateway. Tarifa e confiança `pago_sem_treino` só entram por `tarifas.json` na pasta do placar (a tarifa do cofre não é lida aqui). Nota é mecânica, não é juízo de qualidade.
++5. O placar só lê arquivos; não chama provedor, não altera o gateway. Tarifa e confiança `pago_sem_treino` só entram por `tarifas.json` na pasta do placar (a tarifa do cofre não é lida aqui). Nota mecânica não é juízo de qualidade; o conteúdo entra pelo item 6.
++6. Qualidade de conteúdo (19/11/2026): por modelo, o pior de três sinais já existentes: bloqueios do gateway (journal `bloqueio_turno ... served_by=`, via `--bloqueios`; 5 bloqueios zeram o sinal, ou taxa x4 se houver `turnos`), vereditos manuais (`vereditos-manuais.jsonl`) e experimento de escrita longa (`experimento-*.jsonl`). `nota_final` = 0,5 x nota mecânica ajustada + 0,5 x conteúdo; conteúdo < 0,5 é `ruim` e nunca fica à frente de modelo não ruim em `melhores`. Sem sinal: `conteúdo não medido` e `nota_final` limitada a 0,9. Sinal com nome que não casa com modelo do placar vira aviso.
+ 
+ ## Critérios de aceite
+ 
+@@ -16,6 +17,8 @@
+ - [ ] standby no painel tira o modelo; a decisão mais recente vence
+ - [ ] amostra pequena traz aviso e peso menor, sem descartar o modelo
+ - [ ] fonte ausente ou resumo ilegível vira aviso, não falha
++- [ ] modelo com nota mecânica 1.00 e bloqueios frequentes cai e fica marcado `ruim` (`tests/test_placar.py`)
++- [ ] modelo sem dado de conteúdo aparece `conteúdo não medido`, nunca 1.00
+ 
+ ## Código
+ 
+diff --git a/redesign/rotas/tests/test_placar.py b/redesign/rotas/tests/test_placar.py
+index 5a95be17..abcecd0b 100644
+--- a/redesign/rotas/tests/test_placar.py
++++ b/redesign/rotas/tests/test_placar.py
+@@ -38,7 +38,7 @@ class PlacarTests(unittest.TestCase):
+     def gerar(self, fonte, decisoes=None, tarifas=None):
+         dec = self.tmp / "dec.jsonl"
+         dec.write_text("\n".join(json.dumps(d) for d in (decisoes or [])))
+-        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, tarifas or {})
++        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, tarifas or {}, bloqueios=[], experimentos=[])
+ 
+     def test_agrega_por_modelo_e_tipo_com_n_p50_p95(self):
+         f = self.run_dir("a", [("ollama-local/m", "codigo", 10, {}), ("ollama-local/m", "contexto_longo", 6, {})])
+@@ -119,7 +119,7 @@ class PlacarTests(unittest.TestCase):
+         (f / "a" / "resumo-x.json").write_text("{nao json")
+         dec = self.tmp / "dec.jsonl"
+         dec.write_text("")
+-        doc = placar.gerar([f, self.tmp / "nada"], self.tmp / "o.json", dec, {})
++        doc = placar.gerar([f, self.tmp / "nada"], self.tmp / "o.json", dec, {}, bloqueios=[], experimentos=[])
+         self.assertEqual(len(doc["avisos"]), 2)
+         self.assertIn("ollama-local/m", doc["modelos"])
+ 
+@@ -133,5 +133,76 @@ class PlacarTests(unittest.TestCase):
+         self.assertEqual(placar.main(["melhores", "--tipo", "zzz", "--classe", "pessoal", "--placar", str(out)]), 2)
+ 
+ 
++class ConteudoTests(unittest.TestCase):
++    setUp = PlacarTests.setUp
++    run_dir = PlacarTests.run_dir
++
++    def gerar(self, fonte, bloq=None, exp=None):
++        dec = self.tmp / "dec.jsonl"
++        dec.write_text("")
++        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, {}, bloqueios=bloq or [], experimentos=exp or [])
++
++    def duas(self):
++        return self.run_dir("a", [("ollama-local/bom", "conversa", 8, {}), ("ollama-local/forja", "conversa", 8, {})])
++
++    def test_mecanico_1_com_bloqueios_frequentes_cai(self):
++        f = self.duas()
++        log = self.tmp / "bloqueios.txt"
++        linha = "gateway: bloqueio_turno: achados=a persistiu -> resposta mínima · rota=seth-livre · 1.0s · /v1 · served_by=ollama-local/forja\n"
++        log.write_text(linha * 5)
++        ok = self.tmp / "bloqueios-ok.jsonl"
++        ok.write_text(json.dumps({"modelo": "ollama-local/bom", "bloqueios": 0, "turnos": 40}))
++        doc = self.gerar(f, bloq=[log, ok])
++        self.assertEqual(doc["modelos"]["ollama-local/forja"]["tipos"]["conversa"]["nota"], 1.0)
++        lista = placar.melhores(doc, "conversa", "publico")
++        self.assertEqual([x["modelo"] for x in lista], ["ollama-local/bom", "ollama-local/forja"])
++        forja = lista[1]
++        self.assertEqual(forja["conteudo_status"], "ruim")
++        self.assertLess(forja["nota_final"], 0.6)
++        self.assertEqual(lista[0]["nota_final"], 1.0)
++
++    def test_ruim_nao_fica_no_topo_mesmo_com_nota_final_maior(self):
++        f = self.duas()
++        vm = self.tmp / "fonte" / "vereditos-manuais.jsonl"
++        vm.write_text(json.dumps({"modelo": "ollama-local/forja", "veredito": "inutil", "motivo": "x"}))
++        doc = self.gerar(f)  # o bom não tem sinal: não medido, teto 0,9
++        lista = placar.melhores(doc, "conversa", "publico")
++        self.assertEqual(lista[0]["modelo"], "ollama-local/bom")
++        self.assertEqual(lista[1]["conteudo_status"], "ruim")
++
++    def test_sem_dado_de_conteudo_aparece_nao_medido_e_nunca_1(self):
++        doc = self.gerar(self.duas())
++        for x in placar.melhores(doc, "conversa", "publico"):
++            self.assertEqual(x["conteudo_status"], "não medido")
++            self.assertIsNone(x["conteudo"])
++            self.assertEqual(x["nota"], 1.0)
++            self.assertLess(x["nota_final"], 1.0)
++        out = self.tmp / "out" / "placar.json"
++        import contextlib
++        import io
++        buf = io.StringIO()
++        with contextlib.redirect_stdout(buf):
++            placar.main(["melhores", "--tipo", "conversa", "--classe", "publico", "--placar", str(out)])
++        self.assertIn("conteúdo não medido", buf.getvalue())
++
++    def test_experimento_de_escrita_e_nome_sem_modelo_vira_aviso(self):
++        f = self.duas()
++        exp = self.tmp / "experimento-escrita.jsonl"
++        exp.write_text("\n".join(json.dumps(d) for d in [
++            {"modelo": "forja via OpenCode", "resultado": "nao_entregue"},
++            {"modelo": "seth/nemotron via OpenCode", "resultado": "nao_entregue"}]))
++        doc = self.gerar(f, exp=[exp])
++        c = doc["modelos"]["ollama-local/forja"]["conteudo"]
++        self.assertEqual(c["nota"], 0.0)
++        self.assertTrue(c["ruim"])
++        self.assertTrue(any("seth/nemotron" in a for a in doc["avisos"]))
++
++    def test_placar_antigo_sem_conteudo_le_como_nao_medido(self):
++        doc = self.gerar(self.duas())
++        for ent in doc["modelos"].values():
++            del ent["conteudo"]
++        self.assertTrue(all(x["conteudo_status"] == "não medido" for x in placar.melhores(doc, "conversa", "publico")))
++
++
+ if __name__ == "__main__":
+     unittest.main()

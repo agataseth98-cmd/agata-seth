@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1090) DIÁRIO — 19/11/2026 · **Proposta placar-qualidade-19-11: o placar passa a pesar a qualidade do conteúdo, e modelo sem medida aparece como 'conteúdo não medido', nunca 1.00 silencioso.** Frente 3 das três escolhidas com o Humano. Sonnet implementou, Opus revisou; 23 testes. Assinatura pendente: bash scripts/aprovar.sh placar-qualidade-19-11.
+  palavras-chave: proposta, placar, qualidade, passa, pesar, conteúdo, modelo, medida, aparece, medido, nunca, silencioso, frente, três, escolhidas, humano, sonnet, implementou, opus, revisou, testes, assinatura, pendente, bash, scripts, aprovar
 (1089) DIÁRIO — 18/11/2026 · **Aplicada correcoes-19-11: agata-run e assinatura por tipo** Assinada pelo Humano em 19/11 23:30. Substitui sandbox-fase2-19-11 e assinatura-por-tipo-19-11, que falharam no CI.
   palavras-chave: aplicada, correcoes, agata, run, assinatura, tipo, assinada, humano, substitui, sandbox, fase, falharam
 (1088) DIÁRIO — 19/11/2026 · **As aplicações assinadas de sandbox-fase2 e assinatura-por-tipo falharam no CI local e não foram forçadas; a proposta correcoes-19-11 traz o lote completo das duas com as correções.** O agata-run barrava o próprio python do venv (cerca fechada demais); o teste de sincronia contava 16 regras e agora são 17. Modelo: Sonnet corrigiu, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh correcoes-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, rotas, novas, mesma, estado, porque, hook, regenera, arquivo, fiscal, nunca, casaria, fechado, lição, diff, leva, gerado, modelo, opus, assinatura, pendente, bash, scripts, aprovar
 (1061) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11b: substitui rotas-novas-18-11 (não assinar aquela); mesmas rotas da Seth, com o Ollama sob demanda (socket + proxy + 15 min ocioso), por correção do Humano às 18:15.** Modelo: Sonnet orquestrado pelo Opus. Medido: 190 testes, 16 de sob demanda, systemd verify OK, CI local TUDO OK. Não medido: partida a frio real do qwen3-30b. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11b.
   palavras-chave: proposta, rotas, novas, substitui, assinar, aquela, mesmas, seth, ollama, sob, demanda, socket, proxy, min, ocioso, correção, humano, modelo, sonnet, orquestrado, opus, medido, testes, systemd, verify, local, tudo, partida, frio, real, qwen, assinatura, pendente, bash, scripts, aprovar
-(1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal compara OmniRoute com a lista viva dos provedores** Assinada pelo Humano em 18/11. Avisa aposentados e novos sem cota; token só para host local, sem redirecionamento.
-  palavras-chave: aplicada, catalogo, vivo, pesquisa, semanal, compara, omniroute, lista, viva, provedores, assinada, humano, avisa, aposentados, novos, cota, token, host, local, redirecionamento
+(1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal co …
+  palavras-chave: aplicada, catalogo, vivo, pesquisa, semanal
 (1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30 …
   palavras-chave: proposta, rotas, novas, seth, usa, qwen
 (1058) DIÁRIO — 18/11/2026 · **Proposta catalogo-vivo-18-11: a pesquisa semanal …
