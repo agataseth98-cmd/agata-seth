@@ -131,8 +131,12 @@ class RotaChatStreamTests(unittest.TestCase):
         self.gateway.roteiro = ""
         self.gateway.modelo_real = ""
         panel.GATEWAY_CHAT_URL = self.gateway_url
+        # 20/11/2026: seth-livre passa a mandar `tools` (ferramentas_seth). Estes testes são do transporte; sem MCP real.
+        self.sem_ferramentas = mock.patch.object(panel.ferramentas_seth, "esquemas", return_value=[])
+        self.sem_ferramentas.start()
 
     def tearDown(self):
+        self.sem_ferramentas.stop()
         panel.GATEWAY_CHAT_URL = self.antigos[2]
 
     def request(self, method, path, body=None, headers=None):

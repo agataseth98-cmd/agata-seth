@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura e anota no cache do Conselho** Assinada pelo Humano em 20/11. Prova: pedido 4 repetido no painel após reiniciar painel-operacional.
+  palavras-chave: aplicada, painel, ferramentas, seth, ganha, leitura, anota, cache, assinada, humano, prova, pedido, repetido, após, reiniciar, operacional
 (1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
   palavras-chave: proposta, painel, ferramentas, seth, ganha, leitura, máquina, vault, canon, anota, cache, pública, segue, lote, decisões, humano, voz, web, fica, próprio, sonnet, implementou, opus, revisou, mediu, assinatura, pendente, bash, scripts, aprovar
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-cerebro no índice** Assinada pelo Humano em 20/11. Conversa por voz com o modelo da CLI como cérebro; verificador de skills sem problema.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, voz, chamado, fale, comigo, abre, sistema, assinada, humano, agir, naturalmente, responder, sempre, som, espera, opcional
 (1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no canon — bom para todo mundo, e progresso visível e confiável na espera.** Decisão do Humano em 18/11 (18:42 e 19:16). Modelo: Opus. Medido: CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh regra-zero-19-11.
   palavras-chave: proposta, regra, zero, entra, canon, bom, mundo, progresso, visível, confiável, espera, decisão, humano, modelo, opus, medido, local, tudo, assinatura, pendente, bash, scripts, aprovar
-(1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (microfone, palavra de vez Agata, ciclo de conversa, transcrição e voz locais) e o gateway aprende a não gravar um pedido (opção A do Humano).** Fase 1 sem reconhecer a voz. Modelo: Sonnet orquestrado pelo Opus; revisão Codex em 4 rodadas. Medido: 259 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh canal-voz-18-11.
-  palavras-chave: proposta, canal, voz, local, microfone, palavra, agata, ciclo, conversa, transcrição, locais, gateway, aprende, gravar, pedido, opção, humano, fase, reconhecer, modelo, sonnet, orquestrado, opus, revisão, codex, rodadas, medido, testes, tudo, assinatura, pendente, bash, scripts, aprovar
+(1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (mic …
+  palavras-chave: proposta, canal, voz, local, mic
 (1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o …
   palavras-chave: proposta, voz, chamado, fale, comigo, abre
 (1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética …

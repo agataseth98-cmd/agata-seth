@@ -1873,7 +1873,7 @@ function sethAvisoJanela(janela) {
    Erro de transporte (sem stream, 404, 5xx, rede) antes do primeiro delta cai para /api/seth/chat inteiro.
    Erro do próprio stream (tipo "erro") mostra o motivo e não repete a pergunta. */
 function sethErroStream(motivo) { return Object.assign(new Error(String(motivo || "falha no stream")), {motivoStream: true}); }
-async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instrucoes = "", anexos = []) {
+async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instrucoes = "", anexos = [], aoEstado = null) {
   const r = await fetch("/api/seth/chat/stream", {method: "POST", credentials: "same-origin", cache: "no-store", signal: sinal,
     headers: {"Content-Type": "application/json", Accept: "text/event-stream"}, body: JSON.stringify({mensagens, modelo, instrucoes, anexos})});
   if (!r.ok) throw Object.assign(new Error(sethErro(r.status, await sethMotivo(r))), {status: r.status});
@@ -1888,6 +1888,7 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instruc
     try { evento = JSON.parse(dados); } catch (_) { throw sethErroStream("linha de dados inválida"); }
     if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
     else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
+    else if (evento.tipo === "estado" && typeof evento.texto === "string") { if (aoEstado) aoEstado(evento.texto); } // 20/11: ferramenta em curso
     else if (evento.tipo === "fim") fim = true;
     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
   };
@@ -2548,10 +2549,14 @@ async function sethResponder(op) {
     }
     textoNo.appendData(delta); if (perto) log.scrollTop = log.scrollHeight; sethAtualizarFim();
   };
+  const aoEstado = (texto) => { // Regra 0: o que a Seth está consultando fica visível enquanto espera
+    sethStatus("CONSULTANDO", "partial");
+    if (!textoNo) { pensando.textContent = "A Seth está " + texto.charAt(0).toLowerCase() + texto.slice(1); pensando.append(cursor); }
+  };
   let conteudo = null, falha = null, parada = false;
   try {
     try {
-      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal, alvo.instrucoes || "", pedidoBase.anexos);
+      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal, alvo.instrucoes || "", pedidoBase.anexos, aoEstado);
     } catch (erro) {
       if (controle.signal.aborted) throw erro;
       const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
