@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1087) DIÁRIO — 18/11/2026 · **Aplicada persona-entidade-19-11: uma entidade, muitos cérebros** Assinada pelo Humano em 19/11 20:44.
+  palavras-chave: aplicada, persona, entidade, muitos, cérebros, assinada, humano
 (1086) DIÁRIO — 18/11/2026 · **Aplicada voz-conta-turno-19-11: fala transcrita conta como turno** Assinada pelo Humano em 19/11 20:44.
   palavras-chave: aplicada, voz, conta, turno, fala, transcrita, assinada, humano
 (1085) DIÁRIO — 19/11/2026 · **Proposta assinatura-por-tipo-19-11: o Humano decidiu por voz que mudança de sistema continua com assinatura, e estética, usabilidade e ordem das filas vão direto, com aviso e reversão.** Na dúvida, é sistema; o fiscal-p8 aprende a lista no próximo lote. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh assinatura-por-tipo-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, rotas, novas, seth, usa, qwen, local, json, código, contexto, longo, queda, segura, regra, hoje, ollama, passa, subir, descer, sistema, segredo, nunca, vai, rota, painel, restringe, prazo, maior, sucesso, ordem, humano, lfm, rlm, lumi, catalogados, tem, planos, modelo, sonnet, orquestrado, opus, revisão, agata, revisor, reprovaram, tudo, corrigido, medido, testes, assinatura, pendente, bash, scripts, aprovar
 (1058) DIÁRIO — 18/11/2026 · **Proposta catalogo-vivo-18-11: a pesquisa semanal compara a lista do OmniRoute com a lista viva da NVIDIA e do OpenRouter e avisa aposentados e novos.** Sem cota, sem chamada a modelo; token só para host local e sem redirecionamento. Modelo: Sonnet orquestrado pelo Opus; revisão agata-revisor (Codex sem cota). Medido: selftest 28 PASS, CI local TUDO OK. Reaberta em branch nova porque o número da entrada do PR #1046 foi ocupado pela aplicação do painel. Assinatura pendente: bash scripts/aprovar.sh catalogo-vivo-18-11.
   palavras-chave: proposta, catalogo, vivo, pesquisa, semanal, compara, lista, omniroute, viva, nvidia, openrouter, avisa, aposentados, novos, cota, chamada, modelo, token, host, local, redirecionamento, sonnet, orquestrado, opus, revisão, agata, revisor, codex, medido, selftest, pass, tudo, reaberta, branch, nova, porque, número, entrada, ocupado, aplicação, painel, assinatura, pendente, bash, scripts, aprovar
-(1057) DIÁRIO — 18/11/2026 · **Aplicada painel-modelos-18-11: liberar modelos do catálogo pelo painel** Assinada pelo Humano em 18/11. Subpainel Catálogo de modelos; decisões só em decisoes.jsonl.
-  palavras-chave: aplicada, painel, modelos, liberar, catálogo, assinada, humano, subpainel, decisões, decisoes, jsonl
+(1057) DIÁRIO — 18/11/2026 · **Aplicada painel-modelos-18-11: liberar modelos do …
+  palavras-chave: aplicada, painel, modelos, liberar
 (1056) DIÁRIO — 18/11/2026 · **Aplicada porta-entrada-18-11: prova obrigatória p …
   palavras-chave: aplicada, porta, entrada, prova, obrigatória
 (1055) DIÁRIO — 18/11/2026 · **Proposta painel-modelos-18-11: o Humano libera ou …
