@@ -1,6 +1,6 @@
 # Onde estamos
 
-Atualizado em 17/11/2026.
+Atualizado em 20/11/2026. Em 20/11 os 7 lotes que ainda constavam como "proposta" foram conferidos: todos estão em `propostas/superadas/`; o estado na tabela abaixo foi corrigido.
 
 Agata é o seu sistema. Ele guarda memória e regras que nunca se apagam.
 Modelos de IA trabalham nele seguindo o que está escrito aqui.
@@ -34,13 +34,13 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 
 | componente | proposta | estado | desde |
 |---|---|---|---|
-| Teste comparativo (Agata, chat e spec leve): desenho no repositório; a rodada pede aprovação à parte. Ouvir/Ditar: teste real com o Humano, outro dia | teste-comparativo-14-11 | proposta; a assinatura é do Humano | 14/11 21:00 |
-| Pacote de assinatura único de 14/11: sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão. A fiscal-yaml-12-11 já foi aplicada (#986); falta recolocar o `fiscal-p8` como obrigatório no `main` | pacote-14-11 | proposta; a assinatura é do Humano | 14/11 11:45 |
-| Workflow do fiscal com chave repetida (o GitHub recusa o fiscal-p8 desde o merge de #982; PR #983 bloqueado) e gate de YAML dos workflows | fiscal-yaml-12-11 | proposta em draft; antes de tudo, o Humano destrava a proteção do main | 12/11 16h |
+| Teste comparativo (Agata, chat e spec leve): desenho no repositório; a rodada pede aprovação à parte. Ouvir/Ditar: teste real com o Humano, outro dia | teste-comparativo-14-11 | superada (em propostas/superadas/, conferido 20/11) | 14/11 21:00 |
+| Pacote de assinatura único de 14/11: sincronia, PROJETO índice, correções de 12/11 e reversão da nova versão. A fiscal-yaml-12-11 já foi aplicada (#986); falta recolocar o `fiscal-p8` como obrigatório no `main` | pacote-14-11 | superada (em propostas/superadas/, conferido 20/11) | 14/11 11:45 |
+| Workflow do fiscal com chave repetida (o GitHub recusa o fiscal-p8 desde o merge de #982; PR #983 bloqueado) e gate de YAML dos workflows | fiscal-yaml-12-11 | superada (em propostas/superadas/, conferido 20/11) | 12/11 16h |
 | Pacote de assinatura único: chat lote 4, processo ágil, spec primeiro, voz, Importantes e História (Tomo I) | pacote-11-11 | aplicada (PR #973, 12/11 08:29) | 11/11 20:21 |
 | Pacote 12/11: tira o LibreChat, canon de boot, OpenCode no terminal (docs e agente), `--verificar` com rastro, lições da skill e registro do Texto 1 da História | pacote-12-11 | aplicada (PR #976, 12/11) | 12/11 09:01 |
-| Skills do Agata: 20 pastas viram 10, sem perder texto (originais em extras/); aplicar depois do pacote mecânico | skills-consolidadas-12-11 | proposta | 12/11 10:30 |
-| Pacote mecânico: a verificação vale para todo modelo (contador de turno, aviso de fim de turno, negação do .env, ponteiros para AGENTS.md, subagentes com pacote mínimo) | pacote-mecanico-12-11 | proposta | 12/11 09:47 |
+| Skills do Agata: 20 pastas viram 10, sem perder texto (originais em extras/); aplicar depois do pacote mecânico | skills-consolidadas-12-11 | superada (em propostas/superadas/, conferido 20/11) | 12/11 10:30 |
+| Pacote mecânico: a verificação vale para todo modelo (contador de turno, aviso de fim de turno, negação do .env, ponteiros para AGENTS.md, subagentes com pacote mínimo) | pacote-mecanico-12-11 | superada (em propostas/superadas/, conferido 20/11) | 12/11 09:47 |
 | Correção de estado (12/11): `pacote-mecanico-12-11` e `skills-consolidadas-12-11` (linhas acima, ainda com "proposta") estão superadas pelo `pacote-mecanico-skills-12-11`, aplicado com a assinatura do Humano | pacote-mecanico-skills-12-11 | aplicada (PR #982, 12/11) | 12/11 |
 | Chat lote 4: editar, ramos, parar, feedback, atalhos, tema | chat-lote4-09-11 | incluída em pacote-11-11 | 11/11 18:54 |
 | Processo ágil da skill de lote (R1, R3, R5, R2) | processo-agil-11-11 | incluída em pacote-11-11 | 11/11 |
@@ -49,11 +49,11 @@ Fonte: `propostas/*.diff` sem `APROVADO-` e `propostas/aplicadas/`. Última apli
 | Troca Goose por OpenCode no terminal | agente-opencode-07-11 | incluída em pacote-12-11 | 07/11 13:40 |
 | Docs canon e skills da troca OpenCode | docs-opencode-07-11 | incluída em pacote-12-11 (refeita) | 07/11 13:42 |
 | PROJETO.md: o que sobe no boot | canon-boot-07-11 | incluída em pacote-12-11 | 07/11 13:07 |
-| Núcleo de desenvolvimento (Ma'at, Ptah, Thoth) | nucleo-desenvolvimento-07-11 | proposta | 07/11 15:31 |
+| Núcleo de desenvolvimento (Ma'at, Ptah, Thoth) | nucleo-desenvolvimento-07-11 | superada (em propostas/superadas/, conferido 20/11) | 07/11 15:31 |
 | Origem preservada ao salvar conversas | origem-preservada-07-11 | superada (PR #965) | 07/11 13:39 |
 | Skill de processo: lições medidas | skill-processo-lessons-07-11 | incluída em pacote-12-11 (só as que não repetem a skill) | 07/11 13:18 |
 | Tira o LibreChat dos atalhos e do P-9 | tira-librechat-07-11 | incluída em pacote-12-11 | 07/11 13:39 |
-| Nova versão (lote 2) | nova-versao-lote2-20261106 | proposta | 06/11 21:21 |
+| Nova versão (lote 2) | nova-versao-lote2-20261106 | superada (em propostas/superadas/, conferido 20/11) | 06/11 21:21 |
 | Orçamento do turno em sombra (lote 9) | sombra-orcamento-20261106 | superada pela spec v2 | 06/11 09:35 |
 | `--verificar` deixa rastro no log da auditoria | verificar-rastro-20261106 | incluída em pacote-12-11 (refeita) | 06/11 23:54 |
 
