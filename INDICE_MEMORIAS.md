@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-cerebro no índice** Assinada pelo Humano em 20/11. Conversa por voz com o modelo da CLI como cérebro; verificador de skills sem problema.
 (1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-cerebro — conversa por voz em que o modelo da CLI é o cérebro (ouvido local, voz do sistema, som de espera), com as lições e ferramentas da conversa de 20/11.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-cerebro-cli-20-11.
 (1093) DIÁRIO — 20/11/2026 · **Aplicada tool-call-json-20-11: chamada de ferramenta escrita como JSON passa a rodar no gateway** Assinada pelo Humano em 20/11 11:56. 64 testes em redesign/router/test_seth_base.py; prova no painel após reiniciar o seth-gateway.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o chamado de voz do sistema** Assinada pelo Humano em 19/11. Agir naturalmente, responder sempre em voz, som de espera opcional.
 (1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no canon — bom para todo mundo, e progresso visível e confiável na espera.** Decisão do Humano em 18/11 (18:42 e 19:16). Modelo: Opus. Medido: CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh regra-zero-19-11.
 (1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (microfone, palavra de vez Agata, ciclo de conversa, transcrição e voz locais) e o gateway aprende a não gravar um pedido (opção A do Humano).** Fase 1 sem reconhecer a voz. Modelo: Sonnet orquestrado pelo Opus; revisão Codex em 4 rodadas. Medido: 259 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh canal-voz-18-11.
-(1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o chamado de voz do sistema; agir naturalmente, responder sempre em voz, som de espera opcional.** Ordem do Humano em 18/11 18:54, com os ajustes do uso real (19:09, 20:38). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh voz-chamado-18-11.
+(1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o …
 (1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética …
 (1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética …
 (1063) DIÁRIO — 18/11/2026 · **Aplicada rotas-novas-18-11c: Seth usa o qwen3-30b …

@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
+  palavras-chave: proposta, painel, ferramentas, seth, ganha, leitura, máquina, vault, canon, anota, cache, pública, segue, lote, decisões, humano, voz, web, fica, próprio, sonnet, implementou, opus, revisou, mediu, assinatura, pendente, bash, scripts, aprovar
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-cerebro no índice** Assinada pelo Humano em 20/11. Conversa por voz com o modelo da CLI como cérebro; verificador de skills sem problema.
   palavras-chave: aplicada, voz, cerebro, cli, skill, agata, índice, assinada, humano, conversa, modelo, cérebro, verificador, skills, problema
 (1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-cerebro — conversa por voz em que o modelo da CLI é o cérebro (ouvido local, voz do sistema, som de espera), com as lições e ferramentas da conversa de 20/11.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-cerebro-cli-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, regra, zero, entra, canon, bom, mundo, progresso, visível, confiável, espera, decisão, humano, modelo, opus, medido, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1067) DIÁRIO — 19/11/2026 · **Proposta canal-voz-18-11: canal de voz local (microfone, palavra de vez Agata, ciclo de conversa, transcrição e voz locais) e o gateway aprende a não gravar um pedido (opção A do Humano).** Fase 1 sem reconhecer a voz. Modelo: Sonnet orquestrado pelo Opus; revisão Codex em 4 rodadas. Medido: 259 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh canal-voz-18-11.
   palavras-chave: proposta, canal, voz, local, microfone, palavra, agata, ciclo, conversa, transcrição, locais, gateway, aprende, gravar, pedido, opção, humano, fase, reconhecer, modelo, sonnet, orquestrado, opus, revisão, codex, rodadas, medido, testes, tudo, assinatura, pendente, bash, scripts, aprovar
-(1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o chamado de voz do sistema; agir naturalmente, responder sempre em voz, som de espera opcional.** Ordem do Humano em 18/11 18:54, com os ajustes do uso real (19:09, 20:38). Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh voz-chamado-18-11.
-  palavras-chave: proposta, voz, chamado, fale, comigo, abre, sistema, agir, naturalmente, responder, sempre, som, espera, opcional, ordem, humano, ajustes, uso, real, modelo, opus, assinatura, pendente, bash, scripts, aprovar
+(1066) DIÁRIO — 19/11/2026 · **Proposta voz-chamado-18-11: "fale comigo" abre o …
+  palavras-chave: proposta, voz, chamado, fale, comigo, abre
 (1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética …
   palavras-chave: aplicada, alexandria, nome, origem, poética
 (1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética …
