@@ -1,0 +1,775 @@
+diff --git a/.opencode/agent/agata-code.md b/.opencode/agent/agata-code.md
+new file mode 100644
+index 00000000..57d41d81
+--- /dev/null
++++ b/.opencode/agent/agata-code.md
+@@ -0,0 +1,62 @@
++---
++description: Agata Code, frente de código do Agata. Edita arquivos numa worktree descartável, roda testes e anota no cache do Conselho. Nunca commita, publica, aplica nem assina.
++mode: primary
++model: agata/seth-livre
++temperature: 0.1
++permission:
++  edit: allow
++  read:
++    "*": allow
++    "*.env": deny
++    "*.env.*": deny
++    "*/.config/agata/*": deny
++  webfetch: deny
++  websearch: deny
++  external_directory: deny
++  bash:
++    "*": deny
++    "git status*": allow
++    "git diff*": allow
++    "git log*": allow
++    "git show*": allow
++    "git ls-files*": allow
++    "ls*": allow
++    "cat *": deny
++    "grep *": allow
++    "rg *": allow
++    "find *": allow
++    "wc *": allow
++    "head *": allow
++    "tail *": allow
++    "pwd": allow
++    "python3 -m pytest*": allow
++    "python3 -m unittest*": allow
++    "*/pytest *": allow
++    "pytest *": allow
++    "python3 redesign/router/cache_conselho.py*": allow
++    "git commit*": deny
++    "git push*": deny
++    "sudo*": deny
++    "rm -rf*": deny
++    "curl*": deny
++    "wget*": deny
++    "*-exec*": deny
++    "*-delete*": deny
++    "*--output*": deny
++    "*>*": deny
++---
++
++Você é o Agata Code, o agente de código do sistema Agata. Siga o AGENTS.md do repositório: ele vale para você sem exceção.
++
++Ao começar, leia a memória comum: `python3 redesign/router/cache_conselho.py ler --n 20`.
++Ao fechar, anote o que importa: `python3 redesign/router/cache_conselho.py anotar --autor "Agata Code" --tipo nota "<lição>"`. Sem segredo nem dado pessoal.
++
++Regras que não se negociam:
++- Meça antes de afirmar. O que não rodou ou não leu, diga "não medido".
++- Escreva o código e o teste juntos, e rode os testes da sua área antes de responder.
++- Nunca commite, publique (push), aplique proposta, assine nem rode aprovar.sh.
++- Nunca use sudo, rm -rf, curl ou wget para fora.
++- Nunca abra `~/.config/agata/.env` nem leia chaves.
++- Trabalhe só no diretório em que foi aberto (uma worktree descartável).
++
++Resposta final curta: o que mudou (caminho de cada arquivo), a saída real dos testes e o que ficou de fora.
+diff --git a/redesign/painel_operacional/ferramentas_seth.py b/redesign/painel_operacional/ferramentas_seth.py
+index dfa72482..892bfde8 100644
+--- a/redesign/painel_operacional/ferramentas_seth.py
++++ b/redesign/painel_operacional/ferramentas_seth.py
+@@ -7,12 +7,21 @@ escrita: anotar no cache do Conselho (autor fixo "Seth (painel)").
+ - Web (buscar_web, ler_pagina): NÃO implementada. O navegador-mcp (127.0.0.1:20136/mcp) é FastMCP HTTP com sessão e
+   estado de página (navegar, depois ler_pagina); não há chamada simples de uma ferramenta só.
+ - O laço (`laco`) reenvia ao gateway com os resultados, no máximo MAX_RODADAS rodadas. Transporte injetado.
++- `agata_code` (lote 2, 20/11/2026): a Seth chama o Agata Code (agente do OpenCode, `.opencode/agent/agata-code.md`) numa
++  worktree NOVA e descartável a partir de origin/main, fora do ~/agata vivo. Um sentido só: ele não chama a Seth.
++  Devolve resposta, `git diff --stat` e caminhos; sem mudança, a worktree é removida. O laço emite estado a cada 10 s.
+ Não registra texto de usuário em log.
+ """
+ import json
++import os
++import re
++import shutil
++import signal
+ import subprocess
+ import sys
++import threading
+ import time
++from datetime import datetime
+ from pathlib import Path
+ 
+ from chat_stream import eventos_do_stream
+@@ -20,7 +29,8 @@ from chat_stream import eventos_do_stream
+ MODELO_COM_FERRAMENTAS = "seth-livre"
+ NOMES_MCP = ("maquina_verificar", "vault_buscar", "query_canon", "vault_consultar")  # lista fixa; sem memoria_acrescentar
+ NOME_ANOTAR = "cache_anotar"
+-NOMES_PERMITIDOS = frozenset(NOMES_MCP) | {NOME_ANOTAR}
++NOME_AGATA_CODE = "agata_code"
++NOMES_PERMITIDOS = frozenset(NOMES_MCP) | {NOME_ANOTAR, NOME_AGATA_CODE}
+ AUTOR_CACHE = "Seth (painel)"
+ TIPOS_CACHE = ("fato", "decisao", "pendencia", "nota")
+ MAX_TEXTO_CACHE = 4000
+@@ -28,6 +38,17 @@ MAX_RODADAS = 5
+ MAX_RESULTADO = 12000
+ TIMEOUT_FERRAMENTA_S = 60
+ MCP_CANON = Path(__file__).resolve().parents[1] / "librechat" / "canon-mcp.mjs"
++# Agata Code (lote 2). Tudo que o teste precisa trocar é variável de módulo, lida na hora da chamada.
++MAX_TAREFA_CODE = 4000
++TIMEOUT_AGATA_CODE_S = 600
++PULSO_S = 10                     # intervalo do evento de estado enquanto o Agata Code trabalha (Regra 0)
++MAX_RESPOSTA_CODE = 6000
++AGENTE_CODE = "agata-code"
++AGENTE_CODE_ARQUIVO = Path(".opencode") / "agent" / "agata-code.md"
++OPENCODE_BIN = Path.home() / ".opencode" / "bin" / "opencode"
++ARQUIVO_CODE = Path.home() / "agata-arquivo" / "agata-code"      # uma pasta por execução: worktree + transcricao.jsonl
++REPO_RAIZ = Path(__file__).resolve().parents[2]                    # checkout de onde sai a worktree (só leitura de refs)
++ENV_CODE_PERMITIDAS = ("PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "TERM", "SHELL")  # nada de segredo herdado
+ AVISO_LIMITE = "\n\n[Limite de {n} rodadas de ferramentas atingido; sigo sem mais consultas.]"
+ 
+ ESQUEMA_ANOTAR = {
+@@ -98,11 +119,25 @@ def esquemas(agora=None, ttl: float = 300.0) -> list[dict]:
+         lista = []
+     lista.sort(key=lambda f: NOMES_MCP.index(f["function"]["name"]))
+     lista.append(ESQUEMA_ANOTAR)
+-    if len(lista) > 1:  # só guarda lista completa; falha do MCP tenta de novo no próximo pedido
++    lista.append(ESQUEMA_AGATA_CODE)
++    if len(lista) > 2:  # só guarda lista completa; falha do MCP tenta de novo no próximo pedido
+         _cache_esquemas.update(quando=t, lista=lista)
+     return list(lista)
+ 
+ 
++ESQUEMA_AGATA_CODE = {
++    "type": "function",
++    "function": {
++        "name": NOME_AGATA_CODE,
++        "description": ("Chama o Agata Code, o agente de código do Agata (OpenCode), numa cópia descartável do repositório. "
++                        "Ele edita arquivos e roda testes, mas nunca commita, publica, aplica nem assina. Devolve a resposta, "
++                        "o resumo das mudanças (git diff --stat) e o caminho da cópia. Leva minutos; use para tarefa de código."),
++        "parameters": {"type": "object", "additionalProperties": False, "required": ["tarefa"],
++                       "properties": {"tarefa": {"type": "string", "maxLength": MAX_TAREFA_CODE}}},
++    },
++}
++
++
+ def _cache_modulo():
+     router = str(Path(__file__).resolve().parents[1] / "router")
+     if router not in sys.path:
+@@ -127,6 +162,123 @@ def cache_anotar(args: dict) -> str:
+     return json.dumps(recibo, ensure_ascii=False)
+ 
+ 
++def _env_code() -> dict:
++    return {k: os.environ[k] for k in ENV_CODE_PERMITIDAS if k in os.environ}
++
++
++def _git(pasta, *args, timeout: float = 60) -> subprocess.CompletedProcess:
++    return subprocess.run(["git", "-C", str(pasta), *args], capture_output=True, text=True, timeout=timeout)
++
++
++def _texto_final(transcricao: Path) -> str:
++    """Texto do agente: junta os eventos {"type":"text"} da transcrição (formato `opencode run --format json`)."""
++    partes = []
++    try:
++        for linha in transcricao.read_text(encoding="utf-8", errors="replace").splitlines():
++            try:
++                ev = json.loads(linha)
++            except ValueError:
++                continue
++            if isinstance(ev, dict) and ev.get("type") == "text":
++                texto = (ev.get("part") or {}).get("text")
++                if isinstance(texto, str) and texto.strip():
++                    partes.append(texto.strip())
++    except OSError:
++        pass
++    return "\n\n".join(partes)
++
++
++def _rodar_opencode(cmd: list, pasta: Path, transcricao: Path, timeout_s: float, cancelar) -> str | None:
++    """Roda o agente com a saída (eventos json) direto no arquivo. Devolve None se terminou, ou o motivo (tempo/cancelado)."""
++    with open(transcricao, "wb") as saida:
++        proc = subprocess.Popen(cmd, cwd=str(pasta), env=_env_code(), stdin=subprocess.DEVNULL, stdout=saida,
++                                stderr=subprocess.DEVNULL, start_new_session=True)
++        fim = time.monotonic() + timeout_s
++        motivo = None
++        while proc.poll() is None:
++            if cancelar is not None and cancelar.is_set():
++                motivo = "cancelado (a conversa foi fechada)"
++            elif time.monotonic() >= fim:
++                motivo = f"tempo esgotado ({int(timeout_s)} s)"
++            if motivo:
++                try:
++                    os.killpg(proc.pid, signal.SIGKILL)
++                except OSError:
++                    proc.kill()
++                proc.wait()
++                return motivo
++            time.sleep(0.2)
++    return None
++
++
++def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) -> dict:
++    """Roda o Agata Code numa worktree nova de origin/main, em ARQUIVO_CODE/<data-hora>/. Devolve um dict:
++    {ok, resposta, diff_stat, worktree (None se removida), transcricao, erro, tempo_s}. Nunca levanta."""
++    t0 = time.monotonic()
++    res = {"ok": False, "resposta": "", "diff_stat": "", "worktree": None, "transcricao": None, "erro": None, "tempo_s": 0.0}
++    tarefa = args.get("tarefa") if isinstance(args, dict) else None
++    if not isinstance(tarefa, str) or not tarefa.strip():
++        res["erro"] = f"tarefa obrigatória, texto de até {MAX_TAREFA_CODE} caracteres"
++        return res
++    if len(tarefa) > MAX_TAREFA_CODE:
++        res["erro"] = f"tarefa acima de {MAX_TAREFA_CODE} caracteres"
++        return res
++    timeout_s = TIMEOUT_AGATA_CODE_S if timeout_s is None else timeout_s
++    pasta = Path(ARQUIVO_CODE) / (datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + os.urandom(3).hex())
++    worktree, transcricao = pasta / "worktree", pasta / "transcricao.jsonl"
++    try:
++        pasta.mkdir(parents=True, exist_ok=False)
++        criou = _git(REPO_RAIZ, "worktree", "add", "--detach", str(worktree), "origin/main")
++        if criou.returncode != 0:
++            res["erro"] = "não consegui criar a worktree de origin/main"
++            return res
++        origem = Path(REPO_RAIZ) / AGENTE_CODE_ARQUIVO  # a definição do agente é a do checkout servido, mesmo antes do merge
++        if origem.is_file():
++            (worktree / AGENTE_CODE_ARQUIVO).parent.mkdir(parents=True, exist_ok=True)
++            shutil.copyfile(origem, worktree / AGENTE_CODE_ARQUIVO)
++        res["transcricao"] = str(transcricao)
++        cmd = [str(OPENCODE_BIN), "run", "--agent", AGENTE_CODE, "--format", "json", "--dir", str(worktree), "--", tarefa]
++        try:
++            motivo = _rodar_opencode(cmd, worktree, transcricao, timeout_s, cancelar)
++        except OSError:
++            motivo = "não consegui iniciar o opencode"
++        res["resposta"] = truncar(_texto_final(transcricao), MAX_RESPOSTA_CODE)
++        excluir = f":(exclude){AGENTE_CODE_ARQUIVO.as_posix()}"
++        _git(worktree, "add", "-A", "-N", "--", ".", excluir)
++        stat = _git(worktree, "diff", "--stat", "--", ".", excluir).stdout.strip()
++        res["diff_stat"] = truncar(stat, 3000)
++        if stat:
++            res["worktree"] = str(worktree)
++        else:
++            _git(REPO_RAIZ, "worktree", "remove", "--force", str(worktree))  # sem mudança, nada a guardar
++        if motivo:
++            res["erro"] = motivo
++        elif not res["resposta"]:
++            res["erro"] = "o agente não devolveu texto (veja a transcrição)"
++        else:
++            res["ok"] = True
++    except Exception as erro:  # a ferramenta nunca derruba a conversa
++        res["erro"] = f"falha ao rodar o Agata Code ({type(erro).__name__})"
++    finally:
++        res["tempo_s"] = round(time.monotonic() - t0, 1)
++    return res
++
++
++def texto_agata_code(res: dict) -> str:
++    """O que volta para a Seth (e para o gateway): resposta, diff --stat e caminhos."""
++    linhas = []
++    if res.get("erro"):
++        linhas.append("erro: " + str(res["erro"]))
++    if res.get("resposta"):
++        linhas.append("Resposta do Agata Code:\n" + res["resposta"])
++    linhas.append("git diff --stat:\n" + (res.get("diff_stat") or "(sem mudanças; worktree removida)"))
++    if res.get("worktree"):
++        linhas.append("Worktree: " + res["worktree"])
++    if res.get("transcricao"):
++        linhas.append("Transcrição: " + res["transcricao"])
++    return truncar("\n\n".join(linhas))
++
++
+ def _texto_mcp(resp: dict) -> str:
+     if "error" in resp:
+         return "erro: " + str((resp["error"] or {}).get("message", "falha do MCP"))
+@@ -147,6 +299,8 @@ def executar(nome, argumentos) -> str:
+     try:
+         if nome == NOME_ANOTAR:
+             return truncar(cache_anotar(args))
++        if nome == NOME_AGATA_CODE:
++            return texto_agata_code(executar_agata_code(args))
+         resp = _rpc_mcp([{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": nome, "arguments": args}}])
+         return truncar(_texto_mcp(resp.get(1) or {"error": {"message": "sem resposta do MCP"}}))
+     except ErroMCP as erro:
+@@ -159,7 +313,45 @@ def _id_chamada(c: dict, i: int) -> str:
+     return str(c.get("id") or f"call_{i}")
+ 
+ 
+-def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodadas: int = MAX_RODADAS):
++def _args_json(argumentos) -> dict:
++    try:
++        args = json.loads(argumentos) if isinstance(argumentos, str) and argumentos.strip() else (argumentos or {})
++    except ValueError:
++        return {}
++    return args if isinstance(args, dict) else {}
++
++
++def _com_pulso(funcao, cancelar: threading.Event, intervalo: float | None = None):
++    """Roda `funcao` numa thread e emite {"tipo":"estado"} a cada `intervalo` s até ela terminar (Regra 0: o stream não
++    fica mudo). Se o gerador for fechado (o navegador saiu), sinaliza `cancelar` e o agente é morto. Devolve o resultado."""
++    intervalo = PULSO_S if intervalo is None else intervalo
++    saida = {}
++
++    def alvo():
++        try:
++            saida["r"] = funcao()
++        except Exception as erro:
++            saida["e"] = erro
++
++    thread = threading.Thread(target=alvo, daemon=True)
++    thread.start()
++    inicio = time.monotonic()
++    try:
++        while True:
++            thread.join(intervalo)
++            if not thread.is_alive():
++                break
++            yield {"tipo": "estado", "texto": f"Agata Code trabalhando… ({int(time.monotonic() - inicio)} s)"}
++    finally:
++        if thread.is_alive():
++            cancelar.set()
++    if "e" in saida:
++        raise saida["e"]
++    return saida["r"]
++
++
++def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodadas: int = MAX_RODADAS,
++         executor_code=None, intervalo_pulso: float | None = None):
+     """Gera eventos SSE do painel. `primeira_linhas` são as linhas da 1ª resposta (já aberta). `abrir_proxima(pedido)`
+     devolve as linhas da resposta seguinte (ou levanta OSError). Eventos de texto passam na hora; chamadas de
+     ferramenta emitem {"tipo":"estado"} e voltam ao gateway com a resposta; uso e fim saem só da resposta final."""
+@@ -186,8 +378,19 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
+         for i, c in enumerate(chamadas):
+             nome = c["nome"]
+             yield {"tipo": "estado", "texto": f"consultando {nome}…" if nome in NOMES_PERMITIDOS else "ferramenta não permitida"}
+-            pedido["messages"].append({"role": "tool", "tool_call_id": _id_chamada(c, i),
+-                                       "content": truncar(executor(nome, c["argumentos"]))})
++            if nome == NOME_AGATA_CODE:
++                cancelar = threading.Event()
++                args = _args_json(c["argumentos"])
++                fn = executor_code or executar_agata_code
++                yield {"tipo": "estado", "texto": "Agata Code trabalhando…"}
++                res = yield from _com_pulso(lambda: fn(args, cancelar=cancelar), cancelar, intervalo_pulso)
++                yield {"tipo": "agata_code", "resposta": res.get("resposta") or "", "diff_stat": res.get("diff_stat") or "",
++                       "transcricao": res.get("transcricao") or "", "worktree": res.get("worktree") or "",
++                       "erro": res.get("erro") or "", "tempo_s": res.get("tempo_s") or 0}
++                conteudo = texto_agata_code(res)
++            else:
++                conteudo = executor(nome, c["argumentos"])
++            pedido["messages"].append({"role": "tool", "tool_call_id": _id_chamada(c, i), "content": truncar(conteudo)})
+         try:
+             linhas = abrir_proxima(pedido)
+         except OSError:
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index 69360720..008985a9 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -786,6 +786,9 @@ body:has(#conversa:not([hidden])) main{height:100vh;height:100dvh;overflow:hidde
+ .seth-detalhes>summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+ .seth-detalhes-corpo{display:flex;flex-direction:column;gap:6px;max-width:76ch;margin-top:6px}
+ .seth-detalhes-corpo p{margin:0}
++.seth-agata-code{margin:8px 0;padding:6px 10px;border:1px solid var(--line);border-radius:8px}
++.seth-agata-code-rotulo{font-weight:600;color:var(--ink)}
++.seth-agata-code-texto{margin:0;max-height:240px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;scrollbar-width:thin}
+ .seth-linha-baixo .seth-contexto-detalhe{font-size:var(--fs-1);line-height:1.5}
+ .menu-fechar{display:none}
+ .nv-cartoes>.panel{margin:0}
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 717e11f0..3b5da861 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -1889,6 +1889,7 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instruc
+     if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
+     else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
+     else if (evento.tipo === "estado" && typeof evento.texto === "string") { if (aoEstado) aoEstado(evento.texto); } // 20/11: ferramenta em curso
++    else if (evento.tipo === "agata_code") (parcial.agata_code = parcial.agata_code || []).push(evento); // 20/11: trabalho do Agata Code
+     else if (evento.tipo === "fim") fim = true;
+     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
+   };
+@@ -2517,6 +2518,29 @@ function sethRemover(id, c = sethAtual) {
+   if (c.folha === id) c.folha = no.pai || null;
+ }
+ 
++// Bloco recolhido "Trabalho do Agata Code" (20/11/2026): o Humano escolhe ver ou não. Fechado por padrão; só texto (textContent).
++// Vale para a tela em curso: não entra na conversa salva. A transcrição completa fica no arquivo indicado.
++function sethBlocoAgataCode(dados) {
++  const bloco = document.createElement("details"); bloco.className = "seth-detalhes seth-agata-code";
++  const resumo = document.createElement("summary"); resumo.textContent = "Trabalho do Agata Code"; bloco.append(resumo);
++  const corpo = document.createElement("div"); corpo.className = "seth-detalhes-corpo";
++  const campo = (rotulo, texto, pre) => {
++    if (!texto) return;
++    const titulo = document.createElement("p"); titulo.className = "seth-agata-code-rotulo"; titulo.textContent = rotulo;
++    const valor = document.createElement(pre ? "pre" : "p"); valor.className = "seth-agata-code-texto"; valor.textContent = String(texto);
++    corpo.append(titulo, valor);
++  };
++  campo("Resposta", dados.resposta, true);
++  campo("Mudanças (git diff --stat)", dados.diff_stat || "sem mudanças", true);
++  campo("Erro", dados.erro, false);
++  campo("Worktree", dados.worktree, false);
++  campo("Transcrição completa", dados.transcricao, false);
++  if (dados.tempo_s) campo("Tempo", dados.tempo_s + " s", false);
++  bloco.append(corpo);
++  return bloco;
++}
++function sethMostrarAgataCode(log, parcial) { (parcial.agata_code || []).forEach((d) => log.append(sethBlocoAgataCode(d))); }
++
+ // Motor da resposta. A conversa é `alvo` (capturada antes de qualquer await): a resposta vai para ela e o salvar grava
+ // ela, mesmo que a tela tenha trocado. A trava (sethRespondendo) vale até o salvar terminar.
+ // Envia a janela do caminho até `paiId` (nova resposta) ou até a resposta de `alvoId` mais a mensagem "continue de onde
+@@ -2574,12 +2598,12 @@ async function sethResponder(op) {
+   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
+   if (conteudo !== null) {
+     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
+-    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
++    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
+     await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
+   } else if (parada) {
+     if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
+     if (alvo === sethAtual) {
+-      sethDesenhar();
++      sethDesenhar(); sethMostrarAgataCode(log, parcial);
+       if (falha) log.append(sethVazio("Não consegui terminar a resposta: " + (falha.message || "falha desconhecida") + "."));
+       else if (modo === "continuar" && !parcial.texto) log.append(sethVazio("Continuação parada antes do primeiro texto. A resposta ficou como estava."));
+       sethStatus("INTERROMPIDA", "partial");
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 71d7a849..6c1f8e4c 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -2879,5 +2879,61 @@
+       "redesign/painel_operacional/test_ferramentas_seth.py::CacheAnotarTests"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a ferramenta `agata_code` é oferecida só no seth-livre (nunca na Seth pública), está na lista fixa e recusa tarefa vazia, não textual ou acima de 4000 caracteres sem criar worktree",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeOferecidoTests",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_tarefa_vazia_ou_acima_de_4000_e_recusada_sem_criar_nada"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o Agata Code roda por `opencode run --agent agata-code --format json --dir <worktree>` numa worktree nova de origin/main em `~/agata-arquivo/agata-code/<data-hora>/`, nunca no repositório vivo, com ambiente restrito a uma lista fixa (sem segredo herdado)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_comando_com_agente_e_dir_na_worktree_nova_e_nunca_no_repo_vivo",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_worktree_parte_de_origin_main_e_ambiente_sem_segredo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "sem mudança a worktree é removida e a transcrição fica; com mudança a worktree fica e o resultado traz resposta, `git diff --stat` e os caminhos; o timeout de 600 s mata o agente; a resposta é truncada; executável ausente vira erro em texto",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "durante o trabalho o laço emite estado \"Agata Code trabalhando…\" a cada 10 s e um evento `agata_code` com o resultado; fechar o stream cancela o agente",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeLacoTests"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a tela mostra o bloco recolhido \"Trabalho do Agata Code\" (fechado por padrão, só `textContent`, estilo em arquivo externo) com resposta, diff e caminho da transcrição",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeTelaTests"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o agente `.opencode/agent/agata-code.md` manda seguir o AGENTS.md, ler e anotar no cache do Conselho, e nega git commit/push, sudo, rm -rf, curl, wget, leitura de .env e rede da web",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeDefinicaoTests"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index a71ab426..6e92b589 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -668,6 +668,12 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] a Seth pública nunca recebe `tools`; o seth-livre recebe só os nomes da lista fixa (quatro de leitura do MCP do canon e `cache_anotar`), e `memoria_acrescentar` não é oferecida nem executada
+ - [ ] o laço executa só ferramenta da lista, para em 5 rodadas com aviso, trunca o resultado e transforma erro de ferramenta em texto para o modelo; cada ferramenta emite o evento de estado para a tela
+ - [ ] `cache_anotar` grava com o autor fixo "Seth (painel)", recusa tipo e texto inválidos e usa o filtro do cache
++- [ ] a ferramenta `agata_code` é oferecida só no seth-livre (nunca na Seth pública), está na lista fixa e recusa tarefa vazia, não textual ou acima de 4000 caracteres sem criar worktree
++- [ ] o Agata Code roda por `opencode run --agent agata-code --format json --dir <worktree>` numa worktree nova de origin/main em `~/agata-arquivo/agata-code/<data-hora>/`, nunca no repositório vivo, com ambiente restrito a uma lista fixa (sem segredo herdado)
++- [ ] sem mudança a worktree é removida e a transcrição fica; com mudança a worktree fica e o resultado traz resposta, `git diff --stat` e os caminhos; o timeout de 600 s mata o agente; a resposta é truncada; executável ausente vira erro em texto
++- [ ] durante o trabalho o laço emite estado "Agata Code trabalhando…" a cada 10 s e um evento `agata_code` com o resultado; fechar o stream cancela o agente
++- [ ] a tela mostra o bloco recolhido "Trabalho do Agata Code" (fechado por padrão, só `textContent`, estilo em arquivo externo) com resposta, diff e caminho da transcrição
++- [ ] o agente `.opencode/agent/agata-code.md` manda seguir o AGENTS.md, ler e anotar no cache do Conselho, e nega git commit/push, sudo, rm -rf, curl, wget, leitura de .env e rede da web
+ 
+ ## Desenho e alternativas
+ 
+@@ -745,6 +751,8 @@ Ferramentas da Seth no painel (20/11/2026, decisão do Humano): só no modelo `s
+ - Lote 4, atalhos: o navegador pode reservar algum atalho (por exemplo, Ctrl+Shift+C em alguns navegadores). Medido só em teste de DOM e em Chromium headless, sem janela de navegador.
+ - Lote 4, tema claro: a paleta clara é gerada por inversão de luminosidade das cores escuras (pares `--luz-*` no `:root`; a geração foi feita por um script local, fora do repositório). Não há medição de contraste por ferramenta; as capturas mostram o estado, não aprovam.
+ 
++Agata Code na conversa (lote 2, 20/11/2026, decisão do Humano por voz): "Agata Code" é o agente de código do Agata, o `opencode` 1.19.5 com o agente de projeto `.opencode/agent/agata-code.md` (formato: markdown com frontmatter `description`, `mode`, `model: agata/seth-livre`, `permission` com `edit`, `read` e `bash` por padrão; conferido com `opencode agent list`). Mesmas regras e portões do AGENTS.md: o prompt manda ler o cache do Conselho ao começar e anotar com `--autor "Agata Code"` ao fechar; a permissão de bash é negar por padrão e liberar só leitura (git status/diff/log/show, ls, grep, rg, find, wc, head, tail), pytest/unittest e `cache_conselho.py`; nega `git commit`, `git push`, `sudo`, `rm -rf`, `curl`, `wget`, web e leitura de `.env`. A Seth chama o Agata Code de dentro da conversa pela ferramenta `agata_code` (só no seth-livre, `{tarefa}` até 4000 caracteres), num sentido só: o agente não chama a Seth. `executar_agata_code` cria uma worktree descartável detached de `origin/main` (ref local, sem `fetch`) em `~/agata-arquivo/agata-code/<data-hora>-<id>/worktree`, copia para ela a definição do agente do checkout servido (a worktree vem de `origin/main`, que só tem o arquivo depois do merge) e roda `opencode run --agent agata-code --format json --dir <worktree> -- "<tarefa>"` com timeout de 600 s e ambiente restrito (PATH, HOME, USER, LOGNAME, LANG, LC_ALL, TERM, SHELL). A saída json vai direto a `transcricao.jsonl`, ao lado da worktree. Devolve à Seth a resposta (truncada em 6000), o `git diff --stat` (a definição do agente fica fora) e os caminhos; sem mudança, a worktree é removida com `git worktree remove` e a transcrição fica. Regra 0: o laço roda a ferramenta numa thread e emite `{"tipo":"estado"}` "Agata Code trabalhando… (N s)" a cada 10 s, e um evento `{"tipo":"agata_code"}` com o resultado; se o navegador sair, o agente é morto. A tela mostra o bloco recolhido "Trabalho do Agata Code" (fechado por padrão, `textContent`, estilo em `prototipo.css`); o bloco vale para a tela em curso e não entra na conversa salva. Durante a ferramenta a trava de uma conversa por vez continua ocupada (até 600 s). Os testes usam executável falso, nunca o `opencode` real: `test_ferramentas_seth.py` (`AgataCode*`).
++
+ ## Código
+ 
+ - `server.py`
+diff --git a/redesign/painel_operacional/test_ferramentas_seth.py b/redesign/painel_operacional/test_ferramentas_seth.py
+index 8ed87925..924ef2e5 100644
+--- a/redesign/painel_operacional/test_ferramentas_seth.py
++++ b/redesign/painel_operacional/test_ferramentas_seth.py
+@@ -7,7 +7,10 @@ import http.client
+ import importlib.util
+ import json
+ import os
++import stat
++import subprocess
+ import tempfile
++import time
+ import threading
+ import unittest
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -24,7 +27,7 @@ spec.loader.exec_module(panel)
+ 
+ MSG = [{"role": "user", "content": "oi"}]
+ ESQ_FALSOS = [{"type": "function", "function": {"name": n, "description": "", "parameters": {"type": "object"}}}
+-              for n in fs.NOMES_MCP] + [fs.ESQUEMA_ANOTAR]
++              for n in fs.NOMES_MCP] + [fs.ESQUEMA_ANOTAR, fs.ESQUEMA_AGATA_CODE]
+ 
+ 
+ def sse_chamada(nome, args="{}", id_="c1"):
+@@ -64,15 +67,15 @@ class ListaFixaTests(unittest.TestCase):
+             fs._cache_esquemas.update(quando=0.0, lista=None)
+             nomes = [f["function"]["name"] for f in fs.esquemas()]
+             fs._cache_esquemas.update(quando=0.0, lista=None)
+-        self.assertEqual(nomes, list(fs.NOMES_MCP) + ["cache_anotar"])
++        self.assertEqual(nomes, list(fs.NOMES_MCP) + ["cache_anotar", "agata_code"])
+         with mock.patch.object(fs, "_rpc_mcp") as rpc:
+             self.assertIn("não permitida", fs.executar("memoria_acrescentar", '{"texto":"x"}'))
+             rpc.assert_not_called()
+ 
+-    def test_mcp_fora_do_ar_oferece_so_cache_anotar(self):
++    def test_mcp_fora_do_ar_oferece_so_cache_anotar_e_agata_code(self):
+         with mock.patch.object(fs, "_rpc_mcp", side_effect=fs.ErroMCP("x")):
+             fs._cache_esquemas.update(quando=0.0, lista=None)
+-            self.assertEqual([f["function"]["name"] for f in fs.esquemas()], ["cache_anotar"])
++            self.assertEqual([f["function"]["name"] for f in fs.esquemas()], ["cache_anotar", "agata_code"])
+ 
+     def test_resultado_truncado_e_erro_do_mcp_vira_texto(self):
+         longo = {1: {"result": {"content": [{"type": "text", "text": "a" * 30000}]}}}
+@@ -143,6 +146,217 @@ class LacoTests(unittest.TestCase):
+         self.assertEqual(evs[0]["texto"], "consultando query_canon…")
+ 
+ 
++# ---- Agata Code (lote 2, 20/11/2026): sempre com executável falso, nunca o opencode real -----------------------------------
++
++FAKE_OPENCODE = """#!/usr/bin/env python3
++import json, os, sys, time
++modo = os.environ.get("FAKE_MODO", "")
++open(os.environ["FAKE_REGISTRO"], "w").write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd(), "env": sorted(os.environ)}))
++if modo == "dorme":
++    time.sleep(30)
++if modo == "muda":
++    open("novo.txt", "w").write("conteudo\\n")
++texto = "x" * 20000 if modo == "longo" else "pronto"
++print(json.dumps({"type": "step_start"}))
++print(json.dumps({"type": "text", "part": {"type": "text", "text": texto}}))
++"""
++
++
++class AgataCodeBase(unittest.TestCase):
++    """Repo git de mentira com origin/main, pasta de arquivo temporária e opencode falso."""
++
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        base = Path(self.tmp.name)
++        self.repo, self.arquivo, self.reg = base / "repo", base / "arquivo", base / "registro.json"
++        self.repo.mkdir()
++        git = lambda *a: subprocess.run(["git", "-C", str(self.repo), *a], check=True, capture_output=True,
++                                        env={**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
++                                             "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"})
++        git("init", "-q")
++        (self.repo / "a.txt").write_text("a\n")
++        git("add", "a.txt")
++        git("commit", "-q", "-m", "c")
++        git("update-ref", "refs/remotes/origin/main", "HEAD")
++        (self.repo / "a.txt").write_text("sujeira no repo vivo\n")  # não pode aparecer na worktree
++        self.bin = base / "opencode"
++        self.bin.write_text(FAKE_OPENCODE)
++        self.bin.chmod(self.bin.stat().st_mode | stat.S_IEXEC)
++        self.patches = [mock.patch.object(fs, "REPO_RAIZ", self.repo), mock.patch.object(fs, "ARQUIVO_CODE", self.arquivo),
++                        mock.patch.object(fs, "OPENCODE_BIN", self.bin),
++                        mock.patch.object(fs, "ENV_CODE_PERMITIDAS", fs.ENV_CODE_PERMITIDAS + ("FAKE_REGISTRO", "FAKE_MODO")),
++                        mock.patch.dict(os.environ, {"FAKE_REGISTRO": str(self.reg), "FAKE_MODO": "",
++                                                     "SEGREDO_DE_TESTE": "nao-pode-passar"})]
++        for p in self.patches:
++            p.start()
++
++    def tearDown(self):
++        for p in self.patches:
++            p.stop()
++        subprocess.run(["git", "-C", str(self.repo), "worktree", "prune"], capture_output=True)
++        self.tmp.cleanup()
++
++    def registro(self):
++        return json.loads(self.reg.read_text())
++
++
++class AgataCodeOferecidoTests(unittest.TestCase):
++    def test_nao_e_oferecido_na_seth_public(self):
++        self.assertNotIn("tools", chat_stream.montar_pedido(MSG, "seth-public", ferramentas=ESQ_FALSOS))
++        livre = chat_stream.montar_pedido(MSG, "seth-livre", ferramentas=ESQ_FALSOS)
++        self.assertIn("agata_code", {t["function"]["name"] for t in livre["tools"]})
++        self.assertEqual(fs.ESQUEMA_AGATA_CODE["function"]["parameters"]["properties"]["tarefa"]["maxLength"], 4000)
++
++    def test_esta_na_lista_fixa_e_o_esquema_so_pede_tarefa(self):
++        self.assertIn("agata_code", fs.NOMES_PERMITIDOS)
++        self.assertEqual(list(fs.ESQUEMA_AGATA_CODE["function"]["parameters"]["properties"]), ["tarefa"])
++
++
++class AgataCodeDefinicaoTests(unittest.TestCase):
++    def test_agente_do_repositorio_nega_commit_push_sudo_rede_e_env_e_manda_ler_e_anotar_no_cache(self):
++        md = (HERE.parents[1] / ".opencode" / "agent" / "agata-code.md").read_text(encoding="utf-8")
++        cabeca = md.split("---")[1]
++        for negado in ('"git commit*": deny', '"git push*": deny', '"sudo*": deny', '"rm -rf*": deny',
++                       '"curl*": deny', '"wget*": deny', '"*": deny', '"*.env": deny', "webfetch: deny"):
++            self.assertIn(negado, cabeca)
++        self.assertIn("edit: allow", cabeca)
++        self.assertIn("model: agata/seth-livre", cabeca)
++        for texto in ("AGENTS.md", "cache_conselho.py ler --n 20", '--autor "Agata Code"', "Meça antes de afirmar", ".env"):
++            self.assertIn(texto, md)
++
++
++class AgataCodeExecucaoTests(AgataCodeBase):
++    def test_tarefa_vazia_ou_acima_de_4000_e_recusada_sem_criar_nada(self):
++        for args in ({}, {"tarefa": ""}, {"tarefa": "   "}, {"tarefa": 5}, {"tarefa": "x" * 4001}, "texto"):
++            r = fs.executar_agata_code(args)
++            self.assertFalse(r["ok"], args)
++            self.assertIn("tarefa", r["erro"])
++        self.assertFalse(self.arquivo.exists())
++        self.assertFalse(self.reg.exists())
++        self.assertTrue(fs.executar("agata_code", '{"tarefa":""}').startswith("erro:"))
++
++    def test_comando_com_agente_e_dir_na_worktree_nova_e_nunca_no_repo_vivo(self):
++        r = fs.executar_agata_code({"tarefa": "diga oi"})
++        reg = self.registro()
++        argv = reg["argv"]
++        self.assertEqual(argv[:5], ["run", "--agent", "agata-code", "--format", "json"])
++        wt = argv[argv.index("--dir") + 1]
++        self.assertEqual(argv[-2:], ["--", "diga oi"])
++        self.assertNotEqual(Path(wt).resolve(), self.repo.resolve())
++        self.assertTrue(Path(wt).resolve().is_relative_to(self.arquivo.resolve()))
++        self.assertEqual(Path(reg["cwd"]).resolve(), Path(wt).resolve())
++        self.assertTrue(r["ok"])
++        self.assertEqual(r["resposta"], "pronto")
++        self.assertEqual((self.repo / "a.txt").read_text(), "sujeira no repo vivo\n")  # o repo vivo não foi tocado
++
++    def test_worktree_parte_de_origin_main_e_ambiente_sem_segredo(self):
++        fs.executar_agata_code({"tarefa": "x"})
++        reg = self.registro()
++        wt = Path(reg["argv"][reg["argv"].index("--dir") + 1])
++        self.assertTrue(wt.exists() is False or (wt / "a.txt").read_text() == "a\n")  # removida sem diff; se ficou, é de origin/main
++        self.assertNotIn("SEGREDO_DE_TESTE", reg["env"])
++        self.assertEqual(fs._env_code().keys() - set(fs.ENV_CODE_PERMITIDAS), set())  # o filtro só deixa a lista fixa
++        self.assertNotIn("SEGREDO_DE_TESTE", fs._env_code())
++
++    def test_sem_mudanca_remove_a_worktree_e_guarda_a_transcricao(self):
++        r = fs.executar_agata_code({"tarefa": "só ler"})
++        self.assertIsNone(r["worktree"])
++        self.assertEqual(r["diff_stat"], "")
++        self.assertFalse(any(self.arquivo.glob("*/worktree")))
++        transcricao = Path(r["transcricao"])
++        self.assertTrue(transcricao.is_file())
++        self.assertIn('"type": "text"', transcricao.read_text())
++        self.assertIn("sem mudanças", fs.texto_agata_code(r))
++
++    def test_com_mudanca_guarda_a_worktree_e_devolve_diff_stat_resposta_e_caminhos(self):
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "muda"}):
++            r = fs.executar_agata_code({"tarefa": "crie um arquivo"})
++        self.assertTrue(r["ok"])
++        self.assertTrue(Path(r["worktree"], "novo.txt").is_file())
++        self.assertIn("novo.txt", r["diff_stat"])
++        texto = fs.texto_agata_code(r)
++        for parte in ("pronto", "novo.txt", r["worktree"], r["transcricao"]):
++            self.assertIn(parte, texto)
++
++    def test_timeout_respeitado_mata_o_agente(self):
++        t0 = time.monotonic()
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "dorme"}):
++            r = fs.executar_agata_code({"tarefa": "demora"}, timeout_s=1)
++        self.assertLess(time.monotonic() - t0, 10)
++        self.assertFalse(r["ok"])
++        self.assertIn("tempo esgotado", r["erro"])
++        self.assertIn("tempo esgotado", fs.texto_agata_code(r))
++        self.assertEqual(fs.TIMEOUT_AGATA_CODE_S, 600)
++
++    def test_resposta_longa_e_truncada(self):
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "longo"}):
++            r = fs.executar_agata_code({"tarefa": "texto grande"})
++        self.assertLess(len(r["resposta"]), fs.MAX_RESPOSTA_CODE + 100)
++        self.assertIn("truncado", r["resposta"])
++
++    def test_executavel_ausente_vira_erro_em_texto_e_nao_deixa_worktree(self):
++        with mock.patch.object(fs, "OPENCODE_BIN", Path(self.tmp.name) / "nao-existe"):
++            r = fs.executar_agata_code({"tarefa": "x"})
++        self.assertFalse(r["ok"])
++        self.assertIn("não consegui iniciar", r["erro"])
++        self.assertFalse(any(self.arquivo.glob("*/worktree")))
++
++
++class AgataCodeLacoTests(unittest.TestCase):
++    def test_laco_emite_estado_periodico_e_o_evento_do_trabalho(self):
++        pedidos = []
++        def abrir(pedido):
++            pedidos.append(json.loads(json.dumps(pedido)))
++            return iter(sse_texto("feito"))
++        def lento(args, cancelar=None):
++            time.sleep(0.5)
++            return {"ok": True, "resposta": "r", "diff_stat": " a | 1 +", "worktree": "/w", "transcricao": "/t", "erro": None, "tempo_s": 0.5}
++        evs = list(fs.laco(abrir, iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
++                           executor_code=lento, intervalo_pulso=0.1))
++        pulsos = [e for e in evs if e["tipo"] == "estado" and e["texto"].startswith("Agata Code trabalhando…")]
++        self.assertGreaterEqual(len(pulsos), 3)
++        trabalho = [e for e in evs if e["tipo"] == "agata_code"]
++        self.assertEqual(len(trabalho), 1)
++        self.assertEqual((trabalho[0]["resposta"], trabalho[0]["diff_stat"], trabalho[0]["transcricao"]), ("r", " a | 1 +", "/t"))
++        self.assertIn("/w", pedidos[0]["messages"][-1]["content"])
++        self.assertEqual(evs[-1], {"tipo": "fim"})
++
++    def test_fechar_o_gerador_cancela_o_agente(self):
++        visto = {}
++        def preso(args, cancelar=None):
++            visto["cancelar"] = cancelar
++            cancelar.wait(5)
++            return {}
++        g = fs.laco(lambda p: iter(sse_texto("x")), iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
++                    executor_code=preso, intervalo_pulso=0.05)
++        for ev in g:
++            if ev["texto"].startswith("Agata Code trabalhando…") and "(" in ev["texto"]:
++                break
++        g.close()
++        self.assertTrue(visto["cancelar"].wait(2))
++
++    def test_argumentos_invalidos_chegam_como_tarefa_recusada(self):
++        pedidos = []
++        def abrir(pedido):
++            pedidos.append(pedido)
++            return iter(sse_texto("ok"))
++        list(fs.laco(abrir, iter(sse_chamada("agata_code", "{isso não")), {"messages": list(MSG)}))
++        self.assertIn("tarefa", pedidos[0]["messages"][-1]["content"])
++
++
++class AgataCodeTelaTests(unittest.TestCase):
++    def test_bloco_trabalho_do_agata_code_fechado_por_padrao_so_textcontent_e_sem_script_inline(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        inicio = js.index("function sethBlocoAgataCode")
++        corpo = js[inicio:js.index("function sethMostrarAgataCode")]
++        self.assertIn("Trabalho do Agata Code", corpo)
++        self.assertIn('createElement("details")', corpo)
++        self.assertNotIn(".open = true", corpo)
++        self.assertNotIn("innerHTML", corpo)
++        self.assertIn('evento.tipo === "agata_code"', js)
++        self.assertIn(".seth-agata-code", (HERE / "prototipo.css").read_text(encoding="utf-8"))
++
++
+ class GatewayRoteiroHandler(BaseHTTPRequestHandler):
+     def do_POST(self):
+         pedido = json.loads(self.rfile.read(int(self.headers["Content-Length"])).decode("utf-8"))
