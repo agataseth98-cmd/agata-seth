@@ -38,7 +38,7 @@ class PlacarTests(unittest.TestCase):
     def gerar(self, fonte, decisoes=None, tarifas=None):
         dec = self.tmp / "dec.jsonl"
         dec.write_text("\n".join(json.dumps(d) for d in (decisoes or [])))
-        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, tarifas or {})
+        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, tarifas or {}, bloqueios=[], experimentos=[])
 
     def test_agrega_por_modelo_e_tipo_com_n_p50_p95(self):
         f = self.run_dir("a", [("ollama-local/m", "codigo", 10, {}), ("ollama-local/m", "contexto_longo", 6, {})])
@@ -119,7 +119,7 @@ class PlacarTests(unittest.TestCase):
         (f / "a" / "resumo-x.json").write_text("{nao json")
         dec = self.tmp / "dec.jsonl"
         dec.write_text("")
-        doc = placar.gerar([f, self.tmp / "nada"], self.tmp / "o.json", dec, {})
+        doc = placar.gerar([f, self.tmp / "nada"], self.tmp / "o.json", dec, {}, bloqueios=[], experimentos=[])
         self.assertEqual(len(doc["avisos"]), 2)
         self.assertIn("ollama-local/m", doc["modelos"])
 
@@ -131,6 +131,77 @@ class PlacarTests(unittest.TestCase):
         self.assertEqual(placar.main(["gerar", "--fontes", str(f), "--saida", str(out), "--decisoes", str(dec)]), 0)
         self.assertEqual(placar.main(["melhores", "--tipo", "json", "--classe", "pessoal", "--placar", str(out)]), 0)
         self.assertEqual(placar.main(["melhores", "--tipo", "zzz", "--classe", "pessoal", "--placar", str(out)]), 2)
+
+
+class ConteudoTests(unittest.TestCase):
+    setUp = PlacarTests.setUp
+    run_dir = PlacarTests.run_dir
+
+    def gerar(self, fonte, bloq=None, exp=None):
+        dec = self.tmp / "dec.jsonl"
+        dec.write_text("")
+        return placar.gerar([fonte], self.tmp / "out" / "placar.json", dec, {}, bloqueios=bloq or [], experimentos=exp or [])
+
+    def duas(self):
+        return self.run_dir("a", [("ollama-local/bom", "conversa", 8, {}), ("ollama-local/forja", "conversa", 8, {})])
+
+    def test_mecanico_1_com_bloqueios_frequentes_cai(self):
+        f = self.duas()
+        log = self.tmp / "bloqueios.txt"
+        linha = "gateway: bloqueio_turno: achados=a persistiu -> resposta mínima · rota=seth-livre · 1.0s · /v1 · served_by=ollama-local/forja\n"
+        log.write_text(linha * 5)
+        ok = self.tmp / "bloqueios-ok.jsonl"
+        ok.write_text(json.dumps({"modelo": "ollama-local/bom", "bloqueios": 0, "turnos": 40}))
+        doc = self.gerar(f, bloq=[log, ok])
+        self.assertEqual(doc["modelos"]["ollama-local/forja"]["tipos"]["conversa"]["nota"], 1.0)
+        lista = placar.melhores(doc, "conversa", "publico")
+        self.assertEqual([x["modelo"] for x in lista], ["ollama-local/bom", "ollama-local/forja"])
+        forja = lista[1]
+        self.assertEqual(forja["conteudo_status"], "ruim")
+        self.assertLess(forja["nota_final"], 0.6)
+        self.assertEqual(lista[0]["nota_final"], 1.0)
+
+    def test_ruim_nao_fica_no_topo_mesmo_com_nota_final_maior(self):
+        f = self.duas()
+        vm = self.tmp / "fonte" / "vereditos-manuais.jsonl"
+        vm.write_text(json.dumps({"modelo": "ollama-local/forja", "veredito": "inutil", "motivo": "x"}))
+        doc = self.gerar(f)  # o bom não tem sinal: não medido, teto 0,9
+        lista = placar.melhores(doc, "conversa", "publico")
+        self.assertEqual(lista[0]["modelo"], "ollama-local/bom")
+        self.assertEqual(lista[1]["conteudo_status"], "ruim")
+
+    def test_sem_dado_de_conteudo_aparece_nao_medido_e_nunca_1(self):
+        doc = self.gerar(self.duas())
+        for x in placar.melhores(doc, "conversa", "publico"):
+            self.assertEqual(x["conteudo_status"], "não medido")
+            self.assertIsNone(x["conteudo"])
+            self.assertEqual(x["nota"], 1.0)
+            self.assertLess(x["nota_final"], 1.0)
+        out = self.tmp / "out" / "placar.json"
+        import contextlib
+        import io
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            placar.main(["melhores", "--tipo", "conversa", "--classe", "publico", "--placar", str(out)])
+        self.assertIn("conteúdo não medido", buf.getvalue())
+
+    def test_experimento_de_escrita_e_nome_sem_modelo_vira_aviso(self):
+        f = self.duas()
+        exp = self.tmp / "experimento-escrita.jsonl"
+        exp.write_text("\n".join(json.dumps(d) for d in [
+            {"modelo": "forja via OpenCode", "resultado": "nao_entregue"},
+            {"modelo": "seth/nemotron via OpenCode", "resultado": "nao_entregue"}]))
+        doc = self.gerar(f, exp=[exp])
+        c = doc["modelos"]["ollama-local/forja"]["conteudo"]
+        self.assertEqual(c["nota"], 0.0)
+        self.assertTrue(c["ruim"])
+        self.assertTrue(any("seth/nemotron" in a for a in doc["avisos"]))
+
+    def test_placar_antigo_sem_conteudo_le_como_nao_medido(self):
+        doc = self.gerar(self.duas())
+        for ent in doc["modelos"].values():
+            del ent["conteudo"]
+        self.assertTrue(all(x["conteudo_status"] == "não medido" for x in placar.melhores(doc, "conversa", "publico")))
 
 
 if __name__ == "__main__":

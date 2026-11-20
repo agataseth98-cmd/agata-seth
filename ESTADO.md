@@ -77,10 +77,9 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 6.
+Abertas (sem APROVADO-): 5.
 - `agentes-skills-18-11`
 - `assinatura-por-tipo-19-11`
-- `placar-qualidade-19-11`
 - `rotas-novas-18-11`
 - `rotas-novas-18-11b`
 - `sandbox-fase2-19-11`
