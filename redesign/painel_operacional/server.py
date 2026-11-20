@@ -39,6 +39,7 @@ import medicoes_painel  # noqa: E402
 import sdd_painel  # noqa: E402
 import nova_versao_painel  # noqa: E402
 import chat_stream  # noqa: E402
+import ferramentas_seth  # noqa: E402  (20/11/2026): ferramentas de leitura da Seth no seth-livre
 import historia_painel  # noqa: E402
 import modelos_painel  # noqa: E402
 import importantes  # noqa: E402
@@ -220,6 +221,17 @@ def _derrubar_gateway(sock) -> None:
             sock.shutdown(socket.SHUT_RDWR)
         except OSError:
             pass
+
+
+class _SocketAtual:
+    """Aponta para o socket da resposta do gateway em curso: o laço de ferramentas abre uma resposta por rodada,
+    e a vigia do navegador precisa derrubar a que estiver aberta."""
+    def __init__(self, sock=None):
+        self.sock = sock
+
+    def shutdown(self, como):
+        if self.sock is not None:
+            self.sock.shutdown(como)
 
 
 def _relay_modules():
@@ -2092,7 +2104,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
     def _seth_chat_stream(self) -> None:
-        """Chat da Seth em streaming (SSE) pelo gateway local: só texto, sem ferramentas, sem escrita. Não grava conteúdo em log."""
+        """Chat da Seth em streaming (SSE) pelo gateway local. Seth pública: só texto. seth-livre (20/11/2026): ferramentas de
+        leitura (ferramentas_seth) e anotar no cache do Conselho, em laço de até 5 rodadas. Não grava conteúdo em log."""
         if self.headers.get("Origin") != ALLOWED_ORIGIN or not _same_origin_request(
             self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")
         ):
@@ -2117,9 +2130,21 @@ class Handler(BaseHTTPRequestHandler):
         if not _SEM_CONVERSA_EM_CURSO.acquire(blocking=False):
             return self._send(429, "text/plain; charset=utf-8", b"busy")
         resposta, fim = None, threading.Event()
+        sock_gateway = _SocketAtual()
+        proximas = []  # respostas abertas pelo laço de ferramentas, fechadas ao fim
+
+        def abrir_proxima(pedido_seguinte):
+            nova, sock = _abrir_gateway(pedido_seguinte)
+            proximas.append(nova)
+            sock_gateway.sock = sock
+            return _linhas_do_gateway(nova)
         try:
+            if pedido["model"] == ferramentas_seth.MODELO_COM_FERRAMENTAS:
+                ferramentas = ferramentas_seth.esquemas()  # nunca na Seth pública
+                if ferramentas:
+                    pedido["tools"] = ferramentas
             try:
-                resposta, sock_gateway = _abrir_gateway(pedido)
+                resposta, sock_gateway.sock = _abrir_gateway(pedido)
             except (OSError, http.client.HTTPException):
                 return self._stream_sse([{"tipo": "erro", "motivo": "gateway indisponível"}])
             # Vigia: se o navegador sair no meio do stream, a conexão com o gateway cai já, sem esperar o próximo pedaço.
@@ -2127,11 +2152,17 @@ class Handler(BaseHTTPRequestHandler):
             with resposta:
                 # Modelo real (X-Modelo-Real, fato da Máquina) segue no cabeçalho da resposta; sem ele, a UI mostra o escolhido.
                 real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
-                self._stream_sse(chat_stream.eventos_do_stream(_linhas_do_gateway(resposta)), (("X-Modelo-Real", real),) if real else ())
+                if "tools" in pedido:
+                    eventos = ferramentas_seth.laco(abrir_proxima, _linhas_do_gateway(resposta), pedido)
+                else:
+                    eventos = chat_stream.eventos_do_stream(_linhas_do_gateway(resposta))
+                self._stream_sse(eventos, (("X-Modelo-Real", real),) if real else ())
         finally:
             fim.set()
             if resposta is not None:
                 resposta.close()  # fecha o socket do gateway, mesmo se o cliente saiu no meio
+            for extra in proximas:
+                extra.close()
             _SEM_CONVERSA_EM_CURSO.release()
 
     def _vigiar_cliente(self, sock_gateway, fim: threading.Event) -> None:

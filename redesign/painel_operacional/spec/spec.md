@@ -665,6 +665,9 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] `/api/equipe` lê sessão, itens, ausentes, divergências e vigias
 - [ ] `/api/backup` lê HD, régua e pendentes
 - [ ] `/api/egress` marca em dia pelo mtime, e o navegador usa Rust só pela chave
+- [ ] a Seth pública nunca recebe `tools`; o seth-livre recebe só os nomes da lista fixa (quatro de leitura do MCP do canon e `cache_anotar`), e `memoria_acrescentar` não é oferecida nem executada
+- [ ] o laço executa só ferramenta da lista, para em 5 rodadas com aviso, trunca o resultado e transforma erro de ferramenta em texto para o modelo; cada ferramenta emite o evento de estado para a tela
+- [ ] `cache_anotar` grava com o autor fixo "Seth (painel)", recusa tipo e texto inválidos e usa o filtro do cache
 
 ## Desenho e alternativas
 
@@ -709,6 +712,8 @@ Testes do lote de proteção (09/11/2026): `test_conversas_protege.py` (novo: li
 Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem navegador; o arquivo e o registro vão para um diretório temporário). `test_importantes_ui.py` roda `prototipo.js` em node, com um DOM mínimo montado no próprio teste e um fetch roteirizado, e confere em texto o bloco novo (sem innerHTML, style nem on*). A lista de subpainéis do Panorama em `test_painel_unificado.py` ganhou `importantes` (única mudança nesse teste).
 
 Catálogo de modelos (18/11/2026, decisão do Humano: "facilitar o acesso ao cadastro para liberar os modelos para os humanos"): subpainel `catalogo-modelos` em Sistema. `GET /api/modelos` lê o catálogo JSON (`AGATA_CATALOGO_MODELOS`, padrão `~/.local/share/agata/catalogo-modelos/catalogo.json`) e o arquivo de decisões; `POST /api/modelos/decisao` ({id, acao liberar|standby, confirmacao igual ao id, quem}) só acrescenta uma linha a `decisoes.jsonl` (quem, quando, de, para). Não altera rotas nem o OmniRoute. `proibido_pela_regra` e `indisponivel` recusam liberar (409); sem `confirmacao` igual ao id, 400; origem alheia, 403. O cadastro de provedor e de chave é o fluxo existente de Conexões de modelos (botão leva até lá). Testes: `test_modelos_painel.py`.
+
+Ferramentas da Seth no painel (20/11/2026, decisão do Humano): só no modelo `seth-livre` (nunca na Seth pública), só de leitura, mais uma escrita. `ferramentas_seth.py` oferece ao gateway (`tools`) as quatro de leitura do MCP do canon (`maquina_verificar`, `vault_buscar`, `query_canon`, `vault_consultar`, pelo `tools/list` do `canon-mcp.mjs`, um processo node por chamada, 60 s) e `cache_anotar` (autor fixo "Seth (painel)", tipo fato|decisao|pendencia|nota, texto até 4000; o cache recusa segredo e marca dado pessoal). `memoria_acrescentar` nunca é oferecida nem executada. O servidor executa só nomes da lista fixa, devolve o resultado (truncado em 12000 caracteres; erro vira texto) ao gateway e repete por no máximo 5 rodadas, depois responde com aviso. Cada ferramenta emite o evento SSE `{"tipo":"estado"}` ("consultando <nome>…"), que a tela mostra no lugar de "A Seth está respondendo…". Leitura da web (`buscar_web`, `ler_pagina`) não entrou: o navegador-mcp (127.0.0.1:20136/mcp) é FastMCP com sessão e estado de página, sem chamada simples de uma ferramenta só; fica para lote próprio (resultado de web iria como dado, nunca instrução). O caminho sem stream (`/api/seth/chat`) continua sem ferramentas. Testes: `test_ferramentas_seth.py`.
 
 ## Migração e reversão
 
@@ -784,6 +789,8 @@ Catálogo de modelos (18/11/2026, decisão do Humano: "facilitar o acesso ao cad
 - `modelos_painel.py`
 - `modelos.js`
 - `test_modelos_painel.py`
+- `ferramentas_seth.py`
+- `test_ferramentas_seth.py`
 - `seth_voz.py`
 - `seth_ditado.py`
 - `test_seth_voz.py`

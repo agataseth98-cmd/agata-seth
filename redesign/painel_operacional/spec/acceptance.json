@@ -2848,5 +2848,36 @@
       "redesign/painel_operacional/test_painel_unificado.py::ProvedoresETabelasTests::test_conexoes_tem_uma_linha_por_provedor_do_catalogo"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a Seth pública nunca recebe `tools`; o seth-livre recebe só os nomes da lista fixa (quatro de leitura do MCP do canon e `cache_anotar`), e `memoria_acrescentar` não é oferecida nem executada",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::ChatStreamChamadasTests::test_seth_public_nao_manda_tools_e_livre_so_com_a_lista",
+      "redesign/painel_operacional/test_ferramentas_seth.py::ListaFixaTests::test_memoria_acrescentar_nunca_oferecida_nem_executada",
+      "redesign/painel_operacional/test_ferramentas_seth.py::RotaComFerramentasTests::test_seth_public_nao_manda_tools"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o laço executa só ferramenta da lista, para em 5 rodadas com aviso, trunca o resultado e transforma erro de ferramenta em texto para o modelo; cada ferramenta emite o evento de estado para a tela",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::LacoTests",
+      "redesign/painel_operacional/test_ferramentas_seth.py::ListaFixaTests::test_resultado_truncado_e_erro_do_mcp_vira_texto",
+      "redesign/painel_operacional/test_ferramentas_seth.py::RotaComFerramentasTests::test_seth_livre_manda_so_os_permitidos_e_executa_o_laco_pelo_servidor"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`cache_anotar` grava com o autor fixo \"Seth (painel)\", recusa tipo e texto inválidos e usa o filtro do cache",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::CacheAnotarTests"
+    ],
+    "cwd": null
   }
 ]

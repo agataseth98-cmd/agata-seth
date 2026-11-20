@@ -33,7 +33,7 @@ MODELO_PADRAO = "seth-livre"
 MODELOS_CHAT = (
     {"id": "seth-livre", "rotulo": "Seth (padrão)",
      "descricao": "Usa o contexto do Agata. Antes de sair, a mensagem passa por filtro de segredos "
-                  "e dados pessoais. Nesta tela não há ferramentas."},
+                  "e dados pessoais. Consulta o canon, o vault e a Máquina; só anota no cache do Conselho."},
     {"id": "seth-public", "rotulo": "Seth pública",
      "descricao": "Só o texto da conversa vai para modelos externos. Sem contexto do Agata e sem ferramentas."},
 )
@@ -89,6 +89,8 @@ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
     - {"tipo": "uso", "entrada": int, "saida": int} antes do fim, se algum bloco trouxe `usage` válido
       (o último visto vale); sem `usage` no gateway, o evento não existe
     - {"tipo": "fim"} ao ver [DONE], se houve ao menos um delta
+    - {"tipo": "chamadas", "chamadas": [{"id", "nome", "argumentos"}]} ao ver [DONE] com tool_calls no stream
+      (sem uso nem fim: quem chama executa e reenvia)
     - {"tipo": "erro", "motivo": "resposta vazia"} se [DONE] chegou sem delta
     - {"tipo": "erro", "motivo": "linha de dados inválida"} para JSON inválido (e para)
     - {"tipo": "erro", "motivo": "stream interrompido"} se o stream acabou sem [DONE]
@@ -98,13 +100,17 @@ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
     """
     houve_delta = False
     uso = None
+    chamadas: dict[int, dict] = {}
     for linha in linhas:
         linha = linha.rstrip("\r\n")
         if not linha.startswith(PREFIXO_DADOS):
             continue
         dados = linha[len(PREFIXO_DADOS):].lstrip(" ")
         if dados == SENTINELA_FIM:
-            if houve_delta:
+            if chamadas:
+                yield {"tipo": "chamadas", "chamadas": [
+                    {"id": c["id"], "nome": c["nome"], "argumentos": c["argumentos"]} for _, c in sorted(chamadas.items())]}
+            elif houve_delta:
                 if uso is not None:
                     yield {"tipo": "uso", **uso}
                 yield {"tipo": "fim"}
@@ -127,6 +133,18 @@ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
             continue
         delta = escolhas[0].get("delta")
         conteudo = delta.get("content") if isinstance(delta, dict) else None
+        for parte in (delta.get("tool_calls") if isinstance(delta, dict) else None) or []:
+            if not isinstance(parte, dict):
+                continue
+            indice = parte.get("index") if type(parte.get("index")) is int else len(chamadas)
+            atual = chamadas.setdefault(indice, {"id": None, "nome": "", "argumentos": ""})
+            funcao = parte.get("function") if isinstance(parte.get("function"), dict) else {}
+            if isinstance(parte.get("id"), str):
+                atual["id"] = parte["id"]
+            if isinstance(funcao.get("name"), str):
+                atual["nome"] += funcao["name"]
+            if isinstance(funcao.get("arguments"), str):
+                atual["argumentos"] += funcao["arguments"]
         if isinstance(conteudo, str) and conteudo:
             houve_delta = True
             yield {"tipo": "texto", "delta": conteudo}
@@ -251,11 +269,12 @@ def montar_mensagens(limpas: list[dict], instrucoes=None, anexos=None, filtro=No
 
 
 def montar_pedido(mensagens: list[dict], modelo: str | None = None, instrucoes=None, anexos=None,
-                  filtro=None) -> dict:
+                  filtro=None, ferramentas=None) -> dict:
     """Monta o corpo do pedido de chat em streaming. Recusa entrada inválida com ValueError.
 
     `modelo` ausente vale MODELO_PADRAO; fora de MODELOS_PERMITIDOS é recusado.
     `instrucoes` e `anexos` seguem montar_mensagens (filtro de saída aplicado a ambos).
+    `ferramentas` (lista de esquemas OpenAI) só entra no pedido do seth-livre; na Seth pública é ignorada (20/11/2026).
     As mensagens da exceção não ecoam o conteúdo do usuário.
     """
     modelo = modelo_valido(modelo)
@@ -277,5 +296,8 @@ def montar_pedido(mensagens: list[dict], modelo: str | None = None, instrucoes=N
             raise ValueError(f"mensagem {indice} acima de {MAX_CARACTERES_MENSAGEM} caracteres")
         limpas.append({"role": papel, "content": conteudo})
     # C11 (16/11/2026): o gateway informa o uso (entrada e saída) no fim do stream, para a linha de contexto.
-    return {"model": modelo, "messages": montar_mensagens(limpas, instrucoes, anexos, filtro), "stream": True,
-            "stream_options": {"include_usage": True}}
+    pedido = {"model": modelo, "messages": montar_mensagens(limpas, instrucoes, anexos, filtro), "stream": True,
+              "stream_options": {"include_usage": True}}
+    if ferramentas and modelo == "seth-livre":
+        pedido["tools"] = list(ferramentas)
+    return pedido
