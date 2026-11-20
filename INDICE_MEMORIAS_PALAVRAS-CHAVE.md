@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-cerebro — conversa por voz em que o modelo da CLI é o cérebro (ouvido local, voz do sistema, som de espera), com as lições e ferramentas da conversa de 20/11.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-cerebro-cli-20-11.
+  palavras-chave: proposta, voz, cerebro, cli, skill, agata, conversa, modelo, cérebro, ouvido, local, sistema, som, espera, lições, ferramentas, ordem, humano, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1093) DIÁRIO — 20/11/2026 · **Aplicada tool-call-json-20-11: chamada de ferramenta escrita como JSON passa a rodar no gateway** Assinada pelo Humano em 20/11 11:56. 64 testes em redesign/router/test_seth_base.py; prova no painel após reiniciar o seth-gateway.
   palavras-chave: aplicada, tool, call, json, chamada, ferramenta, escrita, passa, rodar, gateway, assinada, humano, testes, redesign, router, test, seth, base, prova, painel, após, reiniciar
 (1092) DIÁRIO — 20/11/2026 · **Proposta tool-call-json-20-11: chamada de ferramenta escrita como JSON (cru ou em cerca, chaves em pt ou en) passa a ser executada pelo gateway, com a mesma regra estrita do <tool_call>.** Defeito medido na auditoria do painel de 20/11 11:26 (maquina_verificar saiu como texto pela seth-livre). Sonnet implementou, Opus revisou e restringiu a retenção a cercas JSON; 64 testes, CI local OK. Assinatura pendente: bash scripts/aprovar.sh tool-call-json-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, voz, chamado, fale, comigo, abre, sistema, agir, naturalmente, responder, sempre, som, espera, opcional, ordem, humano, ajustes, uso, real, modelo, opus, assinatura, pendente, bash, scripts, aprovar
 (1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética do nome Alexandria entra na spec** Assinada pelo Humano em 18/11 20:03. Calímaco, as Pínakes e a poesia alexandrina. Primeira proposta nascida de conversa por voz.
   palavras-chave: aplicada, alexandria, nome, origem, poética, entra, spec, assinada, humano, calímaco, pínakes, poesia, alexandrina, primeira, proposta, nascida, conversa, voz
-(1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética do nome Alexandria (Calímaco, as Pínakes, a poesia alexandrina) entra na spec.** Pedido do Humano por voz no canal de voz (19:57), confirmado na tela (19:58). Primeira proposta nascida de uma conversa falada. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh alexandria-nome-18-11.
-  palavras-chave: proposta, alexandria, nome, origem, poética, calímaco, pínakes, poesia, alexandrina, entra, spec, pedido, humano, voz, canal, confirmado, tela, primeira, nascida, conversa, falada, modelo, opus, assinatura, pendente, bash, scripts, aprovar
+(1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética …
+  palavras-chave: proposta, alexandria, nome, origem, poética
 (1063) DIÁRIO — 18/11/2026 · **Aplicada rotas-novas-18-11c: Seth usa o qwen3-30b …
   palavras-chave: aplicada, rotas, novas, seth, usa, qwen
 (1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas- …
