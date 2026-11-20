@@ -507,3 +507,82 @@ def test_nuvem_sem_classificacao_continua_bloqueada():
         except g.DadosExternosSemClassificacao:
             bloqueou = True
         assert bloqueou, m
+
+
+# --- (20/11) chamada escrita como JSON cru ou em cerca ```json --------------------------------------------
+
+J_PT = '{"nome": "buscar", "argumentos": {"q": "estado"}}'
+J_EN = '{"name": "buscar", "arguments": {"q": "estado"}}'
+
+
+def _args(ch):
+    return [(c["function"]["name"], json.loads(c["function"]["arguments"])) for c in ch]
+
+
+def test_json_cru_e_cercado_convertem_pt_e_en():
+    for t in (J_PT, J_EN, "```json\n" + J_PT + "\n```", "```\n" + J_EN + "\n```", "  " + CAB + J_PT + "\n"):
+        assert _args(g._extrair_tool_calls(t, TOOLS)) == [("buscar", {"q": "estado"})], t
+
+
+def test_json_lista_e_arguments_como_string():
+    t = '[{"name": "buscar", "arguments": "{\\"q\\": \\"a\\"}"}, ' + J_PT.replace("estado", "b") + "]"
+    assert _args(g._extrair_tool_calls(t, TOOLS)) == [("buscar", {"q": "a"}), ("buscar", {"q": "b"})]
+
+
+def test_json_negativos_nao_convertem():
+    ruins = [
+        "Vou rodar:\n" + J_PT,                       # texto antes
+        J_PT + "\nPronto.",                          # texto depois
+        "```json\n" + J_PT + "\n```\nfeito",         # texto fora da cerca
+        "```json\n" + J_PT + "\n```\n```json\n" + J_PT + "\n```",  # duas cercas
+        '{"nome": "buscar", "argumentos": {}, "x": 1}',  # chave extra
+        '{"name": "buscar", "argumentos": {}}',       # chaves misturadas
+        '{"nome": "outra", "argumentos": {}}',        # nome fora
+        '{"modelo": "x", "rota": "y"}',               # JSON do usuário
+        '{"nome": "buscar", "argumentos": [1]}',      # argumentos não objeto
+        '{"nome": "buscar", "argumentos": {"q": ',    # inválido
+        "```json\n" + J_PT,                           # cerca sem fechar
+    ]
+    for t in ruins:
+        assert g._extrair_tool_calls(t, TOOLS) is None, t
+    assert g._extrair_tool_calls(J_PT, frozenset()) is None  # sem ferramentas
+
+
+def test_json_nao_stream_converte_e_preserva_resposta_do_usuario():
+    o = json.loads(g._tool_calls_do_json(_resposta("```json\n" + J_PT + "\n```"), TOOLS))
+    assert o["choices"][0]["finish_reason"] == "tool_calls" and o["choices"][0]["message"]["content"] == ""
+    corpo = _resposta('{"modelo": "x", "rota": "y"}')
+    assert g._tool_calls_do_json(corpo, TOOLS) == corpo
+
+
+def test_json_sse_converte_e_devolve_intacto_quando_nao():
+    assert g._decisao_tool_call(_linha_sse({"content": "```json\n"})) == "mais"  # (20/11) cerca json ainda sem { espera mais
+    assert g._decisao_tool_call(_linha_sse({"content": "{"})) == "sim"
+    buf = _linha_sse({"content": "```json\n" + J_PT[:20]})
+    saida, _ = g._converter_sse_stream(buf, _LeitorFalso([_linha_sse({"content": J_PT[20:] + "\n```"}), FIM]), TOOLS)
+    nomes, args, fins = _chamadas_do_stream(saida)
+    assert nomes == ["buscar"] and fins == ["tool_calls"] and json.loads(args) == {"q": "estado"}
+    buf = _linha_sse({"content": '{"modelo": "x", '})
+    resto = _linha_sse({"content": '"rota": "y"}'}) + FIM
+    saida, _ = g._converter_sse_stream(buf, _LeitorFalso([resto]), TOOLS)
+    assert saida == buf + resto
+
+
+class TestCercaDeCodigoSegueEmStream:
+    """(20/11, revisão do coordenador) cerca de código comum não é retida; só cerca que abre com JSON."""
+
+    def _dec(self, texto):
+        import json as _j
+        ev = {"choices": [{"index": 0, "delta": {"content": texto}}]}
+        return g._decisao_tool_call(b"data: " + _j.dumps(ev).encode() + b"\n\n")
+
+    def test_cerca_python_nao_retem(self):
+        assert self._dec("```python\ndef f():\n    return 1\n") == "nao"
+
+    def test_cerca_json_retem(self):
+        assert self._dec('```json\n{"nome": "x"') == "sim"
+        assert self._dec('```\n{"name": "x"') == "sim"
+
+    def test_cerca_incompleta_espera(self):
+        assert self._dec("```js") == "mais"
+        assert self._dec("```") == "mais"

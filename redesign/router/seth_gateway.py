@@ -1686,6 +1686,44 @@ def _sem_cabecalho_inicial(texto: str) -> str:
     return "\n".join(linhas[i:])
 
 
+_RE_CERCA_JSON = re.compile(r"\A```[ \t]*(?:json)?[ \t]*\n(.*?)\n?```\Z", re.S | re.I)
+_RE_CERCA_JSON_INICIO = re.compile(r"```[ \t]*(?:json[ \t]*\n\s*|\n\s*)[\{\[]", re.I)
+_RE_CERCA_JSON_PREFIXO = re.compile(r"```[ \t]*(?:j(?:s(?:o(?:n)?)?)?)?[ \t]*\n?\s*", re.I)
+_CHAVES_CHAMADA = (frozenset({"name", "arguments"}), frozenset({"nome", "argumentos"}))
+
+
+def _chamadas_do_json_cru(t: str, nomes) -> list | None:
+    """(20/11) Chamada escrita como texto: o `t` inteiro é um objeto JSON (ou lista de objetos) cru, ou o mesmo JSON
+    dentro de UMA cerca ```json (ou ```), nada fora dela. Cada objeto tem exatamente as chaves {name, arguments} ou
+    {nome, argumentos} (argumentos: objeto ou string JSON de objeto), nome em `nomes`. Senão None."""
+    m = _RE_CERCA_JSON.match(t)
+    if m:
+        t = m.group(1).strip()
+        if "```" in t:
+            return None
+    if not t.startswith(("{", "[")):
+        return None
+    try:
+        o = json.loads(t)
+    except ValueError:
+        return None
+    pares = []
+    for it in (o if isinstance(o, list) else [o]):
+        if not isinstance(it, dict) or frozenset(it) not in _CHAVES_CHAMADA:
+            return None
+        nome = it.get("name", it.get("nome"))
+        args = it.get("arguments", it.get("argumentos"))
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except ValueError:
+                return None
+        if not isinstance(nome, str) or nome not in nomes or not isinstance(args, dict):
+            return None
+        pares.append((nome, args))
+    return pares or None
+
+
 def _extrair_tool_calls(texto: str, nomes) -> list | None:
     """Regra estrita (revisão do Codex, 17/11): converte SÓ se o texto, sem o cabeçalho inicial (da Máquina ou do
     modelo) e sem espaços nas bordas, é feito EXCLUSIVAMENTE de um ou mais blocos <tool_call>...</tool_call> completos
@@ -1695,6 +1733,12 @@ def _extrair_tool_calls(texto: str, nomes) -> list | None:
         return None
     t = _sem_cabecalho_inicial(texto).strip()
     chamadas, pos = [], 0
+    if not t.startswith(_TAG_TOOL):
+        pares = _chamadas_do_json_cru(t, nomes)
+        if not pares:
+            return None
+        return [{"id": "call_" + os.urandom(4).hex(), "type": "function",
+                 "function": {"name": n, "arguments": json.dumps(a, ensure_ascii=False)}} for n, a in pares]
     while True:
         m = _RE_TOOL_BLOCO.match(t, pos)
         if m is None:
@@ -1753,8 +1797,13 @@ def _decisao_tool_call(buf: bytes) -> str:
     resto = "\n".join(linhas[i:]).lstrip()
     if not resto:
         return "mais"
-    if resto.startswith(_TAG_TOOL):
-        return "sim"
+    if resto.startswith(_TAG_TOOL) or resto.startswith(("{", "[")):
+        return "sim"  # (20/11) JSON cru: lê até o fim; o extrator decide, e se não converte o texto sai intacto
+    if resto.startswith("```"):
+        # (20/11) cerca: só retém se abre com JSON (```json ou ``` seguido de { ou [); cerca de código segue em stream
+        if _RE_CERCA_JSON_INICIO.match(resto):
+            return "sim"
+        return "mais" if _RE_CERCA_JSON_PREFIXO.fullmatch(resto) else "nao"
     sem = "".join(resto.split())
     if _TAG_TOOL.startswith(sem) or len(sem) < len(_TAG_TOOL):
         return "mais"
