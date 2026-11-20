@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1089) DIÁRIO — 18/11/2026 · **Aplicada correcoes-19-11: agata-run e assinatura por tipo** Assinada pelo Humano em 19/11 23:30. Substitui sandbox-fase2-19-11 e assinatura-por-tipo-19-11, que falharam no CI.
+  palavras-chave: aplicada, correcoes, agata, run, assinatura, tipo, assinada, humano, substitui, sandbox, fase, falharam
 (1088) DIÁRIO — 19/11/2026 · **As aplicações assinadas de sandbox-fase2 e assinatura-por-tipo falharam no CI local e não foram forçadas; a proposta correcoes-19-11 traz o lote completo das duas com as correções.** O agata-run barrava o próprio python do venv (cerca fechada demais); o teste de sincronia contava 16 regras e agora são 17. Modelo: Sonnet corrigiu, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh correcoes-19-11.
   palavras-chave: aplicações, assinadas, sandbox, fase, assinatura, tipo, falharam, local, foram, forçadas, proposta, correcoes, traz, lote, completo, correções, agata, run, barrava, próprio, python, venv, cerca, fechada, demais, teste, sincronia, contava, regras, agora, modelo, sonnet, corrigiu, opus, revisou, pendente, bash, scripts, aprovar
 (1087) DIÁRIO — 18/11/2026 · **Aplicada persona-entidade-19-11: uma entidade, muitos cérebros** Assinada pelo Humano em 19/11 20:44.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, rotas, novas, substitui, assinar, aquela, mesmas, seth, ollama, sob, demanda, socket, proxy, min, ocioso, correção, humano, modelo, sonnet, orquestrado, opus, medido, testes, systemd, verify, local, tudo, partida, frio, real, qwen, assinatura, pendente, bash, scripts, aprovar
 (1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal compara OmniRoute com a lista viva dos provedores** Assinada pelo Humano em 18/11. Avisa aposentados e novos sem cota; token só para host local, sem redirecionamento.
   palavras-chave: aplicada, catalogo, vivo, pesquisa, semanal, compara, omniroute, lista, viva, provedores, assinada, humano, avisa, aposentados, novos, cota, token, host, local, redirecionamento
-(1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30b-a3b local em JSON, código e contexto longo, com queda segura para a regra de hoje; o Ollama passa a subir e descer com o sistema.** Segredo nunca vai a rota; painel só restringe; prazo da rota local 100,5 s (maior sucesso + 30 s, ordem do Humano). lfm3, rlm e lumi catalogados sem rota (Humano tem planos). Modelo: Sonnet orquestrado pelo Opus; revisão agata-revisor r1 e r2 reprovaram, tudo corrigido. Medido: 188 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11.
-  palavras-chave: proposta, rotas, novas, seth, usa, qwen, local, json, código, contexto, longo, queda, segura, regra, hoje, ollama, passa, subir, descer, sistema, segredo, nunca, vai, rota, painel, restringe, prazo, maior, sucesso, ordem, humano, lfm, rlm, lumi, catalogados, tem, planos, modelo, sonnet, orquestrado, opus, revisão, agata, revisor, reprovaram, tudo, corrigido, medido, testes, assinatura, pendente, bash, scripts, aprovar
+(1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30 …
+  palavras-chave: proposta, rotas, novas, seth, usa, qwen
 (1058) DIÁRIO — 18/11/2026 · **Proposta catalogo-vivo-18-11: a pesquisa semanal …
   palavras-chave: proposta, catalogo, vivo, pesquisa, semanal
 (1057) DIÁRIO — 18/11/2026 · **Aplicada painel-modelos-18-11: liberar modelos do …
