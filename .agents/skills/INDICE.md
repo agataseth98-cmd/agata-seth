@@ -14,6 +14,7 @@ Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`): de 21 pastas p
 | `agata-equipe` | trabalhar em Equipe, qualquer membro do Conselho (papéis, canal MSG, vigia, fila, fallback, cota) | Claude |
 | `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
 | `agata-voz` | ler em voz alta, falar, conversa falada e debate; todo modelo que fala usa a voz do Agata | Claude |
+| `agata-voz-cerebro` | conversa por voz com o modelo da CLI como cérebro (ouvido + voz + som de espera) | todos os modelos de CLI |
 | `agata-conversar-com-seth` | conversar com a Seth ou ler a conversa dela | Claude |
 | `agata-relay-provedores` | adaptadores de chats web no RelayCouncil | Codex |
 | `agata-time-inovacao` | propor melhoria nova com SDD (pesquisa, spec, revisão, decisão, drift); método elefante e peixinhos dourados | Claude |
