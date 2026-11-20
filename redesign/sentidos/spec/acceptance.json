@@ -448,5 +448,32 @@
       "redesign/sentidos/tests/test_canal_voz.py::CanalTests::test_http_500_sem_confirmacao_encerra_a_sessao"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "cada fala entregue ao modelo avança o contador de turnos uma vez e leva o cabeçalho",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_uma_fala_entregue_avanca_uma_vez_e_leva_o_cabecalho"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "fala vazia ou eco da própria voz não avança o contador",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_eco_da_propria_voz_rejeitado_nao_avanca"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "turno.py ausente ou falhando só avisa e não derruba o canal",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/sentidos/tests/test_canal_voz.py::ContadorDeTurnoTests::test_turno_ausente_ou_falhando_so_avisa"
+    ],
+    "cwd": null
   }
 ]
