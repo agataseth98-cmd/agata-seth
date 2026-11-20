@@ -1,0 +1,165 @@
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 5543af7b..24a5a4bf 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -1686,6 +1686,44 @@ def _sem_cabecalho_inicial(texto: str) -> str:
+     return "\n".join(linhas[i:])
+ 
+ 
++_RE_CERCA_JSON = re.compile(r"\A```[ \t]*(?:json)?[ \t]*\n(.*?)\n?```\Z", re.S | re.I)
++_RE_CERCA_JSON_INICIO = re.compile(r"```[ \t]*(?:json[ \t]*\n\s*|\n\s*)[\{\[]", re.I)
++_RE_CERCA_JSON_PREFIXO = re.compile(r"```[ \t]*(?:j(?:s(?:o(?:n)?)?)?)?[ \t]*\n?\s*", re.I)
++_CHAVES_CHAMADA = (frozenset({"name", "arguments"}), frozenset({"nome", "argumentos"}))
++
++
++def _chamadas_do_json_cru(t: str, nomes) -> list | None:
++    """(20/11) Chamada escrita como texto: o `t` inteiro é um objeto JSON (ou lista de objetos) cru, ou o mesmo JSON
++    dentro de UMA cerca ```json (ou ```), nada fora dela. Cada objeto tem exatamente as chaves {name, arguments} ou
++    {nome, argumentos} (argumentos: objeto ou string JSON de objeto), nome em `nomes`. Senão None."""
++    m = _RE_CERCA_JSON.match(t)
++    if m:
++        t = m.group(1).strip()
++        if "```" in t:
++            return None
++    if not t.startswith(("{", "[")):
++        return None
++    try:
++        o = json.loads(t)
++    except ValueError:
++        return None
++    pares = []
++    for it in (o if isinstance(o, list) else [o]):
++        if not isinstance(it, dict) or frozenset(it) not in _CHAVES_CHAMADA:
++            return None
++        nome = it.get("name", it.get("nome"))
++        args = it.get("arguments", it.get("argumentos"))
++        if isinstance(args, str):
++            try:
++                args = json.loads(args)
++            except ValueError:
++                return None
++        if not isinstance(nome, str) or nome not in nomes or not isinstance(args, dict):
++            return None
++        pares.append((nome, args))
++    return pares or None
++
++
+ def _extrair_tool_calls(texto: str, nomes) -> list | None:
+     """Regra estrita (revisão do Codex, 17/11): converte SÓ se o texto, sem o cabeçalho inicial (da Máquina ou do
+     modelo) e sem espaços nas bordas, é feito EXCLUSIVAMENTE de um ou mais blocos <tool_call>...</tool_call> completos
+@@ -1695,6 +1733,12 @@ def _extrair_tool_calls(texto: str, nomes) -> list | None:
+         return None
+     t = _sem_cabecalho_inicial(texto).strip()
+     chamadas, pos = [], 0
++    if not t.startswith(_TAG_TOOL):
++        pares = _chamadas_do_json_cru(t, nomes)
++        if not pares:
++            return None
++        return [{"id": "call_" + os.urandom(4).hex(), "type": "function",
++                 "function": {"name": n, "arguments": json.dumps(a, ensure_ascii=False)}} for n, a in pares]
+     while True:
+         m = _RE_TOOL_BLOCO.match(t, pos)
+         if m is None:
+@@ -1753,8 +1797,13 @@ def _decisao_tool_call(buf: bytes) -> str:
+     resto = "\n".join(linhas[i:]).lstrip()
+     if not resto:
+         return "mais"
+-    if resto.startswith(_TAG_TOOL):
+-        return "sim"
++    if resto.startswith(_TAG_TOOL) or resto.startswith(("{", "[")):
++        return "sim"  # (20/11) JSON cru: lê até o fim; o extrator decide, e se não converte o texto sai intacto
++    if resto.startswith("```"):
++        # (20/11) cerca: só retém se abre com JSON (```json ou ``` seguido de { ou [); cerca de código segue em stream
++        if _RE_CERCA_JSON_INICIO.match(resto):
++            return "sim"
++        return "mais" if _RE_CERCA_JSON_PREFIXO.fullmatch(resto) else "nao"
+     sem = "".join(resto.split())
+     if _TAG_TOOL.startswith(sem) or len(sem) < len(_TAG_TOOL):
+         return "mais"
+diff --git a/redesign/router/test_seth_base.py b/redesign/router/test_seth_base.py
+index e8b05a34..cdfbdd3e 100644
+--- a/redesign/router/test_seth_base.py
++++ b/redesign/router/test_seth_base.py
+@@ -507,3 +507,82 @@ def test_nuvem_sem_classificacao_continua_bloqueada():
+         except g.DadosExternosSemClassificacao:
+             bloqueou = True
+         assert bloqueou, m
++
++
++# --- (20/11) chamada escrita como JSON cru ou em cerca ```json --------------------------------------------
++
++J_PT = '{"nome": "buscar", "argumentos": {"q": "estado"}}'
++J_EN = '{"name": "buscar", "arguments": {"q": "estado"}}'
++
++
++def _args(ch):
++    return [(c["function"]["name"], json.loads(c["function"]["arguments"])) for c in ch]
++
++
++def test_json_cru_e_cercado_convertem_pt_e_en():
++    for t in (J_PT, J_EN, "```json\n" + J_PT + "\n```", "```\n" + J_EN + "\n```", "  " + CAB + J_PT + "\n"):
++        assert _args(g._extrair_tool_calls(t, TOOLS)) == [("buscar", {"q": "estado"})], t
++
++
++def test_json_lista_e_arguments_como_string():
++    t = '[{"name": "buscar", "arguments": "{\\"q\\": \\"a\\"}"}, ' + J_PT.replace("estado", "b") + "]"
++    assert _args(g._extrair_tool_calls(t, TOOLS)) == [("buscar", {"q": "a"}), ("buscar", {"q": "b"})]
++
++
++def test_json_negativos_nao_convertem():
++    ruins = [
++        "Vou rodar:\n" + J_PT,                       # texto antes
++        J_PT + "\nPronto.",                          # texto depois
++        "```json\n" + J_PT + "\n```\nfeito",         # texto fora da cerca
++        "```json\n" + J_PT + "\n```\n```json\n" + J_PT + "\n```",  # duas cercas
++        '{"nome": "buscar", "argumentos": {}, "x": 1}',  # chave extra
++        '{"name": "buscar", "argumentos": {}}',       # chaves misturadas
++        '{"nome": "outra", "argumentos": {}}',        # nome fora
++        '{"modelo": "x", "rota": "y"}',               # JSON do usuário
++        '{"nome": "buscar", "argumentos": [1]}',      # argumentos não objeto
++        '{"nome": "buscar", "argumentos": {"q": ',    # inválido
++        "```json\n" + J_PT,                           # cerca sem fechar
++    ]
++    for t in ruins:
++        assert g._extrair_tool_calls(t, TOOLS) is None, t
++    assert g._extrair_tool_calls(J_PT, frozenset()) is None  # sem ferramentas
++
++
++def test_json_nao_stream_converte_e_preserva_resposta_do_usuario():
++    o = json.loads(g._tool_calls_do_json(_resposta("```json\n" + J_PT + "\n```"), TOOLS))
++    assert o["choices"][0]["finish_reason"] == "tool_calls" and o["choices"][0]["message"]["content"] == ""
++    corpo = _resposta('{"modelo": "x", "rota": "y"}')
++    assert g._tool_calls_do_json(corpo, TOOLS) == corpo
++
++
++def test_json_sse_converte_e_devolve_intacto_quando_nao():
++    assert g._decisao_tool_call(_linha_sse({"content": "```json\n"})) == "mais"  # (20/11) cerca json ainda sem { espera mais
++    assert g._decisao_tool_call(_linha_sse({"content": "{"})) == "sim"
++    buf = _linha_sse({"content": "```json\n" + J_PT[:20]})
++    saida, _ = g._converter_sse_stream(buf, _LeitorFalso([_linha_sse({"content": J_PT[20:] + "\n```"}), FIM]), TOOLS)
++    nomes, args, fins = _chamadas_do_stream(saida)
++    assert nomes == ["buscar"] and fins == ["tool_calls"] and json.loads(args) == {"q": "estado"}
++    buf = _linha_sse({"content": '{"modelo": "x", '})
++    resto = _linha_sse({"content": '"rota": "y"}'}) + FIM
++    saida, _ = g._converter_sse_stream(buf, _LeitorFalso([resto]), TOOLS)
++    assert saida == buf + resto
++
++
++class TestCercaDeCodigoSegueEmStream:
++    """(20/11, revisão do coordenador) cerca de código comum não é retida; só cerca que abre com JSON."""
++
++    def _dec(self, texto):
++        import json as _j
++        ev = {"choices": [{"index": 0, "delta": {"content": texto}}]}
++        return g._decisao_tool_call(b"data: " + _j.dumps(ev).encode() + b"\n\n")
++
++    def test_cerca_python_nao_retem(self):
++        assert self._dec("```python\ndef f():\n    return 1\n") == "nao"
++
++    def test_cerca_json_retem(self):
++        assert self._dec('```json\n{"nome": "x"') == "sim"
++        assert self._dec('```\n{"name": "x"') == "sim"
++
++    def test_cerca_incompleta_espera(self):
++        assert self._dec("```js") == "mais"
++        assert self._dec("```") == "mais"

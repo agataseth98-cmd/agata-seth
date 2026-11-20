@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1092) DIÁRIO — 20/11/2026 · **Proposta tool-call-json-20-11: chamada de ferramenta escrita como JSON (cru ou em cerca, chaves em pt ou en) passa a ser executada pelo gateway, com a mesma regra estrita do <tool_call>.** Defeito medido na auditoria do painel de 20/11 11:26 (maquina_verificar saiu como texto pela seth-livre). Sonnet implementou, Opus revisou e restringiu a retenção a cercas JSON; 64 testes, CI local OK. Assinatura pendente: bash scripts/aprovar.sh tool-call-json-20-11.
 (1091) DIÁRIO — 18/11/2026 · **Aplicada placar-qualidade-19-11: placar com qualidade do conteúdo** Assinada pelo Humano entre 19/11 e 20/11.
 (1090) DIÁRIO — 19/11/2026 · **Proposta placar-qualidade-19-11: o placar passa a pesar a qualidade do conteúdo, e modelo sem medida aparece como 'conteúdo não medido', nunca 1.00 silencioso.** Frente 3 das três escolhidas com o Humano. Sonnet implementou, Opus revisou; 23 testes. Assinatura pendente: bash scripts/aprovar.sh placar-qualidade-19-11.
 (1089) DIÁRIO — 18/11/2026 · **Aplicada correcoes-19-11: agata-run e assinatura por tipo** Assinada pelo Humano em 19/11 23:30. Substitui sandbox-fase2-19-11 e assinatura-por-tipo-19-11, que falharam no CI.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1065) DIÁRIO — 18/11/2026 · **Aplicada alexandria-nome-18-11: a origem poética do nome Alexandria entra na spec** Assinada pelo Humano em 18/11 20:03. Calímaco, as Pínakes e a poesia alexandrina. Primeira proposta nascida de conversa por voz.
 (1064) DIÁRIO — 18/11/2026 · **Proposta alexandria-nome-18-11: a origem poética do nome Alexandria (Calímaco, as Pínakes, a poesia alexandrina) entra na spec.** Pedido do Humano por voz no canal de voz (19:57), confirmado na tela (19:58). Primeira proposta nascida de uma conversa falada. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh alexandria-nome-18-11.
 (1063) DIÁRIO — 18/11/2026 · **Aplicada rotas-novas-18-11c: Seth usa o qwen3-30b-a3b local em JSON, código e contexto longo; Ollama sob demanda** Assinada pelo Humano em 18/11 19:09. Mesmo conteúdo da 18-11b, sem ESTADO.md (gerado pelo hook).
-(1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas-18-11b sem ESTADO.md, porque o hook regenera esse arquivo e o fiscal P-8 nunca casaria (PR #1051 fechado).** Lição: diff de proposta não leva arquivo gerado. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11c.
+(1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas- …
 (1061) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11b: substitui rotas-nova …
 (1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal co …
 (1059) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11: a Seth usa o qwen3-30 …

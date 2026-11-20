@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1092) DIÁRIO — 20/11/2026 · **Proposta tool-call-json-20-11: chamada de ferramenta escrita como JSON (cru ou em cerca, chaves em pt ou en) passa a ser executada pelo gateway, com a mesma regra estrita do <tool_call>.** Defeito medido na auditoria do painel de 20/11 11:26 (maquina_verificar saiu como texto pela seth-livre). Sonnet implementou, Opus revisou e restringiu a retenção a cercas JSON; 64 testes, CI local OK. Assinatura pendente: bash scripts/aprovar.sh tool-call-json-20-11.
+  palavras-chave: proposta, tool, call, json, chamada, ferramenta, escrita, cru, cerca, chaves, passa, executada, gateway, mesma, regra, estrita, defeito, medido, auditoria, painel, maquina, verificar, saiu, texto, seth, livre, sonnet, implementou, opus, revisou, restringiu, retenção, cercas, testes, local, assinatura, pendente, bash, scripts, aprovar
 (1091) DIÁRIO — 18/11/2026 · **Aplicada placar-qualidade-19-11: placar com qualidade do conteúdo** Assinada pelo Humano entre 19/11 e 20/11.
   palavras-chave: aplicada, placar, qualidade, conteúdo, assinada, humano
 (1090) DIÁRIO — 19/11/2026 · **Proposta placar-qualidade-19-11: o placar passa a pesar a qualidade do conteúdo, e modelo sem medida aparece como 'conteúdo não medido', nunca 1.00 silencioso.** Frente 3 das três escolhidas com o Humano. Sonnet implementou, Opus revisou; 23 testes. Assinatura pendente: bash scripts/aprovar.sh placar-qualidade-19-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, alexandria, nome, origem, poética, calímaco, pínakes, poesia, alexandrina, entra, spec, pedido, humano, voz, canal, confirmado, tela, primeira, nascida, conversa, falada, modelo, opus, assinatura, pendente, bash, scripts, aprovar
 (1063) DIÁRIO — 18/11/2026 · **Aplicada rotas-novas-18-11c: Seth usa o qwen3-30b-a3b local em JSON, código e contexto longo; Ollama sob demanda** Assinada pelo Humano em 18/11 19:09. Mesmo conteúdo da 18-11b, sem ESTADO.md (gerado pelo hook).
   palavras-chave: aplicada, rotas, novas, seth, usa, qwen, local, json, código, contexto, longo, ollama, sob, demanda, assinada, humano, mesmo, conteúdo, estado, gerado, hook
-(1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas-18-11b sem ESTADO.md, porque o hook regenera esse arquivo e o fiscal P-8 nunca casaria (PR #1051 fechado).** Lição: diff de proposta não leva arquivo gerado. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh rotas-novas-18-11c.
-  palavras-chave: proposta, rotas, novas, mesma, estado, porque, hook, regenera, arquivo, fiscal, nunca, casaria, fechado, lição, diff, leva, gerado, modelo, opus, assinatura, pendente, bash, scripts, aprovar
+(1062) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11c: a mesma rotas-novas- …
+  palavras-chave: proposta, rotas, novas, mesma
 (1061) DIÁRIO — 18/11/2026 · **Proposta rotas-novas-18-11b: substitui rotas-nova …
   palavras-chave: proposta, rotas, novas, substitui, nova
 (1060) DIÁRIO — 18/11/2026 · **Aplicada catalogo-vivo-18-11: pesquisa semanal co …
