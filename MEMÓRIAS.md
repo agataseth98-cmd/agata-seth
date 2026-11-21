@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 1fc57073a75a5e0202a37b3aa365eabf26fe7915
-  Escrito em: 20/11/2026 22:45 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ce5a6ac263473a69a6c8755678298191daa1225a
+  Escrito em: 20/11/2026 22:51 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fc57073a75a5e0202a37b3aa365eabf26fe7915/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fc57073a75a5e0202a37b3aa365eabf26fe7915/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fc57073a75a5e0202a37b3aa365eabf26fe7915/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fc57073a75a5e0202a37b3aa365eabf26fe7915/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/1fc57073a75a5e0202a37b3aa365eabf26fe7915/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce5a6ac263473a69a6c8755678298191daa1225a/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce5a6ac263473a69a6c8755678298191daa1225a/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce5a6ac263473a69a6c8755678298191daa1225a/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce5a6ac263473a69a6c8755678298191daa1225a/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ce5a6ac263473a69a6c8755678298191daa1225a/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
+
 (1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
 
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
