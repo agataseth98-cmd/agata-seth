@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1105) DIÁRIO — 21/11/2026 · **Aplicada agata-code-verifica-21-11: selo de verificação do Agata Code** Assinada pelo Humano em 21/11. Painel reiniciado.
+  palavras-chave: aplicada, agata, code, verifica, selo, verificação, assinada, humano, painel, reiniciado
 (1104) DIÁRIO — 21/11/2026 · **Aplicada voz-aprendizado-20-11: aprendizado da voz de 20/11 na skill agata-voz-cerebro** Assinada pelo Humano em 21/11.
   palavras-chave: aplicada, voz, aprendizado, skill, agata, cerebro, assinada, humano
 (1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, sandbox, fase, contenção, landlock, prova, assinada, humano, ctypes, allow, only, abi, env, escrita, indevida, bloqueados, processo, filho
 (1076) DIÁRIO — 19/11/2026 · **Proposta sandbox-fase1-19-11: contenção Landlock por ctypes, allow-only, com prova em processo filho de que o .env e a escrita indevida ficam bloqueados.** Primeiro lote em que a Seth (nemotron via OpenCode) escreveu o plano e o código sob supervisão do Opus; ela afirmou falsamente que o kernel falhava, o Opus provou o contrário e um agente Sonnet consertou. Medido: 9 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh sandbox-fase1-19-11.
   palavras-chave: proposta, sandbox, fase, contenção, landlock, ctypes, allow, only, prova, processo, filho, env, escrita, indevida, ficam, bloqueados, primeiro, lote, seth, nemotron, opencode, escreveu, plano, código, sob, supervisão, opus, ela, afirmou, falsamente, kernel, falhava, provou, contrário, agente, sonnet, consertou, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
-(1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único modelo × tipo** Assinada pelo Humano em 19/11 13:13. Ainda não muda o gateway.
-  palavras-chave: aplicada, placar, modelos, único, modelo, tipo, assinada, humano, muda, gateway
+(1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único model …
+  palavras-chave: aplicada, placar, modelos, único, model
 (1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos …
   palavras-chave: aplicada, rotas, nuvem, nvidia, gratuitos
 (1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de ca …

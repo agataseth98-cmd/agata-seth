@@ -2530,6 +2530,7 @@ function sethBlocoAgataCode(dados) {
     const valor = document.createElement(pre ? "pre" : "p"); valor.className = "seth-agata-code-texto"; valor.textContent = String(texto);
     corpo.append(titulo, valor);
   };
+  campo("Verificação", dados.aviso, false);
   campo("Resposta", dados.resposta, true);
   campo("Mudanças (git diff --stat)", dados.diff_stat || "sem mudanças", true);
   campo("Erro", dados.erro, false);

@@ -154,6 +154,13 @@ modo = os.environ.get("FAKE_MODO", "")
 open(os.environ["FAKE_REGISTRO"], "w").write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd(), "env": sorted(os.environ)}))
 if modo == "dorme":
     time.sleep(30)
+if modo == "stdin":
+    open(os.environ["FAKE_REGISTRO"] + ".stdin", "w").write(os.readlink("/proc/self/fd/0"))
+if modo == "vazio":
+    sys.exit(0)
+if modo == "ferramentas":
+    for nome in ("glob", "glob", "read"):
+        print(json.dumps({"type": "tool_use", "part": {"type": "tool", "tool": nome, "state": {"status": "completed"}}}))
 if modo == "muda":
     open("novo.txt", "w").write("conteudo\\n")
 texto = "x" * 20000 if modo == "longo" else "pronto"
@@ -300,6 +307,64 @@ class AgataCodeExecucaoTests(AgataCodeBase):
         self.assertFalse(r["ok"])
         self.assertIn("não consegui iniciar", r["erro"])
         self.assertFalse(any(self.arquivo.glob("*/worktree")))
+
+
+class AgataCodeVerificacaoTests(AgataCodeBase):
+    """21/11: o resultado diz se houve prova (tool_use na transcrição) ou se é opinião."""
+
+    def test_sem_ferramenta_abre_com_nao_verificado(self):
+        r = fs.executar_agata_code({"tarefa": "conte"})
+        self.assertEqual(r["ferramentas"], {})
+        self.assertEqual(r["aviso"], fs.AVISO_NAO_VERIFICADO)
+        self.assertTrue(fs.texto_agata_code(r).startswith(
+            "NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova."))
+        self.assertTrue(r["ok"])
+
+    def test_com_ferramenta_lista_quais_e_quantas(self):
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "ferramentas"}):
+            r = fs.executar_agata_code({"tarefa": "conte"})
+        self.assertEqual(r["ferramentas"], {"glob": 2, "read": 1})
+        self.assertEqual(r["aviso"], "verificado por: glob×2, read×1")
+        texto = fs.texto_agata_code(r)
+        self.assertTrue(texto.startswith("verificado por: glob×2, read×1"))
+        self.assertNotIn("NÃO VERIFICADO", texto)
+
+    def test_transcricao_vazia_diz_sem_resposta_e_nunca_texto_vazio(self):
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "vazio"}):
+            r = fs.executar_agata_code({"tarefa": "x"})
+        self.assertFalse(r["ok"])
+        texto = fs.texto_agata_code(r)
+        self.assertTrue(texto.startswith("sem resposta do Agata Code (timeout)"))
+        self.assertNotIn("NÃO VERIFICADO", texto)
+
+    def test_timeout_diz_sem_resposta(self):
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "dorme"}):
+            r = fs.executar_agata_code({"tarefa": "x"}, timeout_s=1)
+        self.assertTrue(fs.texto_agata_code(r).startswith("sem resposta do Agata Code (timeout)"))
+        self.assertIn("tempo esgotado", fs.texto_agata_code(r))
+
+    def test_contagem_ignora_linha_ruim_e_tool_use_sem_nome(self):
+        arq = Path(self.tmp.name) / "t.jsonl"
+        arq.write_text('lixo\n{"type":"tool_use","part":{}}\n{"type":"tool_use","part":{"tool":"grep"}}\n{"type":"text"}\n')
+        self.assertEqual(fs._ferramentas_usadas(arq), {"?": 1, "grep": 1})
+        self.assertEqual(fs._ferramentas_usadas(Path(self.tmp.name) / "nao-existe"), {})
+
+    def test_filho_roda_sem_stdin_aberto(self):
+        """Causa da trava medida em 21/11: `opencode run` com stdin aberto e sem EOF não chama o gateway. Tem de ser /dev/null."""
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "stdin"}):
+            fs.executar_agata_code({"tarefa": "x"})
+        self.assertEqual(Path(str(self.reg) + ".stdin").read_text(), "/dev/null")
+
+    def test_laco_repassa_o_aviso_para_a_tela_e_para_a_seth(self):
+        pedidos = []
+        def abrir(pedido):
+            pedidos.append(json.loads(json.dumps(pedido)))
+            return iter(sse_texto("feito"))
+        sem_prova = lambda args, cancelar=None: {"ok": True, "resposta": "r", "ferramentas": {}, "transcricao": "/t", "tempo_s": 1}
+        evs = list(fs.laco(abrir, iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
+                           executor_code=sem_prova, intervalo_pulso=5))
+        self.assertEqual([e for e in evs if e["tipo"] == "agata_code"][0]["aviso"], fs.AVISO_NAO_VERIFICADO)
+        self.assertTrue(pedidos[0]["messages"][-1]["content"].startswith("NÃO VERIFICADO"))
 
 
 class AgataCodeLacoTests(unittest.TestCase):
