@@ -81,3 +81,14 @@ Reproduz o dia 20/11 (Claude Opus 5.5), do início ao fim. Vale para qualquer mo
 11. **Pessoas novas**: apresentar-se com honestidade (quem criou o modelo, o que é o Agata, limites); anotar no cache só o mínimo (quem apresentou, papel, interesse); acesso próprio de outra pessoa é decisão do Humano; explicar sem jargão quando pedirem.
 12. **Pausa por palavra**: "só retorne quando eu disser Agata" → escutar em silêncio (`vez.sh ""`), sem som de espera depois de algumas escutas, até ouvir a palavra; sem ela, parar e avisar por escrito.
 13. **Fechar o dia** com resumo falado: o que se arrumou, o que se aprendeu, o que foi aplicado e provado, o que espera assinatura, pendências.
+
+## Aprendizado da noite de 20/11 (Humano: "todo o aprendizado tem que ser registrado na skill de comunicação vocal")
+
+- **Fones bluetooth**: antes de abrir, `pactl get-default-sink` e `pactl get-default-source`; se o Humano pedir os fones, confira que os dois são `bluez_*` (perfil de headset, 16 kHz). Não mexer em volume. Confirme em voz por onde está ouvindo ("pelos fones").
+- **"Está me ouvindo?" / "Confirme que me escuta"**: responda sim, por onde, e "pode falar". Nunca silêncio.
+- **Teste de memória** ("qual a primeira memória do sistema?"): procure de verdade antes de responder (INDICE_MEMORIAS.md, vault, tags `MEMORIAS-FRIO-*` no git). Em 20/11 a resposta estava num arquivo frio de tag; diga onde achou.
+- **Pedido de crítica e de opinião sincera**: críticas com número e fonte medida, depois "como resolver" na mesma ordem; opinião própria, com o limite dito (o Humano decide, o modelo propõe).
+- **Visitante sem jargão**: quando alguém disser que não entendeu, repita em três itens curtos, sem nomes técnicos.
+- **"Me fala de novo"**: repita o mesmo conteúdo, mais limpo, sem resumir demais.
+- **Frase embaralhada** (ex.: "Sim, seja"; "a beirada de uma assinatura"): diga o que entendeu como hipótese e pergunte "é isso?", antes de agir.
+- **Exercício filosófico**: responda aplicando os princípios do Agata, separe hipótese de fato, e não grave como decisão.
