@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1104) DIÁRIO — 21/11/2026 · **Aplicada voz-aprendizado-20-11: aprendizado da voz de 20/11 na skill agata-voz-cerebro** Assinada pelo Humano em 21/11.
+  palavras-chave: aplicada, voz, aprendizado, skill, agata, cerebro, assinada, humano
 (1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
   palavras-chave: proposta, agata, code, verifica, seth, recebe, selo, dizendo, usou, ferramenta, verificado, resposta, diagnóstico, trava, opencode, run, stdin, aberto, módulo, usa, dev, null, medido, acerto, modelo, serve, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, sandbox, fase, contenção, landlock, ctypes, allow, only, prova, processo, filho, env, escrita, indevida, ficam, bloqueados, primeiro, lote, seth, nemotron, opencode, escreveu, plano, código, sob, supervisão, opus, ela, afirmou, falsamente, kernel, falhava, provou, contrário, agente, sonnet, consertou, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único modelo × tipo** Assinada pelo Humano em 19/11 13:13. Ainda não muda o gateway.
   palavras-chave: aplicada, placar, modelos, único, modelo, tipo, assinada, humano, muda, gateway
-(1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos na rota pública da Seth** Assinada pelo Humano em 19/11 13:13. super-vl em conversa, bolt em código e json, só pedidos públicos, prazo absoluto de 30 s.
-  palavras-chave: aplicada, rotas, nuvem, nvidia, gratuitos, rota, pública, seth, assinada, humano, super, conversa, bolt, código, json, pedidos, públicos, prazo, absoluto
+(1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos …
+  palavras-chave: aplicada, rotas, nuvem, nvidia, gratuitos
 (1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de ca …
   palavras-chave: proposta, placar, modelos, único
 (1072) DIÁRIO — 19/11/2026 · **Proposta rotas-nuvem-19-11: nemotron-3.5-super-vl …

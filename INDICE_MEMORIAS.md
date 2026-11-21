@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1104) DIÁRIO — 21/11/2026 · **Aplicada voz-aprendizado-20-11: aprendizado da voz de 20/11 na skill agata-voz-cerebro** Assinada pelo Humano em 21/11.
 (1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
 (1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1077) DIÁRIO — 18/11/2026 · **Aplicada sandbox-fase1-19-11: contenção Landlock com prova** Assinada pelo Humano em 19/11 13:55. ctypes, allow-only, ABI 11, .env e escrita indevida bloqueados em processo filho.
 (1076) DIÁRIO — 19/11/2026 · **Proposta sandbox-fase1-19-11: contenção Landlock por ctypes, allow-only, com prova em processo filho de que o .env e a escrita indevida ficam bloqueados.** Primeiro lote em que a Seth (nemotron via OpenCode) escreveu o plano e o código sob supervisão do Opus; ela afirmou falsamente que o kernel falhava, o Opus provou o contrário e um agente Sonnet consertou. Medido: 9 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh sandbox-fase1-19-11.
 (1075) DIÁRIO — 18/11/2026 · **Aplicada placar-modelos-19-11: placar único modelo × tipo** Assinada pelo Humano em 19/11 13:13. Ainda não muda o gateway.
-(1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos na rota pública da Seth** Assinada pelo Humano em 19/11 13:13. super-vl em conversa, bolt em código e json, só pedidos públicos, prazo absoluto de 30 s.
+(1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos …
 (1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de ca …
 (1072) DIÁRIO — 19/11/2026 · **Proposta rotas-nuvem-19-11: nemotron-3.5-super-vl …
 (1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no can …
