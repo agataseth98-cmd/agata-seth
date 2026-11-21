@@ -2944,5 +2944,27 @@
       "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeVerificacaoTests"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a Seth no painel (só seth-livre) lê a web por `buscar_web` e `ler_pagina` (navegar + ler numa sessão MCP do navegador-mcp); só http(s), consulta até 300 caracteres; o resultado volta com o selo de DADO EXTERNO; clicar, preencher, navegar e screenshot nunca entram na lista; erro do navegador vira texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "na Seth do painel, `ler_pagina` nunca devolve a página anterior: erro de ferramenta (`isError`) ou endereço lido diferente do aberto vira erro em texto; na resposta que já leu a web, `cache_anotar` é recusado (texto da web pode trazer instrução); host com rótulo longo é bloqueado pela política de egress sem exceção",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_navegar_com_iserror_nao_le_a_pagina_anterior",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_pagina_trocada_entre_abrir_e_ler_vira_erro",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_erro_de_navegar_e_de_ler_viram_texto",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_cache_anotar_recusado_na_resposta_que_leu_a_web",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_host_com_rotulo_longo_bloqueia_sem_excecao"
+    ],
+    "cwd": null
   }
 ]

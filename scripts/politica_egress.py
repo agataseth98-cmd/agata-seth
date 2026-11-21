@@ -103,6 +103,8 @@ def _resolver_destino(url: str) -> tuple[str | None, int | None, list[str], str]
         enderecos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
     except socket.gaierror as e:
         return None, None, [], f"DNS não resolveu '{host}': {e}"
+    except (UnicodeError, ValueError) as e:  # (21/11/2026) rótulo de host > 63 caracteres levanta UnicodeError
+        return None, None, [], f"host inválido: {type(e).__name__}"
     ips = sorted({info[4][0].split("%", 1)[0] for info in enderecos})
     if not ips:
         return None, None, [], f"DNS não devolveu endereço pra '{host}'"

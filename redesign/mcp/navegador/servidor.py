@@ -66,7 +66,7 @@ from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-from politica_egress import destino_permitido  # noqa: E402 -- import após ajuste de sys.path
+from politica_egress import buscar_seguro, destino_permitido  # noqa: E402 -- import após ajuste de sys.path
 from redesign.mcp.capability import verificar_capability  # noqa: E402
 from egress_proxy import EgressProxy  # noqa: E402 -- conexão efetiva pinada ao IP validado
 import egress_proxy  # noqa: E402
@@ -87,6 +87,43 @@ _BUSCA_JS = """() => Array.from(document.querySelectorAll('li.b_algo')).map(li =
   const a = li.querySelector('h2 a'); const p = li.querySelector('.b_caption p, p');
   return {titulo: a ? a.innerText.trim() : '', href: a ? a.href : '', trecho: p ? p.innerText.trim() : ''};
 })"""
+
+# (21/11/2026, seth-web-21-11) medido: a página comum do Bing chega ao Brave automatizado sem nenhum `li.b_algo`
+# (2 de 2 consultas vazias; o texto da página só tem o menu) e o DuckDuckGo HTML pede captcha. O RSS do Bing
+# (format=rss) devolve os resultados sem JavaScript. Vai pelo buscar_seguro (curl com IP fixado e cada redirect
+# conferido pela política de egress), não pelo navegador. Sem item no RSS, cai na página comum como antes.
+_BUSCA_RSS_URL = "https://www.bing.com/search?format=rss&q={q}&setlang=pt-BR"
+_MAX_BYTES_RSS = 2_000_000
+
+
+def _itens_rss(xml_texto: str) -> list[dict]:
+    """[{titulo, href, trecho}] dos <item> de um RSS. XML ruim, DOCTYPE ou entidade = lista vazia (não expande nada)."""
+    import xml.etree.ElementTree as ET
+    if not xml_texto or "<!DOCTYPE" in xml_texto.upper() or "<!ENTITY" in xml_texto.upper():
+        return []
+    try:
+        raiz = ET.fromstring(xml_texto)
+    except ET.ParseError:
+        return []
+    itens = []
+    for it in raiz.iter("item"):
+        itens.append({"titulo": (it.findtext("title") or "").strip(), "href": (it.findtext("link") or "").strip(),
+                      "trecho": (it.findtext("description") or "").strip()})
+    return itens
+
+
+def _buscar_rss(consulta: str) -> list[dict] | None:
+    """Itens do RSS; [] = RSS respondeu sem item; None = RSS falhou (aí, e só aí, cai na página comum)."""
+    import tempfile
+    url = _BUSCA_RSS_URL.format(q=urllib.parse.quote_plus(consulta))
+    with tempfile.TemporaryDirectory(prefix="agata-busca-") as d:
+        destino = os.path.join(d, "r.xml")
+        ok, status, _final, _motivo = buscar_seguro(url, destino, timeout_s=20, max_bytes=_MAX_BYTES_RSS)
+        if not ok or status != 200 or not os.path.exists(destino):
+            return None
+        with open(destino, encoding="utf-8", errors="replace") as f:
+            return _itens_rss(f.read(_MAX_BYTES_RSS))
+
 
 mcp = FastMCP("agata-navegador")
 
@@ -253,7 +290,6 @@ def _termos(consulta: str) -> list[str]:
 
 
 @mcp.tool
-@_na_fila
 def buscar_web(consulta: str, n: int = 8) -> dict:
     """Busca na internet (Bing) e devolve os resultados: título, endereço e trecho.
     READ-ONLY -- é uma leitura de página de resultados por URL, nenhum clique nem
@@ -281,20 +317,15 @@ def buscar_web(consulta: str, n: int = 8) -> dict:
                 "aviso": None, "erro": f"destino bloqueado pela política de egress: {motivo}",
                 **_PROVENIENCIA}
     try:
-        page = _pagina()
-        for tentativa in (1, 2):  # 2ª busca seguida às vezes aborta a navegação anterior
-            try:
-                page.goto(url, timeout=_TIMEOUT_MS, wait_until="domcontentloaded")
-                break
-            except Exception:  # noqa: BLE001
-                if tentativa == 2:
-                    raise
-                page.wait_for_timeout(1000)
+        # o RSS roda FORA da fila do navegador (curl, sem Brave): Bing lento não trava navegar/ler dos outros clientes
         try:
-            page.wait_for_selector("li.b_algo", timeout=8000)
-        except Exception:  # noqa: BLE001 -- sem resultado: devolve lista vazia, não erro
-            pass
-        brutos = page.evaluate(_BUSCA_JS)
+            brutos = _buscar_rss(consulta)
+        except Exception:  # noqa: BLE001 -- RSS fora: segue pela página comum
+            brutos = None
+        motor = "bing-rss"
+        if brutos is None:
+            motor = "bing"
+            brutos = _na_fila(_buscar_pagina)(url)
         termos = _termos(consulta)
         res = []
         for r in brutos:
@@ -311,13 +342,31 @@ def buscar_web(consulta: str, n: int = 8) -> dict:
         elif not any(r["relacionado"] for r in res):
             aviso = ("nenhum resultado contém os termos da consulta (busca degradada) -- reformule; "
                      "isto não prova nada, nem que existe nem que não existe")
-        _log("buscar_web", consulta=consulta, n=len(res), aviso=bool(aviso))
-        return {"consulta": consulta, "motor": "bing", "resultados": res, "aviso": aviso,
+        _log("buscar_web", consulta=consulta, n=len(res), aviso=bool(aviso), motor=motor)
+        return {"consulta": consulta, "motor": motor, "resultados": res, "aviso": aviso,
                 "erro": None, **_PROVENIENCIA}
     except Exception as e:  # noqa: BLE001
         _log("buscar_web_erro", consulta=consulta, erro=str(e))
         return {"consulta": consulta, "motor": "bing", "resultados": [], "aviso": None,
                 "erro": f"{type(e).__name__}: {e}", **_PROVENIENCIA}
+
+
+def _buscar_pagina(url: str) -> list[dict]:
+    """O caminho antigo: a página comum do Bing no Brave, lida por `li.b_algo`."""
+    page = _pagina()
+    for tentativa in (1, 2):  # 2ª busca seguida às vezes aborta a navegação anterior
+        try:
+            page.goto(url, timeout=_TIMEOUT_MS, wait_until="domcontentloaded")
+            break
+        except Exception:  # noqa: BLE001
+            if tentativa == 2:
+                raise
+            page.wait_for_timeout(1000)
+    try:
+        page.wait_for_selector("li.b_algo", timeout=8000)
+    except Exception:  # noqa: BLE001 -- sem resultado: devolve lista vazia, não erro
+        pass
+    return page.evaluate(_BUSCA_JS)
 
 
 @mcp.tool
@@ -490,6 +539,20 @@ def _selftest_offline() -> int:
         print("navegar(): campos de proveniência presentes mesmo bloqueado — OK")
     else:
         print(f"FALHA: navegar() sem proveniência em {r!r}")
+        ok = False
+
+    rss = ("<rss><channel><item><title>T</title><link>https://a.b/</link><description>d</description></item>"
+           "</channel></rss>")
+    if _itens_rss(rss) == [{"titulo": "T", "href": "https://a.b/", "trecho": "d"}]:
+        print("_itens_rss: item lido — OK")
+    else:
+        print(f"FALHA: _itens_rss deu {_itens_rss(rss)!r}")
+        ok = False
+    ruins = ('<!DOCTYPE r [<!ENTITY x "y">]><rss><channel><item><title>&x;</title></item></channel></rss>', "<rss><item>", "")
+    if all(_itens_rss(x) == [] for x in ruins):
+        print("_itens_rss: DOCTYPE, entidade e XML quebrado viram lista vazia — OK")
+    else:
+        print("FALHA: _itens_rss aceitou XML ruim")
         ok = False
 
     return 0 if ok else 1
