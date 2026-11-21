@@ -77,8 +77,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 5.
-- `agata-code-e-seth-21-11`
+Abertas (sem APROVADO-): 4.
 - `agentes-skills-18-11`
 - `assinatura-por-tipo-19-11`
 - `rotas-novas-18-11b`
@@ -135,77 +134,77 @@ Endereços concretos e o comando `atualizar` são deste projeto: `PROTOCOLOS.md`
 ### Seth no gateway (texto da hidratação) — PROTOCOLOS.md:261 (#seth-no-gateway-texto-da-hidratacao)
 *Lido pelo `redesign/router/seth_gateway.py` a cada hidratação, entre os marcadores `SETH-GATEWAY`. A hidratação também inclui o `AGENTS.md`: as regras gerais (verdade, voz, pesquisa, economia, modo, memória comum) estão lá, não aqui. Este bloco guarda só o que é próprio do gateway e não estava no canon. Até a proposta `sincronia-12-11` o mesmo texto era cópia no código (`_DOUTRINA_FIXA`); a comparação linha a linha está em `propostas/sincronia-12-11.md`. Editar este bloco muda o que a Seth recebe: é proposta P-8.*
 
-### Seth pública (rota sem ferramentas) — PROTOCOLOS.md:300 (#seth-publica-rota-sem-ferramentas)
+### Seth pública (rota sem ferramentas) — PROTOCOLOS.md:301 (#seth-publica-rota-sem-ferramentas)
 *Lido pelo `redesign/router/seth_gateway.py` na rota pública (`seth-public`), entre os marcadores `SETH-PUBLICA`. Sem a seção, a rota não responde (falha fechada, 503). Estava como `_DOUTRINA_PUBLICA` no código até a proposta `sincronia-12-11`. Editar este bloco muda o que a rota pública recebe: é proposta P-8.*
 
-### Movido do PROJETO.md em 12/11/2026 (projeto-indice) — PROTOCOLOS.md:304 (#movido-do-projetomd-em-12112026-projeto-indice)
+### Movido do PROJETO.md em 12/11/2026 (projeto-indice) — PROTOCOLOS.md:305 (#movido-do-projetomd-em-12112026-projeto-indice)
 As seções abaixo saíram do PROJETO.md, que virou índice (decisão do Humano, cache do Conselho, entradas 521 e 522: "como" vai para PROTOCOLOS.md). O texto é o mesmo, verbatim. O destino de cada parágrafo está em `redesign/projeto_indice/destinos.json`, e o PROJETO.md anterior inteiro está em `extras/arquivo/projeto-ate-2026-11-12.md`.
 
-### Nome falado do sistema — PROTOCOLOS.md:308 (#nome-falado-do-sistema)
+### Nome falado do sistema — PROTOCOLOS.md:309 (#nome-falado-do-sistema)
 Fonte única do nome falado (Fase 2, plano de replicabilidade, 25/09/2026 — parecer do laboratório-nuvem "Ensaio"). Todo lugar onde `{{NOME_SISTEMA}}` aparece (REGRAS.md, PROMPT_CARREGAMENTO.md, `.agents/skills/*/SKILL.md`) resolve pra este campo — inclusive lendo o arquivo cru, sem script nenhum: a regra de resolução está escrita junto do token em cada um desses arquivos. Campo ausente (clone com PROJETO.md ainda vazio) = usa "Agata". Nunca edite os caminhos internos (`~/.config/agata/`, nomes de serviço) por causa deste campo — só o nome falado muda.
 
-### Ambiente Operacional — PROTOCOLOS.md:318 (#ambiente-operacional)
+### Ambiente Operacional — PROTOCOLOS.md:319 (#ambiente-operacional)
 - **Shell do Humano:** `fish`. Rejeita heredoc POSIX (`cat <<'EOF'`); para escrever arquivo: `printf ... | tee`/`sudo tee`, ou `bash -c '...'` / scripts `.sh` (149).
 
-### Memória e hidratação — PROTOCOLOS.md:323 (#memoria-e-hidratacao)
+### Memória e hidratação — PROTOCOLOS.md:324 (#memoria-e-hidratacao)
 - **Canônicos** em `~/agata`; o repositório git é também o cofre Obsidian. `MEMÓRIAS.md` é o canônico da história: DIÁRIO coletivo + blocos MOD por modelo + registro do Conselho, append-only. Camadas por período (Fase 4): quente `MEMÓRIAS.md` · morno `MEMORIAS-MORNO.md` · frio `memoria/frio/MEMORIAS-FRIO-<data>[-N].md`, congelado e selado (`git tag` + `scripts/selar.sh`, P-14); migração e verificação por `scripts/migrar_periodo.py` e `scripts/verificar_migracao_periodo.py` (357).
 
-### Personalidade da Seth — PROTOCOLOS.md:339 (#personalidade-da-seth)
+### Personalidade da Seth — PROTOCOLOS.md:340 (#personalidade-da-seth)
 Decisão do Humano, 14/10/2026 (685). Vale **dentro** das REGRAS; em conflito, REGRAS vence.
 
-### Atualização segura de componentes — PROTOCOLOS.md:354 (#atualizacao-segura-de-componentes)
+### Atualização segura de componentes — PROTOCOLOS.md:355 (#atualizacao-segura-de-componentes)
 - **Inventário.** `scripts/inventario_componentes.py` acrescenta a `models/manifest.json` a chave `componentes_externos` (imagens Docker com digest ou só tag, modelos do Ollama pelo digest da API, arquivos de `config/componentes-externos.txt` com sha256, Obsidian Flatpak). A chave `modelos`, régua do P-12, não é tocada. Só relata deriva; nunca atualiza. Tag de imagem não é imutável: em 16/10/2026 `librechat` e `ollaya` estavam fixados por digest e `mongo`, `meilisearch` e `socat` só por tag.
 
-### Segurança — PROTOCOLOS.md:360 (#seguranca)
+### Segurança — PROTOCOLOS.md:361 (#seguranca)
 - **Sandbox sempre.** Segredos só em `~/.config/agata/.env`, fora do repo, junto de `restic.pass`, `obsidian.token` e `google-project/` (312). Ver `CHAVES.md`: checklist público de teste e rotação, sem nenhum valor de chave — a Seth lê pelo `query_canon` (decisão do Humano, (660)); proibido é abrir o `.env`. O OmniRoute não lê esse arquivo em runtime: as chaves ficam cifradas em `~/.omniroute/storage.sqlite`; o `.env` é a fonte para adicionar ou rotacionar provedor (`redesign/router/PROVEDORES.md`).
 
-### Conselho Remoto — Fase 1 (transporte, não decisão) — PROTOCOLOS.md:368 (#conselho-remoto-fase-1-transporte-nao-decisao)
+### Conselho Remoto — Fase 1 (transporte, não decisão) — PROTOCOLOS.md:369 (#conselho-remoto-fase-1-transporte-nao-decisao)
 Escopo pequeno de propósito: **UM modelo, UMA tarefa** — enviar um pedido de parecer já escrito pelo Humano e recolher a resposta. A fase testa o transporte, não a qualidade do parecer (206).
 
-### Sudo e interação humana — PROTOCOLOS.md:379 (#sudo-e-interacao-humana)
+### Sudo e interação humana — PROTOCOLOS.md:380 (#sudo-e-interacao-humana)
 Quando uma operação exige `sudo`, o executor pausa e pede ao Humano para rodar o comando (por exemplo, prefixo `!` no Claude Code). Não armazenar senha, não simular autenticação, não contornar (110).
 
-### Quarentena estrutural (P-8) — PROTOCOLOS.md:386 (#quarentena-estrutural-p-8)
+### Quarentena estrutural (P-8) — PROTOCOLOS.md:387 (#quarentena-estrutural-p-8)
 Texto completo: `propostas/README.md`. Fluxo prático: skill `agata-aplicar-proposta`.
 
-### Doutrina de defesa proporcional — PROTOCOLOS.md:394 (#doutrina-de-defesa-proporcional)
+### Doutrina de defesa proporcional — PROTOCOLOS.md:395 (#doutrina-de-defesa-proporcional)
 Os princípios desta doutrina ficam no PROJETO.md, seção "Princípios" (índice). Aqui fica o formato de pedido de decisão:
 
-### Decisor local — PROTOCOLOS.md:400 (#decisor-local)
+### Decisor local — PROTOCOLOS.md:401 (#decisor-local)
 Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
 
-### Estado de publicação — PROTOCOLOS.md:411 (#estado-de-publicacao)
+### Estado de publicação — PROTOCOLOS.md:412 (#estado-de-publicacao)
 Repositório **público**, por decisão registrada do Humano — foi isso que queimou o nonce; consequência conhecida, não acidente. O estado de publicação não se afirma por este texto: mede-se em cada sessão (`sync`, `PROTOCOLOS.md`). Se o remoto ficar atrás, o executor trabalha com os arquivos entregues pelo Humano e declara a origem.
 
-### Ferramenta embutida: selar.sh (Fase 4) — PROTOCOLOS.md:415 (#ferramenta-embutida-selarsh-fase-4)
+### Ferramenta embutida: selar.sh (Fase 4) — PROTOCOLOS.md:416 (#ferramenta-embutida-selarsh-fase-4)
 `scripts/selar.sh` sela arquivos em `SELOS.txt` (sha256); `--check` dá exit 1 sem `SELOS.txt` ou com arquivo violado ("VIOLADO"), exit 0 com tudo íntegro. É o P-14 sobre as camadas frias de MEMÓRIAS.
 
-### Memória em duas camadas — PROTOCOLOS.md:419 (#memoria-em-duas-camadas)
+### Memória em duas camadas — PROTOCOLOS.md:420 (#memoria-em-duas-camadas)
 **Camada local** — Obsidian sobre o próprio repositório git: offline, privada, é **FATO**. **Camada nuvem** — NotebookLM e afins: processamento de fonte bruta, é **RELATO/projeção**. Nunca recebe canon e nunca vira cérebro do sistema.
 
-#### Esfera pessoal — PROTOCOLOS.md:424 (#esfera-pessoal)
+#### Esfera pessoal — PROTOCOLOS.md:425 (#esfera-pessoal)
 `memoria/missoes/segunda-camada/` é a esfera local e privada do Humano. Sem remote, não sobe para serviço externo nenhum. Pode conter o que só existe nesta Máquina: hardware, rotina, configuração local, assunto pessoal. Modelos locais consultam sob demanda; modelos em nuvem não veem.
 
-#### Esfera do projeto — PROTOCOLOS.md:427 (#esfera-do-projeto)
+#### Esfera do projeto — PROTOCOLOS.md:428 (#esfera-do-projeto)
 `memoria/missoes/agata-sistema/` é a esfera de trabalho do sistema, vinculada a uma conta Google Workspace **dedicada ao projeto** — nunca a conta pessoal do Humano. Recebe material do sistema que o Humano autorize, e pode ser consultada por modelos externos sob autorização.
 
-#### Fronteira — PROTOCOLOS.md:430 (#fronteira)
+#### Fronteira — PROTOCOLOS.md:431 (#fronteira)
 Só o não-sensível sobe. Conteúdo público sobre o sistema pode ser usado na esfera do projeto; os arquivos canônicos não sobem como canon. Dado que só existe nesta Máquina, ou que pertence ao domínio pessoal, fica na esfera pessoal. Segredo, chave e credencial nunca sobem para esfera externa nenhuma.
 
-#### Fronteira mecânica — `subir_esfera_projeto.py` — PROTOCOLOS.md:435 (#fronteira-mecanica-subiresferaprojetopy)
+#### Fronteira mecânica — `subir_esfera_projeto.py` — PROTOCOLOS.md:436 (#fronteira-mecanica-subiresferaprojetopy)
 Único cano de código entre o sistema e o Drive: um arquivo por invocação, 8 checagens em ordem (caminho, esfera pessoal, canon, é arquivo, extensão, tamanho, UTF-8, varredura de segredo) e aborta na primeira que falhar; não é allowlist. Texto: `extras/projeto-detalhe/memoria-duas-camadas.md`.
 
-#### Índice derivado do canon público e export pro Drive — PROTOCOLOS.md:438 (#indice-derivado-do-canon-publico-e-export-pro-drive)
+#### Índice derivado do canon público e export pro Drive — PROTOCOLOS.md:439 (#indice-derivado-do-canon-publico-e-export-pro-drive)
 Camada de consulta separada do vault, gerada só do canon público (`gerar_indice_derivado.py`), exportada ao Drive só quando o sha256 do `indice.md` muda (post-commit, fail-soft). Ver `extras/projeto-detalhe/memoria-duas-camadas.md`.
 
-#### Mão única refinada — PROTOCOLOS.md:441 (#mao-unica-refinada)
+#### Mão única refinada — PROTOCOLOS.md:442 (#mao-unica-refinada)
 **Nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta; nada disso é escrita de fato. Resultado processado só influencia o canon pelo fluxo normal: proposta explícita, decisão do Humano, verificação pela Máquina quando aplicável, registro em MEMÓRIAS, commit. A autorização do Humano permite a incorporação; não dispensa verificação nem registro.
 
-#### Postura sobre uso dos dados pelo Google — PROTOCOLOS.md:444 (#postura-sobre-uso-dos-dados-pelo-google)
+#### Postura sobre uso dos dados pelo Google — PROTOCOLOS.md:445 (#postura-sobre-uso-dos-dados-pelo-google)
 O Humano autoriza o uso dos dados da esfera do projeto nos serviços Google escolhidos, incluindo eventual uso para melhoria ou treinamento **quando os termos daquele serviço assim previrem**. É postura declarada do Humano, não alegação sobre o que a Google faz. Dados da esfera pessoal nunca são usados para isso, porque nunca sobem.
 
-#### ACB — reversão parcial de (223) — PROTOCOLOS.md:447 (#acb-reversao-parcial-de-223)
+#### ACB — reversão parcial de (223) — PROTOCOLOS.md:448 (#acb-reversao-parcial-de-223)
 Desde 27/08/2026, a exclusão do ACB vale só para assuntos pessoais e partes desnecessárias ao sistema. Assunto do próprio sistema pode voltar ao escopo com autorização explícita do Humano e o mesmo controle de proposta, verificação e registro.
 
-#### Limitação conhecida — Conselho Remoto — PROTOCOLOS.md:450 (#limitacao-conhecida-conselho-remoto)
+#### Limitação conhecida — Conselho Remoto — PROTOCOLOS.md:451 (#limitacao-conhecida-conselho-remoto)
 A esfera do projeto mora em `memoria/missoes/`, que casa com a Condição 1 do `scripts/conselho_remoto.py`: por mecanismo, não pode ser discutida com o Conselho Remoto. É a proteção funcionando. Mudar exige allowlist explícita ou mover a esfera — decisão do Humano.
