@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
+  palavras-chave: proposta, agata, code, verifica, seth, recebe, selo, dizendo, usou, ferramenta, verificado, resposta, diagnóstico, trava, opencode, run, stdin, aberto, módulo, usa, dev, null, medido, acerto, modelo, serve, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
   palavras-chave: proposta, voz, aprendizado, conversa, noite, fones, bluetooth, teste, memória, crítica, opinião, visitante, jargão, frase, embaralhada, entra, skill, agata, cerebro, ordem, humano, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, placar, modelos, único, modelo, tipo, assinada, humano, muda, gateway
 (1074) DIÁRIO — 18/11/2026 · **Aplicada rotas-nuvem-19-11: dois NVIDIA gratuitos na rota pública da Seth** Assinada pelo Humano em 19/11 13:13. super-vl em conversa, bolt em código e json, só pedidos públicos, prazo absoluto de 30 s.
   palavras-chave: aplicada, rotas, nuvem, nvidia, gratuitos, rota, pública, seth, assinada, humano, super, conversa, bolt, código, json, pedidos, públicos, prazo, absoluto
-(1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de cada modelo por tipo de pedido, com nota, tempo, custo, confiança e estado no painel.** Princípio do Humano: todo modelo tem sua chance no que é bom. Ainda não muda o gateway. Modelo: Sonnet orquestrado pelo Opus. Medido: 18 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh placar-modelos-19-11.
-  palavras-chave: proposta, placar, modelos, único, modelo, tipo, pedido, nota, tempo, custo, confiança, estado, painel, princípio, humano, tem, chance, bom, muda, gateway, sonnet, orquestrado, opus, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
+(1073) DIÁRIO — 19/11/2026 · **Proposta placar-modelos-19-11: placar único de ca …
+  palavras-chave: proposta, placar, modelos, único
 (1072) DIÁRIO — 19/11/2026 · **Proposta rotas-nuvem-19-11: nemotron-3.5-super-vl …
   palavras-chave: proposta, rotas, nuvem, nemotron, super
 (1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no can …
