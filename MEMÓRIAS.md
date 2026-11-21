@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d6525d82a68fb11ae9c29dccd52879c15ef8120b
-  Escrito em: 21/11/2026 11:15 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0fdded2458c1107626728a3f6b1ef1f5f976228c
+  Escrito em: 21/11/2026 11:32 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6525d82a68fb11ae9c29dccd52879c15ef8120b/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6525d82a68fb11ae9c29dccd52879c15ef8120b/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6525d82a68fb11ae9c29dccd52879c15ef8120b/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6525d82a68fb11ae9c29dccd52879c15ef8120b/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d6525d82a68fb11ae9c29dccd52879c15ef8120b/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fdded2458c1107626728a3f6b1ef1f5f976228c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fdded2458c1107626728a3f6b1ef1f5f976228c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fdded2458c1107626728a3f6b1ef1f5f976228c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fdded2458c1107626728a3f6b1ef1f5f976228c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0fdded2458c1107626728a3f6b1ef1f5f976228c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1104) DIÁRIO — 21/11/2026 · **Aplicada voz-aprendizado-20-11: aprendizado da voz de 20/11 na skill agata-voz-cerebro** Assinada pelo Humano em 21/11.
+
 (1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
 
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
