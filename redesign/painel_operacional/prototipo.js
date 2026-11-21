@@ -1889,6 +1889,7 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instruc
     if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
     else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
     else if (evento.tipo === "estado" && typeof evento.texto === "string") { if (aoEstado) aoEstado(evento.texto); } // 20/11: ferramenta em curso
+    else if (evento.tipo === "agata_code") (parcial.agata_code = parcial.agata_code || []).push(evento); // 20/11: trabalho do Agata Code
     else if (evento.tipo === "fim") fim = true;
     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);
   };
@@ -2517,6 +2518,29 @@ function sethRemover(id, c = sethAtual) {
   if (c.folha === id) c.folha = no.pai || null;
 }
 
+// Bloco recolhido "Trabalho do Agata Code" (20/11/2026): o Humano escolhe ver ou não. Fechado por padrão; só texto (textContent).
+// Vale para a tela em curso: não entra na conversa salva. A transcrição completa fica no arquivo indicado.
+function sethBlocoAgataCode(dados) {
+  const bloco = document.createElement("details"); bloco.className = "seth-detalhes seth-agata-code";
+  const resumo = document.createElement("summary"); resumo.textContent = "Trabalho do Agata Code"; bloco.append(resumo);
+  const corpo = document.createElement("div"); corpo.className = "seth-detalhes-corpo";
+  const campo = (rotulo, texto, pre) => {
+    if (!texto) return;
+    const titulo = document.createElement("p"); titulo.className = "seth-agata-code-rotulo"; titulo.textContent = rotulo;
+    const valor = document.createElement(pre ? "pre" : "p"); valor.className = "seth-agata-code-texto"; valor.textContent = String(texto);
+    corpo.append(titulo, valor);
+  };
+  campo("Resposta", dados.resposta, true);
+  campo("Mudanças (git diff --stat)", dados.diff_stat || "sem mudanças", true);
+  campo("Erro", dados.erro, false);
+  campo("Worktree", dados.worktree, false);
+  campo("Transcrição completa", dados.transcricao, false);
+  if (dados.tempo_s) campo("Tempo", dados.tempo_s + " s", false);
+  bloco.append(corpo);
+  return bloco;
+}
+function sethMostrarAgataCode(log, parcial) { (parcial.agata_code || []).forEach((d) => log.append(sethBlocoAgataCode(d))); }
+
 // Motor da resposta. A conversa é `alvo` (capturada antes de qualquer await): a resposta vai para ela e o salvar grava
 // ela, mesmo que a tela tenha trocado. A trava (sethRespondendo) vale até o salvar terminar.
 // Envia a janela do caminho até `paiId` (nova resposta) ou até a resposta de `alvoId` mais a mensagem "continue de onde
@@ -2574,12 +2598,12 @@ async function sethResponder(op) {
   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
   if (conteudo !== null) {
     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
-    if (alvo === sethAtual) { sethDesenhar(); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
+    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
     await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
   } else if (parada) {
     if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
     if (alvo === sethAtual) {
-      sethDesenhar();
+      sethDesenhar(); sethMostrarAgataCode(log, parcial);
       if (falha) log.append(sethVazio("Não consegui terminar a resposta: " + (falha.message || "falha desconhecida") + "."));
       else if (modo === "continuar" && !parcial.texto) log.append(sethVazio("Continuação parada antes do primeiro texto. A resposta ficou como estava."));
       sethStatus("INTERROMPIDA", "partial");
