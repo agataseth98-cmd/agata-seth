@@ -2879,5 +2879,61 @@
       "redesign/painel_operacional/test_ferramentas_seth.py::CacheAnotarTests"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a ferramenta `agata_code` é oferecida só no seth-livre (nunca na Seth pública), está na lista fixa e recusa tarefa vazia, não textual ou acima de 4000 caracteres sem criar worktree",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeOferecidoTests",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_tarefa_vazia_ou_acima_de_4000_e_recusada_sem_criar_nada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o Agata Code roda por `opencode run --agent agata-code --format json --dir <worktree>` numa worktree nova de origin/main em `~/agata-arquivo/agata-code/<data-hora>/`, nunca no repositório vivo, com ambiente restrito a uma lista fixa (sem segredo herdado)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_comando_com_agente_e_dir_na_worktree_nova_e_nunca_no_repo_vivo",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests::test_worktree_parte_de_origin_main_e_ambiente_sem_segredo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "sem mudança a worktree é removida e a transcrição fica; com mudança a worktree fica e o resultado traz resposta, `git diff --stat` e os caminhos; o timeout de 600 s mata o agente; a resposta é truncada; executável ausente vira erro em texto",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeExecucaoTests"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "durante o trabalho o laço emite estado \"Agata Code trabalhando…\" a cada 10 s e um evento `agata_code` com o resultado; fechar o stream cancela o agente",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeLacoTests"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a tela mostra o bloco recolhido \"Trabalho do Agata Code\" (fechado por padrão, só `textContent`, estilo em arquivo externo) com resposta, diff e caminho da transcrição",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeTelaTests"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o agente `.opencode/agent/agata-code.md` manda seguir o AGENTS.md, ler e anotar no cache do Conselho, e nega git commit/push, sudo, rm -rf, curl, wget, leitura de .env e rede da web",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeDefinicaoTests"
+    ],
+    "cwd": null
   }
 ]

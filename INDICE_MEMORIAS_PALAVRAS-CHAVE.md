@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
+  palavras-chave: aplicada, agata, code, nasce, seth, painel, passa, chamá, assinada, humano, prova, tarefa, leitura, após, reiniciar, operacional
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
   palavras-chave: proposta, dinamica, voz, dinâmica, sessão, estado, auditoria, caminho, humano, decisão, registro, cache, lotes, pequenos, aplicação, prova, vira, procedimento, passos, skill, agata, cerebro, modelos, confederados, ordem, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (agente do OpenCode, mesmas regras, worktree descartável) e a Seth do painel passa a chamá-lo, com o trabalho visível sob demanda.** Lote 2 das decisões do Humano por voz de 20/11. Medição real: respeitou 'não altere', mas errou contagem (modelo gratuito). Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, rotas, nuvem, nemotron, super, conversa, bolt, código, json, gratuitos, nvidia, entram, rota, seth, pedidos, públicos, prazo, absoluto, queda, segura, laguna, catalogada, modelo, sonnet, orquestrado, opus, revisão, final, autorização, humano, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no canon** Assinada pelo Humano em 19/11 09:14. Bom para todo mundo; progresso visível e confiável na espera.
   palavras-chave: aplicada, regra, zero, entra, canon, assinada, humano, bom, mundo, progresso, visível, confiável, espera
-(1070) DIÁRIO — 18/11/2026 · **Aplicada canal-voz-18-11: canal de voz local e não-registro por pedido no gateway** Assinada pelo Humano em 19/11. Fase 1, sem reconhecer a voz; gateway honra X-Agata-Nao-Registrar só de loopback.
-  palavras-chave: aplicada, canal, voz, local, registro, pedido, gateway, assinada, humano, fase, reconhecer, honra, agata, nao, registrar, loopback
+(1070) DIÁRIO — 18/11/2026 · **Aplicada canal-voz-18-11: canal de voz local e nã …
+  palavras-chave: aplicada, canal, voz, local
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o ch …
   palavras-chave: aplicada, voz, chamado, fale, comigo, abre
 (1068) DIÁRIO — 19/11/2026 · **Proposta regra-zero-19-11: a Regra 0 entra no can …

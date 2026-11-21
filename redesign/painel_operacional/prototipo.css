@@ -786,6 +786,9 @@ body:has(#conversa:not([hidden])) main{height:100vh;height:100dvh;overflow:hidde
 .seth-detalhes>summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .seth-detalhes-corpo{display:flex;flex-direction:column;gap:6px;max-width:76ch;margin-top:6px}
 .seth-detalhes-corpo p{margin:0}
+.seth-agata-code{margin:8px 0;padding:6px 10px;border:1px solid var(--line);border-radius:8px}
+.seth-agata-code-rotulo{font-weight:600;color:var(--ink)}
+.seth-agata-code-texto{margin:0;max-height:240px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;scrollbar-width:thin}
 .seth-linha-baixo .seth-contexto-detalhe{font-size:var(--fs-1);line-height:1.5}
 .menu-fechar{display:none}
 .nv-cartoes>.panel{margin:0}

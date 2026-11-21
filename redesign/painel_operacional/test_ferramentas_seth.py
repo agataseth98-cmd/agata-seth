@@ -7,7 +7,10 @@ import http.client
 import importlib.util
 import json
 import os
+import stat
+import subprocess
 import tempfile
+import time
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -24,7 +27,7 @@ spec.loader.exec_module(panel)
 
 MSG = [{"role": "user", "content": "oi"}]
 ESQ_FALSOS = [{"type": "function", "function": {"name": n, "description": "", "parameters": {"type": "object"}}}
-              for n in fs.NOMES_MCP] + [fs.ESQUEMA_ANOTAR]
+              for n in fs.NOMES_MCP] + [fs.ESQUEMA_ANOTAR, fs.ESQUEMA_AGATA_CODE]
 
 
 def sse_chamada(nome, args="{}", id_="c1"):
@@ -64,15 +67,15 @@ class ListaFixaTests(unittest.TestCase):
             fs._cache_esquemas.update(quando=0.0, lista=None)
             nomes = [f["function"]["name"] for f in fs.esquemas()]
             fs._cache_esquemas.update(quando=0.0, lista=None)
-        self.assertEqual(nomes, list(fs.NOMES_MCP) + ["cache_anotar"])
+        self.assertEqual(nomes, list(fs.NOMES_MCP) + ["cache_anotar", "agata_code"])
         with mock.patch.object(fs, "_rpc_mcp") as rpc:
             self.assertIn("não permitida", fs.executar("memoria_acrescentar", '{"texto":"x"}'))
             rpc.assert_not_called()
 
-    def test_mcp_fora_do_ar_oferece_so_cache_anotar(self):
+    def test_mcp_fora_do_ar_oferece_so_cache_anotar_e_agata_code(self):
         with mock.patch.object(fs, "_rpc_mcp", side_effect=fs.ErroMCP("x")):
             fs._cache_esquemas.update(quando=0.0, lista=None)
-            self.assertEqual([f["function"]["name"] for f in fs.esquemas()], ["cache_anotar"])
+            self.assertEqual([f["function"]["name"] for f in fs.esquemas()], ["cache_anotar", "agata_code"])
 
     def test_resultado_truncado_e_erro_do_mcp_vira_texto(self):
         longo = {1: {"result": {"content": [{"type": "text", "text": "a" * 30000}]}}}
@@ -141,6 +144,217 @@ class LacoTests(unittest.TestCase):
         self.assertLess(len(msgs[2]["content"]), fs.MAX_RESULTADO + 100)
         self.assertEqual([e["tipo"] for e in evs], ["estado", "texto", "fim"])
         self.assertEqual(evs[0]["texto"], "consultando query_canon…")
+
+
+# ---- Agata Code (lote 2, 20/11/2026): sempre com executável falso, nunca o opencode real -----------------------------------
+
+FAKE_OPENCODE = """#!/usr/bin/env python3
+import json, os, sys, time
+modo = os.environ.get("FAKE_MODO", "")
+open(os.environ["FAKE_REGISTRO"], "w").write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd(), "env": sorted(os.environ)}))
+if modo == "dorme":
+    time.sleep(30)
+if modo == "muda":
+    open("novo.txt", "w").write("conteudo\\n")
+texto = "x" * 20000 if modo == "longo" else "pronto"
+print(json.dumps({"type": "step_start"}))
+print(json.dumps({"type": "text", "part": {"type": "text", "text": texto}}))
+"""
+
+
+class AgataCodeBase(unittest.TestCase):
+    """Repo git de mentira com origin/main, pasta de arquivo temporária e opencode falso."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        base = Path(self.tmp.name)
+        self.repo, self.arquivo, self.reg = base / "repo", base / "arquivo", base / "registro.json"
+        self.repo.mkdir()
+        git = lambda *a: subprocess.run(["git", "-C", str(self.repo), *a], check=True, capture_output=True,
+                                        env={**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+                                             "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"})
+        git("init", "-q")
+        (self.repo / "a.txt").write_text("a\n")
+        git("add", "a.txt")
+        git("commit", "-q", "-m", "c")
+        git("update-ref", "refs/remotes/origin/main", "HEAD")
+        (self.repo / "a.txt").write_text("sujeira no repo vivo\n")  # não pode aparecer na worktree
+        self.bin = base / "opencode"
+        self.bin.write_text(FAKE_OPENCODE)
+        self.bin.chmod(self.bin.stat().st_mode | stat.S_IEXEC)
+        self.patches = [mock.patch.object(fs, "REPO_RAIZ", self.repo), mock.patch.object(fs, "ARQUIVO_CODE", self.arquivo),
+                        mock.patch.object(fs, "OPENCODE_BIN", self.bin),
+                        mock.patch.object(fs, "ENV_CODE_PERMITIDAS", fs.ENV_CODE_PERMITIDAS + ("FAKE_REGISTRO", "FAKE_MODO")),
+                        mock.patch.dict(os.environ, {"FAKE_REGISTRO": str(self.reg), "FAKE_MODO": "",
+                                                     "SEGREDO_DE_TESTE": "nao-pode-passar"})]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        subprocess.run(["git", "-C", str(self.repo), "worktree", "prune"], capture_output=True)
+        self.tmp.cleanup()
+
+    def registro(self):
+        return json.loads(self.reg.read_text())
+
+
+class AgataCodeOferecidoTests(unittest.TestCase):
+    def test_nao_e_oferecido_na_seth_public(self):
+        self.assertNotIn("tools", chat_stream.montar_pedido(MSG, "seth-public", ferramentas=ESQ_FALSOS))
+        livre = chat_stream.montar_pedido(MSG, "seth-livre", ferramentas=ESQ_FALSOS)
+        self.assertIn("agata_code", {t["function"]["name"] for t in livre["tools"]})
+        self.assertEqual(fs.ESQUEMA_AGATA_CODE["function"]["parameters"]["properties"]["tarefa"]["maxLength"], 4000)
+
+    def test_esta_na_lista_fixa_e_o_esquema_so_pede_tarefa(self):
+        self.assertIn("agata_code", fs.NOMES_PERMITIDOS)
+        self.assertEqual(list(fs.ESQUEMA_AGATA_CODE["function"]["parameters"]["properties"]), ["tarefa"])
+
+
+class AgataCodeDefinicaoTests(unittest.TestCase):
+    def test_agente_do_repositorio_nega_commit_push_sudo_rede_e_env_e_manda_ler_e_anotar_no_cache(self):
+        md = (HERE.parents[1] / ".opencode" / "agent" / "agata-code.md").read_text(encoding="utf-8")
+        cabeca = md.split("---")[1]
+        for negado in ('"git commit*": deny', '"git push*": deny', '"sudo*": deny', '"rm -rf*": deny',
+                       '"curl*": deny', '"wget*": deny', '"*": deny', '"*.env": deny', "webfetch: deny"):
+            self.assertIn(negado, cabeca)
+        self.assertIn("edit: allow", cabeca)
+        self.assertIn("model: agata/seth-livre", cabeca)
+        for texto in ("AGENTS.md", "cache_conselho.py ler --n 20", '--autor "Agata Code"', "Meça antes de afirmar", ".env"):
+            self.assertIn(texto, md)
+
+
+class AgataCodeExecucaoTests(AgataCodeBase):
+    def test_tarefa_vazia_ou_acima_de_4000_e_recusada_sem_criar_nada(self):
+        for args in ({}, {"tarefa": ""}, {"tarefa": "   "}, {"tarefa": 5}, {"tarefa": "x" * 4001}, "texto"):
+            r = fs.executar_agata_code(args)
+            self.assertFalse(r["ok"], args)
+            self.assertIn("tarefa", r["erro"])
+        self.assertFalse(self.arquivo.exists())
+        self.assertFalse(self.reg.exists())
+        self.assertTrue(fs.executar("agata_code", '{"tarefa":""}').startswith("erro:"))
+
+    def test_comando_com_agente_e_dir_na_worktree_nova_e_nunca_no_repo_vivo(self):
+        r = fs.executar_agata_code({"tarefa": "diga oi"})
+        reg = self.registro()
+        argv = reg["argv"]
+        self.assertEqual(argv[:5], ["run", "--agent", "agata-code", "--format", "json"])
+        wt = argv[argv.index("--dir") + 1]
+        self.assertEqual(argv[-2:], ["--", "diga oi"])
+        self.assertNotEqual(Path(wt).resolve(), self.repo.resolve())
+        self.assertTrue(Path(wt).resolve().is_relative_to(self.arquivo.resolve()))
+        self.assertEqual(Path(reg["cwd"]).resolve(), Path(wt).resolve())
+        self.assertTrue(r["ok"])
+        self.assertEqual(r["resposta"], "pronto")
+        self.assertEqual((self.repo / "a.txt").read_text(), "sujeira no repo vivo\n")  # o repo vivo não foi tocado
+
+    def test_worktree_parte_de_origin_main_e_ambiente_sem_segredo(self):
+        fs.executar_agata_code({"tarefa": "x"})
+        reg = self.registro()
+        wt = Path(reg["argv"][reg["argv"].index("--dir") + 1])
+        self.assertTrue(wt.exists() is False or (wt / "a.txt").read_text() == "a\n")  # removida sem diff; se ficou, é de origin/main
+        self.assertNotIn("SEGREDO_DE_TESTE", reg["env"])
+        self.assertEqual(fs._env_code().keys() - set(fs.ENV_CODE_PERMITIDAS), set())  # o filtro só deixa a lista fixa
+        self.assertNotIn("SEGREDO_DE_TESTE", fs._env_code())
+
+    def test_sem_mudanca_remove_a_worktree_e_guarda_a_transcricao(self):
+        r = fs.executar_agata_code({"tarefa": "só ler"})
+        self.assertIsNone(r["worktree"])
+        self.assertEqual(r["diff_stat"], "")
+        self.assertFalse(any(self.arquivo.glob("*/worktree")))
+        transcricao = Path(r["transcricao"])
+        self.assertTrue(transcricao.is_file())
+        self.assertIn('"type": "text"', transcricao.read_text())
+        self.assertIn("sem mudanças", fs.texto_agata_code(r))
+
+    def test_com_mudanca_guarda_a_worktree_e_devolve_diff_stat_resposta_e_caminhos(self):
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "muda"}):
+            r = fs.executar_agata_code({"tarefa": "crie um arquivo"})
+        self.assertTrue(r["ok"])
+        self.assertTrue(Path(r["worktree"], "novo.txt").is_file())
+        self.assertIn("novo.txt", r["diff_stat"])
+        texto = fs.texto_agata_code(r)
+        for parte in ("pronto", "novo.txt", r["worktree"], r["transcricao"]):
+            self.assertIn(parte, texto)
+
+    def test_timeout_respeitado_mata_o_agente(self):
+        t0 = time.monotonic()
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "dorme"}):
+            r = fs.executar_agata_code({"tarefa": "demora"}, timeout_s=1)
+        self.assertLess(time.monotonic() - t0, 10)
+        self.assertFalse(r["ok"])
+        self.assertIn("tempo esgotado", r["erro"])
+        self.assertIn("tempo esgotado", fs.texto_agata_code(r))
+        self.assertEqual(fs.TIMEOUT_AGATA_CODE_S, 600)
+
+    def test_resposta_longa_e_truncada(self):
+        with mock.patch.dict(os.environ, {"FAKE_MODO": "longo"}):
+            r = fs.executar_agata_code({"tarefa": "texto grande"})
+        self.assertLess(len(r["resposta"]), fs.MAX_RESPOSTA_CODE + 100)
+        self.assertIn("truncado", r["resposta"])
+
+    def test_executavel_ausente_vira_erro_em_texto_e_nao_deixa_worktree(self):
+        with mock.patch.object(fs, "OPENCODE_BIN", Path(self.tmp.name) / "nao-existe"):
+            r = fs.executar_agata_code({"tarefa": "x"})
+        self.assertFalse(r["ok"])
+        self.assertIn("não consegui iniciar", r["erro"])
+        self.assertFalse(any(self.arquivo.glob("*/worktree")))
+
+
+class AgataCodeLacoTests(unittest.TestCase):
+    def test_laco_emite_estado_periodico_e_o_evento_do_trabalho(self):
+        pedidos = []
+        def abrir(pedido):
+            pedidos.append(json.loads(json.dumps(pedido)))
+            return iter(sse_texto("feito"))
+        def lento(args, cancelar=None):
+            time.sleep(0.5)
+            return {"ok": True, "resposta": "r", "diff_stat": " a | 1 +", "worktree": "/w", "transcricao": "/t", "erro": None, "tempo_s": 0.5}
+        evs = list(fs.laco(abrir, iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
+                           executor_code=lento, intervalo_pulso=0.1))
+        pulsos = [e for e in evs if e["tipo"] == "estado" and e["texto"].startswith("Agata Code trabalhando…")]
+        self.assertGreaterEqual(len(pulsos), 3)
+        trabalho = [e for e in evs if e["tipo"] == "agata_code"]
+        self.assertEqual(len(trabalho), 1)
+        self.assertEqual((trabalho[0]["resposta"], trabalho[0]["diff_stat"], trabalho[0]["transcricao"]), ("r", " a | 1 +", "/t"))
+        self.assertIn("/w", pedidos[0]["messages"][-1]["content"])
+        self.assertEqual(evs[-1], {"tipo": "fim"})
+
+    def test_fechar_o_gerador_cancela_o_agente(self):
+        visto = {}
+        def preso(args, cancelar=None):
+            visto["cancelar"] = cancelar
+            cancelar.wait(5)
+            return {}
+        g = fs.laco(lambda p: iter(sse_texto("x")), iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
+                    executor_code=preso, intervalo_pulso=0.05)
+        for ev in g:
+            if ev["texto"].startswith("Agata Code trabalhando…") and "(" in ev["texto"]:
+                break
+        g.close()
+        self.assertTrue(visto["cancelar"].wait(2))
+
+    def test_argumentos_invalidos_chegam_como_tarefa_recusada(self):
+        pedidos = []
+        def abrir(pedido):
+            pedidos.append(pedido)
+            return iter(sse_texto("ok"))
+        list(fs.laco(abrir, iter(sse_chamada("agata_code", "{isso não")), {"messages": list(MSG)}))
+        self.assertIn("tarefa", pedidos[0]["messages"][-1]["content"])
+
+
+class AgataCodeTelaTests(unittest.TestCase):
+    def test_bloco_trabalho_do_agata_code_fechado_por_padrao_so_textcontent_e_sem_script_inline(self):
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        inicio = js.index("function sethBlocoAgataCode")
+        corpo = js[inicio:js.index("function sethMostrarAgataCode")]
+        self.assertIn("Trabalho do Agata Code", corpo)
+        self.assertIn('createElement("details")', corpo)
+        self.assertNotIn(".open = true", corpo)
+        self.assertNotIn("innerHTML", corpo)
+        self.assertIn('evento.tipo === "agata_code"', js)
+        self.assertIn(".seth-agata-code", (HERE / "prototipo.css").read_text(encoding="utf-8"))
 
 
 class GatewayRoteiroHandler(BaseHTTPRequestHandler):
