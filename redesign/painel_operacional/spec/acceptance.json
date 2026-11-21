@@ -2935,5 +2935,14 @@
       "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeDefinicaoTests"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o resultado do Agata Code diz se houve prova: sem nenhum evento `tool_use` na transcrição o texto devolvido à Seth abre com \"NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova.\"; com ferramentas abre com \"verificado por: glob×1\" (nome e contagem); timeout ou transcrição sem texto abre com \"sem resposta do Agata Code (timeout)\"; o bloco da tela mostra o mesmo aviso; o filho roda com stdin em /dev/null (stdin aberto trava o `opencode run` antes de chegar ao gateway)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeVerificacaoTests"
+    ],
+    "cwd": null
   }
 ]

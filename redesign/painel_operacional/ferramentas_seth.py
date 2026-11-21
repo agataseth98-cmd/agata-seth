@@ -188,6 +188,41 @@ def _texto_final(transcricao: Path) -> str:
     return "\n\n".join(partes)
 
 
+AVISO_NAO_VERIFICADO = ("NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; "
+                        "trate a resposta como opinião sem prova.")
+AVISO_SEM_RESPOSTA = "sem resposta do Agata Code (timeout)"
+
+
+def _ferramentas_usadas(transcricao: Path) -> dict:
+    """Conta os eventos {"type":"tool_use"} da transcrição, por nome da ferramenta (`part.tool`). Ferramenta sem nome vira "?"."""
+    contagem: dict = {}
+    try:
+        for linha in transcricao.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                ev = json.loads(linha)
+            except ValueError:
+                continue
+            if isinstance(ev, dict) and ev.get("type") == "tool_use":
+                nome = (ev.get("part") or {}).get("tool")
+                nome = nome if isinstance(nome, str) and nome.strip() else "?"
+                contagem[nome] = contagem.get(nome, 0) + 1
+    except OSError:
+        pass
+    return contagem
+
+
+def _aviso_verificacao(res: dict) -> str:
+    """Selo de prova do resultado: "verificado por: glob×1", o aviso de NÃO VERIFICADO ou o de sem resposta (timeout)."""
+    if not res.get("transcricao"):  # recusa de argumentos ou falha antes de rodar: o agente nem rodou
+        return ""
+    if not res.get("resposta"):
+        return AVISO_SEM_RESPOSTA if res.get("erro") else ""
+    usadas = res.get("ferramentas") or {}
+    if not usadas:
+        return AVISO_NAO_VERIFICADO
+    return "verificado por: " + ", ".join(f"{n}×{q}" for n, q in sorted(usadas.items()))
+
+
 def _rodar_opencode(cmd: list, pasta: Path, transcricao: Path, timeout_s: float, cancelar) -> str | None:
     """Roda o agente com a saída (eventos json) direto no arquivo. Devolve None se terminou, ou o motivo (tempo/cancelado)."""
     with open(transcricao, "wb") as saida:
@@ -215,7 +250,8 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) -> 
     """Roda o Agata Code numa worktree nova de origin/main, em ARQUIVO_CODE/<data-hora>/. Devolve um dict:
     {ok, resposta, diff_stat, worktree (None se removida), transcricao, erro, tempo_s}. Nunca levanta."""
     t0 = time.monotonic()
-    res = {"ok": False, "resposta": "", "diff_stat": "", "worktree": None, "transcricao": None, "erro": None, "tempo_s": 0.0}
+    res = {"ok": False, "resposta": "", "diff_stat": "", "worktree": None, "transcricao": None, "erro": None, "tempo_s": 0.0,
+           "ferramentas": {}, "aviso": ""}
     tarefa = args.get("tarefa") if isinstance(args, dict) else None
     if not isinstance(tarefa, str) or not tarefa.strip():
         res["erro"] = f"tarefa obrigatória, texto de até {MAX_TAREFA_CODE} caracteres"
@@ -243,6 +279,7 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) -> 
         except OSError:
             motivo = "não consegui iniciar o opencode"
         res["resposta"] = truncar(_texto_final(transcricao), MAX_RESPOSTA_CODE)
+        res["ferramentas"] = _ferramentas_usadas(transcricao)
         excluir = f":(exclude){AGENTE_CODE_ARQUIVO.as_posix()}"
         _git(worktree, "add", "-A", "-N", "--", ".", excluir)
         stat = _git(worktree, "diff", "--stat", "--", ".", excluir).stdout.strip()
@@ -261,12 +298,16 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) -> 
         res["erro"] = f"falha ao rodar o Agata Code ({type(erro).__name__})"
     finally:
         res["tempo_s"] = round(time.monotonic() - t0, 1)
+        res["aviso"] = _aviso_verificacao(res)
     return res
 
 
 def texto_agata_code(res: dict) -> str:
     """O que volta para a Seth (e para o gateway): resposta, diff --stat e caminhos."""
     linhas = []
+    aviso = res.get("aviso") or _aviso_verificacao(res)
+    if aviso:
+        linhas.append(aviso)  # o selo de prova abre o texto: a Seth lê antes de repetir a resposta
     if res.get("erro"):
         linhas.append("erro: " + str(res["erro"]))
     if res.get("resposta"):
@@ -386,7 +427,8 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
                 res = yield from _com_pulso(lambda: fn(args, cancelar=cancelar), cancelar, intervalo_pulso)
                 yield {"tipo": "agata_code", "resposta": res.get("resposta") or "", "diff_stat": res.get("diff_stat") or "",
                        "transcricao": res.get("transcricao") or "", "worktree": res.get("worktree") or "",
-                       "erro": res.get("erro") or "", "tempo_s": res.get("tempo_s") or 0}
+                       "erro": res.get("erro") or "", "tempo_s": res.get("tempo_s") or 0,
+                       "aviso": res.get("aviso") or _aviso_verificacao(res)}
                 conteudo = texto_agata_code(res)
             else:
                 conteudo = executor(nome, c["argumentos"])
