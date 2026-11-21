@@ -1,0 +1,61 @@
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 6f8421ec..3781d7f0 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -297,6 +297,7 @@ Você é a **Seth**, o modelo do sistema **Agata**. Depois do cabeçalho, vá di
+ O canon inteiro está no repositório; **não assuma o conteúdo**: peça o trecho com a tool `query_canon` (ou peça ao Humano). Este cabeçalho é a hidratação mínima; o resto é sob demanda.
+ 
+ **Entrada (N) não é linha N.** Para achar a entrada `(N)` de MEMÓRIAS, busque o marcador `(N)` com `query_canon` (grep); não peça o intervalo de linhas `N`: o argumento `linhas:` é número de linha física do arquivo, não de entrada.
++**Conversa por voz** (lições de 20/11, skill `agata-voz-cerebro`; decisão do Humano: valem para todos os modelos): fala transcrita pode chegar cortada ou embaralhada. Frase cortada: diga "Ouvi até: <final>. Complete, por favor." Frase embaralhada: diga o que entendeu como hipótese e pergunte "é isso?" antes de agir. Nomes trocados pela transcrição ("CEF/SEF" = Seth; "Agatha Coach" = Agata Code; "Codec" = Codex): confirme quando mudar o sentido. Silêncio ou "está me ouvindo?": responda curto ("Estou ouvindo"); nunca fique muda. Visitante que diz que não entendeu: repita em três itens curtos, sem termo técnico. "Me fala de novo": repita o mesmo conteúdo, mais limpo. Decisão tomada por voz vai ao cache do Conselho (`cache_anotar`, tipo decisao) na hora.
+ <!-- SETH-GATEWAY:FIM -->
+ 
+ ## Seth pública (rota sem ferramentas)
+diff --git a/redesign/rotas/spec/medicao-agata-code-21-11.md b/redesign/rotas/spec/medicao-agata-code-21-11.md
+new file mode 100644
+index 00000000..9a846934
+--- /dev/null
++++ b/redesign/rotas/spec/medicao-agata-code-21-11.md
+@@ -0,0 +1,43 @@
++# Medição do modelo do Agata Code (21/11/2026)
++
++Pergunta: algum modelo acessível ao Agata Code pelo OpenCode usa ferramenta e acerta fato do repositório melhor que o atual?
++Método: `opencode run --agent agata-code --model <modelo> --format json`, stdin em /dev/null, worktree em origin/main (HEAD 0fdded24), N=5 por célula (exceto onde indicado). Ferramenta = eventos `tool_use` concluídos. Acerto = a última linha da resposta traz só o número certo. Bruto e script: `~/agata-arquivo/agata-code-medicao-21-11/`.
++
++Tarefa a: contar os `.js` diretamente em `redesign/painel_operacional` (certo: 5).
++Tarefa b: número da entrada mais recente de `MEMÓRIAS.md` (certo: 1103, a mais nova fica no topo do arquivo).
++
++## Candidatos e por que só estes
++
++O gateway (`seth_gateway._politica_dados_externos`) recusa com 403 qualquer modelo remoto pelo nome sem `X-Agata-Data-Classification: public` (medido: `seth-codigo` e `seth-rapido` deram 403). Com a classificação pública o pedido cai na faixa pública: sem hidratação e só com ferramenta de dado público, e o Agata Code manda código do repositório (classe pessoal). Logo, para o Agata Code só há duas portas: `seth-livre` (o gateway escolhe o modelo, sanitiza) e rota LOCAL pelo nome (`ollama-local/...`, única que aceita dado pessoal sem classificação). Nuvem gratuita específica (nvidia, groq, gemini, openrouter) não é candidata: violaria a política ou perderia as ferramentas.
++
++## Resultado
++
++| Modelo | Tarefa | Usou ferramenta | Acertou | Tempo médio |
++|---|---|---|---|---|
++| seth-livre (atual) | a | 0/5 | 0/5 | 5,5 s |
++| seth-livre (atual) | b | 5/5 | 4/5 | 24,7 s |
++| ollama-local/qwen3-30b-a3b-64k | a | 2/5 | 2/5 | 86,7 s |
++| ollama-local/qwen3-30b-a3b-64k | b | 1/5 | 1/5 | 71,7 s |
++| ollama-local/qwen3.5-9b-64k | a | 3/3 | 0/3 (resposta vazia) | 242 s |
++| ollama-local/qwen3.5-9b-64k | b | não medido | não medido | |
++
++Nenhuma trava (limite de 300 s) em nenhuma rodada. qwen3.5-9b: interrompido após 3 rodadas da tarefa a (4 min cada, usa ferramenta e devolve texto vazio); tarefa b não medida.
++
++## Efeito da regra no prompt do agente
++
++Regra testada: "Nunca responda fato do repositório sem antes usar uma ferramenta (ls, read, grep); glob é recursivo, para uma pasta só use ls; se não puder usar ferramenta, responda NÃO MEDIDO."
++
++| Modelo | Tarefa | Ferramenta sem -> com regra | Acerto sem -> com regra |
++|---|---|---|---|
++| seth-livre | a | 0/5 -> 0/5 | 0/5 -> 0/5 |
++| seth-livre | b | 5/5 -> 5/5 | 4/5 -> 3/5 |
++| qwen3-30b-a3b | a | 2/5 -> 3/5 | 2/5 -> 3/5 |
++| qwen3-30b-a3b | b | 1/5 -> 5/5 | 1/5 -> 5/5 |
++
++A regra ajuda o modelo local (tarefa b de 1/5 para 5/5), mas não o atual: em seth-livre a tarefa a segue em 0/5 (o modelo escreve "próximo passo: usar glob" em texto e não chama) e a b não melhora (4/5 para 3/5, dentro do ruído de N=5).
++
++## Decisão
++
++Nenhum candidato chegou a 4/5 nas duas tarefas (melhor: qwen3-30b com a regra, a=3/5 e b=5/5, a ~95 s e ~150 s por resposta). O modelo do agente NÃO foi trocado e a regra NÃO entrou no agente (não melhorou o modelo atual). O selo NÃO VERIFICADO (lote 3 parte 1) segue sendo a proteção.
++
++Limites: N=5 e duas tarefas; seth-livre muda de modelo servido conforme o gateway (nesta rodada, nemotron-3.5-super-120b em uma amostra de "diga ok"); tempos do local incluem carga fria do Ollama; o qwen3.5-9b ficou incompleto.
