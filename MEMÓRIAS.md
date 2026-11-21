@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7a446d32088a92c00e9b09d0a181d7408392c742
-  Escrito em: 21/11/2026 15:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f07a5f08b858fa1b97f5f33b57eb75b5215734a3
+  Escrito em: 21/11/2026 16:43 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a446d32088a92c00e9b09d0a181d7408392c742/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a446d32088a92c00e9b09d0a181d7408392c742/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a446d32088a92c00e9b09d0a181d7408392c742/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a446d32088a92c00e9b09d0a181d7408392c742/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7a446d32088a92c00e9b09d0a181d7408392c742/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f07a5f08b858fa1b97f5f33b57eb75b5215734a3/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f07a5f08b858fa1b97f5f33b57eb75b5215734a3/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f07a5f08b858fa1b97f5f33b57eb75b5215734a3/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f07a5f08b858fa1b97f5f33b57eb75b5215734a3/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f07a5f08b858fa1b97f5f33b57eb75b5215734a3/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1108) DIÁRIO — 21/11/2026 · **Proposta seth-web-21-11: a Seth no painel lê a web (buscar_web e ler_pagina, só leitura, selo de dado externo) e a busca do navegador-mcp passa ao RSS do Bing.** Achado: o buscar_web devolvia vazio para todo cliente (página do Bing sem resultado no Brave automatizado). Revisão independente pediu e o lote traz: erro e página trocada viram erro, cache_anotar recusado após web, host longo bloqueado. Também 21/11, 15:16–15:33: uma cópia de teste do gateway na porta do sanitizador deixou a Seth fora do ar; restaurada; a doutrina de agente de código para o Agata Code foi medida e descartada (piorou a tarefa b de 5/5 para 2/5; cache 702). Assinatura pendente: bash scripts/aprovar.sh seth-web-21-11
+
 (1107) DIÁRIO — 21/11/2026 · **Aplicada agata-code-e-seth-21-11 (assinada pelo Humano).** Entram a medição dos modelos do Agata Code (redesign/rotas/spec/medicao-agata-code-21-11.md: nenhum candidato chegou a 4/5 nas duas tarefas; modelo e regra não mudam) e o parágrafo "Conversa por voz" no bloco da Seth em PROTOCOLOS.md. Próximo lote: o gateway reconhecer o Agata Code e mandar instruções de agente de código (cache 701).
 
 (1106) DIÁRIO — 21/11/2026 · **Proposta agata-code-e-seth-21-11 (lote único da manhã): medição do modelo do Agata Code (nenhum candidato ≥4/5; modelo não muda) e lições de voz nas instruções da Seth.** Ordem do Humano: uma assinatura ao final. Hipótese registrada: a doutrina da Seth no seth-livre atrapalha o Agata Code. Sonnet mediu, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-e-seth-21-11.
