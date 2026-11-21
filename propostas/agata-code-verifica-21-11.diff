@@ -1,0 +1,226 @@
+diff --git a/redesign/painel_operacional/ferramentas_seth.py b/redesign/painel_operacional/ferramentas_seth.py
+index 892bfde8..d6617f2b 100644
+--- a/redesign/painel_operacional/ferramentas_seth.py
++++ b/redesign/painel_operacional/ferramentas_seth.py
+@@ -188,6 +188,41 @@ def _texto_final(transcricao: Path) -> str:
+     return "\n\n".join(partes)
+ 
+ 
++AVISO_NAO_VERIFICADO = ("NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; "
++                        "trate a resposta como opinião sem prova.")
++AVISO_SEM_RESPOSTA = "sem resposta do Agata Code (timeout)"
++
++
++def _ferramentas_usadas(transcricao: Path) -> dict:
++    """Conta os eventos {"type":"tool_use"} da transcrição, por nome da ferramenta (`part.tool`). Ferramenta sem nome vira "?"."""
++    contagem: dict = {}
++    try:
++        for linha in transcricao.read_text(encoding="utf-8", errors="replace").splitlines():
++            try:
++                ev = json.loads(linha)
++            except ValueError:
++                continue
++            if isinstance(ev, dict) and ev.get("type") == "tool_use":
++                nome = (ev.get("part") or {}).get("tool")
++                nome = nome if isinstance(nome, str) and nome.strip() else "?"
++                contagem[nome] = contagem.get(nome, 0) + 1
++    except OSError:
++        pass
++    return contagem
++
++
++def _aviso_verificacao(res: dict) -> str:
++    """Selo de prova do resultado: "verificado por: glob×1", o aviso de NÃO VERIFICADO ou o de sem resposta (timeout)."""
++    if not res.get("transcricao"):  # recusa de argumentos ou falha antes de rodar: o agente nem rodou
++        return ""
++    if not res.get("resposta"):
++        return AVISO_SEM_RESPOSTA if res.get("erro") else ""
++    usadas = res.get("ferramentas") or {}
++    if not usadas:
++        return AVISO_NAO_VERIFICADO
++    return "verificado por: " + ", ".join(f"{n}×{q}" for n, q in sorted(usadas.items()))
++
++
+ def _rodar_opencode(cmd: list, pasta: Path, transcricao: Path, timeout_s: float, cancelar) -> str | None:
+     """Roda o agente com a saída (eventos json) direto no arquivo. Devolve None se terminou, ou o motivo (tempo/cancelado)."""
+     with open(transcricao, "wb") as saida:
+@@ -215,7 +250,8 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) ->
+     """Roda o Agata Code numa worktree nova de origin/main, em ARQUIVO_CODE/<data-hora>/. Devolve um dict:
+     {ok, resposta, diff_stat, worktree (None se removida), transcricao, erro, tempo_s}. Nunca levanta."""
+     t0 = time.monotonic()
+-    res = {"ok": False, "resposta": "", "diff_stat": "", "worktree": None, "transcricao": None, "erro": None, "tempo_s": 0.0}
++    res = {"ok": False, "resposta": "", "diff_stat": "", "worktree": None, "transcricao": None, "erro": None, "tempo_s": 0.0,
++           "ferramentas": {}, "aviso": ""}
+     tarefa = args.get("tarefa") if isinstance(args, dict) else None
+     if not isinstance(tarefa, str) or not tarefa.strip():
+         res["erro"] = f"tarefa obrigatória, texto de até {MAX_TAREFA_CODE} caracteres"
+@@ -243,6 +279,7 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) ->
+         except OSError:
+             motivo = "não consegui iniciar o opencode"
+         res["resposta"] = truncar(_texto_final(transcricao), MAX_RESPOSTA_CODE)
++        res["ferramentas"] = _ferramentas_usadas(transcricao)
+         excluir = f":(exclude){AGENTE_CODE_ARQUIVO.as_posix()}"
+         _git(worktree, "add", "-A", "-N", "--", ".", excluir)
+         stat = _git(worktree, "diff", "--stat", "--", ".", excluir).stdout.strip()
+@@ -261,12 +298,16 @@ def executar_agata_code(args, timeout_s: float | None = None, cancelar=None) ->
+         res["erro"] = f"falha ao rodar o Agata Code ({type(erro).__name__})"
+     finally:
+         res["tempo_s"] = round(time.monotonic() - t0, 1)
++        res["aviso"] = _aviso_verificacao(res)
+     return res
+ 
+ 
+ def texto_agata_code(res: dict) -> str:
+     """O que volta para a Seth (e para o gateway): resposta, diff --stat e caminhos."""
+     linhas = []
++    aviso = res.get("aviso") or _aviso_verificacao(res)
++    if aviso:
++        linhas.append(aviso)  # o selo de prova abre o texto: a Seth lê antes de repetir a resposta
+     if res.get("erro"):
+         linhas.append("erro: " + str(res["erro"]))
+     if res.get("resposta"):
+@@ -386,7 +427,8 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
+                 res = yield from _com_pulso(lambda: fn(args, cancelar=cancelar), cancelar, intervalo_pulso)
+                 yield {"tipo": "agata_code", "resposta": res.get("resposta") or "", "diff_stat": res.get("diff_stat") or "",
+                        "transcricao": res.get("transcricao") or "", "worktree": res.get("worktree") or "",
+-                       "erro": res.get("erro") or "", "tempo_s": res.get("tempo_s") or 0}
++                       "erro": res.get("erro") or "", "tempo_s": res.get("tempo_s") or 0,
++                       "aviso": res.get("aviso") or _aviso_verificacao(res)}
+                 conteudo = texto_agata_code(res)
+             else:
+                 conteudo = executor(nome, c["argumentos"])
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 3b5da861..07bc5797 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -2530,6 +2530,7 @@ function sethBlocoAgataCode(dados) {
+     const valor = document.createElement(pre ? "pre" : "p"); valor.className = "seth-agata-code-texto"; valor.textContent = String(texto);
+     corpo.append(titulo, valor);
+   };
++  campo("Verificação", dados.aviso, false);
+   campo("Resposta", dados.resposta, true);
+   campo("Mudanças (git diff --stat)", dados.diff_stat || "sem mudanças", true);
+   campo("Erro", dados.erro, false);
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 6c1f8e4c..54cc0864 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -2935,5 +2935,14 @@
+       "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeDefinicaoTests"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "o resultado do Agata Code diz se houve prova: sem nenhum evento `tool_use` na transcrição o texto devolvido à Seth abre com \"NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova.\"; com ferramentas abre com \"verificado por: glob×1\" (nome e contagem); timeout ou transcrição sem texto abre com \"sem resposta do Agata Code (timeout)\"; o bloco da tela mostra o mesmo aviso; o filho roda com stdin em /dev/null (stdin aberto trava o `opencode run` antes de chegar ao gateway)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::AgataCodeVerificacaoTests"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 6e92b589..1394a1e4 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -674,6 +674,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] durante o trabalho o laço emite estado "Agata Code trabalhando…" a cada 10 s e um evento `agata_code` com o resultado; fechar o stream cancela o agente
+ - [ ] a tela mostra o bloco recolhido "Trabalho do Agata Code" (fechado por padrão, só `textContent`, estilo em arquivo externo) com resposta, diff e caminho da transcrição
+ - [ ] o agente `.opencode/agent/agata-code.md` manda seguir o AGENTS.md, ler e anotar no cache do Conselho, e nega git commit/push, sudo, rm -rf, curl, wget, leitura de .env e rede da web
++- [ ] o resultado do Agata Code diz se houve prova: sem nenhum evento `tool_use` na transcrição o texto devolvido à Seth abre com "NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova."; com ferramentas abre com "verificado por: glob×1" (nome e contagem); timeout ou transcrição sem texto abre com "sem resposta do Agata Code (timeout)"; o bloco da tela mostra o mesmo aviso; o filho roda com stdin em /dev/null (stdin aberto trava o `opencode run` antes de chegar ao gateway)
+ 
+ ## Desenho e alternativas
+ 
+@@ -751,7 +752,7 @@ Ferramentas da Seth no painel (20/11/2026, decisão do Humano): só no modelo `s
+ - Lote 4, atalhos: o navegador pode reservar algum atalho (por exemplo, Ctrl+Shift+C em alguns navegadores). Medido só em teste de DOM e em Chromium headless, sem janela de navegador.
+ - Lote 4, tema claro: a paleta clara é gerada por inversão de luminosidade das cores escuras (pares `--luz-*` no `:root`; a geração foi feita por um script local, fora do repositório). Não há medição de contraste por ferramenta; as capturas mostram o estado, não aprovam.
+ 
+-Agata Code na conversa (lote 2, 20/11/2026, decisão do Humano por voz): "Agata Code" é o agente de código do Agata, o `opencode` 1.19.5 com o agente de projeto `.opencode/agent/agata-code.md` (formato: markdown com frontmatter `description`, `mode`, `model: agata/seth-livre`, `permission` com `edit`, `read` e `bash` por padrão; conferido com `opencode agent list`). Mesmas regras e portões do AGENTS.md: o prompt manda ler o cache do Conselho ao começar e anotar com `--autor "Agata Code"` ao fechar; a permissão de bash é negar por padrão e liberar só leitura (git status/diff/log/show, ls, grep, rg, find, wc, head, tail), pytest/unittest e `cache_conselho.py`; nega `git commit`, `git push`, `sudo`, `rm -rf`, `curl`, `wget`, web e leitura de `.env`. A Seth chama o Agata Code de dentro da conversa pela ferramenta `agata_code` (só no seth-livre, `{tarefa}` até 4000 caracteres), num sentido só: o agente não chama a Seth. `executar_agata_code` cria uma worktree descartável detached de `origin/main` (ref local, sem `fetch`) em `~/agata-arquivo/agata-code/<data-hora>-<id>/worktree`, copia para ela a definição do agente do checkout servido (a worktree vem de `origin/main`, que só tem o arquivo depois do merge) e roda `opencode run --agent agata-code --format json --dir <worktree> -- "<tarefa>"` com timeout de 600 s e ambiente restrito (PATH, HOME, USER, LOGNAME, LANG, LC_ALL, TERM, SHELL). A saída json vai direto a `transcricao.jsonl`, ao lado da worktree. Devolve à Seth a resposta (truncada em 6000), o `git diff --stat` (a definição do agente fica fora) e os caminhos; sem mudança, a worktree é removida com `git worktree remove` e a transcrição fica. Regra 0: o laço roda a ferramenta numa thread e emite `{"tipo":"estado"}` "Agata Code trabalhando… (N s)" a cada 10 s, e um evento `{"tipo":"agata_code"}` com o resultado; se o navegador sair, o agente é morto. A tela mostra o bloco recolhido "Trabalho do Agata Code" (fechado por padrão, `textContent`, estilo em `prototipo.css`); o bloco vale para a tela em curso e não entra na conversa salva. Durante a ferramenta a trava de uma conversa por vez continua ocupada (até 600 s). Os testes usam executável falso, nunca o `opencode` real: `test_ferramentas_seth.py` (`AgataCode*`).
++Agata Code na conversa (lote 2, 20/11/2026, decisão do Humano por voz): "Agata Code" é o agente de código do Agata, o `opencode` 1.19.5 com o agente de projeto `.opencode/agent/agata-code.md` (formato: markdown com frontmatter `description`, `mode`, `model: agata/seth-livre`, `permission` com `edit`, `read` e `bash` por padrão; conferido com `opencode agent list`). Mesmas regras e portões do AGENTS.md: o prompt manda ler o cache do Conselho ao começar e anotar com `--autor "Agata Code"` ao fechar; a permissão de bash é negar por padrão e liberar só leitura (git status/diff/log/show, ls, grep, rg, find, wc, head, tail), pytest/unittest e `cache_conselho.py`; nega `git commit`, `git push`, `sudo`, `rm -rf`, `curl`, `wget`, web e leitura de `.env`. A Seth chama o Agata Code de dentro da conversa pela ferramenta `agata_code` (só no seth-livre, `{tarefa}` até 4000 caracteres), num sentido só: o agente não chama a Seth. `executar_agata_code` cria uma worktree descartável detached de `origin/main` (ref local, sem `fetch`) em `~/agata-arquivo/agata-code/<data-hora>-<id>/worktree`, copia para ela a definição do agente do checkout servido (a worktree vem de `origin/main`, que só tem o arquivo depois do merge) e roda `opencode run --agent agata-code --format json --dir <worktree> -- "<tarefa>"` com timeout de 600 s e ambiente restrito (PATH, HOME, USER, LOGNAME, LANG, LC_ALL, TERM, SHELL). A saída json vai direto a `transcricao.jsonl`, ao lado da worktree. Devolve à Seth a resposta (truncada em 6000), o `git diff --stat` (a definição do agente fica fora) e os caminhos; sem mudança, a worktree é removida com `git worktree remove` e a transcrição fica. Regra 0: o laço roda a ferramenta numa thread e emite `{"tipo":"estado"}` "Agata Code trabalhando… (N s)" a cada 10 s, e um evento `{"tipo":"agata_code"}` com o resultado; se o navegador sair, o agente é morto. A tela mostra o bloco recolhido "Trabalho do Agata Code" (fechado por padrão, `textContent`, estilo em `prototipo.css`); o bloco vale para a tela em curso e não entra na conversa salva. Durante a ferramenta a trava de uma conversa por vez continua ocupada (até 600 s). Verificação do resultado (21/11/2026, medida: 6 de 6 rodadas com stdin aberto travaram sem POST no gateway; com stdin em /dev/null nenhuma travou em 30 rodadas, mas o modelo chamou a ferramenta em cerca de um terço das rodadas e inventou o resto): `executar_agata_code` conta os eventos `tool_use` da transcrição (`_ferramentas_usadas`), grava `ferramentas` e `aviso` no resultado, e `texto_agata_code` abre com o aviso (NÃO VERIFICADO, `verificado por: glob×1` ou `sem resposta do Agata Code (timeout)`); o evento `agata_code` leva o `aviso` e o bloco da tela o mostra em "Verificação". Os testes usam executável falso, nunca o `opencode` real: `test_ferramentas_seth.py` (`AgataCode*`).
+ 
+ ## Código
+ 
+diff --git a/redesign/painel_operacional/test_ferramentas_seth.py b/redesign/painel_operacional/test_ferramentas_seth.py
+index 924ef2e5..629dc4f4 100644
+--- a/redesign/painel_operacional/test_ferramentas_seth.py
++++ b/redesign/painel_operacional/test_ferramentas_seth.py
+@@ -154,6 +154,13 @@ modo = os.environ.get("FAKE_MODO", "")
+ open(os.environ["FAKE_REGISTRO"], "w").write(json.dumps({"argv": sys.argv[1:], "cwd": os.getcwd(), "env": sorted(os.environ)}))
+ if modo == "dorme":
+     time.sleep(30)
++if modo == "stdin":
++    open(os.environ["FAKE_REGISTRO"] + ".stdin", "w").write(os.readlink("/proc/self/fd/0"))
++if modo == "vazio":
++    sys.exit(0)
++if modo == "ferramentas":
++    for nome in ("glob", "glob", "read"):
++        print(json.dumps({"type": "tool_use", "part": {"type": "tool", "tool": nome, "state": {"status": "completed"}}}))
+ if modo == "muda":
+     open("novo.txt", "w").write("conteudo\\n")
+ texto = "x" * 20000 if modo == "longo" else "pronto"
+@@ -302,6 +309,64 @@ class AgataCodeExecucaoTests(AgataCodeBase):
+         self.assertFalse(any(self.arquivo.glob("*/worktree")))
+ 
+ 
++class AgataCodeVerificacaoTests(AgataCodeBase):
++    """21/11: o resultado diz se houve prova (tool_use na transcrição) ou se é opinião."""
++
++    def test_sem_ferramenta_abre_com_nao_verificado(self):
++        r = fs.executar_agata_code({"tarefa": "conte"})
++        self.assertEqual(r["ferramentas"], {})
++        self.assertEqual(r["aviso"], fs.AVISO_NAO_VERIFICADO)
++        self.assertTrue(fs.texto_agata_code(r).startswith(
++            "NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova."))
++        self.assertTrue(r["ok"])
++
++    def test_com_ferramenta_lista_quais_e_quantas(self):
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "ferramentas"}):
++            r = fs.executar_agata_code({"tarefa": "conte"})
++        self.assertEqual(r["ferramentas"], {"glob": 2, "read": 1})
++        self.assertEqual(r["aviso"], "verificado por: glob×2, read×1")
++        texto = fs.texto_agata_code(r)
++        self.assertTrue(texto.startswith("verificado por: glob×2, read×1"))
++        self.assertNotIn("NÃO VERIFICADO", texto)
++
++    def test_transcricao_vazia_diz_sem_resposta_e_nunca_texto_vazio(self):
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "vazio"}):
++            r = fs.executar_agata_code({"tarefa": "x"})
++        self.assertFalse(r["ok"])
++        texto = fs.texto_agata_code(r)
++        self.assertTrue(texto.startswith("sem resposta do Agata Code (timeout)"))
++        self.assertNotIn("NÃO VERIFICADO", texto)
++
++    def test_timeout_diz_sem_resposta(self):
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "dorme"}):
++            r = fs.executar_agata_code({"tarefa": "x"}, timeout_s=1)
++        self.assertTrue(fs.texto_agata_code(r).startswith("sem resposta do Agata Code (timeout)"))
++        self.assertIn("tempo esgotado", fs.texto_agata_code(r))
++
++    def test_contagem_ignora_linha_ruim_e_tool_use_sem_nome(self):
++        arq = Path(self.tmp.name) / "t.jsonl"
++        arq.write_text('lixo\n{"type":"tool_use","part":{}}\n{"type":"tool_use","part":{"tool":"grep"}}\n{"type":"text"}\n')
++        self.assertEqual(fs._ferramentas_usadas(arq), {"?": 1, "grep": 1})
++        self.assertEqual(fs._ferramentas_usadas(Path(self.tmp.name) / "nao-existe"), {})
++
++    def test_filho_roda_sem_stdin_aberto(self):
++        """Causa da trava medida em 21/11: `opencode run` com stdin aberto e sem EOF não chama o gateway. Tem de ser /dev/null."""
++        with mock.patch.dict(os.environ, {"FAKE_MODO": "stdin"}):
++            fs.executar_agata_code({"tarefa": "x"})
++        self.assertEqual(Path(str(self.reg) + ".stdin").read_text(), "/dev/null")
++
++    def test_laco_repassa_o_aviso_para_a_tela_e_para_a_seth(self):
++        pedidos = []
++        def abrir(pedido):
++            pedidos.append(json.loads(json.dumps(pedido)))
++            return iter(sse_texto("feito"))
++        sem_prova = lambda args, cancelar=None: {"ok": True, "resposta": "r", "ferramentas": {}, "transcricao": "/t", "tempo_s": 1}
++        evs = list(fs.laco(abrir, iter(sse_chamada("agata_code", '{"tarefa":"x"}')), {"messages": list(MSG)},
++                           executor_code=sem_prova, intervalo_pulso=5))
++        self.assertEqual([e for e in evs if e["tipo"] == "agata_code"][0]["aviso"], fs.AVISO_NAO_VERIFICADO)
++        self.assertTrue(pedidos[0]["messages"][-1]["content"].startswith("NÃO VERIFICADO"))
++
++
+ class AgataCodeLacoTests(unittest.TestCase):
+     def test_laco_emite_estado_periodico_e_o_evento_do_trabalho(self):
+         pedidos = []
