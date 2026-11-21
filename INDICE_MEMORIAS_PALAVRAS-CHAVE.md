@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
+  palavras-chave: aplicada, dinamica, voz, dinâmica, passos, skill, agata, cerebro, assinada, humano
 (1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
   palavras-chave: aplicada, agata, code, nasce, seth, painel, passa, chamá, assinada, humano, prova, tarefa, leitura, após, reiniciar, operacional
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, placar, modelos, único, modelo, tipo, pedido, nota, tempo, custo, confiança, estado, painel, princípio, humano, tem, chance, bom, muda, gateway, sonnet, orquestrado, opus, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
 (1072) DIÁRIO — 19/11/2026 · **Proposta rotas-nuvem-19-11: nemotron-3.5-super-vl (conversa) e nemotron-3.5-bolt (código e json), gratuitos da NVIDIA, entram na rota da Seth só para pedidos públicos, com prazo absoluto de 30 s e queda segura.** Laguna catalogada sem rota. Modelo: Sonnet orquestrado pelo Opus; revisão final pelo Opus com autorização do Humano. Medido: 294 testes, CI local TUDO OK. Assinatura pendente: bash scripts/aprovar.sh rotas-nuvem-19-11.
   palavras-chave: proposta, rotas, nuvem, nemotron, super, conversa, bolt, código, json, gratuitos, nvidia, entram, rota, seth, pedidos, públicos, prazo, absoluto, queda, segura, laguna, catalogada, modelo, sonnet, orquestrado, opus, revisão, final, autorização, humano, medido, testes, local, tudo, assinatura, pendente, bash, scripts, aprovar
-(1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no canon** Assinada pelo Humano em 19/11 09:14. Bom para todo mundo; progresso visível e confiável na espera.
-  palavras-chave: aplicada, regra, zero, entra, canon, assinada, humano, bom, mundo, progresso, visível, confiável, espera
+(1071) DIÁRIO — 18/11/2026 · **Aplicada regra-zero-19-11: a Regra 0 entra no can …
+  palavras-chave: aplicada, regra, zero, entra, can
 (1070) DIÁRIO — 18/11/2026 · **Aplicada canal-voz-18-11: canal de voz local e nã …
   palavras-chave: aplicada, canal, voz, local
 (1069) DIÁRIO — 18/11/2026 · **Aplicada voz-chamado-18-11: fale comigo abre o ch …

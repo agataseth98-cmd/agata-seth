@@ -63,3 +63,21 @@ Conselho (decisão de 20/11, "Humano 20/11 (voz): cache do Conselho vira a memó
 
 `pw-record`/`pw-play` (PipeWire), `ffmpeg` (gera o som de espera em `$XDG_RUNTIME_DIR`), transcrição local
 (`redesign/sentidos/ouvido.py`), voz `scripts/agata_falar.py`. Sem áudio em disco além do .wav temporário apagado.
+
+## Dinâmica completa de uma sessão (Humano, 20/11/2026 22:3x: "reproduzível por todos os modelos confederados")
+
+Reproduz o dia 20/11 (Claude Opus 5.5), do início ao fim. Vale para qualquer modelo de CLI; troque só o nome do autor.
+
+1. **Abrir com estado.** Bloco de prontidão; `cache_conselho.py ler --n 20`; medir pendências (propostas sem APROVADO, PRs abertos, soltos na raiz, lotes "proposta" no ONDE_ESTAMOS, branches sem commit próprio). Entregar ao Humano a lista curta com recomendação.
+2. **Executar o que ele ordenar em uma palavra** ("arquive", "resolva", "confira", "faça tudo"): arquivar em `~/agata-arquivo/<tema>-DD-MM/` antes de remover; o que é derivado se refaz; o que apaga fora da Máquina guarda a lista (ex.: SHAs de branches) antes.
+3. **Auditar pelo caminho do Humano.** Testar pelo painel no navegador, não só por script; ler no log do gateway rota, modelo e tempo de cada pedido; comparar o que a tela mostrou com a Máquina.
+4. **Diagnosticar até a causa real antes de propor.** Em 20/11 a primeira causa (gateway) era parcial; a real era o painel sem ferramentas. Conferir quem envia e quem executa antes de corrigir.
+5. **Conversa por voz para decidir** (seção "Ciclo" acima): o modelo é o cérebro; discorda com fato; cada decisão vai ao cache na hora (`--tipo decisao`, "Humano DD/MM (voz)"); ao fim, checkpoint numerado na tela para o Humano conferir; "leia" → ler o checkpoint inteiro em voz.
+6. **Memória comum.** O que o modelo sabe vai ao cache (decisão de 20/11: o cache é a memória principal de todos). Memória particular da plataforma migra para o cache.
+7. **Lotes pequenos, em ordem de dependência.** Um lote, uma proposta, uma assinatura. Orquestrador planeja e especifica; agente barato (agata-dev) implementa em worktree; o orquestrador revisa o diff (fechar brechas), mede na Máquina e só então propõe.
+8. **Proposta**: `.diff` (com arquivos novos via `git add -N`) + `.md` (o quê, medido, limite, risco, reversão, modelo) + entrada "Proposta …" no topo de MEMÓRIAS; PR direto contra o main; esperar checks; juntar; entregar ao Humano `bash scripts/aprovar.sh <nome>`. Skill nova: `python3 -I ferramentas/ferramentas.py reindexar` dentro do diff.
+9. **Aplicar** após o APROVADO: `scripts/equipe/aplicar.py <nome> --registro <arq> --agente <membro> --coautor "<modelo real>"`; se um check falhar, corrigir só o derivado na branch de aplicação; reiniciar o serviço afetado.
+10. **Provar no uso real** e registrar o resultado no cache (ex.: pedido repetido no painel, resposta conferida com a Máquina).
+11. **Pessoas novas**: apresentar-se com honestidade (quem criou o modelo, o que é o Agata, limites); anotar no cache só o mínimo (quem apresentou, papel, interesse); acesso próprio de outra pessoa é decisão do Humano; explicar sem jargão quando pedirem.
+12. **Pausa por palavra**: "só retorne quando eu disser Agata" → escutar em silêncio (`vez.sh ""`), sem som de espera depois de algumas escutas, até ouvir a palavra; sem ela, parar e avisar por escrito.
+13. **Fechar o dia** com resumo falado: o que se arrumou, o que se aprendeu, o que foi aplicado e provado, o que espera assinatura, pendências.
