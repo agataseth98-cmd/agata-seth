@@ -3004,5 +3004,98 @@
       "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_lista_de_conversas_tem_piso_e_a_barra_rola"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "unidade parada de propósito, com o socket de mesmo nome escutando ou na lista fixa de sob demanda, aparece como `sob_demanda` com o motivo; o timer de manutenção parado também",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_socket_em_escuta_torna_parada_sob_demanda_com_motivo",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_lista_fixa_e_timer_de_manutencao_parados_sao_sob_demanda",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_detalhes_marca_whisper_parado_como_sob_demanda"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "socket de mesmo nome que não escuta, ou que não responde, deixa a unidade parada como `warning`; estado que não é parada nem ativa também é `warning`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_parada_sem_socket_escutando_continua_aviso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "unidade em `failed` aparece como `erro`, mesmo com o socket escutando, e nunca como `sob_demanda`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_failed_continua_erro_mesmo_com_socket_em_escuta"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`sob_demanda` não muda o estado geral: só `warning`, `erro` ou `ausente` deixam o geral em warning",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_sob_demanda_nao_vira_aviso_no_estado_geral"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "no cliente, `sob_demanda` aparece como chip SOB DEMANDA na classe neutra `horizon` e `erro` como ERRO, sem cor nova",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cliente_mostra_sob_demanda_e_erro_com_chip_proprio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a sub-tela visível de leitura recarrega a cada 60 s pelas cargas que ela já tem, no intervalo que já existe; Conversa, Detalhes, Panorama e Medições ficam fora desse mapa, e não há intervalo novo",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_js_recarrega_so_as_telas_de_leitura_sem_intervalo_novo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a recarga não roda com a página oculta nem com edição em curso (campo de texto alterado, campo com foco, caixa de diálogo aberta) e não apaga o texto digitado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_recarga_so_roda_na_tela_visivel_e_sem_edicao_em_curso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/lacunas` não marca como lacuna a unidade declarada no boot que está sob demanda, nem a porta dela; falha e inativa sem motivo continuam lacuna",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_lacunas_nao_marcam_parada_sob_demanda_mas_marcam_falha_e_inativa_sem_motivo"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "`/api/capacidades` põe a capacidade em `sob_demanda` quando a unidade parada é de propósito (o timer de manutenção), e não em aviso; falha continua `warning`",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_capacidade_manutencao_com_timer_parado_e_sob_demanda_nao_e_aviso",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_capacidade_manutencao_com_timer_falhado_continua_aviso"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "no cartão de capacidade, `sob_demanda` fica no filtro horizon com o chip SOB DEMANDA, e o cartão lido pela rota não vira partial",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial"
+    ],
+    "cwd": null
   }
 ]

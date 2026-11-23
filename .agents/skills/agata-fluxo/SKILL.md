@@ -118,6 +118,8 @@ O sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussol
 - "endereçado", "fechado", "confirmado" só com PR, commit, caminho ou saída de comando no mesmo parágrafo.
 - Afirmação agregada ("todos", "5 de 7") exige tabela por item.
 - Componente removido só se citado com a entrada de remoção.
+- Leitura parcial não prova fim (FALHAS, FAB-6): saída "cortada", "truncada", "resumida" ou listagem sem total explícito não sustenta "vai até X" nem "é tudo". Peça a continuação ou o total; até lá é lacuna. Vale para todo modelo, não só a Seth (veio da doutrina da Seth em PROTOCOLOS.md, trazido para cá em 23/11/2026).
+- Lista de falhas não prova ausência (MEMÓRIAS (725)): unidade que não aparece numa lista de unidades em falha pode estar saudável ou nem existir. Para dizer que algo existe ou está integrado, consulte a unidade ou o canon.
 - Fato do sistema: busque antes. Prioridade 1 é o vault (`python3 scripts/busca_semantica.py "frase"` ou `python3 scripts/busca_texto.py`). Depois confirme no canon e cite caminho e linha.
 - Antes de dizer "assinado", confira se `propostas/APROVADO-<nome>` existe. Um "ok" do Humano não cria o arquivo.
 - Conversa com outro modelo não é fonte. Só entra o que tiver PR, commit ou medição (M7, entrada 791).

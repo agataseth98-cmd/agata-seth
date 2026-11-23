@@ -32,6 +32,26 @@ _ci_gravar_ultimo() {
   } >/dev/null 2>&1
   return 0
 }
+# Progresso em cada linha (Regra 0, decisão do Humano 18/11/2026): "[n/total · tempo decorrido]". O total não é número
+# fixo: _ci_passos() roda uma vez em modo de contagem (CI_CONTANDO=1, sem executar comando nenhum) e conta as chamadas.
+_ci_marca() {
+  local n="$1" total="$2" seg="$3"
+  printf '[%s/%s · %dm%02ds]' "$n" "$total" $((seg / 60)) $((seg % 60))
+}
+# Roda o passo, imprime OK/FALHA com o progresso e guarda o resultado. Em modo de contagem só responde "." (uma linha por chamada).
+passo() {
+  local nome="$1" marca ok=0
+  shift
+  if [ "${CI_CONTANDO:-0}" = 1 ]; then echo "."; return 0; fi
+  CI_N=$((CI_N + 1))
+  # Regra 0 (revisão 23/11): o passo anuncia que começou; a linha OK/FALHA sai ao terminar.
+  echo "  ... [$CI_N/$CI_TOTAL] $nome"
+  if "$@" >"$TMP/saida.txt" 2>&1; then ok=1; fi
+  # o tempo é medido quando o passo TERMINA: a linha sai nesse instante, e o tempo tem de ser o dele
+  marca="$(_ci_marca "$CI_N" "$CI_TOTAL" "$(( $(date +%s) - CI_INICIO ))")"
+  if [ "$ok" = 1 ]; then echo "OK    $marca $nome"; CI_PASSOS+=("$nome|1")
+  else echo "FALHA $marca $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); CI_PASSOS+=("$nome|0"); fi
+}
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then return 0; fi
 # set -u só na execução (R4, 17/11/2026): dar source para testar as funções não muda as opções do shell de quem chamou.
 set -u
@@ -42,14 +62,18 @@ PYTEST="${PYTEST:-$(command -v pytest || true)}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 FALHAS=0
-passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; CI_PASSOS+=("$nome|1"); else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); CI_PASSOS+=("$nome|0"); fi; }
+CI_N=0
+CI_TOTAL=0
+CI_INICIO=0
+CI_CONTANDO=0
 
 if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
 # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
 PATH_ORIGINAL="$PATH"
 export PATH="$(dirname "$PYTEST"):$PATH"
 
-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
+_ci_passos() {
+passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
 passo "gate de sincronia das specs (selftest)" python3 -I scripts/gate_spec_sync.py --selftest
 passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" python3 -I scripts/gate_spec_sync.py
 passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
@@ -96,6 +120,7 @@ passo "projeto índice: testes (pytest)" "$PYTEST" -q -p no:cacheprovider redesi
 passo "projeto índice: destinos do PROJETO (verificar_destinos)" python3 redesign/projeto_indice/verificar_destinos.py
 passo "projeto índice: teto do PROJETO (teto.py)" python3 redesign/projeto_indice/teto.py
 passo "projeto índice: ESTADO.md em dia (gerar_estado --verificar)" python3 scripts/gerar_estado.py --verificar
+passo "ci: progresso e contagem dos passos (testes)" python3 -I scripts/testar_ci_progresso.py
 
 # --- Job suite-adversarial (.github/workflows/perimetro.yml): os mesmos comandos, na mesma ordem, com os mesmos flags.
 # Sem sudo, sem rede e sem serviço. Usa o python do sistema (PY_SISTEMA), não o do venv do uv (sem os pacotes do sistema).
@@ -138,6 +163,17 @@ passo "suite adversarial: testes dos auxiliares da equipe" "$PY_SISTEMA" -I scri
 passo "suite adversarial: contrato de leitura de memória" "$PY_SISTEMA" -I scripts/testar_memoria_leitura.py
 passo "suite adversarial: contrato da trava do escriba" "$PY_SISTEMA" -I scripts/testar_trava_escriba.py
 passo "suite adversarial: contrato sem Goose ativo" "$PY_SISTEMA" -I scripts/testar_sem_goose_ativo.py
+}
+
+# Contagem e execução (Regra 0). A contagem roda _ci_passos sem executar nada; a execução real vem depois, com o total já sabido.
+# CI_SO_CONTAR=1 (testes) imprime só o total e sai, sem gravar o resumo.
+CI_CONTANDO=1
+CI_TOTAL="$(_ci_passos | grep -c '^\.$')"
+CI_CONTANDO=0
+if [ "${CI_SO_CONTAR:-0}" = 1 ]; then echo "$CI_TOTAL"; exit 0; fi
+CI_INICIO="$(date +%s)"
+_ci_passos
+if [ "$CI_N" -ne "$CI_TOTAL" ]; then echo "AVISO: o CI rodou $CI_N passo(s), mas a contagem previa $CI_TOTAL -- conferir scripts/ci_sdd_local.sh"; fi
 
 if [ "$FALHAS" -eq 0 ]; then LINHA_FINAL="CI LOCAL: TUDO OK"; else LINHA_FINAL="CI LOCAL: $FALHAS passo(s) falharam"; fi
 _ci_gravar_ultimo "$LINHA_FINAL" || true

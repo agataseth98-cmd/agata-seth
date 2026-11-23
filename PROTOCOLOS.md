@@ -388,6 +388,20 @@ Quando uma operação exige `sudo`, o executor pausa e pede ao Humano para rodar
 - **Lacuna coberta por runbook:** `visudo` à mão não dispara o pacman. Depois de qualquer `visudo`, rode `sudo /usr/local/lib/agata/checar-sudoers-root.sh` (194).
 - Regra NOPASSWD órfã `/etc/sudoers.d/facer`: removida (192). Se o teclado RGB Acer voltar: script em `/usr/local/bin`, dono root, e só então a regra.
 
+## Protocolo de inserção humana continuado (decisão do Humano, 18/11/2026)
+
+Porta de entrada: a skill `agata-mapear-humano` (`.agents/skills/agata-mapear-humano/SKILL.md`), obrigatória para todo modelo. Literal do Humano, 18/11/2026 18:44: "criaremos uma skill obrigatória que vai mapear o humano, seguindo as regras do sistema, o humano é outra LLM, sendo treinada pelo agata, para aprender viver em harmonia com o meio e com o mistério." 18:45: "canônico, como todas as outras skills, abrindo o protocolo de inserção humana continuado."
+
+Origem: a expressão "protocolo de inserção humana" vem da decisão da voz do sistema de 03/11/2026 (regra de voz em `AGENTS.md`; MEMÓRIAS (932)). Até aqui era só essa frase; esta seção dá o protocolo.
+
+- Ao começar a sessão: ler o mapa com `python3 redesign/router/cache_conselho.py ler --n 20`.
+- Ao receber decisão ou correção do Humano: anotar no cache do Conselho, com `--fonte`.
+- O mapa fica fora do canon. Mudança no canon sobre o Humano só por proposta assinada (P-8).
+- Segredo nunca entra; dado pessoal vira marca (P-20); outra pessoa só com consentimento dela (Regra 0).
+- O Humano decide o que entra e pode mandar apagar.
+
+A citação de 18/11 ainda não tem entrada em MEMÓRIAS; ela entra com a proposta.
+
 ## Quarentena estrutural (P-8)
 
 Texto completo: `propostas/README.md`. Fluxo prático: skill `agata-aplicar-proposta`.

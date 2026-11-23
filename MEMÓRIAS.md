@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): e39d97159bbc09026da2ac180787dd2b6fcda147
-  Escrito em: 23/11/2026 16:22 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): cf3c377b5a7d8f96886ae63cd0e12206afec43c4
+  Escrito em: 23/11/2026 16:28 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e39d97159bbc09026da2ac180787dd2b6fcda147/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e39d97159bbc09026da2ac180787dd2b6fcda147/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e39d97159bbc09026da2ac180787dd2b6fcda147/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e39d97159bbc09026da2ac180787dd2b6fcda147/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/e39d97159bbc09026da2ac180787dd2b6fcda147/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf3c377b5a7d8f96886ae63cd0e12206afec43c4/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf3c377b5a7d8f96886ae63cd0e12206afec43c4/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf3c377b5a7d8f96886ae63cd0e12206afec43c4/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf3c377b5a7d8f96886ae63cd0e12206afec43c4/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/cf3c377b5a7d8f96886ae63cd0e12206afec43c4/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1120) DIÁRIO — 23/11/2026 · **Aplicada caminho-visao-23-11 (assinada pelo Humano).** Painel com sob demanda, erro e recarga de 60 s; P-23 confere a doutrina montada pelo gateway; CI local com progresso (Regra 0); P-27 dos atalhos; P-10 isento em worktree; skill obrigatória agata-mapear-humano e protocolo de inserção humana continuado; FAB-6 e (725) na agata-fluxo. Depois de aplicar: restart do painel e do seth-gateway. Reverter: git apply -R propostas/aplicadas/caminho-visao-23-11.diff e restart.
+
 (1119) DIÁRIO — 23/11/2026 · **Proposta caminho-visao-23-11: primeiro passo do "Caminho até a visão" numa assinatura só — painel com sob demanda e recarga, P-23 verdadeiro para a Seth, progresso no CI (Regra 0), P-27 dos atalhos, skill obrigatória de mapear o Humano e duas lições levadas da doutrina da Seth para todo modelo.** A ideia "SKILL — Adesão a processos" trazida da Seth foi auditada e não vira skill nova: tudo já está no canon e uma segunda cópia reabriria a deriva fechada pela sincronia-12-11. Fora do lote: HD de backup (Humano), migração da memória quente (precisa de marca própria do P-5), roteador próprio, Jev e Capivara fora da sombra, modelo do Agata Code, decisões do Humano. Também 23/11: Codex marcado ausente até 25/11 na equipe (equipe.py). Modelo: Claude Opus 5.5 (Claude Code, na Máquina), orquestrando agata-dev, agata-spec e agata-revisor (Claude Haiku 5.5) · vetor: CI local TUDO OK, apply --check em cópia limpa, revisão independente · Autorização: Humano — "sem hd por enquanto o restante pode fazer. me entregue apenas assinatura única". Assinatura pendente: bash scripts/aprovar.sh caminho-visao-23-11
 
 (1118) DIÁRIO — 23/11/2026 · **Aplicada vault-inbox-sai-23-11b (assinada pelo Humano).** O inbox do Obsidian sai: unidades e script em extras/arquivo-vault-inbox-23-11/, fora do servicos-agata.txt e do painel. Runtime: ~/.config/systemd/user/agata-vault-inbox.service movido para ~/agata-arquivo/limpeza-23-11/, daemon-reload e restart do painel. Reverter: git apply -R propostas/aplicadas/vault-inbox-sai-23-11b.diff e devolver a unidade.

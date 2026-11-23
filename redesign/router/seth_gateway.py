@@ -288,6 +288,19 @@ def _diretrizes_agents() -> str:
     return "**Diretrizes de todo modelo (AGENTS.md, lido pela Máquina):**\n" + _CACHE_AGENTS["texto"] + "\n"
 
 
+def doutrina_montada() -> str:
+    """O texto de doutrina que a rota interna põe antes do modelo (modo compacto): a seção SETH-GATEWAY do
+    PROTOCOLOS.md e o AGENTS.md inteiro, na ordem de _hidratacao. Sem estado e sem rede. Em modo full, o arquivo
+    SETH_HIDRATA. É o texto que o P-23 confere (config/portas-de-entrada.txt, leitura 'doutrina'): o que o
+    gateway monta, não o conteúdo de um arquivo do próprio gateway (23/11/2026, caminho-visao-23-11)."""
+    if MODO == "compacto":
+        return _doutrina_seth() + _diretrizes_agents()
+    try:
+        return HIDRATA_PATH.read_text(encoding="utf-8")
+    except OSError:
+        return f"(hidratação indisponível: {HIDRATA_PATH} não pôde ser lido)"
+
+
 # (07/11/2026, núcleo de desenvolvimento, D2) ponteiro de uma linha para o guia universal (Ma'at), no canal de
 # estado de _injeta, só nas faixas internas (a faixa pública não passa por _injeta). Fica FORA da doutrina (seção SETH-GATEWAY do
 # PROTOCOLOS.md), para não mudar o marcador. SETH_PROCESSO_HIDRATA=0 desliga.
@@ -316,7 +329,7 @@ def _hidratacao(extra: str = "") -> str:
             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
                              "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
                              + (f"{extra}\n" if extra else ""))
-        return f"{MARCADOR}\n{_doutrina_seth()}{_diretrizes_agents()}{bloco_estado}"
+        return f"{MARCADOR}\n{doutrina_montada()}{bloco_estado}"
     try:
         st = HIDRATA_PATH.stat()
         if _CACHE["mtime"] != st.st_mtime:

@@ -17,6 +17,10 @@ p17_skip_cronico() {
     if printf '%s' " $P17_SKIPS" | grep -q " $ctrl "; then
       serie=$((serie + 1))
       [ "$serie" -ge "$P17_LIMITE" ] && alarmes="${alarmes}${ctrl}=${serie} "
+    elif printf '%s' " ${P17_ISENTOS:-}" | grep -q " $ctrl "; then
+      # SKIP isento ("não se aplica", ex. P-10 numa worktree vinculada): não conta esta corrida e não zera a série
+      # anterior -- senão uma worktree apagaria a contagem que o checkout principal fez no mesmo arquivo de estado.
+      :
     else
       serie=0
     fi

@@ -130,7 +130,7 @@ class TestPorques(unittest.TestCase):
         unidades, orfaos = porques.verificar(RAIZ)
         regras = [u for u in unidades if u.origem == "AGENTS.md"]
         skills = [u for u in unidades if u.origem == "skill"]
-        self.assertEqual(len(regras), 17)
+        self.assertEqual(len(regras), 18)
         self.assertEqual(len(skills), len(list((RAIZ / ".agents" / "skills").glob("*/SKILL.md"))))
         self.assertEqual(orfaos, [])
 
@@ -151,7 +151,7 @@ class TestPorques(unittest.TestCase):
 
     def test_regras_curtas_lista_os_titulos(self):
         texto = porques.regras_curtas(RAIZ)
-        self.assertTrue(texto.startswith("Regras ativas (AGENTS.md, Sempre, 17): Regra 1 · "))
+        self.assertTrue(texto.startswith("Regras ativas (AGENTS.md, Sempre, 18): Regra 1 · "))
 
 
 class TestSessaoContexto(unittest.TestCase):

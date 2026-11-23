@@ -37,7 +37,7 @@ def _rota(id, modelo, tipos, prio=10, maxt=6000, classes=("publico", "sintetico"
 def ficha(tmp_path, monkeypatch):
     f = tmp_path / "ficha.json"
     f.write_text(json.dumps({"schema_version": 1, "decisoes": {}, "rotas": [
-        _rota("local-a", "a:1b", ["codigo", "conversa"], 10),
+        _rota("local-a", "a:1b", ["codigo", "conversa"], 10, 12000),  # 23/11: a injeção real passou de 6000 tokens estimados (AGENTS.md maior)
         _rota("local-b", "b:30b", ["json", "conversa"], 20, 16000),
         _rota("local-c", "c:8b", ["ferramenta"], 10, 12000, classes=("publico",)),
         {"id": "reserva", "provedor": "ollama", "modelo": "r:9b", "categoria": "local", "tipos": [],
@@ -93,7 +93,7 @@ def test_so_rota_local_com_tipos(ficha):
 def test_classe_e_teto_de_entrada(ficha):
     assert rl.escolher(_p(), "ferramenta", False, checar_ollama=False) is None  # c só aceita público
     assert rl.escolher(_p(), "ferramenta", True, checar_ollama=False)["id"] == "local-c"
-    grande = _p("a" * 20000)  # ~6666 tokens > teto de local-a (6000)
+    grande = _p("a" * 40000)  # ~13333 tokens > teto de local-a (12000)
     assert rl.escolher(grande, "conversa", False, checar_ollama=False)["id"] == "local-b"
 
 

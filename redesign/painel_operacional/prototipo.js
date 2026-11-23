@@ -215,10 +215,13 @@ function stateOf(item, forcedStale = false) {
   if (item.state === "ausente") return "ausente";
   const until = Date.parse(item.fresh_until || "");
   if (forcedStale || item.state === "stale" || !Number.isFinite(until) || Date.now() > until) return "stale";
+  // 23/11/2026: sob_demanda é parada de propósito (não é aviso); erro é unidade em falha (systemd failed).
+  if (item.state === "sob_demanda") return "sob_demanda";
+  if (item.state === "erro") return "erro";
   return item.state === "ok" ? "ok" : "warning";
 }
 function stateLabel(state) {
-  return {ok: "ATIVO", warning: "ATENÇÃO", stale: "DESATUALIZADO", unknown: "SEM LEITURA", ausente: "NÃO EXISTE (ESCOPO DO USUÁRIO)"}[state] || "SEM LEITURA";
+  return {ok: "ATIVO", warning: "ATENÇÃO", erro: "ERRO", sob_demanda: "SOB DEMANDA", stale: "DESATUALIZADO", unknown: "SEM LEITURA", ausente: "NÃO EXISTE (ESCOPO DO USUÁRIO)"}[state] || "SEM LEITURA";
 }
 function snapshotStateKey(snapshot, forced) {
   return JSON.stringify([
@@ -232,7 +235,7 @@ function detailsStateKey(data, forced) {
 }
 function chip(id, state, text) {
   const el = byId(id);
-  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: "ausente"}[state] ?? "horizon");
+  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", erro: "erro", unknown: "horizon", ausente: "ausente", sob_demanda: "horizon"}[state] ?? "horizon");
   el.textContent = text || stateLabel(state);
 }
 function preserveReading(oldValue, nextValue) {
@@ -260,7 +263,7 @@ function row(title, status, detail, labelText = null) {
   const item = document.createElement("div"); item.className = "live-row";
   const line = document.createElement("div"); line.className = "live-row-top";
   const label = document.createElement("strong"); label.textContent = title;
-  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: ""}[status] ?? "horizon"); badge.textContent = labelText || stateLabel(status);
+  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", erro: "erro", unknown: "horizon", ausente: "", sob_demanda: "horizon"}[status] ?? "horizon"); badge.textContent = labelText || stateLabel(status);
   line.append(label, badge); item.append(line);
   if (detail) { const note = document.createElement("small"); note.textContent = detail; item.append(note); }
   return item;
@@ -279,9 +282,11 @@ function sourceLine(item) {
 const serviceNames = {"omniroute.service":"OmniRoute", "omniroute-sanitizer.service":"Sanitizador", "seth-gateway.service":"Seth Gateway", "seth-verificador.service":"Verificador", "piper-tts.service":"Piper", "openvino-whisper.service":"Whisper", "openvino-embeddings.service":"Embeddings", "obsidian-ro-proxy.service":"Proxy Obsidian", "discord-mcp.service":"Discord MCP", "navegador-mcp.service":"Navegador MCP", "laya-roteador.service":"Laya", "seth-escriba.service":"Escriba"};
 const timerNames = {"agata-manutencao.timer":"Janela de manutenção"};
 const taskNames = {"avaliar-decisor":"Avaliar o decisor", "memoria-semanal":"Memória semanal", "consolidacao":"Consolidar memórias", "laya-treino":"Treinar candidato do Laya"};
+// 23/11/2026: o motivo de sob demanda (lista fixa ou socket em escuta) vai na linha da unidade, como evidência.
+function motivoSobDemanda(item) { return item && item.sob_demanda_por ? "sob demanda: " + item.sob_demanda_por + " · " : ""; }
 function unitRows(items, forced) {
   return (items || []).map((item) => row(serviceNames[item.unit] || item.unit, stateOf(item, forced),
-    (item.active_state ? item.active_state + " / " + (item.sub_state || "—") + " · " : "") + sourceLine(item)));
+    motivoSobDemanda(item) + (item.active_state ? item.active_state + " / " + (item.sub_state || "—") + " · " : "") + sourceLine(item)));
 }
 function timerRows(items, forced) {
   return (items || []).map((item) => {
@@ -289,7 +294,7 @@ function timerRows(items, forced) {
     const last = execution.state === "skipped" ? "última ativação pulada por condição" :
       execution.state === "observed" ? "resultado da unidade: " + execution.result + " · término " + (execution.ended_at || "não informado") : "resultado da unidade não medido";
     return row(timerNames[item.unit] || item.unit, stateOf(item, forced),
-      "Próximo disparo: " + (item.next_trigger || "não informado") + " · último disparo: " + (item.last_trigger || "não informado") + " · " + last + " · " + sourceLine(item));
+      motivoSobDemanda(item) + "Próximo disparo: " + (item.next_trigger || "não informado") + " · último disparo: " + (item.last_trigger || "não informado") + " · " + last + " · " + sourceLine(item));
   });
 }
 function taskRows(value, forced) {
@@ -388,8 +393,9 @@ function render(snapshot, forced = false) {
   const services = snapshot.services || [];
   const states = services.map((item) => stateOf(item, forced));
   // 'ausente' não entra no total nem na conta de ativas.
-  const presentes = states.filter((s) => s !== "ausente");
-  const overall = !presentes.length || presentes.includes("unknown") ? "unknown" : presentes.includes("warning") ? "warning" : presentes.includes("stale") ? "stale" : "ok";
+  // 'sob_demanda' (23/11) também não entra: parado de propósito não é degradação.
+  const presentes = states.filter((s) => s !== "ausente" && s !== "sob_demanda");
+  const overall = !presentes.length || presentes.includes("unknown") ? "unknown" : presentes.includes("warning") || presentes.includes("erro") ? "warning" : presentes.includes("stale") ? "stale" : "ok";
   const active = states.filter((s) => s === "ok").length;
   chip("units-panel-state", overall);
   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + presentes.length);
@@ -419,7 +425,7 @@ function render(snapshot, forced = false) {
   chip("chat-state", chatState, chatState === "ok" ? "HTTP 200" : null);
   set("chat-source", sourceLine(chat) + (chat.http_status ? " · HTTP " + chat.http_status : "") + ". A saúde do endpoint não garante cada função do chat.");
   const timers = snapshot.timers || []; const timerStates = timers.map((item) => stateOf(item, forced)).filter((s) => s !== "ausente");
-  const timerState = !timerStates.length || timerStates.includes("unknown") ? "unknown" : timerStates.includes("stale") ? "stale" : timerStates.includes("warning") ? "warning" : "ok";
+  const timerState = !timerStates.length || timerStates.includes("unknown") ? "unknown" : timerStates.includes("stale") ? "stale" : timerStates.includes("warning") || timerStates.includes("erro") ? "warning" : "ok";
   chip("timer-panel-state", timerState, timerState === "ok" ? "LEITURA VÁLIDA" : null);
   set("overview-timers", timerState === "unknown" ? "—" : timerState === "stale" ? "Vencida" : timerStates.filter((x) => x === "ok").length + "/" + timerStates.length);
   replaceRows("live-timers", timerRows(timers, forced), "Timers indisponíveis.");
@@ -432,14 +438,18 @@ function render(snapshot, forced = false) {
 function linhaDaUnidade(unidade, item, forced) {
   if (!item) return unidade + ": sem leitura";
   if (stateOf(item, forced) === "ausente") return unidade + ": não existe (escopo do usuário) · fonte " + (item.source || "não informada") + " · observado " + niceTime(item.observed_at);
-  return unidade + ": " + (item.active_state || "estado não informado") + " / " + (item.sub_state || "—") + " · fonte " + (item.source || "não informada") +
+  const sobDemanda = item.sob_demanda_por ? " · sob demanda: " + item.sob_demanda_por : "";
+  return unidade + ": " + (item.active_state || "estado não informado") + " / " + (item.sub_state || "—") + sobDemanda + " · fonte " + (item.source || "não informada") +
     " · observado " + niceTime(item.observed_at) + " · válido até " + niceTime(item.fresh_until);
 }
 // Selo do cartão a partir das unidades que ele lê. Com uma unidade, diz inativo quando o systemd diz inactive.
+// 23/11/2026: erro (failed) aparece como ERRO; parada de propósito (sob_demanda) não é ATENÇÃO nem INATIVO.
 function rotuloDoCartao(itens, estados) {
   if (estados.every((e) => e === "ok")) return ["chip active", "ATIVO"];
   if (estados.every((e) => e === "ausente")) return ["chip ausente", "NÃO EXISTE (ESCOPO DO USUÁRIO)"];
   if (estados.every((e) => e === "unknown")) return ["chip horizon", "SEM LEITURA"];
+  if (estados.includes("erro")) return ["chip erro", "ERRO"];
+  if (estados.some((e) => e === "sob_demanda") && estados.every((e) => e === "ok" || e === "sob_demanda")) return ["chip horizon", "SOB DEMANDA"];
   if (estados.length === 1 && estados[0] === "warning" && itens[0].active_state === "inactive") return ["chip partial", "INATIVO"];
   if (estados.length === 1 && estados[0] === "stale") return ["chip partial", "DESATUALIZADO"];
   return ["chip partial", "ATENÇÃO"];
@@ -644,10 +654,46 @@ document.addEventListener("visibilitychange", () => {
     if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
   }
 });
+// Recarga automática das sub-telas de leitura (23/11/2026). Só a sub-tela visível, só com a página visível,
+// e nunca com edição em curso (texto digitado, campo com foco, caixa de diálogo aberta). Usa as funções de carga
+// que a tela já tem, sem intervalo próprio: o intervalo de 60 s abaixo chama recarregarSubsVisiveis().
+// Fora da lista: Conversa e formulários (texto digitado), Panorama e Detalhes (têm o próprio 60 s), Medições (4 s),
+// e Avaliação e Sentidos (formulários de rodada).
+const RECARGA_SUB = {
+  equipe: () => carregarEquipe(),
+  backup: () => carregarBackup(),
+  "saida-rede": () => carregarEgress(),
+  perimetro: () => carregarPerimetro(),
+  ci: () => carregarCI(),
+  "conselho-memoria": () => carregarMemoriaConselho(),
+  importantes: () => carregarImportantes(),
+  lacunas: () => { calcularLacunas(); carregarLacunasCanon(); },
+  qualidade: () => carregarQualidade(),
+  "catalogo-modelos": () => { if (AgataPainel.carregarModelos) AgataPainel.carregarModelos(); },
+};
+function edicaoEmCurso(sub) {
+  const foco = document.activeElement;
+  if (foco && sub.contains(foco) && ["TEXTAREA", "INPUT", "SELECT"].includes(foco.tagName)) return true;
+  // Revisão 23/11: campo preenchido por script não trava a recarga para sempre; só foco e diálogo aberto contam,
+  // mais texto digitado em área de texto (textarea), que é onde se escreve à mão.
+  if (sub.querySelector("dialog[open]")) return true;
+  return [...sub.querySelectorAll("textarea")].some((campo) => campo.value.trim() !== "" && campo.value !== campo.defaultValue);
+}
+function recarregarSubsVisiveis() {
+  if (document.visibilityState !== "visible") return;
+  subsAtivos().forEach((sub) => {
+    const carga = RECARGA_SUB[sub.dataset.sub];
+    if (!carga || edicaoEmCurso(sub)) return;
+    // Cada carga mostra o próprio erro; aqui só se impede que uma falha derrube as outras.
+    try { Promise.resolve(carga()).catch(() => {}); } catch (_) { /* idem */ }
+  });
+}
+// Fim da recarga automática das sub-telas.
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
   atualizarPanorama();
   if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
+  recarregarSubsVisiveis();
 }, 60000);
 setInterval(() => {
   if (document.visibilityState !== "visible") return;
@@ -662,7 +708,8 @@ async function loadCapacidades() {
   let dados = null;
   try { dados = await fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
   const porId = new Map(((dados && dados.items) || []).map((i) => [i.id, i]));
-  const rotuloVivo = {ok: "ativo", warning: "sem resposta", unknown: "sem leitura"};
+  // 23/11/2026: sob_demanda (timer ou unidade parada de propósito) não é "sem resposta" nem ATENÇÃO.
+  const rotuloVivo = {ok: "ativo", warning: "sem resposta", unknown: "sem leitura", sob_demanda: "sob demanda"};
   document.querySelectorAll("[data-live]").forEach((el) => {
     const item = porId.get(el.dataset.live);
     el.textContent = item ? (rotuloVivo[item.state] || "sem leitura") : "sem leitura";
@@ -688,11 +735,11 @@ async function loadCapacidades() {
       cartao.dataset.sonda = "sem leitura da sonda nesta medição.";
       if (!lidaPorRota) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; }
     } else {
-      cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned"}[item.state] || "planned";
+      cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned", sob_demanda: "horizon"}[item.state] || "planned";
       cartao.dataset.sonda = item.evidencia || "sem leitura nesta medição.";
       cartao.dataset.sondaFonte = item.source + " · " + item.source_ref;
       if (!lidaPorRota) {
-        const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
+        const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"], sob_demanda: ["chip horizon", "SOB DEMANDA"]}[item.state];
         chip.className = rotulo[0]; chip.textContent = rotulo[1];
         if (hora) hora.textContent = dados && dados.observed_at ? "lido " + niceTime(dados.observed_at) : "hora não medida";
       }
@@ -705,6 +752,7 @@ async function loadCapacidades() {
    Rota que não responde vira "sem leitura" com o motivo: nada antigo aparece como atual. */
 const ESTADO_LIDO = {
   ok: ["LEITURA VÁLIDA", "chip active"], warning: ["ATENÇÃO", "chip partial"], falha: ["FALHA", "chip erro"],
+  erro: ["ERRO", "chip erro"], sob_demanda: ["SOB DEMANDA", "chip horizon"],
   sem_leitura: ["SEM LEITURA", "chip horizon"], ausente: ["AUSENTE", "chip ausente"],
 };
 function estadoDe(dados) { return (dados && dados.state) || "sem_leitura"; }
