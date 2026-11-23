@@ -1,0 +1,332 @@
+diff --git a/redesign/mcp/navegador/busca_filtro.py b/redesign/mcp/navegador/busca_filtro.py
+new file mode 100644
+index 00000000..dab9c33b
+--- /dev/null
++++ b/redesign/mcp/navegador/busca_filtro.py
+@@ -0,0 +1,62 @@
++"""Funções puras da busca do navegador-mcp (23/11/2026, seth-web2-23-11): sem fastmcp nem playwright, para o CI testar.
++Leitura da resposta da Wikipedia, filtro e ordem por termos sem acento."""
++from __future__ import annotations
++
++import json
++import urllib.parse
++
++
++def termos(consulta: str) -> list[str]:
++    """Palavras da consulta com 3+ letras, sem aspas nem operador (`site:`)."""
++    return [t for t in (w.strip('"\'').lower() for w in consulta.split())
++            if len(t) >= 3 and ":" not in t]
++
++
++def itens_wiki(json_texto: str, lang: str) -> list[dict]:
++    """[{titulo, href, trecho}] da resposta da API de busca. JSON ruim = lista vazia."""
++    import html
++    import re as _re
++    try:
++        dados = json.loads(json_texto)
++        lista = dados["query"]["search"]
++    except (ValueError, KeyError, TypeError):
++        return []
++    itens = []
++    for r in lista if isinstance(lista, list) else []:
++        titulo = str((r or {}).get("title") or "").strip()
++        if not titulo:
++            continue
++        trecho = html.unescape(_re.sub(r"<[^>]+>", "", str(r.get("snippet") or "")))
++        itens.append({"titulo": f"{titulo} (Wikipedia)",
++                      "href": f"https://{lang}.wikipedia.org/wiki/" + urllib.parse.quote(titulo.replace(" ", "_")),
++                      "trecho": trecho})
++    return itens
++
++
++def sem_acento(texto: str) -> str:
++    import unicodedata
++    return "".join(c for c in unicodedata.normalize("NFKD", texto.lower()) if not unicodedata.combining(c))
++
++
++def filtrar_e_ordenar(itens: list[dict], termos: list[str], fracao: tuple[int, int] = (2, 3)) -> list[dict]:
++    """Tira o que casa menos de 2/3 dos termos (o RSS do Bing casa só a 1ª palavra: "capital da Mongólia" vinha
++    com corretoras e rádios) e ordena o resto."""
++    if not termos:
++        return list(itens)
++    a, b = fracao
++    minimo = max(1, -(-a * len(termos) // b))  # fração dos termos, para cima (2/3: 1→1, 2→2, 3→2, 4→3)
++    termos = [sem_acento(t) for t in termos]
++
++    def n(it):
++        alvo = sem_acento(" ".join(str(v) for v in it.values()))
++        return sum(1 for t in termos if t in alvo)
++    return ordenar_por_termos([it for it in itens if n(it) >= minimo], termos)
++
++
++def ordenar_por_termos(itens: list[dict], termos: list[str]) -> list[dict]:
++    """Mais termos da consulta casados primeiro (no título valem 2, no trecho 1); empate mantém a ordem de chegada."""
++    def casados(it):
++        titulo, trecho = sem_acento(str(it.get("titulo") or "")), sem_acento(str(it.get("trecho") or ""))
++        termos_n = [sem_acento(t) for t in termos]
++        return sum(2 if t in titulo else 1 if t in trecho else 0 for t in termos_n)
++    return sorted(itens, key=casados, reverse=True)
+diff --git a/redesign/mcp/navegador/servidor.py b/redesign/mcp/navegador/servidor.py
+index 28bcf222..715ae69a 100644
+--- a/redesign/mcp/navegador/servidor.py
++++ b/redesign/mcp/navegador/servidor.py
+@@ -70,6 +70,7 @@ from politica_egress import buscar_seguro, destino_permitido  # noqa: E402 -- im
+ from redesign.mcp.capability import verificar_capability  # noqa: E402
+ from egress_proxy import EgressProxy  # noqa: E402 -- conexão efetiva pinada ao IP validado
+ import egress_proxy  # noqa: E402
++from busca_filtro import filtrar_e_ordenar as _filtrar_e_ordenar, itens_wiki as _itens_wiki, sem_acento as _sem_acento  # noqa: E402,F401
+ 
+ PERFIL_DIR = os.path.expanduser("~/.cache/agata/navegador-perfil")
+ ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/navegador-dominios-permitidos.txt")
+@@ -125,6 +126,29 @@ def _buscar_rss(consulta: str) -> list[dict] | None:
+             return _itens_rss(f.read(_MAX_BYTES_RSS))
+ 
+ 
++# (23/11/2026, seth-web2-23-11) medido: o RSS do Bing casa só o termo mais comum ("Python 3.14 release date" devolve
++# a página inicial do python.org e compiladores online, 4 variações de URL iguais). A busca da Wikipedia (API pública,
++# sem chave nem captcha) trouxe resultado no assunto. Entra primeiro (pt, depois en, 3 de cada); o Bing vem depois, filtrado.
++_WIKI_URL = "https://{lang}.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch={q}"
++_MAX_BYTES_WIKI = 300_000
++# A Wikimedia estrangula (429) User-Agent genérico; pede um que nomeie o programa. Sem dado pessoal nem contato.
++_UA_WIKI = "AgataBusca/1.0 (assistente pessoal local; baixo volume)"
++
++
++def _buscar_wiki(consulta: str) -> list[dict]:
++    import tempfile
++    itens = []
++    for lang in ("pt", "en"):
++        url = _WIKI_URL.format(lang=lang, q=urllib.parse.quote_plus(consulta))
++        with tempfile.TemporaryDirectory(prefix="agata-wiki-") as d:
++            destino = os.path.join(d, "w.json")
++            ok, status, _f, _m = buscar_seguro(url, destino, ua=_UA_WIKI, timeout_s=8, max_bytes=_MAX_BYTES_WIKI)
++            if ok and status == 200 and os.path.exists(destino):
++                with open(destino, encoding="utf-8", errors="replace") as f:
++                    itens += _itens_wiki(f.read(_MAX_BYTES_WIKI), lang)
++    return itens
++
++
+ mcp = FastMCP("agata-navegador")
+ 
+ # (725) Uma thread só para o navegador. A Seth chama ferramentas em PARALELO, e o FastMCP
+@@ -327,18 +351,29 @@ def buscar_web(consulta: str, n: int = 8) -> dict:
+             motor = "bing"
+             brutos = _na_fila(_buscar_pagina)(url)
+         termos = _termos(consulta)
++        try:
++            wiki = _buscar_wiki(consulta)
++        except Exception:  # noqa: BLE001 -- Wikipedia fora: segue só com o Bing
++            wiki = []
++        if wiki:
++            motor += "+wikipedia"
++        # Wikipedia primeiro, com filtro brando (metade dos termos; ela acha por sentido); Bing depois, com 2/3
++        # teto de 3 para a Wikipedia: o resto das vagas (n, até 10) fica para o Bing
++        brutos = (_filtrar_e_ordenar(wiki, termos, (1, 2))[:3]
++                  + _filtrar_e_ordenar(list(brutos), termos))
+         res = []
+         for r in brutos:
+             if not (r.get("titulo") and r.get("href")):
+                 continue
+             item = {"titulo": r["titulo"], "url": _url_real(r["href"]), "trecho": r["trecho"][:300]}
+             alvo = " ".join(item.values()).lower()
+-            item["relacionado"] = (not termos) or any(t in alvo for t in termos)
++            item["relacionado"] = (not termos) or any(_sem_acento(t) in _sem_acento(alvo) for t in termos)
+             res.append(item)
+         res = res[:n]
+         aviso = None
+         if not res:
+-            aviso = "nenhum resultado -- reformule antes de concluir; isto não prova que não existe"
++            aviso = ("nenhum resultado com os termos da consulta -- reformule (menos palavras, inglês, nome próprio) "
++                     "ou leia a fonte oficial com ler_pagina; isto não prova que não existe")
+         elif not any(r["relacionado"] for r in res):
+             aviso = ("nenhum resultado contém os termos da consulta (busca degradada) -- reformule; "
+                      "isto não prova nada, nem que existe nem que não existe")
+@@ -555,6 +590,23 @@ def _selftest_offline() -> int:
+         print("FALHA: _itens_rss aceitou XML ruim")
+         ok = False
+ 
++    wiki = json.dumps({"query": {"search": [{"title": "Ulan Bator", "snippet": "capital da <span>Mongólia</span>"}]}})
++    if _itens_wiki(wiki, "pt") == [{"titulo": "Ulan Bator (Wikipedia)", "href": "https://pt.wikipedia.org/wiki/Ulan_Bator",
++                                    "trecho": "capital da Mongólia"}] and _itens_wiki("{", "pt") == []:
++        print("_itens_wiki: item lido, HTML do trecho tirado, JSON ruim vira vazio — OK")
++    else:
++        print(f"FALHA: _itens_wiki deu {_itens_wiki(wiki, 'pt')!r}")
++        ok = False
++    itens = [{"titulo": "Capital.com trading", "href": "https://x", "trecho": ""},
++             {"titulo": "Ulan Bator", "href": "https://y", "trecho": "capital da mongólia"},
++             {"titulo": "Mongólia", "href": "https://z", "trecho": "país; capital Ulan Bator"}]
++    r = [i["href"] for i in _filtrar_e_ordenar(itens, _termos("capital da Mongólia"))]
++    if r == ["https://z", "https://y"]:
++        print("_filtrar_e_ordenar: tira o que casa só 1 termo de 2 (mínimo 2/3) e põe título casado na frente — OK")
++    else:
++        print(f"FALHA: _filtrar_e_ordenar deu {r!r}")
++        ok = False
++
+     return 0 if ok else 1
+ 
+ 
+diff --git a/redesign/mcp/navegador/test_busca_filtro.py b/redesign/mcp/navegador/test_busca_filtro.py
+new file mode 100644
+index 00000000..6d88f9ff
+--- /dev/null
++++ b/redesign/mcp/navegador/test_busca_filtro.py
+@@ -0,0 +1,38 @@
++"""Busca do navegador-mcp: funções puras (23/11/2026, seth-web2-23-11). Sem rede, sem navegador.
++Rodar: pytest -q redesign/mcp/navegador/test_busca_filtro.py
++"""
++import json
++import os
++import sys
++
++sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++
++import busca_filtro as bf  # noqa: E402
++
++
++def test_itens_wiki_le_titulo_link_e_tira_html_do_trecho():
++    r = json.dumps({"query": {"search": [{"title": "Ulan Bator", "snippet": "capital da <span>Mongólia</span> &amp; x"}]}})
++    assert bf.itens_wiki(r, "pt") == [{"titulo": "Ulan Bator (Wikipedia)", "href": "https://pt.wikipedia.org/wiki/Ulan_Bator",
++                                      "trecho": "capital da Mongólia & x"}]
++
++
++def test_itens_wiki_json_ruim_ou_sem_busca_vira_vazio():
++    assert bf.itens_wiki("{", "pt") == []
++    assert bf.itens_wiki(json.dumps({"error": {"code": "x"}}), "en") == []
++
++
++def test_filtro_tira_o_que_casa_so_a_primeira_palavra_e_ignora_acento():
++    itens = [{"titulo": "Capital.com trading", "href": "a", "trecho": ""},
++             {"titulo": "Ulan Bator", "href": "b", "trecho": "capital da mongolia"},
++             {"titulo": "Mongólia", "href": "c", "trecho": "país; capital Ulan Bator"}]
++    assert [i["href"] for i in bf.filtrar_e_ordenar(itens, bf.termos("capital da Mongólia"))] == ["c", "b"]
++
++
++def test_fracao_branda_e_sem_termos_devolve_tudo():
++    itens = [{"titulo": "History of Python", "href": "a", "trecho": ""}, {"titulo": "nada", "href": "b", "trecho": ""}]
++    assert [i["href"] for i in bf.filtrar_e_ordenar(itens, bf.termos("Python release"), (1, 2))] == ["a"]
++    assert bf.filtrar_e_ordenar(itens, []) == itens
++
++
++def test_termos_ignora_curtas_e_operador():
++    assert bf.termos('capital da "Mongólia" site:x.org') == ["capital", "mongólia"]
+diff --git a/redesign/painel_operacional/ferramentas_seth.py b/redesign/painel_operacional/ferramentas_seth.py
+index 517caaa3..c5483ec7 100644
+--- a/redesign/painel_operacional/ferramentas_seth.py
++++ b/redesign/painel_operacional/ferramentas_seth.py
+@@ -226,7 +226,7 @@ def executar_web(nome: str, args: dict, rpc=None) -> str:
+         linhas = [f"{i}. {r.get('titulo', '')}\n   {r.get('url', '')}\n   {r.get('trecho', '')}"
+                   for i, r in enumerate(d.get("resultados") or [], 1)]
+         corpo = "\n".join(linhas) or "nenhum resultado nesta busca (não prova que não existe)"
+-        if d.get("aviso") and linhas:
++        if d.get("aviso"):  # vazio também leva o aviso: diz à Seth o que tentar em seguida
+             corpo += "\naviso: " + str(d["aviso"])
+         return truncar(SELO_WEB + corpo)
+     url = str(args.get("url") or "").strip()
+@@ -531,10 +531,13 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
+     web_nesta_resposta = False
+     while True:
+         chamadas = None
++        texto_rodada = []
+         for ev in eventos_do_stream(linhas):
+             if ev["tipo"] == "chamadas":
+                 chamadas = ev["chamadas"]
+             else:
++                if ev["tipo"] == "texto":
++                    texto_rodada.append(ev.get("delta") or "")
+                 yield ev
+         if chamadas is None:
+             return
+@@ -543,7 +546,9 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
+             yield {"tipo": "fim"}
+             return
+         rodada += 1
+-        pedido["messages"].append({"role": "assistant", "content": "", "tool_calls": [
++        # (23/11/2026) o texto já mostrado nesta rodada (o cabeçalho da Máquina incluso) volta ao gateway: com o
++        # content vazio o gateway via a resposta como nova e repetia o cabeçalho a cada rodada de ferramenta
++        pedido["messages"].append({"role": "assistant", "content": "".join(texto_rodada), "tool_calls": [
+             {"id": _id_chamada(c, i), "type": "function",
+              "function": {"name": c["nome"], "arguments": c["argumentos"]}} for i, c in enumerate(chamadas)]})
+         for i, c in enumerate(chamadas):
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 96204ec5..9ec04bd8 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -2966,5 +2966,24 @@
+       "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_host_com_rotulo_longo_bloqueia_sem_excecao"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "a cada rodada de ferramenta o painel devolve ao gateway o texto já mostrado nela (o cabeçalho da Máquina incluso), para o gateway não repetir o cabeçalho na mesma resposta; busca vazia leva à Seth o aviso do que tentar em seguida",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_rodada_devolve_o_texto_ja_mostrado_para_o_gateway_nao_repetir_o_cabecalho",
++      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_busca_vazia_leva_o_aviso_do_que_tentar"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/mcp/navegador/test_busca_filtro.py"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index e637605b..deb3de99 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -677,6 +677,8 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] o resultado do Agata Code diz se houve prova: sem nenhum evento `tool_use` na transcrição o texto devolvido à Seth abre com "NÃO VERIFICADO: o Agata Code não usou nenhuma ferramenta; trate a resposta como opinião sem prova."; com ferramentas abre com "verificado por: glob×1" (nome e contagem); timeout ou transcrição sem texto abre com "sem resposta do Agata Code (timeout)"; o bloco da tela mostra o mesmo aviso; o filho roda com stdin em /dev/null (stdin aberto trava o `opencode run` antes de chegar ao gateway)
+ - [ ] a Seth no painel (só seth-livre) lê a web por `buscar_web` e `ler_pagina` (navegar + ler numa sessão MCP do navegador-mcp); só http(s), consulta até 300 caracteres; o resultado volta com o selo de DADO EXTERNO; clicar, preencher, navegar e screenshot nunca entram na lista; erro do navegador vira texto
+ - [ ] na Seth do painel, `ler_pagina` nunca devolve a página anterior: erro de ferramenta (`isError`) ou endereço lido diferente do aberto vira erro em texto; na resposta que já leu a web, `cache_anotar` é recusado (texto da web pode trazer instrução); host com rótulo longo é bloqueado pela política de egress sem exceção
++- [ ] a cada rodada de ferramenta o painel devolve ao gateway o texto já mostrado nela (o cabeçalho da Máquina incluso), para o gateway não repetir o cabeçalho na mesma resposta; busca vazia leva à Seth o aviso do que tentar em seguida
++- [ ] a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)
+ 
+ ## Desenho e alternativas
+ 
+@@ -722,7 +724,7 @@ Importantes (11/11/2026): `test_importantes.py` cobre o armazém e as rotas (sem
+ 
+ Catálogo de modelos (18/11/2026, decisão do Humano: "facilitar o acesso ao cadastro para liberar os modelos para os humanos"): subpainel `catalogo-modelos` em Sistema. `GET /api/modelos` lê o catálogo JSON (`AGATA_CATALOGO_MODELOS`, padrão `~/.local/share/agata/catalogo-modelos/catalogo.json`) e o arquivo de decisões; `POST /api/modelos/decisao` ({id, acao liberar|standby, confirmacao igual ao id, quem}) só acrescenta uma linha a `decisoes.jsonl` (quem, quando, de, para). Não altera rotas nem o OmniRoute. `proibido_pela_regra` e `indisponivel` recusam liberar (409); sem `confirmacao` igual ao id, 400; origem alheia, 403. O cadastro de provedor e de chave é o fluxo existente de Conexões de modelos (botão leva até lá). Testes: `test_modelos_painel.py`.
+ 
+-Ferramentas da Seth no painel (20/11/2026, decisão do Humano): só no modelo `seth-livre` (nunca na Seth pública), só de leitura, mais uma escrita. `ferramentas_seth.py` oferece ao gateway (`tools`) as quatro de leitura do MCP do canon (`maquina_verificar`, `vault_buscar`, `query_canon`, `vault_consultar`, pelo `tools/list` do `canon-mcp.mjs`, um processo node por chamada, 60 s) e `cache_anotar` (autor fixo "Seth (painel)", tipo fato|decisao|pendencia|nota, texto até 4000; o cache recusa segredo e marca dado pessoal). `memoria_acrescentar` nunca é oferecida nem executada. O servidor executa só nomes da lista fixa, devolve o resultado (truncado em 12000 caracteres; erro vira texto) ao gateway e repete por no máximo 5 rodadas, depois responde com aviso. Cada ferramenta emite o evento SSE `{"tipo":"estado"}` ("consultando <nome>…"), que a tela mostra no lugar de "A Seth está respondendo…". Leitura da web (21/11/2026, seth-web-21-11): `buscar_web(consulta)` e `ler_pagina(url, inicio)` pelo navegador-mcp (127.0.0.1:20136/mcp), uma sessão MCP HTTP por chamada; `ler_pagina` faz `navegar` + `ler_pagina` (8000 caracteres por vez) nessa sessão. O resultado abre com o selo de dado externo, nunca instrução. A busca do navegador-mcp passou a ler o RSS do Bing pelo `politica_egress.buscar_seguro` (a página comum chegava vazia ao Brave automatizado); só quando o RSS falha cai na página comum (essa, na fila do navegador; o RSS fica fora da fila). Risco declarado: o texto da web volta ao modelo só com o selo; na mesma resposta `cache_anotar` é recusado, mas as leituras do vault continuam disponíveis e a consulta e o endereço saem para fora ((716), risco assumido pelo Humano). O autoteste offline do navegador-mcp (`servidor.py --selftest offline`, que cobre `_itens_rss`) não roda no CI. O caminho sem stream (`/api/seth/chat`) continua sem ferramentas. Testes: `test_ferramentas_seth.py`.
++Ferramentas da Seth no painel (20/11/2026, decisão do Humano): só no modelo `seth-livre` (nunca na Seth pública), só de leitura, mais uma escrita. `ferramentas_seth.py` oferece ao gateway (`tools`) as quatro de leitura do MCP do canon (`maquina_verificar`, `vault_buscar`, `query_canon`, `vault_consultar`, pelo `tools/list` do `canon-mcp.mjs`, um processo node por chamada, 60 s) e `cache_anotar` (autor fixo "Seth (painel)", tipo fato|decisao|pendencia|nota, texto até 4000; o cache recusa segredo e marca dado pessoal). `memoria_acrescentar` nunca é oferecida nem executada. O servidor executa só nomes da lista fixa, devolve o resultado (truncado em 12000 caracteres; erro vira texto) ao gateway e repete por no máximo 5 rodadas, depois responde com aviso. Cada ferramenta emite o evento SSE `{"tipo":"estado"}` ("consultando <nome>…"), que a tela mostra no lugar de "A Seth está respondendo…". Leitura da web (21/11/2026, seth-web-21-11): `buscar_web(consulta)` e `ler_pagina(url, inicio)` pelo navegador-mcp (127.0.0.1:20136/mcp), uma sessão MCP HTTP por chamada; `ler_pagina` faz `navegar` + `ler_pagina` (8000 caracteres por vez) nessa sessão. O resultado abre com o selo de dado externo, nunca instrução. A busca do navegador-mcp passou a ler o RSS do Bing pelo `politica_egress.buscar_seguro` (a página comum chegava vazia ao Brave automatizado); só quando o RSS falha cai na página comum (essa, na fila do navegador; o RSS fica fora da fila). Risco declarado: o texto da web volta ao modelo só com o selo; na mesma resposta `cache_anotar` é recusado, mas as leituras do vault continuam disponíveis e a consulta e o endereço saem para fora ((716), risco assumido pelo Humano). O autoteste offline do navegador-mcp (`servidor.py --selftest offline`, que cobre `_itens_rss`) não roda no CI. (23/11/2026, seth-web2-23-11) A busca soma a API de busca da Wikipedia (pt e en, 3 de cada, User-Agent próprio sem dado pessoal; 429 é ignorado) e filtra por termos sem acento: Wikipedia com metade dos termos, Bing com 2/3 (o RSS do Bing casa só a 1ª palavra). Limite medido: busca gratuita sem chave segue com ruído; fato preciso pede `ler_pagina` na fonte oficial. A consulta passa a sair também para pt.wikipedia.org e en.wikipedia.org (8 s cada). Não medido: se algum modelo do seth-livre copia o cabeçalho na rodada 2 (o gateway só limpa cópia quando injeta); efeito na auditoria de ler o texto das rodadas intermediárias; se a Wikimedia aceita o User-Agent sem contato por muito tempo. O caminho sem stream (`/api/seth/chat`) continua sem ferramentas. Testes: `test_ferramentas_seth.py`.
+ 
+ ## Migração e reversão
+ 
+diff --git a/redesign/painel_operacional/test_ferramentas_seth.py b/redesign/painel_operacional/test_ferramentas_seth.py
+index 36b72596..11a8ca0c 100644
+--- a/redesign/painel_operacional/test_ferramentas_seth.py
++++ b/redesign/painel_operacional/test_ferramentas_seth.py
+@@ -584,6 +584,28 @@ class WebTests(unittest.TestCase):
+         self.assertFalse(ok)
+         self.assertTrue(motivo)
+ 
++    def test_rodada_devolve_o_texto_ja_mostrado_para_o_gateway_nao_repetir_o_cabecalho(self):
++        roteiro = [["data: " + json.dumps({"choices": [{"delta": {"content": "agata-seth · cab\npronto.\n"}}]}), ""]
++                   + sse_chamada("buscar_web", '{"consulta":"x"}'), sse_texto("ok")]
++        pedidos = []
++        def abrir(p):
++            pedidos.append(json.loads(json.dumps(p)))
++            return roteiro[len(pedidos)]
++        list(fs.laco(abrir, roteiro[0], {"messages": []}, executor=lambda n, a: "r"))
++        assistente = [m for m in pedidos[0]["messages"] if m["role"] == "assistant"][0]
++        self.assertEqual(assistente["content"], "agata-seth · cab\npronto.\n")
++        # a condição do gateway para NÃO repor o cabeçalho (seth_gateway: só põe se _em_andamento for vazio)
++        import sys
++        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "router"))
++        import auditoria_turno
++        historico = [{"role": "user", "content": "pergunta"}] + pedidos[0]["messages"]
++        self.assertTrue(auditoria_turno._em_andamento(historico).strip())
++
++    def test_busca_vazia_leva_o_aviso_do_que_tentar(self):
++        txt = fs.executar_web("buscar_web", {"consulta": "x"},
++                              rpc=lambda c: [_res({"resultados": [], "aviso": "reformule ou use ler_pagina", "erro": None})])
++        self.assertIn("aviso: reformule ou use ler_pagina", txt)
++
+     def test_rpc_navegador_usa_uma_sessao_e_le_sse(self):
+         vistos = []
+         class R:
