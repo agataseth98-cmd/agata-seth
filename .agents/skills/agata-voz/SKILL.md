@@ -62,6 +62,17 @@ Adaptar à saída de áudio disponível (Humano, 03/11): toque na saída que hou
 - **Divergência preservada.** Não converta debate em consenso, decisão arquitetural, autorização ou resultado de experimento. Não escreva no canon nem altere serviço, teste, memória ou projeto como consequência do debate, sem autorização e gates próprios.
 - **Métrica exploratória (não medida).** Uma avaliação futura pode medir interrupção prematura, latência após fim de fala confirmado e retomadas ou correções. A janela de 2 a 5 segundos é só candidata até ser medida e aprovada; adapte a espera aos sinais de continuação e à preferência explícita do Humano.
 
+## 3a. Chamada de voz em app com fala própria (proposta de 07/11, reaproveitada em 23/11)
+
+A fala do app e o Piper local são saídas separadas. O modelo não consegue trocar a voz nativa da chamada por uma configuração do Piper. Para o Humano ouvir só a voz do sistema durante uma chamada:
+
+1. Se houver controle de áudio do app acessível, silencie apenas a saída da chamada atual. Não silencie o computador nem mude o volume global. Se não houver controle acessível, diga que o Humano precisa silenciar manualmente o app e espere a confirmação antes de iniciar o Piper; não afirme que o fez.
+2. Continue mostrando as respostas e atualizações curtas em texto. Não exponha nem leia raciocínio interno. Fale somente o texto final destinado ao Humano, usando `scripts/agata_falar.py` na Máquina.
+3. Se o Humano já pediu fala, não peça uma segunda autorização para a mesma resposta. A autorização para falar não substitui uma aprovação de ferramenta exigida pelo ambiente: use o fluxo de permissão normal e nunca contorne uma recusa.
+4. Na chamada normal de reprodução, sem `--preparar` nem `--sem-tocar`, o código `0` indica que a síntese e o player terminaram sem erro; não prova que o Humano ouviu. Com `--preparar` ou `--sem-tocar`, `0` não confirma reprodução. Em `3` ou `4`, diga que não falou e não use outra voz.
+
+Esse arranjo silencia a saída audível do app e reproduz o texto final pelo Piper no computador. Ele não troca a voz nativa nem envia o áudio do Piper de volta à chamada. Se o app não estiver silenciado, as duas saídas podem ser ouvidas.
+
 ## 4. Quem não consegue emitir áudio
 
 Escreve para ser falado, na voz comum: resultado primeiro, evidência (ou "não medido"), próximo passo; frases curtas; sem saudação, muleta, emoji nem exclamação. Sem tabela, caminho ou bloco de código dentro do trecho falado. Siglas soletradas; números por extenso quando soar melhor. Entrega o texto falável e diz que não falou. Havendo shell em qualquer ponto da conversa, usa o script da seção 2.
