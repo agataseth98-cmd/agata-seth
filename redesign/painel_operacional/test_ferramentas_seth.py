@@ -584,6 +584,28 @@ class WebTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertTrue(motivo)
 
+    def test_rodada_devolve_o_texto_ja_mostrado_para_o_gateway_nao_repetir_o_cabecalho(self):
+        roteiro = [["data: " + json.dumps({"choices": [{"delta": {"content": "agata-seth · cab\npronto.\n"}}]}), ""]
+                   + sse_chamada("buscar_web", '{"consulta":"x"}'), sse_texto("ok")]
+        pedidos = []
+        def abrir(p):
+            pedidos.append(json.loads(json.dumps(p)))
+            return roteiro[len(pedidos)]
+        list(fs.laco(abrir, roteiro[0], {"messages": []}, executor=lambda n, a: "r"))
+        assistente = [m for m in pedidos[0]["messages"] if m["role"] == "assistant"][0]
+        self.assertEqual(assistente["content"], "agata-seth · cab\npronto.\n")
+        # a condição do gateway para NÃO repor o cabeçalho (seth_gateway: só põe se _em_andamento for vazio)
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "router"))
+        import auditoria_turno
+        historico = [{"role": "user", "content": "pergunta"}] + pedidos[0]["messages"]
+        self.assertTrue(auditoria_turno._em_andamento(historico).strip())
+
+    def test_busca_vazia_leva_o_aviso_do_que_tentar(self):
+        txt = fs.executar_web("buscar_web", {"consulta": "x"},
+                              rpc=lambda c: [_res({"resultados": [], "aviso": "reformule ou use ler_pagina", "erro": None})])
+        self.assertIn("aviso: reformule ou use ler_pagina", txt)
+
     def test_rpc_navegador_usa_uma_sessao_e_le_sse(self):
         vistos = []
         class R:

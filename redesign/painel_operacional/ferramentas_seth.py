@@ -226,7 +226,7 @@ def executar_web(nome: str, args: dict, rpc=None) -> str:
         linhas = [f"{i}. {r.get('titulo', '')}\n   {r.get('url', '')}\n   {r.get('trecho', '')}"
                   for i, r in enumerate(d.get("resultados") or [], 1)]
         corpo = "\n".join(linhas) or "nenhum resultado nesta busca (não prova que não existe)"
-        if d.get("aviso") and linhas:
+        if d.get("aviso"):  # vazio também leva o aviso: diz à Seth o que tentar em seguida
             corpo += "\naviso: " + str(d["aviso"])
         return truncar(SELO_WEB + corpo)
     url = str(args.get("url") or "").strip()
@@ -531,10 +531,13 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
     web_nesta_resposta = False
     while True:
         chamadas = None
+        texto_rodada = []
         for ev in eventos_do_stream(linhas):
             if ev["tipo"] == "chamadas":
                 chamadas = ev["chamadas"]
             else:
+                if ev["tipo"] == "texto":
+                    texto_rodada.append(ev.get("delta") or "")
                 yield ev
         if chamadas is None:
             return
@@ -543,7 +546,9 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
             yield {"tipo": "fim"}
             return
         rodada += 1
-        pedido["messages"].append({"role": "assistant", "content": "", "tool_calls": [
+        # (23/11/2026) o texto já mostrado nesta rodada (o cabeçalho da Máquina incluso) volta ao gateway: com o
+        # content vazio o gateway via a resposta como nova e repetia o cabeçalho a cada rodada de ferramenta
+        pedido["messages"].append({"role": "assistant", "content": "".join(texto_rodada), "tool_calls": [
             {"id": _id_chamada(c, i), "type": "function",
              "function": {"name": c["nome"], "arguments": c["argumentos"]}} for i, c in enumerate(chamadas)]})
         for i, c in enumerate(chamadas):
