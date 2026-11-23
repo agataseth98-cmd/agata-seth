@@ -27,5 +27,20 @@ caso "P-16 sem arquivo de controle staged: SKIP isento" '[ "$PERIMETRO_ESTADO" =
 PERIMETRO_P17_ISENTO=0; PERIMETRO_ESTADO=""; AGATA_TESTE_PERIMETRO=1 p16_testes_dos_controles >/dev/null 2>&1
 caso "P-16 dentro da suíte (recursão): SKIP isento" '[ "$PERIMETRO_ESTADO" = SKIP ] && [ "$PERIMETRO_P17_ISENTO" = 1 ]'
 
+# (23/11/2026) a série é a do arquivo de estado (compartilhado entre checkout e worktrees): um isento não a zera,
+# um SKIP comum soma, e uma corrida que não pula zera. Usa um arquivo de estado descartável.
+P17_ESTADO="$TMP/serie-p17.tsv"
+serie() { awk -v c="$1" '$1==c{print $2}' "$P17_ESTADO" | tail -1; }
+printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=""; P17_ISENTOS=" P-10 "
+p17_skip_cronico >/dev/null 2>&1
+caso "P-17: isento não zera a série anterior (worktree não apaga a contagem)" '[ "$(serie P-10)" = 4 ]'
+printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=" P-10 "; P17_ISENTOS=""
+p17_skip_cronico >/dev/null 2>&1
+caso "P-17: SKIP comum soma à série" '[ "$(serie P-10)" = 5 ]'
+printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=""; P17_ISENTOS=""
+p17_skip_cronico >/dev/null 2>&1
+caso "P-17: corrida que não pula zera a série" '[ "$(serie P-10)" = 0 ]'
+P17_SKIPS=""; P17_ISENTOS=""
+
 [ "$falhas" -eq 0 ] && echo "P-17 isento: OK" || echo "P-17 isento: $falhas FALHA(S)"
 exit "$falhas"

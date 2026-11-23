@@ -85,6 +85,16 @@ SERVICE_ALLOWLIST = (
 # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
 TIMER_ALLOWLIST = ("agata-manutencao.timer",)
 TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service"}
+# Sob demanda (decisão do Humano, 29/10/2026: nada sobe no boot; a unidade acorda por socket ou por pedido).
+# Parada de propósito não é aviso nem falha. Esta lista cobre as unidades sem socket de escuta (whisper,
+# embeddings, proxy do Obsidian) e o timer de manutenção. As unidades com `.socket` de mesmo nome
+# (laya-roteador, ollaya, ollama-agata) entram pela regra do socket em _estado_da_unidade.
+SOB_DEMANDA_FIXA = frozenset({
+    "openvino-whisper.service", "openvino-embeddings.service", "obsidian-ro-proxy.service",
+    "agata-manutencao.timer",
+    # 23/11/2026: o atalho `agata` não sobe o Obsidian (abre pelo painel) nem o ouvido (sobe quando a voz pede).
+    "obsidian-app.service", "ouvido-agata.service",
+})
 MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
 # Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
 EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
@@ -528,8 +538,8 @@ def _service_snapshot(unit: str) -> dict:
             "sub_state": values["SubState"], "source": "seth-verificador", "source_ref": "unidade:" + unit,
             "observed_at": observed_at, "fresh_until": fresh_until, "error": TEXTO_UNIDADE_AUSENTE,
         }
-    state = "ok" if load == "loaded" and active == "active" else "warning"
-    return {
+    state, sob_demanda_por = _estado_da_unidade(unit, load, active)
+    result = {
         "unit": unit,
         "state": state,
         "load_state": load,
@@ -540,13 +550,51 @@ def _service_snapshot(unit: str) -> dict:
         "observed_at": observed_at,
         "fresh_until": fresh_until,
     }
+    if sob_demanda_por:
+        result["sob_demanda_por"] = sob_demanda_por
+    return result
+
+
+def _socket_de(unit: str) -> str | None:
+    """Socket de mesmo nome de uma unidade `.service` (laya-roteador.service -> laya-roteador.socket)."""
+    return unit[: -len(".service")] + ".socket" if unit.endswith(".service") else None
+
+
+def _socket_escutando(socket_unit: str) -> bool:
+    """Socket de usuário ativo e em escuta (SubState listening). Leitura que falha conta como não escutando."""
+    try:
+        values = _parse_pairs(_command_body(_verify("unidade", consulta=socket_unit)))
+    except (OSError, TimeoutError, ValueError, urllib.error.URLError):
+        return False
+    return (values.get("LoadState") == "loaded" and values.get("ActiveState") == "active"
+            and values.get("SubState") == "listening")
+
+
+def _estado_da_unidade(unit: str, load: str, active: str) -> tuple[str, str | None]:
+    """Estado do painel para uma unidade já lida (não encontrada é tratada antes, como ausente).
+    - failed: erro, mesmo que o socket de mesmo nome esteja escutando;
+    - active: ok;
+    - inactive de propósito (lista fixa, ou socket de mesmo nome em escuta): sob_demanda, com o motivo;
+    - qualquer outro caso: warning."""
+    if active == "failed":
+        return "erro", None
+    if load == "loaded" and active == "active":
+        return "ok", None
+    if load == "loaded" and active == "inactive":
+        if unit in SOB_DEMANDA_FIXA:
+            return "sob_demanda", "lista fixa do painel (decisão de 29/10/2026)"
+        socket = _socket_de(unit)
+        if socket and _socket_escutando(socket):
+            return "sob_demanda", f"socket {socket} em escuta"
+    return "warning", None
 
 
 def _overall_state(states: list[str]) -> str:
     if any(state == "unknown" for state in states):
         return "unknown"
-    # "ausente" conta como warning: antes desta mudança, unidade não encontrada já caía em warning.
-    if any(state in ("warning", "ausente") for state in states):
+    # "ausente" e "erro" contam como warning (como antes desta mudança, unidade não encontrada ou falhada caía em warning).
+    # "sob_demanda" não entra: parada de propósito não é aviso e não muda o estado geral.
+    if any(state in ("warning", "ausente", "erro") for state in states):
         return "warning"
     return "ok"
 
@@ -575,12 +623,15 @@ def _timer_snapshot(unit: str) -> dict:
                 raise ValueError("consulta ao timer indisponível")
             if values.get("Id") != unit or values.get("LoadState") != "loaded" or not values.get("ActiveState"):
                 raise ValueError("timer ausente ou resposta incompleta")
+            estado, sob_demanda_por = _estado_da_unidade(unit, values["LoadState"], values["ActiveState"])
             result.update({
-                "state": "ok" if values["ActiveState"] == "active" else "warning",
+                "state": estado,
                 "active_state": values["ActiveState"], "sub_state": values.get("SubState", ""),
                 "next_trigger": values.get("NextElapseUSecRealtime") or None,
                 "last_trigger": values.get("LastTriggerUSec") or None,
             })
+            if sob_demanda_por:
+                result["sob_demanda_por"] = sob_demanda_por
     except (OSError, subprocess.TimeoutExpired, ValueError):
         result["error"] = "estado do timer indisponível"
     service = TIMER_SERVICES[unit]
@@ -702,9 +753,8 @@ CAPACIDADES = {
 }
 
 
-def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
-    """'ativa' ou 'inativa' se a unidade existe; 'ausente' se o systemd diz not-found; None se não deu para ler.
-    `sistema=True` consulta a unidade de sistema (sem --user)."""
+def _leitura_systemd(unit: str, sistema: bool = False) -> tuple[str | None, str | None] | None:
+    """(LoadState, ActiveState) do systemctl; None se o comando não rodou. `sistema=True` consulta a unidade de sistema."""
     comando = ["/usr/bin/systemctl"] + ([] if sistema else ["--user"])
     try:
         proc = subprocess.run(comando + ["show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
@@ -712,16 +762,55 @@ def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
     except (OSError, subprocess.TimeoutExpired):
         return None
     valores = _parse_pairs(proc.stdout)
-    if valores.get("LoadState") == "not-found":
-        return "ausente"
-    if valores.get("LoadState") != "loaded":
+    return valores.get("LoadState"), valores.get("ActiveState")
+
+
+def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
+    """'ativa' ou 'inativa' se a unidade existe; 'ausente' se o systemd diz not-found; None se não deu para ler.
+    `sistema=True` consulta a unidade de sistema (sem --user)."""
+    leitura = _leitura_systemd(unit, sistema)
+    if leitura is None:
         return None
-    return "ativa" if valores.get("ActiveState") == "active" else "inativa"
+    load, active = leitura
+    if load == "not-found":
+        return "ausente"
+    if load != "loaded":
+        return None
+    return "ativa" if active == "active" else "inativa"
 
 
-def _unidade_ativa(unit: str) -> bool | None:
-    estado = _estado_systemd(unit)
-    return None if estado in (None, "ausente") else estado == "ativa"
+def _estado_painel_unidade(unit: str) -> tuple[str, str | None] | None:
+    """Estado do painel de uma unidade de usuário, pela regra de _estado_da_unidade (a mesma de /api/status).
+    ("ausente", None) se o systemd não a conhece; None se não deu para ler. Só escopo de usuário: é o que o verificador lê."""
+    leitura = _leitura_systemd(unit)
+    if leitura is None:
+        return None
+    load, active = leitura
+    if load == "not-found":
+        return "ausente", None
+    if load != "loaded" or active is None:
+        return None
+    return _estado_da_unidade(unit, load, active)
+
+
+def _sob_demanda_agora(unit: str) -> bool:
+    """True se a unidade de usuário está parada de propósito agora (a regra de _estado_da_unidade). Sem leitura: False."""
+    leitura = _estado_painel_unidade(unit)
+    return leitura is not None and leitura[0] == "sob_demanda"
+
+
+def _unidade_ativa(unit: str) -> bool | str | None:
+    """Leitura de uma unidade para as capacidades: True (ativa), "sob_demanda" (parada de propósito, não é aviso),
+    False (aviso: inativa sem motivo, em falha ou em transição), None (sem leitura ou ausente)."""
+    leitura = _estado_painel_unidade(unit)
+    if leitura is None:
+        return None
+    estado = leitura[0]
+    if estado == "ausente":
+        return None
+    if estado == "sob_demanda":
+        return "sob_demanda"
+    return estado == "ok"
 
 
 def _http_ok(url: str) -> bool:
@@ -732,21 +821,37 @@ def _http_ok(url: str) -> bool:
         return False
 
 
+def _texto_leitura_unidade(valor: bool | str | None) -> str:
+    """Texto da evidência de uma unidade nas capacidades (valores de _unidade_ativa)."""
+    if valor is True:
+        return "ativo"
+    if valor == "sob_demanda":
+        return "sob demanda (parada de propósito; não é aviso)"
+    if valor is False:
+        return "inativo ou ausente"
+    return "sem leitura"
+
+
 def _capacidades_snapshot() -> dict:
     observed_at, fresh_until = _reading_window()
     itens = []
     for nome, sondas in CAPACIDADES.items():
-        estados = [_unidade_ativa(u) for u in sondas["units"]] + [_http_ok(h) for h in sondas["http"]]
+        leituras_unidades = [_unidade_ativa(u) for u in sondas["units"]]
+        leituras_http = [_http_ok(h) for h in sondas["http"]]
+        estados = leituras_unidades + leituras_http
         if any(e is None for e in estados):
             estado = "unknown"
-        elif all(estados):
+        elif all(e is True for e in estados):
             estado = "ok"
+        elif all(e is True or e == "sob_demanda" for e in estados) and "sob_demanda" in estados:
+            # 23/11/2026: parada de propósito não é aviso (ver _estado_da_unidade); o resto está ativo.
+            estado = "sob_demanda"
         else:
             estado = "warning"
         partes = []
-        for u, e in zip(sondas["units"], estados[:len(sondas["units"])]):
-            partes.append(f"{u} {'ativo' if e else ('inativo ou ausente' if e is False else 'sem leitura')}")
-        for h, e in zip(sondas["http"], estados[len(sondas["units"]):]):
+        for u, e in zip(sondas["units"], leituras_unidades):
+            partes.append(f"{u} {_texto_leitura_unidade(e)}")
+        for h, e in zip(sondas["http"], leituras_http):
             partes.append(f"{h} {'responde 200' if e else 'sem resposta 200'}")
         itens.append({"id": nome, "state": estado, "source": sondas.get("fonte", "systemctl --user show; HTTP local"),
                       "source_ref": ", ".join(sondas["units"] + sondas["http"]),
@@ -796,8 +901,13 @@ def _lacunas_snapshot() -> dict:
             vistas.add(unit); declaradas += 1
             if _tipo_unidade_usuario(unit) == "oneshot":
                 continue
-            estado = _estado_systemd(unit)
-            if estado in (None, "ausente"):
+            # 23/11/2026: parada de propósito (lista fixa ou socket em escuta) não é lacuna. Sem leitura ou ausente no
+            # escopo do usuário, consulta o escopo de sistema, como antes.
+            leitura = _estado_painel_unidade(unit)
+            if leitura is not None and leitura[0] == "sob_demanda":
+                continue
+            estado = {"ok": "ativa", "warning": "inativa", "erro": "inativa"}.get(leitura[0]) if leitura else None
+            if estado is None:
                 estado = _estado_systemd(unit, sistema=True)
             if estado == "ausente":
                 itens.append({"nome": unit, "state": "ausente", "motivo": TEXTO_UNIDADE_AUSENTE, "fonte": "ESTADO.md · Serviços (boot)"})
@@ -810,6 +920,10 @@ def _lacunas_snapshot() -> dict:
         m = re.search(r"`([a-z][a-z0-9-]+)`.{0,40}?:(\d{4,5})\b", linha)
         if m and not re.search(r"\.(service|timer)$", m.group(1)):
             declaradas += 1
+            # 23/11/2026: a porta fechada de um serviço parado de propósito (o mesmo da linha) não é lacuna.
+            unidade_da_linha = re.search(r"`([a-z0-9@._-]+\.(?:service|timer))`", linha)
+            if unidade_da_linha and _sob_demanda_agora(unidade_da_linha.group(1)):
+                continue
             if not _porta_responde(int(m.group(2))):
                 itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "ESTADO.md · Serviços (boot)"})
     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until,

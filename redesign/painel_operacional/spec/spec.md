@@ -247,6 +247,17 @@ Lote `atualiza-17-11`. Os critérios com teste estão em "Critérios de aceite",
 - Abas novas: em Sistema, Equipe, Backup e Saída de rede (Integrações e Conexões já existiam); em Qualidade, Perímetro e CI (Qualidade de LLM e Lacunas já existiam).
 - Regra: o painel não executa perímetro nem CI; mostra o último resultado gravado. A tela diz isso ("O painel não roda o perímetro; mostra o último resultado gravado."). As rotas `/api/perimetro` e `/api/ci` só leem arquivo.
 
+### Sob demanda e recarga (23/11/2026)
+
+- Estado `sob_demanda`: unidade parada de propósito (`ActiveState=inactive`, `LoadState=loaded`) que está na lista fixa `SOB_DEMANDA_FIXA` do servidor (whisper, embeddings, proxy do Obsidian e o timer de manutenção, decisão do Humano de 29/10/2026: nada sobe no boot) ou cujo socket de mesmo nome (`laya-roteador.service` -> `laya-roteador.socket`) está `active` e `listening`. O item traz `sob_demanda_por` com o motivo. Vale em `/api/status` (`services`, `timers`) e `/api/details` (`integrations`).
+- `sob_demanda` não é aviso: não muda o estado geral de `/api/status`. Socket que não escuta, ou que não responde, deixa a unidade parada como `warning`.
+- Estado `erro`: unidade em `failed`, mesmo com o socket escutando. Antes desta mudança saía como `warning`; no estado geral, `erro` continua contando como warning (como `ausente`).
+- No cliente, `sob_demanda` vira chip "SOB DEMANDA" na classe neutra `horizon`; `erro` vira "ERRO" (`chip erro`). Nenhuma cor nova.
+- Recarga (`RECARGA_SUB` em `prototipo.js`): a cada 60 s, no mesmo intervalo que já existe, a sub-tela visível de leitura recarrega pela própria carga (equipe, backup, saída de rede, perímetro, CI, memória do Conselho, importantes, lacunas, qualidade de LLM e catálogo de modelos). Fora dela: Conversa e formulários, Panorama e Detalhes (60 s próprios), Medições (4 s próprios), Avaliação e Sentidos.
+- Recarga só com a página visível, e nunca com edição em curso: campo de texto com valor diferente do inicial, campo com foco ou caixa de diálogo aberta. O texto digitado não é apagado.
+- `/api/lacunas`: unidade declarada em ESTADO.md (Serviços (boot)) que está sob demanda (mesma regra de `_estado_da_unidade`) não é lacuna, e a porta declarada na mesma linha também não. Falha e inativa sem motivo continuam lacuna. Só escopo de usuário; o escopo de sistema segue como antes.
+- `/api/capacidades`: a capacidade com unidade parada de propósito sai `sob_demanda` (hoje, `manutencao` com o timer parado), e a evidência diz "sob demanda". Falha e inativa sem motivo continuam `warning`. No cartão lido pela rota, o estado vira `horizon` e o chip é SOB DEMANDA.
+
 ## Mapeamento de funções
 
 Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operator_console` e `/conselho-rede`. A coluna "Subpainel e ids" traz o id do subpainel ou dos controles. "Casca" são elementos de moldura; estão listados para não sumirem, e a decisão de não mapeá-los a uma seção é pedida ao Humano.
@@ -681,6 +692,19 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)
 - [ ] quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra "modelos (um por rodada): a → b"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta
 - [ ] na tela larga a lista de conversas da barra lateral tem piso de 180 px e a barra rola quando falta altura (em 632 px de altura a lista encolhia a 0 e sumia)
+
+### Critérios do lote sob demanda e recarga (23/11/2026)
+
+- [ ] unidade parada de propósito, com o socket de mesmo nome escutando ou na lista fixa de sob demanda, aparece como `sob_demanda` com o motivo; o timer de manutenção parado também
+- [ ] socket de mesmo nome que não escuta, ou que não responde, deixa a unidade parada como `warning`; estado que não é parada nem ativa também é `warning`
+- [ ] unidade em `failed` aparece como `erro`, mesmo com o socket escutando, e nunca como `sob_demanda`
+- [ ] `sob_demanda` não muda o estado geral: só `warning`, `erro` ou `ausente` deixam o geral em warning
+- [ ] no cliente, `sob_demanda` aparece como chip SOB DEMANDA na classe neutra `horizon` e `erro` como ERRO, sem cor nova
+- [ ] a sub-tela visível de leitura recarrega a cada 60 s pelas cargas que ela já tem, no intervalo que já existe; Conversa, Detalhes, Panorama e Medições ficam fora desse mapa, e não há intervalo novo
+- [ ] a recarga não roda com a página oculta nem com edição em curso (campo de texto alterado, campo com foco, caixa de diálogo aberta) e não apaga o texto digitado
+- [ ] `/api/lacunas` não marca como lacuna a unidade declarada no boot que está sob demanda, nem a porta dela; falha e inativa sem motivo continuam lacuna
+- [ ] `/api/capacidades` põe a capacidade em `sob_demanda` quando a unidade parada é de propósito (o timer de manutenção), e não em aviso; falha continua `warning`
+- [ ] no cartão de capacidade, `sob_demanda` fica no filtro horizon com o chip SOB DEMANDA, e o cartão lido pela rota não vira partial
 
 ## Desenho e alternativas
 

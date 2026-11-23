@@ -176,6 +176,14 @@
   "resumo": "-"
  },
  {
+  "nome": "agata-mapear-humano",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-mapear-humano/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "agata-painel",
   "tipo": "skill",
   "fonte": "agata",

@@ -3,10 +3,15 @@
 # plataforma, devem seguir as diretrizes do sistema"). O P-23 confere que cada uma
 # traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
 # Conselho -- cache_conselho) ou importa o AGENTS.md.
-# Plataforma nova = linha nova aqui. Formato: caminho|quem lê
+# Plataforma nova = linha nova aqui. Formato: caminho|quem lê|leitura
+#   leitura vazia ou 'arquivo': confere o próprio arquivo (ou o AGENTS.md que ele importa).
+#   leitura 'doutrina': o módulo Python expõe doutrina_montada(), o texto que ele põe antes do modelo;
+#   o P-23 confere esse texto, não o arquivo do módulo.
 AGENTS.md|Codex, Cursor e outras ferramentas que leem AGENTS.md
 GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
 CLAUDE.md|Claude Code (importa o AGENTS.md)
 PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
-redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)
+# Rota interna da Seth. A rota pública (seth-public, seção SETH-PUBLICA) não passa por aqui: recebe só a sua
+# instrução, sem o AGENTS.md, por política da faixa pública (_preparar_payload_publico).
+redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)|doutrina
 redesign/goose/AGENTS.md|arquivo histórico do Goose (saiu em 07/11/2026)

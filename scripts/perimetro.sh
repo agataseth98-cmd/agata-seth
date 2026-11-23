@@ -63,6 +63,7 @@ source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
 source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
 source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
 source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
+source "$_PERIMETRO_DIR/perimetro/p27_atalhos_fonte.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -229,7 +230,7 @@ p9_carregar_fonte
 # scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
 # mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
 # SKIP crônico; foi lido como "por desenho" em (527), e era isto).
-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|testar_(capability|dados_externos|egress_proxy|net02_compose|fork_librechat)|verificar_cabecalho|verificar_migracao_[a-z]+|politica_egress|criar_chave_capability)\.(sh|py)|redesign/(mcp/capability\.py|mcp/(discord|navegador)/.*\.py|router/(proxy|seth_gateway|seth_escriba)\.py|librechat/(canon-mcp\.mjs|librechat\.yaml|docker-compose\.yml|Dockerfile|fork/agata-capabilities\.patch)|systemd/(discord-mcp|navegador-mcp|seth-escriba)\.service)|\.githooks/.*)$'
+P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|testar_(capability|dados_externos|egress_proxy|net02_compose|fork_librechat|p27_atalhos|p10_worktree|p17_isento|ci_progresso)|verificar_cabecalho|verificar_migracao_[a-z]+|politica_egress|criar_chave_capability)\.(sh|py)|redesign/(mcp/capability\.py|mcp/(discord|navegador)/.*\.py|router/(proxy|seth_gateway|seth_escriba)\.py|librechat/(canon-mcp\.mjs|librechat\.yaml|docker-compose\.yml|Dockerfile|fork/agata-capabilities\.patch)|systemd/(discord-mcp|navegador-mcp|seth-escriba)\.service)|\.githooks/.*)$'
 
 
 # --- P-17 ----------------------------------------------------------------
@@ -254,6 +255,8 @@ P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_se
 # Estado FORA do repositório (~/.cache/agata/): é telemetria de execução,
 # não canon, e não deve sujar `git status` nem exigir entrada no .gitignore.
 P17_SKIPS=""
+# SKIP isento ("não se aplica": P-16 fora de commit de controle, P-10 numa worktree vinculada): não entra na série.
+P17_ISENTOS=""
 P17_LIMITE=10
 P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
 
@@ -274,9 +277,9 @@ _perimetro_veredito() {
     echo "veredito: SKIP"
     _perimetro_registrar SKIP
     CONT_SKIP=$((CONT_SKIP + 1))
-    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese) não é pular em silêncio:
-    # a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida.
-    [ "$p17_isento" = 1 ] || P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
+    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese; P-10 em worktree vinculada) não é pular em
+    # silêncio: a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida (nem zera a anterior).
+    if [ "$p17_isento" = 1 ]; then P17_ISENTOS="${P17_ISENTOS}${PERIMETRO_CTRL:-?} "; else P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "; fi
   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
     echo "veredito: PARCIAL"
     _perimetro_registrar PARCIAL
@@ -467,6 +470,11 @@ main() {
   cabecalho "P-16" "Quem muda um controle roda os testes daquele controle" "MEMÓRIAS (421); scripts/testar_perimetro.sh"
   PERIMETRO_ESTADO=""
   p16_testes_dos_controles; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-27" "Atalho instalado em ~/.local/bin igual à fonte versionada que ele declara (aviso, nunca falha)" "decisão do Humano, 18/11/2026 (o sistema se atualiza sozinho); redesign/systemd/seth e seth-parar"
+  PERIMETRO_ESTADO=""
+  p27_atalhos_fonte; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"

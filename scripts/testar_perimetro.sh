@@ -271,7 +271,8 @@ declare -A SEM_TESTE=(
   [P-4]="binds sintéticos cobertos por testar_cobertura_servicos.py no fim desta suíte; atribuição de processos vivos exige integração"
   [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
   [P-9]="lista de unidades e ponte coberta offline por testar_cobertura_servicos.py no fim desta suíte; integração depende de unidades systemd vivas. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
-  [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
+  [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso). O ramo de worktree vinculada (SKIP isento, 23/11/2026) e' coberto por scripts/testar_p10_worktree.sh, ligado no fim desta suite"
+  [P-27]="le ~/.local/bin (o HOME real, fora do repositorio) e so' emite AVISO, que _acusacoes() nao conta; a checagem e' testada com HOME falso em scripts/testar_p27_atalhos.sh, ligado no fim desta suite"
   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
@@ -293,7 +294,7 @@ declare -A SEM_TESTE=(
 #         root, sem rede, sem servico vivo. Todo controle com _caso() aqui
 #         e' L1, por definicao (P-1, P-5, P-7, P-8, P-11, P-14).
 #   L2 -- integracao local: precisa de processo/servico vivo na Maquina,
-#         mas nada alem de localhost (P-4, P-9, P-10).
+#         mas nada alem de localhost (P-4, P-9, P-10, P-27).
 #   L3 -- privilegiado: precisa de root (P-2).
 #   L4 -- rede: depende de chamada remota real ou relogio de calendario
 #         passando (P-3, P-13, P-15).
@@ -306,7 +307,7 @@ declare -A NIVEL=(
   [P-21]=L1 [P-20]=L1 [P-22]=L1 [P-23]=L1
   [P-2]=L3
   [P-3]=L4 [P-13]=L4 [P-15]=L4
-  [P-4]=L2 [P-9]=L2 [P-10]=L2
+  [P-4]=L2 [P-9]=L2 [P-10]=L2 [P-27]=L2
   [P-6]=L5 [P-12]=L5
 )
 
@@ -717,6 +718,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-16 || "$FILTRO" == P-17 || "$FILTRO" == "__
   else
     FALHOU=$((FALHOU + 1))
     falhas_detalhe+=("P-16/P-17: contraprovas do isento (scripts/testar_p17_isento.sh)")
+  fi
+fi
+
+# (23/11/2026) P-10 em worktree vinculada (SKIP isento, nao conta no P-17) e P-27 (atalho instalado igual a fonte; so AVISO).
+if [[ -z "$FILTRO" || "$FILTRO" == P-10 || "$FILTRO" == P-27 || "$FILTRO" == L2 || "$FILTRO" == "__AGREGADOS__" ]]; then
+  if bash "$RAIZ/scripts/testar_p10_worktree.sh" >/dev/null 2>&1 && bash "$RAIZ/scripts/testar_p27_atalhos.sh" >/dev/null 2>&1; then
+    OK=$((OK + 1))
+  else
+    FALHOU=$((FALHOU + 1))
+    falhas_detalhe+=("P-10/P-27: contraprovas da worktree vinculada e dos atalhos (scripts/testar_p10_worktree.sh, scripts/testar_p27_atalhos.sh)")
   fi
 fi
 

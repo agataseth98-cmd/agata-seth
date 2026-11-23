@@ -76,8 +76,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 1.
-- `caminho-visao-23-11`
+Abertas (sem APROVADO-): 0.
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
@@ -160,47 +159,50 @@ Escopo pequeno de propósito: **UM modelo, UMA tarefa** — enviar um pedido de 
 ### Sudo e interação humana — PROTOCOLOS.md:380 (#sudo-e-interacao-humana)
 Quando uma operação exige `sudo`, o executor pausa e pede ao Humano para rodar o comando (por exemplo, prefixo `!` no Claude Code). Não armazenar senha, não simular autenticação, não contornar (110).
 
-### Quarentena estrutural (P-8) — PROTOCOLOS.md:387 (#quarentena-estrutural-p-8)
+### Protocolo de inserção humana continuado (decisão do Humano, 18/11/2026) — PROTOCOLOS.md:387 (#protocolo-de-insercao-humana-continuado-decisao-do-humano-18112026)
+Porta de entrada: a skill `agata-mapear-humano` (`.agents/skills/agata-mapear-humano/SKILL.md`), obrigatória para todo modelo. Literal do Humano, 18/11/2026 18:44: "criaremos uma skill obrigatória que vai mapear o humano, seguindo as regras do sistema, o humano é outra LLM, sendo treinada pelo agata, para aprender viver em harmonia com o meio e com o mistério." 18:45: "canônico, como todas as outras skills, abrindo o protocolo de inserção humana continuado."
+
+### Quarentena estrutural (P-8) — PROTOCOLOS.md:401 (#quarentena-estrutural-p-8)
 Texto completo: `propostas/README.md`. Fluxo prático: skill `agata-aplicar-proposta`.
 
-### Doutrina de defesa proporcional — PROTOCOLOS.md:395 (#doutrina-de-defesa-proporcional)
+### Doutrina de defesa proporcional — PROTOCOLOS.md:409 (#doutrina-de-defesa-proporcional)
 Os princípios desta doutrina ficam no PROJETO.md, seção "Princípios" (índice). Aqui fica o formato de pedido de decisão:
 
-### Decisor local — PROTOCOLOS.md:401 (#decisor-local)
+### Decisor local — PROTOCOLOS.md:415 (#decisor-local)
 Desde 13/10/2026 (655), decisão do Humano: modelos de decisão no estilo Jev rodando na Máquina, "onde der", **com o risco assumido por escrito (656)** contra 7 pareceres do Conselho Remoto (3 famílias: 2 "não", 5 "condicional"; o ponto mais contestado foi o roteador, por reabrir (383)/(416)). `ollaya` (contêiner `ghcr.io/ollaya-dev/ollaya` 0.13.0, CPU, pinado por digest, `:11435` loopback, `--memory=8g --cpus=8 --oom-score-adj=1000` — sem swap, ele é o primeiro a morrer se a RAM acabar), modelo `winnow:e4b`. Cliente único: `redesign/router/decisor.py` (`--selftest`). Um modelo de decisão não gera texto: recebe o texto e perguntas tipadas (`choice`, `score`, `noul`) e devolve probabilidades.
 
-### Estado de publicação — PROTOCOLOS.md:412 (#estado-de-publicacao)
+### Estado de publicação — PROTOCOLOS.md:426 (#estado-de-publicacao)
 Repositório **público**, por decisão registrada do Humano — foi isso que queimou o nonce; consequência conhecida, não acidente. O estado de publicação não se afirma por este texto: mede-se em cada sessão (`sync`, `PROTOCOLOS.md`). Se o remoto ficar atrás, o executor trabalha com os arquivos entregues pelo Humano e declara a origem.
 
-### Ferramenta embutida: selar.sh (Fase 4) — PROTOCOLOS.md:416 (#ferramenta-embutida-selarsh-fase-4)
+### Ferramenta embutida: selar.sh (Fase 4) — PROTOCOLOS.md:430 (#ferramenta-embutida-selarsh-fase-4)
 `scripts/selar.sh` sela arquivos em `SELOS.txt` (sha256); `--check` dá exit 1 sem `SELOS.txt` ou com arquivo violado ("VIOLADO"), exit 0 com tudo íntegro. É o P-14 sobre as camadas frias de MEMÓRIAS.
 
-### Memória em duas camadas — PROTOCOLOS.md:420 (#memoria-em-duas-camadas)
+### Memória em duas camadas — PROTOCOLOS.md:434 (#memoria-em-duas-camadas)
 **Camada local** — Obsidian sobre o próprio repositório git: offline, privada, é **FATO**. **Camada nuvem** — NotebookLM e afins: processamento de fonte bruta, é **RELATO/projeção**. Nunca recebe canon e nunca vira cérebro do sistema.
 
-#### Esfera pessoal — PROTOCOLOS.md:425 (#esfera-pessoal)
+#### Esfera pessoal — PROTOCOLOS.md:439 (#esfera-pessoal)
 `memoria/missoes/segunda-camada/` é a esfera local e privada do Humano. Sem remote, não sobe para serviço externo nenhum. Pode conter o que só existe nesta Máquina: hardware, rotina, configuração local, assunto pessoal. Modelos locais consultam sob demanda; modelos em nuvem não veem.
 
-#### Esfera do projeto — PROTOCOLOS.md:428 (#esfera-do-projeto)
+#### Esfera do projeto — PROTOCOLOS.md:442 (#esfera-do-projeto)
 `memoria/missoes/agata-sistema/` é a esfera de trabalho do sistema, vinculada a uma conta Google Workspace **dedicada ao projeto** — nunca a conta pessoal do Humano. Recebe material do sistema que o Humano autorize, e pode ser consultada por modelos externos sob autorização.
 
-#### Fronteira — PROTOCOLOS.md:431 (#fronteira)
+#### Fronteira — PROTOCOLOS.md:445 (#fronteira)
 Só o não-sensível sobe. Conteúdo público sobre o sistema pode ser usado na esfera do projeto; os arquivos canônicos não sobem como canon. Dado que só existe nesta Máquina, ou que pertence ao domínio pessoal, fica na esfera pessoal. Segredo, chave e credencial nunca sobem para esfera externa nenhuma.
 
-#### Fronteira mecânica — `subir_esfera_projeto.py` — PROTOCOLOS.md:436 (#fronteira-mecanica-subiresferaprojetopy)
+#### Fronteira mecânica — `subir_esfera_projeto.py` — PROTOCOLOS.md:450 (#fronteira-mecanica-subiresferaprojetopy)
 Único cano de código entre o sistema e o Drive: um arquivo por invocação, 8 checagens em ordem (caminho, esfera pessoal, canon, é arquivo, extensão, tamanho, UTF-8, varredura de segredo) e aborta na primeira que falhar; não é allowlist. Texto: `extras/projeto-detalhe/memoria-duas-camadas.md`.
 
-#### Índice derivado do canon público e export pro Drive — PROTOCOLOS.md:439 (#indice-derivado-do-canon-publico-e-export-pro-drive)
+#### Índice derivado do canon público e export pro Drive — PROTOCOLOS.md:453 (#indice-derivado-do-canon-publico-e-export-pro-drive)
 Camada de consulta separada do vault, gerada só do canon público (`gerar_indice_derivado.py`), exportada ao Drive só quando o sha256 do `indice.md` muda (post-commit, fail-soft). Ver `extras/projeto-detalhe/memoria-duas-camadas.md`.
 
-#### Mão única refinada — PROTOCOLOS.md:442 (#mao-unica-refinada)
+#### Mão única refinada — PROTOCOLOS.md:456 (#mao-unica-refinada)
 **Nenhum resultado externo tem autoridade automática para escrever no canon.** A esfera do projeto pode produzir síntese, análise ou proposta; nada disso é escrita de fato. Resultado processado só influencia o canon pelo fluxo normal: proposta explícita, decisão do Humano, verificação pela Máquina quando aplicável, registro em MEMÓRIAS, commit. A autorização do Humano permite a incorporação; não dispensa verificação nem registro.
 
-#### Postura sobre uso dos dados pelo Google — PROTOCOLOS.md:445 (#postura-sobre-uso-dos-dados-pelo-google)
+#### Postura sobre uso dos dados pelo Google — PROTOCOLOS.md:459 (#postura-sobre-uso-dos-dados-pelo-google)
 O Humano autoriza o uso dos dados da esfera do projeto nos serviços Google escolhidos, incluindo eventual uso para melhoria ou treinamento **quando os termos daquele serviço assim previrem**. É postura declarada do Humano, não alegação sobre o que a Google faz. Dados da esfera pessoal nunca são usados para isso, porque nunca sobem.
 
-#### ACB — reversão parcial de (223) — PROTOCOLOS.md:448 (#acb-reversao-parcial-de-223)
+#### ACB — reversão parcial de (223) — PROTOCOLOS.md:462 (#acb-reversao-parcial-de-223)
 Desde 27/08/2026, a exclusão do ACB vale só para assuntos pessoais e partes desnecessárias ao sistema. Assunto do próprio sistema pode voltar ao escopo com autorização explícita do Humano e o mesmo controle de proposta, verificação e registro.
 
-#### Limitação conhecida — Conselho Remoto — PROTOCOLOS.md:451 (#limitacao-conhecida-conselho-remoto)
+#### Limitação conhecida — Conselho Remoto — PROTOCOLOS.md:465 (#limitacao-conhecida-conselho-remoto)
 A esfera do projeto mora em `memoria/missoes/`, que casa com a Condição 1 do `scripts/conselho_remoto.py`: por mecanismo, não pode ser discutida com o Conselho Remoto. É a proteção funcionando. Mudar exige allowlist explícita ou mover a esfera — decisão do Humano.

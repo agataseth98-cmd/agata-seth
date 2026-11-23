@@ -3,6 +3,15 @@
 # auditoria do Marcos, MEMORIAS (437)) -- corte-e-cola, corpo identico ao
 # de antes, nao e reescrita de logica.
 
+# Worktree vinculada (git worktree add): o diretório de git deste checkout é outro que o diretório comum.
+# No checkout principal os dois são o mesmo .git. Caminhos absolutos dos dois lados, porque --git-dir é relativo lá.
+_p10_worktree_vinculada() {
+  local gd gcd
+  gd="$(git rev-parse --git-dir 2>/dev/null)" || return 1
+  gcd="$(git rev-parse --git-common-dir 2>/dev/null)" || return 1
+  [ "$(cd "$gd" 2>/dev/null && pwd -P)" != "$(cd "$gcd" 2>/dev/null && pwd -P)" ]
+}
+
 p10_vault_derivado() {
   # P-10 (MEMÓRIAS (293)): memoria/obsidian/ é o único derivado gerado FORA do
   # commit (post-commit, gitignorado) -- .hidrata.md e os índices entram no
@@ -11,6 +20,14 @@ p10_vault_derivado() {
   # HEAD dos DOIS lados -- comparar contra o disco staged reprovaria todo commit
   # que toca canon (o vault no disco foi gerado do commit anterior).
   local vault="memoria/obsidian"
+
+  # Worktree vinculada (23/11/2026): o vault é gerado só no checkout principal (post-commit, gitignorado), então numa
+  # worktree ele quase nunca existe. Isso não é "clone fresco" e não é SKIP em série: a checagem não se aplica aqui.
+  # SKIP ISENTO (PERIMETRO_P17_ISENTO=1), que o P-17 não conta. Com o vault presente na worktree, a conferência roda.
+  if [ ! -d "$vault" ] && _p10_worktree_vinculada; then
+    echo "P-10: worktree vinculada -- $vault/ só existe no checkout principal (o post-commit gera lá); conferência não se aplica aqui."
+    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
+  fi
 
   # Bootstrap: se o próprio gerador muda neste commit, HEAD tem a versão antiga
   # -- a conferência não faz sentido, adia pro próximo commit.

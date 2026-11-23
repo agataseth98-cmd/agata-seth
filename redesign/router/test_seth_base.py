@@ -9,6 +9,7 @@ import json
 import os
 import queue
 import re
+import subprocess
 import sys
 import time
 import types
@@ -586,3 +587,104 @@ class TestCercaDeCodigoSegueEmStream:
     def test_cerca_incompleta_espera(self):
         assert self._dec("```js") == "mais"
         assert self._dec("```") == "mais"
+
+
+# --- P-23 (23/11/2026, caminho-visao-23-11): o texto que o gateway monta traz as diretrizes comuns -------------
+# Antes, o P-23 lia o arquivo seth_gateway.py: 'economia de tokens' não está nele (AVISO falso) e 'modo conciso'
+# só aparecia num comentário (OK falso). A doutrina vem de PROTOCOLOS.md (SETH-GATEWAY) + AGENTS.md, em código.
+_FRASES_P23 = ("modo conciso", "economia de tokens", "cache_conselho")
+_RAIZ_TESTE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+_P23_SH = os.path.join(_RAIZ_TESTE, "scripts", "perimetro", "p23_portas_entrada.sh")
+_MODULO_BOM = ('def doutrina_montada():\n'
+               '    return "Modo conciso é o padrão. Economia de tokens é permanente. cache_conselho ler."\n')
+_MODULO_FRACO = 'def doutrina_montada():\n    return "oi"\n'
+_MODULO_COMENTARIO = ('# modo conciso, economia de tokens, cache_conselho: só num comentário\n'
+                      'def doutrina_montada():\n    return "oi"\n')
+_MODULO_SEM_FUNCAO = 'X = 1\n'
+
+
+def _p23(cwd, lista, extra=None):
+    """Roda o P-23 num diretório próprio (config/portas-de-entrada.txt e as portas são relativas a ele)."""
+    (cwd / "config").mkdir(exist_ok=True)
+    (cwd / "config" / "portas-de-entrada.txt").write_text(lista, encoding="utf-8")
+    for nome, corpo in (extra or {}).items():
+        (cwd / nome).write_text(corpo, encoding="utf-8")
+    r = subprocess.run(["bash", "-c", f"source '{_P23_SH}'; p23_portas_entrada"], cwd=str(cwd),
+                       capture_output=True, text=True, timeout=60)
+    return r.stdout
+
+
+def test_doutrina_montada_traz_as_tres_diretrizes():
+    texto = g.doutrina_montada().lower()
+    for frase in _FRASES_P23:
+        assert frase in texto, frase
+
+
+def test_hidratacao_compacta_monta_a_doutrina_e_o_estado(monkeypatch):
+    monkeypatch.setattr(g, "MODO", "compacto")
+    monkeypatch.setattr(g, "_estado", lambda: "HEAD: teste (medido)")
+    hid = g._hidratacao("")
+    assert hid.startswith(g.MARCADOR + "\n" + g.doutrina_montada())
+    assert "HEAD: teste" in hid
+
+
+def test_injeta_primeiro_turno_leva_doutrina_e_memoria_comum(monkeypatch, tmp_path):
+    import cache_conselho
+    monkeypatch.setattr(g.auditoria_turno, "LOG", tmp_path / "aud.jsonl")
+    monkeypatch.setattr(g, "_estado", lambda: "HEAD: teste (medido)")
+    monkeypatch.setattr(cache_conselho, "resumo_hidratacao",
+                        lambda *a, **k: "CACHE-CONSELHO (não canônico; teste): (1) agata-dev, 2026-11-23: nota")
+    payload = g._injeta({"model": "seth", "messages": [{"role": "user", "content": "oi"}]})
+    sistema = payload["messages"][0]
+    assert sistema["role"] == "system"
+    assert g.MARCADOR in sistema["content"]
+    texto = sistema["content"].lower()
+    assert "cache-conselho" in texto
+    for frase in _FRASES_P23:
+        assert frase in texto, frase
+
+
+def test_p23_seth_gateway_passa_pelo_texto_montado():
+    r = subprocess.run(["bash", "-c", f"source '{_P23_SH}'; p23_portas_entrada"], cwd=_RAIZ_TESTE,
+                       capture_output=True, text=True, timeout=120)
+    linhas = r.stdout.splitlines()
+    assert not [l for l in linhas if l.startswith("AVISO (P-23)") and "seth_gateway.py" in l], r.stdout
+    assert any(l.startswith("OK (P-23): 'redesign/router/seth_gateway.py'") and "texto que o módulo monta" in l
+               for l in linhas), r.stdout
+
+
+def test_p23_doutrina_passa_quando_o_texto_montado_traz_as_tres(tmp_path):
+    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_BOM})
+    assert out.startswith("OK (P-23): 'porta.py'") and "AVISO" not in out, out
+
+
+def test_p23_doutrina_pega_texto_montado_sem_as_diretrizes(tmp_path):
+    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_FRACO})
+    assert "AVISO (P-23): 'porta.py'" in out, out
+    for frase in _FRASES_P23:
+        assert frase in out, frase
+
+
+def test_p23_doutrina_nao_aceita_frase_que_so_esta_em_comentario(tmp_path):
+    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_COMENTARIO})
+    assert "AVISO (P-23): 'porta.py'" in out, out
+
+
+def test_p23_doutrina_sem_funcao_avisa_que_nao_deu_para_conferir(tmp_path):
+    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_SEM_FUNCAO})
+    assert "AVISO (P-23): 'porta.py'" in out and "não dá para conferir" in out, out
+
+
+def test_p23_arquivo_confere_o_proprio_arquivo_ou_o_agents_importado(tmp_path):
+    out = _p23(tmp_path, "bom.md|teste\nruim.md|teste\nimporta.md|teste\n",
+               {"bom.md": "modo conciso; economia de tokens; cache_conselho\n",
+                "ruim.md": "só instruções\n",
+                "importa.md": "@AGENTS.md\n"})
+    assert "OK (P-23): 'bom.md'" in out and "no arquivo" in out, out
+    assert "AVISO (P-23): 'ruim.md'" in out and "não traz" in out, out
+    assert "OK (P-23): 'importa.md' (teste) importa o AGENTS.md" in out, out
+
+
+def test_p23_leitura_desconhecida_avisa(tmp_path):
+    out = _p23(tmp_path, "porta.py|teste|tanto_faz\n", {"porta.py": _MODULO_BOM})
+    assert "AVISO (P-23): 'porta.py'" in out and "desconhecida" in out, out

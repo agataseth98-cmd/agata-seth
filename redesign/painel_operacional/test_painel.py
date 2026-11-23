@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
 import tempfile
 import threading
 import time
@@ -164,7 +165,9 @@ class PainelTests(unittest.TestCase):
                     return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=active\n")
                 return SimpleNamespace(returncode=0, stdout="LoadState=not-found\nActiveState=inactive\n")
 
-            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl):
+            # 23/11/2026: a lacuna consulta o socket de unidade parada; o teste não fala com o verificador de verdade.
+            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
+                    mock.patch.object(panel, "_verify", side_effect=OSError("verificador fora deste teste")):
                 data = panel._lacunas_snapshot()
         por_nome = {item["nome"]: item for item in data["items"]}
         self.assertEqual((por_nome["laya-roteador.service"]["state"], por_nome["laya-roteador.service"]["motivo"]),
@@ -1175,6 +1178,381 @@ class LeiturasCurtasTests(unittest.TestCase):
                 self.assertIn("observed_at", d, rota)
                 self.assertIn("fresh_until", d, rota)
                 self.assertIn("source", d, rota)
+
+
+def _funcao_js(js, nome):
+    """Texto de uma função de topo do prototipo.js (vai do `function nome(` ao `}` da coluna zero)."""
+    inicio = js.index(f"function {nome}(")
+    return js[inicio: js.index("\n}\n", inicio) + 3]
+
+
+# Harness node da recarga (23/11/2026): roda o bloco de prototipo.js de verdade, com um DOM mínimo e as cargas
+# trocadas por espiões. Também roda stateOf, stateLabel e rotuloDoCartao. Nada sai da máquina.
+NODE_RECARGA_SUB = r"""
+const fs = require('fs'); const vm = require('vm');
+const entrada = JSON.parse(fs.readFileSync(0, 'utf8'));
+const recarga = [];
+for (const c of entrada.cenarios) {
+  const log = [];
+  const focado = c.foco ? {tagName: c.foco} : null;
+  const ctx = {
+    document: {visibilityState: c.visibilidade, activeElement: focado},
+    AgataPainel: {carregarModelos: () => { log.push('carregarModelos'); }},
+  };
+  for (const nome of entrada.cargas) ctx[nome] = () => { log.push(nome); };
+  ctx.subsAtivos = () => c.subs.map((s) => ({
+    dataset: {sub: s.sub},
+    contains: (el) => s.focoDentro === true && focado !== null && el === focado,
+    querySelector: (sel) => (sel === 'dialog[open]' && s.dialogoAberto ? {} : null),
+    querySelectorAll: () => s.campos || [],
+  }));
+  vm.createContext(ctx);
+  vm.runInContext(entrada.bloco + '\n;this.recarregarSubsVisiveis = recarregarSubsVisiveis;', ctx);
+  ctx.recarregarSubsVisiveis();
+  recarga.push({nome: c.nome, log});
+}
+const E = {Date};
+vm.createContext(E);
+vm.runInContext(entrada.funcoes + '\n;this.stateOf = stateOf; this.stateLabel = stateLabel; this.rotuloDoCartao = rotuloDoCartao;', E);
+const futuro = '2999-01-01T00:00:00Z';
+const estados = {
+  sob_demanda: E.stateOf({state: 'sob_demanda', fresh_until: futuro}),
+  erro: E.stateOf({state: 'erro', fresh_until: futuro}),
+  ausente: E.stateOf({state: 'ausente'}),
+  ok: E.stateOf({state: 'ok', fresh_until: futuro}),
+  rotulo_sob_demanda: E.stateLabel('sob_demanda'),
+  rotulo_erro: E.stateLabel('erro'),
+  cartao_sob_demanda: E.rotuloDoCartao([{active_state: 'inactive'}], ['sob_demanda']),
+  cartao_erro: E.rotuloDoCartao([{active_state: 'failed'}], ['erro']),
+  cartao_inativo: E.rotuloDoCartao([{active_state: 'inactive'}], ['warning']),
+  cartao_misto: E.rotuloDoCartao([{}, {}], ['ok', 'sob_demanda']),
+};
+process.stdout.write(JSON.stringify({recarga, estados}));
+"""
+
+
+# Harness node do cartão de capacidade (23/11/2026): roda loadCapacidades de prototipo.js com um DOM mínimo.
+NODE_CAPACIDADES = r"""
+const fs = require('fs'); const vm = require('vm');
+const entrada = JSON.parse(fs.readFileSync(0, 'utf8'));
+const cartoes = entrada.cartoes.map((c) => ({
+  dataset: Object.assign({}, c.dataset),
+  chip: {className: c.chip[0], textContent: c.chip[1]},
+  hora: {textContent: ''},
+  querySelector(sel) { return sel === '.chip' ? this.chip : sel === '.cap-hora' ? this.hora : null; },
+}));
+const vivos = [{dataset: {live: 'manutencao'}, textContent: ''}];
+const ctx = {
+  document: {
+    querySelectorAll(sel) {
+      if (sel === '[data-live]') return vivos;
+      if (sel === '#integration-list .cap-card') return cartoes;
+      return [];
+    },
+  },
+  fetchJson: async () => entrada.dados,
+  niceTime: () => 'hora',
+  ligarCartoesClicaveis: () => {},
+  comporEvidencia: () => {},
+};
+vm.createContext(ctx);
+vm.runInContext(entrada.funcao + '\n;this.loadCapacidades = loadCapacidades;', ctx);
+(async () => {
+  await ctx.loadCapacidades();
+  const saida = {
+    cartoes: cartoes.map((c) => ({state: c.dataset.state, chip: [c.chip.className, c.chip.textContent]})),
+    vivo: vivos[0].textContent,
+  };
+  process.stdout.write(JSON.stringify(saida));
+})();
+"""
+
+
+class SobDemandaERecargaTests(unittest.TestCase):
+    """23/11/2026: parada de propósito é sob_demanda (não aviso), falha é erro; a sub-tela visível recarrega sozinha."""
+
+    @staticmethod
+    def _verificador(tabela):
+        """Imita `_verify("unidade", consulta=...)`: tabela unidade -> (LoadState, ActiveState, SubState). Guarda as consultas."""
+        chamadas = []
+
+        def verify(command, **arguments):
+            assert command == "unidade", command
+            consulta = arguments["consulta"]
+            chamadas.append(consulta)
+            if consulta not in tabela:
+                raise OSError("unidade fora da tabela do teste")
+            load, active, sub = tabela[consulta]
+            return f"$ unidade (exit=0)\n\nLoadState={load}\nActiveState={active}\nSubState={sub}\n"
+
+        return verify, chamadas
+
+    def test_socket_em_escuta_torna_parada_sob_demanda_com_motivo(self):
+        verify, chamadas = self._verificador({
+            "laya-roteador.service": ("loaded", "inactive", "dead"),
+            "laya-roteador.socket": ("loaded", "active", "listening"),
+        })
+        with mock.patch.object(panel, "_verify", side_effect=verify):
+            servico = panel._service_snapshot("laya-roteador.service")
+        self.assertEqual(servico["state"], "sob_demanda")
+        self.assertEqual(servico["sob_demanda_por"], "socket laya-roteador.socket em escuta")
+        self.assertEqual(servico["active_state"], "inactive")
+        self.assertEqual(chamadas, ["laya-roteador.service", "laya-roteador.socket"])
+
+    def test_lista_fixa_e_timer_de_manutencao_parados_sao_sob_demanda(self):
+        motivo = "lista fixa do painel (decisão de 29/10/2026)"
+        for unidade in ("openvino-whisper.service", "openvino-embeddings.service", "obsidian-ro-proxy.service"):
+            verify, chamadas = self._verificador({unidade: ("loaded", "inactive", "dead")})
+            with mock.patch.object(panel, "_verify", side_effect=verify):
+                servico = panel._service_snapshot(unidade)
+            self.assertEqual((servico["state"], servico["sob_demanda_por"]), ("sob_demanda", motivo), unidade)
+            self.assertEqual(chamadas, [unidade], "unidade da lista fixa não consulta socket")
+
+        def systemctl(ativo):
+            timer = ("Id=agata-manutencao.timer\nLoadState=loaded\n" f"ActiveState={ativo}\nSubState=dead\n"
+                     "NextElapseUSecRealtime=\nLastTriggerUSec=\n")
+            servico = "Id=agata-manutencao.service\nLoadState=loaded\nActiveState=inactive\nResult=success\nExecMainExitTimestamp=\n"
+            return [SimpleNamespace(returncode=0, stdout=timer), SimpleNamespace(returncode=0, stdout=servico)]
+
+        estados = {}
+        for ativo in ("inactive", "active"):
+            with mock.patch.object(panel.subprocess, "run", side_effect=systemctl(ativo)):
+                estados[ativo] = panel._timer_snapshot("agata-manutencao.timer")
+        self.assertEqual((estados["inactive"]["state"], estados["inactive"]["sob_demanda_por"]), ("sob_demanda", motivo))
+        self.assertEqual(estados["active"]["state"], "ok")
+        self.assertNotIn("sob_demanda_por", estados["active"])
+
+    def test_parada_sem_socket_escutando_continua_aviso(self):
+        casos = (
+            {"laya-roteador.service": ("loaded", "inactive", "dead"), "laya-roteador.socket": ("loaded", "active", "running")},
+            {"laya-roteador.service": ("loaded", "inactive", "dead"), "laya-roteador.socket": ("loaded", "inactive", "dead")},
+        )
+        for tabela in casos:
+            verify, _ = self._verificador(tabela)
+            with mock.patch.object(panel, "_verify", side_effect=verify):
+                servico = panel._service_snapshot("laya-roteador.service")
+            self.assertEqual(servico["state"], "warning")
+            self.assertNotIn("sob_demanda_por", servico)
+
+        def socket_fora_do_ar(command, **arguments):
+            if arguments["consulta"].endswith(".socket"):
+                raise OSError("verificador fora do ar")
+            return "$ unidade (exit=0)\n\nLoadState=loaded\nActiveState=inactive\nSubState=dead\n"
+
+        with mock.patch.object(panel, "_verify", side_effect=socket_fora_do_ar):
+            ollaya = panel._service_snapshot("ollaya.service")
+        self.assertEqual(ollaya["state"], "warning")
+        # Estado que não é parada nem ativa (activating) também é aviso, e a unidade sem .service não tem socket.
+        verify, _ = self._verificador({"seth-gateway.service": ("loaded", "activating", "start")})
+        with mock.patch.object(panel, "_verify", side_effect=verify):
+            transitorio = panel._service_snapshot("seth-gateway.service")
+        self.assertEqual(transitorio["state"], "warning")
+        self.assertIsNone(panel._socket_de("agata-manutencao.timer"))
+
+    def test_failed_continua_erro_mesmo_com_socket_em_escuta(self):
+        verify, chamadas = self._verificador({
+            "laya-roteador.service": ("loaded", "failed", "failed"),
+            "laya-roteador.socket": ("loaded", "active", "listening"),
+            "openvino-whisper.service": ("loaded", "failed", "failed"),
+        })
+        with mock.patch.object(panel, "_verify", side_effect=verify):
+            laya = panel._service_snapshot("laya-roteador.service")
+            whisper = panel._service_snapshot("openvino-whisper.service")
+        self.assertEqual((laya["state"], whisper["state"]), ("erro", "erro"))
+        self.assertNotIn("sob_demanda_por", laya)
+        self.assertNotIn("laya-roteador.socket", chamadas, "falha não consulta o socket para virar sob demanda")
+
+    def test_sob_demanda_nao_vira_aviso_no_estado_geral(self):
+        self.assertEqual(panel._overall_state(["ok", "sob_demanda"]), "ok")
+        self.assertEqual(panel._overall_state(["sob_demanda", "sob_demanda"]), "ok")
+        self.assertEqual(panel._overall_state(["sob_demanda", "warning"]), "warning")
+        self.assertEqual(panel._overall_state(["erro", "ok"]), "warning")
+        self.assertEqual(panel._overall_state(["ausente", "sob_demanda"]), "warning")
+        self.assertEqual(panel._overall_state(["sob_demanda", "unknown"]), "unknown")
+
+    def test_detalhes_marca_whisper_parado_como_sob_demanda(self):
+        verify, _ = self._verificador({"openvino-whisper.service": ("loaded", "inactive", "dead")})
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)), \
+                mock.patch.object(panel, "_verify", side_effect=verify):
+            detalhes = panel._details_snapshot()
+        por_unidade = {item["unit"]: item for item in detalhes["integrations"]}
+        self.assertEqual(por_unidade["openvino-whisper.service"]["state"], "sob_demanda")
+
+    def test_js_recarrega_so_as_telas_de_leitura_sem_intervalo_novo(self):
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        mapa = js[js.index("const RECARGA_SUB = {"): js.index("};\n", js.index("const RECARGA_SUB = {")) + 3]
+        chaves = re.findall(r'^  "?([a-z-]+)"?: ', mapa, re.M)
+        self.assertEqual(sorted(chaves), sorted(["equipe", "backup", "saida-rede", "perimetro", "ci", "conselho-memoria",
+                                                 "importantes", "lacunas", "qualidade", "catalogo-modelos"]))
+        for carga in ("carregarEquipe()", "carregarBackup()", "carregarEgress()", "carregarPerimetro()", "carregarCI()",
+                      "carregarMemoriaConselho()", "carregarImportantes()", "calcularLacunas()", "carregarLacunasCanon()",
+                      "carregarQualidade()", "AgataPainel.carregarModelos()"):
+            self.assertIn(carga, mapa)
+        self.assertNotIn("carregarMedicoes", mapa, "Medições tem o próprio intervalo de 4 s")
+        self.assertIn('function recarregarSubsVisiveis() {\n  if (document.visibilityState !== "visible") return;', js)
+        self.assertIn("  recarregarSubsVisiveis();\n}, 60000);", js)
+        self.assertEqual(js.count("setInterval("), 3, "a recarga entra no intervalo de 60 s que já existe; nenhum intervalo novo")
+
+    def test_lacunas_nao_marcam_parada_sob_demanda_mas_marcam_falha_e_inativa_sem_motivo(self):
+        estados_usuario = {
+            "laya-roteador.service": "LoadState=loaded\nActiveState=inactive\n",
+            "openvino-whisper.service": "LoadState=loaded\nActiveState=inactive\n",
+            "seth-escriba.service": "LoadState=loaded\nActiveState=inactive\n",
+            "obsidian-ro-proxy.service": "LoadState=loaded\nActiveState=failed\n",
+        }
+        verify, _ = self._verificador({"laya-roteador.socket": ("loaded", "active", "listening")})
+
+        def systemctl(argv, **_kwargs):
+            if "--property=Type" in argv:
+                return SimpleNamespace(returncode=0, stdout="Type=simple\n")
+            if "--user" not in argv:
+                return SimpleNamespace(returncode=0, stdout="LoadState=not-found\nActiveState=inactive\n")
+            return SimpleNamespace(returncode=0, stdout=estados_usuario.get(argv[-1], "LoadState=not-found\nActiveState=inactive\n"))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "ESTADO.md").write_text("## Serviços (boot)\n- `laya-roteador.service` (declarada)\n"
+                                            "- `openvino-whisper.service` (declarada)\n- `seth-escriba.service` (declarada)\n"
+                                            "- `obsidian-ro-proxy.service` (declarada)\n"
+                                            "- `openvino-whisper` (porta :20130) — unidade `openvino-whisper.service`\n"
+                                            "- `seth-escriba` (porta :20140) — unidade `seth-escriba.service`\n\n## Outra\n",
+                            encoding="utf-8")
+            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
+                    mock.patch.object(panel, "_verify", side_effect=verify), \
+                    mock.patch.object(panel, "_porta_responde", return_value=False):
+                data = panel._lacunas_snapshot()
+        por_nome = {item["nome"]: item for item in data["items"]}
+        self.assertNotIn("laya-roteador.service", por_nome, "socket em escuta: parada de propósito, não é lacuna")
+        self.assertNotIn("openvino-whisper.service", por_nome, "lista fixa: parada de propósito, não é lacuna")
+        self.assertNotIn("openvino-whisper :20130", por_nome, "porta da unidade parada de propósito não é lacuna")
+        self.assertEqual(por_nome["seth-escriba.service"]["motivo"], "declarada no boot e inativa agora")
+        self.assertEqual(por_nome["seth-escriba :20140"]["motivo"], "porta declarada não responde em 127.0.0.1",
+                         "porta de unidade que não é sob demanda continua lacuna")
+        self.assertEqual(por_nome["obsidian-ro-proxy.service"]["motivo"], "declarada no boot e inativa agora",
+                         "falha continua lacuna, mesmo na lista fixa")
+
+    def _capacidades_com_timer(self, ativo):
+        """Itens de /api/capacidades com o timer de manutenção em `ativo` (ActiveState). O resto das unidades está ativo."""
+        def systemctl(argv, **_kwargs):
+            if argv[-1] == "agata-manutencao.timer":
+                return SimpleNamespace(returncode=0, stdout=f"LoadState=loaded\nActiveState={ativo}\n")
+            return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=active\n")
+
+        with mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
+                mock.patch.object(panel, "_http_ok", return_value=True), \
+                mock.patch.object(panel, "_verify", side_effect=OSError("verificador fora deste teste")):
+            return {item["id"]: item for item in panel._capacidades_snapshot()["items"]}
+
+    def test_capacidade_manutencao_com_timer_parado_e_sob_demanda_nao_e_aviso(self):
+        itens = self._capacidades_com_timer("inactive")
+        self.assertEqual(itens["manutencao"]["state"], "sob_demanda")
+        self.assertIn("agata-manutencao.timer sob demanda", itens["manutencao"]["evidencia"])
+        self.assertEqual(itens["conversar"]["state"], "ok", "as outras capacidades seguem a regra antiga")
+
+    def test_capacidade_manutencao_com_timer_falhado_continua_aviso(self):
+        falhado = self._capacidades_com_timer("failed")
+        self.assertEqual(falhado["manutencao"]["state"], "warning")
+        self.assertIn("agata-manutencao.timer inativo ou ausente", falhado["manutencao"]["evidencia"])
+        ativo = self._capacidades_com_timer("active")
+        self.assertEqual(ativo["manutencao"]["state"], "ok")
+
+    def test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial(self):
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        entrada = {
+            # _funcao_js começa em `function`; a função é `async function`, então o prefixo volta.
+            "funcao": "async " + _funcao_js(js, "loadCapacidades"),
+            "dados": {"observed_at": "2026-11-23T15:00:00-03:00", "items": [
+                {"id": "manutencao", "state": "sob_demanda", "source": "systemctl --user show", "source_ref": "agata-manutencao.timer",
+                 "evidencia": "Medido agora: agata-manutencao.timer sob demanda."},
+                {"id": "conversar", "state": "warning", "source": "seth-gateway", "source_ref": "127.0.0.1:20126/",
+                 "evidencia": "Medido agora: seth-gateway sem resposta."},
+            ]},
+            "cartoes": [
+                {"dataset": {"probe": "manutencao", "unit": "agata-manutencao.timer", "fonte": "status"},
+                 "chip": ["chip horizon", "SOB DEMANDA"]},
+                {"dataset": {"probe": "manutencao"}, "chip": ["chip horizon", "SEM LEITURA"]},
+                {"dataset": {"probe": "conversar"}, "chip": ["chip planned", "SEM LEITURA"]},
+            ],
+        }
+        saida = self._rodar_node_capacidades(entrada)
+        cartoes = saida["cartoes"]
+        self.assertEqual(cartoes[0]["state"], "horizon", "cartão lido pela rota segue o estado do status, não vira partial")
+        self.assertEqual(cartoes[0]["chip"], ["chip horizon", "SOB DEMANDA"])
+        self.assertEqual(cartoes[1]["state"], "horizon")
+        self.assertEqual(cartoes[1]["chip"], ["chip horizon", "SOB DEMANDA"])
+        self.assertEqual((cartoes[2]["state"], cartoes[2]["chip"]), ("partial", ["chip partial", "ATENÇÃO"]))
+        self.assertEqual(saida["vivo"], "sob demanda")
+
+    def _rodar_node_capacidades(self, entrada):
+        try:
+            resultado = subprocess.run(["node", "-e", NODE_CAPACIDADES], input=json.dumps(entrada, ensure_ascii=False),
+                                       capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired) as erro:
+            self.fail(f"node não rodou (não medido): {erro}")
+        self.assertEqual(resultado.returncode, 0, resultado.stderr[-400:])
+        return json.loads(resultado.stdout)
+
+    def _rodar_node(self, entrada):
+        """Roda NODE_RECARGA_SUB com a entrada em JSON e devolve a saída. Sem node, o teste falha (não medido)."""
+        try:
+            resultado = subprocess.run(["node", "-e", NODE_RECARGA_SUB], input=json.dumps(entrada, ensure_ascii=False),
+                                       capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired) as erro:
+            self.fail(f"node não rodou (não medido): {erro}")
+        self.assertEqual(resultado.returncode, 0, resultado.stderr[-400:])
+        return json.loads(resultado.stdout)
+
+    def test_recarga_so_roda_na_tela_visivel_e_sem_edicao_em_curso(self):
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        bloco = js[js.index("const RECARGA_SUB = {"): js.index("// Fim da recarga automática das sub-telas.")]
+        cargas = ["carregarEquipe", "carregarBackup", "carregarEgress", "carregarPerimetro", "carregarCI",
+                  "carregarMemoriaConselho", "carregarImportantes", "calcularLacunas", "carregarLacunasCanon", "carregarQualidade"]
+        cenarios = [
+            {"nome": "visivel_so_as_telas_da_lista", "visibilidade": "visible",
+             "subs": [{"sub": "equipe"}, {"sub": "conversa"}, {"sub": "integracoes"}, {"sub": "lacunas"}],
+             "esperado": ["carregarEquipe", "calcularLacunas", "carregarLacunasCanon"]},
+            {"nome": "pagina_oculta_nao_recarrega", "visibilidade": "hidden",
+             "subs": [{"sub": "equipe"}, {"sub": "lacunas"}], "esperado": []},
+            {"nome": "texto_digitado_segura_so_a_sub_editada", "visibilidade": "visible",
+             "subs": [{"sub": "importantes", "campos": [{"type": "textarea", "value": "ideia", "defaultValue": ""}]},
+                      {"sub": "backup"}],
+             "esperado": ["carregarBackup"]},
+            {"nome": "campo_com_foco_segura_a_sub", "visibilidade": "visible", "foco": "TEXTAREA",
+             "subs": [{"sub": "perimetro", "focoDentro": True}, {"sub": "ci"}], "esperado": ["carregarCI"]},
+            {"nome": "dialogo_aberto_segura_o_catalogo", "visibilidade": "visible",
+             "subs": [{"sub": "catalogo-modelos", "dialogoAberto": True}, {"sub": "saida-rede"}],
+             "esperado": ["carregarEgress"]},
+            {"nome": "campo_vazio_e_caixa_marcada_nao_seguram", "visibilidade": "visible",
+             "subs": [{"sub": "backup", "campos": [{"type": "text", "value": "", "defaultValue": ""},
+                                                   {"type": "checkbox", "value": "", "defaultValue": "on"}]}],
+             "esperado": ["carregarBackup"]},
+            {"nome": "qualidade_recarrega_so_a_propria_carga", "visibilidade": "visible",
+             "subs": [{"sub": "qualidade"}], "esperado": ["carregarQualidade"]},
+            {"nome": "catalogo_sem_edicao_recarrega", "visibilidade": "visible",
+             "subs": [{"sub": "catalogo-modelos"}], "esperado": ["carregarModelos"]},
+            {"nome": "memoria_do_conselho_e_importantes_sem_edicao", "visibilidade": "visible",
+             "subs": [{"sub": "conselho-memoria"}, {"sub": "importantes"}],
+             "esperado": ["carregarMemoriaConselho", "carregarImportantes"]},
+        ]
+        entrada = {"bloco": bloco, "cargas": cargas, "cenarios": cenarios,
+                   "funcoes": "\n".join(_funcao_js(js, nome) for nome in ("stateOf", "stateLabel", "rotuloDoCartao"))}
+        saida = self._rodar_node(entrada)
+        self.assertEqual(len(saida["recarga"]), len(cenarios))
+        for cenario, feito in zip(cenarios, saida["recarga"]):
+            self.assertEqual(feito["log"], cenario["esperado"], cenario["nome"])
+
+    def test_cliente_mostra_sob_demanda_e_erro_com_chip_proprio(self):
+        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
+        entrada = {"bloco": "", "cargas": [], "cenarios": [],
+                   "funcoes": "\n".join(_funcao_js(js, nome) for nome in ("stateOf", "stateLabel", "rotuloDoCartao"))}
+        estados = self._rodar_node(entrada)["estados"]
+        self.assertEqual((estados["sob_demanda"], estados["erro"], estados["ausente"], estados["ok"]),
+                         ("sob_demanda", "erro", "ausente", "ok"))
+        self.assertEqual((estados["rotulo_sob_demanda"], estados["rotulo_erro"]), ("SOB DEMANDA", "ERRO"))
+        self.assertEqual(estados["cartao_sob_demanda"], ["chip horizon", "SOB DEMANDA"])
+        self.assertEqual(estados["cartao_erro"], ["chip erro", "ERRO"])
+        self.assertEqual(estados["cartao_inativo"], ["chip partial", "INATIVO"], "parada sem motivo continua INATIVO")
+        self.assertEqual(estados["cartao_misto"], ["chip horizon", "SOB DEMANDA"])
 
 
 if __name__ == "__main__":
