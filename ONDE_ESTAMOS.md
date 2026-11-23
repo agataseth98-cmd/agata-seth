@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 23/11, noite (proposta capacidade-producao-23-11)
+
+Uma proposta espera sua assinatura (`capacidade-producao-23-11`). Para quem usa: a Seth e o Agata Code passam a escolher o modelo pela qualidade medida em cada tipo de pedido; o perfil de cada modelo vem de pesquisa na internet e melhora com o uso; e nenhuma resposta sai sem ser conferida e, se preciso, refeita — com a etapa visível na tela enquanto você espera.
+
 ## Hoje, 23/11, tarde (proposta caminho-visao-23-11)
 
 Uma proposta espera sua assinatura (`caminho-visao-23-11`). Para quem usa: o painel para de mostrar como problema o que só está dormindo de propósito e se atualiza sozinho; o teste local mostra quanto falta; o sistema avisa quando os atalhos ficam diferentes do repositório; e entra a skill que mapeia você, com o protocolo de inserção humana. Confira a sua frase de 18/11 citada na proposta.
