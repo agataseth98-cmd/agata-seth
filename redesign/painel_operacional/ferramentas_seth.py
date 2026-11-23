@@ -529,12 +529,19 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
     pedido = dict(pedido, messages=list(pedido["messages"]))
     linhas, rodada = primeira_linhas, 0
     web_nesta_resposta = False
+    ultimo_modelo = None
     while True:
         chamadas = None
         texto_rodada = []
         for ev in eventos_do_stream(linhas):
             if ev["tipo"] == "chamadas":
                 chamadas = ev["chamadas"]
+            elif ev["tipo"] == "modelo":
+                # (23/11/2026) com a conferência ligada o gateway diz o modelo em ": agata modelo"; a tela só recebe
+                # quando muda (a 1ª vez, e depois só troca de modelo entre rodadas), nunca "a+a"
+                if ev["modelo"] != ultimo_modelo:
+                    ultimo_modelo = ev["modelo"]
+                    yield ev
             else:
                 if ev["tipo"] == "texto":
                     texto_rodada.append(ev.get("delta") or "")
@@ -582,5 +589,7 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
         # (23/11/2026) cada rodada pode sair de outro modelo; o servidor põe o X-Modelo-Real dela em `modelos`
         # rodada sem X-Modelo-Real ("") não conta: compara com o último modelo conhecido
         conhecidos = [m for m in (modelos or []) if m]
-        if modelos and modelos[-1] and len(conhecidos) > 1 and conhecidos[-1] != conhecidos[-2]:
+        if modelos and modelos[-1] and len(conhecidos) > 1 and conhecidos[-1] != conhecidos[-2] \
+                and modelos[-1] != ultimo_modelo:  # o comentário ": agata modelo" pode já ter avisado
+            ultimo_modelo = modelos[-1]
             yield {"tipo": "modelo", "modelo": modelos[-1]}

@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0074c313357e338196ea1b6b09d0d42e9f47b59d
-  Escrito em: 23/11/2026 19:08 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 852f8ec56fe9d69976e917eeb72135be109f2be7
+  Escrito em: 23/11/2026 19:45 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0074c313357e338196ea1b6b09d0d42e9f47b59d/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0074c313357e338196ea1b6b09d0d42e9f47b59d/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0074c313357e338196ea1b6b09d0d42e9f47b59d/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0074c313357e338196ea1b6b09d0d42e9f47b59d/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0074c313357e338196ea1b6b09d0d42e9f47b59d/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/852f8ec56fe9d69976e917eeb72135be109f2be7/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/852f8ec56fe9d69976e917eeb72135be109f2be7/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/852f8ec56fe9d69976e917eeb72135be109f2be7/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/852f8ec56fe9d69976e917eeb72135be109f2be7/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/852f8ec56fe9d69976e917eeb72135be109f2be7/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1122) DIÁRIO — 23/11/2026 · **Aplicada capacidade-producao-23-11 (assinada pelo Humano).** Escolha de modelo por capacidade em produção na Seth e no Agata Code; Capivara única semeada por pesquisa e melhorada com o uso (estado em ~/.local/share/agata/capivara/); respostas só depois da conferência e refação, com progresso visível. Depois de aplicar: restart do seth-gateway e do painel. Reverter: git apply -R propostas/aplicadas/capacidade-producao-23-11.diff e restart, ou SETH_ESCOLHA_CAPACIDADE=0 / SETH_REFAZER=0.
+
 (1121) DIÁRIO — 23/11/2026 · **Proposta capacidade-producao-23-11: todo modelo da Seth e do Agata Code escolhido por capacidade em produção, Capivara única semeada por pesquisa e melhorada com o uso, e respostas só depois da conferência e refação, com progresso visível.** Decisões do Humano de 23/11 (16:40, 18:18, 18:34; cache 720-722). Duas revisões independentes; dois bloqueios de privacidade achados e corrigidos (a escolha nunca manda dado pessoal a remoto; a queda segue a fila de sempre, como desde 22/10). Próximo lote: qualidade sem pressa (tirar o filtro de 40 s com segurança). Modelo: Claude Opus 5.5 (Claude Code, na Máquina), orquestrando agata-dev, agata-revisor e Explore (Claude Haiku 5.5) · vetor: CI local TUDO OK, 404 testes do roteador, apply --check em cópia limpa, simulação com o registro real · Autorização: Humano — "todos os modelos devem ser escolhidos a partir de suas capacidades". Assinatura pendente: bash scripts/aprovar.sh capacidade-producao-23-11
 
 (1120) DIÁRIO — 23/11/2026 · **Aplicada caminho-visao-23-11 (assinada pelo Humano).** Painel com sob demanda, erro e recarga de 60 s; P-23 confere a doutrina montada pelo gateway; CI local com progresso (Regra 0); P-27 dos atalhos; P-10 isento em worktree; skill obrigatória agata-mapear-humano e protocolo de inserção humana continuado; FAB-6 e (725) na agata-fluxo. Depois de aplicar: restart do painel e do seth-gateway. Reverter: git apply -R propostas/aplicadas/caminho-visao-23-11.diff e restart.

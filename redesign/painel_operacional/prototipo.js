@@ -1939,6 +1939,8 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instruc
     else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
     else if (evento.tipo === "estado" && typeof evento.texto === "string") { if (aoEstado) aoEstado(evento.texto); } // 20/11: ferramenta em curso
     else if (evento.tipo === "modelo" && typeof evento.modelo === "string") { // 23/11: outra rodada, outro modelo
+      const ultimo = (parcial.modelo_real || "").split("+").pop(); // 23/11: o comentário pode repetir o cabeçalho
+      if (ultimo === evento.modelo) return;
       const junto = parcial.modelo_real ? parcial.modelo_real + "+" + evento.modelo : evento.modelo;
       if (junto.length <= 120) parcial.modelo_real = junto;
     }

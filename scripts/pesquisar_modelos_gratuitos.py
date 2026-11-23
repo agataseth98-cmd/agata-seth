@@ -663,6 +663,63 @@ def _log(msg):
         f.write(f"[{datetime.now(timezone.utc).astimezone().isoformat()}] {msg}\n")
 
 
+def _etapa_capivara(origem=None, estado=None, perfil=None, fetch_omni=None, fetch_publico=None, uso=None, hoje=None):
+    """(23/11/2026) Etapa semanal da capivara. Lê o registro em uso (o do estado se for válido; senão o retrato
+    do repositório, `origem`) e grava SÓ no estado (`estado`, padrão ~/.local/share/agata/capivara/):
+    1) semeadura da camada `declarado` a partir do /v1/models do OmniRoute (local) e das listas públicas
+       do OpenRouter e da NVIDIA (GET sem chave, o mesmo LISTAS_VIVAS acima). Uma fonte que falha não
+       apaga o que já tinha: a afirmação antiga fica, com a data antiga;
+    2) incorporação do uso real (`observado`, uso.jsonl do gateway), só o que é novo;
+    3) regenera o perfil derivado no estado (`perfil`).
+    NÃO escreve em config/capivara/ (retrato versionado) e NÃO muda o perfil que o gateway lê (ele passa o
+    retrato por caminho explícito): mudar roteamento é decisão do Humano, por proposta assinada.
+    Nenhuma chamada a modelo, nenhuma escrita no OmniRoute."""
+    import capivara_capacidades as cap  # noqa: E402  (scripts/, já no sys.path)
+    import capivara_perfis as perf  # noqa: E402
+    origem = origem or (REPO / "config" / "capivara" / "capacidades.json")
+    estado = estado or cap.ESTADO_REGISTRO
+    perfil = perfil or cap.ESTADO_PERFIL
+    hoje = hoje or date.today().isoformat()
+    base = estado if cap.registro_valido(estado) else origem
+    reg = cap.carregar(base)
+    if not reg.get("modelos"):
+        return {"erro": f"registro ausente em {base.name}"}
+    antes = json.dumps(reg, sort_keys=True)
+    cap.normalizar(reg)
+    buscar_omni = fetch_omni or (lambda: _http(f"{OMNIROUTE}/v1/models"))
+    buscar_pub = fetch_publico or _http_publico
+    fontes = [
+        ("omniroute", lambda: cap.afirma_omniroute(buscar_omni(), hoje)),
+        ("openrouter", lambda: cap.afirma_openrouter(buscar_pub(LISTAS_VIVAS["openrouter"][0]), hoje)),
+        ("nvidia", lambda: cap.afirma_nvidia(buscar_pub(LISTAS_VIVAS["nvidia"][0]), hoje)),
+    ]
+    resumo, tudo = {}, {}
+    for nome, buscar in fontes:
+        try:
+            af = buscar()
+        except Exception as e:  # noqa: BLE001  (uma fonte fora do ar não derruba a etapa)
+            resumo[nome] = f"erro: {type(e).__name__}: {e}"[:160]
+            continue
+        resumo[nome] = len(af)
+        for mid, campos in af.items():
+            for campo, lista in campos.items():
+                tudo.setdefault(mid, {}).setdefault(campo, []).extend(lista)
+    aplicado = cap.aplicar(reg["modelos"], tudo)
+    st = cap.incorporar_arquivo(reg, uso or cap.USO)  # só o que é novo desde a posição guardada
+    resumo.update(aplicadas=aplicado["aplicadas"], fora_do_inventario=aplicado["fora_do_inventario"],
+                  uso_linhas=st["lidas"], uso_novas=st["novas"], uso_malformadas=st["malformadas"],
+                  uso_registros=st["registros"], base="estado" if base == estado else "retrato", gravado=False)
+    erros = cap.conferir(reg)
+    if erros:
+        resumo["erro"] = "não gravado: " + "; ".join(erros[:3])
+        return resumo
+    if json.dumps(reg, sort_keys=True) != antes or base != estado:
+        cap.gravar(reg, estado)
+        resumo["gravado"] = True
+    cap.gravar(perf.derivar(reg), perfil)  # perfil derivado do registro gravado, no estado
+    return resumo
+
+
 def main():
     args = sys.argv[1:]
     if args == ["--selftest"]:
@@ -679,6 +736,10 @@ def main():
         atual, disc = descobrir(anterior)
         ESTADO_DIR.mkdir(parents=True, exist_ok=True)
         ULTIMA_DESCOBERTA.write_text(json.dumps(atual, ensure_ascii=False, indent=2), encoding="utf-8")
+        try:  # capivara: roda sempre, mesmo quando a descoberta não mudou
+            _log(f"capivara: {_etapa_capivara()}")
+        except Exception as e:  # noqa: BLE001
+            _log(f"capivara: FALHA {type(e).__name__}: {e}")
         if (atual["candidatos"] == anterior.get("candidatos")
                 and _chave_mudanca(atual["catalogo_vivo"]) == _chave_mudanca(anterior.get("catalogo_vivo"))):
             _log(f"descoberta: sem mudança. candidatos={atual['candidatos']}")

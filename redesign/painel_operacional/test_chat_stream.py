@@ -410,3 +410,20 @@ class AnexosTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProgressoDaConferenciaTests(unittest.TestCase):
+    """23/11/2026 (Regra 0): o comentário ": agata <etapa>" do gateway vira estado; outros comentários não."""
+
+    def test_comentario_agata_vira_estado_e_texto_segue_igual(self):
+        linhas = [": agata conferindo · tentativa 1/3 · 10s", ": keepalive", "",
+                  'data: {"choices":[{"delta":{"content":"oi"}}]}', "", "data: [DONE]", ""]
+        evs = list(eventos_do_stream(linhas))
+        self.assertEqual(evs[0], {"tipo": "estado", "texto": "conferindo · tentativa 1/3 · 10s"})
+        self.assertEqual([e["tipo"] for e in evs[1:]], ["texto", "fim"])
+        self.assertEqual(sum(1 for e in evs if e["tipo"] == "estado"), 1)
+
+    def test_comentario_de_modelo_vira_evento_modelo(self):
+        evs = list(eventos_do_stream([": agata modelo gemini/gemini-3.5-flash-lite", "",
+                                      'data: {"choices":[{"delta":{"content":"oi"}}]}', "", "data: [DONE]", ""]))
+        self.assertEqual(evs[0], {"tipo": "modelo", "modelo": "gemini/gemini-3.5-flash-lite"})

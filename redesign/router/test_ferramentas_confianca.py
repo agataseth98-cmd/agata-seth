@@ -18,6 +18,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import ferramentas_confianca as fc  # noqa: E402
 import seth_gateway as g  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _uso_capivara_em_tmp(tmp_path, monkeypatch):
+    """(23/11/2026) O log de uso da Capivara vai para um temporário: teste nunca grava no uso.jsonl real."""
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(tmp_path / "uso.jsonl"))
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=tmp_path / "sem-registro.json": p)  # sem escolha por capacidade
 from test_bloqueio_turno import Cenario, ambiente, cenario, conteudo  # noqa: E402,F401  (o mesmo gateway e upstream falsos)
 
 SEGREDO = "sk" + "-" + "TESTEsintetico0123456789abcdefGHIJ"  # montado em tempo de execução: não casa a varredura

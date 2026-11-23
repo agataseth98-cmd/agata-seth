@@ -33,12 +33,15 @@ Env:
                     p/ query_canon. Rápido, sem estourar o deadline do OmniRoute.
         full     -> injeta o .hidrata-seth.md inteiro (~45k tokens). Só com um
                     modelo de janela grande E o deadline do OmniRoute folgado.
-    SETH_REFAZER         1 liga verificar e refazer (18/11/2026); 0 desliga sempre.
-                         Sem ela: SETH_ROTEADOR=capacidade:N liga N% dos pedidos.
+    SETH_REFAZER         padrão LIGADO (23/11/2026): a resposta é conferida e refeita antes de sair; 0 desliga sempre;
+                         1 liga sempre. SETH_ROTEADOR=capacidade:N com N válido sorteia N% dos pedidos (canário).
     SETH_REFAZER_MAX     novas tentativas por resposta (default 2)
-    SETH_REFAZER_SEG     teto, em segundos, para as novas tentativas (default 60)
+    SETH_REFAZER_SEG     teto, em segundos, para as novas tentativas (default 180)
     SETH_REFAZER_1A_SEG  prazo para a 1ª resposta chegar inteira (default 180); passou, segue sem refazer
     SETH_REFAZER_BYTES   teto de bytes por coleta de resposta (default 4 MiB); passou, idem
+    SETH_ESCOLHA_CAPACIDADE  padrão ligado (23/11/2026): o modelo concreto que o registro recomenda para o tipo, com nota
+                         e amostra suficientes; 0 volta ao combo de antes
+    AGATA_CAPIVARA_USO   log de uso da Capivara (padrão ~/.local/share/agata/capivara/uso.jsonl; sem texto)
 """
 from __future__ import annotations
 
@@ -564,8 +567,9 @@ def _politica_dados_externos(payload: dict, classification: str | None = None) -
         payload["agata_data_classification"] = "public"
     classification = payload.pop("agata_data_classification", classification)
     local = model.startswith(_ROTAS_LOCAIS)
-    # (22/10/2026, P-8 sanitizador-cascata) a cascata seth-livre segue ao proxy, que sanitiza
-    # (segredo, dados pessoais, nomes de projeto) antes de qualquer saída. Outros modelos externos continuam exigindo public.
+    # (22/10/2026, P-8 sanitizador-cascata) a cascata seth-livre segue ao proxy, que bloqueia SEGREDO antes de qualquer
+    # saída (sanitizar.sanitizar_payload). Dado pessoal e nomes de projeto NÃO são varridos pelo proxy desde a decisão
+    # relaxa-pessoal (22/10). Outros modelos externos continuam exigindo public.
     if not local and classification != "public" and model != _ROTA_BASE:
         raise DadosExternosSemClassificacao(
             "dados sem classificação pública não podem ser enviados a modelos externos"
@@ -675,17 +679,24 @@ import ferramentas_confianca  # noqa: E402  (mesmo diretório; rótulos de ferra
 import bloqueio_turno  # noqa: E402  (mesmo diretório; bloqueio no lugar de aviso na verificação do turno, 19/11/2026)
 import rotas_locais  # noqa: E402  (mesmo diretório; rotas locais por tipo, ficha assinada + painel que só restringe, 18/11/2026)
 
-_PERFIS = {"mtime": None, "dados": {}}
+_PERFIS = {"mtime": None, "caminho": None, "quando": 0.0, "dados": {}}
+_PERFIS_VALIDADE_S = 5.0  # caminho_perfil() relê o registro; o gateway chama _perfis() várias vezes por pedido
 
 
 def _perfis() -> dict:
-    caminho = REPO / "config" / "capivara" / "perfis-modelos.json"
+    """Perfis de janela em uso (23/11/2026, coordenação): capivara_perfis.carregar() sem argumento, que usa caminho_perfil()
+    (o estado da Capivara quando está em dia com o registro; senão o retrato do repositório). Lembrado por 5 s e por mtime."""
+    agora = time.monotonic()
+    if _PERFIS["caminho"] is not None and agora - _PERFIS["quando"] < _PERFIS_VALIDADE_S:
+        return _PERFIS["dados"]
     try:
-        mt = caminho.stat().st_mtime
-    except OSError:
+        caminho = capivara_perfis.caminho_perfil()
+        mt = Path(caminho).stat().st_mtime
+    except Exception:  # noqa: BLE001 -- sem perfil legível: sem janela, vale a fila de sempre
         return {}
-    if _PERFIS["mtime"] != mt:
-        _PERFIS["dados"], _PERFIS["mtime"] = capivara_perfis.carregar(caminho), mt
+    if _PERFIS["mtime"] != mt or _PERFIS["caminho"] != str(caminho):
+        _PERFIS["dados"], _PERFIS["mtime"], _PERFIS["caminho"] = capivara_perfis.carregar(), mt, str(caminho)
+    _PERFIS["quando"] = agora
     return _PERFIS["dados"]
 
 
@@ -797,6 +808,109 @@ def _sombra_rota(payload: dict, rota_ativa: str, laya: dict | None = None) -> No
             _SOMBRA_LIVRE.release()
 
     threading.Thread(target=_rodar, daemon=True).start()
+
+
+# --- escolha por capacidade em produção e log de uso (23/11/2026) ----------------------------------------------------
+# Decisão do Humano (23/11, 16:40): "todos os modelos devem ser escolhidos a partir de suas capacidades ... agata code
+# segue as mesmas regras". A rota vem do Laya e o combo da fila. A capacidade troca o combo pelo modelo concreto que o
+# registro (config/capivara/capacidades.json, só leitura aqui) recomenda para o tipo, com nota >= PISO e amostra >=
+# AMOSTRA_MIN. Sem nota e amostra suficientes, vale o combo de sempre. Sai pelo mesmo sanitizador (UPSTREAM).
+_ROTAS_CLASSE = ("rapido", "livre", "pesado", "codigo")
+USO_CAPIVARA_PADRAO = Path.home() / ".local" / "share" / "agata" / "capivara" / "uso.jsonl"
+
+
+def _escolha_capacidade_ligada() -> bool:
+    """SETH_ESCOLHA_CAPACIDADE=0 desliga e volta ao combo de antes. Padrão ligado (decisão do Humano = produção)."""
+    return os.environ.get("SETH_ESCOLHA_CAPACIDADE") != "0"
+
+
+def _rota_classe(rota: str | None) -> str | None:
+    """seth-livre-longo -> livre. Fora das quatro classes do Laya (ou sem rota) -> None."""
+    base = (rota or "").removeprefix("seth-").removesuffix("-longo")
+    return base if base in _ROTAS_CLASSE else None
+
+
+def _rota_laya_por(rota: str, laya: dict | None) -> tuple[str, float | None]:
+    """De onde saiu a rota: 'laya' se a escolha do Laya passou do limiar e virou a rota; 'regra' se o Laya caiu, demorou,
+    veio com confiança abaixo do limiar, ou uma trava trocou a rota. A mesma regra de decisor.escolha."""
+    if not isinstance(laya, dict):
+        return "regra", None
+    conf = laya.get("confidence")
+    if isinstance(conf, bool) or not isinstance(conf, (int, float)):
+        return "regra", None
+    escolhida = laya.get("choice") if conf >= _LIMIAR_ROTA else None
+    por = "laya" if escolhida and rota == f"seth-{escolhida}" else "regra"
+    return por, float(conf)
+
+
+def _janelas_perfis() -> dict:
+    pf = _perfis()
+    return {m: capivara_perfis.janela(pf, m) for m in (pf.get("modelos") or {})}
+
+
+def _perfil_do_pedido(payload: dict, msgs_pedido: list, rota_laya: str | None) -> dict:
+    """Perfil do pedido que vai ao modelo, sem texto: os requisitos da sombra sobre o pedido final (tokens com a injeção
+    da Máquina e as ferramentas), a régua de dado pessoal sobre TODAS as falas recebidas (sem a injeção) e o segredo
+    (falha fechada). Tipo: a rota do Laya manda (codigo -> codigo); o resto vem dos requisitos."""
+    req = sombra_capacidade.requisitos(payload, varrer_pessoal=lambda _t: [])  # o privado sai do histórico, abaixo
+    msgs = msgs_pedido if isinstance(msgs_pedido, list) else []
+    req["privado"] = sombra_capacidade.privado_no_historico(msgs)
+    req["tokens_est"] = rotas_locais.tokens_estimados(payload)
+    rf = payload.get("response_format")
+    req["json"] = bool(req.get("json")) or (isinstance(rf, dict) and str(rf.get("type", "")).startswith("json"))
+    req["tipo"] = sombra_capacidade.tipo_da_escolha(rota_laya, req)
+    req["stream"] = bool(payload.get("stream"))  # em stream, o p95 do modelo tem de caber no prazo do 1º conteúdo
+    segredo = rotas_locais.tem_segredo({"messages": msgs})
+    classe = "pessoal" if (req["privado"] or segredo) else "publico"  # pessoal = só modelo local na escolha
+    return {"req": req, "tipo": req["tipo"], "classe": classe, "segredo": segredo}
+
+
+def _escolha_capacidade(perfil: dict | None, rota: str) -> dict | None:
+    """Escolha de produção (sombra_capacidade.escolher), ou None = combo de sempre. Segredo nunca escolhe; desligada por
+    SETH_ESCOLHA_CAPACIDADE=0; qualquer exceção vira None (nunca derruba o pedido)."""
+    if not perfil or not _escolha_capacidade_ligada() or perfil.get("segredo"):
+        return None
+    try:
+        return sombra_capacidade.escolher(perfil["req"], rota, sombra_capacidade.carregar_registro(), _janelas_perfis(),
+                                          prazo_stream_s=PRAZO_1O_CONTEUDO)
+    except Exception:  # noqa: BLE001 -- escolha quebrada: fica o combo
+        return None
+
+
+def _caminho_uso() -> Path:
+    """AGATA_CAPIVARA_USO aponta outro arquivo (os testes usam um temporário; o log real não recebe lixo de teste)."""
+    return Path(os.environ.get("AGATA_CAPIVARA_USO") or USO_CAPIVARA_PADRAO)
+
+
+def _linha_uso(*, modelo, tipo, classe, status, bloqueado, latencia_ms, rota, rota_por, laya_confianca,
+               achados, refeito, corrigido) -> dict:
+    """Uma linha do log de uso da Capivara. Só rótulos, números, códigos de achado e o nome do modelo: nenhum texto do
+    pedido ou da resposta. achados = códigos (lista); refeito = nº de refações; corrigido = a entregue saiu sem achado
+    (None = não verificada)."""
+    return {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "modelo": modelo, "tipo": tipo, "classe": classe,
+            "status": status, "bloqueado": bool(bloqueado), "latencia_ms": latencia_ms, "rota": rota,
+            "rota_por": rota_por, "laya_confianca": laya_confianca, "achados": list(achados),
+            "refeito": int(refeito), "corrigido": corrigido}
+
+
+def _gravar_uso(linha: dict) -> None:
+    """Acrescenta a linha ao uso.jsonl (pasta criada se faltar). Nunca levanta: falha ao gravar não derruba o pedido."""
+    try:
+        caminho = _caminho_uso()
+        caminho.parent.mkdir(parents=True, exist_ok=True)
+        with open(caminho, "a", encoding="utf-8") as f:
+            f.write(json.dumps(linha, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"uso: não gravou ({e.__class__.__name__})", file=sys.stderr, flush=True)
+
+
+def _modelo_do_corpo(corpo: bytes) -> str | None:
+    """Nome do modelo que o corpo pede (a tentativa que falhou). Sem JSON legível = None."""
+    try:
+        m = json.loads(corpo).get("model") if corpo else None
+    except (ValueError, AttributeError, TypeError):
+        return None
+    return m if isinstance(m, str) else None
 
 
 # (705) O cabeçalho é da Máquina: o modelo real DESTE turno (medido na espiada do stream,
@@ -1276,21 +1390,32 @@ _REFAZER_ORDEM = ("seth-rapido", "seth-livre", "seth-pesado")
 
 
 def _refazer_ligado_neste_pedido() -> bool:
-    """Decidido por pedido. SETH_REFAZER=0 desliga sempre; =1 liga sempre. Senão, SETH_ROTEADOR=capacidade:N
-    liga N% dos pedidos (sorteio por pedido); capacidade sem N fica desligada. Padrão (legado): desligada."""
+    """Decidido por pedido. Padrão LIGADO (23/11/2026, Humano: "as respostas só saem depois da correção do sistema"): a
+    resposta é conferida e refeita antes de sair. SETH_REFAZER=0 desliga sempre; =1 liga sempre. Com o canário
+    SETH_ROTEADOR=capacidade:N, liga N% dos pedidos (sorteio por pedido)."""
     chave = (os.environ.get("SETH_REFAZER") or "").strip()
     if chave == "0":
         return False
     if chave == "1":
         return True
     modo = _modo_roteador()
-    if not modo.startswith("capacidade"):
-        return False
+    if modo.startswith("capacidade:"):
+        try:
+            pct = float(modo.partition(":")[2])
+            return random.random() * 100 < pct
+        except ValueError:
+            pass  # N inválido: sem canário, vale o padrão ligado
+    return True
+
+
+_PEDIDO_TETO_S_PADRAO = 600.0  # (23/11, Humano) teto total do pedido: coleta + refazer + correção do bloqueio
+
+
+def _pedido_teto_seg() -> float:
     try:
-        pct = float(modo.partition(":")[2] or 0)
+        return max(0.001, float(os.environ.get("SETH_PEDIDO_TETO_SEG", str(_PEDIDO_TETO_S_PADRAO))))
     except ValueError:
-        return False
-    return random.random() * 100 < pct
+        return _PEDIDO_TETO_S_PADRAO
 
 
 def _refazer_max() -> int:
@@ -1303,9 +1428,9 @@ def _refazer_max() -> int:
 def _refazer_seg() -> float:
     """Teto, em segundos, das NOVAS tentativas (a partir do fim da 1ª resposta). Não conta a 1ª resposta."""
     try:
-        return max(0.0, float(os.environ.get("SETH_REFAZER_SEG", "60")))
+        return max(0.0, float(os.environ.get("SETH_REFAZER_SEG", "180")))
     except ValueError:
-        return 60.0
+        return 180.0
 
 
 def _refazer_1a_seg() -> float:
@@ -1317,6 +1442,7 @@ def _refazer_1a_seg() -> float:
 
 
 _REFAZER_BYTES_PADRAO = 4 * 1024 * 1024
+_PROGRESSO_S = 10.0  # (23/11/2026, Regra 0) comentário de progresso no SSE enquanto o gateway confere e refaz
 
 
 def _refazer_bytes() -> int:
@@ -1407,6 +1533,40 @@ def _achados_do_texto(texto: str, msgs: list) -> list[str]:
         return list(auditoria_turno.verificar_resposta_atual(texto, msgs) or [])
     except Exception:  # noqa: BLE001 -- como na entrega: falha da verificação não segura a resposta
         return []
+
+
+# (23/11/2026, Humano: o uso guarda CÓDIGOS, nunca o texto) prefixo da frase de cada checagem -> código do achado. A frase
+# pode trazer trecho da resposta; por isso só o código sai daqui.
+_CODIGOS_ACHADO = (
+    ("evidência: cita", "citacao_inventada"),
+    ("estado desatualizado:", "estado_desatualizado"),
+    ("estilo:", "estilo"),
+    ("contagem de controles:", "controles"),
+    ("cita controle inexistente:", "controles"),
+    ("cabeçalho:", "cabecalho"),
+    ("negou '", "negacao_contradita"),
+    ("origem (F0):", "origem_f0"),
+    ("ação afirmada sem chamada", "acao_sem_chamada"),
+    ("opinião atribuída", "opiniao_sem_consulta"),
+    ("cita caminho que não existe", "caminho_inexistente"),
+)
+
+
+# (23/11) letras do bloqueio_turno -> o mesmo vocabulário de nomes fixos
+_CODIGOS_BLOQUEIO = {"a": "escrita_sem_ferramenta", "b": "saida_simulada", "c": "cabecalho_divergente"}
+
+
+def _codigos_achados(achados) -> list[str]:
+    """Códigos (rótulos fixos) dos achados da verificação: frase do auditoria (por prefixo), tupla (letra, descrição)
+    do bloqueio (pela letra). Desconhecido = 'outro'. Só o código sai daqui, nunca a descrição."""
+    out = []
+    for a in achados or []:
+        if isinstance(a, tuple):
+            out.append(_CODIGOS_BLOQUEIO.get(a[0], "outro") if a and isinstance(a[0], str) else "outro")
+            continue
+        texto = a if isinstance(a, str) else ""
+        out.append(next((c for prefixo, c in _CODIGOS_ACHADO if texto.startswith(prefixo)), "outro"))
+    return out
 
 
 def _bloqueio_ligado() -> bool:
@@ -1939,6 +2099,22 @@ class _Handler(BaseHTTPRequestHandler):
     _fallback_corpo = None  # (18/11) corpo com a fila de sempre, se este pedido foi para uma rota local por tipo
     _nao_registrar = False  # (19/11) por pedido: X-Agata-Nao-Registrar: 1 vindo de loopback; o GET lê só este padrão
     _prazo_nuvem = False  # (19/11) o pedido foi para uma rota de nuvem por tipo: prazo próprio, não o da rota local
+    _laya_rodou = False  # (23/11) o Laya decidiu a rota deste pedido (Agent e alias público)
+    _rota_por = None  # (23/11) "laya" ou "regra": de onde saiu a rota (log de uso)
+    _laya_conf = None  # (23/11) confiança do Laya, número ou None (log de uso)
+    _perfil = None  # (23/11) perfil do pedido que vai ao modelo: req, tipo, classe, segredo
+    _escolha = None  # (23/11) escolha por capacidade aplicada neste pedido, se houve
+    _bloqueado = False  # (23/11) a verificação da Máquina barrou e a resposta mínima saiu (log de uso)
+    _cap_sombra = False  # (23/11) o pedido entra na sombra de capacidade (não é utilitário nem continuação)
+    _t_inicio = 0.0  # (23/11) início do pedido, para a latência do log de uso
+    _achados_uso = None  # (23/11) códigos dos achados da 1ª resposta; None = não verificada (log de uso)
+    _refeito = 0  # (23/11) refações feitas pela verificação neste pedido (log de uso)
+    _corrigido = None  # (23/11) a entregue saiu sem achado; None = não verificada (log de uso)
+    _progresso = None  # (23/11) etapa atual da conferência, para o comentário de progresso (SSE)
+    _cabecalhos_ja_enviados = False  # (23/11) SSE com conferência: os cabeçalhos saíram antes da conferência
+    _prazo_pedido = float("inf")  # (23/11) instante em que o teto total do pedido estoura
+    _fn_parar = None  # (23/11) função que para o comentário de progresso, se ele estiver rodando
+    _rota_no_cabecalho = None  # (23/11) rota que foi no cabeçalho X-Seth-Rota (para avisar a troca)
 
     def log_message(self, fmt, *args):
         pass
@@ -1970,6 +2146,21 @@ class _Handler(BaseHTTPRequestHandler):
         self._prazo_nuvem = False
         self._data_classification = None
         self._public_only_lane = False
+        self._laya_rodou = False
+        self._rota_por = None
+        self._laya_conf = None
+        self._perfil = None
+        self._escolha = None
+        self._bloqueado = False
+        self._cap_sombra = False
+        self._t_inicio = time.monotonic()
+        self._prazo_pedido = time.monotonic() + _pedido_teto_seg()  # (23/11) teto total do pedido
+        self._fn_parar = None
+        self._achados_uso = None
+        self._refeito = 0
+        self._corrigido = None
+        self._progresso = None
+        self._cabecalhos_ja_enviados = False
         self._reg = None
         self._aud = ""
         self._nao_registrar = _pede_nao_registrar(self)
@@ -2005,17 +2196,14 @@ class _Handler(BaseHTTPRequestHandler):
                 # roteador por complexidade: só o alvo "seth-livre" do Agent
                 if payload.get("model") == _ROTA_BASE:
                     self._rota, laya = _rota_laya(payload)
+                    self._laya_rodou = True
+                    self._rota_por, self._laya_conf = _rota_laya_por(self._rota, laya)
+                    self._cap_sombra = (not _e_chamada_utilitaria(payload)
+                                        and not auditoria_turno.e_continuacao(payload.get("messages") or []))
                     # 1 decisão por resposta: no modo Agent os passos depois de
                     # ferramenta são a mesma resposta (664)
-                    if not _e_chamada_utilitaria(payload) and not auditoria_turno.e_continuacao(
-                            payload.get("messages") or []):
+                    if self._cap_sombra:
                         _sombra_rota(payload, self._rota, laya)
-                        # passos 3-4 do roteamento por capacidade: só registra a recomendação (sombra)
-                        if sombra_capacidade.ligado():
-                            _pf = _perfis()
-                            sombra_capacidade.registrar(payload, self._rota,
-                                                        {m: capivara_perfis.janela(_pf, m)
-                                                         for m in (_pf.get("modelos") or {})})
                         # nova versão (Alexandria + metacognição): só registra o que faria (sombra)
                         if sombra_nova_versao.ligado():
                             sombra_nova_versao.registrar(payload, self._rota)
@@ -2061,10 +2249,18 @@ class _Handler(BaseHTTPRequestHandler):
                     print(f"fila pela janela: {payload.get('model')} -> {longa}", file=sys.stderr, flush=True)
                     payload["model"] = longa
                     self._rota = longa
+                # (23/11/2026) perfil do pedido que vai ao modelo: requisitos, tipo (a rota do Laya manda), classe pela
+                # régua de dado pessoal sobre as falas recebidas e segredo. Alimenta a escolha por capacidade e o log de uso.
+                try:
+                    self._perfil = _perfil_do_pedido(payload, self._msgs_pedido,
+                                                     _rota_classe(self._rota) if self._laya_rodou else None)
+                except Exception:  # noqa: BLE001 -- perfil quebrado nunca derruba o pedido: sem escolha, sem log de uso
+                    self._perfil = None
                 corpo = json.dumps(payload, ensure_ascii=False).encode("utf-8")
                 # Decisão do coordenador (18/11): a queda segura de pedido pessoal volta para a fila de sempre, que é a
-                # regra de hoje (seth-livre sanitiza segredo, dado pessoal e nomes de projeto antes de sair). Segredo
-                # nem chega a rota local (rotas_locais.tem_segredo).
+                # regra de hoje. O proxy (sanitizar.sanitizar_payload) bloqueia SEGREDO; dado pessoal e nomes de projeto
+                # não são varridos desde a decisão relaxa-pessoal (22/10). Segredo nem chega a rota local
+                # (rotas_locais.tem_segredo).
                 # (18/11/2026) rota local por tipo: a ficha assinada manda, o painel só restringe, Ollama fora = regra
                 # de sempre. Guarda o corpo com a fila original para a queda segura em _passar.
                 if agent_padrao and not self._public_only_lane and not _e_chamada_utilitaria(payload):
@@ -2095,7 +2291,99 @@ class _Handler(BaseHTTPRequestHandler):
                                            ensure_ascii=False).encode("utf-8")
                         print(f"rota de nuvem por tipo: {self._rota} -> {rotas_locais.nome_nuvem(nuvem)}",
                               file=sys.stderr, flush=True)
+                # (23/11/2026) escolha por capacidade (decisão do Humano, 16:40): o modelo concreto que o registro recomenda
+                # para o tipo, só com nota >= PISO e amostra >= AMOSTRA_MIN. Sai pelo mesmo sanitizador (UPSTREAM). Rota local
+                # e de nuvem da ficha já escolhidas mandam; falha ou prazo do concreto volta ao combo (_fallback_corpo).
+                if (self._fallback_corpo is None and self._laya_rodou and self._perfil is not None
+                        and not _e_chamada_utilitaria(payload)):
+                    escolha = _escolha_capacidade(self._perfil, self._rota)
+                    if escolha:
+                        self._escolha = escolha
+                        self._fallback_corpo = corpo
+                        self._prazo_nuvem = not escolha["modelo"].startswith(_ROTAS_LOCAIS)
+                        corpo = json.dumps(dict(payload, model=escolha["modelo"]), ensure_ascii=False).encode("utf-8")
+                        print(f"escolha por capacidade: {self._rota} -> {escolha['modelo']} ({escolha['motivo']})",
+                              file=sys.stderr, flush=True)
+                # passos 3-4 do roteamento por capacidade: só registra a recomendação (sombra), com a escolha aplicada ou não
+                if self._cap_sombra and self._perfil is not None and sombra_capacidade.ligado():
+                    sombra_capacidade.registrar(payload, self._rota, _janelas_perfis(), req=self._perfil["req"],
+                                                escolhida=(self._escolha or {}).get("modelo"))
         self._passar(corpo, "POST")
+
+    def _enviar_cabecalhos(self, up, modelo_real) -> None:
+        """Cabeçalhos da resposta ao cliente, uma vez por resposta. Com modelo_real, leva X-Modelo-Real."""
+        self.send_response(up.status)
+        for k, v in up.headers.items():
+            if k.lower() not in _HOP_BY_HOP:
+                self.send_header(k, v)
+        if self._rota:
+            self.send_header("X-Seth-Rota", self._rota)
+        if self._nao_registrar:
+            self.send_header("X-Agata-Registro", "nao")  # confirmação: este pedido não foi nem será registrado
+        if modelo_real:
+            self.send_header("X-Modelo-Real", modelo_real)
+        self.send_header("Transfer-Encoding", "chunked")
+        self.end_headers()
+        self._cabecalhos_ja_enviados = True
+        self._rota_no_cabecalho = self._rota
+
+    def _escrever_comentario_sse(self, linha: str) -> None:
+        """Um comentário SSE (linha que começa com ':') em bloco HTTP próprio. Só depois dos cabeçalhos."""
+        dado = (linha + "\n\n").encode("utf-8")
+        self.wfile.write(f"{len(dado):X}\r\n".encode() + dado + b"\r\n")
+
+    def _encerrar_com_erro(self, msg: str) -> None:
+        """(23/11) Fim de um stream que já abriu (200 com cabeçalhos): para o progresso, um evento SSE de erro curto, [DONE]
+        e o terminador chunked. Nunca deixa a resposta truncada."""
+        if self._fn_parar is not None:
+            self._fn_parar()
+        dado = ("data: " + json.dumps({"error": {"message": msg}}, ensure_ascii=False)
+                + "\n\ndata: [DONE]\n\n").encode("utf-8")
+        try:
+            self.wfile.write(f"{len(dado):X}\r\n".encode() + dado + b"\r\n0\r\n\r\n")
+        except OSError:
+            pass
+        self.close_connection = True
+
+    def _etapa_progresso(self, etapa: str, tentativa: int, total: int) -> None:
+        """Etapa real da conferência, para o comentário de progresso (coleta, conferindo, refazendo)."""
+        self._progresso = {"etapa": etapa, "tentativa": tentativa, "total": total}
+
+    def _linha_progresso(self, t0: float) -> str:
+        p = self._progresso or {}
+        return (f": agata {p.get('etapa', 'coletando')} · tentativa {p.get('tentativa', 1)}/{p.get('total', 1)} · "
+                f"{int(time.monotonic() - t0)}s")
+
+    def _iniciar_progresso(self, t0: float):
+        """(23/11/2026, Regra 0) Comentários SSE a cada _PROGRESSO_S enquanto a conferência roda. Só depois dos cabeçalhos.
+        São linhas de comentário: o cliente as ignora e o conteúdo entregue não muda. Devolve a função que para e espera
+        o último comentário sair (a partir daí nada mais é escrito por este caminho)."""
+        trava = threading.Lock()
+        parar = threading.Event()
+
+        def _emitir(linha: str) -> None:
+            dado = (linha + "\n\n").encode("utf-8")
+            with trava:
+                if parar.is_set():
+                    return
+                self.wfile.write(f"{len(dado):X}\r\n".encode() + dado + b"\r\n")
+                self.wfile.flush()
+
+        def _bater() -> None:
+            while not parar.wait(_PROGRESSO_S):
+                try:
+                    _emitir(self._linha_progresso(t0))
+                except OSError:
+                    return  # o cliente saiu: o fim do pedido trata
+
+        th = threading.Thread(target=_bater, daemon=True)
+        th.start()
+
+        def _parar() -> None:
+            with trava:
+                parar.set()
+            th.join(timeout=1.0)
+        return _parar
 
     # Nome real do modelo que respondeu, pela Máquina (campo "model" que o
     # OmniRoute devolve -- "openai/gpt-oss-120b", nunca o alias de roteamento
@@ -2127,6 +2415,30 @@ class _Handler(BaseHTTPRequestHandler):
         # (17/11, item 1) served_by = campo "model" que o upstream devolveu nesta resposta; "?" se não veio
         print(f"gateway: {msg} · rota={self._rota or '-'} · {time.monotonic() - t0:.1f}s · {self.path} · "
               f"served_by={self._served_by or '?'}", file=sys.stderr, flush=True)
+
+    def _uso_do_pedido(self, status: int, modelo: str | None = None, entregue: bool = True) -> None:
+        """(23/11/2026) Uma linha por pedido de chat que chegou ao cliente: modelo servido, tipo, classe, status, bloqueio,
+        latência e a rota do Laya (classe, de onde saiu e confiança). Sem texto do pedido nem da resposta. Com `modelo`,
+        é a linha de uma tentativa que falhou (o modelo pedido)."""
+        perfil = self._perfil or {}
+        if entregue:
+            achados, refeito, corrigido = list(self._achados_uso or []), self._refeito, self._corrigido
+        else:  # tentativa que não entregou nada: sem achado, sem refação, não verificada
+            achados, refeito, corrigido = [], 0, None
+        _gravar_uso(_linha_uso(
+            modelo=self._served_by if modelo is None else modelo, tipo=perfil.get("tipo"), classe=perfil.get("classe"),
+            status=int(status), achados=achados, refeito=refeito, corrigido=corrigido,
+            bloqueado=self._bloqueado, latencia_ms=int((time.monotonic() - self._t_inicio) * 1000),
+            rota=_rota_classe(self._rota), rota_por=self._rota_por if self._laya_rodou else None,
+            laya_confianca=self._laya_conf if self._laya_rodou else None))
+
+    def _uso_de_falha(self, status: int, corpo: bytes, metodo: str) -> None:
+        """(23/11/2026) Tentativa que não entregou resposta útil (HTTP de erro, queda, timeout ou resposta vazia; com ou
+        sem fallback) e erro final do gateway (502/504): uma linha do modelo PEDIDO, com o status (0 = sem resposta útil).
+        Assim o uso registra a falha do concreto, da rota local e da nuvem, além do que foi servido."""
+        if metodo != "POST" or self._perfil is None or "/chat/completions" not in self.path:
+            return
+        self._uso_do_pedido(status, modelo=_modelo_do_corpo(corpo), entregue=False)
 
     # (695) 200 sem texto nem ferramenta (Gemini, 14/10 15:00:12: "succeeded" em 2,4 s e o
     # LibreChat gravou resposta vazia). Nada foi enviado ao cliente ainda: tenta 1 vez a
@@ -2204,10 +2516,12 @@ class _Handler(BaseHTTPRequestHandler):
         if len(buf) > limite:
             self._log("verificar e refazer: 1ª resposta passou do limite (limite), seguiu sem refazer", t0)
             return buf, leitor, modelo
+        self._etapa_progresso("coletando", 1, _refazer_max() + 1)  # (23/11) progresso: a 1ª resposta sendo coletada
         if sse:
             # a 1ª coleta tem prazo absoluto próprio (não o da refazer): quem manda keepalive sem parar não prende o
             # pedido nem enche a memória
-            resto, motivo = _consumir(leitor, time.monotonic() + _refazer_1a_seg(), limite - len(buf))
+            resto, motivo = _consumir(leitor, min(time.monotonic() + _refazer_1a_seg(), self._prazo_pedido),
+                                      limite - len(buf))
             buf = buf + resto
             if motivo == "erro":
                 self._log("verificar e refazer: 1ª resposta com erro no upstream, entregue como veio", t0)
@@ -2229,10 +2543,13 @@ class _Handler(BaseHTTPRequestHandler):
         cands = [(buf, rota0, modelo, texto, _achados_do_texto(texto, msgs))]
         inicio, teto, maximo, n = time.monotonic(), _refazer_seg(), _refazer_max(), 0
         atual = cands[0]
-        while atual[4] and n < maximo and time.monotonic() - inicio < teto:
+        self._etapa_progresso("conferindo", 1, maximo + 1)  # (23/11) progresso: conferindo a 1ª resposta
+        while atual[4] and n < maximo and time.monotonic() - inicio < teto and time.monotonic() < self._prazo_pedido:
             n += 1
             rota = _proxima_fila_refazer(atual[1])
-            nova = self._refazer_chamada(_pedido_refazer(corpo, atual[3], atual[4], rota), sse, inicio + teto)
+            self._etapa_progresso("refazendo", n + 1, maximo + 1)  # (23/11) progresso: uma nova tentativa
+            nova = self._refazer_chamada(_pedido_refazer(corpo, atual[3], atual[4], rota), sse,
+                                         min(inicio + teto, self._prazo_pedido))
             if nova is None:
                 break
             bruto, modelo_n = nova
@@ -2242,6 +2559,9 @@ class _Handler(BaseHTTPRequestHandler):
         melhor = min(cands, key=lambda c: len(c[4]))  # empate: a mais antiga, a 1ª resposta
         if melhor[1] != rota0:
             self._rota = melhor[1]
+        self._achados_uso = _codigos_achados(cands[0][4])  # (23/11) códigos da 1ª resposta, sem texto
+        self._refeito = n
+        self._corrigido = not melhor[4]
         self._served_by = melhor[2]
         self._log(f"refazer_tentativas={n} achados_inicio={len(cands[0][4])} achados_fim={len(melhor[4])}", t0)
         return melhor[0], leitor, melhor[2]
@@ -2259,13 +2579,16 @@ class _Handler(BaseHTTPRequestHandler):
             if _tem_tool_calls(buf, sse):
                 return buf, leitor, modelo
             self._log(f"bloqueio_turno: resposta não conferida ({motivo_}) -> resposta mínima", t0)
+            self._bloqueado = True  # (23/11) log de uso: a resposta mínima saiu no lugar da do modelo
+            self._corrigido = False
             return (_resposta_com_texto(buf, sse, bloqueio_turno.resposta_longa_demais(), modelo),
                     _LeitorVazio(), modelo)
 
         if len(buf) > limite:
             return nao_conferida("limite")
         if sse:
-            resto, motivo = _consumir(leitor, time.monotonic() + _refazer_1a_seg(), limite - len(buf))
+            resto, motivo = _consumir(leitor, min(time.monotonic() + _refazer_1a_seg(), self._prazo_pedido),
+                                      limite - len(buf))
             buf = buf + resto
             if motivo != "fim":
                 return nao_conferida(motivo)  # prazo, teto de bytes ou upstream caído no meio
@@ -2280,13 +2603,27 @@ class _Handler(BaseHTTPRequestHandler):
             texto = _texto_auditavel(bruto, sse, nomes)
             return texto, bloqueio_turno.achados(texto, msgs, mod)
 
+        self._etapa_progresso("conferindo", 1, 2)  # (23/11) progresso: conferindo o texto que sairia
         texto, ach = avaliar(buf, modelo)
         if not ach:
+            if self._achados_uso is None:
+                self._achados_uso = []  # (23/11) verificada e sem achado
+            if self._corrigido is None:  # (23/11) sem o refazer, esta verificação diz se saiu sem achado; com ele, vale o dele
+                self._corrigido = True
             return buf, leitor, modelo
         cods = "".join(c for c, _ in ach)
+        # (23/11) códigos do bloqueio somados aos do refazer (sem repetir): cada verificador pode achar o que o outro não viu
+        self._achados_uso = list(dict.fromkeys((self._achados_uso or []) + _codigos_achados(ach)))
+        self._corrigido = False  # (23/11) o texto que sairia tem achado
+        if time.monotonic() >= self._prazo_pedido:  # (23/11) teto do pedido estourado: sai a 1ª resposta, com o aviso
+            self._log("bloqueio_turno: teto do pedido estourado -> 1ª resposta com aviso da Máquina", t0)
+            return buf, leitor, modelo
         nova = None
+        self._etapa_progresso("refazendo", 2, 2)  # (23/11) progresso: uma correção pedida ao modelo
         try:
-            nova = self._refazer_chamada(_pedido_correcao(corpo, texto, ach), sse, time.monotonic() + _refazer_seg())
+            self._refeito += 1  # (23/11) uma correção pedida ao modelo
+            nova = self._refazer_chamada(_pedido_correcao(corpo, texto, ach), sse,
+                                         min(time.monotonic() + _refazer_seg(), self._prazo_pedido))
         except Exception:  # noqa: BLE001 -- a nova tentativa nunca derruba a resposta
             nova = None
         if nova is not None:
@@ -2294,9 +2631,12 @@ class _Handler(BaseHTTPRequestHandler):
             texto_n, ach_n = avaliar(bruto_n, modelo_n)
             if not ach_n:
                 self._served_by = modelo_n
+                self._corrigido = True
                 self._log(f"bloqueio_turno: achados={cods} corrigido_na_2a", t0)
                 return bruto_n, leitor, modelo_n
             ach, modelo = ach_n, modelo_n
+        self._bloqueado = True  # (23/11) log de uso: a resposta mínima saiu no lugar da do modelo
+        self._corrigido = False
         self._log(f"bloqueio_turno: achados={cods} persistiu -> resposta mínima", t0)
         return _resposta_com_texto(buf, sse, bloqueio_turno.resposta_minima(ach), modelo), leitor, modelo
 
@@ -2305,6 +2645,7 @@ class _Handler(BaseHTTPRequestHandler):
         if metodo != "POST":
             self._fallback_corpo = None
         self._served_by = None  # (17/11, item 1) por tentativa: a nova tentativa põe o modelo da sua resposta
+        self._cabecalhos_ja_enviados = False  # (23/11) por tentativa
         url = UPSTREAM + self.path
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in _HOP_BY_HOP}
@@ -2331,14 +2672,17 @@ class _Handler(BaseHTTPRequestHandler):
         except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException) as e:
             self._log(f"upstream inacessível ({e})", t0)
             if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local sem conexão/timeout: fila de sempre
+                self._uso_de_falha(0, corpo, metodo)  # (23/11) a tentativa que caiu entra no uso, com status 0
                 fb, self._fallback_corpo = self._fallback_corpo, None
                 return self._passar(fb, metodo, tentativa)
+            self._uso_de_falha(502, corpo, metodo)  # (23/11) erro final do gateway entra no uso
             return self._erro(502, f"upstream ({UPSTREAM}) inacessível: {e}. "
                                    "Suba o sanitizador: systemctl --user start omniroute-sanitizer omniroute")
         if up.status >= 400 and self._fallback_corpo is not None and metodo == "POST":
             # (18/11/2026) queda segura: a rota local falhou (modelo ausente, Ollama parou no meio): fila de sempre
             fb, self._fallback_corpo = self._fallback_corpo, None
             self._log(f"rota local falhou (HTTP {up.status}) -> fila de sempre", t0)
+            self._uso_de_falha(up.status, corpo, metodo)  # (23/11) a tentativa com erro entra no uso
             _derrubar(up)
             return self._passar(fb, metodo, tentativa)
         sse = "text/event-stream" in (up.headers.get("Content-Type") or "").lower()
@@ -2397,6 +2741,7 @@ class _Handler(BaseHTTPRequestHandler):
             if vazio and self._fallback_corpo is not None and metodo == "POST":
                 fb, self._fallback_corpo = self._fallback_corpo, None
                 self._log(f"rota local sem conteúdo (modelo {modelo_real or '?'}) -> fila de sempre", t0)
+                self._uso_de_falha(0, corpo, metodo)  # (23/11) resposta vazia: sem resposta útil, status 0
                 _derrubar(up)
                 return self._passar(fb, metodo, tentativa)
             if vazio and tentativa == 0 and self._rota in self._SUBIR_FILA:
@@ -2424,23 +2769,52 @@ class _Handler(BaseHTTPRequestHandler):
             else:
                 up.close()
             if self._fallback_corpo is not None and metodo == "POST":  # (18/11) rota local pendurada: fila de sempre
+                self._uso_de_falha(0, corpo, metodo)  # (23/11) a tentativa que travou entra no uso, com status 0
                 fb, self._fallback_corpo = self._fallback_corpo, None
                 return self._passar(fb, metodo, tentativa)
+            self._uso_de_falha(504, corpo, metodo)  # (23/11) erro final do gateway entra no uso
             return self._erro(504, f"upstream parou de responder: {e}")
         # (18/11/2026, verificar e refazer) antes de qualquer byte ao cliente: lê a resposta inteira, confere e, com
         # achado, refaz (SETH_REFAZER). Desligado, segue o caminho de sempre, abaixo.
-        if self._refazer and self._verificar and metodo == "POST" and up.status == 200 and _verificacao_ligada():
-            # (r4) se a espreita já leu o EOF (fim), o leitor não tem mais nada e não manda outro: a coleta não pode
-            # esperar nele (180 s por padrão) nem registrar um limite de prazo falso. Vale um leitor vazio.
-            buf_pre, leitor, modelo_real = self._refazer_antes_de_entregar(
-                corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
-        # (19/11/2026) bloqueio no lugar de aviso: vale com ou sem SETH_REFAZER, em toda rota seth-* verificada e na faixa
-        # pública (onde há ferramenta de dado público e nenhuma de escrita). SETH_BLOQUEIO_TURNO=0 desliga.
-        # (a ordem importa: GET e HEAD não passam por do_POST, que é quem põe _verificar e _public_only_lane)
-        if (metodo == "POST" and up.status == 200 and (self._verificar or self._public_only_lane)
-                and _bloqueio_ligado() and "/chat/completions" in self.path):
-            buf_pre, leitor, modelo_real = self._bloquear_antes_de_entregar(
-                corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
+        # (23/11/2026, Regra 0) SSE com conferência: os cabeçalhos saem ANTES da coleta e da conferência, e um comentário
+        # de progresso (": agata ...") sai a cada _PROGRESSO_S até a resposta estar conferida. O conteúdo não muda: sai depois.
+        conferindo = (sse and metodo == "POST" and up.status == 200 and "/chat/completions" in self.path and (
+            (self._refazer and self._verificar and _verificacao_ligada())
+            or ((self._verificar or self._public_only_lane) and _bloqueio_ligado())))
+        parar_progresso = None
+        if conferindo:
+            try:
+                self._enviar_cabecalhos(up, None)  # sem X-Modelo-Real: o modelo final só se sabe depois da conferência
+            except (BrokenPipeError, ConnectionResetError):
+                self.close_connection = True
+                up.close()
+                return
+            parar_progresso = self._iniciar_progresso(t0)
+            self._fn_parar = parar_progresso
+        try:
+            if self._refazer and self._verificar and metodo == "POST" and up.status == 200 and _verificacao_ligada():
+                # (r4) se a espreita já leu o EOF (fim), o leitor não tem mais nada e não manda outro: a coleta não pode
+                # esperar nele (180 s por padrão) nem registrar um limite de prazo falso. Vale um leitor vazio.
+                buf_pre, leitor, modelo_real = self._refazer_antes_de_entregar(
+                    corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
+            # (19/11/2026) bloqueio no lugar de aviso: vale com ou sem SETH_REFAZER, em toda rota seth-* verificada e na faixa
+            # pública (onde há ferramenta de dado público e nenhuma de escrita). SETH_BLOQUEIO_TURNO=0 desliga.
+            # (a ordem importa: GET e HEAD não passam por do_POST, que é quem põe _verificar e _public_only_lane)
+            if (metodo == "POST" and up.status == 200 and (self._verificar or self._public_only_lane)
+                    and _bloqueio_ligado() and "/chat/completions" in self.path):
+                buf_pre, leitor, modelo_real = self._bloquear_antes_de_entregar(
+                    corpo, buf_pre, _LeitorVazio() if (sse and fim) else leitor, sse, modelo_real, t0)
+        except Exception as e:  # noqa: BLE001 -- (23/11) falha da conferência: fecha o stream, não o deixa truncado
+            if not self._cabecalhos_ja_enviados:
+                raise
+            print(f"gateway: conferência falhou depois dos cabeçalhos ({e.__class__.__name__}) -> fim do stream com erro",
+                  file=sys.stderr, flush=True)
+            self._uso_de_falha(500, corpo, metodo)
+            self._encerrar_com_erro("a conferência da resposta falhou; tente de novo")
+            return
+        finally:
+            if parar_progresso is not None:
+                parar_progresso()
         if sse and up.status == 200 and self._nomes_tools and leitor is not None:
             # (17/11, item 3, SSE) decide, lê até o fim se for ferramenta em texto, e só converte com o stream
             # terminado: senão o stream passa como chegou
@@ -2474,6 +2848,7 @@ class _Handler(BaseHTTPRequestHandler):
                         if not m.get("tool_calls") and _guarda_bloqueia(m["content"], self._msgs_pedido):
                             import guarda as _g  # noqa: E402  (lote 5, A3: recusa no lugar da resposta)
                             m["content"] = _g.RECUSA
+                            self._bloqueado = True  # (23/11) log de uso: a recusa da Máquina saiu no lugar da resposta
                             _ach = []
                         if _ach:
                             m["content"] = m["content"] + _bloco_verificacao(_ach)
@@ -2492,20 +2867,18 @@ class _Handler(BaseHTTPRequestHandler):
             _registrar_cabecalho(self._rota, modelo_real, _nc)
         if up.status == 200 and not sse and self._cab_injetado:
             buf_pre = _cabecalho_unico_json(buf_pre, self._cab_injetado)  # (17/11, item 2): prefixo e duplicata
-        self.send_response(up.status)
-        for k, v in up.headers.items():
-            if k.lower() not in _HOP_BY_HOP:
-                self.send_header(k, v)
-        if self._rota:
-            self.send_header("X-Seth-Rota", self._rota)
-        if self._nao_registrar:
-            self.send_header("X-Agata-Registro", "nao")  # confirmação: este pedido não foi nem será registrado
+        if not self._cabecalhos_ja_enviados:
+            self._enviar_cabecalhos(up, modelo_real)
         if modelo_real:
-            self.send_header("X-Modelo-Real", modelo_real)
             _lembrar_modelo_real(modelo_real)
-        self.send_header("Transfer-Encoding", "chunked")
-        self.end_headers()
         try:
+            if sse and modelo_real:
+                # (23/11/2026) o modelo servido vai num comentário SSE antes do conteúdo: o painel converte; os clientes
+                # ignoram. Substitui o X-Modelo-Real nas respostas com conferência (cabeçalhos saem antes da conferência).
+                self._escrever_comentario_sse(f": agata modelo {modelo_real}")
+            if sse and self._rota and self._rota != self._rota_no_cabecalho:
+                # (23/11) a rota mudou depois do cabeçalho X-Seth-Rota (refazer ou troca de fila): avisa no stream
+                self._escrever_comentario_sse(f": agata rota {self._rota}")
             if sse:
                 self._stream_sse_filtrado(leitor, buf_pre)
             else:
@@ -2514,6 +2887,10 @@ class _Handler(BaseHTTPRequestHandler):
                     self.wfile.write(f"{len(pedaco):X}\r\n".encode())
                     self.wfile.write(pedaco)
                     self.wfile.write(b"\r\n")
+            # (23/11) o uso é gravado ANTES do terminador: o cliente só dá a resposta por completa quando lê o terminador,
+            # então a linha já está no arquivo quando ele vê o fim (sem corrida). Latência = até o fim do corpo.
+            if metodo == "POST" and "/chat/completions" in self.path and self._perfil is not None:
+                self._uso_do_pedido(up.status)  # sem texto do pedido nem da resposta
             self.wfile.write(b"0\r\n\r\n")
             if up.status == 200 and "/chat/completions" in self.path:
                 self._log("ok", t0)  # (17/11, item 1) uma linha por pedido concluído, com served_by
@@ -2881,6 +3258,10 @@ def _selftest() -> int:
     UPSTREAM = f"http://127.0.0.1:{up_port}"
     import tempfile
     MODELO_REAL_PATH = Path(tempfile.mkdtemp()) / "modelo-real.txt"  # isolado do arquivo real
+    os.environ["AGATA_CAPIVARA_USO"] = str(Path(tempfile.mkdtemp()) / "uso.jsonl")  # (23/11) o selftest não grava no log real
+    # (23/11) o selftest confere a rota do Laya e o combo; a escolha por capacidade (que lê o registro real) tem testes
+    # próprios, com registro temporário, em redesign/router/test_rotas_locais.py
+    os.environ["SETH_ESCOLHA_CAPACIDADE"] = "0"
     # (719) o selftest nunca fala com o Laya nem com o Jev de verdade: rota e sombra
     # determinísticas mesmo com os serviços no ar (os casos que precisam deles os simulam)
     decisor.URL = decisor.URL_LAYA = "http://127.0.0.1:9"

@@ -27,6 +27,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import seth_gateway as g  # noqa: E402
 
+
+@pytest.fixture(autouse=True)
+def _uso_capivara_em_tmp(tmp_path, monkeypatch):
+    """(23/11/2026) O log de uso da Capivara vai para um temporário: teste nunca grava no uso.jsonl real."""
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(tmp_path / "uso.jsonl"))
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=tmp_path / "sem-registro.json": p)  # sem escolha por capacidade
+
 REAL_VERIFICAR = g.auditoria_turno.verificar_resposta_atual
 VARS = ("SETH_REFAZER", "SETH_REFAZER_MAX", "SETH_REFAZER_SEG", "SETH_REFAZER_1A_SEG", "SETH_REFAZER_BYTES",
         "SETH_ROTEADOR", "SETH_VERIFICACAO_BLOQUEIA")
@@ -274,8 +281,9 @@ def test_teto_de_segundos_corta_a_nova_tentativa(cenario, monkeypatch, capsys):
     assert "refazer_tentativas=1 achados_inicio=1 achados_fim=1" in capsys.readouterr().err
 
 
-def test_legado_nao_refaz_e_anexa_o_bloco(cenario, capsys):
-    c = cenario(["RUIM", "resposta boa"])  # sem nenhuma variável: padrão legado
+def test_legado_nao_refaz_e_anexa_o_bloco(cenario, capsys, monkeypatch):
+    monkeypatch.setenv("SETH_REFAZER", "0")  # 23/11/2026: o padrão agora é LIGADO; este teste cobre o legado (desligado)
+    c = cenario(["RUIM", "resposta boa"])
     _, _, corpo = c.pedir()
     assert len(c.up.chamadas) == 1
     assert "RUIM" in _conteudo(corpo, False) and "Verificação da Máquina" in _conteudo(corpo, False)
@@ -292,8 +300,9 @@ def test_chave_zero_desliga_mesmo_com_canario_em_100(cenario, monkeypatch, capsy
     assert "refazer_tentativas" not in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("roteador, chamadas", [("capacidade:100", 2), ("capacidade:0", 1), ("capacidade", 1),
-                                                ("sombra", 1)])
+# 23/11/2026: padrão ligado. Só capacidade:N com N válido sorteia; sem N, vale o padrão ligado.
+@pytest.mark.parametrize("roteador, chamadas", [("capacidade:100", 2), ("capacidade:0", 1), ("capacidade", 2),
+                                                ("sombra", 2)])
 def test_canario_capacidade_decide_por_pedido(cenario, monkeypatch, roteador, chamadas):
     monkeypatch.setenv("SETH_ROTEADOR", roteador)
     c = cenario(["RUIM", "resposta boa"])
@@ -527,16 +536,18 @@ def test_escalada_sobe_uma_fila_e_para_no_topo():
 def test_decisao_do_canario_e_da_chave(monkeypatch):
     for var in VARS:
         monkeypatch.delenv(var, raising=False)
-    assert g._refazer_ligado_neste_pedido() is False  # legado
+    assert g._refazer_ligado_neste_pedido() is True  # 23/11/2026: padrão ligado
     monkeypatch.setenv("SETH_REFAZER", "1")
     assert g._refazer_ligado_neste_pedido() is True
     monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
     monkeypatch.setenv("SETH_REFAZER", "0")
     assert g._refazer_ligado_neste_pedido() is False  # a chave 0 vence o canário
     monkeypatch.delenv("SETH_REFAZER")
-    for modo in ("capacidade:0", "capacidade", "capacidade:abc", "sombra"):
+    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:0")
+    assert g._refazer_ligado_neste_pedido() is False  # canário em 0%: desligado para este pedido
+    for modo in ("capacidade", "capacidade:abc", "sombra"):  # sem N válido não há canário: vale o padrão ligado
         monkeypatch.setenv("SETH_ROTEADOR", modo)
-        assert g._refazer_ligado_neste_pedido() is False, modo
+        assert g._refazer_ligado_neste_pedido() is True, modo
     monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
     assert g._refazer_ligado_neste_pedido() is True
 
@@ -544,7 +555,7 @@ def test_decisao_do_canario_e_da_chave(monkeypatch):
 def test_limites_com_padrao_e_valor_invalido(monkeypatch):
     for var in VARS:
         monkeypatch.delenv(var, raising=False)
-    assert g._refazer_max() == 2 and g._refazer_seg() == 60.0
+    assert g._refazer_max() == 2 and g._refazer_seg() == 180.0
     assert g._refazer_1a_seg() == 180.0 and g._refazer_bytes() == 4 * 1024 * 1024
     monkeypatch.setenv("SETH_REFAZER_MAX", "5")
     monkeypatch.setenv("SETH_REFAZER_SEG", "0.5")
@@ -556,7 +567,7 @@ def test_limites_com_padrao_e_valor_invalido(monkeypatch):
     monkeypatch.setenv("SETH_REFAZER_SEG", "x")
     monkeypatch.setenv("SETH_REFAZER_1A_SEG", "x")
     monkeypatch.setenv("SETH_REFAZER_BYTES", "-5")
-    assert g._refazer_max() == 0 and g._refazer_seg() == 60.0
+    assert g._refazer_max() == 0 and g._refazer_seg() == 180.0
     assert g._refazer_1a_seg() == 180.0 and g._refazer_bytes() == 0
 
 

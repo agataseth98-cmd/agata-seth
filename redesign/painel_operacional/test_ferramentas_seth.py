@@ -669,3 +669,21 @@ class WebTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ModeloPorComentarioTests(unittest.TestCase):
+    """23/11/2026: ': agata modelo' de cada rodada chega à tela só quando o modelo muda."""
+
+    def _linhas(self, modelo, texto, chamada=False):
+        ls = [f": agata modelo {modelo}", ""]
+        if chamada:
+            ls += ['data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"c1","function":{"name":"hora","arguments":"{}"}}]}}]}', ""]
+        else:
+            ls += ['data: {"choices":[{"delta":{"content":"' + texto + '"}}]}', ""]
+        return ls + ["data: [DONE]", ""]
+
+    def test_mesmo_modelo_nao_repete_e_troca_aparece(self):
+        import ferramentas_seth as fs
+        evs = list(fs.laco(lambda _p: self._linhas("b/m", "fim"), self._linhas("a/m", "", chamada=True),
+                           {"messages": [{"role": "user", "content": "x"}]}, executor=lambda n, a: "ok"))
+        self.assertEqual([e["modelo"] for e in evs if e["tipo"] == "modelo"], ["a/m", "b/m"])

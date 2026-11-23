@@ -1009,12 +1009,16 @@ def _model_snapshot() -> dict:
     value = {"state": "unknown", "source": "config/capivara/capacidades.json",
              "observed_at": observed_at, "fresh_until": fresh_until, "models": []}
     try:
-        path = ROOT / "config/capivara/capacidades.json"
-        if path.stat().st_size > 2 * 1024 * 1024:
+        # 23/11/2026 (capacidade-producao): a Capivara viva fica no estado (atualizada pela pesquisa semanal e pelo uso);
+        # o arquivo do repositório é o retrato versionado e vale quando o estado não existe.
+        estado = Path.home() / ".local/share/agata/capivara/capacidades.json"
+        path = estado if estado.is_file() else ROOT / "config/capivara/capacidades.json"
+        value["source"] = str(path).replace(str(Path.home()), "~")
+        if path.stat().st_size > 8 * 1024 * 1024:  # 23/11: cobre todos os modelos (523 em 23/11, ~0,8 MB)
             raise ValueError("registro acima do limite")
         data = json.loads(path.read_text(encoding="utf-8"))
         models = data["modelos"]
-        if not isinstance(models, dict) or len(models) > 100:
+        if not isinstance(models, dict) or len(models) > 2000:
             raise ValueError("registro de modelos inválido")
         for name, model in sorted(models.items()):
             if not isinstance(name, str) or len(name) > 200 or not isinstance(model, dict):

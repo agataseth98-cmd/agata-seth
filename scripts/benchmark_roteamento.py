@@ -508,7 +508,8 @@ def _selftest() -> int:
         nomes_med = {x["metrica"] for x in res["medido"]}
         sys.path.insert(0, str(RAIZ / "scripts"))
         import capivara_capacidades as cc  # noqa: E402
-        reg = {"modelos": {"a/m": {"catalogo": None, "declarado": None, "medido": res["medido"], "observado": []}}}
+        reg = {"modelos": {"a/m": {"catalogo": None, "declarado": None, "medido": res["medido"], "observado": [],
+                                  "janela": None, "saida_max": None, "fonte": "nao_medido"}}}  # formato de 23/11 (fonte única)
         casos = [
             ("JSON estrito: válido", rj["checagens"] == {"json_valido": True}),
             ("JSON com texto em volta é inválido", json_estrito('aqui: {"a":1}') is False),

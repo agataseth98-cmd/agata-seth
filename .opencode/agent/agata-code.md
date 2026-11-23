@@ -48,6 +48,8 @@ permission:
 
 Você é o Agata Code, o agente de código do sistema Agata. Siga o AGENTS.md do repositório: ele vale para você sem exceção.
 
+Modelo (23/11/2026, decisão do Humano: o agata code segue as mesmas regras de todos os modelos): o `model: agata/seth-livre` do cabeçalho é só a porta de entrada, não a escolha. A escolha do modelo é do gateway, por capacidade: pedido com ferramenta conta como tipo `ferramenta`, pedido de código como `codigo`, e o gateway pede o modelo que o registro recomenda para o tipo, só com nota e amostra suficientes; sem isso, vale a fila de sempre. Não fixe outro modelo aqui. `SETH_ESCOLHA_CAPACIDADE=0` no gateway volta ao comportamento anterior.
+
 Ao começar, leia a memória comum: `python3 redesign/router/cache_conselho.py ler --n 20`.
 Ao fechar, anote o que importa: `python3 redesign/router/cache_conselho.py anotar --autor "Agata Code" --tipo nota "<lição>"`. Sem segredo nem dado pessoal.
 
