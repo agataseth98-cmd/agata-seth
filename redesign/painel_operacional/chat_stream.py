@@ -95,14 +95,28 @@ def eventos_do_stream(linhas: Iterable[str]) -> Iterator[dict]:
     - {"tipo": "erro", "motivo": "linha de dados inválida"} para JSON inválido (e para)
     - {"tipo": "erro", "motivo": "stream interrompido"} se o stream acabou sem [DONE]
 
+    - {"tipo": "estado", "texto": str} para o comentário ": agata <etapa>" do gateway (progresso da conferência)
+
     Linhas em branco (separadores de evento) e linhas que não são "data:"
-    (comentários, "event:") são ignoradas.
+    (outros comentários, "event:") são ignoradas.
     """
     houve_delta = False
     uso = None
     chamadas: dict[int, dict] = {}
     for linha in linhas:
         linha = linha.rstrip("\r\n")
+        # (23/11/2026, Regra 0) o gateway manda ": agata conferindo · ..." enquanto confere e refaz a resposta;
+        # vira {"tipo": "estado"} para a tela mostrar o progresso real. Outros comentários seguem ignorados.
+        if linha.startswith(": agata modelo "):  # 23/11: o modelo servido, quando o cabeçalho X-Modelo-Real não pode sair
+            modelo = linha[len(": agata modelo "):].strip()[:120]
+            if modelo:
+                yield {"tipo": "modelo", "modelo": modelo}
+            continue
+        if linha.startswith(": agata "):
+            texto = linha[len(": agata "):].strip()[:120]
+            if texto:
+                yield {"tipo": "estado", "texto": texto}
+            continue
         if not linha.startswith(PREFIXO_DADOS):
             continue
         dados = linha[len(PREFIXO_DADOS):].lstrip(" ")

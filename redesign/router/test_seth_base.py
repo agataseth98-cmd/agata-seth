@@ -16,7 +16,15 @@ import types
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import pytest  # noqa: E402
 import seth_gateway as g  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _uso_capivara_em_tmp(tmp_path, monkeypatch):
+    """(23/11/2026) O log de uso da Capivara vai para um temporário: teste nunca grava no uso.jsonl real."""
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(tmp_path / "uso.jsonl"))
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=tmp_path / "sem-registro.json": p)  # sem escolha por capacidade
 
 CAB = ("agata-seth · modelo: x (nuvem) · sync: PASS · 2026-11-17 18:00 -0300 (relógio da Máquina)\n"
        "Última entrada: (1) x\npronto.\n\n")

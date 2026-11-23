@@ -8,6 +8,7 @@ Rodar: pytest -q redesign/router/test_rotas_locais.py
 """
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
@@ -20,6 +21,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rotas"))
 
 import seth_gateway as g  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _uso_capivara_em_tmp(tmp_path, monkeypatch):
+    """(23/11/2026) O log de uso da Capivara vai para um temporário: teste nunca grava no uso.jsonl real."""
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(tmp_path / "uso.jsonl"))
+    # sem registro de capacidades: os testes de rota local e de fila seguem o combo de sempre; a escolha por capacidade
+    # tem os seus próprios testes, com registro temporário (o registro real muda com a Capivara)
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=tmp_path / "sem-registro.json": p)
 import rotas_locais as rl  # noqa: E402
 import ficha as ficha_mod  # noqa: E402
 
@@ -213,6 +223,23 @@ class _Up(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(corpo)
 
+    def _sse_lento(self, pausa):
+        """SSE de upstream lento: dois pedaços de conteúdo com pausa entre eles, depois o fim."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.end_headers()
+        try:
+            for pedaco in ("olá ", "mundo"):
+                linha = {"id": "x", "model": "m-lento", "choices": [{"delta": {"content": pedaco}, "finish_reason": None}]}
+                self.wfile.write(("data: " + json.dumps(linha, ensure_ascii=False) + "\n\n").encode("utf-8"))
+                self.wfile.flush()
+                time.sleep(pausa)
+            fim = {"id": "x", "model": "m-lento", "choices": [{"delta": {}, "finish_reason": "stop"}]}
+            self.wfile.write(("data: " + json.dumps(fim) + "\n\ndata: [DONE]\n\n").encode("utf-8"))
+        except OSError:
+            pass
+        self.close_connection = True
+
     def do_GET(self):
         self.server.gets.append(self.path)
         self._enviar(200, json.dumps({"object": "list", "data": [{"id": "seth-livre"}]}).encode())
@@ -222,6 +249,15 @@ class _Up(BaseHTTPRequestHandler):
         self.server.chamadas.append(corpo.get("model"))
         nuvem = str(corpo.get("model", "")).startswith("nvidia/")
         self.server.corpos.append(corpo)
+        self.server.cabecalhos.append(dict(self.headers))  # (23/11) prova do caminho de saída (sanitizador)
+        if getattr(self.server, "sse_lento", 0) and corpo.get("stream"):  # (23/11) upstream lento, em SSE
+            return self._sse_lento(self.server.sse_lento)
+        modo = self.server.falhar.get(corpo.get("model"))  # (23/11) falha escolhida para um modelo concreto
+        if modo == "500":
+            return self._enviar(500, b'{"error":"modelo concreto indisponivel"}')
+        if modo == "vazio":
+            return self._enviar(200, json.dumps({"model": "m-vazio", "choices": [{"message": {
+                "role": "assistant", "content": ""}}]}).encode())
         if nuvem and self.server.nuvem == "500":
             return self._enviar(500, b'{"error":"cota"}')
         if nuvem and self.server.nuvem == "keepalive":  # SSE que só manda keep-alives (nunca conteúdo)
@@ -288,6 +324,8 @@ class _Cen:
         self.up = ThreadingHTTPServer(("127.0.0.1", 0), _Up)
         self.up.chamadas, self.up.gets, self.up.local = [], [], local
         self.up.corpos, self.up.nuvem = [], "ok"
+        self.up.cabecalhos, self.up.falhar = [], {}
+        self.up.sse_lento = 0  # (23/11) pausa entre pedaços do SSE do upstream lento; 0 = modo normal
         threading.Thread(target=self.up.serve_forever, daemon=True).start()
         mp.setattr(g, "UPSTREAM", f"http://127.0.0.1:{self.up.server_address[1]}")
         self.gw = g.ServidorConcorrenciaLimitada(("127.0.0.1", 0), g._Handler)
@@ -897,7 +935,7 @@ def test_queda_segura_da_nuvem_volta_a_fila_de_sempre(gw, ficha, modo):
     c = gw()
     c.up.nuvem = modo
     status, texto = c.post(publico=True)
-    assert status == 200 and texto == "fila ok"
+    assert status == 200 and "fila ok" in texto
     assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[1].startswith("seth-")
 
 
@@ -943,7 +981,7 @@ def test_prazo_absoluto_da_nuvem_com_so_keepalives_cai_na_fila(gw, ficha, monkey
     t0 = time.monotonic()
     status, texto = c.post(publico=True)
     dt = time.monotonic() - t0
-    assert status == 200 and texto == "fila ok"
+    assert status == 200 and "fila ok" in texto
     assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[1].startswith("seth-")
     assert len(c.up.chamadas) == 2          # sem resposta duplicada
     assert 0.9 <= dt < 5.0, dt              # ~1 s, nunca os 40 s do prazo padrão nem os 8 s dos keep-alives
@@ -1016,7 +1054,7 @@ def test_http_exception_do_upstream_na_nuvem_cai_na_fila(gw, ficha, monkeypatch)
         return orig(req, timeout=timeout)
     monkeypatch.setattr(g.urllib.request, "urlopen", falso)
     status, texto = c.post(publico=True)
-    assert status == 200 and texto == "fila ok" and vistos[-2:] == ["nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b", "seth-livre"], vistos
+    assert status == 200 and "fila ok" in texto and vistos[-2:] == ["nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b", "seth-livre"], vistos
 
 
 def test_get_zera_o_prazo_da_nuvem(gw, ficha):
@@ -1046,7 +1084,7 @@ def test_prazo_absoluto_da_nuvem_headers_e_json_lentos(gw, ficha, monkeypatch, m
     t0 = time.monotonic()
     status, texto = c.post(publico=True)
     dt = time.monotonic() - t0
-    assert status == 200 and texto == "fila ok"
+    assert status == 200 and "fila ok" in texto
     assert c.up.chamadas[0].startswith("nvidia/") and c.up.chamadas[-1].startswith("seth-")
     assert 0.9 <= dt < teto, dt   # ~1 s: nem os 2,5 s dos headers nem a leitura inteira do JSON (~3 s)
 
@@ -1061,7 +1099,7 @@ def test_json_pingo_e_silencio_responde_pela_fila_antes_do_prazo_mais_meio_segun
     t0 = time.monotonic()
     status, texto = c.post(publico=True)
     dt = time.monotonic() - t0
-    assert status == 200 and texto == "fila ok" and len(c.up.chamadas) == 2
+    assert status == 200 and "fila ok" in texto and len(c.up.chamadas) == 2
     assert 2.9 <= dt < 3.5, dt
 
 
@@ -1128,3 +1166,871 @@ def test_nome_de_modelo_de_nuvem_nvidia_e_de_nivel_gratuito():
     import ferramentas_confianca as fc
     assert fc.dado_maximo("nvidia/nvidia/nemotron-3.5-bolt-e4b", False) == "publico"
     assert fc.dado_maximo("nvidia/poolside/laguna-xs-2.1", True) == "publico"
+
+
+# --- escolha por capacidade em produção e log de uso (23/11/2026) ---------------------------------------------------
+# Decisão do Humano (23/11, 16:40): todos os modelos são escolhidos pelas capacidades; o Agata Code segue as mesmas
+# regras. O registro aqui é temporário (o real muda com a Capivara). Cobre: concreto com nota e amostra; combo sem
+# elas; pessoal só local; falha, vazio ou queda do concreto volta ao combo; flag 0; saída pelo sanitizador; log de uso
+# sem texto com rota, rota_por e laya_confianca; tipo do Agata Code (ferramenta e código); sombra com "aplicada".
+
+LOG_CAMPOS = {"ts", "modelo", "tipo", "classe", "status", "bloqueado", "latencia_ms", "rota", "rota_por",
+              "laya_confianca", "achados", "refeito", "corrigido"}
+FILA_CODIGO = {"seth-codigo": ["mistral/codestral-latest", "gemini/gemini-3-flash-preview"]}
+
+
+def _med(metrica, valor, amostra=6):
+    return {"metrica": metrica, "valor": valor, "amostra": amostra}
+
+
+def _urlopen_que_falha_para(monkeypatch, marca, erro):
+    real = urllib.request.urlopen
+
+    def falso(req, *a, **k):
+        if marca in (getattr(req, "data", None) or b""):
+            raise erro
+        return real(req, *a, **k)
+    monkeypatch.setattr(g.urllib.request, "urlopen", falso)
+
+
+def _ultima_linha_uso(tmp_path):
+    return json.loads((tmp_path / "uso.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+
+@pytest.fixture
+def capacidade(gw, tmp_path, monkeypatch):
+    """Gateway com as rotas locais e de nuvem desligadas (o que se testa é a escolha por capacidade), e funções para
+    pôr um registro temporário e um Laya de mentira. Devolve (registro, laya)."""
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.delenv("SETH_ESCOLHA_CAPACIDADE", raising=False)
+
+    def registro(filas, modelos):
+        modelos = {m: dict(info, catalogo=info.get("catalogo") or {"janela": 128000}) for m, info in modelos.items()}
+        p = tmp_path / "capacidades-teste.json"
+        p.write_text(json.dumps({"filas": filas, "modelos": modelos}), encoding="utf-8")
+        monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=p: p)
+
+    def laya(rota, choice=None, conf=None):
+        dec = {} if choice is None else {"choice": choice, "confidence": conf}
+        monkeypatch.setattr(g, "_rota_laya", lambda payload: (rota, dec))
+    return registro, laya
+
+
+def test_escolhe_o_concreto_com_nota_e_amostra_por_padrao(capacidade, gw):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]},
+                           "gemini/gemini-3-flash-preview": {"medido": [_med("qualidade_codigo", 0.95, 4)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    status, texto = c.post("escreva uma função")
+    assert status == 200 and "fila ok" in texto
+    assert c.up.chamadas == ["mistral/codestral-latest"]  # o de amostra 4 não conta; o concreto venceu o combo
+
+
+@pytest.mark.parametrize("modelos", [
+    {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 5)]}},   # amostra 5 (mínimo é 6)
+    {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.6, 20)]}},  # nota abaixo do piso 0,7
+    {"mistral/codestral-latest": {"medido": []}},                                   # sem medida
+    {},                                                                             # o modelo nem está no registro
+])
+def test_sem_nota_e_amostra_suficientes_vale_o_combo(capacidade, gw, modelos):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, modelos)
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("escreva uma função")
+    assert c.up.chamadas == ["seth-codigo"]
+
+
+def test_dado_pessoal_so_vai_a_modelo_local(capacidade, gw):
+    registro, laya = capacidade
+    registro({"seth-codigo": ["mistral/codestral-latest", "ollama-local/qwen3.5-9b-64k:latest"]}, {
+        "mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.95, 10)]},
+        "ollama-local/qwen3.5-9b-64k:latest": {"medido": [_med("qualidade_codigo", 0.75, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("escreva uma função e mande para ana@exemplo.com")
+    assert c.up.chamadas == ["ollama-local/qwen3.5-9b-64k:latest"]  # o remoto, melhor, não recebe dado pessoal
+
+
+def test_dado_pessoal_sem_modelo_local_qualificado_vai_ao_combo(capacidade, gw):
+    registro, laya = capacidade
+    registro({"seth-codigo": ["mistral/codestral-latest", "ollama-local/qwen3.5-9b-64k:latest"]}, {
+        "mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.95, 10)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("escreva uma função e mande para ana@exemplo.com")
+    # a escolha nova não manda dado pessoal a remoto; a queda segue a política de hoje (combo), como antes do lote
+    assert c.up.chamadas == ["seth-codigo"]
+
+
+@pytest.mark.parametrize("modo", ["500", "vazio"])
+def test_falha_ou_resposta_vazia_do_concreto_volta_ao_combo(capacidade, gw, modo):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.up.falhar["mistral/codestral-latest"] = modo
+    status, texto = c.post("escreva uma função")
+    assert status == 200 and "fila ok" in texto
+    assert c.up.chamadas == ["mistral/codestral-latest", "seth-codigo"]  # o concreto falhou; a fila respondeu
+
+
+@pytest.mark.parametrize("erro", [urllib.error.URLError("conexão recusada"), socket.timeout("timed out"),
+                                  TimeoutError("timeout")])
+def test_queda_de_conexao_do_concreto_volta_ao_combo(capacidade, gw, monkeypatch, erro):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    _urlopen_que_falha_para(monkeypatch, b"mistral/codestral-latest", erro)
+    c = gw()
+    status, texto = c.post("escreva uma função")
+    assert status == 200 and "fila ok" in texto
+    assert c.up.chamadas == ["seth-codigo"]  # o concreto nem chegou ao sanitizador; o combo respondeu
+
+
+def test_flag_zero_volta_ao_comportamento_anterior(capacidade, gw, monkeypatch):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    monkeypatch.setenv("SETH_ESCOLHA_CAPACIDADE", "0")
+    c = gw()
+    c.post("escreva uma função")
+    assert c.up.chamadas == ["seth-codigo"]
+
+
+def test_concreto_remoto_sai_pelo_mesmo_sanitizador_do_combo(capacidade, gw):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("escreva uma função")
+    assert c.up.chamadas == ["mistral/codestral-latest"]
+    cab = {k.lower(): v for k, v in c.up.cabecalhos[-1].items()}
+    # o pedido chegou ao sanitizador (o servidor falso que o gateway usa como UPSTREAM), com o token interno e a
+    # mesma classificação que o combo leva (sanitizado-cascata): é o mesmo caminho de saída
+    assert g.UPSTREAM == f"http://127.0.0.1:{c.up.server_address[1]}"
+    assert cab.get("x-agata-token") == TOKEN
+    assert cab.get("x-agata-data-classification") == "sanitizado-cascata"
+
+
+def test_concreto_na_faixa_publica_leva_classificacao_public(capacidade, gw):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("escreva uma função", publico=True)
+    assert c.up.chamadas == ["mistral/codestral-latest"]
+    cab = {k.lower(): v for k, v in c.up.cabecalhos[-1].items()}
+    assert cab.get("x-agata-data-classification") == "public"
+
+
+def test_chamada_utilitaria_segue_o_combo(capacidade, gw, monkeypatch):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    monkeypatch.setattr(g, "_e_chamada_utilitaria", lambda payload: True)  # título do frontend: nunca escolha
+    c = gw()
+    c.post("escreva uma função")
+    assert c.up.chamadas == ["seth-codigo"]
+
+
+def test_agata_code_com_ferramenta_passa_pela_escolha(capacidade, gw, tmp_path):
+    registro, laya = capacidade
+    registro({"seth-livre": ["mistral/ministral-14b-latest", "gemini/gemini-2.5-flash"]}, {
+        "mistral/ministral-14b-latest": {"medido": [_med("qualidade_ferramenta", 0.8, 6)]},
+        "gemini/gemini-2.5-flash": {"medido": [_med("qualidade_ferramenta", 0.95, 3)]}})  # amostra 3 não conta
+    laya("seth-livre", "livre", 0.9)
+    c = gw()
+    tools = [{"type": "function", "function": {"name": "ler_arquivo", "parameters": {}}}]
+    c.post("leia o arquivo de notas", extra={"tools": tools})
+    assert c.up.chamadas == ["mistral/ministral-14b-latest"]  # não fixado: a capacidade ferramenta escolheu
+    assert _ultima_linha_uso(tmp_path)["tipo"] == "ferramenta"
+
+
+def test_agata_code_com_codigo_passa_pela_escolha_e_o_tipo_e_codigo(capacidade, gw, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.post("corrija este script python: x = 1 +")
+    assert c.up.chamadas == ["mistral/codestral-latest"]
+    assert _ultima_linha_uso(tmp_path)["tipo"] == "codigo"
+
+
+def test_log_de_uso_sem_texto_com_os_campos(capacidade, gw, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    marca = "PEDIDO-SEM-TEXTO-7731"
+    c.post(f"escreva uma função {marca}")
+    bruto = (tmp_path / "uso.jsonl").read_text(encoding="utf-8")
+    assert marca not in bruto and "escreva" not in bruto and "fila ok" not in bruto  # nenhum texto do pedido ou da resposta
+    linhas = [json.loads(x) for x in bruto.splitlines()]
+    assert len(linhas) == 1 and set(linhas[0]) == LOG_CAMPOS
+    linha = linhas[0]
+    assert linha["modelo"] == "m-falso"  # o modelo servido de verdade (campo model da resposta)
+    assert (linha["tipo"], linha["classe"], linha["status"], linha["bloqueado"]) == ("codigo", "publico", 200, False)
+    assert isinstance(linha["latencia_ms"], int) and linha["latencia_ms"] >= 0
+    assert (linha["rota"], linha["rota_por"], linha["laya_confianca"]) == ("codigo", "laya", 0.9)
+
+
+@pytest.mark.parametrize("rota, dec, esperado", [
+    ("seth-codigo", {"choice": "codigo", "confidence": 0.9}, ("codigo", "laya", 0.9)),
+    ("seth-livre", {"choice": "livre", "confidence": 0.3}, ("livre", "regra", 0.3)),  # confiança abaixo do limiar
+    ("seth-livre", {}, ("livre", "regra", None)),                                    # Laya fora ou lento
+])
+def test_log_traz_rota_rota_por_e_confianca_do_laya(gw, monkeypatch, tmp_path, rota, dec, esperado):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.setattr(g, "_rota_laya", lambda payload: (rota, dec))
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", lambda p=tmp_path / "sem-registro.json": p)
+    c = gw()
+    c.post("oi")
+    linha = _ultima_linha_uso(tmp_path)
+    assert (linha["rota"], linha["rota_por"], linha["laya_confianca"]) == esperado
+
+
+def test_rota_por_regra_quando_a_trava_troca_a_rota_do_laya():
+    assert g._rota_laya_por("seth-pesado", {"choice": "livre", "confidence": 0.9}) == ("regra", 0.9)
+    assert g._rota_laya_por("seth-livre", {"choice": "livre", "confidence": 0.9}) == ("laya", 0.9)
+    assert g._rota_laya_por("seth-livre", {"choice": "livre", "confidence": True}) == ("regra", None)  # bool não é número
+
+
+@pytest.mark.parametrize("payload, rota_laya, tipo", [
+    ({"messages": [{"role": "user", "content": "oi"}]}, "codigo", "codigo"),
+    ({"messages": [{"role": "user", "content": "oi"}], "tools": [{"type": "function"}]}, None, "ferramenta"),
+    ({"messages": [{"role": "user", "content": "oi"}],
+      "response_format": {"type": "json_object"}}, None, "json"),
+    ({"messages": [{"role": "user", "content": "oi"}]}, "livre", "conversa"),
+    ({"messages": [{"role": "user", "content": "oi " * 40000}]}, None, "contexto"),
+])
+def test_tipo_do_perfil_parte_da_rota_do_laya(payload, rota_laya, tipo):
+    perfil = g._perfil_do_pedido(payload, payload["messages"], rota_laya)
+    assert perfil["tipo"] == tipo and perfil["classe"] == "publico"
+
+
+def test_segredo_nunca_escolhe_modelo(capacidade, monkeypatch):
+    registro, _laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    monkeypatch.setattr(g.rotas_locais, "tem_segredo", lambda payload: True)
+    msgs = [{"role": "user", "content": "oi"}]
+    perfil = g._perfil_do_pedido({"messages": msgs}, msgs, "codigo")
+    assert perfil["segredo"] and perfil["classe"] == "pessoal"
+    assert g._escolha_capacidade(perfil, "seth-codigo") is None
+
+
+def test_sombra_registra_aplicada_quando_a_escolha_foi_aplicada(capacidade, gw, monkeypatch, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    monkeypatch.setenv("SETH_SOMBRA_CAPACIDADE", "1")
+    sombra = tmp_path / "roteador-capacidade.jsonl"
+    monkeypatch.setattr(g.sombra_capacidade, "LOG", sombra)
+    c = gw()
+    c.post("escreva uma função")
+    for _ in range(100):  # a sombra roda numa thread: espera a linha (até 5 s)
+        if sombra.exists() and sombra.read_text(encoding="utf-8").strip():
+            break
+        time.sleep(0.05)
+    linha = json.loads(sombra.read_text(encoding="utf-8").splitlines()[0])
+    assert linha["aplicada"] is True and linha["escolhida"] == "mistral/codestral-latest"
+
+
+def test_falha_ao_gravar_o_uso_nao_derruba_o_pedido(gw, monkeypatch, tmp_path):
+    bloqueio = tmp_path / "arquivo"
+    bloqueio.write_text("não é pasta", encoding="utf-8")
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(bloqueio / "uso.jsonl"))  # a "pasta" é um arquivo: não grava
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    c = gw()
+    status, _texto = c.post()
+    assert status == 200
+
+
+def test_pasta_do_uso_e_criada_se_faltar(gw, monkeypatch, tmp_path):
+    destino = tmp_path / "novo" / "sub" / "uso.jsonl"
+    monkeypatch.setenv("AGATA_CAPIVARA_USO", str(destino))
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    c = gw()
+    c.post()
+    assert destino.exists() and len(destino.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_log_marca_bloqueado_quando_a_resposta_minima_sai(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.setattr(g.bloqueio_turno, "achados", lambda texto, msgs, mod: [("X1", "achado de teste")])
+    monkeypatch.setattr(g.bloqueio_turno, "resposta_minima", lambda ach: "resposta mínima de teste")
+    c = gw()
+    status, texto = c.post("oi")
+    assert status == 200 and "resposta mínima de teste" in texto  # o cabeçalho da Máquina vem antes
+    assert _ultima_linha_uso(tmp_path)["bloqueado"] is True
+
+
+# --- registro de capacidades: estado da Capivara, com queda para o repositório (23/11/2026, coordenação) -----------
+
+_CAMINHO_REGISTRO_ORIGINAL = g.sombra_capacidade._caminho_registro  # antes do fixture que o troca por um temporário
+
+
+@pytest.fixture
+def caminho_real(monkeypatch):
+    """Restaura a resolução de verdade (o fixture de gateway a troca por um registro temporário)."""
+    monkeypatch.setattr(g.sombra_capacidade, "_caminho_registro", _CAMINHO_REGISTRO_ORIGINAL)
+    monkeypatch.setitem(g.sombra_capacidade._CACHE_CAMINHO, "valor", None)  # sem resultado lembrado de outro teste
+
+
+def _capivara_falsa(monkeypatch, funcao=None):
+    """Módulo capivara_capacidades falso em sys.modules: com a função caminho_registro (ou sem ela)."""
+    import types
+    mod = types.ModuleType("capivara_capacidades")
+    if funcao is not None:
+        mod.caminho_registro = funcao
+    monkeypatch.setitem(sys.modules, "capivara_capacidades", mod)
+
+
+def test_caminho_registro_usa_o_estado_da_capivara_quando_existe(monkeypatch, tmp_path, caminho_real):
+    estado = tmp_path / "estado" / "capacidades.json"
+    _capivara_falsa(monkeypatch, funcao=lambda: estado)
+    assert g.sombra_capacidade._caminho_registro() == estado
+
+
+def test_sem_caminho_registro_cai_no_repositorio(monkeypatch, caminho_real):
+    _capivara_falsa(monkeypatch)  # o módulo existe, mas ainda sem a função
+    assert g.sombra_capacidade._caminho_registro() == g.sombra_capacidade.REGISTRO
+
+
+def test_caminho_registro_quebrado_cai_no_repositorio(monkeypatch, caminho_real):
+    def _quebra():
+        raise OSError("estado ilegível")
+    _capivara_falsa(monkeypatch, funcao=_quebra)
+    assert g.sombra_capacidade._caminho_registro() == g.sombra_capacidade.REGISTRO
+
+
+def test_modulo_da_capivara_ausente_cai_no_repositorio(monkeypatch, caminho_real):
+    monkeypatch.setitem(sys.modules, "capivara_capacidades", None)  # o import falha
+    assert g.sombra_capacidade._caminho_registro() == g.sombra_capacidade.REGISTRO
+
+
+def test_carregar_registro_le_do_caminho_da_capivara(monkeypatch, tmp_path, caminho_real):
+    estado = tmp_path / "capacidades.json"
+    estado.write_text(json.dumps({"filas": {"seth-codigo": ["x/y"]}, "modelos": {}}), encoding="utf-8")
+    _capivara_falsa(monkeypatch, funcao=lambda: estado)
+    assert g.sombra_capacidade.carregar_registro()["filas"] == {"seth-codigo": ["x/y"]}
+
+
+def test_janela_declarada_e_escalar():
+    sc = g.sombra_capacidade
+    assert sc._janela({"declarado": {"janela": 8000}}, None) == 8000
+    assert sc._janela({"catalogo": {"janela": 128000}, "declarado": {"janela": 8000}}, 4000) == 128000
+    assert sc._janela({"declarado": [1, 2]}, 4000) == 4000                 # não é objeto: vale o perfil
+    assert sc._janela({"declarado": {"janela": "grande"}}, 4000) == 4000   # não é número: não conta
+    assert sc._janela({"declarado": {"janela": True}}, None) is None       # bool não é janela
+
+
+# --- perfis de janela do gateway: a Capivara viva (caminho_perfil, sem argumento) (23/11/2026, coordenação) ---------
+
+def test_perfis_do_gateway_usam_o_caminho_da_capivara_sem_argumento(monkeypatch, tmp_path):
+    perfil = tmp_path / "perfis-viva.json"
+    perfil.write_text(json.dumps({"modelos": {"m/x": {"janela": 777}}, "filas": {}}), encoding="utf-8")
+    monkeypatch.setattr(g.capivara_perfis, "caminho_perfil", lambda *a, **k: perfil)
+    monkeypatch.setitem(g._PERFIS, "quando", 0.0)
+    monkeypatch.setitem(g._PERFIS, "caminho", None)
+    assert g._perfis()["modelos"]["m/x"]["janela"] == 777
+    assert g._janelas_perfis()["m/x"] == 777
+
+
+def test_perfis_com_estado_da_capivara_em_pasta_temporaria(tmp_path):
+    """Num subprocesso, com AGATA_CAPIVARA_ESTADO apontando para uma pasta temporária (a constante da Capivara é lida
+    na importação). Sem estado: o retrato do repositório. Com estado em dia com o registro em uso: o estado."""
+    estado = tmp_path / "estado"
+    estado.mkdir()
+    env = dict(os.environ, AGATA_CAPIVARA_ESTADO=str(estado), AGATA_CAPIVARA_USO=str(tmp_path / "uso.jsonl"))
+    codigo = (
+        "import json, sys\n"
+        "from pathlib import Path\n"
+        "sys.path.insert(0, sys.argv[1])\n"
+        "import seth_gateway as g\n"
+        "import capivara_perfis as cp\n"
+        "import capivara_capacidades as cap\n"
+        "out = {'estado': str(cap.ESTADO_PERFIL), 'retrato': str(cp.PERFIS)}\n"
+        "out['sem_estado'] = str(cp.caminho_perfil())\n"
+        "reg = cap.carregar()\n"
+        "out['tem_registro'] = bool(reg.get('modelos'))\n"
+        "Path(cap.ESTADO_PERFIL).write_text(json.dumps(cp.derivar(reg)), encoding='utf-8')\n"
+        "out['com_estado'] = str(cp.caminho_perfil())\n"
+        "g._PERFIS['quando'] = 0.0\n"
+        "g._PERFIS['caminho'] = None\n"
+        "out['perfis_tem_modelos'] = bool(g._perfis().get('modelos'))\n"
+        "print(json.dumps(out))\n"
+    )
+    r = subprocess.run([sys.executable, "-c", codigo, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "router")],
+                       env=env, capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, r.stderr[-800:]
+    out = json.loads(r.stdout.strip().splitlines()[-1])
+    assert out["tem_registro"], "o registro em uso precisa ter modelos para o teste de estado em dia"
+    assert out["estado"].startswith(str(estado))  # a variável apontou para a pasta temporária
+    assert out["sem_estado"] == out["retrato"]    # sem estado, cai no retrato do repositório
+    assert out["com_estado"] == out["estado"]     # com estado em dia, o gateway usa o estado da Capivara
+    assert out["perfis_tem_modelos"]
+
+
+# --- revisão independente (23/11/2026): comentários, privado no pedido inteiro, latência em stream, uso degradado,
+# falhas no log, cache, e refazer ligado por padrão com achados no uso (Humano, 18:18) ---------------------------------
+
+def _linhas_uso(tmp_path):
+    return [json.loads(x) for x in (tmp_path / "uso.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+class _RespostaTravada:
+    """Resposta de upstream que não entrega nada: a leitura estoura (queda no meio do corpo)."""
+    status = 200
+    headers = {"Content-Type": "application/json"}
+
+    def read(self, *a):
+        raise TimeoutError("lido devagar")
+
+    read1 = read
+
+    def close(self):
+        pass
+
+
+def _upstream_com(monkeypatch, comportamento, marca=None):
+    """Troca o urlopen só para o upstream (o sanitizador falso). `comportamento(req)` devolve uma resposta ou levanta."""
+    real = urllib.request.urlopen
+
+    def falso(req, *a, **k):
+        url = str(getattr(req, "full_url", ""))
+        if url.startswith(g.UPSTREAM) and (marca is None or marca in (getattr(req, "data", None) or b"")):
+            return comportamento(req)
+        return real(req, *a, **k)
+    monkeypatch.setattr(g.urllib.request, "urlopen", falso)
+
+
+# (2) comentários: o proxy não varre dado pessoal desde a decisão relaxa-pessoal (22/10)
+def test_comentarios_nao_dizem_que_o_proxy_varre_dado_pessoal():
+    aqui = os.path.dirname(os.path.abspath(g.__file__))
+    proxy = open(os.path.join(aqui, "proxy.py"), encoding="utf-8").read()
+    gw = open(os.path.join(aqui, "seth_gateway.py"), encoding="utf-8").read()
+    sombra = open(os.path.join(aqui, "sombra_capacidade.py"), encoding="utf-8").read()
+    for texto in (proxy, gw, sombra):
+        assert "(segredo, dados pessoais, nomes de projeto)" not in texto
+        assert "segredo + dados pessoais + nomes de projeto" not in texto
+        assert "seth-livre sanitiza segredo, dado pessoal" not in texto
+    assert "NÃO são varridos" in proxy
+    assert "não são varridos desde a decisão relaxa-pessoal" in gw
+    assert "O proxy NÃO varre dado pessoal" in sombra
+
+
+# (3) dado pessoal em qualquer parte do pedido: turno anterior, tool_calls (string e objeto), papel tool e nome
+@pytest.mark.parametrize("msgs, esperado", [
+    ([{"role": "user", "content": "oi"},
+      {"role": "assistant", "content": "o contato é ana@exemplo.com"},
+      {"role": "user", "content": "obrigado"}], True),                                      # turno anterior
+    ([{"role": "user", "content": "envie"},
+      {"role": "assistant", "content": None, "tool_calls": [{"id": "1", "type": "function", "function": {
+          "name": "enviar", "arguments": "{\"para\": \"ana@exemplo.com\"}"}}]}], True),        # argumentos em texto
+    ([{"role": "user", "content": "envie"},
+      {"role": "assistant", "content": None, "tool_calls": [{"id": "1", "type": "function", "function": {
+          "name": "enviar", "arguments": {"para": "ana@exemplo.com"}}}]}], True),             # argumentos em objeto
+    ([{"role": "user", "content": "leia"},
+      {"role": "tool", "tool_call_id": "1", "content": "contato: ana@exemplo.com"}], True),     # papel tool
+    ([{"role": "user", "content": "x"}, {"role": "assistant", "content": "ok", "name": "ana@exemplo.com"}], True),
+    ([{"role": "user", "content": "bom dia equipe"},
+      {"role": "assistant", "content": None, "tool_calls": [{"id": "1", "type": "function", "function": {
+          "name": "somar", "arguments": "{\"a\": 1}"}}]}], False),                               # sem dado pessoal
+])
+def test_dado_pessoal_em_qualquer_parte_do_pedido(msgs, esperado):
+    assert g.sombra_capacidade.privado_no_historico(msgs) is esperado
+
+
+# (4) latência: em stream, o p95 do tipo tem de caber no prazo do primeiro conteúdo
+def _janela_ok(modelos):
+    return {m: dict(info, catalogo=info.get("catalogo") or {"janela": 128000}) for m, info in modelos.items()}
+
+
+def _reg_latencia(p95_qwen=168, com_p95_qwen=True):
+    qwen = [_med("qualidade_ferramenta", 0.95, 10)] + ([_med("latencia_p95_s", p95_qwen, 10)] if com_p95_qwen else [])
+    return {"filas": {"seth-livre": ["ollama-local/qwen3-30b-a3b-64k:latest", "mistral/ministral-14b-latest"]},
+            "modelos": _janela_ok({"ollama-local/qwen3-30b-a3b-64k:latest": {"medido": qwen},
+                                   "mistral/ministral-14b-latest": {"medido": [_med("qualidade_ferramenta", 0.8, 6),
+                                                                               _med("latencia_p95_s", 5, 6)]}})}
+
+
+REQ_FERR = {"tipo": "ferramenta", "tokens_est": 100, "privado": False, "ferramentas": True, "codigo": False, "json": False}
+
+
+def test_stream_nao_escolhe_modelo_com_p95_acima_do_prazo():
+    r = g.sombra_capacidade.escolher(dict(REQ_FERR, stream=True), "seth-livre", _reg_latencia(), {}, prazo_stream_s=40.0)
+    assert r["modelo"] == "mistral/ministral-14b-latest"  # qwen3 tem nota maior, mas p95 de 168 s não cabe no stream
+
+
+def test_sem_stream_o_p95_nao_pesa():
+    r = g.sombra_capacidade.escolher(dict(REQ_FERR), "seth-livre", _reg_latencia(), {}, prazo_stream_s=40.0)
+    assert r["modelo"] == "ollama-local/qwen3-30b-a3b-64k:latest"
+
+
+def test_stream_sem_p95_conhecido_nao_filtra_por_latencia():
+    r = g.sombra_capacidade.escolher(dict(REQ_FERR, stream=True), "seth-livre",
+                                     _reg_latencia(com_p95_qwen=False), {}, prazo_stream_s=40.0)
+    assert r["modelo"] == "ollama-local/qwen3-30b-a3b-64k:latest"  # sem p95, só a amostra mínima vale
+
+
+def test_gateway_stream_com_ferramenta_nao_vai_ao_modelo_lento(capacidade, gw):
+    registro, laya = capacidade
+    registro({"seth-livre": ["ollama-local/qwen3-30b-a3b-64k:latest", "mistral/ministral-14b-latest"]}, {
+        "ollama-local/qwen3-30b-a3b-64k:latest": {"medido": [_med("qualidade_ferramenta", 0.95, 10),
+                                                             _med("latencia_p95_s", 168, 10)]},
+        "mistral/ministral-14b-latest": {"medido": [_med("qualidade_ferramenta", 0.8, 6),
+                                                    _med("latencia_p95_s", 5, 6)]}})
+    laya("seth-livre", "livre", 0.9)
+    c = gw()
+    tools = [{"type": "function", "function": {"name": "ler_arquivo", "parameters": {}}}]
+    c.post("leia o arquivo de notas", extra={"tools": tools, "stream": True})
+    assert c.up.chamadas == ["mistral/ministral-14b-latest"]
+
+
+# (5) uso real: taxa_ok baixa ou taxa_achado alta, com amostra >= 20 para o tipo, tiram o modelo da escolha
+def _reg_uso(observado_a):
+    return {"filas": {"seth-livre": ["x/a", "x/b"]},
+            "modelos": _janela_ok({"x/a": {"medido": [_med("qualidade_ferramenta", 0.95, 10)], "observado": observado_a},
+                                   "x/b": {"medido": [_med("qualidade_ferramenta", 0.8, 6)]}})}
+
+
+def _obs(metrica, valor, amostra, tipo="ferramenta"):
+    return {"metrica": metrica, "tipo": tipo, "valor": valor, "amostra": amostra}
+
+
+@pytest.mark.parametrize("observado_a, escolhido", [
+    ([_obs("taxa_ok", 0.6, 25)], "x/b"),                 # uso degradado (0,6 < 0,8, amostra 25)
+    ([_obs("taxa_ok", 0.0, 25)], "x/b"),                 # taxa zero também tira
+    ([_obs("taxa_ok", 0.6, 19)], "x/a"),                 # amostra 19: ainda não conta
+    ([_obs("taxa_ok", 0.9, 25)], "x/a"),                 # uso bom: fica
+    ([_obs("taxa_achado", 0.35, 25)], "x/b"),            # muitos achados da verificação (0,35 >= 0,3)
+    ([_obs("taxa_achado", 0.2, 25)], "x/a"),             # poucos achados: fica
+    ([_obs("taxa_achado", 0.35, 19)], "x/a"),            # amostra 19: não conta
+    ([_obs("taxa_ok", 0.6, 25, tipo="conversa")], "x/a"),  # medida de OUTRO tipo não vale para ferramenta
+])
+def test_uso_real_degradado_fica_fora_da_escolha(observado_a, escolhido):
+    r = g.sombra_capacidade.escolher(dict(REQ_FERR), "seth-livre", _reg_uso(observado_a), {})
+    assert r["modelo"] == escolhido
+
+
+# (6) log de uso registra falhas: a tentativa que cai entra com o status do erro (0 = sem resposta útil)
+def test_falha_do_concreto_entra_no_uso_antes_do_combo(capacidade, gw, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.up.falhar["mistral/codestral-latest"] = "500"
+    status, texto = c.post("escreva uma função")
+    assert status == 200 and "fila ok" in texto
+    linhas = _linhas_uso(tmp_path)
+    assert [(x["modelo"], x["status"]) for x in linhas] == [("mistral/codestral-latest", 500), ("m-falso", 200)]
+    assert linhas[0]["achados"] == [] and linhas[0]["corrigido"] is None  # tentativa que não entregou nada
+
+
+@pytest.mark.parametrize("erro", [urllib.error.URLError("conexão recusada"), socket.timeout("timed out")])
+def test_queda_do_concreto_entra_no_uso_com_status_zero(capacidade, gw, monkeypatch, tmp_path, erro):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    _urlopen_que_falha_para(monkeypatch, b"mistral/codestral-latest", erro)
+    c = gw()
+    c.post("escreva uma função")
+    assert [(x["modelo"], x["status"]) for x in _linhas_uso(tmp_path)] == [("mistral/codestral-latest", 0), ("m-falso", 200)]
+
+
+def test_resposta_vazia_do_concreto_entra_no_uso_com_status_zero(capacidade, gw, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    c = gw()
+    c.up.falhar["mistral/codestral-latest"] = "vazio"
+    c.post("escreva uma função")
+    assert [(x["modelo"], x["status"]) for x in _linhas_uso(tmp_path)] == [("mistral/codestral-latest", 0), ("m-falso", 200)]
+
+
+def test_leitura_travada_do_concreto_entra_no_uso_com_status_zero(capacidade, gw, monkeypatch, tmp_path):
+    registro, laya = capacidade
+    registro(FILA_CODIGO, {"mistral/codestral-latest": {"medido": [_med("qualidade_codigo", 0.9, 6)]}})
+    laya("seth-codigo", "codigo", 0.9)
+    _upstream_com(monkeypatch, lambda req: _RespostaTravada(), marca=b"mistral/codestral-latest")
+    c = gw()
+    status, texto = c.post("escreva uma função")
+    assert status == 200 and "fila ok" in texto
+    assert [(x["modelo"], x["status"]) for x in _linhas_uso(tmp_path)] == [("mistral/codestral-latest", 0), ("m-falso", 200)]
+
+
+def test_erro_final_502_entra_no_uso(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+
+    def fora(req):
+        raise urllib.error.URLError("sanitizador fora")
+    _upstream_com(monkeypatch, fora)
+    c = gw()
+    with pytest.raises(urllib.error.HTTPError) as erro:
+        c.post()
+    assert erro.value.code == 502
+    assert [(x["modelo"], x["status"]) for x in _linhas_uso(tmp_path)] == [("seth-livre", 502)]
+
+
+def test_erro_final_504_entra_no_uso(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    _upstream_com(monkeypatch, lambda req: _RespostaTravada())
+    c = gw()
+    with pytest.raises(urllib.error.HTTPError) as erro:
+        c.post()
+    assert erro.value.code == 504
+    assert [(x["modelo"], x["status"]) for x in _linhas_uso(tmp_path)] == [("seth-livre", 504)]
+
+
+# (8) cache: a segunda leitura dentro da validade não refaz a conferência do perfil nem do registro
+def test_perfis_nao_refaz_a_conferencia_dentro_da_validade(monkeypatch, tmp_path):
+    perfil = tmp_path / "perfis.json"
+    perfil.write_text(json.dumps({"modelos": {}}), encoding="utf-8")
+    contagem = {"n": 0}
+
+    def conta(*a, **k):
+        contagem["n"] += 1
+        return perfil
+    monkeypatch.setattr(g.capivara_perfis, "caminho_perfil", conta)
+    monkeypatch.setitem(g._PERFIS, "quando", 0.0)
+    monkeypatch.setitem(g._PERFIS, "caminho", None)
+    g._perfis()
+    depois_da_primeira = contagem["n"]
+    g._perfis()
+    g._perfis()
+    assert depois_da_primeira >= 1 and contagem["n"] == depois_da_primeira
+
+
+def test_registro_nao_refaz_a_conferencia_na_segunda_leitura(monkeypatch, tmp_path, caminho_real):
+    estado = tmp_path / "capacidades.json"
+    estado.write_text(json.dumps({"filas": {}, "modelos": {}}), encoding="utf-8")
+    contagem = {"n": 0}
+
+    def caminho():
+        contagem["n"] += 1
+        return estado
+    _capivara_falsa(monkeypatch, funcao=caminho)
+    monkeypatch.setitem(g.sombra_capacidade._CACHE_CAMINHO, "valor", None)
+    a = g.sombra_capacidade.carregar_registro()
+    b = g.sombra_capacidade.carregar_registro()
+    assert contagem["n"] == 1 and a is b
+
+
+# (B) achados no uso: códigos fixos, refações e corrigido; sem texto
+def test_codigos_dos_achados_sao_rotulos_sem_texto():
+    achados = ["evidência: cita 'ana@exemplo.com' como fonte, mas nenhuma chamada", "estilo: 'trecho da resposta'",
+               "frase nova qualquer com trecho secreto"]
+    assert g._codigos_achados(achados) == ["citacao_inventada", "estilo", "outro"]
+    assert "ana@exemplo.com" not in " ".join(g._codigos_achados(achados))
+
+
+def test_uso_traz_codigos_refacoes_e_corrigido(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    chamadas = {"n": 0}
+
+    def achados(texto, msgs):
+        chamadas["n"] += 1
+        return ["evidência: cita 'ana@exemplo.com' como fonte, mas nenhuma chamada"] if chamadas["n"] == 1 else []
+    monkeypatch.setattr(g, "_achados_do_texto", achados)
+    c = gw()
+    c.post("oi")
+    linha = _ultima_linha_uso(tmp_path)
+    assert linha["achados"] == ["citacao_inventada"]
+    assert linha["refeito"] == 1 and linha["corrigido"] is True
+    assert "ana@exemplo.com" not in (tmp_path / "uso.jsonl").read_text(encoding="utf-8")
+
+
+def test_uso_sem_achado_marca_verificada_e_corrigido(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    c = gw()
+    c.post("oi")
+    linha = _ultima_linha_uso(tmp_path)
+    assert (linha["achados"], linha["refeito"], linha["corrigido"]) == ([], 0, True)
+
+
+def test_uso_com_achado_que_persiste_marca_nao_corrigido(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.setattr(g, "_achados_do_texto", lambda texto, msgs: ["estilo: x"])
+    c = gw()
+    c.post("oi")
+    linha = _ultima_linha_uso(tmp_path)
+    assert linha["achados"] == ["estilo"] and linha["refeito"] == 2 and linha["corrigido"] is False
+
+
+# (A) refazer ligado por padrão; SETH_REFAZER=0 desliga; canário capacidade:N vale quando definido
+def test_refazer_ligado_por_padrao(monkeypatch):
+    monkeypatch.delenv("SETH_REFAZER", raising=False)
+    monkeypatch.delenv("SETH_ROTEADOR", raising=False)
+    assert g._refazer_ligado_neste_pedido() is True
+
+
+def test_refazer_zero_desliga_e_canario_vale_quando_definido(monkeypatch):
+    monkeypatch.setenv("SETH_REFAZER", "0")
+    assert g._refazer_ligado_neste_pedido() is False
+    monkeypatch.delenv("SETH_REFAZER")
+    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:0")
+    assert g._refazer_ligado_neste_pedido() is False
+    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:100")
+    assert g._refazer_ligado_neste_pedido() is True
+    monkeypatch.setenv("SETH_ROTEADOR", "capacidade:xyz")  # N inválido: sem canário, vale o padrão ligado
+    assert g._refazer_ligado_neste_pedido() is True
+
+
+# --- progresso visível no SSE durante a conferência (Regra 0, 23/11/2026) ----------------------------------------------
+
+def _sse_pedido(base, pergunta="oi"):
+    corpo = json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": pergunta}],
+                        "stream": True}).encode("utf-8")
+    r = urllib.request.Request(base + "/v1/chat/completions", data=corpo, method="POST",
+                               headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(r, timeout=60) as x:
+        return x.read().decode("utf-8")
+
+
+def _texto_sse(bruto):
+    partes = []
+    for linha in bruto.splitlines():
+        if linha.startswith("data:") and not linha.startswith("data: [DONE]"):
+            for ch in json.loads(linha[5:]).get("choices") or []:
+                partes.append(((ch.get("delta") or {}).get("content")) or "")
+    return "".join(partes)
+
+
+def test_sse_com_conferencia_mostra_progresso_e_o_texto_final_nao_muda(gw, monkeypatch):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.setattr(g, "_PROGRESSO_S", 0.1)
+    c = gw()
+    c.up.sse_lento = 0.5  # upstream lento: a coleta da 1ª resposta leva ~1 s
+    bruto = _sse_pedido(c.base)
+    comentarios = [x for x in bruto.splitlines() if x.startswith(": agata")]
+    assert len(comentarios) >= 2, bruto[:400]
+    assert "coletando" in comentarios[0] and "tentativa 1/3" in comentarios[0] and comentarios[0].endswith("s")
+    texto = _texto_sse(bruto)
+    assert "olá mundo" in texto
+    monkeypatch.setattr(g, "_PROGRESSO_S", 999.0)  # mesmo pedido sem progresso: o texto entregue é o mesmo
+    c2 = gw()
+    c2.up.sse_lento = 0.5
+    bruto2 = _sse_pedido(c2.base)
+    # sem progresso não há comentário de etapa ("tentativa"); o comentário de modelo ": agata modelo ..." continua
+    assert not [x for x in bruto2.splitlines() if x.startswith(": agata") and "tentativa" in x]
+    assert _texto_sse(bruto2) == texto
+
+
+def test_linha_de_progresso_mostra_a_etapa_real_e_os_segundos():
+    import types
+    ns = types.SimpleNamespace(_progresso={"etapa": "conferindo", "tentativa": 1, "total": 3})
+    assert g._Handler._linha_progresso(ns, time.monotonic() - 23.4) == ": agata conferindo · tentativa 1/3 · 23s"
+    ns._progresso = {"etapa": "refazendo", "tentativa": 2, "total": 3}
+    assert g._Handler._linha_progresso(ns, time.monotonic()) == ": agata refazendo · tentativa 2/3 · 0s"
+
+
+# --- modelo servido em comentário SSE, antes do conteúdo (23/11/2026, painel) ----------------------------------------
+
+def test_modelo_servido_vai_em_comentario_antes_do_conteudo(gw, monkeypatch):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    c = gw()
+    c.up.sse_lento = 0.01  # modo SSE do servidor falso (0 desliga o modo)
+    bruto = _sse_pedido(c.base)
+    linhas = bruto.splitlines()
+    assert ": agata modelo m-lento" in linhas
+    primeiro_dado = next(i for i, x in enumerate(linhas) if x.startswith("data:"))
+    assert linhas.index(": agata modelo m-lento") < primeiro_dado
+    assert "olá mundo" in _texto_sse(bruto)
+
+
+# --- revisão final (23/11/2026): fila sem candidato, pessoal e janela na escolha; exceção; teto; códigos; rota ----------
+
+def _escolha(req, filas, modelos):
+    return g.sombra_capacidade.escolher(req, "seth-codigo", {"filas": filas, "modelos": modelos}, {})
+
+
+def test_fila_so_nuvem_com_dado_pessoal_nao_escolhe():
+    modelos = {"x/nuvem": {"catalogo": {"janela": 128000}, "medido": [_med("qualidade_codigo", 0.95, 10)]}}
+    assert _escolha(dict(REQ_FERR, tipo="codigo", privado=True), {"seth-codigo": ["x/nuvem"]}, modelos) is None
+
+
+def test_nuvem_com_janela_e_local_sem_janela_nao_escolhe():
+    modelos = {"x/nuvem": {"catalogo": {"janela": 128000}, "medido": [_med("qualidade_codigo", 0.8, 10)]},
+               "ollama-local/loc": {"medido": [_med("qualidade_codigo", 0.95, 10)]}}  # o melhor, sem janela informada
+    assert _escolha(dict(REQ_FERR, tipo="codigo"), {"seth-codigo": ["x/nuvem", "ollama-local/loc"]}, modelos) is None
+
+
+def test_nenhum_candidato_passa_nos_filtros_nao_escolhe():
+    modelos = {"x/a": {"catalogo": {"janela": 1000}, "medido": [_med("qualidade_codigo", 0.9, 10)]}}
+    assert _escolha(dict(REQ_FERR, tipo="codigo", tokens_est=500000), {"seth-codigo": ["x/a"]}, modelos) is None
+
+
+def test_excecao_na_conferencia_depois_dos_cabecalhos_fecha_o_stream(gw, monkeypatch, capsys):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+
+    def boom(self, *a, **k):
+        raise RuntimeError("falha injetada")
+    monkeypatch.setattr(g._Handler, "_refazer_antes_de_entregar", boom)
+    c = gw()
+    c.up.sse_lento = 0.01
+    bruto = _sse_pedido(c.base)  # se o stream tivesse ficado truncado, a leitura chcaria com erro de corpo incompleto
+    assert '"error"' in bruto and "[DONE]" in bruto
+    assert "falha injetada" not in bruto  # a mensagem ao cliente é genérica
+    assert "conferência falhou depois dos cabeçalhos" in capsys.readouterr().err
+
+
+def test_pedido_teto_padrao_e_env(monkeypatch):
+    monkeypatch.delenv("SETH_PEDIDO_TETO_SEG", raising=False)
+    assert g._pedido_teto_seg() == 600.0
+    monkeypatch.setenv("SETH_PEDIDO_TETO_SEG", "45")
+    assert g._pedido_teto_seg() == 45.0
+    monkeypatch.setenv("SETH_PEDIDO_TETO_SEG", "x")
+    assert g._pedido_teto_seg() == 600.0
+
+
+def test_teto_do_pedido_nao_pede_nova_tentativa_e_entrega_a_primeira(gw, monkeypatch):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    monkeypatch.setattr(g, "_pedido_teto_seg", lambda: 0.0)  # o teto já estourou quando a conferência começa
+    monkeypatch.setattr(g, "_achados_do_texto", lambda texto, msgs: ["estilo: x"])
+    c = gw()
+    status, texto = c.post("oi")
+    assert status == 200 and "fila ok" in texto
+    assert len(c.up.chamadas) == 1  # nenhuma nova tentativa depois do teto
+
+
+def test_codigos_do_bloqueio_usam_o_vocabulario_comum():
+    assert g._codigos_achados([("a", "x"), ("b", "y"), ("c", "z"), ("q", "w")]) == [
+        "escrita_sem_ferramenta", "saida_simulada", "cabecalho_divergente", "outro"]
+
+
+def test_uso_traz_o_codigo_do_bloqueio_sem_a_descricao(gw, monkeypatch, tmp_path):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    n = {"k": 0}
+
+    def achados(texto, msgs, mod=None):
+        n["k"] += 1
+        return [("a", "afirma escrita 'ana@exemplo.com'")] if n["k"] == 1 else []
+    monkeypatch.setattr(g.bloqueio_turno, "achados", achados)
+    c = gw()
+    c.post("oi")
+    assert _ultima_linha_uso(tmp_path)["achados"] == ["escrita_sem_ferramenta"]
+    assert "ana@exemplo.com" not in (tmp_path / "uso.jsonl").read_text(encoding="utf-8")
+
+
+def test_troca_de_rota_depois_do_cabecalho_vira_comentario(gw, monkeypatch):
+    monkeypatch.setenv("SETH_ROTAS_LOCAIS", "0")
+    n = {"k": 0}
+
+    def achados(texto, msgs):
+        n["k"] += 1
+        return ["estilo: x"] if n["k"] == 1 else []  # a 1ª resposta tem achado: o refazer sobe a fila
+    monkeypatch.setattr(g, "_achados_do_texto", achados)
+    c = gw()
+    c.up.sse_lento = 0.01
+    corpo = json.dumps({"model": "seth-livre", "messages": [{"role": "user", "content": "oi"}],
+                        "stream": True}).encode("utf-8")
+    r = urllib.request.Request(c.base + "/v1/chat/completions", data=corpo, method="POST",
+                               headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(r, timeout=60) as x:
+        cabecalho = x.headers.get("X-Seth-Rota")
+        bruto = x.read().decode("utf-8")
+    assert cabecalho == "seth-livre"  # o cabeçalho saiu antes da troca
+    assert ": agata rota seth-pesado" in bruto.splitlines()  # a troca vai no stream, antes do conteúdo
+

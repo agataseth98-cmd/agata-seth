@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Capivara — perfis de capacidade dos modelos das filas da Seth (MEMÓRIAS (667)).
 
-1ª peça do projeto Capivara (observatório dos modelos, (44)): mede o que cada modelo
-das filas aguenta — janela de contexto e saída máxima — e grava em
-`config/capivara/perfis-modelos.json`. Lê fatos, nunca escreve canon.
+`config/capivara/perfis-modelos.json` é DERIVADO de `config/capivara/capacidades.json` (fonte única,
+capivara_capacidades.py). O gateway da Seth lê este arquivo (`seth_gateway._perfis()`), então ele
+continua existindo, no mesmo formato. Este script não mede nada: quem mede é
+capivara_capacidades.py. Lê fatos, nunca escreve canon.
 
-Fontes, nesta ordem: `/v1/models` do OmniRoute (o que o provedor declara); `num_ctx`
-do Ollama para os locais; `config/capivara/janelas-documentadas.json` (só documentação
-oficial do provedor). Sem fonte = `nao_medido`, tratado como PEQUENO — nunca como grande.
+Fonte da janela e da saída máxima: a mesma precedência do registro (ollama num_ctx; /v1/models do
+OmniRoute; documentação oficial; lista pública do provedor). Sem fonte = `nao_medido`, tratado como
+PEQUENO — nunca como grande.
 
 Para que serve:
 - **Fila longa.** Cada fila da conversa ganha uma variante `<fila>-longo`, mesma ordem,
@@ -18,30 +19,30 @@ Para que serve:
   capacidade garantida do sistema, calculada, não chutada.
 
 Uso:
-  capivara_perfis.py                    mede e grava o perfil
-  capivara_perfis.py --conferir         mede e mostra o que mudou (saída 1 se mudou)
+  capivara_perfis.py                      deriva o perfil de capacidades.json e grava
+  capivara_perfis.py --conferir           diz se o perfil gravado está em dia com o registro (saída 1 se não)
   capivara_perfis.py --sincronizar-filas  cria/atualiza as filas -longo no OmniRoute
-  capivara_perfis.py --janela-agente    imprime a janela calculada para o Agent
+  capivara_perfis.py --janela-agente      imprime a janela calculada para o Agent
   capivara_perfis.py --selftest
 """
 from __future__ import annotations
 
 import json
 import sys
-import time
 import urllib.request
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 PERFIS = RAIZ / "config" / "capivara" / "perfis-modelos.json"
-DOCUMENTADAS = RAIZ / "config" / "capivara" / "janelas-documentadas.json"
 FILAS_CONVERSA = ("seth-rapido", "seth-livre", "seth-pesado")
 SUFIXO_LONGO = "-longo"
 JANELA_LONGA = 128000        # modelo entra na fila -longo se aguentar isto
 RESERVA_SAIDA = 8000         # tokens deixados para a resposta
 RESERVA_HIDRATACAO = 4000    # o gateway injeta ~3 mil tokens que o LibreChat não conta
 JANELA_DESCONHECIDA = 32768  # `nao_medido` vale isto para o limiar: pequeno, de propósito
-OLLAMA = "http://127.0.0.1:11434"
+COMO_USAR = ("Gerado por scripts/capivara_perfis.py a partir de config/capivara/capacidades.json "
+             "(fonte única) — não editar à mão; rode capivara_capacidades.py e depois capivara_perfis.py. "
+             "MEMÓRIAS (667).")
 
 
 # --- cálculo (puro, sem rede: o gateway importa só isto) ----------------------
@@ -70,63 +71,61 @@ def janela_agente(perfis: dict, teto_economia: int) -> int:
     return min(teto_economia, piso) - RESERVA_HIDRATACAO
 
 
-def carregar(caminho: Path = PERFIS) -> dict:
+def conferir_perfil(perfil: dict, reg: dict) -> list[str]:
+    """Diferenças entre o perfil dado e o que o registro deriva. Lista vazia = em dia."""
+    esperado = derivar(reg)
+    mods = perfil.get("modelos") or {}
+    erros = ["filas"] if perfil.get("filas") != esperado["filas"] else []
+    erros += [m for m in sorted(set(esperado["modelos"]) | set(mods)) if mods.get(m) != esperado["modelos"].get(m)]
+    return erros
+
+
+def caminho_perfil(retrato: Path | None = None, estado: Path | None = None) -> Path:
+    """Perfil em uso: o do estado se existir e estiver em dia com o registro em uso (conferir_perfil); senão o
+    retrato do repositório. O gateway passa o caminho do retrato de forma explícita: não muda com isto."""
+    aqui = str(Path(__file__).resolve().parent)
+    if aqui not in sys.path:
+        sys.path.insert(0, aqui)
+    import capivara_capacidades as cap  # noqa: E402  (fonte única; import tardio: o gateway só usa as funções puras)
+    retrato = PERFIS if retrato is None else retrato
+    estado = cap.ESTADO_PERFIL if estado is None else estado
     try:
-        return json.loads(caminho.read_text(encoding="utf-8"))
+        perfil = json.loads(estado.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return retrato
+    reg = cap.carregar()
+    if isinstance(perfil, dict) and reg.get("modelos") and not conferir_perfil(perfil, reg):
+        return estado
+    return retrato
+
+
+def carregar(caminho: Path | None = None) -> dict:
+    try:
+        return json.loads((caminho or caminho_perfil()).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
 
 
-# --- medição (rede, só leitura) ---------------------------------------------------
+# --- derivação (puro): registro de capacidades -> perfil que o gateway lê ----------------
+def derivar(reg: dict) -> dict:
+    """Projeção do registro: só as filas, com janela, saída máxima e a fonte da janela.
+    Modelo de fila sem dado vira `nao_medido` (janela None), nunca um número."""
+    filas = reg.get("filas") or {}
+    registro = reg.get("modelos") or {}
+    modelos = {}
+    for m in sorted({x for ordem in filas.values() for x in ordem}):
+        v = registro.get(m) if isinstance(registro.get(m), dict) else {}
+        modelos[m] = {"janela": v.get("janela"), "saida_max": v.get("saida_max"),
+                      "fonte": v.get("fonte") or "nao_medido"}
+    return {"_como_usar": COMO_USAR, "medido_em": str(reg.get("gerado_em") or "")[:10],
+            "filas": filas, "modelos": modelos}
+
+
+# --- sincronização das filas -longo no OmniRoute (rede, escreve no OmniRoute) ----------
 def _q():
     sys.path.insert(0, str(RAIZ / "scripts"))
     import queda_por_elo as q  # noqa: E402  (filas, token interno, abridor sem proxy)
     return q
-
-
-def _janelas_omniroute(q) -> dict:
-    req = urllib.request.Request(q.PROXY + "/v1/models", headers={"X-Agata-Token": q._token_interno()})
-    with q._SEM_PROXY.open(req, timeout=30) as r:
-        dados = json.load(r)
-    return {m["id"]: (m.get("context_length") or m.get("max_input_tokens"), m.get("max_output_tokens"))
-            for m in dados.get("data", []) if isinstance(m, dict) and m.get("id")}
-
-
-def _num_ctx_ollama(q, modelo: str) -> int | None:
-    req = urllib.request.Request(OLLAMA + "/api/show", json.dumps({"model": modelo.split("/", 1)[1]}).encode(),
-                                 {"Content-Type": "application/json"})
-    try:
-        with q._SEM_PROXY.open(req, timeout=15) as r:
-            params = json.load(r).get("parameters", "")
-    except OSError:
-        return None
-    for linha in params.splitlines():
-        partes = linha.split()
-        if len(partes) == 2 and partes[0] == "num_ctx":
-            return int(partes[1])
-    return None
-
-
-def medir() -> dict:
-    q = _q()
-    filas = q.ler_filas(quais=FILAS_CONVERSA + ("seth-codigo",))
-    omni = _janelas_omniroute(q)
-    doc = json.loads(DOCUMENTADAS.read_text(encoding="utf-8")).get("modelos", {})
-    modelos = {}
-    for m in sorted({x for ordem in filas.values() for x in ordem}):
-        if m.startswith("ollama-local/"):
-            n = _num_ctx_ollama(q, m)
-            modelos[m] = {"janela": n, "saida_max": None, "fonte": "ollama num_ctx" if n else "nao_medido"}
-        elif m in omni and omni[m][0]:
-            modelos[m] = {"janela": omni[m][0], "saida_max": omni[m][1], "fonte": "omniroute /v1/models"}
-        elif m in doc:
-            modelos[m] = {"janela": doc[m]["janela"], "saida_max": doc[m].get("saida_max"),
-                          "fonte": "documentação oficial: " + doc[m]["fonte"]}
-        else:
-            modelos[m] = {"janela": None, "saida_max": None, "fonte": "nao_medido"}
-    return {"_como_usar": "Gerado por scripts/capivara_perfis.py — não editar à mão; rode de novo quando as filas "
-                          "ou os modelos mudarem. MEMÓRIAS (667).",
-            "medido_em": time.strftime("%Y-%m-%d"), "filas": filas, "modelos": modelos}
 
 
 def sincronizar_filas(perfis: dict) -> list[str]:
@@ -200,21 +199,25 @@ def main(argv: list[str]) -> int:
         for linha in sincronizar_filas(carregar()):
             print(linha)
         return 0
-    novo = medir()
-    if argv == ["--conferir"]:
-        velho = carregar()
-        mudou = [m for m in sorted(set(novo["modelos"]) | set(velho.get("modelos", {})))
-                 if novo["modelos"].get(m, {}).get("janela") != velho.get("modelos", {}).get(m, {}).get("janela")]
-        mudou += ["filas"] if novo["filas"] != velho.get("filas") else []
-        print("OK: perfil em dia" if not mudou else "MUDOU: " + ", ".join(mudou))
-        return 1 if mudou else 0
-    if argv:
+    if argv and argv != ["--conferir"]:
         print(__doc__)
         return 2
-    PERFIS.parent.mkdir(parents=True, exist_ok=True)
-    PERFIS.write_text(json.dumps(novo, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import capivara_capacidades as cap  # noqa: E402  (fonte única)
+    reg = cap.carregar()
+    if not reg.get("modelos"):
+        print("registro de capacidades ausente: rode capivara_capacidades.py antes")
+        return 1
+    novo = derivar(reg)
+    if argv == ["--conferir"]:
+        diferencas = conferir_perfil(carregar(), reg)
+        print("OK: perfil em dia com o registro em uso" if not diferencas
+              else "DESATUALIZADO: " + ", ".join(diferencas))
+        return 1 if diferencas else 0
+    cap.gravar(novo, PERFIS)              # retrato versionado
+    cap.gravar(novo, cap.ESTADO_PERFIL)   # estado operacional, o mesmo conteúdo
     for m, d in novo["modelos"].items():
-        print(f"{m:55} {str(d['janela']):>8}  {d['fonte'][:60]}")
+        print(f"{m:55} {str(d['janela']):>8}  {str(d['fonte'])[:60]}")
     return 0
 
 

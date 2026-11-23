@@ -84,7 +84,9 @@ def validar_egresso_publico(payload: object, classification: str | None) -> None
     if isinstance(model, str) and model.startswith(_LOCAL_MODEL_PREFIXES):
         return
     # (22/10/2026, P-8 sanitizador-cascata) "sanitizado-cascata" é a cascata seth-livre: só chega
-    # aqui depois de sanitizar_payload (segredo + dados pessoais + nomes de projeto) em do_POST.
+    # aqui depois de sanitizar_payload em do_POST, que bloqueia SEGREDO. Dado pessoal e nomes de projeto
+    # NÃO são varridos aqui desde a decisão relaxa-pessoal (22/10); quem escolhe modelo por capacidade
+    # é que manda pessoal só a local.
     if classification not in ("public", "sanitizado-cascata"):
         raise PermissionError("dados sem classificação pública bloqueados antes do OmniRoute")
 
