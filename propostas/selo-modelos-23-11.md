@@ -1,0 +1,7 @@
+# Proposta selo-modelos-23-11 — selo com os modelos de cada rodada e lista de conversas visível (uma assinatura)
+
+**1. Selo de modelo** (`server.py`, `ferramentas_seth.laco`, `prototipo.js`). Medido em 23/11 09:12: resposta com ferramenta mostrou cabeçalho com `nemotron-3.5-bolt` e selo com `nemotron-3.5-super`. Causa: a 1ª rodada (super) só chamou a ferramenta, sem texto; o cabeçalho saiu na 2ª rodada (bolt); o selo lia só o X-Modelo-Real da 1ª. Agora o servidor coleta o modelo de cada rodada, o laço emite `{"tipo":"modelo"}` quando muda, e a tela mostra "modelos (um por rodada): a → b" (guardado como `a+b`, até 120 caracteres, dentro da validação atual).
+
+**2. Lista de conversas sumida** (`prototipo.css`). Pergunta do Humano 23/11 09:25: "onde posso ver e organizar minhas conversas anteriores pelo painel não encontrei". Medido: em janela de 632 px de altura, a barra lateral (`overflow:hidden`) dava 0 px à `.menu-conversas` (`min-height:0`) e a lista com o rótulo "Conversas" sumia. Agora a lista tem piso de 180 px e a barra rola (`overflow-y:auto`) na tela larga. A gaveta de tela estreita fica como estava (rodapé fixo, teste existente). Conferido numa cópia do painel da worktree: "CONVERSAS / HOJE" aparece com rolagem.
+
+**Medido:** suíte do painel 803 passando; CI local TUDO OK. **Depois de aplicar:** restart painel-operacional e recarregar a aba. **Reversão:** git revert + restart. **Modelo:** Opus 5.5.
