@@ -679,6 +679,8 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
 - [ ] na Seth do painel, `ler_pagina` nunca devolve a página anterior: erro de ferramenta (`isError`) ou endereço lido diferente do aberto vira erro em texto; na resposta que já leu a web, `cache_anotar` é recusado (texto da web pode trazer instrução); host com rótulo longo é bloqueado pela política de egress sem exceção
 - [ ] a cada rodada de ferramenta o painel devolve ao gateway o texto já mostrado nela (o cabeçalho da Máquina incluso), para o gateway não repetir o cabeçalho na mesma resposta; busca vazia leva à Seth o aviso do que tentar em seguida
 - [ ] a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)
+- [ ] quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra "modelos (um por rodada): a → b"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta
+- [ ] na tela larga a lista de conversas da barra lateral tem piso de 180 px e a barra rola quando falta altura (em 632 px de altura a lista encolhia a 0 e sumia)
 
 ## Desenho e alternativas
 

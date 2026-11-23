@@ -606,6 +606,45 @@ class WebTests(unittest.TestCase):
                               rpc=lambda c: [_res({"resultados": [], "aviso": "reformule ou use ler_pagina", "erro": None})])
         self.assertIn("aviso: reformule ou use ler_pagina", txt)
 
+    def test_rodada_de_outro_modelo_emite_evento_modelo(self):
+        roteiro = [sse_chamada("buscar_web", '{"consulta":"x"}'), sse_texto("ok")]
+        modelos = ["a/super"]
+        def abrir(p):
+            modelos.append("b/bolt")
+            return roteiro[1]
+        evs = list(fs.laco(abrir, roteiro[0], {"messages": []}, executor=lambda n, a: "r", modelos=modelos))
+        self.assertIn({"tipo": "modelo", "modelo": "b/bolt"}, evs)
+        modelos2 = ["a/x"]
+        def abrir2(p):
+            modelos2.append("a/x")
+            return roteiro[1]
+        evs2 = list(fs.laco(abrir2, roteiro[0], {"messages": []}, executor=lambda n, a: "r", modelos=modelos2))
+        self.assertFalse([e for e in evs2 if e["tipo"] == "modelo"])
+        modelos3 = ["a/x", ""]  # rodada anterior sem cabeçalho: compara com o último conhecido
+        def abrir3(p):
+            modelos3.append("a/x")
+            return roteiro[1]
+        evs3 = list(fs.laco(abrir3, roteiro[0], {"messages": []}, executor=lambda n, a: "r", modelos=modelos3))
+        self.assertFalse([e for e in evs3 if e["tipo"] == "modelo"])
+
+    def test_tela_mostra_os_modelos_por_rodada_e_servidor_coleta_cada_rodada(self):
+        js = (Path(__file__).parent / "prototipo.js").read_text(encoding="utf-8")
+        srv = (Path(__file__).parent / "server.py").read_text(encoding="utf-8")
+        self.assertIn('evento.tipo === "modelo"', js)
+        self.assertIn('"modelos (um por rodada): "', js)
+        self.assertIn("modelos=modelos_rodadas", srv)
+        self.assertIn('modelos_rodadas.append(real or "")', srv)  # a 1ª rodada entra na lista antes do laço
+        self.assertLess(srv.index('modelos_rodadas.append(real or "")'), srv.index("modelos=modelos_rodadas"))
+        self.assertIn('modelos_rodadas.append(chat_stream.modelo_real_valido(nova.headers.get("X-Modelo-Real"))', srv)
+
+    def test_lista_de_conversas_tem_piso_e_a_barra_rola(self):
+        css = (Path(__file__).parent / "prototipo.css").read_text(encoding="utf-8")
+        self.assertIn(".menu-conversas{flex:1 1 auto;min-height:180px;", css)
+        self.assertIn("overflow-x:hidden;overflow-y:auto;", css)
+        self.assertNotIn(".menu-conversas{flex:1 1 auto;min-height:0;", css)
+        self.assertIn(".sidebar-collapsed .menu-conversas{min-height:0}", css)  # recolhida (64 px) sem piso
+        self.assertIn("  .sidebar .menu-conversas{flex:1 1 0;min-height:0}", css)  # gaveta estreita: rodapé fixo
+
     def test_rpc_navegador_usa_uma_sessao_e_le_sse(self):
         vistos = []
         class R:
