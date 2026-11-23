@@ -78,7 +78,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 ## Propostas (propostas/)
 
 Abertas (sem APROVADO-): 1.
-- `vault-inbox-sai-23-11`
+- `vault-inbox-sai-23-11b`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
