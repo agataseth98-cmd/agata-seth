@@ -1,0 +1,106 @@
+diff --git a/config/servicos-agata.txt b/config/servicos-agata.txt
+index f36d9ecc..bfbaa1d5 100644
+--- a/config/servicos-agata.txt
++++ b/config/servicos-agata.txt
+@@ -39,7 +39,6 @@ ollama-agata.service|usuario|11447|nao|config/ollama-agata.service (sob demanda,
+ ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
+ ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
+ ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
+-agata-vault-inbox.timer|usuario|-|sim|fora do repo (unidade do usuário)
+ 
+ # Unidades com WantedBy/PartOf de agata.target fora do P-9 (p9=nao). Listadas para o ESTADO conferir; avisam só se 'failed'.
+ agata-drain.service|usuario|-|nao|redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
+diff --git a/extras/arquivo-vault-inbox-23-11/README.md b/extras/arquivo-vault-inbox-23-11/README.md
+new file mode 100644
+index 00000000..03e97170
+--- /dev/null
++++ b/extras/arquivo-vault-inbox-23-11/README.md
+@@ -0,0 +1,5 @@
++# Arquivo: inbox do Obsidian (vault-inbox)
++
++Retirado em 23/11/2026 por ordem do Humano ("remova"). Criado em 25/09/2026 (vault-inbox-fase4-2026-09-25): nota parada 10 min em memoria/obsidian-inbox/ virava entrada de MEMÓRIAS pelo escriba. Nunca usado: timer nunca instalado, pasta inexistente, nenhuma execução no journal (medido em 23/11).
++
++Para voltar: mover os três arquivos para config/ e scripts/, recolocar a linha em config/servicos-agata.txt e o timer no TIMER_ALLOWLIST do painel (por proposta).
+diff --git a/config/agata-vault-inbox.service b/extras/arquivo-vault-inbox-23-11/agata-vault-inbox.service
+similarity index 100%
+rename from config/agata-vault-inbox.service
+rename to extras/arquivo-vault-inbox-23-11/agata-vault-inbox.service
+diff --git a/config/agata-vault-inbox.timer b/extras/arquivo-vault-inbox-23-11/agata-vault-inbox.timer
+similarity index 100%
+rename from config/agata-vault-inbox.timer
+rename to extras/arquivo-vault-inbox-23-11/agata-vault-inbox.timer
+diff --git a/scripts/vault_importar_inbox.py b/extras/arquivo-vault-inbox-23-11/vault_importar_inbox.py
+similarity index 100%
+rename from scripts/vault_importar_inbox.py
+rename to extras/arquivo-vault-inbox-23-11/vault_importar_inbox.py
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index 5589c0f3..e893c71c 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -238,7 +238,7 @@
+       <article class="cap-card" data-state="sem-leitura" data-unit="seth-escriba.service" data-probe="acrescentar" data-search="escriba escrever escrita memória append only aprovação token capability chat diário"><div class="cap-top"><h3>Escrita controlada → canon</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>O Escriba só acrescenta e recusa segredos. O painel não escreve no canon.</p><p class="subnote"></p><div class="cap-meta"><small>GOVERNAR · escrita</small><small>Rota: /api/details · seth-escriba · sonda acrescentar</small><small>Documental: registrado; build de aprovação não confirmado</small><button class="evidence" type="button" data-title="Escrita de memória" data-body="MEMÓRIAS (809) e (810) registram token por projeto e configuração do servidor canon. O serviço exige token provisionado no host e reinício combinado; esta tela não conclui que o fluxo esteja homologado." data-source="MEMÓRIAS (809)-(810), 22/10/2026; PROJETO.md · Interface">EVIDÊNCIA</button></div></article>
+       <article class="cap-card" data-state="sem-leitura" data-unit="navegador-mcp.service discord-mcp.service" data-probe="navegar" data-search="navegador navegar web discord mcp browser ler_pagina comunicação conectores integração"><div class="cap-top"><h3>Navegação: navegador e Discord</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>Conectores MCP para navegador e Discord, com limites de domínio e sanitização documentados. Conectar não autoriza publicar.</p><p class="subnote"></p><div class="cap-meta"><small>USAR · conectores</small><small>Rota: /api/details · navegador-mcp, discord-mcp · sonda navegar</small><small>Documental: descrito (PROJETO.md)</small><button class="evidence" type="button" data-title="Navegador e Discord" data-body="PROJETO.md lista discord-mcp e navegador-mcp. A fronteira de recusas manda esgotar ferramentas existentes antes de acrescentar outra. Ações externas seguem aprovação e os limites da ferramenta." data-source="PROJETO.md · Serviços (boot); PROJETO_REFERENCIA.md · ACB e fronteira de recusas">EVIDÊNCIA</button></div></article>
+       <article class="cap-card" data-state="sem-leitura" data-unit="laya-roteador.service" data-probe="rota" data-search="roteamento rota capacidade modelos laya jev omniroute local nuvem cascata fallback sanitizador fila decisor"><div class="cap-top"><h3>Roteamento por capacidade</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>A Laya escolhe a fila, dentro de regras fixas; modelos locais e remotos entram em cascata; o Jev observa em sombra. A seleção por capacidade é a próxima frente.</p><p class="subnote"></p><div class="cap-meta"><small>MELHORAR · roteamento</small><small>Rota: /api/details · laya-roteador · sonda rota</small><small>Documental: próxima frente (ONDE_ESTAMOS.md)</small><button class="evidence" type="button" data-title="Roteamento e modelos" data-body="PROJETO.md documenta cascatas por prioridade, decisor Laya, Jev em sombra e sanitização antes do egresso. A fila viva vem da API do OmniRoute e de config/modelos-gratuitos.md. O mapa não presume desempenho atual de cada provedor." data-source="PROJETO.md · Cérebro / Interface / Serviços (boot); ONDE_ESTAMOS.md">EVIDÊNCIA</button></div></article>
+-      <article class="cap-card" data-state="sem-leitura" data-fonte="status" data-unit="agata-manutencao.timer agata-vault-inbox.timer" data-probe="manutencao" data-search="manutenção avaliação consolidação treinamento candidato janela timers inbox rotina decisor pesquisa modelos"><div class="cap-top"><h3>Manutenção programada</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>Janela central chama avaliação do decisor, consolidação e treino de candidato do Laya; promoção segue humana. Rotinas não mudam o canon.</p><p class="subnote"></p><div class="cap-meta"><small>MANTER · rotina</small><small>Rota: /api/status · timers · sonda manutencao</small><small>Documental: configurado (config/janela-tarefas.txt)</small><button class="evidence" type="button" data-title="Rotinas de manutenção" data-body="O timer agata-manutencao.timer mostra o disparo, não o resultado da tarefa. A MEMÓRIAS (804) registra que o timer do inbox foi parado pelo Humano em 22/10; estado e decisão podem divergir." data-source="config/janela-tarefas.txt · systemctl --user show · MEMÓRIAS (804)">EVIDÊNCIA</button></div></article>
++      <article class="cap-card" data-state="sem-leitura" data-fonte="status" data-unit="agata-manutencao.timer" data-probe="manutencao" data-search="manutenção avaliação consolidação treinamento candidato janela timers inbox rotina decisor pesquisa modelos"><div class="cap-top"><h3>Manutenção programada</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>Janela central chama avaliação do decisor, consolidação e treino de candidato do Laya; promoção segue humana. Rotinas não mudam o canon.</p><p class="subnote"></p><div class="cap-meta"><small>MANTER · rotina</small><small>Rota: /api/status · timers · sonda manutencao</small><small>Documental: configurado (config/janela-tarefas.txt)</small><button class="evidence" type="button" data-title="Rotinas de manutenção" data-body="O timer agata-manutencao.timer mostra o disparo, não o resultado da tarefa. A MEMÓRIAS (804) registra que o timer do inbox foi parado pelo Humano em 22/10; estado e decisão podem divergir." data-source="config/janela-tarefas.txt · systemctl --user show · MEMÓRIAS (804)">EVIDÊNCIA</button></div></article>
+       <article class="cap-card" data-state="horizon" data-probe="documento" data-search="orusoua windows réplica failover leitura continuidade"><div class="cap-top"><h3>Réplica Windows e failover</h3><div class="cap-estado"><span class="chip horizon">HORIZONTE</span><small class="cap-hora">sem leitura</small></div></div><p>Uma segunda máquina Windows como réplica e caminho de failover. Não há prazo indicado; não é conexão pronta.</p><p class="subnote"></p><div class="cap-meta"><small>MANTER · continuidade</small><small>Rota: sem rota (documento)</small><small>Documental: horizonte; planejado sem prazo (PROJETO.md · Máquinas)</small><button class="evidence" type="button" data-title="Réplica Windows" data-body="O PROJETO classifica a réplica Windows 11 de leitura/failover como planejada, sem prazo indicado. Não é conexão pronta nem backlog ativo desta rodada." data-source="PROJETO.md · Máquinas e roadmap; REGRAS.md · contenção de escopo">EVIDÊNCIA</button></div></article>
+       <article class="cap-card" data-state="planned" data-probe="documento" data-search="home assistant whatsapp integração mcp automação mensagens"><div class="cap-top"><h3>Home Assistant e WhatsApp</h3><div class="cap-estado"><span class="chip planned">SOB DEMANDA</span><small class="cap-hora">sem leitura</small></div></div><p>Integrações previstas como servidores MCP separados, quando a frente abrir. Não são conexão instalada.</p><p class="subnote"></p><div class="cap-meta"><small>USAR · integração sob demanda</small><small>Rota: sem rota (documento)</small><small>Documental: sob demanda (PROJETO.md · Interface)</small><button class="evidence" type="button" data-title="Integrações sob demanda" data-body="O PROJETO nomeia Home Assistant e WhatsApp como integrações futuras sob demanda por MCP. Não há evidência lida nesta passada de implementação ativa." data-source="PROJETO.md · Interface">EVIDÊNCIA</button></div></article>
+       <article class="cap-card" data-state="sem-leitura" data-probe="documento" data-search="opencode código agente desenvolvimento terminal"><div class="cap-top"><h3>Trabalhar com código</h3><div class="cap-estado"><span class="chip horizon">SEM LEITURA</span><small class="cap-hora">sem leitura</small></div></div><p>O agente de terminal hoje é o OpenCode, para tarefas de código. Sem medição nesta tela.</p><p class="subnote"></p><div class="cap-meta"><small>USAR · agente</small><small>Rota: sem rota (documento)</small><small>Documental: descrito (PROJETO.md)</small><button class="evidence" type="button" data-title="Agente de código" data-body="A arquitetura separa o agente de código da conversa comum. O OpenCode não é medido nesta tela: o estado dele não aparece aqui." data-source="PROJETO.md · Interface · OpenCode sem medição nesta tela">EVIDÊNCIA</button></div></article>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 9f133d28..3492f4db 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -277,7 +277,7 @@ function sourceLine(item) {
+     (item.last_error ? " · " + item.last_error : "");
+ }
+ const serviceNames = {"omniroute.service":"OmniRoute", "omniroute-sanitizer.service":"Sanitizador", "seth-gateway.service":"Seth Gateway", "seth-verificador.service":"Verificador", "piper-tts.service":"Piper", "openvino-whisper.service":"Whisper", "openvino-embeddings.service":"Embeddings", "obsidian-ro-proxy.service":"Proxy Obsidian", "discord-mcp.service":"Discord MCP", "navegador-mcp.service":"Navegador MCP", "laya-roteador.service":"Laya", "seth-escriba.service":"Escriba"};
+-const timerNames = {"agata-manutencao.timer":"Janela de manutenção", "agata-vault-inbox.timer":"Inbox do Obsidian"};
++const timerNames = {"agata-manutencao.timer":"Janela de manutenção"};
+ const taskNames = {"avaliar-decisor":"Avaliar o decisor", "memoria-semanal":"Memória semanal", "consolidacao":"Consolidar memórias", "laya-treino":"Treinar candidato do Laya"};
+ function unitRows(items, forced) {
+   return (items || []).map((item) => row(serviceNames[item.unit] || item.unit, stateOf(item, forced),
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 5868ea1f..8ba8dab5 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -83,9 +83,8 @@ SERVICE_ALLOWLIST = (
+ )
+ 
+ # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
+-TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
+-TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
+-                  "agata-vault-inbox.timer": "agata-vault-inbox.service"}
++TIMER_ALLOWLIST = ("agata-manutencao.timer",)
++TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service"}
+ MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
+ # Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
+ EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 13874264..89fa9989 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -142,9 +142,9 @@ class PainelTests(unittest.TestCase):
+             servico = panel._service_snapshot("laya-roteador.service")
+         texto = "unidade não existe no escopo do usuário desta Máquina"  # C5 (16/11/2026): systemctl --user, não o sistema todo
+         self.assertEqual((servico["state"], servico["error"]), ("ausente", texto))
+-        timer_nao = "Id=agata-vault-inbox.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
++        timer_nao = "Id=agata-manutencao.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
+         with mock.patch.object(panel.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=timer_nao)):
+-            timer = panel._timer_snapshot("agata-vault-inbox.timer")
++            timer = panel._timer_snapshot("agata-manutencao.timer")
+         self.assertEqual((timer["state"], timer["error"], timer["execution"]["state"]),
+                          ("ausente", texto, "ausente"))
+         self.assertEqual(panel._overall_state(["ok", "ausente"]), "warning")
+diff --git a/scripts/seth_autodev.py b/scripts/seth_autodev.py
+index 23e3b721..ab73c07f 100644
+--- a/scripts/seth_autodev.py
++++ b/scripts/seth_autodev.py
+@@ -156,7 +156,7 @@ def rodar_caso(pergunta, mcp, post=_post_gateway, max_passos=MAX_PASSOS, sistema
+ # ------------------------------------------------------------------ casos: ouro (golden) + gerados (verdade na hora)
+ UNIDADES = ["seth-gateway.service", "seth-escriba.service", "seth-verificador.service", "piper-tts.service", "omniroute.service",
+             "laya-roteador.service", "agata-vigia@claude.service", "agata-vigia@codex.service", "agata-manutencao.timer",
+-            "agata-vault-inbox.timer", "agata-laya-treino.timer", "agata-consolidacao.timer", "agata-avaliacao-decisor.timer",
++            "agata-laya-treino.timer", "agata-consolidacao.timer", "agata-avaliacao-decisor.timer",
+             "agata-pesquisa-modelos.timer"]
+ 
+ 
