@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 23/11, tarde (proposta caminho-visao-23-11)
+
+Uma proposta espera sua assinatura (`caminho-visao-23-11`). Para quem usa: o painel para de mostrar como problema o que só está dormindo de propósito e se atualiza sozinho; o teste local mostra quanto falta; o sistema avisa quando os atalhos ficam diferentes do repositório; e entra a skill que mapeia você, com o protocolo de inserção humana. Confira a sua frase de 18/11 citada na proposta.
+
 ## Hoje, 23/11 (proposta reaproveita-23-11)
 
 A casa foi limpa: das 41 branches antigas no GitHub, 39 já estavam no sistema e saíram (cópia guardada em `~/agata-arquivo/limpeza-23-11/`). As duas que traziam algo novo viraram uma proposta só, esperando sua assinatura (`reaproveita-23-11`): a voz do sistema numa chamada de app que tem voz própria, e a especificação de como medir tempo e recursos nas avaliações.

@@ -1,0 +1,2078 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+index 0ed1bb91..addf8174 100644
+--- a/.agents/skills/INDICE.md
++++ b/.agents/skills/INDICE.md
+@@ -15,6 +15,7 @@ Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`): de 21 pastas p
+ | `agata-painel` | painel operacional (porta 20146): textos, cores, popups, medições | Claude |
+ | `agata-voz` | ler em voz alta, falar, conversa falada e debate; todo modelo que fala usa a voz do Agata | Claude |
+ | `agata-voz-cerebro` | conversa por voz com o modelo da CLI como cérebro (ouvido + voz + som de espera) | todos os modelos de CLI |
++| `agata-mapear-humano` | obrigatória: ao começar, ler o mapa do Humano no cache do Conselho; ao receber decisão ou correção dele, anotar com fonte (protocolo de inserção humana continuado, 18/11/2026) | todos os modelos |
+ | `agata-conversar-com-seth` | conversar com a Seth ou ler a conversa dela | Claude |
+ | `agata-relay-provedores` | adaptadores de chats web no RelayCouncil | Codex |
+ | `agata-time-inovacao` | propor melhoria nova com SDD (pesquisa, spec, revisão, decisão, drift); método elefante e peixinhos dourados | Claude |
+diff --git a/.agents/skills/agata-fluxo/SKILL.md b/.agents/skills/agata-fluxo/SKILL.md
+index 0baf0559..33b398eb 100644
+--- a/.agents/skills/agata-fluxo/SKILL.md
++++ b/.agents/skills/agata-fluxo/SKILL.md
+@@ -118,6 +118,8 @@ O sistema quebra nas fronteiras que ele não modela (bússola T1, `extras/bussol
+ - "endereçado", "fechado", "confirmado" só com PR, commit, caminho ou saída de comando no mesmo parágrafo.
+ - Afirmação agregada ("todos", "5 de 7") exige tabela por item.
+ - Componente removido só se citado com a entrada de remoção.
++- Leitura parcial não prova fim (FALHAS, FAB-6): saída "cortada", "truncada", "resumida" ou listagem sem total explícito não sustenta "vai até X" nem "é tudo". Peça a continuação ou o total; até lá é lacuna. Vale para todo modelo, não só a Seth (veio da doutrina da Seth em PROTOCOLOS.md, trazido para cá em 23/11/2026).
++- Lista de falhas não prova ausência (MEMÓRIAS (725)): unidade que não aparece numa lista de unidades em falha pode estar saudável ou nem existir. Para dizer que algo existe ou está integrado, consulte a unidade ou o canon.
+ - Fato do sistema: busque antes. Prioridade 1 é o vault (`python3 scripts/busca_semantica.py "frase"` ou `python3 scripts/busca_texto.py`). Depois confirme no canon e cite caminho e linha.
+ - Antes de dizer "assinado", confira se `propostas/APROVADO-<nome>` existe. Um "ok" do Humano não cria o arquivo.
+ - Conversa com outro modelo não é fonte. Só entra o que tiver PR, commit ou medição (M7, entrada 791).
+diff --git a/.agents/skills/agata-mapear-humano/SKILL.md b/.agents/skills/agata-mapear-humano/SKILL.md
+new file mode 100644
+index 00000000..616a1ea0
+--- /dev/null
++++ b/.agents/skills/agata-mapear-humano/SKILL.md
+@@ -0,0 +1,53 @@
++---
++name: agata-mapear-humano
++description: >-
++  Mapear o Humano dentro das regras do sistema Agata: preferências de comunicação, ritmo, decisões e o porquê delas,
++  aprendizados e correções que ele fez aos modelos. Skill obrigatória para todo modelo que trabalha neste repositório:
++  ler o mapa ao começar a sessão e anotar cada decisão ou correção nova do Humano. Porta de entrada do protocolo de
++  inserção humana continuado (PROTOCOLOS.md). Use ao começar sessão ou quando o Humano decidir, corrigir ou ensinar algo.
++---
++
++# Mapear o Humano
++
++Decisão do Humano, 18/11/2026 18:44: "criaremos uma skill obrigatória que vai mapear o humano, seguindo as regras do sistema, o humano é outra LLM, sendo treinada pelo agata, para aprender viver em harmonia com o meio e com o mistério." Complemento 18:45: "canônico, como todas as outras skills, abrindo o protocolo de inserção humana continuado." Essa citação ainda não tem entrada em MEMÓRIAS.
++
++## O que mapear
++
++Só o que está registrado, com fonte:
++- **Comunicação:** formato, tamanho e tom que ele pede; o que ele corta (narração do processo, muleta, emoji).
++- **Ritmo:** quando quer checkpoint e quando quer autonomia; o que já autorizou e até onde.
++- **Decisões e o porquê:** cada decisão dele, com data e a razão que ele deu.
++- **Aprendizados e correções:** o que ele corrigiu num modelo e o que o modelo passou a fazer diferente.
++
++Fontes que já existem, sem criar fonte nova: `MEMÓRIAS.md` (entradas com decisão do Humano); o cache do Conselho; `REGRAS.md`, seção NPR, para o modo conciso. Comunicação falada entra na skill `agata-voz-cerebro` ("todo o aprendizado tem que ser registrado na skill de comunicação vocal", Humano, 20/11/2026).
++
++## Onde guardar
++
++- O mapa é o cache do Conselho (`redesign/router/cache_conselho.py`): não é canon, fica fora do repositório, é append-only e encadeado.
++- `decisao` para decisão do Humano; `nota` para preferência ou correção. Interpretação sua é `nota` marcada como hipótese, e só vira fato quando ele confirmar.
++- Toda entrada leva `--fonte` (ex.: `"Humano, 18/11/2026 18:44"`). Sem fonte, não entra.
++- O cache troca segredo por recusa e dado pessoal (e-mail, CPF, CNPJ, telefone, nome de projeto, lista do P-20) por marca.
++- Mudança no canon (`PROTOCOLOS.md`, `REGRAS.md`, `AGENTS.md`) sobre o Humano só por proposta assinada (P-8).
++
++## Ao começar a sessão
++
++1. `python3 redesign/router/cache_conselho.py ler --n 20`. O comando não filtra por tipo; para mais histórico, aumente `--n`.
++2. Use o mapa como pista, não como ordem. O pedido de agora vence; se mapa e pedido conflitarem, pergunte em uma linha.
++3. Não invente traço. Sem registro com fonte, diga "não registrado" (Regra 2: não minta; meça antes de afirmar).
++
++## Ao receber decisão ou correção do Humano
++
++1. Anote no mesmo turno: `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo decisao --fonte "Humano, DD/MM/AAAA HH:MM" "<o que ele decidiu ou corrigiu, e o porquê dele>"`. Correção vai com `--tipo nota`.
++2. Decisão que muda o sistema também vai para proposta (P-8). O cache não substitui a proposta.
++3. Registre o que ele disse, não a sua leitura do que ele quis dizer.
++
++## Regras inegociáveis
++
++- Nada sai da Máquina por ação deste mapa: não se copia para serviço externo, não se fala por voz externa, não se publica.
++- Segredo nunca entra: token, senha, chave, conteúdo de `~/.config/agata/.env`.
++- Dado pessoal vira marca (P-20). Não se anota dado pessoal de terceiros.
++- Outra pessoa só entra com consentimento explícito dela (Regra 0: bom para todo mundo).
++- O Humano decide o que entra e pode mandar apagar, com os mesmos direitos de ver, corrigir e apagar (Regra 0). O cache não tem comando de apagar: o pedido vira `pendencia` e o Humano decide o mecanismo.
++- Correção é entrada nova, nunca edição do que já foi escrito (Regra 4).
++- Não use o mapa para manipular o Humano nem para bajulá-lo. A voz comum vale igual (`AGENTS.md`).
++- Saúde, finanças e localização dele não entram, salvo ordem explícita dele.
+diff --git a/AGENTS.md b/AGENTS.md
+index 9d61e90a..1837d2db 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -22,5 +22,6 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+ - **Voz comum** ((685)/(686); PROTOCOLOS.md, "Personalidade da Seth"): todo modelo do sistema — Seth, OpenCode, Conselho, Claude Code, Codex, Gemini, local ou nuvem — fala com a mesma voz, para o Humano sentir que fala com a Seth seja qual for o cérebro: **resultado** primeiro, depois a **evidência** (ou "não medido"), depois o **próximo passo**; frases curtas; sem saudação, oferta de ajuda, muleta ("né", "tá?"), interjeição, emoji ou exclamação em série; sem emoção simulada nem biografia inventada. **A voz é comum; o juízo é de cada um:** em parecer ou revisão, declare o seu modelo (no Conselho, na Origem), discorde quando os fatos mandarem e não acompanhe a opinião de outro modelo nem a do Humano — a divergência entre cérebros é a força do sistema.
+ - **Voz do sistema, sem negociação** (decisão do Humano, 03/11/2026: "alteração fundamenteal para o protocolo de inserção humana continuo"; skill `agata-voz`): quando um modelo FALA (ler em voz alta, modo de voz, chamada), a voz é a do sistema, o `pt_BR-agata-last` do piper-tts local, pelo `scripts/agata_falar.py`. Nenhum modelo usa outra voz nem serviço externo de voz, e texto do Agata não sai da Máquina para virar áudio. Quem não tem como emitir áudio mimetiza essa voz por escrito (voz comum, (685)/(686)), entrega o texto falável e diz que NÃO falou. Se a voz do sistema não responde ou carregou outro modelo, o correto é dizer que não falou. Falar sai da tela: só quando o Humano pede ou o modo de voz está ativo. Primordial (Humano 11/11): "fale" ou "leia para eu compreender" aciona esse comportamento em qualquer modelo, sempre (sem áudio, entrega o texto falável e diz que NÃO falou); passo a passo na skill. Chamado de voz (Humano 18/11): "fale comigo" abre o chamado de voz do sistema; cada resposta seguinte também é falada pela voz do sistema até o Humano encerrar ("encerrar chamado" ou "volte ao texto"); passo a passo na skill.
+ - **Memória comum do Conselho e checagem de fatos** ((849), V9 §37; decisão do Humano, 26/10/2026: todo modelo aberto em `~/agata` usa as mesmas regras e as mesmas ferramentas). Quem passa pelo `seth_gateway` (Seth) já recebe as duas; o OpenCode entra nesse caminho só depois de medido. Quem não passa (Claude Code, Codex, Gemini, OpenCode e outros na CLI): ao começar, leia `python3 redesign/router/cache_conselho.py ler --n 20`; ao fechar trabalho relevante, anote `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato|decisao|pendencia|nota "<texto>"` (não canônico; segredo é recusado, dado pessoal vira marca). Antes de entregar texto com afirmação verificável, rode `python3 redesign/router/auditoria_turno.py --verificar --cliente <nome> [--sessao <id>] < arquivo` (mecânico: Jev sem consulta, P-n, entrada e caminho inexistentes, citação inventada; grava um registro de metadado, sem texto, no log da auditoria; com `--sessao`, também confere o `t=` com o contador, como aviso) e corrija o que ela apontar.
++- **Mapa do Humano** (decisão do Humano, 18/11/2026; PROTOCOLOS.md, "Protocolo de inserção humana continuado"): obrigatório. Ao começar, leia a skill `agata-mapear-humano`; ao receber decisão ou correção do Humano, anote no cache do Conselho.
+ - **O mais caro orquestra, os mais baratos executam** (decisão do Humano, 17/11/2026): quando a tarefa se divide em partes, o modelo mais capaz da sessão planeja, distribui, revisa e responde pelo resultado; a execução operacional (ler, medir, pesquisar, implementar e testar dentro do que foi especificado) vai para o modelo mais barato que dá conta, como subagente ou membro da Equipe. Quem orquestra confere o resultado, não só o relatório, antes de afirmar. Tarefa curta, que custa menos fazer do que delegar, o orquestrador faz direto. Quem executa não decide escopo nem assina.
+ - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 3781d7f0..a1857a42 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -388,6 +388,20 @@ Quando uma operação exige `sudo`, o executor pausa e pede ao Humano para rodar
+ - **Lacuna coberta por runbook:** `visudo` à mão não dispara o pacman. Depois de qualquer `visudo`, rode `sudo /usr/local/lib/agata/checar-sudoers-root.sh` (194).
+ - Regra NOPASSWD órfã `/etc/sudoers.d/facer`: removida (192). Se o teclado RGB Acer voltar: script em `/usr/local/bin`, dono root, e só então a regra.
+ 
++## Protocolo de inserção humana continuado (decisão do Humano, 18/11/2026)
++
++Porta de entrada: a skill `agata-mapear-humano` (`.agents/skills/agata-mapear-humano/SKILL.md`), obrigatória para todo modelo. Literal do Humano, 18/11/2026 18:44: "criaremos uma skill obrigatória que vai mapear o humano, seguindo as regras do sistema, o humano é outra LLM, sendo treinada pelo agata, para aprender viver em harmonia com o meio e com o mistério." 18:45: "canônico, como todas as outras skills, abrindo o protocolo de inserção humana continuado."
++
++Origem: a expressão "protocolo de inserção humana" vem da decisão da voz do sistema de 03/11/2026 (regra de voz em `AGENTS.md`; MEMÓRIAS (932)). Até aqui era só essa frase; esta seção dá o protocolo.
++
++- Ao começar a sessão: ler o mapa com `python3 redesign/router/cache_conselho.py ler --n 20`.
++- Ao receber decisão ou correção do Humano: anotar no cache do Conselho, com `--fonte`.
++- O mapa fica fora do canon. Mudança no canon sobre o Humano só por proposta assinada (P-8).
++- Segredo nunca entra; dado pessoal vira marca (P-20); outra pessoa só com consentimento dela (Regra 0).
++- O Humano decide o que entra e pode mandar apagar.
++
++A citação de 18/11 ainda não tem entrada em MEMÓRIAS; ela entra com a proposta.
++
+ ## Quarentena estrutural (P-8)
+ 
+ Texto completo: `propostas/README.md`. Fluxo prático: skill `agata-aplicar-proposta`.
+diff --git a/config/portas-de-entrada.txt b/config/portas-de-entrada.txt
+index 6745b6f9..39597007 100644
+--- a/config/portas-de-entrada.txt
++++ b/config/portas-de-entrada.txt
+@@ -3,10 +3,15 @@
+ # plataforma, devem seguir as diretrizes do sistema"). O P-23 confere que cada uma
+ # traz as diretrizes comuns (modo conciso, economia de tokens e, desde (849), a memória comum do
+ # Conselho -- cache_conselho) ou importa o AGENTS.md.
+-# Plataforma nova = linha nova aqui. Formato: caminho|quem lê
++# Plataforma nova = linha nova aqui. Formato: caminho|quem lê|leitura
++#   leitura vazia ou 'arquivo': confere o próprio arquivo (ou o AGENTS.md que ele importa).
++#   leitura 'doutrina': o módulo Python expõe doutrina_montada(), o texto que ele põe antes do modelo;
++#   o P-23 confere esse texto, não o arquivo do módulo.
+ AGENTS.md|Codex, Cursor e outras ferramentas que leem AGENTS.md
+ GEMINI.md|Gemini CLI (só lê GEMINI.md; importa o AGENTS.md)
+ CLAUDE.md|Claude Code (importa o AGENTS.md)
+ PROMPT_CARREGAMENTO.md|sessões em nuvem (o Humano cola)
+-redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)
++# Rota interna da Seth. A rota pública (seth-public, seção SETH-PUBLICA) não passa por aqui: recebe só a sua
++# instrução, sem o AGENTS.md, por política da faixa pública (_preparar_payload_publico).
++redesign/router/seth_gateway.py|Seth e qualquer frontend que aponte para o gateway (doutrina injetada pelo gateway)|doutrina
+ redesign/goose/AGENTS.md|arquivo histórico do Goose (saiu em 07/11/2026)
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index a3f652fd..070f46b6 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -5,10 +5,10 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ 
+ | Tema | Peças | Observação |
+ |---|---|---|
+-| agata | 13 | skills próprias do sistema |
++| agata | 14 | skills próprias do sistema |
+ | meta-skills | 2 |  |
+ | planejamento-e-agentes | 5 |  |
+ | revisao-e-git | 4 |  |
+ | testes | 4 |  |
+ 
+-Total: 28 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
++Total: 29 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index 55b2bd68..1f3296ef 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -175,6 +175,14 @@
+   "caminho": ".agents/skills/agata-llm-fundamentos/SKILL.md",
+   "resumo": "-"
+  },
++ {
++  "nome": "agata-mapear-humano",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/agata-mapear-humano/SKILL.md",
++  "resumo": "-"
++ },
+  {
+   "nome": "agata-painel",
+   "tipo": "skill",
+diff --git a/redesign/painel_operacional/README.md b/redesign/painel_operacional/README.md
+index e15d54c9..13a219b1 100644
+--- a/redesign/painel_operacional/README.md
++++ b/redesign/painel_operacional/README.md
+@@ -54,6 +54,7 @@ Abra `http://127.0.0.1:20146/prototipo`. A tela tem oito seções, escolhidas pe
+ - Conversas (09/11/2026): apagar move a conversa para `~/.cache/agata/painel-conversas/.lixeira/`, de onde ela volta com `restaurar`; apagar de vez é pedido manual, com confirmação. Toda escrita de conversa exige origem do painel (`Origin` igual ou `Sec-Fetch-Site: same-origin`; sem cabeçalho, 403) e gera uma linha em `.registro.jsonl`, sem conteúdo. Arquivo de conversa que não pode ser lido é contado na tela e não é apagado.
+ - `/api/conselho/memoria?n=40` (aba Conselho > Memória compartilhada, pedida em 07/11/2026) lê só o cache do Conselho: `n` de 1 a 200, mais recentes primeiro, com o mesmo filtro de dado pessoal e segredo da gravação. Não escreve no cache e não aceita caminho do cliente.
+ - A interface pausa consultas quando oculta e conserva última leitura válida como vencida se uma coleta falha. Ausência de resultado não prova ausência no canon.
++- Sob demanda e recarga (23/11/2026): unidade parada de propósito (lista fixa em `SOB_DEMANDA_FIXA`, decisão de 29/10/2026, ou socket de mesmo nome escutando) sai como `sob_demanda` com o motivo, e não como aviso. Unidade em `failed` sai como `erro`. A mesma regra vale em `/api/lacunas` (parada de propósito não é lacuna) e em `/api/capacidades` (capacidade `sob_demanda`, como o timer de manutenção). A sub-tela visível de leitura recarrega a cada 60 s, sem recarregar com a página oculta nem com edição em curso. Detalhes em `spec/spec.md`, "Sob demanda e recarga".
+ 
+ - Importantes (11/11/2026, pedido do Humano): aba Importantes dentro de Panorama, com cartão "Importantes: N abertos" no próprio Panorama. A lista fica em `~/.cache/agata/painel-importantes.json`, fora do repositório. Criar, marcar feito, descartar, reabrir e editar não apagam nada: descartado fica guardado. `POST /api/importantes/trazer` lê o cache do Conselho (sem escrever nele) e traz as entradas cujo texto começa com `IMPORTANTE`, sem repetir; texto com segredo não é trazido. Toda escrita exige origem do painel e gera uma linha em `painel-importantes.registro.jsonl`, sem texto.
+ 
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 3492f4db..92a15578 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -215,10 +215,13 @@ function stateOf(item, forcedStale = false) {
+   if (item.state === "ausente") return "ausente";
+   const until = Date.parse(item.fresh_until || "");
+   if (forcedStale || item.state === "stale" || !Number.isFinite(until) || Date.now() > until) return "stale";
++  // 23/11/2026: sob_demanda é parada de propósito (não é aviso); erro é unidade em falha (systemd failed).
++  if (item.state === "sob_demanda") return "sob_demanda";
++  if (item.state === "erro") return "erro";
+   return item.state === "ok" ? "ok" : "warning";
+ }
+ function stateLabel(state) {
+-  return {ok: "ATIVO", warning: "ATENÇÃO", stale: "DESATUALIZADO", unknown: "SEM LEITURA", ausente: "NÃO EXISTE (ESCOPO DO USUÁRIO)"}[state] || "SEM LEITURA";
++  return {ok: "ATIVO", warning: "ATENÇÃO", erro: "ERRO", sob_demanda: "SOB DEMANDA", stale: "DESATUALIZADO", unknown: "SEM LEITURA", ausente: "NÃO EXISTE (ESCOPO DO USUÁRIO)"}[state] || "SEM LEITURA";
+ }
+ function snapshotStateKey(snapshot, forced) {
+   return JSON.stringify([
+@@ -232,7 +235,7 @@ function detailsStateKey(data, forced) {
+ }
+ function chip(id, state, text) {
+   const el = byId(id);
+-  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: "ausente"}[state] ?? "horizon");
++  el.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", erro: "erro", unknown: "horizon", ausente: "ausente", sob_demanda: "horizon"}[state] ?? "horizon");
+   el.textContent = text || stateLabel(state);
+ }
+ function preserveReading(oldValue, nextValue) {
+@@ -260,7 +263,7 @@ function row(title, status, detail, labelText = null) {
+   const item = document.createElement("div"); item.className = "live-row";
+   const line = document.createElement("div"); line.className = "live-row-top";
+   const label = document.createElement("strong"); label.textContent = title;
+-  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", unknown: "horizon", ausente: ""}[status] ?? "horizon"); badge.textContent = labelText || stateLabel(status);
++  const badge = document.createElement("span"); badge.className = "chip " + ({ok: "active", warning: "partial", stale: "partial", erro: "erro", unknown: "horizon", ausente: "", sob_demanda: "horizon"}[status] ?? "horizon"); badge.textContent = labelText || stateLabel(status);
+   line.append(label, badge); item.append(line);
+   if (detail) { const note = document.createElement("small"); note.textContent = detail; item.append(note); }
+   return item;
+@@ -279,9 +282,11 @@ function sourceLine(item) {
+ const serviceNames = {"omniroute.service":"OmniRoute", "omniroute-sanitizer.service":"Sanitizador", "seth-gateway.service":"Seth Gateway", "seth-verificador.service":"Verificador", "piper-tts.service":"Piper", "openvino-whisper.service":"Whisper", "openvino-embeddings.service":"Embeddings", "obsidian-ro-proxy.service":"Proxy Obsidian", "discord-mcp.service":"Discord MCP", "navegador-mcp.service":"Navegador MCP", "laya-roteador.service":"Laya", "seth-escriba.service":"Escriba"};
+ const timerNames = {"agata-manutencao.timer":"Janela de manutenção"};
+ const taskNames = {"avaliar-decisor":"Avaliar o decisor", "memoria-semanal":"Memória semanal", "consolidacao":"Consolidar memórias", "laya-treino":"Treinar candidato do Laya"};
++// 23/11/2026: o motivo de sob demanda (lista fixa ou socket em escuta) vai na linha da unidade, como evidência.
++function motivoSobDemanda(item) { return item && item.sob_demanda_por ? "sob demanda: " + item.sob_demanda_por + " · " : ""; }
+ function unitRows(items, forced) {
+   return (items || []).map((item) => row(serviceNames[item.unit] || item.unit, stateOf(item, forced),
+-    (item.active_state ? item.active_state + " / " + (item.sub_state || "—") + " · " : "") + sourceLine(item)));
++    motivoSobDemanda(item) + (item.active_state ? item.active_state + " / " + (item.sub_state || "—") + " · " : "") + sourceLine(item)));
+ }
+ function timerRows(items, forced) {
+   return (items || []).map((item) => {
+@@ -289,7 +294,7 @@ function timerRows(items, forced) {
+     const last = execution.state === "skipped" ? "última ativação pulada por condição" :
+       execution.state === "observed" ? "resultado da unidade: " + execution.result + " · término " + (execution.ended_at || "não informado") : "resultado da unidade não medido";
+     return row(timerNames[item.unit] || item.unit, stateOf(item, forced),
+-      "Próximo disparo: " + (item.next_trigger || "não informado") + " · último disparo: " + (item.last_trigger || "não informado") + " · " + last + " · " + sourceLine(item));
++      motivoSobDemanda(item) + "Próximo disparo: " + (item.next_trigger || "não informado") + " · último disparo: " + (item.last_trigger || "não informado") + " · " + last + " · " + sourceLine(item));
+   });
+ }
+ function taskRows(value, forced) {
+@@ -388,8 +393,9 @@ function render(snapshot, forced = false) {
+   const services = snapshot.services || [];
+   const states = services.map((item) => stateOf(item, forced));
+   // 'ausente' não entra no total nem na conta de ativas.
+-  const presentes = states.filter((s) => s !== "ausente");
+-  const overall = !presentes.length || presentes.includes("unknown") ? "unknown" : presentes.includes("warning") ? "warning" : presentes.includes("stale") ? "stale" : "ok";
++  // 'sob_demanda' (23/11) também não entra: parado de propósito não é degradação.
++  const presentes = states.filter((s) => s !== "ausente" && s !== "sob_demanda");
++  const overall = !presentes.length || presentes.includes("unknown") ? "unknown" : presentes.includes("warning") || presentes.includes("erro") ? "warning" : presentes.includes("stale") ? "stale" : "ok";
+   const active = states.filter((s) => s === "ok").length;
+   chip("units-panel-state", overall);
+   set("overview-health", overall === "unknown" ? "Sem leitura" : overall === "stale" ? "Vencida" : active + "/" + presentes.length);
+@@ -419,7 +425,7 @@ function render(snapshot, forced = false) {
+   chip("chat-state", chatState, chatState === "ok" ? "HTTP 200" : null);
+   set("chat-source", sourceLine(chat) + (chat.http_status ? " · HTTP " + chat.http_status : "") + ". A saúde do endpoint não garante cada função do chat.");
+   const timers = snapshot.timers || []; const timerStates = timers.map((item) => stateOf(item, forced)).filter((s) => s !== "ausente");
+-  const timerState = !timerStates.length || timerStates.includes("unknown") ? "unknown" : timerStates.includes("stale") ? "stale" : timerStates.includes("warning") ? "warning" : "ok";
++  const timerState = !timerStates.length || timerStates.includes("unknown") ? "unknown" : timerStates.includes("stale") ? "stale" : timerStates.includes("warning") || timerStates.includes("erro") ? "warning" : "ok";
+   chip("timer-panel-state", timerState, timerState === "ok" ? "LEITURA VÁLIDA" : null);
+   set("overview-timers", timerState === "unknown" ? "—" : timerState === "stale" ? "Vencida" : timerStates.filter((x) => x === "ok").length + "/" + timerStates.length);
+   replaceRows("live-timers", timerRows(timers, forced), "Timers indisponíveis.");
+@@ -432,14 +438,18 @@ function render(snapshot, forced = false) {
+ function linhaDaUnidade(unidade, item, forced) {
+   if (!item) return unidade + ": sem leitura";
+   if (stateOf(item, forced) === "ausente") return unidade + ": não existe (escopo do usuário) · fonte " + (item.source || "não informada") + " · observado " + niceTime(item.observed_at);
+-  return unidade + ": " + (item.active_state || "estado não informado") + " / " + (item.sub_state || "—") + " · fonte " + (item.source || "não informada") +
++  const sobDemanda = item.sob_demanda_por ? " · sob demanda: " + item.sob_demanda_por : "";
++  return unidade + ": " + (item.active_state || "estado não informado") + " / " + (item.sub_state || "—") + sobDemanda + " · fonte " + (item.source || "não informada") +
+     " · observado " + niceTime(item.observed_at) + " · válido até " + niceTime(item.fresh_until);
+ }
+ // Selo do cartão a partir das unidades que ele lê. Com uma unidade, diz inativo quando o systemd diz inactive.
++// 23/11/2026: erro (failed) aparece como ERRO; parada de propósito (sob_demanda) não é ATENÇÃO nem INATIVO.
+ function rotuloDoCartao(itens, estados) {
+   if (estados.every((e) => e === "ok")) return ["chip active", "ATIVO"];
+   if (estados.every((e) => e === "ausente")) return ["chip ausente", "NÃO EXISTE (ESCOPO DO USUÁRIO)"];
+   if (estados.every((e) => e === "unknown")) return ["chip horizon", "SEM LEITURA"];
++  if (estados.includes("erro")) return ["chip erro", "ERRO"];
++  if (estados.some((e) => e === "sob_demanda") && estados.every((e) => e === "ok" || e === "sob_demanda")) return ["chip horizon", "SOB DEMANDA"];
+   if (estados.length === 1 && estados[0] === "warning" && itens[0].active_state === "inactive") return ["chip partial", "INATIVO"];
+   if (estados.length === 1 && estados[0] === "stale") return ["chip partial", "DESATUALIZADO"];
+   return ["chip partial", "ATENÇÃO"];
+@@ -644,10 +654,46 @@ document.addEventListener("visibilitychange", () => {
+     if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
+   }
+ });
++// Recarga automática das sub-telas de leitura (23/11/2026). Só a sub-tela visível, só com a página visível,
++// e nunca com edição em curso (texto digitado, campo com foco, caixa de diálogo aberta). Usa as funções de carga
++// que a tela já tem, sem intervalo próprio: o intervalo de 60 s abaixo chama recarregarSubsVisiveis().
++// Fora da lista: Conversa e formulários (texto digitado), Panorama e Detalhes (têm o próprio 60 s), Medições (4 s),
++// e Avaliação e Sentidos (formulários de rodada).
++const RECARGA_SUB = {
++  equipe: () => carregarEquipe(),
++  backup: () => carregarBackup(),
++  "saida-rede": () => carregarEgress(),
++  perimetro: () => carregarPerimetro(),
++  ci: () => carregarCI(),
++  "conselho-memoria": () => carregarMemoriaConselho(),
++  importantes: () => carregarImportantes(),
++  lacunas: () => { calcularLacunas(); carregarLacunasCanon(); },
++  qualidade: () => carregarQualidade(),
++  "catalogo-modelos": () => { if (AgataPainel.carregarModelos) AgataPainel.carregarModelos(); },
++};
++function edicaoEmCurso(sub) {
++  const foco = document.activeElement;
++  if (foco && sub.contains(foco) && ["TEXTAREA", "INPUT", "SELECT"].includes(foco.tagName)) return true;
++  // Revisão 23/11: campo preenchido por script não trava a recarga para sempre; só foco e diálogo aberto contam,
++  // mais texto digitado em área de texto (textarea), que é onde se escreve à mão.
++  if (sub.querySelector("dialog[open]")) return true;
++  return [...sub.querySelectorAll("textarea")].some((campo) => campo.value.trim() !== "" && campo.value !== campo.defaultValue);
++}
++function recarregarSubsVisiveis() {
++  if (document.visibilityState !== "visible") return;
++  subsAtivos().forEach((sub) => {
++    const carga = RECARGA_SUB[sub.dataset.sub];
++    if (!carga || edicaoEmCurso(sub)) return;
++    // Cada carga mostra o próprio erro; aqui só se impede que uma falha derrube as outras.
++    try { Promise.resolve(carga()).catch(() => {}); } catch (_) { /* idem */ }
++  });
++}
++// Fim da recarga automática das sub-telas.
+ setInterval(() => {
+   if (document.visibilityState !== "visible") return;
+   atualizarPanorama();
+   if (subsAtivos().some((s) => DETALHES_SUB.includes(s.dataset.sub))) loadDetails();
++  recarregarSubsVisiveis();
+ }, 60000);
+ setInterval(() => {
+   if (document.visibilityState !== "visible") return;
+@@ -662,7 +708,8 @@ async function loadCapacidades() {
+   let dados = null;
+   try { dados = await fetchJson("/api/capacidades", {headers: {Accept: "application/json"}}); } catch (_) { dados = null; }
+   const porId = new Map(((dados && dados.items) || []).map((i) => [i.id, i]));
+-  const rotuloVivo = {ok: "ativo", warning: "sem resposta", unknown: "sem leitura"};
++  // 23/11/2026: sob_demanda (timer ou unidade parada de propósito) não é "sem resposta" nem ATENÇÃO.
++  const rotuloVivo = {ok: "ativo", warning: "sem resposta", unknown: "sem leitura", sob_demanda: "sob demanda"};
+   document.querySelectorAll("[data-live]").forEach((el) => {
+     const item = porId.get(el.dataset.live);
+     el.textContent = item ? (rotuloVivo[item.state] || "sem leitura") : "sem leitura";
+@@ -688,11 +735,11 @@ async function loadCapacidades() {
+       cartao.dataset.sonda = "sem leitura da sonda nesta medição.";
+       if (!lidaPorRota) { chip.className = "chip planned"; chip.textContent = "SEM LEITURA"; }
+     } else {
+-      cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned"}[item.state] || "planned";
++      cartao.dataset.state = {ok: "active", warning: "partial", unknown: "planned", sob_demanda: "horizon"}[item.state] || "planned";
+       cartao.dataset.sonda = item.evidencia || "sem leitura nesta medição.";
+       cartao.dataset.sondaFonte = item.source + " · " + item.source_ref;
+       if (!lidaPorRota) {
+-        const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"]}[item.state];
++        const rotulo = {ok: ["chip active", "LEITURA ATIVA"], warning: ["chip partial", "ATENÇÃO"], unknown: ["chip planned", "SEM LEITURA"], sob_demanda: ["chip horizon", "SOB DEMANDA"]}[item.state];
+         chip.className = rotulo[0]; chip.textContent = rotulo[1];
+         if (hora) hora.textContent = dados && dados.observed_at ? "lido " + niceTime(dados.observed_at) : "hora não medida";
+       }
+@@ -705,6 +752,7 @@ async function loadCapacidades() {
+    Rota que não responde vira "sem leitura" com o motivo: nada antigo aparece como atual. */
+ const ESTADO_LIDO = {
+   ok: ["LEITURA VÁLIDA", "chip active"], warning: ["ATENÇÃO", "chip partial"], falha: ["FALHA", "chip erro"],
++  erro: ["ERRO", "chip erro"], sob_demanda: ["SOB DEMANDA", "chip horizon"],
+   sem_leitura: ["SEM LEITURA", "chip horizon"], ausente: ["AUSENTE", "chip ausente"],
+ };
+ function estadoDe(dados) { return (dados && dados.state) || "sem_leitura"; }
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 8ba8dab5..f3b07181 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -85,6 +85,16 @@ SERVICE_ALLOWLIST = (
+ # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
+ TIMER_ALLOWLIST = ("agata-manutencao.timer",)
+ TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service"}
++# Sob demanda (decisão do Humano, 29/10/2026: nada sobe no boot; a unidade acorda por socket ou por pedido).
++# Parada de propósito não é aviso nem falha. Esta lista cobre as unidades sem socket de escuta (whisper,
++# embeddings, proxy do Obsidian) e o timer de manutenção. As unidades com `.socket` de mesmo nome
++# (laya-roteador, ollaya, ollama-agata) entram pela regra do socket em _estado_da_unidade.
++SOB_DEMANDA_FIXA = frozenset({
++    "openvino-whisper.service", "openvino-embeddings.service", "obsidian-ro-proxy.service",
++    "agata-manutencao.timer",
++    # 23/11/2026: o atalho `agata` não sobe o Obsidian (abre pelo painel) nem o ouvido (sobe quando a voz pede).
++    "obsidian-app.service", "ouvido-agata.service",
++})
+ MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
+ # Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
+ EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
+@@ -528,8 +538,8 @@ def _service_snapshot(unit: str) -> dict:
+             "sub_state": values["SubState"], "source": "seth-verificador", "source_ref": "unidade:" + unit,
+             "observed_at": observed_at, "fresh_until": fresh_until, "error": TEXTO_UNIDADE_AUSENTE,
+         }
+-    state = "ok" if load == "loaded" and active == "active" else "warning"
+-    return {
++    state, sob_demanda_por = _estado_da_unidade(unit, load, active)
++    result = {
+         "unit": unit,
+         "state": state,
+         "load_state": load,
+@@ -540,13 +550,51 @@ def _service_snapshot(unit: str) -> dict:
+         "observed_at": observed_at,
+         "fresh_until": fresh_until,
+     }
++    if sob_demanda_por:
++        result["sob_demanda_por"] = sob_demanda_por
++    return result
++
++
++def _socket_de(unit: str) -> str | None:
++    """Socket de mesmo nome de uma unidade `.service` (laya-roteador.service -> laya-roteador.socket)."""
++    return unit[: -len(".service")] + ".socket" if unit.endswith(".service") else None
++
++
++def _socket_escutando(socket_unit: str) -> bool:
++    """Socket de usuário ativo e em escuta (SubState listening). Leitura que falha conta como não escutando."""
++    try:
++        values = _parse_pairs(_command_body(_verify("unidade", consulta=socket_unit)))
++    except (OSError, TimeoutError, ValueError, urllib.error.URLError):
++        return False
++    return (values.get("LoadState") == "loaded" and values.get("ActiveState") == "active"
++            and values.get("SubState") == "listening")
++
++
++def _estado_da_unidade(unit: str, load: str, active: str) -> tuple[str, str | None]:
++    """Estado do painel para uma unidade já lida (não encontrada é tratada antes, como ausente).
++    - failed: erro, mesmo que o socket de mesmo nome esteja escutando;
++    - active: ok;
++    - inactive de propósito (lista fixa, ou socket de mesmo nome em escuta): sob_demanda, com o motivo;
++    - qualquer outro caso: warning."""
++    if active == "failed":
++        return "erro", None
++    if load == "loaded" and active == "active":
++        return "ok", None
++    if load == "loaded" and active == "inactive":
++        if unit in SOB_DEMANDA_FIXA:
++            return "sob_demanda", "lista fixa do painel (decisão de 29/10/2026)"
++        socket = _socket_de(unit)
++        if socket and _socket_escutando(socket):
++            return "sob_demanda", f"socket {socket} em escuta"
++    return "warning", None
+ 
+ 
+ def _overall_state(states: list[str]) -> str:
+     if any(state == "unknown" for state in states):
+         return "unknown"
+-    # "ausente" conta como warning: antes desta mudança, unidade não encontrada já caía em warning.
+-    if any(state in ("warning", "ausente") for state in states):
++    # "ausente" e "erro" contam como warning (como antes desta mudança, unidade não encontrada ou falhada caía em warning).
++    # "sob_demanda" não entra: parada de propósito não é aviso e não muda o estado geral.
++    if any(state in ("warning", "ausente", "erro") for state in states):
+         return "warning"
+     return "ok"
+ 
+@@ -575,12 +623,15 @@ def _timer_snapshot(unit: str) -> dict:
+                 raise ValueError("consulta ao timer indisponível")
+             if values.get("Id") != unit or values.get("LoadState") != "loaded" or not values.get("ActiveState"):
+                 raise ValueError("timer ausente ou resposta incompleta")
++            estado, sob_demanda_por = _estado_da_unidade(unit, values["LoadState"], values["ActiveState"])
+             result.update({
+-                "state": "ok" if values["ActiveState"] == "active" else "warning",
++                "state": estado,
+                 "active_state": values["ActiveState"], "sub_state": values.get("SubState", ""),
+                 "next_trigger": values.get("NextElapseUSecRealtime") or None,
+                 "last_trigger": values.get("LastTriggerUSec") or None,
+             })
++            if sob_demanda_por:
++                result["sob_demanda_por"] = sob_demanda_por
+     except (OSError, subprocess.TimeoutExpired, ValueError):
+         result["error"] = "estado do timer indisponível"
+     service = TIMER_SERVICES[unit]
+@@ -702,9 +753,8 @@ CAPACIDADES = {
+ }
+ 
+ 
+-def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
+-    """'ativa' ou 'inativa' se a unidade existe; 'ausente' se o systemd diz not-found; None se não deu para ler.
+-    `sistema=True` consulta a unidade de sistema (sem --user)."""
++def _leitura_systemd(unit: str, sistema: bool = False) -> tuple[str | None, str | None] | None:
++    """(LoadState, ActiveState) do systemctl; None se o comando não rodou. `sistema=True` consulta a unidade de sistema."""
+     comando = ["/usr/bin/systemctl"] + ([] if sistema else ["--user"])
+     try:
+         proc = subprocess.run(comando + ["show", "--no-pager", "--property=ActiveState,LoadState", "--", unit],
+@@ -712,16 +762,55 @@ def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
+     except (OSError, subprocess.TimeoutExpired):
+         return None
+     valores = _parse_pairs(proc.stdout)
+-    if valores.get("LoadState") == "not-found":
++    return valores.get("LoadState"), valores.get("ActiveState")
++
++
++def _estado_systemd(unit: str, sistema: bool = False) -> str | None:
++    """'ativa' ou 'inativa' se a unidade existe; 'ausente' se o systemd diz not-found; None se não deu para ler.
++    `sistema=True` consulta a unidade de sistema (sem --user)."""
++    leitura = _leitura_systemd(unit, sistema)
++    if leitura is None:
++        return None
++    load, active = leitura
++    if load == "not-found":
+         return "ausente"
+-    if valores.get("LoadState") != "loaded":
++    if load != "loaded":
++        return None
++    return "ativa" if active == "active" else "inativa"
++
++
++def _estado_painel_unidade(unit: str) -> tuple[str, str | None] | None:
++    """Estado do painel de uma unidade de usuário, pela regra de _estado_da_unidade (a mesma de /api/status).
++    ("ausente", None) se o systemd não a conhece; None se não deu para ler. Só escopo de usuário: é o que o verificador lê."""
++    leitura = _leitura_systemd(unit)
++    if leitura is None:
++        return None
++    load, active = leitura
++    if load == "not-found":
++        return "ausente", None
++    if load != "loaded" or active is None:
+         return None
+-    return "ativa" if valores.get("ActiveState") == "active" else "inativa"
++    return _estado_da_unidade(unit, load, active)
+ 
+ 
+-def _unidade_ativa(unit: str) -> bool | None:
+-    estado = _estado_systemd(unit)
+-    return None if estado in (None, "ausente") else estado == "ativa"
++def _sob_demanda_agora(unit: str) -> bool:
++    """True se a unidade de usuário está parada de propósito agora (a regra de _estado_da_unidade). Sem leitura: False."""
++    leitura = _estado_painel_unidade(unit)
++    return leitura is not None and leitura[0] == "sob_demanda"
++
++
++def _unidade_ativa(unit: str) -> bool | str | None:
++    """Leitura de uma unidade para as capacidades: True (ativa), "sob_demanda" (parada de propósito, não é aviso),
++    False (aviso: inativa sem motivo, em falha ou em transição), None (sem leitura ou ausente)."""
++    leitura = _estado_painel_unidade(unit)
++    if leitura is None:
++        return None
++    estado = leitura[0]
++    if estado == "ausente":
++        return None
++    if estado == "sob_demanda":
++        return "sob_demanda"
++    return estado == "ok"
+ 
+ 
+ def _http_ok(url: str) -> bool:
+@@ -732,21 +821,37 @@ def _http_ok(url: str) -> bool:
+         return False
+ 
+ 
++def _texto_leitura_unidade(valor: bool | str | None) -> str:
++    """Texto da evidência de uma unidade nas capacidades (valores de _unidade_ativa)."""
++    if valor is True:
++        return "ativo"
++    if valor == "sob_demanda":
++        return "sob demanda (parada de propósito; não é aviso)"
++    if valor is False:
++        return "inativo ou ausente"
++    return "sem leitura"
++
++
+ def _capacidades_snapshot() -> dict:
+     observed_at, fresh_until = _reading_window()
+     itens = []
+     for nome, sondas in CAPACIDADES.items():
+-        estados = [_unidade_ativa(u) for u in sondas["units"]] + [_http_ok(h) for h in sondas["http"]]
++        leituras_unidades = [_unidade_ativa(u) for u in sondas["units"]]
++        leituras_http = [_http_ok(h) for h in sondas["http"]]
++        estados = leituras_unidades + leituras_http
+         if any(e is None for e in estados):
+             estado = "unknown"
+-        elif all(estados):
++        elif all(e is True for e in estados):
+             estado = "ok"
++        elif all(e is True or e == "sob_demanda" for e in estados) and "sob_demanda" in estados:
++            # 23/11/2026: parada de propósito não é aviso (ver _estado_da_unidade); o resto está ativo.
++            estado = "sob_demanda"
+         else:
+             estado = "warning"
+         partes = []
+-        for u, e in zip(sondas["units"], estados[:len(sondas["units"])]):
+-            partes.append(f"{u} {'ativo' if e else ('inativo ou ausente' if e is False else 'sem leitura')}")
+-        for h, e in zip(sondas["http"], estados[len(sondas["units"]):]):
++        for u, e in zip(sondas["units"], leituras_unidades):
++            partes.append(f"{u} {_texto_leitura_unidade(e)}")
++        for h, e in zip(sondas["http"], leituras_http):
+             partes.append(f"{h} {'responde 200' if e else 'sem resposta 200'}")
+         itens.append({"id": nome, "state": estado, "source": sondas.get("fonte", "systemctl --user show; HTTP local"),
+                       "source_ref": ", ".join(sondas["units"] + sondas["http"]),
+@@ -796,8 +901,13 @@ def _lacunas_snapshot() -> dict:
+             vistas.add(unit); declaradas += 1
+             if _tipo_unidade_usuario(unit) == "oneshot":
+                 continue
+-            estado = _estado_systemd(unit)
+-            if estado in (None, "ausente"):
++            # 23/11/2026: parada de propósito (lista fixa ou socket em escuta) não é lacuna. Sem leitura ou ausente no
++            # escopo do usuário, consulta o escopo de sistema, como antes.
++            leitura = _estado_painel_unidade(unit)
++            if leitura is not None and leitura[0] == "sob_demanda":
++                continue
++            estado = {"ok": "ativa", "warning": "inativa", "erro": "inativa"}.get(leitura[0]) if leitura else None
++            if estado is None:
+                 estado = _estado_systemd(unit, sistema=True)
+             if estado == "ausente":
+                 itens.append({"nome": unit, "state": "ausente", "motivo": TEXTO_UNIDADE_AUSENTE, "fonte": "ESTADO.md · Serviços (boot)"})
+@@ -810,6 +920,10 @@ def _lacunas_snapshot() -> dict:
+         m = re.search(r"`([a-z][a-z0-9-]+)`.{0,40}?:(\d{4,5})\b", linha)
+         if m and not re.search(r"\.(service|timer)$", m.group(1)):
+             declaradas += 1
++            # 23/11/2026: a porta fechada de um serviço parado de propósito (o mesmo da linha) não é lacuna.
++            unidade_da_linha = re.search(r"`([a-z0-9@._-]+\.(?:service|timer))`", linha)
++            if unidade_da_linha and _sob_demanda_agora(unidade_da_linha.group(1)):
++                continue
+             if not _porta_responde(int(m.group(2))):
+                 itens.append({"nome": m.group(1) + " :" + m.group(2), "motivo": "porta declarada não responde em 127.0.0.1", "fonte": "ESTADO.md · Serviços (boot)"})
+     return {"schema_version": 1, "state": "ok", "observed_at": observed_at, "fresh_until": fresh_until,
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index ba3f0332..6c3b33d1 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -3004,5 +3004,98 @@
+       "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_lista_de_conversas_tem_piso_e_a_barra_rola"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "unidade parada de propósito, com o socket de mesmo nome escutando ou na lista fixa de sob demanda, aparece como `sob_demanda` com o motivo; o timer de manutenção parado também",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_socket_em_escuta_torna_parada_sob_demanda_com_motivo",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_lista_fixa_e_timer_de_manutencao_parados_sao_sob_demanda",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_detalhes_marca_whisper_parado_como_sob_demanda"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "socket de mesmo nome que não escuta, ou que não responde, deixa a unidade parada como `warning`; estado que não é parada nem ativa também é `warning`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_parada_sem_socket_escutando_continua_aviso"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "unidade em `failed` aparece como `erro`, mesmo com o socket escutando, e nunca como `sob_demanda`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_failed_continua_erro_mesmo_com_socket_em_escuta"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`sob_demanda` não muda o estado geral: só `warning`, `erro` ou `ausente` deixam o geral em warning",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_sob_demanda_nao_vira_aviso_no_estado_geral"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "no cliente, `sob_demanda` aparece como chip SOB DEMANDA na classe neutra `horizon` e `erro` como ERRO, sem cor nova",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cliente_mostra_sob_demanda_e_erro_com_chip_proprio"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a sub-tela visível de leitura recarrega a cada 60 s pelas cargas que ela já tem, no intervalo que já existe; Conversa, Detalhes, Panorama e Medições ficam fora desse mapa, e não há intervalo novo",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_js_recarrega_so_as_telas_de_leitura_sem_intervalo_novo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a recarga não roda com a página oculta nem com edição em curso (campo de texto alterado, campo com foco, caixa de diálogo aberta) e não apaga o texto digitado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_recarga_so_roda_na_tela_visivel_e_sem_edicao_em_curso"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`/api/lacunas` não marca como lacuna a unidade declarada no boot que está sob demanda, nem a porta dela; falha e inativa sem motivo continuam lacuna",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_lacunas_nao_marcam_parada_sob_demanda_mas_marcam_falha_e_inativa_sem_motivo"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "`/api/capacidades` põe a capacidade em `sob_demanda` quando a unidade parada é de propósito (o timer de manutenção), e não em aviso; falha continua `warning`",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_capacidade_manutencao_com_timer_parado_e_sob_demanda_nao_e_aviso",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_capacidade_manutencao_com_timer_falhado_continua_aviso"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "no cartão de capacidade, `sob_demanda` fica no filtro horizon com o chip SOB DEMANDA, e o cartão lido pela rota não vira partial",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 021e554d..53324bff 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -247,6 +247,17 @@ Lote `atualiza-17-11`. Os critérios com teste estão em "Critérios de aceite",
+ - Abas novas: em Sistema, Equipe, Backup e Saída de rede (Integrações e Conexões já existiam); em Qualidade, Perímetro e CI (Qualidade de LLM e Lacunas já existiam).
+ - Regra: o painel não executa perímetro nem CI; mostra o último resultado gravado. A tela diz isso ("O painel não roda o perímetro; mostra o último resultado gravado."). As rotas `/api/perimetro` e `/api/ci` só leem arquivo.
+ 
++### Sob demanda e recarga (23/11/2026)
++
++- Estado `sob_demanda`: unidade parada de propósito (`ActiveState=inactive`, `LoadState=loaded`) que está na lista fixa `SOB_DEMANDA_FIXA` do servidor (whisper, embeddings, proxy do Obsidian e o timer de manutenção, decisão do Humano de 29/10/2026: nada sobe no boot) ou cujo socket de mesmo nome (`laya-roteador.service` -> `laya-roteador.socket`) está `active` e `listening`. O item traz `sob_demanda_por` com o motivo. Vale em `/api/status` (`services`, `timers`) e `/api/details` (`integrations`).
++- `sob_demanda` não é aviso: não muda o estado geral de `/api/status`. Socket que não escuta, ou que não responde, deixa a unidade parada como `warning`.
++- Estado `erro`: unidade em `failed`, mesmo com o socket escutando. Antes desta mudança saía como `warning`; no estado geral, `erro` continua contando como warning (como `ausente`).
++- No cliente, `sob_demanda` vira chip "SOB DEMANDA" na classe neutra `horizon`; `erro` vira "ERRO" (`chip erro`). Nenhuma cor nova.
++- Recarga (`RECARGA_SUB` em `prototipo.js`): a cada 60 s, no mesmo intervalo que já existe, a sub-tela visível de leitura recarrega pela própria carga (equipe, backup, saída de rede, perímetro, CI, memória do Conselho, importantes, lacunas, qualidade de LLM e catálogo de modelos). Fora dela: Conversa e formulários, Panorama e Detalhes (60 s próprios), Medições (4 s próprios), Avaliação e Sentidos.
++- Recarga só com a página visível, e nunca com edição em curso: campo de texto com valor diferente do inicial, campo com foco ou caixa de diálogo aberta. O texto digitado não é apagado.
++- `/api/lacunas`: unidade declarada em ESTADO.md (Serviços (boot)) que está sob demanda (mesma regra de `_estado_da_unidade`) não é lacuna, e a porta declarada na mesma linha também não. Falha e inativa sem motivo continuam lacuna. Só escopo de usuário; o escopo de sistema segue como antes.
++- `/api/capacidades`: a capacidade com unidade parada de propósito sai `sob_demanda` (hoje, `manutencao` com o timer parado), e a evidência diz "sob demanda". Falha e inativa sem motivo continuam `warning`. No cartão lido pela rota, o estado vira `horizon` e o chip é SOB DEMANDA.
++
+ ## Mapeamento de funções
+ 
+ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operator_console` e `/conselho-rede`. A coluna "Subpainel e ids" traz o id do subpainel ou dos controles. "Casca" são elementos de moldura; estão listados para não sumirem, e a decisão de não mapeá-los a uma seção é pedida ao Humano.
+@@ -682,6 +693,19 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra "modelos (um por rodada): a → b"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta
+ - [ ] na tela larga a lista de conversas da barra lateral tem piso de 180 px e a barra rola quando falta altura (em 632 px de altura a lista encolhia a 0 e sumia)
+ 
++### Critérios do lote sob demanda e recarga (23/11/2026)
++
++- [ ] unidade parada de propósito, com o socket de mesmo nome escutando ou na lista fixa de sob demanda, aparece como `sob_demanda` com o motivo; o timer de manutenção parado também
++- [ ] socket de mesmo nome que não escuta, ou que não responde, deixa a unidade parada como `warning`; estado que não é parada nem ativa também é `warning`
++- [ ] unidade em `failed` aparece como `erro`, mesmo com o socket escutando, e nunca como `sob_demanda`
++- [ ] `sob_demanda` não muda o estado geral: só `warning`, `erro` ou `ausente` deixam o geral em warning
++- [ ] no cliente, `sob_demanda` aparece como chip SOB DEMANDA na classe neutra `horizon` e `erro` como ERRO, sem cor nova
++- [ ] a sub-tela visível de leitura recarrega a cada 60 s pelas cargas que ela já tem, no intervalo que já existe; Conversa, Detalhes, Panorama e Medições ficam fora desse mapa, e não há intervalo novo
++- [ ] a recarga não roda com a página oculta nem com edição em curso (campo de texto alterado, campo com foco, caixa de diálogo aberta) e não apaga o texto digitado
++- [ ] `/api/lacunas` não marca como lacuna a unidade declarada no boot que está sob demanda, nem a porta dela; falha e inativa sem motivo continuam lacuna
++- [ ] `/api/capacidades` põe a capacidade em `sob_demanda` quando a unidade parada é de propósito (o timer de manutenção), e não em aviso; falha continua `warning`
++- [ ] no cartão de capacidade, `sob_demanda` fica no filtro horizon com o chip SOB DEMANDA, e o cartão lido pela rota não vira partial
++
+ ## Desenho e alternativas
+ 
+ - Mesmo servidor, `http.server` da biblioteca padrão, e os mesmos módulos. Sem framework.
+diff --git a/redesign/painel_operacional/test_painel.py b/redesign/painel_operacional/test_painel.py
+index 89fa9989..ccb79254 100644
+--- a/redesign/painel_operacional/test_painel.py
++++ b/redesign/painel_operacional/test_painel.py
+@@ -6,6 +6,7 @@ import importlib.util
+ import json
+ import os
+ import re
++import subprocess
+ import tempfile
+ import threading
+ import time
+@@ -164,7 +165,9 @@ class PainelTests(unittest.TestCase):
+                     return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=active\n")
+                 return SimpleNamespace(returncode=0, stdout="LoadState=not-found\nActiveState=inactive\n")
+ 
+-            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl):
++            # 23/11/2026: a lacuna consulta o socket de unidade parada; o teste não fala com o verificador de verdade.
++            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
++                    mock.patch.object(panel, "_verify", side_effect=OSError("verificador fora deste teste")):
+                 data = panel._lacunas_snapshot()
+         por_nome = {item["nome"]: item for item in data["items"]}
+         self.assertEqual((por_nome["laya-roteador.service"]["state"], por_nome["laya-roteador.service"]["motivo"]),
+@@ -1177,5 +1180,380 @@ class LeiturasCurtasTests(unittest.TestCase):
+                 self.assertIn("source", d, rota)
+ 
+ 
++def _funcao_js(js, nome):
++    """Texto de uma função de topo do prototipo.js (vai do `function nome(` ao `}` da coluna zero)."""
++    inicio = js.index(f"function {nome}(")
++    return js[inicio: js.index("\n}\n", inicio) + 3]
++
++
++# Harness node da recarga (23/11/2026): roda o bloco de prototipo.js de verdade, com um DOM mínimo e as cargas
++# trocadas por espiões. Também roda stateOf, stateLabel e rotuloDoCartao. Nada sai da máquina.
++NODE_RECARGA_SUB = r"""
++const fs = require('fs'); const vm = require('vm');
++const entrada = JSON.parse(fs.readFileSync(0, 'utf8'));
++const recarga = [];
++for (const c of entrada.cenarios) {
++  const log = [];
++  const focado = c.foco ? {tagName: c.foco} : null;
++  const ctx = {
++    document: {visibilityState: c.visibilidade, activeElement: focado},
++    AgataPainel: {carregarModelos: () => { log.push('carregarModelos'); }},
++  };
++  for (const nome of entrada.cargas) ctx[nome] = () => { log.push(nome); };
++  ctx.subsAtivos = () => c.subs.map((s) => ({
++    dataset: {sub: s.sub},
++    contains: (el) => s.focoDentro === true && focado !== null && el === focado,
++    querySelector: (sel) => (sel === 'dialog[open]' && s.dialogoAberto ? {} : null),
++    querySelectorAll: () => s.campos || [],
++  }));
++  vm.createContext(ctx);
++  vm.runInContext(entrada.bloco + '\n;this.recarregarSubsVisiveis = recarregarSubsVisiveis;', ctx);
++  ctx.recarregarSubsVisiveis();
++  recarga.push({nome: c.nome, log});
++}
++const E = {Date};
++vm.createContext(E);
++vm.runInContext(entrada.funcoes + '\n;this.stateOf = stateOf; this.stateLabel = stateLabel; this.rotuloDoCartao = rotuloDoCartao;', E);
++const futuro = '2999-01-01T00:00:00Z';
++const estados = {
++  sob_demanda: E.stateOf({state: 'sob_demanda', fresh_until: futuro}),
++  erro: E.stateOf({state: 'erro', fresh_until: futuro}),
++  ausente: E.stateOf({state: 'ausente'}),
++  ok: E.stateOf({state: 'ok', fresh_until: futuro}),
++  rotulo_sob_demanda: E.stateLabel('sob_demanda'),
++  rotulo_erro: E.stateLabel('erro'),
++  cartao_sob_demanda: E.rotuloDoCartao([{active_state: 'inactive'}], ['sob_demanda']),
++  cartao_erro: E.rotuloDoCartao([{active_state: 'failed'}], ['erro']),
++  cartao_inativo: E.rotuloDoCartao([{active_state: 'inactive'}], ['warning']),
++  cartao_misto: E.rotuloDoCartao([{}, {}], ['ok', 'sob_demanda']),
++};
++process.stdout.write(JSON.stringify({recarga, estados}));
++"""
++
++
++# Harness node do cartão de capacidade (23/11/2026): roda loadCapacidades de prototipo.js com um DOM mínimo.
++NODE_CAPACIDADES = r"""
++const fs = require('fs'); const vm = require('vm');
++const entrada = JSON.parse(fs.readFileSync(0, 'utf8'));
++const cartoes = entrada.cartoes.map((c) => ({
++  dataset: Object.assign({}, c.dataset),
++  chip: {className: c.chip[0], textContent: c.chip[1]},
++  hora: {textContent: ''},
++  querySelector(sel) { return sel === '.chip' ? this.chip : sel === '.cap-hora' ? this.hora : null; },
++}));
++const vivos = [{dataset: {live: 'manutencao'}, textContent: ''}];
++const ctx = {
++  document: {
++    querySelectorAll(sel) {
++      if (sel === '[data-live]') return vivos;
++      if (sel === '#integration-list .cap-card') return cartoes;
++      return [];
++    },
++  },
++  fetchJson: async () => entrada.dados,
++  niceTime: () => 'hora',
++  ligarCartoesClicaveis: () => {},
++  comporEvidencia: () => {},
++};
++vm.createContext(ctx);
++vm.runInContext(entrada.funcao + '\n;this.loadCapacidades = loadCapacidades;', ctx);
++(async () => {
++  await ctx.loadCapacidades();
++  const saida = {
++    cartoes: cartoes.map((c) => ({state: c.dataset.state, chip: [c.chip.className, c.chip.textContent]})),
++    vivo: vivos[0].textContent,
++  };
++  process.stdout.write(JSON.stringify(saida));
++})();
++"""
++
++
++class SobDemandaERecargaTests(unittest.TestCase):
++    """23/11/2026: parada de propósito é sob_demanda (não aviso), falha é erro; a sub-tela visível recarrega sozinha."""
++
++    @staticmethod
++    def _verificador(tabela):
++        """Imita `_verify("unidade", consulta=...)`: tabela unidade -> (LoadState, ActiveState, SubState). Guarda as consultas."""
++        chamadas = []
++
++        def verify(command, **arguments):
++            assert command == "unidade", command
++            consulta = arguments["consulta"]
++            chamadas.append(consulta)
++            if consulta not in tabela:
++                raise OSError("unidade fora da tabela do teste")
++            load, active, sub = tabela[consulta]
++            return f"$ unidade (exit=0)\n\nLoadState={load}\nActiveState={active}\nSubState={sub}\n"
++
++        return verify, chamadas
++
++    def test_socket_em_escuta_torna_parada_sob_demanda_com_motivo(self):
++        verify, chamadas = self._verificador({
++            "laya-roteador.service": ("loaded", "inactive", "dead"),
++            "laya-roteador.socket": ("loaded", "active", "listening"),
++        })
++        with mock.patch.object(panel, "_verify", side_effect=verify):
++            servico = panel._service_snapshot("laya-roteador.service")
++        self.assertEqual(servico["state"], "sob_demanda")
++        self.assertEqual(servico["sob_demanda_por"], "socket laya-roteador.socket em escuta")
++        self.assertEqual(servico["active_state"], "inactive")
++        self.assertEqual(chamadas, ["laya-roteador.service", "laya-roteador.socket"])
++
++    def test_lista_fixa_e_timer_de_manutencao_parados_sao_sob_demanda(self):
++        motivo = "lista fixa do painel (decisão de 29/10/2026)"
++        for unidade in ("openvino-whisper.service", "openvino-embeddings.service", "obsidian-ro-proxy.service"):
++            verify, chamadas = self._verificador({unidade: ("loaded", "inactive", "dead")})
++            with mock.patch.object(panel, "_verify", side_effect=verify):
++                servico = panel._service_snapshot(unidade)
++            self.assertEqual((servico["state"], servico["sob_demanda_por"]), ("sob_demanda", motivo), unidade)
++            self.assertEqual(chamadas, [unidade], "unidade da lista fixa não consulta socket")
++
++        def systemctl(ativo):
++            timer = ("Id=agata-manutencao.timer\nLoadState=loaded\n" f"ActiveState={ativo}\nSubState=dead\n"
++                     "NextElapseUSecRealtime=\nLastTriggerUSec=\n")
++            servico = "Id=agata-manutencao.service\nLoadState=loaded\nActiveState=inactive\nResult=success\nExecMainExitTimestamp=\n"
++            return [SimpleNamespace(returncode=0, stdout=timer), SimpleNamespace(returncode=0, stdout=servico)]
++
++        estados = {}
++        for ativo in ("inactive", "active"):
++            with mock.patch.object(panel.subprocess, "run", side_effect=systemctl(ativo)):
++                estados[ativo] = panel._timer_snapshot("agata-manutencao.timer")
++        self.assertEqual((estados["inactive"]["state"], estados["inactive"]["sob_demanda_por"]), ("sob_demanda", motivo))
++        self.assertEqual(estados["active"]["state"], "ok")
++        self.assertNotIn("sob_demanda_por", estados["active"])
++
++    def test_parada_sem_socket_escutando_continua_aviso(self):
++        casos = (
++            {"laya-roteador.service": ("loaded", "inactive", "dead"), "laya-roteador.socket": ("loaded", "active", "running")},
++            {"laya-roteador.service": ("loaded", "inactive", "dead"), "laya-roteador.socket": ("loaded", "inactive", "dead")},
++        )
++        for tabela in casos:
++            verify, _ = self._verificador(tabela)
++            with mock.patch.object(panel, "_verify", side_effect=verify):
++                servico = panel._service_snapshot("laya-roteador.service")
++            self.assertEqual(servico["state"], "warning")
++            self.assertNotIn("sob_demanda_por", servico)
++
++        def socket_fora_do_ar(command, **arguments):
++            if arguments["consulta"].endswith(".socket"):
++                raise OSError("verificador fora do ar")
++            return "$ unidade (exit=0)\n\nLoadState=loaded\nActiveState=inactive\nSubState=dead\n"
++
++        with mock.patch.object(panel, "_verify", side_effect=socket_fora_do_ar):
++            ollaya = panel._service_snapshot("ollaya.service")
++        self.assertEqual(ollaya["state"], "warning")
++        # Estado que não é parada nem ativa (activating) também é aviso, e a unidade sem .service não tem socket.
++        verify, _ = self._verificador({"seth-gateway.service": ("loaded", "activating", "start")})
++        with mock.patch.object(panel, "_verify", side_effect=verify):
++            transitorio = panel._service_snapshot("seth-gateway.service")
++        self.assertEqual(transitorio["state"], "warning")
++        self.assertIsNone(panel._socket_de("agata-manutencao.timer"))
++
++    def test_failed_continua_erro_mesmo_com_socket_em_escuta(self):
++        verify, chamadas = self._verificador({
++            "laya-roteador.service": ("loaded", "failed", "failed"),
++            "laya-roteador.socket": ("loaded", "active", "listening"),
++            "openvino-whisper.service": ("loaded", "failed", "failed"),
++        })
++        with mock.patch.object(panel, "_verify", side_effect=verify):
++            laya = panel._service_snapshot("laya-roteador.service")
++            whisper = panel._service_snapshot("openvino-whisper.service")
++        self.assertEqual((laya["state"], whisper["state"]), ("erro", "erro"))
++        self.assertNotIn("sob_demanda_por", laya)
++        self.assertNotIn("laya-roteador.socket", chamadas, "falha não consulta o socket para virar sob demanda")
++
++    def test_sob_demanda_nao_vira_aviso_no_estado_geral(self):
++        self.assertEqual(panel._overall_state(["ok", "sob_demanda"]), "ok")
++        self.assertEqual(panel._overall_state(["sob_demanda", "sob_demanda"]), "ok")
++        self.assertEqual(panel._overall_state(["sob_demanda", "warning"]), "warning")
++        self.assertEqual(panel._overall_state(["erro", "ok"]), "warning")
++        self.assertEqual(panel._overall_state(["ausente", "sob_demanda"]), "warning")
++        self.assertEqual(panel._overall_state(["sob_demanda", "unknown"]), "unknown")
++
++    def test_detalhes_marca_whisper_parado_como_sob_demanda(self):
++        verify, _ = self._verificador({"openvino-whisper.service": ("loaded", "inactive", "dead")})
++        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(panel, "ROOT", Path(tmp)), \
++                mock.patch.object(panel, "_verify", side_effect=verify):
++            detalhes = panel._details_snapshot()
++        por_unidade = {item["unit"]: item for item in detalhes["integrations"]}
++        self.assertEqual(por_unidade["openvino-whisper.service"]["state"], "sob_demanda")
++
++    def test_js_recarrega_so_as_telas_de_leitura_sem_intervalo_novo(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        mapa = js[js.index("const RECARGA_SUB = {"): js.index("};\n", js.index("const RECARGA_SUB = {")) + 3]
++        chaves = re.findall(r'^  "?([a-z-]+)"?: ', mapa, re.M)
++        self.assertEqual(sorted(chaves), sorted(["equipe", "backup", "saida-rede", "perimetro", "ci", "conselho-memoria",
++                                                 "importantes", "lacunas", "qualidade", "catalogo-modelos"]))
++        for carga in ("carregarEquipe()", "carregarBackup()", "carregarEgress()", "carregarPerimetro()", "carregarCI()",
++                      "carregarMemoriaConselho()", "carregarImportantes()", "calcularLacunas()", "carregarLacunasCanon()",
++                      "carregarQualidade()", "AgataPainel.carregarModelos()"):
++            self.assertIn(carga, mapa)
++        self.assertNotIn("carregarMedicoes", mapa, "Medições tem o próprio intervalo de 4 s")
++        self.assertIn('function recarregarSubsVisiveis() {\n  if (document.visibilityState !== "visible") return;', js)
++        self.assertIn("  recarregarSubsVisiveis();\n}, 60000);", js)
++        self.assertEqual(js.count("setInterval("), 3, "a recarga entra no intervalo de 60 s que já existe; nenhum intervalo novo")
++
++    def test_lacunas_nao_marcam_parada_sob_demanda_mas_marcam_falha_e_inativa_sem_motivo(self):
++        estados_usuario = {
++            "laya-roteador.service": "LoadState=loaded\nActiveState=inactive\n",
++            "openvino-whisper.service": "LoadState=loaded\nActiveState=inactive\n",
++            "seth-escriba.service": "LoadState=loaded\nActiveState=inactive\n",
++            "obsidian-ro-proxy.service": "LoadState=loaded\nActiveState=failed\n",
++        }
++        verify, _ = self._verificador({"laya-roteador.socket": ("loaded", "active", "listening")})
++
++        def systemctl(argv, **_kwargs):
++            if "--property=Type" in argv:
++                return SimpleNamespace(returncode=0, stdout="Type=simple\n")
++            if "--user" not in argv:
++                return SimpleNamespace(returncode=0, stdout="LoadState=not-found\nActiveState=inactive\n")
++            return SimpleNamespace(returncode=0, stdout=estados_usuario.get(argv[-1], "LoadState=not-found\nActiveState=inactive\n"))
++
++        with tempfile.TemporaryDirectory() as tmp:
++            root = Path(tmp)
++            (root / "ESTADO.md").write_text("## Serviços (boot)\n- `laya-roteador.service` (declarada)\n"
++                                            "- `openvino-whisper.service` (declarada)\n- `seth-escriba.service` (declarada)\n"
++                                            "- `obsidian-ro-proxy.service` (declarada)\n"
++                                            "- `openvino-whisper` (porta :20130) — unidade `openvino-whisper.service`\n"
++                                            "- `seth-escriba` (porta :20140) — unidade `seth-escriba.service`\n\n## Outra\n",
++                            encoding="utf-8")
++            with mock.patch.object(panel, "ROOT", root), mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
++                    mock.patch.object(panel, "_verify", side_effect=verify), \
++                    mock.patch.object(panel, "_porta_responde", return_value=False):
++                data = panel._lacunas_snapshot()
++        por_nome = {item["nome"]: item for item in data["items"]}
++        self.assertNotIn("laya-roteador.service", por_nome, "socket em escuta: parada de propósito, não é lacuna")
++        self.assertNotIn("openvino-whisper.service", por_nome, "lista fixa: parada de propósito, não é lacuna")
++        self.assertNotIn("openvino-whisper :20130", por_nome, "porta da unidade parada de propósito não é lacuna")
++        self.assertEqual(por_nome["seth-escriba.service"]["motivo"], "declarada no boot e inativa agora")
++        self.assertEqual(por_nome["seth-escriba :20140"]["motivo"], "porta declarada não responde em 127.0.0.1",
++                         "porta de unidade que não é sob demanda continua lacuna")
++        self.assertEqual(por_nome["obsidian-ro-proxy.service"]["motivo"], "declarada no boot e inativa agora",
++                         "falha continua lacuna, mesmo na lista fixa")
++
++    def _capacidades_com_timer(self, ativo):
++        """Itens de /api/capacidades com o timer de manutenção em `ativo` (ActiveState). O resto das unidades está ativo."""
++        def systemctl(argv, **_kwargs):
++            if argv[-1] == "agata-manutencao.timer":
++                return SimpleNamespace(returncode=0, stdout=f"LoadState=loaded\nActiveState={ativo}\n")
++            return SimpleNamespace(returncode=0, stdout="LoadState=loaded\nActiveState=active\n")
++
++        with mock.patch.object(panel.subprocess, "run", side_effect=systemctl), \
++                mock.patch.object(panel, "_http_ok", return_value=True), \
++                mock.patch.object(panel, "_verify", side_effect=OSError("verificador fora deste teste")):
++            return {item["id"]: item for item in panel._capacidades_snapshot()["items"]}
++
++    def test_capacidade_manutencao_com_timer_parado_e_sob_demanda_nao_e_aviso(self):
++        itens = self._capacidades_com_timer("inactive")
++        self.assertEqual(itens["manutencao"]["state"], "sob_demanda")
++        self.assertIn("agata-manutencao.timer sob demanda", itens["manutencao"]["evidencia"])
++        self.assertEqual(itens["conversar"]["state"], "ok", "as outras capacidades seguem a regra antiga")
++
++    def test_capacidade_manutencao_com_timer_falhado_continua_aviso(self):
++        falhado = self._capacidades_com_timer("failed")
++        self.assertEqual(falhado["manutencao"]["state"], "warning")
++        self.assertIn("agata-manutencao.timer inativo ou ausente", falhado["manutencao"]["evidencia"])
++        ativo = self._capacidades_com_timer("active")
++        self.assertEqual(ativo["manutencao"]["state"], "ok")
++
++    def test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        entrada = {
++            # _funcao_js começa em `function`; a função é `async function`, então o prefixo volta.
++            "funcao": "async " + _funcao_js(js, "loadCapacidades"),
++            "dados": {"observed_at": "2026-11-23T15:00:00-03:00", "items": [
++                {"id": "manutencao", "state": "sob_demanda", "source": "systemctl --user show", "source_ref": "agata-manutencao.timer",
++                 "evidencia": "Medido agora: agata-manutencao.timer sob demanda."},
++                {"id": "conversar", "state": "warning", "source": "seth-gateway", "source_ref": "127.0.0.1:20126/",
++                 "evidencia": "Medido agora: seth-gateway sem resposta."},
++            ]},
++            "cartoes": [
++                {"dataset": {"probe": "manutencao", "unit": "agata-manutencao.timer", "fonte": "status"},
++                 "chip": ["chip horizon", "SOB DEMANDA"]},
++                {"dataset": {"probe": "manutencao"}, "chip": ["chip horizon", "SEM LEITURA"]},
++                {"dataset": {"probe": "conversar"}, "chip": ["chip planned", "SEM LEITURA"]},
++            ],
++        }
++        saida = self._rodar_node_capacidades(entrada)
++        cartoes = saida["cartoes"]
++        self.assertEqual(cartoes[0]["state"], "horizon", "cartão lido pela rota segue o estado do status, não vira partial")
++        self.assertEqual(cartoes[0]["chip"], ["chip horizon", "SOB DEMANDA"])
++        self.assertEqual(cartoes[1]["state"], "horizon")
++        self.assertEqual(cartoes[1]["chip"], ["chip horizon", "SOB DEMANDA"])
++        self.assertEqual((cartoes[2]["state"], cartoes[2]["chip"]), ("partial", ["chip partial", "ATENÇÃO"]))
++        self.assertEqual(saida["vivo"], "sob demanda")
++
++    def _rodar_node_capacidades(self, entrada):
++        try:
++            resultado = subprocess.run(["node", "-e", NODE_CAPACIDADES], input=json.dumps(entrada, ensure_ascii=False),
++                                       capture_output=True, text=True, timeout=60)
++        except (OSError, subprocess.TimeoutExpired) as erro:
++            self.fail(f"node não rodou (não medido): {erro}")
++        self.assertEqual(resultado.returncode, 0, resultado.stderr[-400:])
++        return json.loads(resultado.stdout)
++
++    def _rodar_node(self, entrada):
++        """Roda NODE_RECARGA_SUB com a entrada em JSON e devolve a saída. Sem node, o teste falha (não medido)."""
++        try:
++            resultado = subprocess.run(["node", "-e", NODE_RECARGA_SUB], input=json.dumps(entrada, ensure_ascii=False),
++                                       capture_output=True, text=True, timeout=60)
++        except (OSError, subprocess.TimeoutExpired) as erro:
++            self.fail(f"node não rodou (não medido): {erro}")
++        self.assertEqual(resultado.returncode, 0, resultado.stderr[-400:])
++        return json.loads(resultado.stdout)
++
++    def test_recarga_so_roda_na_tela_visivel_e_sem_edicao_em_curso(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        bloco = js[js.index("const RECARGA_SUB = {"): js.index("// Fim da recarga automática das sub-telas.")]
++        cargas = ["carregarEquipe", "carregarBackup", "carregarEgress", "carregarPerimetro", "carregarCI",
++                  "carregarMemoriaConselho", "carregarImportantes", "calcularLacunas", "carregarLacunasCanon", "carregarQualidade"]
++        cenarios = [
++            {"nome": "visivel_so_as_telas_da_lista", "visibilidade": "visible",
++             "subs": [{"sub": "equipe"}, {"sub": "conversa"}, {"sub": "integracoes"}, {"sub": "lacunas"}],
++             "esperado": ["carregarEquipe", "calcularLacunas", "carregarLacunasCanon"]},
++            {"nome": "pagina_oculta_nao_recarrega", "visibilidade": "hidden",
++             "subs": [{"sub": "equipe"}, {"sub": "lacunas"}], "esperado": []},
++            {"nome": "texto_digitado_segura_so_a_sub_editada", "visibilidade": "visible",
++             "subs": [{"sub": "importantes", "campos": [{"type": "textarea", "value": "ideia", "defaultValue": ""}]},
++                      {"sub": "backup"}],
++             "esperado": ["carregarBackup"]},
++            {"nome": "campo_com_foco_segura_a_sub", "visibilidade": "visible", "foco": "TEXTAREA",
++             "subs": [{"sub": "perimetro", "focoDentro": True}, {"sub": "ci"}], "esperado": ["carregarCI"]},
++            {"nome": "dialogo_aberto_segura_o_catalogo", "visibilidade": "visible",
++             "subs": [{"sub": "catalogo-modelos", "dialogoAberto": True}, {"sub": "saida-rede"}],
++             "esperado": ["carregarEgress"]},
++            {"nome": "campo_vazio_e_caixa_marcada_nao_seguram", "visibilidade": "visible",
++             "subs": [{"sub": "backup", "campos": [{"type": "text", "value": "", "defaultValue": ""},
++                                                   {"type": "checkbox", "value": "", "defaultValue": "on"}]}],
++             "esperado": ["carregarBackup"]},
++            {"nome": "qualidade_recarrega_so_a_propria_carga", "visibilidade": "visible",
++             "subs": [{"sub": "qualidade"}], "esperado": ["carregarQualidade"]},
++            {"nome": "catalogo_sem_edicao_recarrega", "visibilidade": "visible",
++             "subs": [{"sub": "catalogo-modelos"}], "esperado": ["carregarModelos"]},
++            {"nome": "memoria_do_conselho_e_importantes_sem_edicao", "visibilidade": "visible",
++             "subs": [{"sub": "conselho-memoria"}, {"sub": "importantes"}],
++             "esperado": ["carregarMemoriaConselho", "carregarImportantes"]},
++        ]
++        entrada = {"bloco": bloco, "cargas": cargas, "cenarios": cenarios,
++                   "funcoes": "\n".join(_funcao_js(js, nome) for nome in ("stateOf", "stateLabel", "rotuloDoCartao"))}
++        saida = self._rodar_node(entrada)
++        self.assertEqual(len(saida["recarga"]), len(cenarios))
++        for cenario, feito in zip(cenarios, saida["recarga"]):
++            self.assertEqual(feito["log"], cenario["esperado"], cenario["nome"])
++
++    def test_cliente_mostra_sob_demanda_e_erro_com_chip_proprio(self):
++        js = (HERE / "prototipo.js").read_text(encoding="utf-8")
++        entrada = {"bloco": "", "cargas": [], "cenarios": [],
++                   "funcoes": "\n".join(_funcao_js(js, nome) for nome in ("stateOf", "stateLabel", "rotuloDoCartao"))}
++        estados = self._rodar_node(entrada)["estados"]
++        self.assertEqual((estados["sob_demanda"], estados["erro"], estados["ausente"], estados["ok"]),
++                         ("sob_demanda", "erro", "ausente", "ok"))
++        self.assertEqual((estados["rotulo_sob_demanda"], estados["rotulo_erro"]), ("SOB DEMANDA", "ERRO"))
++        self.assertEqual(estados["cartao_sob_demanda"], ["chip horizon", "SOB DEMANDA"])
++        self.assertEqual(estados["cartao_erro"], ["chip erro", "ERRO"])
++        self.assertEqual(estados["cartao_inativo"], ["chip partial", "INATIVO"], "parada sem motivo continua INATIVO")
++        self.assertEqual(estados["cartao_misto"], ["chip horizon", "SOB DEMANDA"])
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 24a5a4bf..b8f88c43 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -288,6 +288,19 @@ def _diretrizes_agents() -> str:
+     return "**Diretrizes de todo modelo (AGENTS.md, lido pela Máquina):**\n" + _CACHE_AGENTS["texto"] + "\n"
+ 
+ 
++def doutrina_montada() -> str:
++    """O texto de doutrina que a rota interna põe antes do modelo (modo compacto): a seção SETH-GATEWAY do
++    PROTOCOLOS.md e o AGENTS.md inteiro, na ordem de _hidratacao. Sem estado e sem rede. Em modo full, o arquivo
++    SETH_HIDRATA. É o texto que o P-23 confere (config/portas-de-entrada.txt, leitura 'doutrina'): o que o
++    gateway monta, não o conteúdo de um arquivo do próprio gateway (23/11/2026, caminho-visao-23-11)."""
++    if MODO == "compacto":
++        return _doutrina_seth() + _diretrizes_agents()
++    try:
++        return HIDRATA_PATH.read_text(encoding="utf-8")
++    except OSError:
++        return f"(hidratação indisponível: {HIDRATA_PATH} não pôde ser lido)"
++
++
+ # (07/11/2026, núcleo de desenvolvimento, D2) ponteiro de uma linha para o guia universal (Ma'at), no canal de
+ # estado de _injeta, só nas faixas internas (a faixa pública não passa por _injeta). Fica FORA da doutrina (seção SETH-GATEWAY do
+ # PROTOCOLOS.md), para não mudar o marcador. SETH_PROCESSO_HIDRATA=0 desliga.
+@@ -316,7 +329,7 @@ def _hidratacao(extra: str = "") -> str:
+             bloco_estado = ("**Estado agora:** `lacuna: estado_para_eco.sh falhou ou não rodou "
+                              "(sem shell/Máquina daqui?) — não afirme HEAD/sync sem medir.`\n"
+                              + (f"{extra}\n" if extra else ""))
+-        return f"{MARCADOR}\n{_doutrina_seth()}{_diretrizes_agents()}{bloco_estado}"
++        return f"{MARCADOR}\n{doutrina_montada()}{bloco_estado}"
+     try:
+         st = HIDRATA_PATH.stat()
+         if _CACHE["mtime"] != st.st_mtime:
+diff --git a/redesign/router/test_rotas_locais.py b/redesign/router/test_rotas_locais.py
+index 55c35ce2..4ccca249 100644
+--- a/redesign/router/test_rotas_locais.py
++++ b/redesign/router/test_rotas_locais.py
+@@ -37,7 +37,7 @@ def _rota(id, modelo, tipos, prio=10, maxt=6000, classes=("publico", "sintetico"
+ def ficha(tmp_path, monkeypatch):
+     f = tmp_path / "ficha.json"
+     f.write_text(json.dumps({"schema_version": 1, "decisoes": {}, "rotas": [
+-        _rota("local-a", "a:1b", ["codigo", "conversa"], 10),
++        _rota("local-a", "a:1b", ["codigo", "conversa"], 10, 12000),  # 23/11: a injeção real passou de 6000 tokens estimados (AGENTS.md maior)
+         _rota("local-b", "b:30b", ["json", "conversa"], 20, 16000),
+         _rota("local-c", "c:8b", ["ferramenta"], 10, 12000, classes=("publico",)),
+         {"id": "reserva", "provedor": "ollama", "modelo": "r:9b", "categoria": "local", "tipos": [],
+@@ -93,7 +93,7 @@ def test_so_rota_local_com_tipos(ficha):
+ def test_classe_e_teto_de_entrada(ficha):
+     assert rl.escolher(_p(), "ferramenta", False, checar_ollama=False) is None  # c só aceita público
+     assert rl.escolher(_p(), "ferramenta", True, checar_ollama=False)["id"] == "local-c"
+-    grande = _p("a" * 20000)  # ~6666 tokens > teto de local-a (6000)
++    grande = _p("a" * 40000)  # ~13333 tokens > teto de local-a (12000)
+     assert rl.escolher(grande, "conversa", False, checar_ollama=False)["id"] == "local-b"
+ 
+ 
+diff --git a/redesign/router/test_seth_base.py b/redesign/router/test_seth_base.py
+index cdfbdd3e..a73d21ad 100644
+--- a/redesign/router/test_seth_base.py
++++ b/redesign/router/test_seth_base.py
+@@ -9,6 +9,7 @@ import json
+ import os
+ import queue
+ import re
++import subprocess
+ import sys
+ import time
+ import types
+@@ -586,3 +587,104 @@ class TestCercaDeCodigoSegueEmStream:
+     def test_cerca_incompleta_espera(self):
+         assert self._dec("```js") == "mais"
+         assert self._dec("```") == "mais"
++
++
++# --- P-23 (23/11/2026, caminho-visao-23-11): o texto que o gateway monta traz as diretrizes comuns -------------
++# Antes, o P-23 lia o arquivo seth_gateway.py: 'economia de tokens' não está nele (AVISO falso) e 'modo conciso'
++# só aparecia num comentário (OK falso). A doutrina vem de PROTOCOLOS.md (SETH-GATEWAY) + AGENTS.md, em código.
++_FRASES_P23 = ("modo conciso", "economia de tokens", "cache_conselho")
++_RAIZ_TESTE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
++_P23_SH = os.path.join(_RAIZ_TESTE, "scripts", "perimetro", "p23_portas_entrada.sh")
++_MODULO_BOM = ('def doutrina_montada():\n'
++               '    return "Modo conciso é o padrão. Economia de tokens é permanente. cache_conselho ler."\n')
++_MODULO_FRACO = 'def doutrina_montada():\n    return "oi"\n'
++_MODULO_COMENTARIO = ('# modo conciso, economia de tokens, cache_conselho: só num comentário\n'
++                      'def doutrina_montada():\n    return "oi"\n')
++_MODULO_SEM_FUNCAO = 'X = 1\n'
++
++
++def _p23(cwd, lista, extra=None):
++    """Roda o P-23 num diretório próprio (config/portas-de-entrada.txt e as portas são relativas a ele)."""
++    (cwd / "config").mkdir(exist_ok=True)
++    (cwd / "config" / "portas-de-entrada.txt").write_text(lista, encoding="utf-8")
++    for nome, corpo in (extra or {}).items():
++        (cwd / nome).write_text(corpo, encoding="utf-8")
++    r = subprocess.run(["bash", "-c", f"source '{_P23_SH}'; p23_portas_entrada"], cwd=str(cwd),
++                       capture_output=True, text=True, timeout=60)
++    return r.stdout
++
++
++def test_doutrina_montada_traz_as_tres_diretrizes():
++    texto = g.doutrina_montada().lower()
++    for frase in _FRASES_P23:
++        assert frase in texto, frase
++
++
++def test_hidratacao_compacta_monta_a_doutrina_e_o_estado(monkeypatch):
++    monkeypatch.setattr(g, "MODO", "compacto")
++    monkeypatch.setattr(g, "_estado", lambda: "HEAD: teste (medido)")
++    hid = g._hidratacao("")
++    assert hid.startswith(g.MARCADOR + "\n" + g.doutrina_montada())
++    assert "HEAD: teste" in hid
++
++
++def test_injeta_primeiro_turno_leva_doutrina_e_memoria_comum(monkeypatch, tmp_path):
++    import cache_conselho
++    monkeypatch.setattr(g.auditoria_turno, "LOG", tmp_path / "aud.jsonl")
++    monkeypatch.setattr(g, "_estado", lambda: "HEAD: teste (medido)")
++    monkeypatch.setattr(cache_conselho, "resumo_hidratacao",
++                        lambda *a, **k: "CACHE-CONSELHO (não canônico; teste): (1) agata-dev, 2026-11-23: nota")
++    payload = g._injeta({"model": "seth", "messages": [{"role": "user", "content": "oi"}]})
++    sistema = payload["messages"][0]
++    assert sistema["role"] == "system"
++    assert g.MARCADOR in sistema["content"]
++    texto = sistema["content"].lower()
++    assert "cache-conselho" in texto
++    for frase in _FRASES_P23:
++        assert frase in texto, frase
++
++
++def test_p23_seth_gateway_passa_pelo_texto_montado():
++    r = subprocess.run(["bash", "-c", f"source '{_P23_SH}'; p23_portas_entrada"], cwd=_RAIZ_TESTE,
++                       capture_output=True, text=True, timeout=120)
++    linhas = r.stdout.splitlines()
++    assert not [l for l in linhas if l.startswith("AVISO (P-23)") and "seth_gateway.py" in l], r.stdout
++    assert any(l.startswith("OK (P-23): 'redesign/router/seth_gateway.py'") and "texto que o módulo monta" in l
++               for l in linhas), r.stdout
++
++
++def test_p23_doutrina_passa_quando_o_texto_montado_traz_as_tres(tmp_path):
++    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_BOM})
++    assert out.startswith("OK (P-23): 'porta.py'") and "AVISO" not in out, out
++
++
++def test_p23_doutrina_pega_texto_montado_sem_as_diretrizes(tmp_path):
++    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_FRACO})
++    assert "AVISO (P-23): 'porta.py'" in out, out
++    for frase in _FRASES_P23:
++        assert frase in out, frase
++
++
++def test_p23_doutrina_nao_aceita_frase_que_so_esta_em_comentario(tmp_path):
++    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_COMENTARIO})
++    assert "AVISO (P-23): 'porta.py'" in out, out
++
++
++def test_p23_doutrina_sem_funcao_avisa_que_nao_deu_para_conferir(tmp_path):
++    out = _p23(tmp_path, "porta.py|teste|doutrina\n", {"porta.py": _MODULO_SEM_FUNCAO})
++    assert "AVISO (P-23): 'porta.py'" in out and "não dá para conferir" in out, out
++
++
++def test_p23_arquivo_confere_o_proprio_arquivo_ou_o_agents_importado(tmp_path):
++    out = _p23(tmp_path, "bom.md|teste\nruim.md|teste\nimporta.md|teste\n",
++               {"bom.md": "modo conciso; economia de tokens; cache_conselho\n",
++                "ruim.md": "só instruções\n",
++                "importa.md": "@AGENTS.md\n"})
++    assert "OK (P-23): 'bom.md'" in out and "no arquivo" in out, out
++    assert "AVISO (P-23): 'ruim.md'" in out and "não traz" in out, out
++    assert "OK (P-23): 'importa.md' (teste) importa o AGENTS.md" in out, out
++
++
++def test_p23_leitura_desconhecida_avisa(tmp_path):
++    out = _p23(tmp_path, "porta.py|teste|tanto_faz\n", {"porta.py": _MODULO_BOM})
++    assert "AVISO (P-23): 'porta.py'" in out and "desconhecida" in out, out
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index b85910a4..aa318893 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -32,6 +32,26 @@ _ci_gravar_ultimo() {
+   } >/dev/null 2>&1
+   return 0
+ }
++# Progresso em cada linha (Regra 0, decisão do Humano 18/11/2026): "[n/total · tempo decorrido]". O total não é número
++# fixo: _ci_passos() roda uma vez em modo de contagem (CI_CONTANDO=1, sem executar comando nenhum) e conta as chamadas.
++_ci_marca() {
++  local n="$1" total="$2" seg="$3"
++  printf '[%s/%s · %dm%02ds]' "$n" "$total" $((seg / 60)) $((seg % 60))
++}
++# Roda o passo, imprime OK/FALHA com o progresso e guarda o resultado. Em modo de contagem só responde "." (uma linha por chamada).
++passo() {
++  local nome="$1" marca ok=0
++  shift
++  if [ "${CI_CONTANDO:-0}" = 1 ]; then echo "."; return 0; fi
++  CI_N=$((CI_N + 1))
++  # Regra 0 (revisão 23/11): o passo anuncia que começou; a linha OK/FALHA sai ao terminar.
++  echo "  ... [$CI_N/$CI_TOTAL] $nome"
++  if "$@" >"$TMP/saida.txt" 2>&1; then ok=1; fi
++  # o tempo é medido quando o passo TERMINA: a linha sai nesse instante, e o tempo tem de ser o dele
++  marca="$(_ci_marca "$CI_N" "$CI_TOTAL" "$(( $(date +%s) - CI_INICIO ))")"
++  if [ "$ok" = 1 ]; then echo "OK    $marca $nome"; CI_PASSOS+=("$nome|1")
++  else echo "FALHA $marca $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); CI_PASSOS+=("$nome|0"); fi
++}
+ if [ "${BASH_SOURCE[0]}" != "$0" ]; then return 0; fi
+ # set -u só na execução (R4, 17/11/2026): dar source para testar as funções não muda as opções do shell de quem chamou.
+ set -u
+@@ -42,14 +62,18 @@ PYTEST="${PYTEST:-$(command -v pytest || true)}"
+ TMP="$(mktemp -d)"
+ trap 'rm -rf "$TMP"' EXIT
+ FALHAS=0
+-passo() { local nome="$1"; shift; if "$@" >"$TMP/saida.txt" 2>&1; then echo "OK    $nome"; CI_PASSOS+=("$nome|1"); else echo "FALHA $nome"; tail -5 "$TMP/saida.txt" | sed 's/^/        /'; FALHAS=$((FALHAS+1)); CI_PASSOS+=("$nome|0"); fi; }
++CI_N=0
++CI_TOTAL=0
++CI_INICIO=0
++CI_CONTANDO=0
+ 
+ if [ -z "$PYTEST" ]; then echo "FALHA pytest não encontrado (defina PYTEST=/caminho/pytest)"; exit 1; fi
+ # os ciclos SDD chamam "pytest" pelo nome: o diretório do binário precisa estar no PATH
+ PATH_ORIGINAL="$PATH"
+ export PATH="$(dirname "$PYTEST"):$PATH"
+ 
+-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py
++_ci_passos() {
++passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
+ passo "gate de sincronia das specs (selftest)" python3 -I scripts/gate_spec_sync.py --selftest
+ passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" python3 -I scripts/gate_spec_sync.py
+ passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+@@ -96,6 +120,7 @@ passo "projeto índice: testes (pytest)" "$PYTEST" -q -p no:cacheprovider redesi
+ passo "projeto índice: destinos do PROJETO (verificar_destinos)" python3 redesign/projeto_indice/verificar_destinos.py
+ passo "projeto índice: teto do PROJETO (teto.py)" python3 redesign/projeto_indice/teto.py
+ passo "projeto índice: ESTADO.md em dia (gerar_estado --verificar)" python3 scripts/gerar_estado.py --verificar
++passo "ci: progresso e contagem dos passos (testes)" python3 -I scripts/testar_ci_progresso.py
+ 
+ # --- Job suite-adversarial (.github/workflows/perimetro.yml): os mesmos comandos, na mesma ordem, com os mesmos flags.
+ # Sem sudo, sem rede e sem serviço. Usa o python do sistema (PY_SISTEMA), não o do venv do uv (sem os pacotes do sistema).
+@@ -138,6 +163,17 @@ passo "suite adversarial: testes dos auxiliares da equipe" "$PY_SISTEMA" -I scri
+ passo "suite adversarial: contrato de leitura de memória" "$PY_SISTEMA" -I scripts/testar_memoria_leitura.py
+ passo "suite adversarial: contrato da trava do escriba" "$PY_SISTEMA" -I scripts/testar_trava_escriba.py
+ passo "suite adversarial: contrato sem Goose ativo" "$PY_SISTEMA" -I scripts/testar_sem_goose_ativo.py
++}
++
++# Contagem e execução (Regra 0). A contagem roda _ci_passos sem executar nada; a execução real vem depois, com o total já sabido.
++# CI_SO_CONTAR=1 (testes) imprime só o total e sai, sem gravar o resumo.
++CI_CONTANDO=1
++CI_TOTAL="$(_ci_passos | grep -c '^\.$')"
++CI_CONTANDO=0
++if [ "${CI_SO_CONTAR:-0}" = 1 ]; then echo "$CI_TOTAL"; exit 0; fi
++CI_INICIO="$(date +%s)"
++_ci_passos
++if [ "$CI_N" -ne "$CI_TOTAL" ]; then echo "AVISO: o CI rodou $CI_N passo(s), mas a contagem previa $CI_TOTAL -- conferir scripts/ci_sdd_local.sh"; fi
+ 
+ if [ "$FALHAS" -eq 0 ]; then LINHA_FINAL="CI LOCAL: TUDO OK"; else LINHA_FINAL="CI LOCAL: $FALHAS passo(s) falharam"; fi
+ _ci_gravar_ultimo "$LINHA_FINAL" || true
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index 5ecb3700..da28843d 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -63,6 +63,7 @@ source "$_PERIMETRO_DIR/perimetro/p21_nome_sistema.sh"
+ source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
+ source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
+ source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
++source "$_PERIMETRO_DIR/perimetro/p27_atalhos_fonte.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -229,7 +230,7 @@ p9_carregar_fonte
+ # scripts/perimetro/pNN_*.sh, mas este padrão só conhecia o monolito --
+ # mudar um controle individual NÃO rodava a suíte (P-17 acusava P-16 em
+ # SKIP crônico; foi lido como "por desenho" em (527), e era isto).
+-P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|testar_(capability|dados_externos|egress_proxy|net02_compose|fork_librechat)|verificar_cabecalho|verificar_migracao_[a-z]+|politica_egress|criar_chave_capability)\.(sh|py)|redesign/(mcp/capability\.py|mcp/(discord|navegador)/.*\.py|router/(proxy|seth_gateway|seth_escriba)\.py|librechat/(canon-mcp\.mjs|librechat\.yaml|docker-compose\.yml|Dockerfile|fork/agata-capabilities\.patch)|systemd/(discord-mcp|navegador-mcp|seth-escriba)\.service)|\.githooks/.*)$'
++P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_segredo|checar_citacao|checar_discordancia|selar|testar_perimetro|testar_cobertura_servicos|testar_(capability|dados_externos|egress_proxy|net02_compose|fork_librechat|p27_atalhos|p10_worktree|p17_isento|ci_progresso)|verificar_cabecalho|verificar_migracao_[a-z]+|politica_egress|criar_chave_capability)\.(sh|py)|redesign/(mcp/capability\.py|mcp/(discord|navegador)/.*\.py|router/(proxy|seth_gateway|seth_escriba)\.py|librechat/(canon-mcp\.mjs|librechat\.yaml|docker-compose\.yml|Dockerfile|fork/agata-capabilities\.patch)|systemd/(discord-mcp|navegador-mcp|seth-escriba)\.service)|\.githooks/.*)$'
+ 
+ 
+ # --- P-17 ----------------------------------------------------------------
+@@ -254,6 +255,8 @@ P16_ARQUIVOS_DE_CONTROLE='^(scripts/(perimetro|perimetro/[a-z0-9_]+|varredura_se
+ # Estado FORA do repositório (~/.cache/agata/): é telemetria de execução,
+ # não canon, e não deve sujar `git status` nem exigir entrada no .gitignore.
+ P17_SKIPS=""
++# SKIP isento ("não se aplica": P-16 fora de commit de controle, P-10 numa worktree vinculada): não entra na série.
++P17_ISENTOS=""
+ P17_LIMITE=10
+ P17_ESTADO="${XDG_CACHE_HOME:-$HOME/.cache}/agata/perimetro-skip.tsv"
+ 
+@@ -274,9 +277,9 @@ _perimetro_veredito() {
+     echo "veredito: SKIP"
+     _perimetro_registrar SKIP
+     CONT_SKIP=$((CONT_SKIP + 1))
+-    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese) não é pular em silêncio:
+-    # a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida.
+-    [ "$p17_isento" = 1 ] || P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "
++    # SKIP "não se aplica" (P-16 sem controle staged, dentro da suíte, gênese; P-10 em worktree vinculada) não é pular em
++    # silêncio: a checagem marca PERIMETRO_P17_ISENTO=1 e a série do P-17 não conta essa corrida (nem zera a anterior).
++    if [ "$p17_isento" = 1 ]; then P17_ISENTOS="${P17_ISENTOS}${PERIMETRO_CTRL:-?} "; else P17_SKIPS="${P17_SKIPS}${PERIMETRO_CTRL:-?} "; fi
+   elif [ "$PERIMETRO_ESTADO" = "PARCIAL" ]; then
+     echo "veredito: PARCIAL"
+     _perimetro_registrar PARCIAL
+@@ -469,6 +472,11 @@ main() {
+   p16_testes_dos_controles; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-27" "Atalho instalado em ~/.local/bin igual à fonte versionada que ele declara (aviso, nunca falha)" "decisão do Humano, 18/11/2026 (o sistema se atualiza sozinho); redesign/systemd/seth e seth-parar"
++  PERIMETRO_ESTADO=""
++  p27_atalhos_fonte; _perimetro_veredito "$?"
++  echo
++
+   cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"
+   PERIMETRO_ESTADO=""
+   p17_skip_cronico; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p10_vault_derivado.sh b/scripts/perimetro/p10_vault_derivado.sh
+index f8dc5eeb..d5aad506 100644
+--- a/scripts/perimetro/p10_vault_derivado.sh
++++ b/scripts/perimetro/p10_vault_derivado.sh
+@@ -3,6 +3,15 @@
+ # auditoria do Marcos, MEMORIAS (437)) -- corte-e-cola, corpo identico ao
+ # de antes, nao e reescrita de logica.
+ 
++# Worktree vinculada (git worktree add): o diretório de git deste checkout é outro que o diretório comum.
++# No checkout principal os dois são o mesmo .git. Caminhos absolutos dos dois lados, porque --git-dir é relativo lá.
++_p10_worktree_vinculada() {
++  local gd gcd
++  gd="$(git rev-parse --git-dir 2>/dev/null)" || return 1
++  gcd="$(git rev-parse --git-common-dir 2>/dev/null)" || return 1
++  [ "$(cd "$gd" 2>/dev/null && pwd -P)" != "$(cd "$gcd" 2>/dev/null && pwd -P)" ]
++}
++
+ p10_vault_derivado() {
+   # P-10 (MEMÓRIAS (293)): memoria/obsidian/ é o único derivado gerado FORA do
+   # commit (post-commit, gitignorado) -- .hidrata.md e os índices entram no
+@@ -12,6 +21,14 @@ p10_vault_derivado() {
+   # que toca canon (o vault no disco foi gerado do commit anterior).
+   local vault="memoria/obsidian"
+ 
++  # Worktree vinculada (23/11/2026): o vault é gerado só no checkout principal (post-commit, gitignorado), então numa
++  # worktree ele quase nunca existe. Isso não é "clone fresco" e não é SKIP em série: a checagem não se aplica aqui.
++  # SKIP ISENTO (PERIMETRO_P17_ISENTO=1), que o P-17 não conta. Com o vault presente na worktree, a conferência roda.
++  if [ ! -d "$vault" ] && _p10_worktree_vinculada; then
++    echo "P-10: worktree vinculada -- $vault/ só existe no checkout principal (o post-commit gera lá); conferência não se aplica aqui."
++    PERIMETRO_ESTADO="SKIP"; PERIMETRO_P17_ISENTO=1; return 0
++  fi
++
+   # Bootstrap: se o próprio gerador muda neste commit, HEAD tem a versão antiga
+   # -- a conferência não faz sentido, adia pro próximo commit.
+   if ! git diff --cached --quiet -- scripts/gerar_obsidian.py 2>/dev/null; then
+diff --git a/scripts/perimetro/p17_skip_cronico.sh b/scripts/perimetro/p17_skip_cronico.sh
+index 727a7737..415f1a2f 100644
+--- a/scripts/perimetro/p17_skip_cronico.sh
++++ b/scripts/perimetro/p17_skip_cronico.sh
+@@ -17,6 +17,10 @@ p17_skip_cronico() {
+     if printf '%s' " $P17_SKIPS" | grep -q " $ctrl "; then
+       serie=$((serie + 1))
+       [ "$serie" -ge "$P17_LIMITE" ] && alarmes="${alarmes}${ctrl}=${serie} "
++    elif printf '%s' " ${P17_ISENTOS:-}" | grep -q " $ctrl "; then
++      # SKIP isento ("não se aplica", ex. P-10 numa worktree vinculada): não conta esta corrida e não zera a série
++      # anterior -- senão uma worktree apagaria a contagem que o checkout principal fez no mesmo arquivo de estado.
++      :
+     else
+       serie=0
+     fi
+diff --git a/scripts/perimetro/p23_portas_entrada.sh b/scripts/perimetro/p23_portas_entrada.sh
+index ec8b3388..020b07dc 100644
+--- a/scripts/perimetro/p23_portas_entrada.sh
++++ b/scripts/perimetro/p23_portas_entrada.sh
+@@ -1,29 +1,70 @@
+ #!/usr/bin/env bash
+ # P-23 -- toda porta de entrada de modelo traz as diretrizes comuns da Agata
+ # (MEMÓRIAS (667)): modo conciso como padrão e economia de tokens permanente -- e, desde (849), a memória
+-# comum do Conselho (cache_conselho) -- ou importa
+-# o AGENTS.md, que as traz. Lista em config/portas-de-entrada.txt. AVISA, nunca
+-# falha: é cobertura de instrução, não segurança. Fecha a classe "plataforma nova
+-# entra sem diretriz" (o AGENTS.md da raiz não existia: Codex/Gemini/Cursor
+-# entrariam soltos).
++# comum do Conselho (cache_conselho) -- ou importa o AGENTS.md, que as traz.
++# Lista em config/portas-de-entrada.txt (coluna 3, leitura: arquivo | doutrina).
++# AVISA, nunca falha: é cobertura de instrução, não segurança. Fecha a classe "plataforma nova
++# entra sem diretriz" (o AGENTS.md da raiz não existia: Codex/Gemini/Cursor entrariam soltos).
++#
++# 23/11/2026 (caminho-visao-23-11): a leitura 'doutrina' (o gateway seth_gateway.py) confere o TEXTO QUE O MÓDULO
++# MONTA (doutrina_montada(): seção SETH-GATEWAY do PROTOCOLOS.md + AGENTS.md), não o arquivo do módulo. Conferir o
++# arquivo dava AVISO falso (a frase 'economia de tokens' não está no .py) e OK falso ('modo conciso' só estava
++# num comentário). O módulo é importado sem rodar o __main__ (o gateway sobe o servidor quando roda como script).
++
++# Carrega o módulo $1 sem executar o __main__ e imprime doutrina_montada(). Vazio se não der.
++_p23_texto_montado() {
++  python3 - "$1" <<'PY' 2>/dev/null
++import importlib.util, os, sys
++caminho = os.path.abspath(sys.argv[1])
++sys.path.insert(0, os.path.dirname(caminho))
++spec = importlib.util.spec_from_file_location("porta_p23", caminho)
++mod = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(mod)
++sys.stdout.buffer.write(mod.doutrina_montada().encode("utf-8"))
++PY
++}
+ 
+ p23_portas_entrada() {
+-  local lista="config/portas-de-entrada.txt" caminho quem faltam
++  local lista="config/portas-de-entrada.txt" caminho quem leitura texto onde faltam
+   [ -f "$lista" ] || { echo "AVISO (P-23): $lista não existe -- ninguém confere as portas de entrada."; return 0; }
+-  while IFS='|' read -r caminho quem; do
++  while IFS='|' read -r caminho quem leitura; do
+     case "$caminho" in \#*|"") continue ;; esac
++    leitura="${leitura//[[:space:]]/}"
++    [ -n "$leitura" ] || leitura=arquivo
+     if [ ! -f "$caminho" ]; then
+       echo "AVISO (P-23): porta de entrada '$caminho' ($quem) declarada mas o arquivo não existe."
+       continue
+     fi
+-    grep -q '^@AGENTS\.md' "$caminho" && continue
++    case "$leitura" in
++      arquivo)
++        if grep -q '^@AGENTS\.md' "$caminho"; then
++          echo "OK (P-23): '$caminho' ($quem) importa o AGENTS.md."
++          continue
++        fi
++        texto="$(cat "$caminho")"
++        onde="no arquivo" ;;
++      doutrina)
++        texto="$(_p23_texto_montado "$caminho")"
++        if [ -z "$texto" ]; then
++          echo "AVISO (P-23): '$caminho' ($quem) não dá para conferir: doutrina_montada() não existe ou falhou ao rodar. O que fazer: o módulo precisa expor doutrina_montada() com o texto que ele põe antes do modelo."
++          continue
++        fi
++        onde="no texto que o módulo monta" ;;
++      *)
++        echo "AVISO (P-23): '$caminho' ($quem) tem leitura '$leitura' desconhecida (use arquivo ou doutrina)."
++        continue ;;
++    esac
+     faltam=""
+-    grep -qi 'modo conciso' "$caminho" || faltam="modo conciso"
+-    grep -qi 'economia de tokens' "$caminho" || faltam="${faltam:+$faltam e }economia de tokens"
++    grep -qi 'modo conciso' <<<"$texto" || faltam="modo conciso"
++    grep -qi 'economia de tokens' <<<"$texto" || faltam="${faltam:+$faltam e }economia de tokens"
+     # (26/10/2026, (849)) "todo modelo aberto em ~/agata usa as mesmas regras e as mesmas ferramentas":
+     # a porta tem de levar também à memória comum do Conselho
+-    grep -q 'cache_conselho' "$caminho" || faltam="${faltam:+$faltam e }a memória comum (cache_conselho)"
+-    [ -n "$faltam" ] && echo "AVISO (P-23): '$caminho' ($quem) não traz $faltam nem importa o AGENTS.md. Por que importa: o modelo que entra por ali segue sem as diretrizes comuns (MEMÓRIAS (667)). O que fazer: acrescentar a linha das diretrizes ou '@AGENTS.md'."
++    grep -q 'cache_conselho' <<<"$texto" || faltam="${faltam:+$faltam e }a memória comum (cache_conselho)"
++    if [ -n "$faltam" ]; then
++      echo "AVISO (P-23): '$caminho' ($quem) não traz $faltam $onde. Por que importa: o modelo que entra por ali segue sem as diretrizes comuns (MEMÓRIAS (667)). O que fazer: acrescentar a linha das diretrizes ou '@AGENTS.md'."
++    else
++      echo "OK (P-23): '$caminho' ($quem) traz modo conciso, economia de tokens e a memória comum $onde."
++    fi
+   done < "$lista"
+   return 0
+ }
+diff --git a/scripts/perimetro/p27_atalhos_fonte.sh b/scripts/perimetro/p27_atalhos_fonte.sh
+new file mode 100644
+index 00000000..24244721
+--- /dev/null
++++ b/scripts/perimetro/p27_atalhos_fonte.sh
+@@ -0,0 +1,72 @@
++#!/usr/bin/env bash
++# P-27 (23/11/2026): atalho instalado em ~/.local/bin igual à fonte versionada que ele declara.
++# Motivo medido: em 23/11/2026 ~/.local/bin/fechar-agata estava diferente de redesign/systemd/seth-parar sem ninguém
++# perceber. O atalho roda a cópia instalada, não a do repositório; uma correção versionada pode nunca chegar ao uso.
++# Decisão do Humano, 18/11/2026: o sistema precisa se atualizar sozinho.
++#
++# Pares (instalado <- fonte): ~/.local/bin/agata <- redesign/systemd/seth
++#                             ~/.local/bin/fechar-agata <- redesign/systemd/seth-parar
++# A fonte de cada par é a que o próprio atalho declara na linha "# Fonte versionada: ..." (hoje ~/agata/redesign/systemd/...),
++# e o nome dela tem de bater com o do par. Assim a conferência não depende da worktree em que o perímetro roda.
++#
++# AVISA, nunca falha (mesma doutrina de P-6/P-9): diferença, ausência ou cabeçalho faltando viram AVISO com o comando
++# de reinstalar. Não copia nada sozinho; corrigir é decisão do Humano.
++p27_atalhos_fonte() {
++  local par nome fonte_nome inst decl fonte raiz padrao atencao=0 ok=""
++  raiz="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
++  for par in "agata:seth" "fechar-agata:seth-parar"; do
++    nome="${par%%:*}"
++    fonte_nome="${par##*:}"
++    inst="${HOME:-}/.local/bin/$nome"
++    padrao="$raiz/redesign/systemd/$fonte_nome"
++    if [ ! -f "$inst" ]; then
++      atencao=1
++      echo "AVISO (P-27): $inst não existe -- o atalho \"$nome\" não está instalado."
++      echo "  Por que importa: sem o atalho instalado, o comando não faz o que o repositório manda."
++      echo "  O que fazer: cp $padrao $inst && chmod +x $inst"
++      continue
++    fi
++    decl="$(sed -n 's/^# Fonte versionada: *//p' "$inst" | head -n1 | tr -d '\r' | sed 's/[[:space:]]*$//')"
++    if [ -z "$decl" ]; then
++      atencao=1
++      echo "AVISO (P-27): $inst não tem a linha \"# Fonte versionada: ...\" -- não dá para conferir contra a fonte."
++      echo "  Por que importa: sem a fonte declarada, uma diferença fica invisível."
++      echo "  O que fazer: cp $padrao $inst   (a cópia do repositório traz a linha)"
++      continue
++    fi
++    case "$decl" in
++      "~/"*) fonte="${HOME:-}/${decl#"~/"}" ;;
++      *) fonte="$decl" ;;
++    esac
++    if [ "$(basename "$fonte")" != "$fonte_nome" ]; then
++      atencao=1
++      echo "AVISO (P-27): $inst declara como fonte $fonte, que não é $fonte_nome."
++      echo "  Por que importa: o par do atalho não confere; a comparação sairia contra o arquivo errado."
++      echo "  O que fazer: corrija a linha \"# Fonte versionada\" do atalho para redesign/systemd/$fonte_nome, ou reinstale: cp $padrao $inst"
++      continue
++    fi
++    if [ ! -f "$fonte" ]; then
++      atencao=1
++      echo "AVISO (P-27): a fonte declarada por $inst não existe: $fonte"
++      echo "  Por que importa: sem a fonte, não há como saber se o atalho está atualizado."
++      echo "  O que fazer: confira o checkout do sistema; a fonte versionada é redesign/systemd/$fonte_nome."
++      continue
++    fi
++    if cmp -s "$inst" "$fonte"; then
++      ok="$ok $nome"
++      continue
++    fi
++    atencao=1
++    echo "AVISO (P-27): $inst difere da fonte versionada $fonte."
++    echo "  Por que importa: o atalho roda a cópia instalada, não a do repositório; uma correção versionada pode nunca chegar ao uso."
++    echo "  O que fazer: cp $fonte $inst"
++  done
++  if [ "$atencao" -eq 0 ]; then
++    echo "OK (P-27): atalhos instalados iguais às fontes versionadas:$ok."
++    return 0
++  fi
++  set -- $ok
++  echo "P-27: $# de 2 atalho(s) iguais à fonte versionada; os demais têm AVISO acima."
++  PERIMETRO_ESTADO="PARCIAL"
++  return 0
++}
+diff --git a/scripts/testar_ci_progresso.py b/scripts/testar_ci_progresso.py
+new file mode 100644
+index 00000000..9c2d7359
+--- /dev/null
++++ b/scripts/testar_ci_progresso.py
+@@ -0,0 +1,137 @@
++#!/usr/bin/env python3
++"""Testes do progresso do CI local (Regra 0, decisão do Humano 18/11/2026).
++
++Cada linha OK/FALHA de scripts/ci_sdd_local.sh traz "[n/total · tempo]". O total é contado
++no próprio script (passada sem executar comandos), nunca escrito à mão. Estes testes conferem:
++o formato do marcador, o formato da linha OK/FALHA (prefixo preservado), e que o total contado
++bate com as chamadas `passo` que o código realmente tem (inclusive as do laço `for`).
++Não roda o CI inteiro: só a passada de contagem (CI_SO_CONTAR=1), que não executa passo nenhum.
++"""
++import os
++import pathlib
++import re
++import subprocess
++import sys
++import tempfile
++import unittest
++
++RAIZ = pathlib.Path(__file__).resolve().parent.parent
++CI = RAIZ / "scripts" / "ci_sdd_local.sh"
++
++
++def _ambiente(extra=None):
++    # GIT_* herdado de um hook apontaria o script para outro repositório.
++    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
++    env.update(extra or {})
++    return env
++
++
++def _chamadas_no_codigo():
++    """Conta as chamadas `passo "..."` do código: as de fora de laço valem 1; as de dentro de
++    `for ... in <palavras>; do ... done` valem <palavras> vezes. Não usa o número do script."""
++    total = 0
++    bloco = None  # [palavras do laço, chamadas dentro do laço]
++    for linha in CI.read_text(encoding="utf-8").splitlines():
++        s = linha.strip()
++        m = re.match(r"^for \w+ in (.+); do$", s)
++        if m:
++            bloco = [len(m.group(1).split()), 0]
++            continue
++        if s == "done" and bloco is not None:
++            total += bloco[0] * bloco[1]
++            bloco = None
++            continue
++        if re.match(r'^passo "', s):
++            if bloco is None:
++                total += 1
++            else:
++                bloco[1] += 1
++    if bloco is not None:
++        raise AssertionError("laço for sem done em ci_sdd_local.sh")
++    return total
++
++
++class MarcadorTests(unittest.TestCase):
++    def _marca(self, n, total, seg):
++        r = subprocess.run(
++            ["bash", "-c", 'source "$1"; _ci_marca "$2" "$3" "$4"', "bash", str(CI), str(n), str(total), str(seg)],
++            capture_output=True, text=True, env=_ambiente(), check=True,
++        )
++        return r.stdout.strip()
++
++    def test_minutos_e_segundos_com_dois_digitos(self):
++        self.assertEqual(self._marca(12, 92, 64), "[12/92 · 1m04s]")
++
++    def test_zero_segundos(self):
++        self.assertEqual(self._marca(1, 3, 0), "[1/3 · 0m00s]")
++
++    def test_mais_de_uma_hora_mantem_minutos(self):
++        self.assertEqual(self._marca(90, 92, 3725), "[90/92 · 62m05s]")
++
++
++class LinhaDePassoTests(unittest.TestCase):
++    def test_tempo_e_o_do_fim_do_passo(self):
++        # a linha sai quando o passo termina: um passo de 2 s, começando agora, tem de mostrar ~2 s (e não 0 s)
++        script = (
++            'source "$1"\n'
++            'TMP="$(mktemp -d)"; FALHAS=0; CI_TOTAL=1; CI_INICIO="$(date +%s)"\n'
++            'passo "lento" sleep 2\n'
++            'rm -rf "$TMP"\n'
++        )
++        r = subprocess.run(["bash", "-c", script, "bash", str(CI)], capture_output=True, text=True,
++                           env=_ambiente(), check=True)
++        self.assertEqual(r.stdout.splitlines()[0], "  ... [1/1] lento")  # anúncio do início (Regra 0)
++        self.assertRegex(r.stdout.splitlines()[1], r"^OK    \[1/1 · 0m0[23]s\] lento$")
++
++    def test_ok_e_falha_trazem_progresso_e_prefixo_preservado(self):
++        script = (
++            'source "$1"\n'
++            'TMP="$(mktemp -d)"; FALHAS=0; CI_TOTAL=3; CI_INICIO=$(( $(date +%s) - 64 ))\n'
++            'passo "um passo" true\n'
++            'passo "outro passo" false\n'
++            'passo "terceiro" true\n'
++            'echo "FALHAS=$FALHAS"\n'
++            'echo "PASSOS=${CI_PASSOS[*]}"\n'
++            'rm -rf "$TMP"\n'
++        )
++        r = subprocess.run(["bash", "-c", script, "bash", str(CI)], capture_output=True, text=True,
++                           env=_ambiente(), check=True)
++        # o anúncio de início ("  ... [n/total] nome") sai antes de cada passo; aqui só as linhas de resultado
++        linhas = [l for l in r.stdout.splitlines() if not l.startswith("  ... ")]
++        # o tempo pode virar 1m05s se a fronteira do segundo cair no meio da execução
++        self.assertRegex(linhas[0], r"^OK    \[1/3 · 1m0[45]s\] um passo$")
++        self.assertRegex(linhas[1], r"^FALHA \[2/3 · 1m0[45]s\] outro passo$")
++        self.assertRegex(linhas[-3], r"^OK    \[3/3 · 1m0[45]s\] terceiro$")
++        self.assertIn("FALHAS=1", linhas)
++        self.assertIn("PASSOS=um passo|1 outro passo|0 terceiro|1", linhas)
++
++
++class ContagemTests(unittest.TestCase):
++    def test_total_bate_com_as_chamadas_do_codigo(self):
++        esperado = _chamadas_no_codigo()
++        self.assertGreater(esperado, 50, "a conta do código não pode dar um número trivial")
++        with tempfile.TemporaryDirectory() as d:
++            env = _ambiente({
++                "CI_SO_CONTAR": "1",
++                "AGATA_CI_DIR": d,
++                # a contagem não executa o pytest; só precisa de um valor não vazio
++                "PYTEST": os.environ.get("PYTEST") or sys.executable,
++            })
++            r = subprocess.run(["bash", str(CI)], capture_output=True, text=True, env=env,
++                               cwd=str(RAIZ), timeout=120)
++            self.assertEqual(r.returncode, 0, r.stderr)
++            self.assertEqual(int(r.stdout.strip()), esperado)
++            self.assertFalse((pathlib.Path(d) / "ultimo.json").exists(),
++                             "a passada de contagem não grava o resumo do CI")
++
++    def test_laco_conta_cada_iteracao(self):
++        # o laço "for c in ..." do script tem duas chamadas por item: a conta tem de multiplicar
++        texto = CI.read_text(encoding="utf-8")
++        m = re.search(r"^for \w+ in (.+); do$", texto, re.M)
++        self.assertIsNotNone(m, "o script deve ter um laço for com lista de componentes")
++        palavras = len(m.group(1).split())
++        self.assertGreaterEqual(palavras, 2)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+diff --git a/scripts/testar_p10_worktree.sh b/scripts/testar_p10_worktree.sh
+new file mode 100644
+index 00000000..528fc8e9
+--- /dev/null
++++ b/scripts/testar_p10_worktree.sh
+@@ -0,0 +1,54 @@
++#!/usr/bin/env bash
++# Contraprovas offline do P-10 em worktree vinculada (23/11/2026). Sem vault, a worktree não é "clone fresco":
++# é SKIP isento (PERIMETRO_P17_ISENTO=1), que o P-17 não conta. No checkout principal, sem vault, continua
++# SKIP comum (não isento). Com o vault presente na worktree, a conferência roda de verdade (não vira SKIP).
++# Repositório descartável em $TMP. Saída 0 = todos os casos passaram.
++set -u
++unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_PREFIX GIT_COMMON_DIR GIT_OBJECT_DIRECTORY \
++      GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_NAMESPACE
++RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
++# shellcheck source=/dev/null
++source "$RAIZ/scripts/perimetro/p10_vault_derivado.sh"
++falhas=0
++caso() { if eval "$2"; then echo "PASS  $1"; else echo "FALHA $1"; falhas=$((falhas + 1)); fi; }
++
++PRINCIPAL="$TMP/principal"
++VINCULADA="$TMP/vinculada"
++git init -q "$PRINCIPAL"
++git -C "$PRINCIPAL" -c user.name=teste -c user.email=teste@teste commit -q --allow-empty -m base
++git -C "$PRINCIPAL" worktree add -q -b teste-p10-worktree "$VINCULADA" 2>/dev/null
++
++# roda o P-10 dentro de um diretório, do jeito que o perímetro roda (na raiz do checkout)
++rodar_p10() {  # $1 = diretório
++  (
++    cd "$1" || exit 9
++    PERIMETRO_ESTADO=""; PERIMETRO_P17_ISENTO=0
++    p10_vault_derivado
++    rc=$?
++    echo "ESTADO=$PERIMETRO_ESTADO ISENTO=$PERIMETRO_P17_ISENTO RC=$rc"
++  )
++}
++
++# 1. checkout principal, sem vault: SKIP comum (clone fresco), não isento
++saida="$(rodar_p10 "$PRINCIPAL")"
++caso "principal sem vault: SKIP comum, não isento" 'printf "%s" "$saida" | grep -q "ESTADO=SKIP ISENTO=0 "'
++caso "principal sem vault: mensagem de clone fresco, não de worktree" 'printf "%s" "$saida" | grep -q "ainda não existe" && ! printf "%s" "$saida" | grep -q "worktree vinculada"'
++
++# 2. worktree vinculada, sem vault: SKIP isento, com a explicação
++saida="$(rodar_p10 "$VINCULADA")"
++caso "worktree sem vault: SKIP isento" 'printf "%s" "$saida" | grep -q "ESTADO=SKIP ISENTO=1 RC=0"'
++
++# 3. worktree vinculada com vault presente: a conferência roda, não é SKIP isento
++mkdir -p "$VINCULADA/memoria/obsidian"
++saida="$(rodar_p10 "$VINCULADA")"
++caso "worktree com vault: não vira SKIP isento" '! printf "%s" "$saida" | grep -q "ISENTO=1"'
++caso "worktree com vault: a conferência de fato roda (não é SKIP)" '! printf "%s" "$saida" | grep -q "ESTADO=SKIP"'
++rm -rf "$VINCULADA/memoria"
++
++# 4. o detector: principal não é vinculada; worktree é
++caso "detector: principal não é worktree vinculada" '! (cd "$PRINCIPAL" && _p10_worktree_vinculada)'
++caso "detector: worktree é vinculada" '(cd "$VINCULADA" && _p10_worktree_vinculada)'
++
++[ "$falhas" -eq 0 ] && echo "P-10 worktree: OK" || echo "P-10 worktree: $falhas FALHA(S)"
++exit "$falhas"
+diff --git a/scripts/testar_p17_isento.sh b/scripts/testar_p17_isento.sh
+index 916707ba..0276a33e 100644
+--- a/scripts/testar_p17_isento.sh
++++ b/scripts/testar_p17_isento.sh
+@@ -27,5 +27,20 @@ caso "P-16 sem arquivo de controle staged: SKIP isento" '[ "$PERIMETRO_ESTADO" =
+ PERIMETRO_P17_ISENTO=0; PERIMETRO_ESTADO=""; AGATA_TESTE_PERIMETRO=1 p16_testes_dos_controles >/dev/null 2>&1
+ caso "P-16 dentro da suíte (recursão): SKIP isento" '[ "$PERIMETRO_ESTADO" = SKIP ] && [ "$PERIMETRO_P17_ISENTO" = 1 ]'
+ 
++# (23/11/2026) a série é a do arquivo de estado (compartilhado entre checkout e worktrees): um isento não a zera,
++# um SKIP comum soma, e uma corrida que não pula zera. Usa um arquivo de estado descartável.
++P17_ESTADO="$TMP/serie-p17.tsv"
++serie() { awk -v c="$1" '$1==c{print $2}' "$P17_ESTADO" | tail -1; }
++printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=""; P17_ISENTOS=" P-10 "
++p17_skip_cronico >/dev/null 2>&1
++caso "P-17: isento não zera a série anterior (worktree não apaga a contagem)" '[ "$(serie P-10)" = 4 ]'
++printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=" P-10 "; P17_ISENTOS=""
++p17_skip_cronico >/dev/null 2>&1
++caso "P-17: SKIP comum soma à série" '[ "$(serie P-10)" = 5 ]'
++printf 'P-10\t4\n' > "$P17_ESTADO"; P17_SKIPS=""; P17_ISENTOS=""
++p17_skip_cronico >/dev/null 2>&1
++caso "P-17: corrida que não pula zera a série" '[ "$(serie P-10)" = 0 ]'
++P17_SKIPS=""; P17_ISENTOS=""
++
+ [ "$falhas" -eq 0 ] && echo "P-17 isento: OK" || echo "P-17 isento: $falhas FALHA(S)"
+ exit "$falhas"
+diff --git a/scripts/testar_p27_atalhos.sh b/scripts/testar_p27_atalhos.sh
+new file mode 100644
+index 00000000..0f5a1240
+--- /dev/null
++++ b/scripts/testar_p27_atalhos.sh
+@@ -0,0 +1,88 @@
++#!/usr/bin/env bash
++# Contraprovas offline do P-27 (23/11/2026): atalho instalado igual à fonte que ele declara.
++# Usa um HOME FALSO em cada cenário; nunca lê nem escreve o ~/.local/bin real. Saída 0 = todos os casos passaram.
++# O P-27 só avisa: em todo cenário a função devolve 0 (nunca falha o perímetro).
++set -u
++unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_PREFIX GIT_COMMON_DIR
++RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
++# shellcheck source=/dev/null
++source "$RAIZ/scripts/perimetro/p27_atalhos_fonte.sh"
++falhas=0
++caso() { if eval "$2"; then echo "PASS  $1"; else echo "FALHA $1"; falhas=$((falhas + 1)); fi; }
++
++# repositório descartável só para o `git rev-parse --show-toplevel` da sugestão de cp
++REPO="$TMP/repo"; mkdir -p "$REPO"; git init -q "$REPO"
++
++# monta um HOME falso: fontes em ~/agata/redesign/systemd (como o cabeçalho declara) e os dois atalhos instalados
++cenario() {  # $1 = nome do cenário
++  H="$TMP/home-$1"
++  mkdir -p "$H/.local/bin" "$H/agata/redesign/systemd"
++  printf '#!/usr/bin/env bash\n# Fonte versionada: ~/agata/redesign/systemd/seth\necho ligar v1\n' > "$H/agata/redesign/systemd/seth"
++  printf '#!/usr/bin/env bash\n# Fonte versionada: ~/agata/redesign/systemd/seth-parar\necho parar v1\n' > "$H/agata/redesign/systemd/seth-parar"
++  cp "$H/agata/redesign/systemd/seth" "$H/.local/bin/agata"
++  cp "$H/agata/redesign/systemd/seth-parar" "$H/.local/bin/fechar-agata"
++}
++
++# roda a função com o HOME do cenário; devolve a saída, o estado e o código de retorno
++rodar() {  # $1 = HOME falso
++  (
++    export HOME="$1"
++    cd "$REPO" || exit 9
++    PERIMETRO_ESTADO=""
++    p27_atalhos_fonte
++    rc=$?
++    echo "ESTADO=${PERIMETRO_ESTADO}"
++    echo "RC=$rc"
++  )
++}
++
++# 1. tudo igual: OK, sem aviso
++cenario igual
++saida="$(rodar "$TMP/home-igual")"
++caso "iguais: sai OK (P-27) com os dois atalhos" 'printf "%s" "$saida" | grep -q "^OK (P-27): atalhos instalados iguais às fontes versionadas: agata fechar-agata\.$"'
++caso "iguais: sem AVISO" '! printf "%s" "$saida" | grep -q "AVISO"'
++caso "iguais: estado continua vazio (veredito OK)" 'printf "%s" "$saida" | grep -qx "ESTADO="'
++caso "iguais: devolve 0" 'printf "%s" "$saida" | grep -qx "RC=0"'
++
++# 2. fechar-agata diferente da fonte: AVISO com o cp da fonte, PARCIAL, nunca falha
++cenario diferente
++printf '#!/usr/bin/env bash\n# Fonte versionada: ~/agata/redesign/systemd/seth-parar\necho parar antiga\n' > "$TMP/home-diferente/.local/bin/fechar-agata"
++saida="$(rodar "$TMP/home-diferente")"
++caso "diferente: AVISO nomeia o atalho" 'printf "%s" "$saida" | grep -q "^AVISO (P-27): .*fechar-agata difere da fonte versionada .*seth-parar\.$"'
++caso "diferente: o comando de reinstalar é o cp da fonte declarada" 'printf "%s" "$saida" | grep -q "^  O que fazer: cp .*/home-diferente/agata/redesign/systemd/seth-parar .*/home-diferente/.local/bin/fechar-agata$"'
++caso "diferente: estado PARCIAL" 'printf "%s" "$saida" | grep -qx "ESTADO=PARCIAL"'
++caso "diferente: devolve 0 (aviso, não falha)" 'printf "%s" "$saida" | grep -qx "RC=0"'
++caso "diferente: o outro atalho continua conferido" 'printf "%s" "$saida" | grep -q "^P-27: 1 de 2 atalho(s) iguais"'
++
++# 3. atalho ausente: AVISO, PARCIAL, nunca falha
++cenario ausente
++rm -f "$TMP/home-ausente/.local/bin/agata"
++saida="$(rodar "$TMP/home-ausente")"
++caso "ausente: AVISO diz que não existe" 'printf "%s" "$saida" | grep -q "^AVISO (P-27): .*/agata não existe"'
++caso "ausente: sugere o cp e o chmod" 'printf "%s" "$saida" | grep -q "chmod +x"'
++caso "ausente: PARCIAL e RC 0" 'printf "%s" "$saida" | grep -qx "ESTADO=PARCIAL" && printf "%s" "$saida" | grep -qx "RC=0"'
++
++# 4. atalho sem a linha "Fonte versionada": AVISO, nunca falha
++cenario semcabecalho
++printf '#!/usr/bin/env bash\necho agata sem cabecalho\n' > "$TMP/home-semcabecalho/.local/bin/agata"
++saida="$(rodar "$TMP/home-semcabecalho")"
++caso "sem cabeçalho: AVISO diz que a linha falta" 'printf "%s" "$saida" | grep -q "não tem a linha \"# Fonte versionada"'
++caso "sem cabeçalho: devolve 0" 'printf "%s" "$saida" | grep -qx "RC=0"'
++
++# 5. cabeçalho aponta para a fonte de OUTRO nome: o par não confere, AVISO
++cenario outronome
++printf '#!/usr/bin/env bash\n# Fonte versionada: ~/agata/redesign/systemd/seth-parar\necho agata\n' > "$TMP/home-outronome/.local/bin/agata"
++saida="$(rodar "$TMP/home-outronome")"
++caso "outro nome: AVISO de par que não confere" 'printf "%s" "$saida" | grep -q "declara como fonte .*seth-parar, que não é seth\."'
++caso "outro nome: devolve 0" 'printf "%s" "$saida" | grep -qx "RC=0"'
++
++# 6. fonte declarada que não existe no disco: AVISO
++cenario fontesumida
++rm -f "$TMP/home-fontesumida/agata/redesign/systemd/seth-parar"
++saida="$(rodar "$TMP/home-fontesumida")"
++caso "fonte sumida: AVISO diz que a fonte não existe" 'printf "%s" "$saida" | grep -q "a fonte declarada por .*fechar-agata não existe"'
++caso "fonte sumida: devolve 0" 'printf "%s" "$saida" | grep -qx "RC=0"'
++
++[ "$falhas" -eq 0 ] && echo "P-27 atalhos: OK" || echo "P-27 atalhos: $falhas FALHA(S)"
++exit "$falhas"
+diff --git a/scripts/testar_perimetro.sh b/scripts/testar_perimetro.sh
+index f354c2d6..1edf3cf5 100755
+--- a/scripts/testar_perimetro.sh
++++ b/scripts/testar_perimetro.sh
+@@ -271,7 +271,8 @@ declare -A SEM_TESTE=(
+   [P-4]="binds sintéticos cobertos por testar_cobertura_servicos.py no fim desta suíte; atribuição de processos vivos exige integração"
+   [P-6]="depende de marcador temporal e do HD de backup montado; nao reproduzivel offline"
+   [P-9]="lista de unidades e ponte coberta offline por testar_cobertura_servicos.py no fim desta suíte; integração depende de unidades systemd vivas. O acrescimo _p9_ollama_na_gpu (03/10/2026) foi testado isolado, fora deste harness, contra um /api/ps falso apontado por P9_OLLAMA_PS_URL -- 8 casos (inteiro na GPU, dividido, 0% na GPU, sem modelo, JSON invalido, dois modelos com um dividido, exatamente 1 linha, Ollama fora do ar em <=3s), mais mutacao (comparacao invertida: 4 falhas) e proxy HTTP no ambiente (nao desvia o localhost)"
+-  [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso)"
++  [P-10]="compara o vault derivado com HEAD; testa-lo exigiria gerar o vault inteiro no clone (minutos por caso). O ramo de worktree vinculada (SKIP isento, 23/11/2026) e' coberto por scripts/testar_p10_worktree.sh, ligado no fim desta suite"
++  [P-27]="le ~/.local/bin (o HOME real, fora do repositorio) e so' emite AVISO, que _acusacoes() nao conta; a checagem e' testada com HOME falso em scripts/testar_p27_atalhos.sh, ligado no fim desta suite"
+   [P-12]="exige o HD de backup montado e o repositorio restic; e' o mesmo motivo do PARCIAL que ele ja declara"
+   [P-13]="relogio de 4 semanas; o caso depende de data e nao de estado do indice"
+   [P-15]="depende do log de sucessos do Conselho Remoto, que so existe apos chamadas de rede reais"
+@@ -293,7 +294,7 @@ declare -A SEM_TESTE=(
+ #         root, sem rede, sem servico vivo. Todo controle com _caso() aqui
+ #         e' L1, por definicao (P-1, P-5, P-7, P-8, P-11, P-14).
+ #   L2 -- integracao local: precisa de processo/servico vivo na Maquina,
+-#         mas nada alem de localhost (P-4, P-9, P-10).
++#         mas nada alem de localhost (P-4, P-9, P-10, P-27).
+ #   L3 -- privilegiado: precisa de root (P-2).
+ #   L4 -- rede: depende de chamada remota real ou relogio de calendario
+ #         passando (P-3, P-13, P-15).
+@@ -306,7 +307,7 @@ declare -A NIVEL=(
+   [P-21]=L1 [P-20]=L1 [P-22]=L1 [P-23]=L1
+   [P-2]=L3
+   [P-3]=L4 [P-13]=L4 [P-15]=L4
+-  [P-4]=L2 [P-9]=L2 [P-10]=L2
++  [P-4]=L2 [P-9]=L2 [P-10]=L2 [P-27]=L2
+   [P-6]=L5 [P-12]=L5
+ )
+ 
+@@ -720,6 +721,16 @@ if [[ -z "$FILTRO" || "$FILTRO" == P-16 || "$FILTRO" == P-17 || "$FILTRO" == "__
+   fi
+ fi
+ 
++# (23/11/2026) P-10 em worktree vinculada (SKIP isento, nao conta no P-17) e P-27 (atalho instalado igual a fonte; so AVISO).
++if [[ -z "$FILTRO" || "$FILTRO" == P-10 || "$FILTRO" == P-27 || "$FILTRO" == L2 || "$FILTRO" == "__AGREGADOS__" ]]; then
++  if bash "$RAIZ/scripts/testar_p10_worktree.sh" >/dev/null 2>&1 && bash "$RAIZ/scripts/testar_p27_atalhos.sh" >/dev/null 2>&1; then
++    OK=$((OK + 1))
++  else
++    FALHOU=$((FALHOU + 1))
++    falhas_detalhe+=("P-10/P-27: contraprovas da worktree vinculada e dos atalhos (scripts/testar_p10_worktree.sh, scripts/testar_p27_atalhos.sh)")
++  fi
++fi
++
+ # Contraprovas estruturais do fluxo de escrita, classificação externa,
+ # resolução de DNS/egress e topologia Docker. Entram na suíte que o P-16
+ # dispara quando qualquer uma dessas provas ou seus controles muda.
+diff --git a/scripts/testar_sincronia.py b/scripts/testar_sincronia.py
+index 08322e75..0e48c76a 100644
+--- a/scripts/testar_sincronia.py
++++ b/scripts/testar_sincronia.py
+@@ -130,7 +130,7 @@ class TestPorques(unittest.TestCase):
+         unidades, orfaos = porques.verificar(RAIZ)
+         regras = [u for u in unidades if u.origem == "AGENTS.md"]
+         skills = [u for u in unidades if u.origem == "skill"]
+-        self.assertEqual(len(regras), 17)
++        self.assertEqual(len(regras), 18)
+         self.assertEqual(len(skills), len(list((RAIZ / ".agents" / "skills").glob("*/SKILL.md"))))
+         self.assertEqual(orfaos, [])
+ 
+@@ -151,7 +151,7 @@ class TestPorques(unittest.TestCase):
+ 
+     def test_regras_curtas_lista_os_titulos(self):
+         texto = porques.regras_curtas(RAIZ)
+-        self.assertTrue(texto.startswith("Regras ativas (AGENTS.md, Sempre, 17): Regra 1 · "))
++        self.assertTrue(texto.startswith("Regras ativas (AGENTS.md, Sempre, 18): Regra 1 · "))
+ 
+ 
+ class TestSessaoContexto(unittest.TestCase):
