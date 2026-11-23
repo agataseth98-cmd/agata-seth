@@ -2985,5 +2985,24 @@
       "redesign/mcp/navegador/test_busca_filtro.py"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra \"modelos (um por rodada): a → b\"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_rodada_de_outro_modelo_emite_evento_modelo",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_tela_mostra_os_modelos_por_rodada_e_servidor_coleta_cada_rodada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "na tela larga a lista de conversas da barra lateral tem piso de 180 px e a barra rola quando falta altura (em 632 px de altura a lista encolhia a 0 e sumia)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_lista_de_conversas_tem_piso_e_a_barra_rola"
+    ],
+    "cwd": null
   }
 ]

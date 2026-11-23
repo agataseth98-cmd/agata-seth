@@ -2133,9 +2133,12 @@ class Handler(BaseHTTPRequestHandler):
         sock_gateway = _SocketAtual()
         proximas = []  # respostas abertas pelo laço de ferramentas, fechadas ao fim
 
+        modelos_rodadas = []  # (23/11/2026) X-Modelo-Real de cada rodada de ferramenta, na ordem
+
         def abrir_proxima(pedido_seguinte):
             nova, sock = _abrir_gateway(pedido_seguinte)
             proximas.append(nova)
+            modelos_rodadas.append(chat_stream.modelo_real_valido(nova.headers.get("X-Modelo-Real")) or "")
             sock_gateway.sock = sock
             return _linhas_do_gateway(nova)
         try:
@@ -2152,8 +2155,10 @@ class Handler(BaseHTTPRequestHandler):
             with resposta:
                 # Modelo real (X-Modelo-Real, fato da Máquina) segue no cabeçalho da resposta; sem ele, a UI mostra o escolhido.
                 real = chat_stream.modelo_real_valido(resposta.headers.get("X-Modelo-Real"))
+                modelos_rodadas.append(real or "")
                 if "tools" in pedido:
-                    eventos = ferramentas_seth.laco(abrir_proxima, _linhas_do_gateway(resposta), pedido)
+                    eventos = ferramentas_seth.laco(abrir_proxima, _linhas_do_gateway(resposta), pedido,
+                                                    modelos=modelos_rodadas)
                 else:
                     eventos = chat_stream.eventos_do_stream(_linhas_do_gateway(resposta))
                 self._stream_sse(eventos, (("X-Modelo-Real", real),) if real else ())

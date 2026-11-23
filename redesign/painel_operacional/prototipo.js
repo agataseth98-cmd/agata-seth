@@ -1071,7 +1071,8 @@ async function sethCarregarModelos() {
 }
 // Modelo que respondeu: o real (cabeçalho X-Modelo-Real do gateway); sem ele, o escolhido, marcado "(escolhido)".
 function sethTextoModelo(m) {
-  if (m.modelo_real) return "modelo: " + m.modelo_real;
+  if (m.modelo_real) return (m.modelo_real.includes("+") ? "modelos (um por rodada): " : "modelo: ")
+    + m.modelo_real.split("+").join(" → ");
   if (m.modelo) return "modelo: " + m.modelo + " (escolhido)";
   return "modelo: não registrado";
 }
@@ -1889,6 +1890,10 @@ async function sethLerStream(mensagens, modelo, parcial, aoTexto, sinal, instruc
     if (evento.tipo === "texto" && typeof evento.delta === "string") { parcial.texto += evento.delta; aoTexto(evento.delta); }
     else if (evento.tipo === "uso") parcial.uso = {entrada: evento.entrada, saida: evento.saida}; // C11: uso informado pelo gateway
     else if (evento.tipo === "estado" && typeof evento.texto === "string") { if (aoEstado) aoEstado(evento.texto); } // 20/11: ferramenta em curso
+    else if (evento.tipo === "modelo" && typeof evento.modelo === "string") { // 23/11: outra rodada, outro modelo
+      const junto = parcial.modelo_real ? parcial.modelo_real + "+" + evento.modelo : evento.modelo;
+      if (junto.length <= 120) parcial.modelo_real = junto;
+    }
     else if (evento.tipo === "agata_code") (parcial.agata_code = parcial.agata_code || []).push(evento); // 20/11: trabalho do Agata Code
     else if (evento.tipo === "fim") fim = true;
     else if (evento.tipo === "erro") throw sethErroStream(evento.motivo);

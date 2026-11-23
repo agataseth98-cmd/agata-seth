@@ -81,7 +81,7 @@ code,pre{font-family:var(--mono)}
 
 /* ===== Casca: menu lateral à esquerda, conteúdo à direita ===== */
 .shell{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100vh;min-height:100dvh}
-.sidebar{position:sticky;top:0;z-index:5;display:flex;flex-direction:column;gap:12px;height:100vh;height:100dvh;min-height:0;padding:16px 14px;overflow:hidden;background:var(--paper);border-right:1px solid var(--line)}
+.sidebar{position:sticky;top:0;z-index:5;display:flex;flex-direction:column;gap:12px;height:100vh;height:100dvh;min-height:0;padding:16px 14px;overflow-x:hidden;overflow-y:auto;background:var(--paper);border-right:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .brand-mark{width:36px;height:36px;flex:none;overflow:hidden;border:1px solid var(--line);border-radius:var(--r-2)}
 .brand-mark img{width:100%;height:100%;object-fit:cover;object-position:50% 24%}
@@ -102,7 +102,8 @@ code,pre{font-family:var(--mono)}
 .nav button[aria-current="page"]{background:var(--sheet-2);color:var(--ink);border-left-color:var(--teal)}
 .nav svg{width:16px;height:16px;flex:none}
 .nav-label{margin:0 4px;font:600 var(--fs-1)/1.4 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
-.menu-conversas{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+/* 23/11: em tela baixa a lista encolhia a 0 px e sumia; agora tem piso e a barra rola */
+.menu-conversas{flex:1 1 auto;min-height:180px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
 .menu-conversas .nav-label{margin:0}
 .menu-conversas .seth-conversas{flex:1 1 auto;min-height:120px;max-height:none;gap:2px;overflow:auto}
 .menu-rodape .seth-bloco{padding-top:6px;border-top:1px solid var(--line);font-size:var(--fs-2)}
@@ -119,6 +120,7 @@ code,pre{font-family:var(--mono)}
 #mapa-busca[hidden]{display:none !important}
 .sidebar-collapsed.shell{grid-template-columns:64px minmax(0,1fr)}
 .sidebar-collapsed .sidebar{padding-inline:10px}
+.sidebar-collapsed .menu-conversas{min-height:0}
 .sidebar-collapsed .brand{flex-direction:column;align-items:center;gap:10px;padding-inline:0}
 .sidebar-collapsed .brand>div:not(.brand-mark):not(.sidebar-toggle),.sidebar-collapsed .nav-label,.sidebar-collapsed .side-foot{display:none}
 .sidebar-collapsed .brand-mark{width:40px;height:40px}

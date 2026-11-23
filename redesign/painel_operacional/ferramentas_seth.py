@@ -521,7 +521,7 @@ def _com_pulso(funcao, cancelar: threading.Event, intervalo: float | None = None
 
 
 def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodadas: int = MAX_RODADAS,
-         executor_code=None, intervalo_pulso: float | None = None):
+         executor_code=None, intervalo_pulso: float | None = None, modelos: list | None = None):
     """Gera eventos SSE do painel. `primeira_linhas` são as linhas da 1ª resposta (já aberta). `abrir_proxima(pedido)`
     devolve as linhas da resposta seguinte (ou levanta OSError). Eventos de texto passam na hora; chamadas de
     ferramenta emitem {"tipo":"estado"} e voltam ao gateway com a resposta; uso e fim saem só da resposta final."""
@@ -579,3 +579,8 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
         except OSError:
             yield {"tipo": "erro", "motivo": "gateway indisponível"}
             return
+        # (23/11/2026) cada rodada pode sair de outro modelo; o servidor põe o X-Modelo-Real dela em `modelos`
+        # rodada sem X-Modelo-Real ("") não conta: compara com o último modelo conhecido
+        conhecidos = [m for m in (modelos or []) if m]
+        if modelos and modelos[-1] and len(conhecidos) > 1 and conhecidos[-1] != conhecidos[-2]:
+            yield {"tipo": "modelo", "modelo": modelos[-1]}
