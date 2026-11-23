@@ -1,5 +1,5 @@
 diff --git a/redesign/painel_operacional/ferramentas_seth.py b/redesign/painel_operacional/ferramentas_seth.py
-index c5483ec7..f0764a4d 100644
+index c5483ec7..22f054c4 100644
 --- a/redesign/painel_operacional/ferramentas_seth.py
 +++ b/redesign/painel_operacional/ferramentas_seth.py
 @@ -521,7 +521,7 @@ def _com_pulso(funcao, cancelar: threading.Event, intervalo: float | None = None
@@ -11,15 +11,17 @@ index c5483ec7..f0764a4d 100644
      """Gera eventos SSE do painel. `primeira_linhas` são as linhas da 1ª resposta (já aberta). `abrir_proxima(pedido)`
      devolve as linhas da resposta seguinte (ou levanta OSError). Eventos de texto passam na hora; chamadas de
      ferramenta emitem {"tipo":"estado"} e voltam ao gateway com a resposta; uso e fim saem só da resposta final."""
-@@ -579,3 +579,6 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
+@@ -579,3 +579,8 @@ def laco(abrir_proxima, primeira_linhas, pedido: dict, executor=None, max_rodada
          except OSError:
              yield {"tipo": "erro", "motivo": "gateway indisponível"}
              return
 +        # (23/11/2026) cada rodada pode sair de outro modelo; o servidor põe o X-Modelo-Real dela em `modelos`
-+        if modelos and len(modelos) > 1 and modelos[-1] and modelos[-1] != modelos[-2]:
++        # rodada sem X-Modelo-Real ("") não conta: compara com o último modelo conhecido
++        conhecidos = [m for m in (modelos or []) if m]
++        if modelos and modelos[-1] and len(conhecidos) > 1 and conhecidos[-1] != conhecidos[-2]:
 +            yield {"tipo": "modelo", "modelo": modelos[-1]}
 diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
-index 008985a9..5d513313 100644
+index 008985a9..bff355b0 100644
 --- a/redesign/painel_operacional/prototipo.css
 +++ b/redesign/painel_operacional/prototipo.css
 @@ -81,7 +81,7 @@ code,pre{font-family:var(--mono)}
@@ -41,6 +43,14 @@ index 008985a9..5d513313 100644
  .menu-conversas .nav-label{margin:0}
  .menu-conversas .seth-conversas{flex:1 1 auto;min-height:120px;max-height:none;gap:2px;overflow:auto}
  .menu-rodape .seth-bloco{padding-top:6px;border-top:1px solid var(--line);font-size:var(--fs-2)}
+@@ -119,6 +120,7 @@ code,pre{font-family:var(--mono)}
+ #mapa-busca[hidden]{display:none !important}
+ .sidebar-collapsed.shell{grid-template-columns:64px minmax(0,1fr)}
+ .sidebar-collapsed .sidebar{padding-inline:10px}
++.sidebar-collapsed .menu-conversas{min-height:0}
+ .sidebar-collapsed .brand{flex-direction:column;align-items:center;gap:10px;padding-inline:0}
+ .sidebar-collapsed .brand>div:not(.brand-mark):not(.sidebar-toggle),.sidebar-collapsed .nav-label,.sidebar-collapsed .side-foot{display:none}
+ .sidebar-collapsed .brand-mark{width:40px;height:40px}
 diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
 index 07bc5797..9f133d28 100644
 --- a/redesign/painel_operacional/prototipo.js
@@ -96,7 +106,7 @@ index 4baf8e42..5868ea1f 100644
                      eventos = chat_stream.eventos_do_stream(_linhas_do_gateway(resposta))
                  self._stream_sse(eventos, (("X-Modelo-Real", real),) if real else ())
 diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
-index 9ec04bd8..4b7bd9fb 100644
+index 9ec04bd8..ba3f0332 100644
 --- a/redesign/painel_operacional/spec/acceptance.json
 +++ b/redesign/painel_operacional/spec/acceptance.json
 @@ -2985,5 +2985,24 @@
@@ -105,7 +115,7 @@ index 9ec04bd8..4b7bd9fb 100644
      "cwd": null
 +  },
 +  {
-+    "criterion": "quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra \"modelos (um por rodada): a → b\"; mesmo modelo não repete",
++    "criterion": "quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra \"modelos (um por rodada): a → b\"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta",
 +    "command": [
 +      "pytest",
 +      "-q",
@@ -125,23 +135,23 @@ index 9ec04bd8..4b7bd9fb 100644
    }
  ]
 diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
-index deb3de99..f8c4e783 100644
+index deb3de99..021e554d 100644
 --- a/redesign/painel_operacional/spec/spec.md
 +++ b/redesign/painel_operacional/spec/spec.md
 @@ -679,6 +679,8 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
  - [ ] na Seth do painel, `ler_pagina` nunca devolve a página anterior: erro de ferramenta (`isError`) ou endereço lido diferente do aberto vira erro em texto; na resposta que já leu a web, `cache_anotar` é recusado (texto da web pode trazer instrução); host com rótulo longo é bloqueado pela política de egress sem exceção
  - [ ] a cada rodada de ferramenta o painel devolve ao gateway o texto já mostrado nela (o cabeçalho da Máquina incluso), para o gateway não repetir o cabeçalho na mesma resposta; busca vazia leva à Seth o aviso do que tentar em seguida
  - [ ] a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)
-+- [ ] quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra "modelos (um por rodada): a → b"; mesmo modelo não repete
++- [ ] quando a resposta passa por mais de um modelo (uma rodada por ferramenta), o painel coleta o X-Modelo-Real de cada rodada, emite o evento `modelo` e a tela mostra "modelos (um por rodada): a → b"; o mesmo modelo não repete na rodada seguinte, e rodada sem X-Modelo-Real não conta
 +- [ ] na tela larga a lista de conversas da barra lateral tem piso de 180 px e a barra rola quando falta altura (em 632 px de altura a lista encolhia a 0 e sumia)
  
  ## Desenho e alternativas
  
 diff --git a/redesign/painel_operacional/test_ferramentas_seth.py b/redesign/painel_operacional/test_ferramentas_seth.py
-index 11a8ca0c..a5c066ea 100644
+index 11a8ca0c..992513d2 100644
 --- a/redesign/painel_operacional/test_ferramentas_seth.py
 +++ b/redesign/painel_operacional/test_ferramentas_seth.py
-@@ -606,6 +606,35 @@ class WebTests(unittest.TestCase):
+@@ -606,6 +606,45 @@ class WebTests(unittest.TestCase):
                                rpc=lambda c: [_res({"resultados": [], "aviso": "reformule ou use ler_pagina", "erro": None})])
          self.assertIn("aviso: reformule ou use ler_pagina", txt)
  
@@ -159,6 +169,12 @@ index 11a8ca0c..a5c066ea 100644
 +            return roteiro[1]
 +        evs2 = list(fs.laco(abrir2, roteiro[0], {"messages": []}, executor=lambda n, a: "r", modelos=modelos2))
 +        self.assertFalse([e for e in evs2 if e["tipo"] == "modelo"])
++        modelos3 = ["a/x", ""]  # rodada anterior sem cabeçalho: compara com o último conhecido
++        def abrir3(p):
++            modelos3.append("a/x")
++            return roteiro[1]
++        evs3 = list(fs.laco(abrir3, roteiro[0], {"messages": []}, executor=lambda n, a: "r", modelos=modelos3))
++        self.assertFalse([e for e in evs3 if e["tipo"] == "modelo"])
 +
 +    def test_tela_mostra_os_modelos_por_rodada_e_servidor_coleta_cada_rodada(self):
 +        js = (Path(__file__).parent / "prototipo.js").read_text(encoding="utf-8")
@@ -166,6 +182,8 @@ index 11a8ca0c..a5c066ea 100644
 +        self.assertIn('evento.tipo === "modelo"', js)
 +        self.assertIn('"modelos (um por rodada): "', js)
 +        self.assertIn("modelos=modelos_rodadas", srv)
++        self.assertIn('modelos_rodadas.append(real or "")', srv)  # a 1ª rodada entra na lista antes do laço
++        self.assertLess(srv.index('modelos_rodadas.append(real or "")'), srv.index("modelos=modelos_rodadas"))
 +        self.assertIn('modelos_rodadas.append(chat_stream.modelo_real_valido(nova.headers.get("X-Modelo-Real"))', srv)
 +
 +    def test_lista_de_conversas_tem_piso_e_a_barra_rola(self):
@@ -173,6 +191,8 @@ index 11a8ca0c..a5c066ea 100644
 +        self.assertIn(".menu-conversas{flex:1 1 auto;min-height:180px;", css)
 +        self.assertIn("overflow-x:hidden;overflow-y:auto;", css)
 +        self.assertNotIn(".menu-conversas{flex:1 1 auto;min-height:0;", css)
++        self.assertIn(".sidebar-collapsed .menu-conversas{min-height:0}", css)  # recolhida (64 px) sem piso
++        self.assertIn("  .sidebar .menu-conversas{flex:1 1 0;min-height:0}", css)  # gaveta estreita: rodapé fixo
 +
      def test_rpc_navegador_usa_uma_sessao_e_le_sse(self):
          vistos = []
