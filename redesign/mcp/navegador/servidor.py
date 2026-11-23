@@ -70,6 +70,7 @@ from politica_egress import buscar_seguro, destino_permitido  # noqa: E402 -- im
 from redesign.mcp.capability import verificar_capability  # noqa: E402
 from egress_proxy import EgressProxy  # noqa: E402 -- conexão efetiva pinada ao IP validado
 import egress_proxy  # noqa: E402
+from busca_filtro import filtrar_e_ordenar as _filtrar_e_ordenar, itens_wiki as _itens_wiki, sem_acento as _sem_acento  # noqa: E402,F401
 
 PERFIL_DIR = os.path.expanduser("~/.cache/agata/navegador-perfil")
 ALLOWLIST_PATH = os.path.expanduser("~/.config/agata/navegador-dominios-permitidos.txt")
@@ -123,6 +124,29 @@ def _buscar_rss(consulta: str) -> list[dict] | None:
             return None
         with open(destino, encoding="utf-8", errors="replace") as f:
             return _itens_rss(f.read(_MAX_BYTES_RSS))
+
+
+# (23/11/2026, seth-web2-23-11) medido: o RSS do Bing casa só o termo mais comum ("Python 3.14 release date" devolve
+# a página inicial do python.org e compiladores online, 4 variações de URL iguais). A busca da Wikipedia (API pública,
+# sem chave nem captcha) trouxe resultado no assunto. Entra primeiro (pt, depois en, 3 de cada); o Bing vem depois, filtrado.
+_WIKI_URL = "https://{lang}.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch={q}"
+_MAX_BYTES_WIKI = 300_000
+# A Wikimedia estrangula (429) User-Agent genérico; pede um que nomeie o programa. Sem dado pessoal nem contato.
+_UA_WIKI = "AgataBusca/1.0 (assistente pessoal local; baixo volume)"
+
+
+def _buscar_wiki(consulta: str) -> list[dict]:
+    import tempfile
+    itens = []
+    for lang in ("pt", "en"):
+        url = _WIKI_URL.format(lang=lang, q=urllib.parse.quote_plus(consulta))
+        with tempfile.TemporaryDirectory(prefix="agata-wiki-") as d:
+            destino = os.path.join(d, "w.json")
+            ok, status, _f, _m = buscar_seguro(url, destino, ua=_UA_WIKI, timeout_s=8, max_bytes=_MAX_BYTES_WIKI)
+            if ok and status == 200 and os.path.exists(destino):
+                with open(destino, encoding="utf-8", errors="replace") as f:
+                    itens += _itens_wiki(f.read(_MAX_BYTES_WIKI), lang)
+    return itens
 
 
 mcp = FastMCP("agata-navegador")
@@ -327,18 +351,29 @@ def buscar_web(consulta: str, n: int = 8) -> dict:
             motor = "bing"
             brutos = _na_fila(_buscar_pagina)(url)
         termos = _termos(consulta)
+        try:
+            wiki = _buscar_wiki(consulta)
+        except Exception:  # noqa: BLE001 -- Wikipedia fora: segue só com o Bing
+            wiki = []
+        if wiki:
+            motor += "+wikipedia"
+        # Wikipedia primeiro, com filtro brando (metade dos termos; ela acha por sentido); Bing depois, com 2/3
+        # teto de 3 para a Wikipedia: o resto das vagas (n, até 10) fica para o Bing
+        brutos = (_filtrar_e_ordenar(wiki, termos, (1, 2))[:3]
+                  + _filtrar_e_ordenar(list(brutos), termos))
         res = []
         for r in brutos:
             if not (r.get("titulo") and r.get("href")):
                 continue
             item = {"titulo": r["titulo"], "url": _url_real(r["href"]), "trecho": r["trecho"][:300]}
             alvo = " ".join(item.values()).lower()
-            item["relacionado"] = (not termos) or any(t in alvo for t in termos)
+            item["relacionado"] = (not termos) or any(_sem_acento(t) in _sem_acento(alvo) for t in termos)
             res.append(item)
         res = res[:n]
         aviso = None
         if not res:
-            aviso = "nenhum resultado -- reformule antes de concluir; isto não prova que não existe"
+            aviso = ("nenhum resultado com os termos da consulta -- reformule (menos palavras, inglês, nome próprio) "
+                     "ou leia a fonte oficial com ler_pagina; isto não prova que não existe")
         elif not any(r["relacionado"] for r in res):
             aviso = ("nenhum resultado contém os termos da consulta (busca degradada) -- reformule; "
                      "isto não prova nada, nem que existe nem que não existe")
@@ -553,6 +588,23 @@ def _selftest_offline() -> int:
         print("_itens_rss: DOCTYPE, entidade e XML quebrado viram lista vazia — OK")
     else:
         print("FALHA: _itens_rss aceitou XML ruim")
+        ok = False
+
+    wiki = json.dumps({"query": {"search": [{"title": "Ulan Bator", "snippet": "capital da <span>Mongólia</span>"}]}})
+    if _itens_wiki(wiki, "pt") == [{"titulo": "Ulan Bator (Wikipedia)", "href": "https://pt.wikipedia.org/wiki/Ulan_Bator",
+                                    "trecho": "capital da Mongólia"}] and _itens_wiki("{", "pt") == []:
+        print("_itens_wiki: item lido, HTML do trecho tirado, JSON ruim vira vazio — OK")
+    else:
+        print(f"FALHA: _itens_wiki deu {_itens_wiki(wiki, 'pt')!r}")
+        ok = False
+    itens = [{"titulo": "Capital.com trading", "href": "https://x", "trecho": ""},
+             {"titulo": "Ulan Bator", "href": "https://y", "trecho": "capital da mongólia"},
+             {"titulo": "Mongólia", "href": "https://z", "trecho": "país; capital Ulan Bator"}]
+    r = [i["href"] for i in _filtrar_e_ordenar(itens, _termos("capital da Mongólia"))]
+    if r == ["https://z", "https://y"]:
+        print("_filtrar_e_ordenar: tira o que casa só 1 termo de 2 (mínimo 2/3) e põe título casado na frente — OK")
+    else:
+        print(f"FALHA: _filtrar_e_ordenar deu {r!r}")
         ok = False
 
     return 0 if ok else 1

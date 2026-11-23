@@ -2966,5 +2966,24 @@
       "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_host_com_rotulo_longo_bloqueia_sem_excecao"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "a cada rodada de ferramenta o painel devolve ao gateway o texto já mostrado nela (o cabeçalho da Máquina incluso), para o gateway não repetir o cabeçalho na mesma resposta; busca vazia leva à Seth o aviso do que tentar em seguida",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_rodada_devolve_o_texto_ja_mostrado_para_o_gateway_nao_repetir_o_cabecalho",
+      "redesign/painel_operacional/test_ferramentas_seth.py::WebTests::test_busca_vazia_leva_o_aviso_do_que_tentar"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a busca do navegador-mcp lê a resposta da Wikipedia (título, link, trecho sem HTML; JSON ruim vira vazio) e filtra por termos sem acento: some o resultado que casa só a primeira palavra (2/3 dos termos no Bing, metade na Wikipedia, que entra com no máximo 3)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/mcp/navegador/test_busca_filtro.py"
+    ],
+    "cwd": null
   }
 ]
