@@ -8,6 +8,10 @@ Esta página é só para você — não para os modelos. Teto: uma tela.
 Histórico até 22/10/2026: `extras/arquivo/onde-estamos-ate-2026-10-22.md`; 28 e 29/10: `extras/arquivo/onde-estamos-ate-2026-10-29.md`.
 O registro completo e permanente de tudo é `MEMÓRIAS.md`.
 
+## Hoje, 23/11 (proposta reaproveita-23-11)
+
+A casa foi limpa: das 41 branches antigas no GitHub, 39 já estavam no sistema e saíram (cópia guardada em `~/agata-arquivo/limpeza-23-11/`). As duas que traziam algo novo viraram uma proposta só, esperando sua assinatura (`reaproveita-23-11`): a voz do sistema numa chamada de app que tem voz própria, e a especificação de como medir tempo e recursos nas avaliações.
+
 ## Hoje, 17/11 (proposta atualiza-17-11)
 
 Há uma proposta esperando sua assinatura (`atualiza-17-11`). O painel ganha uma lista única de integrações em Sistema, e os provedores aparecem numa tabela só, em Conexões. Equipe, Backup, Saída de rede, Perímetro e CI passam a ter tela de leitura, com a idade do último resultado; o painel só lê o que já foi gerado. Perímetro, CI, equipe e restic continuam rodando só pelo terminal. Comando: `bash scripts/aprovar.sh atualiza-17-11` (depois do merge do PR de proposta, no terminal, sem `!`).
