@@ -111,3 +111,32 @@ Nada no canon. Reversão por revert. Apagar `<dados>/avaliacao/` remove execuç�
 - `registro_medidor.py`
 - `revisoes.py`
 - `revisar.py`
+
+
+## Extensão proposta: medição experimental de rota
+
+Esta extensão descreve uma medição apenas em rodada experimental de avaliação iniciada explicitamente pelo Humano. Não instrumenta continuamente o gateway e não altera roteamento em produção. A implementação posterior reutilizará o cliente já chamado por `avaliar.py` e o registro comum `registro.py`; não acrescentará chamadas, retries ou retenção.
+
+### Contrato proposto
+
+- Medir no cliente, com relógio monotônico, início da chamada, primeiro chunk recebido e fim. Se o adapter não expuser streaming ou um instante confiável para o primeiro chunk, registrar `null` e o motivo `nao_exposto`; não estimar esse instante.
+- Registrar rota selecionada, modelo, headers e usage somente quando já expostos pela resposta ou cliente. Cada campo indisponível fica `null` com motivo. Não fazer chamada adicional para obter metadados.
+- Cache e prefill ficam `null` com motivo quando não expostos. Custo só recebe valor quando conhecido pela resposta ou runtime; não será calculado por tarifa nesta medição.
+- Preservar resultado, falha, baseline e pareamento da avaliação. Correção/retrabalho posterior permanece separado. Qualquer coeficiente de custo compara pares corretos e comparáveis e declara baseline e denominador.
+- Para rotas locais, GPU e RAM podem ser fotografadas de forma agregada antes e depois da rodada, nunca por requisição. Para rotas remotas esses campos ficam ausentes com motivo.
+- A medição acompanha apenas as chamadas já feitas pela rodada. Falhas permanecem no estado de execução existente.
+- Comparar rodadas equivalentes com medição ligada e desligada, contra limiar de overhead fixado antes do experimento. O limiar é parâmetro experimental, não política permanente.
+- Dados locais permanecem em `<dados>/avaliacao/execucoes/` e seguem o ciclo de remoção já descrito nesta spec. Não se cria política nova de retenção.
+
+### Critérios da implementação posterior, não ativos nesta proposta
+
+Os itens abaixo orientam a implementação futura; não são critérios executáveis desta proposta. O arquivo `acceptance.json` e os testes executáveis entram junto com o código na próxima proposta.
+
+1. A medição começa somente numa rodada experimental de avaliação explicitamente iniciada, sem instrumentação contínua do gateway.
+2. Início, primeiro chunk e fim usam tempos monotônicos observados pelo cliente; primeiro chunk indisponível fica `null` com motivo.
+3. Rota selecionada e metadados expostos são registrados; campos não expostos ficam `null` com motivo e não provocam chamada adicional.
+4. Cache/prefill ausentes ficam `null` com motivo; custo só é preenchido quando conhecido pela resposta ou runtime.
+5. GPU/RAM são agregadas antes/depois e apenas em rodada local.
+6. Resultado correto e retrabalho posterior permanecem separados; coeficientes comparam pares corretos, baseline e denominador explícitos.
+7. Rodadas ligadas/desligadas são comparadas contra limiar de overhead fixado previamente, sem alterar chamadas ou roteamento.
+8. Os dados seguem o diretório e o ciclo de remoção já existentes, sem política de retenção nova.

@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d1e726cbdd03e952d7d85587e03a44df2c985080
-  Escrito em: 23/11/2026 11:01 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7ad4f9fcfc359a008fd606d98d5d55b4bab020c2
+  Escrito em: 23/11/2026 11:18 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e726cbdd03e952d7d85587e03a44df2c985080/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e726cbdd03e952d7d85587e03a44df2c985080/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e726cbdd03e952d7d85587e03a44df2c985080/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e726cbdd03e952d7d85587e03a44df2c985080/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d1e726cbdd03e952d7d85587e03a44df2c985080/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ad4f9fcfc359a008fd606d98d5d55b4bab020c2/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ad4f9fcfc359a008fd606d98d5d55b4bab020c2/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ad4f9fcfc359a008fd606d98d5d55b4bab020c2/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ad4f9fcfc359a008fd606d98d5d55b4bab020c2/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7ad4f9fcfc359a008fd606d98d5d55b4bab020c2/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1115) DIÁRIO — 23/11/2026 · **Aplicada reaproveita-23-11 (assinada pelo Humano).** A skill agata-voz ganha a seção 3a (chamada em app com voz própria: silenciar só o app, falar pelo Piper só o texto final, código de saída descrito com precisão) e a avaliação ganha a spec de telemetria experimental (sem código). Sem restart: só texto de skill e spec.
+
 (1114) DIÁRIO — 23/11/2026 · **Proposta reaproveita-23-11: a seção de chamada com app de voz própria na skill agata-voz (de 07/11) e a spec de telemetria experimental da avaliação (de 17/11), rebaseadas no main numa assinatura só.** Limpeza de branches pedida pelo Humano: das 41 branches remotas, 39 já estavam contempladas no main e foram apagadas (backup em ~/agata-arquivo/limpeza-23-11/branches-remotas.bundle); as quatro assinaturas soltas de 18 e 19/11 eram de propostas substituídas e foram movidas para o mesmo arquivo. CI local OK. Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: git cherry, comparação de arquivos e busca no código atual · Autorização: Humano — "pode reaproveitar já faça e sanitize o sistema". Assinatura pendente: bash scripts/aprovar.sh reaproveita-23-11
 
 (1113) DIÁRIO — 23/11/2026 · **Aplicada selo-modelos-23-11 (assinada pelo Humano).** A lista de conversas volta a aparecer na barra lateral em janela baixa (piso de 180 px e barra que rola) e o selo mostra o modelo de cada rodada ("modelos (um por rodada): a → b"). Depois de aplicar: restart do painel.

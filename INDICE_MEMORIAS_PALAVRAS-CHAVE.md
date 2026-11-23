@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1115) DIÁRIO — 23/11/2026 · **Aplicada reaproveita-23-11 (assinada pelo Humano).** A skill agata-voz ganha a seção 3a (chamada em app com voz própria: silenciar só o app, falar pelo Piper só o texto final, código de saída descrito com precisão) e a avaliação ganha a spec de telemetria experimental (sem código). Sem restart: só texto de skill e spec.
+  palavras-chave: aplicada, reaproveita, assinada, humano, skill, agata, voz, ganha, seção, chamada, app, própria, silenciar, falar, piper, texto, final, código, saída, descrito, precisão, avaliação, spec, telemetria, experimental, restart
 (1114) DIÁRIO — 23/11/2026 · **Proposta reaproveita-23-11: a seção de chamada com app de voz própria na skill agata-voz (de 07/11) e a spec de telemetria experimental da avaliação (de 17/11), rebaseadas no main numa assinatura só.** Limpeza de branches pedida pelo Humano: das 41 branches remotas, 39 já estavam contempladas no main e foram apagadas (backup em ~/agata-arquivo/limpeza-23-11/branches-remotas.bundle); as quatro assinaturas soltas de 18 e 19/11 eram de propostas substituídas e foram movidas para o mesmo arquivo. CI local OK. Modelo: Claude Opus 5.5 (Claude Code, na Máquina) · vetor: git cherry, comparação de arquivos e busca no código atual · Autorização: Humano — "pode reaproveitar já faça e sanitize o sistema". Assinatura pendente: bash scripts/aprovar.sh reaproveita-23-11
   palavras-chave: proposta, reaproveita, seção, chamada, app, voz, própria, skill, agata, spec, telemetria, experimental, avaliação, rebaseadas, main, assinatura, limpeza, branches, pedida, humano, remotas, estavam, contempladas, foram, apagadas, backup, arquivo, bundle, quatro, assinaturas, soltas, eram, propostas, substituídas, movidas, mesmo, local, modelo, claude, opus, code, máquina, vetor, git, cherry, comparação, arquivos, busca, código, atual, autorização, pode, reaproveitar, faça, sanitize, sistema, pendente, bash, scripts, aprovar
 (1113) DIÁRIO — 23/11/2026 · **Aplicada selo-modelos-23-11 (assinada pelo Humano).** A lista de conversas volta a aparecer na barra lateral em janela baixa (piso de 180 px e barra que rola) e o selo mostra o modelo de cada rodada ("modelos (um por rodada): a → b"). Depois de aplicar: restart do painel.
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, persona, entidade, muitos, cérebros, assinada, humano
 (1086) DIÁRIO — 18/11/2026 · **Aplicada voz-conta-turno-19-11: fala transcrita conta como turno** Assinada pelo Humano em 19/11 20:44.
   palavras-chave: aplicada, voz, conta, turno, fala, transcrita, assinada, humano
-(1085) DIÁRIO — 19/11/2026 · **Proposta assinatura-por-tipo-19-11: o Humano decidiu por voz que mudança de sistema continua com assinatura, e estética, usabilidade e ordem das filas vão direto, com aviso e reversão.** Na dúvida, é sistema; o fiscal-p8 aprende a lista no próximo lote. Modelo: Opus. Assinatura pendente: bash scripts/aprovar.sh assinatura-por-tipo-19-11.
-  palavras-chave: proposta, assinatura, tipo, humano, decidiu, voz, mudança, sistema, continua, estética, usabilidade, ordem, filas, vão, direto, aviso, reversão, dúvida, fiscal, aprende, lista, próximo, lote, modelo, opus, pendente, bash, scripts, aprovar
+(1085) DIÁRIO — 19/11/2026 · **Proposta assinatura-por-tipo-19-11: o Humano deci …
+  palavras-chave: proposta, assinatura, tipo, humano, deci
 (1084) DIÁRIO — 19/11/2026 · **Decreto proposto pelo Humano por voz: a conversa …
   palavras-chave: decreto, proposto, humano, voz, conversa
 (1083) DIÁRIO — 19/11/2026 · **Proposta voz-conta-turno-19-11: cada fala transcr …
