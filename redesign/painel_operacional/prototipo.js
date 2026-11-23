@@ -277,7 +277,7 @@ function sourceLine(item) {
     (item.last_error ? " · " + item.last_error : "");
 }
 const serviceNames = {"omniroute.service":"OmniRoute", "omniroute-sanitizer.service":"Sanitizador", "seth-gateway.service":"Seth Gateway", "seth-verificador.service":"Verificador", "piper-tts.service":"Piper", "openvino-whisper.service":"Whisper", "openvino-embeddings.service":"Embeddings", "obsidian-ro-proxy.service":"Proxy Obsidian", "discord-mcp.service":"Discord MCP", "navegador-mcp.service":"Navegador MCP", "laya-roteador.service":"Laya", "seth-escriba.service":"Escriba"};
-const timerNames = {"agata-manutencao.timer":"Janela de manutenção", "agata-vault-inbox.timer":"Inbox do Obsidian"};
+const timerNames = {"agata-manutencao.timer":"Janela de manutenção"};
 const taskNames = {"avaliar-decisor":"Avaliar o decisor", "memoria-semanal":"Memória semanal", "consolidacao":"Consolidar memórias", "laya-treino":"Treinar candidato do Laya"};
 function unitRows(items, forced) {
   return (items || []).map((item) => row(serviceNames[item.unit] || item.unit, stateOf(item, forced),

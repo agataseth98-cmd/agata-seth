@@ -142,9 +142,9 @@ class PainelTests(unittest.TestCase):
             servico = panel._service_snapshot("laya-roteador.service")
         texto = "unidade não existe no escopo do usuário desta Máquina"  # C5 (16/11/2026): systemctl --user, não o sistema todo
         self.assertEqual((servico["state"], servico["error"]), ("ausente", texto))
-        timer_nao = "Id=agata-vault-inbox.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
+        timer_nao = "Id=agata-manutencao.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n"
         with mock.patch.object(panel.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=timer_nao)):
-            timer = panel._timer_snapshot("agata-vault-inbox.timer")
+            timer = panel._timer_snapshot("agata-manutencao.timer")
         self.assertEqual((timer["state"], timer["error"], timer["execution"]["state"]),
                          ("ausente", texto, "ausente"))
         self.assertEqual(panel._overall_state(["ok", "ausente"]), "warning")

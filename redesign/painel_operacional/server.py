@@ -83,9 +83,8 @@ SERVICE_ALLOWLIST = (
 )
 
 # Só unidades fixas; a interface nunca escolhe argumentos do systemctl.
-TIMER_ALLOWLIST = ("agata-manutencao.timer", "agata-vault-inbox.timer")
-TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service",
-                  "agata-vault-inbox.timer": "agata-vault-inbox.service"}
+TIMER_ALLOWLIST = ("agata-manutencao.timer",)
+TIMER_SERVICES = {"agata-manutencao.timer": "agata-manutencao.service"}
 MAINTENANCE_STATE = Path.home() / ".cache/agata/janela/state.json"
 # Diário de eventos do sistema (escrito pela vigia da Equipe). Só leitura; o cliente não escolhe o caminho.
 EVENTOS_DIARIO = Path.home() / ".cache/agata/sincronia/eventos.log"
