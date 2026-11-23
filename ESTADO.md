@@ -77,11 +77,12 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 4.
+Abertas (sem APROVADO-): 5.
 - `agentes-skills-18-11`
 - `assinatura-por-tipo-19-11`
 - `rotas-novas-18-11b`
 - `sandbox-fase2-19-11`
+- `seth-web2-23-11`
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
