@@ -26,20 +26,22 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 68d9d1bd72d07811d490a5067cdaa6400ba53b6a
-  Escrito em: 23/11/2026 09:03 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): f3a04330f863cb372ddcc3c1a1e05e7a8011891c
+  Escrito em: 23/11/2026 09:46 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/68d9d1bd72d07811d490a5067cdaa6400ba53b6a/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/68d9d1bd72d07811d490a5067cdaa6400ba53b6a/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/68d9d1bd72d07811d490a5067cdaa6400ba53b6a/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/68d9d1bd72d07811d490a5067cdaa6400ba53b6a/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/68d9d1bd72d07811d490a5067cdaa6400ba53b6a/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3a04330f863cb372ddcc3c1a1e05e7a8011891c/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3a04330f863cb372ddcc3c1a1e05e7a8011891c/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3a04330f863cb372ddcc3c1a1e05e7a8011891c/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3a04330f863cb372ddcc3c1a1e05e7a8011891c/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/f3a04330f863cb372ddcc3c1a1e05e7a8011891c/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1112) DIÁRIO — 23/11/2026 · **Proposta selo-modelos-23-11: o selo mostra o modelo de cada rodada e a lista de conversas volta a aparecer na barra lateral.** O Humano não achava as conversas anteriores: em janela baixa a lista encolhia a 0 px. Também 23/11: área de trabalho arrumada (planos e auditorias concluídos em ~/agata-arquivo/area-de-trabalho-23-11/; atalhos, organograma e arquivos pessoais ficaram) e worktree do experimento descartado de 21/11 removida (diff em ~/agata-arquivo/agata-code-medicao-21-11/). Assinatura pendente: bash scripts/aprovar.sh selo-modelos-23-11
+
 (1111) DIÁRIO — 23/11/2026 · **Aplicada seth-web2-23-11 (assinada pelo Humano).** Cabeçalho da Máquina uma vez por resposta no painel (o texto da rodada volta ao gateway); busca do navegador-mcp com até 3 resultados da Wikipedia e filtro de termos sem acento; busca vazia leva à Seth o que tentar. Depois de aplicar: restart do navegador-mcp e do painel.
 
 (1110) DIÁRIO — 23/11/2026 · **Proposta seth-web2-23-11: cabeçalho único por resposta no painel e busca com Wikipedia e filtro de termos.** Da conversa de auditoria com a Seth no painel (08:12–08:15): ler_pagina e a recusa do cache_anotar funcionaram; a busca do Bing casa só a 1ª palavra; o cabeçalho repetia por rodada de ferramenta; a Verificação da Máquina pegou citação atribuída à (705) que não está lá, expurgada na conversa salva e no log de pedidos por ordem do Humano (citação inventada se expurga). Assinatura pendente: bash scripts/aprovar.sh seth-web2-23-11
