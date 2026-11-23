@@ -39,7 +39,6 @@ ollama-agata.service|usuario|11447|nao|config/ollama-agata.service (sob demanda,
 ollaya.socket|usuario|11435|sim|config/ollaya.socket (porta pública; sobe com o agata.target)
 ollaya-proxy.service|usuario|-|nao|config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
 ollaya.service|usuario|11445|nao|config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
-agata-vault-inbox.timer|usuario|-|sim|fora do repo (unidade do usuário)
 
 # Unidades com WantedBy/PartOf de agata.target fora do P-9 (p9=nao). Listadas para o ESTADO conferir; avisam só se 'failed'.
 agata-drain.service|usuario|-|nao|redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)

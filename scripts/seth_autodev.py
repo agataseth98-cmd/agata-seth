@@ -156,7 +156,7 @@ def rodar_caso(pergunta, mcp, post=_post_gateway, max_passos=MAX_PASSOS, sistema
 # ------------------------------------------------------------------ casos: ouro (golden) + gerados (verdade na hora)
 UNIDADES = ["seth-gateway.service", "seth-escriba.service", "seth-verificador.service", "piper-tts.service", "omniroute.service",
             "laya-roteador.service", "agata-vigia@claude.service", "agata-vigia@codex.service", "agata-manutencao.timer",
-            "agata-vault-inbox.timer", "agata-laya-treino.timer", "agata-consolidacao.timer", "agata-avaliacao-decisor.timer",
+            "agata-laya-treino.timer", "agata-consolidacao.timer", "agata-avaliacao-decisor.timer",
             "agata-pesquisa-modelos.timer"]
 
 

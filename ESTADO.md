@@ -26,7 +26,6 @@ Manifesto: config/servicos-agata.txt. P-9 sim: o perímetro avisa se a unidade c
 - `ollaya.socket` (porta :11435) — unidade `ollaya.socket`, escopo usuario, P-9 sim — origem: config/ollaya.socket (porta pública; sobe com o agata.target)
 - `ollaya-proxy.service` — escopo usuario, P-9 nao — origem: config/ollaya-proxy.service (sob demanda: sobe com a 1ª conexão, sai após 15 min ociosos)
 - `ollaya` (porta :11445) — unidade `ollaya.service`, escopo usuario, P-9 nao — origem: config/ollaya.service (sob demanda, contêiner; só sobe pelo proxy)
-- `agata-vault-inbox.timer` — escopo usuario, P-9 sim — origem: fora do repo (unidade do usuário)
 - `agata-drain.service` — escopo usuario, P-9 nao — origem: redesign/systemd/agata-drain.service (oneshot que drena o WAL; fora do P-9 antes deste manifesto)
 - `obsidian-app.service` — escopo usuario, P-9 nao — origem: redesign/systemd/obsidian-app.service (app Flatpak; fora do P-9 antes deste manifesto)
 - `ouvido-agata` (porta :20137) — unidade `ouvido-agata.service`, escopo usuario, P-9 nao — origem: redesign/systemd/ouvido-agata.service (entrada de voz; fora do P-9 antes deste manifesto)
@@ -77,8 +76,7 @@ A nota é a da própria tabela, cortada. A tabela escreve a data de cada mediç�
 
 ## Propostas (propostas/)
 
-Abertas (sem APROVADO-): 1.
-- `vault-inbox-sai-23-11b`
+Abertas (sem APROVADO-): 0.
 Aplicadas: ver propostas/aplicadas/ (sem contagem aqui, de propósito).
 
 ## Bugs e testes abertos (ONDE_ESTAMOS.md)
