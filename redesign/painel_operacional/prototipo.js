@@ -2033,7 +2033,8 @@ async function ouvirResposta(texto, automatico) {
     vozEnviarParar();
     return;
   }
-  vozLendo = true; vozBotaoParar(true); vozEstado("Lendo em voz alta…", "");
+  vozLendo = true; vozBotaoParar(true);
+  if (chamadoLigado()) chamadoFalar(); else vozEstado("Lendo em voz alta…", "");
   let motivo = "", classe = "erro";
   try {
     const resposta = await fetch("/api/seth/ouvir", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texto: texto})});
@@ -2042,9 +2043,10 @@ async function ouvirResposta(texto, automatico) {
   } catch (_) {
     motivo = "NÃO falei: não consegui falar com o painel agora.";
   }
-  vozLendo = false; vozBotaoParar(false); vozEstado(motivo, classe);
+  vozLendo = false; vozBotaoParar(false);
+  if (chamadoLigado()) chamadoFimFala(classe === "erro" ? motivo : "", classe, CHAMADO_CAUDA_MAQUINA_MS); else vozEstado(motivo, classe);
   const proxima = vozFila; vozFila = null;
-  if (proxima !== null && vozModoLigado()) ouvirResposta(proxima, true);
+  if (proxima !== null && (vozModoLigado() || chamadoLigado())) ouvirResposta(proxima, true);
 }
 // Parar voz: interrompe entre trechos e descarta a fila. Sem leitura em curso, não chama o painel.
 function vozParar() {
@@ -2058,6 +2060,7 @@ function ditarMarcar(gravando) { const b = byId("seth-ditado"); b.setAttribute("
 // 60 s, para a gravação. O áudio vai só ao painel, que repassa ao ouvido local.
 async function ditarPeloMicrofone() {
   if (ditadoGravador) { ditadoGravador.stop(); return; }
+  if (chamadoLigado()) { vozEstado("A conversa por voz já está ouvindo o microfone. Pare a conversa por voz para ditar.", "erro"); return; }
   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof window.MediaRecorder !== "function") {
     vozEstado("Este navegador não grava áudio aqui. Digite a mensagem.", "erro"); return;
   }
@@ -2068,7 +2071,7 @@ async function ditarPeloMicrofone() {
     vozEstado(negado ? "Permissão do microfone negada. Libere o microfone para este endereço no navegador e tente de novo." : "Não consegui abrir o microfone. Confira se ele está ligado e livre.", "erro");
     return;
   }
-  const tipo = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
+  const tipo = gravacaoTipo();
   let gravador;
   try { gravador = new MediaRecorder(fluxo, tipo ? {mimeType: tipo, audioBitsPerSecond: 32000} : {audioBitsPerSecond: 32000}); }
   catch (_) { fluxo.getTracks().forEach((t) => t.stop()); vozEstado("Não consegui gravar neste navegador. Digite a mensagem.", "erro"); return; }
@@ -2088,24 +2091,39 @@ async function ditarPeloMicrofone() {
   gravador.start(1000);
   ditadoTimer = setTimeout(() => { vozEstado("A gravação parou no limite de 60 segundos.", ""); if (ditadoGravador) ditadoGravador.stop(); }, DITADO_MAX_MS);
 }
-async function enviarDitado(blob) {
-  const botao = byId("seth-ditado");
-  if (!blob.size) { vozEstado("Nada foi gravado. Tente de novo.", "erro"); return; }
-  if (blob.size > DITADO_MAX_BYTES) { vozEstado("Gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos.", "erro"); return; }
-  botao.disabled = true; vozEstado("Transcrevendo no ouvido local…", "");
+// Tamanho da gravação: "" se cabe, ou a frase do motivo. Usado pelo ditado e pela conversa por voz.
+function ditadoMotivoTamanho(blob) {
+  if (!blob.size) return "Nada foi gravado. Tente de novo.";
+  if (blob.size > DITADO_MAX_BYTES) return "Gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos.";
+  return "";
+}
+// Manda a gravação ao ouvido local (pelo painel). Devolve {texto} ou {motivo}; nunca lança.
+async function ditadoTexto(blob) {
+  const prazo = comPrazo(DITADO_PRAZO_MS);
   try {
-    const resposta = await fetch("/api/seth/ditado", {method: "POST", headers: {"Content-Type": blob.type || "audio/webm"}, body: blob});
-    if (!resposta.ok) { vozEstado(await vozErro(resposta), "erro"); return; }
+    const resposta = await fetch("/api/seth/ditado", {method: "POST", headers: {"Content-Type": blob.type || "audio/webm"}, body: blob, signal: prazo.sinal});
+    if (!resposta.ok) return {motivo: await vozErro(resposta)};
     const dados = await resposta.json();
     const texto = dados && typeof dados.texto === "string" ? dados.texto : "";
-    if (!texto) { vozEstado("Não veio texto da gravação. Tente de novo.", "erro"); return; }
+    return texto ? {texto: texto} : {motivo: "Não veio texto da gravação. Tente de novo."};
+  } catch (erro) {
+    if (erro && erro.name === "AbortError") return {motivo: "O ouvido demorou demais para responder: tente de novo."};
+    return {motivo: "Não consegui mandar a gravação ao painel. Digite a mensagem."};
+  } finally { prazo.fim(); }
+}
+async function enviarDitado(blob) {
+  const botao = byId("seth-ditado");
+  const motivo = ditadoMotivoTamanho(blob);
+  if (motivo) { vozEstado(motivo, "erro"); return; }
+  botao.disabled = true; vozEstado("Transcrevendo no ouvido local…", "");
+  try {
+    const r = await ditadoTexto(blob);
+    if (r.motivo) { vozEstado(r.motivo, "erro"); return; }
     const campo = byId("seth-input");
     const atual = campo.value.trim();
-    campo.value = (atual ? atual + " " + texto : texto).slice(0, 4000);
+    campo.value = (atual ? atual + " " + r.texto : r.texto).slice(0, 4000);
     campo.focus();
     vozEstado("Texto ditado. Revise e envie quando quiser.", "ok");
-  } catch (_) {
-    vozEstado("Não consegui mandar a gravação ao painel. Digite a mensagem.", "erro");
   } finally {
     botao.disabled = false;
   }
@@ -2120,6 +2138,366 @@ function vozLigarControles() {
   });
   byId("seth-voz-parar").addEventListener("click", vozParar);
   byId("seth-ditado").addEventListener("click", ditarPeloMicrofone);
+  byId("seth-chamado").addEventListener("click", chamadoAlternar);
+  document.addEventListener("keydown", chamadoTocouHumano);
+  document.addEventListener("click", chamadoTocouHumano);
+}
+
+// Conversa por voz (23/11/2026, pedido do Humano: falar com a Seth sem clique). Liga o microfone e fica ouvindo.
+// Voz vira trecho gravado; silêncio encerra o trecho, que é transcrito pelo ouvido local (como o ditado) e enviado à
+// Seth pelo mesmo caminho do Enviar. A resposta é lida pela voz do sistema e TOCADA NO NAVEGADOR (rota
+// /api/seth/voz-audio), para o echoCancellation do navegador cancelar o eco. Com a fala tocando, voz sustentada acima
+// de CHAMADO_LIMIAR_INTERRUPCAO interrompe a fala e já grava o turno do Humano (barge-in). Se a síntese falha, a fala
+// sai pela Máquina (/api/seth/ouvir), sem interrupção pela voz, e o aviso diz isso. Estados: abrindo, ouvindo,
+// transcrevendo, pensando, falando (e parando, quando a fala pela Máquina recebe Esc). Constantes nomeadas abaixo.
+const CHAMADO_LIMIAR_FALA = 0.02;         // nível RMS (0 a 1) do microfone que conta como voz
+const CHAMADO_LIMIAR_INTERRUPCAO = 0.08;  // nível que interrompe a fala da Seth (mais alto: o eco do alto-falante fica abaixo)
+const CHAMADO_INTERRUPCAO_MS = 300;       // voz sustentada por este tempo acima do limiar de interrupção
+const CHAMADO_SILENCIO_MS = 1200;         // silêncio que encerra o trecho do Humano
+const CHAMADO_VOZ_MIN_MS = 400;           // trecho com menos voz que isso é descartado
+const CHAMADO_POS_FALA_MS = 400;          // microfone mudo por este tempo depois da fala (cauda do eco)
+const CHAMADO_PASSO_MS = 50;              // intervalo da leitura do microfone
+const CHAMADO_CAUDA_MAQUINA_MS = 800;   // cauda pós-fala quando a fala saiu pela Máquina (o eco volta mais longe)
+const CHAMADO_TURNOS_MAX = 6;           // turnos de voz seguidos sem tecla nem clique do Humano antes da pausa
+const CHAMADO_ECO_FRACAO = 0.6;         // se a transcrição traz este trecho da última fala tocada, é eco
+const CHAMADO_ECO_MIN_PALAVRAS = 4;     // fala mais curta que isso não serve de referência para o eco
+const DITADO_PRAZO_MS = 130000;         // prazo do pedido de transcrição (o servidor do ouvido tem 120 s)
+const SINTESE_PRAZO_MS = 60000;         // prazo do pedido de um trecho falado
+const CHAMADO_ROTULOS = {abrindo: "Abrindo o microfone…", ouvindo: "Ouvindo…", transcrevendo: "Transcrevendo…", pensando: "Seth pensando…", falando: "Seth falando…", parando: "Parando a fala…"};
+const CHAMADO_COMANDOS = new Map([["fale comigo", "ligar"], ["encerrar chamado", "desligar"], ["volte ao texto", "desligar"]]);
+const chamado = {ligado: false, estado: "desligado", sessao: 0, fluxo: null, audio: null, timer: null, gravador: null, vad: null,
+  ignorarAte: 0, paradaPedida: false, fala: null, turnosSemToque: 0, pausada: false, ultimaFala: ""};
+// Prazo de um pedido: aborta o fetch se passar de ms. fim() desarma o prazo quando o pedido termina.
+function comPrazo(ms) { const controle = new AbortController(); const t = setTimeout(() => controle.abort(), ms); return {sinal: controle.signal, fim: () => clearTimeout(t)}; }
+function gravacaoTipo() { return ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || ""; }
+// Detector de fala por energia (função pura, testada no node). Devolve a ação deste passo: "" (nada), "iniciar" (a voz
+// começou), "encerrar" (o trecho acabou e tem voz de sobra) ou "descartar" (voz curta demais para contar).
+function chamadoVadNovo() { return {emFala: false, inicio: 0, ultimaVoz: 0}; }
+function chamadoVad(vad, nivel, agora) {
+  if (!vad.emFala) {
+    if (nivel < CHAMADO_LIMIAR_FALA) return "";
+    vad.emFala = true; vad.inicio = agora; vad.ultimaVoz = agora;
+    return "iniciar";
+  }
+  if (nivel >= CHAMADO_LIMIAR_FALA) vad.ultimaVoz = agora;
+  const acabou = agora - vad.ultimaVoz >= CHAMADO_SILENCIO_MS || agora - vad.inicio >= DITADO_MAX_MS;
+  if (!acabou) return "";
+  const comVoz = vad.ultimaVoz - vad.inicio;
+  vad.emFala = false;
+  return comVoz >= CHAMADO_VOZ_MIN_MS ? "encerrar" : "descartar";
+}
+// Frase de comando, digitada ou falada: "ligar", "desligar" ou "" (não é comando). Sem distinção de maiúsculas.
+function chamadoComando(texto) {
+  const frase = String(texto || "").trim().toLowerCase().replace(/[.!?,;:]+$/, "").trim();
+  return CHAMADO_COMANDOS.get(frase) || "";
+}
+// Palavras do texto: minúsculas, sem pontuação. Usado pela comparação do eco.
+function chamadoPalavras(texto) { return String(texto || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean); }
+// Eco (função pura): a transcrição traz um trecho de pelo menos CHAMADO_ECO_FRACAO das palavras da última fala tocada.
+function chamadoEhEco(transcricao, fala) {
+  const alvo = chamadoPalavras(fala);
+  if (alvo.length < CHAMADO_ECO_MIN_PALAVRAS) return false;
+  const k = Math.ceil(CHAMADO_ECO_FRACAO * alvo.length);
+  const ouvido = chamadoPalavras(transcricao);
+  for (let i = 0; i + k <= alvo.length; i++) {
+    const trecho = alvo.slice(i, i + k).join(" ");
+    for (let j = 0; j + k <= ouvido.length; j++) if (ouvido.slice(j, j + k).join(" ") === trecho) return true;
+  }
+  return false;
+}
+function chamadoRotulo(estado, paradaPedida) {
+  return estado === "falando" && paradaPedida ? CHAMADO_ROTULOS.parando : (CHAMADO_ROTULOS[estado] || "");
+}
+function chamadoLigado() { return chamado.ligado; }
+function chamadoBotao(ligado) {
+  const b = byId("seth-chamado");
+  b.setAttribute("aria-pressed", ligado ? "true" : "false");
+  b.textContent = ligado ? "Parar conversa por voz" : "Conversa por voz";
+}
+// Estado sempre visível (Regra 0): o rótulo do estado e, se houver, o aviso. A linha é própria (não a da voz).
+function chamadoIr(estado, aviso = "", classe = "") {
+  chamado.estado = estado;
+  if (estado !== "falando") chamado.paradaPedida = false;
+  const linha = byId("seth-chamado-estado");
+  linha.hidden = false;
+  linha.textContent = chamadoRotulo(estado, chamado.paradaPedida) + (aviso ? " " + aviso : "");
+  linha.className = "seth-voz-estado seth-chamado-estado" + (classe ? " " + classe : "");
+}
+function chamadoVoltarAOuvir(aviso = "", classe = "") {
+  if (!chamado.ligado) return;
+  chamadoCortarTrecho();
+  chamado.vad = chamadoVadNovo();
+  chamadoIr("ouvindo", aviso, classe);
+}
+// Começa a fala (pelo navegador ou pela Máquina): a fala anterior do navegador, se ainda toca, para antes.
+function chamadoFalar() { chamadoPararFala(chamado.fala); chamadoCortarTrecho(); chamado.vad = chamadoVadNovo(); chamadoIr("falando"); }
+// Nova mensagem (digitada ou da conversa por voz): a fala para e o microfone não escuta até a resposta chegar.
+function chamadoPensar() {
+  chamadoPararFala(chamado.fala);
+  vozFila = null;
+  if (vozLendo) vozEnviarParar();
+  chamadoCortarTrecho(); chamado.vad = chamadoVadNovo();
+  chamadoIr("pensando");
+}
+// Fim da fala (naturalmente, ou pela Máquina): volta a ouvir e deixa a cauda do eco passar.
+function chamadoFimFala(aviso = "", classe = "", cauda = CHAMADO_POS_FALA_MS) {
+  if (!chamado.ligado || chamado.estado !== "falando") return;
+  chamado.fala = null;
+  chamado.ignorarAte = performance.now() + cauda;
+  chamadoVoltarAOuvir(aviso, classe);
+}
+// Resposta que não foi lida (erro, parada ou outra conversa): a conversa por voz volta a ouvir.
+function chamadoFimResposta(lida) {
+  if (chamado.ligado && chamado.estado === "pensando") chamadoVoltarAOuvir(lida ? "" : "Nada para ler desta vez.");
+}
+// Gravação do trecho do Humano. O evento de parada só envia se o trecho ainda é o atual (descartado não manda nada).
+function chamadoCortarTrecho() {
+  const gravador = chamado.gravador;
+  chamado.gravador = null;
+  if (gravador) { try { gravador.stop(); } catch (_) { /* já parou */ } }
+}
+function chamadoComecarTrecho() {
+  const tipo = gravacaoTipo();
+  let gravador;
+  try { gravador = new MediaRecorder(chamado.fluxo, tipo ? {mimeType: tipo, audioBitsPerSecond: 32000} : {audioBitsPerSecond: 32000}); }
+  catch (_) { chamadoVoltarAOuvir("Não consegui gravar neste navegador."); return; }
+  const pedacos = [];
+  const sessao = chamado.sessao;
+  gravador.addEventListener("dataavailable", (e) => { if (e.data && e.data.size) pedacos.push(e.data); });
+  gravador.addEventListener("stop", () => {
+    if (chamado.gravador !== gravador) return;
+    chamado.gravador = null;
+    chamadoTranscrever(new Blob(pedacos, {type: gravador.mimeType || tipo || "audio/webm"}), sessao);
+  });
+  chamado.gravador = gravador;
+  gravador.start(1000);
+}
+async function chamadoTranscrever(blob, sessao) {
+  const motivo = ditadoMotivoTamanho(blob);
+  if (motivo) { chamadoVoltarAOuvir(motivo, "erro"); return; }
+  chamadoIr("transcrevendo");
+  const r = await ditadoTexto(blob);
+  if (sessao !== chamado.sessao || !chamado.ligado) return; // desligou enquanto transcrevia
+  if (r.motivo) { chamadoVoltarAOuvir(r.motivo, "erro"); return; }
+  if (chamadoEhEco(r.texto, chamado.ultimaFala)) { chamadoVoltarAOuvir("Trecho descartado: parecia eco da resposta.", "erro"); return; }
+  chamadoEnviarTexto(r.texto);
+}
+// O texto falado segue o caminho do Enviar (o formulário). O rascunho digitado volta ao campo depois.
+function chamadoEnviarTexto(texto) {
+  const comando = chamadoComando(texto);
+  if (comando === "desligar") { chamadoDesligar("Conversa por voz desligada: você pediu para encerrar."); return; }
+  if (comando === "ligar") { chamadoVoltarAOuvir("A conversa por voz já está ligada."); return; }
+  const campo = byId("seth-input");
+  const deixarNoCampo = (aviso) => {
+    const atual = campo.value.trim();
+    campo.value = (atual ? atual + " " + texto : texto).slice(0, 4000);
+    chamadoVoltarAOuvir(aviso, "erro");
+  };
+  if (sethAnexosDoRascunho().length) { deixarNoCampo("Há anexo pendente: envie ou tire o anexo antes de falar. A fala ficou no campo."); return; }
+  if (sethEmCurso() || byId("seth-send").disabled) { deixarNoCampo("A Seth ainda está respondendo: a fala ficou no campo para enviar."); return; }
+  // Pausa: depois de CHAMADO_TURNOS_MAX turnos de voz sem tecla nem clique, a próxima fala não vai à Seth. Falar de novo retoma.
+  if (chamado.pausada) { chamado.pausada = false; chamado.turnosSemToque = 0; }
+  else if (chamado.turnosSemToque >= CHAMADO_TURNOS_MAX) {
+    chamado.pausada = true;
+    deixarNoCampo("Conversa pausada: diga algo ou toque para continuar.");
+    return;
+  }
+  chamado.turnosSemToque += 1;
+  const rascunho = campo.value;
+  campo.value = texto;
+  byId("seth-form").requestSubmit();
+  const enviou = sethEmCurso();
+  campo.value = rascunho;
+  sethGuardarTexto();
+  if (!enviou) chamadoVoltarAOuvir("Não enviei a fala: tente de novo.", "erro");
+}
+// Comando digitado no campo: "fale comigo" liga, "encerrar chamado" e "volte ao texto" desligam.
+function chamadoComandar(comando) {
+  if (comando === "ligar") { if (chamadoLigado()) vozEstado("A conversa por voz já está ligada.", ""); else chamadoLigar(); return; }
+  if (chamadoLigado()) chamadoDesligar("Conversa por voz desligada.");
+  else vozEstado("A conversa por voz já estava desligada.", "");
+}
+// Tecla ou clique do Humano: zera os turnos automáticos e tira a pausa. Só age com a conversa ligada e parada.
+function chamadoTocouHumano() {
+  chamado.turnosSemToque = 0;
+  if (chamado.pausada) { chamado.pausada = false; if (chamado.ligado && chamado.estado === "ouvindo") chamadoVoltarAOuvir(""); }
+}
+function chamadoAlternar() { if (chamado.ligado) chamadoDesligar(); else chamadoLigar(); }
+function chamadoAbrirAudio(fluxo) {
+  const Contexto = window.AudioContext || window.webkitAudioContext;
+  if (typeof Contexto !== "function") throw new Error("sem AudioContext");
+  const contexto = new Contexto();
+  const analisador = contexto.createAnalyser();
+  analisador.fftSize = 2048;
+  contexto.createMediaStreamSource(fluxo).connect(analisador); // só lê o microfone: não vai para a saída
+  return {contexto: contexto, analisador: analisador, buffer: new Float32Array(analisador.fftSize)};
+}
+function chamadoNivel(audio) {
+  audio.analisador.getFloatTimeDomainData(audio.buffer);
+  let soma = 0;
+  for (let i = 0; i < audio.buffer.length; i++) soma += audio.buffer[i] * audio.buffer[i];
+  return Math.sqrt(soma / audio.buffer.length);
+}
+async function chamadoLigar() {
+  if (chamado.ligado) { vozEstado("A conversa por voz já está ligada.", ""); return; }
+  if (ditadoGravador) { vozEstado("Pare a gravação do ditado antes de ligar a conversa por voz.", "erro"); return; }
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof window.MediaRecorder !== "function") {
+    vozEstado("Este navegador não tem conversa por voz aqui. Digite a mensagem.", "erro"); return;
+  }
+  const sessao = ++chamado.sessao;
+  chamado.ligado = true; chamadoBotao(true); chamadoIr("abrindo");
+  let fluxo;
+  try { fluxo = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
+  catch (erro) {
+    if (sessao !== chamado.sessao) return;
+    const negado = erro && (erro.name === "NotAllowedError" || erro.name === "SecurityError");
+    chamadoDesligar(negado ? "Permissão do microfone negada. Libere o microfone para este endereço no navegador e tente de novo." : "Não consegui abrir o microfone. Confira se ele está ligado e livre.");
+    return;
+  }
+  if (sessao !== chamado.sessao) { fluxo.getTracks().forEach((t) => t.stop()); return; }
+  let audio;
+  try { audio = chamadoAbrirAudio(fluxo); }
+  catch (_) { fluxo.getTracks().forEach((t) => t.stop()); chamadoDesligar("Não consegui ouvir o microfone neste navegador."); return; }
+  // Após resume(), se o contexto não ficou "running", o áudio não toca: desliga com aviso, sem deixar a escuta solta.
+  try { if (audio.contexto.state !== "running" && audio.contexto.resume) await audio.contexto.resume(); } catch (_) { /* a checagem abaixo decide */ }
+  if (sessao !== chamado.sessao) { fluxo.getTracks().forEach((t) => t.stop()); return; }
+  if (audio.contexto.state !== "running") {
+    fluxo.getTracks().forEach((t) => t.stop());
+    Promise.resolve(audio.contexto.close && audio.contexto.close()).catch(() => {});
+    chamadoDesligar("O navegador não deixou o áudio tocar: ligue a conversa por voz de novo.");
+    return;
+  }
+  chamado.fluxo = fluxo; chamado.audio = audio; chamado.vad = chamadoVadNovo(); chamado.ignorarAte = 0;
+  chamadoAgendar();
+  if (chamado.estado === "abrindo") chamadoIr("ouvindo");
+}
+function chamadoDesligar(aviso = "Conversa por voz desligada.") {
+  chamado.sessao += 1;
+  chamado.ligado = false; chamado.estado = "desligado"; chamado.paradaPedida = false;
+  if (chamado.timer) { clearTimeout(chamado.timer); chamado.timer = null; }
+  chamadoCortarTrecho();
+  chamadoPararFala(chamado.fala);
+  if (vozLendo) { vozFila = null; vozEnviarParar(); }
+  if (chamado.fluxo) { chamado.fluxo.getTracks().forEach((t) => t.stop()); chamado.fluxo = null; }
+  if (chamado.audio) { const contexto = chamado.audio.contexto; chamado.audio = null; Promise.resolve(contexto.close && contexto.close()).catch(() => {}); }
+  chamado.vad = null;
+  const linha = byId("seth-chamado-estado"); linha.hidden = true; linha.textContent = "";
+  chamadoBotao(false);
+  vozEstado(aviso, "");
+}
+// Um passo da leitura do microfone, a cada CHAMADO_PASSO_MS: um temporizador que se reagenda (o painel não ganha intervalo novo).
+function chamadoAgendar() { chamado.timer = setTimeout(chamadoPasso, CHAMADO_PASSO_MS); }
+function chamadoPasso() {
+  chamado.timer = null;
+  if (!chamado.ligado || !chamado.audio) return;
+  chamadoAvaliar();
+  if (chamado.ligado && chamado.audio) chamadoAgendar();
+}
+// Ouve, grava, encerra ou interrompe a fala, conforme o nível do microfone neste passo.
+function chamadoAvaliar() {
+  const agora = performance.now();
+  const nivel = chamadoNivel(chamado.audio);
+  if (chamado.estado === "falando") { if (chamado.fala) chamadoVigiarInterrupcao(chamado.fala, nivel, agora); return; }
+  if (chamado.estado !== "ouvindo" || agora < chamado.ignorarAte) return;
+  const acao = chamadoVad(chamado.vad, nivel, agora);
+  if (acao === "iniciar") chamadoComecarTrecho();
+  else if (acao === "descartar") chamadoCortarTrecho();
+  else if (acao === "encerrar") {
+    const gravador = chamado.gravador;
+    if (!gravador) { chamadoVoltarAOuvir(); return; }
+    chamadoIr("transcrevendo");
+    gravador.stop();
+  }
+}
+// Barge-in: voz sustentada acima do limiar de interrupção, com a fala tocando no navegador.
+function chamadoVigiarInterrupcao(fala, nivel, agora) {
+  if (nivel < CHAMADO_LIMIAR_INTERRUPCAO) { fala.acimaDesde = null; return; }
+  if (fala.acimaDesde === null) fala.acimaDesde = agora;
+  if (agora - fala.acimaDesde >= CHAMADO_INTERRUPCAO_MS) chamadoInterromper(fala, agora);
+}
+function chamadoInterromper(fala, agora) {
+  chamadoPararFala(fala);
+  chamado.ignorarAte = 0;
+  chamado.vad = {emFala: true, inicio: agora - CHAMADO_INTERRUPCAO_MS, ultimaVoz: agora};
+  chamadoIr("ouvindo", "Fala interrompida pela sua voz.");
+  chamadoComecarTrecho();
+}
+// Para o áudio que está tocando (na hora) e solta quem espera por ele.
+function chamadoPararFala(fala) {
+  if (!fala) return;
+  fala.parada = true;
+  fala.fontes.forEach((f) => { try { f.stop(); } catch (_) { /* já terminou */ } });
+  fala.pendentes.splice(0).forEach((acordar) => acordar());
+  if (chamado.fala === fala) chamado.fala = null;
+}
+// Esc com a conversa por voz ligada: fala tocando no navegador para na hora e volta a ouvir; fala pela Máquina pede a
+// parada (vale entre trechos) e a segunda vez desliga; Seth pensando interrompe a resposta e volta a ouvir; em silêncio, desliga.
+function chamadoEsc() {
+  const estado = chamado.estado;
+  if (estado === "falando" && chamado.fala) {
+    chamadoPararFala(chamado.fala);
+    chamado.ignorarAte = performance.now() + CHAMADO_POS_FALA_MS;
+    chamadoVoltarAOuvir("Fala interrompida.");
+    return;
+  }
+  if (estado === "falando") {
+    if (chamado.paradaPedida) { chamadoDesligar(); return; }
+    chamado.paradaPedida = true; vozFila = null; vozEnviarParar(); chamadoIr("falando");
+    return;
+  }
+  if (estado === "pensando") { sethParar(); chamadoVoltarAOuvir("Resposta interrompida."); return; }
+  chamadoDesligar();
+}
+// Resposta da Seth: lida pelo navegador (ou, se a síntese falhar, pela Máquina).
+function chamadoLerResposta(texto) { chamado.ultimaFala = texto; chamadoFalar(); chamadoLerNoNavegador(texto); }
+async function chamadoSintetizar(texto, indice) {
+  const prazo = comPrazo(SINTESE_PRAZO_MS);
+  try {
+    const resposta = await fetch("/api/seth/voz-audio", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texto: texto, trecho: indice}), signal: prazo.sinal});
+    if (!resposta.ok) throw Object.assign(new Error("voz do navegador"), {status: resposta.status, motivo: await vozErro(resposta)});
+    return {total: Math.max(1, Number(resposta.headers.get("X-Trechos")) || 1), bytes: await resposta.arrayBuffer()};
+  } finally { prazo.fim(); }
+}
+function chamadoTocar(fala, contexto, buffer) {
+  return new Promise((resolver) => {
+    const fonte = contexto.createBufferSource();
+    fonte.buffer = buffer;
+    fonte.connect(contexto.destination);
+    fala.fontes.push(fonte); fala.pendentes.push(resolver);
+    fonte.onended = () => { fala.pendentes = fala.pendentes.filter((f) => f !== resolver); resolver(); };
+    fonte.start();
+  });
+}
+// Fala pelo navegador, trecho a trecho. Se a síntese falha no primeiro trecho, a fala sai pela Máquina (meia-duplex)
+// e o aviso diz isso; se falha no meio, o resto não é falado (sem repetir o que já foi).
+async function chamadoLerNoNavegador(texto) {
+  const fala = {fontes: [], pendentes: [], parada: false, acimaDesde: null};
+  chamado.fala = fala;
+  let total = 1, indice = 0;
+  try {
+    while (indice < total && !fala.parada) {
+      const pacote = await chamadoSintetizar(texto, indice);
+      if (fala.parada) return;
+      total = pacote.total;
+      const buffer = await chamado.audio.contexto.decodeAudioData(pacote.bytes);
+      if (fala.parada) return;
+      await chamadoTocar(fala, chamado.audio.contexto, buffer);
+      indice += 1;
+    }
+  } catch (erro) {
+    if (fala.parada) return;
+    chamadoFalhouNaVoz(texto, indice, erro);
+    return;
+  }
+  if (!fala.parada) chamadoFimFala("");
+}
+function chamadoFalhouNaVoz(texto, indice, erro) {
+  chamado.fala = null;
+  if (erro && erro.status === 413) { chamadoFimFala("Resposta longa demais para falar.", "erro"); return; }
+  if (erro && erro.status === 400) { chamadoFimFala("Nada para falar nesta resposta."); return; }
+  if (indice > 0) { chamadoFimFala("A voz falhou no meio da fala: o resto não foi falado.", "erro"); return; }
+  vozEstado("A voz do navegador falhou: falo pela Máquina, sem interromper pela voz.", "erro");
+  ouvirResposta(texto, true);
 }
 /* Rascunho por conversa (C6): o texto do campo e os anexos pendentes ficam em sethRascunhos, por chave da conversa
    ("conversa-<id>", ou uma chave própria da conversa nova). Cada digitação grava; trocar de conversa restaura. */
@@ -2275,6 +2653,8 @@ function ligarConversaSeth() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const texto = campo.value.trim();
+    const comando = chamadoComando(texto); // "fale comigo" liga sempre; desligar só com a conversa ligada; o resto vai à Seth
+    if (comando === "ligar" || (comando === "desligar" && chamadoLigado())) { campo.value = ""; sethGuardarTexto(); chamadoComandar(comando); return; }
     if (!texto || byId("seth-send").disabled) return;
     // Os anexos pendentes vão com esta pergunta; o rascunho da conversa é limpo ao enviar (C6, C9).
     const anexos = sethAnexosDoRascunho().slice();
@@ -2605,6 +2985,7 @@ async function sethResponder(op) {
   const {modo, alvo = sethAtual, paiId = null, alvoId = null, novoUsuarioId = null, textoDoUsuario = "", anexos = []} = op;
   const campo = byId("seth-input"); const log = byId("seth-transcript"); const botao = byId("seth-send");
   const controle = new AbortController(); sethControle = controle; sethRespondendo = true;
+  if (chamadoLigado()) chamadoPensar(); // a conversa por voz para a fala e espera esta resposta (23/11)
   sethUso = null; alvo.erro = null; // um pedido novo zera o uso anterior e a falha que estava na tela
   botao.disabled = true; sethPintarParar(); sethStatus("PENSANDO", "partial");
   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
@@ -2654,7 +3035,7 @@ async function sethResponder(op) {
   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
   if (conteudo !== null) {
     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
-    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
+    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (chamadoLigado()) chamadoLerResposta(conteudo); else if (vozModoLigado()) ouvirResposta(conteudo, true); }
     await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
   } else if (parada) {
     if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
@@ -2672,6 +3053,7 @@ async function sethResponder(op) {
   }
   sethRespondendo = false;
   botao.disabled = false; sethPintarParar(); campo.focus();
+  chamadoFimResposta(conteudo !== null && alvo === sethAtual);
 }
 
 function sethComecarNova() {
@@ -3208,7 +3590,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (menuAberto) { fecharMenuAberto(); return; }
     if (gavetaAberta()) { setGaveta(false); byId("menu-abrir").focus(); return; }
-    if (atalhosAbertos()) alternarAtalhos(false); else { if (sethEmCurso()) sethParar(); vozParar(); }
+    if (atalhosAbertos()) alternarAtalhos(false); else if (chamadoLigado()) chamadoEsc(); else { if (sethEmCurso()) sethParar(); vozParar(); }
     return;
   }
   if (campoDeTexto(e.target)) return;

@@ -565,6 +565,9 @@ td.mono{font-family:var(--mono);font-size:var(--fs-2);overflow-wrap:anywhere}
 .seth-ditar{min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--sheet-2);color:var(--ink)}
 .seth-ditar[aria-pressed="true"]{border-color:var(--rose);color:var(--rose)}
 .seth-ditar:disabled{opacity:.5;cursor:default}
+.seth-chamar{min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--sheet-2);color:var(--ink)}
+.seth-chamar[aria-pressed="true"]{border-color:var(--rose);color:var(--rose)}
+.seth-chamado-estado{color:var(--ink)}
 .seth-modelo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:var(--fs-2);color:var(--muted)}
 .seth-modelo-desc{flex-basis:100%;font-size:var(--fs-1);color:var(--muted)}
 .seth-modelo select{padding:4px 8px}

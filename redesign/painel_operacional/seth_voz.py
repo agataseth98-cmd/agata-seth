@@ -9,7 +9,8 @@ Humano pede ou o modo conversa está ligado. Quem não fala diz que NÃO falou (
 painel: a trava é a mesma da História (historia_painel._FALA_LOCK).
 
 Interface: iniciar(texto) fala e só volta quando termina, para ou falha; parar() pede a parada, que vale entre
-partes; estado() e resumo_voz() só leem. Nada disso grava o texto: o último motivo e o último uso ficam em memória.
+partes; sintetizar(texto, trecho) devolve o WAV de um trecho sem tocar (conversa por voz: o navegador toca, 23/11);
+estado() e resumo_voz() só leem. Nada disso grava o texto: o último motivo e o último uso ficam em memória.
 """
 from __future__ import annotations
 
@@ -36,6 +37,8 @@ _ESTADO_LOCK = threading.Lock()
 _PARAR = threading.Event()
 _ESTADO = {"falando": False, "trecho": 0, "trechos": 0, "ultimo_uso": None, "ultimo_motivo": None}
 _falar_mod = None
+_SINTESE = threading.BoundedSemaphore(1)  # uma síntese por vez: o piper atende uma de cada vez (23/11)
+ESPERA_SINTESE_S = 30  # o segundo pedido espera até isso; depois recebe 503
 
 
 class ErroVoz(Exception):
@@ -160,6 +163,43 @@ def parar() -> dict:
     if not lendo:
         return {"schema_version": 1, "falando": False, "motivo": "não estou lendo: nada para parar"}
     return {"schema_version": 1, "falando": True, "motivo": "parando: a leitura para depois do trecho que está tocando"}
+
+
+def sintetizar(texto, trecho: int = 0) -> tuple[bytes, int]:
+    """Conversa por voz (23/11/2026): o WAV de UM trecho do texto, com a voz do sistema, sem tocar. Quem toca é o
+    navegador, para o echoCancellation dele cancelar o eco. Devolve (wav, total de trechos do texto preparado).
+    Não grava o texto. Trecho por trecho, o mesmo corte da leitura (agata_falar.paragrafos).
+    O piper sobe sob demanda e não é desligado aqui: cada trecho pediria um ciclo de liga e desliga (segundos)."""
+    if not isinstance(texto, str) or not texto.strip():
+        raise ErroVoz(400, "texto vazio: nada para falar")
+    falar = _falar()
+    fala = falar.preparar(texto)
+    if not fala:
+        raise ErroVoz(400, "nada para falar depois de preparar o texto")
+    if len(fala) > falar.MAX_TOTAL:
+        raise ErroVoz(413, "resposta longa demais para falar. Peça um resumo.")
+    partes = falar.paragrafos(fala)
+    if isinstance(trecho, bool) or not isinstance(trecho, int) or not 0 <= trecho < len(partes):
+        raise ErroVoz(400, "trecho fora do texto")
+    if not _SINTESE.acquire(timeout=ESPERA_SINTESE_S):
+        raise ErroVoz(503, "a voz está ocupada com outro trecho; tente de novo em alguns segundos")
+    try:
+        h, _ligamos = falar.garantir_servico()
+        if not h or not str(h.get("model", "")).startswith(falar.MODELO_DO_SISTEMA):
+            raise ErroVoz(503, "NÃO falei: a voz do sistema não respondeu, ou carregou outro modelo. Não falo com outra voz.")
+        corpo = json.dumps({"model": "tts-1", "input": partes[trecho], "voice": "agata", "response_format": "wav"}).encode("utf-8")
+        try:
+            audio, _cabecalhos = falar._http("/v1/audio/speech", corpo, timeout=TEMPO_TRECHO_S)
+        except urllib.error.HTTPError as erro:
+            erro.close()  # o corpo do erro não interessa; fechar evita o aviso de recurso no GC
+            raise ErroVoz(502, "a voz do sistema falhou ao gerar o áudio: NÃO falei")
+        except (urllib.error.URLError, OSError):
+            raise ErroVoz(502, "a voz do sistema falhou ao gerar o áudio: NÃO falei")
+    finally:
+        _SINTESE.release()
+    if audio[:4] != b"RIFF":
+        raise ErroVoz(502, "a voz do sistema devolveu algo que não é WAV: NÃO falei")
+    return audio, len(partes)
 
 
 def estado() -> dict:

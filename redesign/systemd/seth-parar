@@ -18,6 +18,7 @@ if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
   kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
 fi
 systemctl --user stop piper-tts.service 2>/dev/null || true
+systemctl --user stop ouvido-agata.service 2>/dev/null || true
 systemctl --user stop painel-operacional.service 2>/dev/null || true
 systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
 systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
