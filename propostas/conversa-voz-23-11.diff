@@ -1,0 +1,1876 @@
+diff --git a/redesign/painel_operacional/prototipo.css b/redesign/painel_operacional/prototipo.css
+index bff355b0..203da907 100644
+--- a/redesign/painel_operacional/prototipo.css
++++ b/redesign/painel_operacional/prototipo.css
+@@ -565,6 +565,9 @@ td.mono{font-family:var(--mono);font-size:var(--fs-2);overflow-wrap:anywhere}
+ .seth-ditar{min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--sheet-2);color:var(--ink)}
+ .seth-ditar[aria-pressed="true"]{border-color:var(--rose);color:var(--rose)}
+ .seth-ditar:disabled{opacity:.5;cursor:default}
++.seth-chamar{min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--sheet-2);color:var(--ink)}
++.seth-chamar[aria-pressed="true"]{border-color:var(--rose);color:var(--rose)}
++.seth-chamado-estado{color:var(--ink)}
+ .seth-modelo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:var(--fs-2);color:var(--muted)}
+ .seth-modelo-desc{flex-basis:100%;font-size:var(--fs-1);color:var(--muted)}
+ .seth-modelo select{padding:4px 8px}
+diff --git a/redesign/painel_operacional/prototipo.html b/redesign/painel_operacional/prototipo.html
+index e893c71c..2392b8bf 100644
+--- a/redesign/painel_operacional/prototipo.html
++++ b/redesign/painel_operacional/prototipo.html
+@@ -135,7 +135,7 @@
+     <div class="seth-linha-baixo">
+       <div class="seth-contexto-bloco"><p id="seth-contexto" class="seth-contexto" role="status"></p><progress id="seth-contexto-barra" class="seth-contexto-barra" max="100" value="0" aria-label="Quanto da janela de contexto vai no próximo envio">0%</progress></div>
+       <details class="seth-detalhes" id="seth-detalhes"><summary>Detalhes</summary><div class="seth-detalhes-corpo"><p id="seth-contexto-detalhe" class="seth-contexto-detalhe"></p><p id="seth-modelo-desc" class="seth-modelo-desc"></p></div></details>
+-      <div class="seth-voz" id="seth-voz"><label class="seth-voz-modo" title="Ler cada resposta da Seth em voz alta"><input type="checkbox" id="seth-modo-conversa"> Modo conversa</label><button class="text-link" type="button" id="seth-voz-parar" hidden>Parar voz</button><p class="seth-voz-estado" id="seth-voz-estado" role="status" aria-live="polite"></p></div>
++      <div class="seth-voz" id="seth-voz"><button class="btn secondary seth-chamar" type="button" id="seth-chamado" aria-pressed="false">Conversa por voz</button><label class="seth-voz-modo" title="Ler cada resposta da Seth em voz alta"><input type="checkbox" id="seth-modo-conversa"> Modo conversa</label><button class="text-link" type="button" id="seth-voz-parar" hidden>Parar voz</button><p class="seth-voz-estado" id="seth-voz-estado" role="status" aria-live="polite"></p><p class="seth-voz-estado seth-chamado-estado" id="seth-chamado-estado" role="status" aria-live="polite" hidden></p></div>
+       <p id="seth-copiado" class="seth-copiado" role="status"></p>
+       <p id="seth-temporaria-aviso" class="seth-temporaria" role="status" hidden>Conversa temporária: não é salva. Não aparece na lista nem na busca, e some ao trocar de conversa ou recarregar a página.</p>
+       <p id="seth-salvar-aviso" class="seth-aviso" role="status" hidden></p>
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 4ee4d37d..25a42698 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -2033,7 +2033,8 @@ async function ouvirResposta(texto, automatico) {
+     vozEnviarParar();
+     return;
+   }
+-  vozLendo = true; vozBotaoParar(true); vozEstado("Lendo em voz alta…", "");
++  vozLendo = true; vozBotaoParar(true);
++  if (chamadoLigado()) chamadoFalar(); else vozEstado("Lendo em voz alta…", "");
+   let motivo = "", classe = "erro";
+   try {
+     const resposta = await fetch("/api/seth/ouvir", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texto: texto})});
+@@ -2042,9 +2043,10 @@ async function ouvirResposta(texto, automatico) {
+   } catch (_) {
+     motivo = "NÃO falei: não consegui falar com o painel agora.";
+   }
+-  vozLendo = false; vozBotaoParar(false); vozEstado(motivo, classe);
++  vozLendo = false; vozBotaoParar(false);
++  if (chamadoLigado()) chamadoFimFala(classe === "erro" ? motivo : "", classe, CHAMADO_CAUDA_MAQUINA_MS); else vozEstado(motivo, classe);
+   const proxima = vozFila; vozFila = null;
+-  if (proxima !== null && vozModoLigado()) ouvirResposta(proxima, true);
++  if (proxima !== null && (vozModoLigado() || chamadoLigado())) ouvirResposta(proxima, true);
+ }
+ // Parar voz: interrompe entre trechos e descarta a fila. Sem leitura em curso, não chama o painel.
+ function vozParar() {
+@@ -2058,6 +2060,7 @@ function ditarMarcar(gravando) { const b = byId("seth-ditado"); b.setAttribute("
+ // 60 s, para a gravação. O áudio vai só ao painel, que repassa ao ouvido local.
+ async function ditarPeloMicrofone() {
+   if (ditadoGravador) { ditadoGravador.stop(); return; }
++  if (chamadoLigado()) { vozEstado("A conversa por voz já está ouvindo o microfone. Pare a conversa por voz para ditar.", "erro"); return; }
+   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof window.MediaRecorder !== "function") {
+     vozEstado("Este navegador não grava áudio aqui. Digite a mensagem.", "erro"); return;
+   }
+@@ -2068,7 +2071,7 @@ async function ditarPeloMicrofone() {
+     vozEstado(negado ? "Permissão do microfone negada. Libere o microfone para este endereço no navegador e tente de novo." : "Não consegui abrir o microfone. Confira se ele está ligado e livre.", "erro");
+     return;
+   }
+-  const tipo = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
++  const tipo = gravacaoTipo();
+   let gravador;
+   try { gravador = new MediaRecorder(fluxo, tipo ? {mimeType: tipo, audioBitsPerSecond: 32000} : {audioBitsPerSecond: 32000}); }
+   catch (_) { fluxo.getTracks().forEach((t) => t.stop()); vozEstado("Não consegui gravar neste navegador. Digite a mensagem.", "erro"); return; }
+@@ -2088,24 +2091,39 @@ async function ditarPeloMicrofone() {
+   gravador.start(1000);
+   ditadoTimer = setTimeout(() => { vozEstado("A gravação parou no limite de 60 segundos.", ""); if (ditadoGravador) ditadoGravador.stop(); }, DITADO_MAX_MS);
+ }
++// Tamanho da gravação: "" se cabe, ou a frase do motivo. Usado pelo ditado e pela conversa por voz.
++function ditadoMotivoTamanho(blob) {
++  if (!blob.size) return "Nada foi gravado. Tente de novo.";
++  if (blob.size > DITADO_MAX_BYTES) return "Gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos.";
++  return "";
++}
++// Manda a gravação ao ouvido local (pelo painel). Devolve {texto} ou {motivo}; nunca lança.
++async function ditadoTexto(blob) {
++  const prazo = comPrazo(DITADO_PRAZO_MS);
++  try {
++    const resposta = await fetch("/api/seth/ditado", {method: "POST", headers: {"Content-Type": blob.type || "audio/webm"}, body: blob, signal: prazo.sinal});
++    if (!resposta.ok) return {motivo: await vozErro(resposta)};
++    const dados = await resposta.json();
++    const texto = dados && typeof dados.texto === "string" ? dados.texto : "";
++    return texto ? {texto: texto} : {motivo: "Não veio texto da gravação. Tente de novo."};
++  } catch (erro) {
++    if (erro && erro.name === "AbortError") return {motivo: "O ouvido demorou demais para responder: tente de novo."};
++    return {motivo: "Não consegui mandar a gravação ao painel. Digite a mensagem."};
++  } finally { prazo.fim(); }
++}
+ async function enviarDitado(blob) {
+   const botao = byId("seth-ditado");
+-  if (!blob.size) { vozEstado("Nada foi gravado. Tente de novo.", "erro"); return; }
+-  if (blob.size > DITADO_MAX_BYTES) { vozEstado("Gravação grande demais: o limite é 2 MB, cerca de 60 segundos. Grave menos.", "erro"); return; }
++  const motivo = ditadoMotivoTamanho(blob);
++  if (motivo) { vozEstado(motivo, "erro"); return; }
+   botao.disabled = true; vozEstado("Transcrevendo no ouvido local…", "");
+   try {
+-    const resposta = await fetch("/api/seth/ditado", {method: "POST", headers: {"Content-Type": blob.type || "audio/webm"}, body: blob});
+-    if (!resposta.ok) { vozEstado(await vozErro(resposta), "erro"); return; }
+-    const dados = await resposta.json();
+-    const texto = dados && typeof dados.texto === "string" ? dados.texto : "";
+-    if (!texto) { vozEstado("Não veio texto da gravação. Tente de novo.", "erro"); return; }
++    const r = await ditadoTexto(blob);
++    if (r.motivo) { vozEstado(r.motivo, "erro"); return; }
+     const campo = byId("seth-input");
+     const atual = campo.value.trim();
+-    campo.value = (atual ? atual + " " + texto : texto).slice(0, 4000);
++    campo.value = (atual ? atual + " " + r.texto : r.texto).slice(0, 4000);
+     campo.focus();
+     vozEstado("Texto ditado. Revise e envie quando quiser.", "ok");
+-  } catch (_) {
+-    vozEstado("Não consegui mandar a gravação ao painel. Digite a mensagem.", "erro");
+   } finally {
+     botao.disabled = false;
+   }
+@@ -2120,6 +2138,366 @@ function vozLigarControles() {
+   });
+   byId("seth-voz-parar").addEventListener("click", vozParar);
+   byId("seth-ditado").addEventListener("click", ditarPeloMicrofone);
++  byId("seth-chamado").addEventListener("click", chamadoAlternar);
++  document.addEventListener("keydown", chamadoTocouHumano);
++  document.addEventListener("click", chamadoTocouHumano);
++}
++
++// Conversa por voz (23/11/2026, pedido do Humano: falar com a Seth sem clique). Liga o microfone e fica ouvindo.
++// Voz vira trecho gravado; silêncio encerra o trecho, que é transcrito pelo ouvido local (como o ditado) e enviado à
++// Seth pelo mesmo caminho do Enviar. A resposta é lida pela voz do sistema e TOCADA NO NAVEGADOR (rota
++// /api/seth/voz-audio), para o echoCancellation do navegador cancelar o eco. Com a fala tocando, voz sustentada acima
++// de CHAMADO_LIMIAR_INTERRUPCAO interrompe a fala e já grava o turno do Humano (barge-in). Se a síntese falha, a fala
++// sai pela Máquina (/api/seth/ouvir), sem interrupção pela voz, e o aviso diz isso. Estados: abrindo, ouvindo,
++// transcrevendo, pensando, falando (e parando, quando a fala pela Máquina recebe Esc). Constantes nomeadas abaixo.
++const CHAMADO_LIMIAR_FALA = 0.02;         // nível RMS (0 a 1) do microfone que conta como voz
++const CHAMADO_LIMIAR_INTERRUPCAO = 0.08;  // nível que interrompe a fala da Seth (mais alto: o eco do alto-falante fica abaixo)
++const CHAMADO_INTERRUPCAO_MS = 300;       // voz sustentada por este tempo acima do limiar de interrupção
++const CHAMADO_SILENCIO_MS = 1200;         // silêncio que encerra o trecho do Humano
++const CHAMADO_VOZ_MIN_MS = 400;           // trecho com menos voz que isso é descartado
++const CHAMADO_POS_FALA_MS = 400;          // microfone mudo por este tempo depois da fala (cauda do eco)
++const CHAMADO_PASSO_MS = 50;              // intervalo da leitura do microfone
++const CHAMADO_CAUDA_MAQUINA_MS = 800;   // cauda pós-fala quando a fala saiu pela Máquina (o eco volta mais longe)
++const CHAMADO_TURNOS_MAX = 6;           // turnos de voz seguidos sem tecla nem clique do Humano antes da pausa
++const CHAMADO_ECO_FRACAO = 0.6;         // se a transcrição traz este trecho da última fala tocada, é eco
++const CHAMADO_ECO_MIN_PALAVRAS = 4;     // fala mais curta que isso não serve de referência para o eco
++const DITADO_PRAZO_MS = 130000;         // prazo do pedido de transcrição (o servidor do ouvido tem 120 s)
++const SINTESE_PRAZO_MS = 60000;         // prazo do pedido de um trecho falado
++const CHAMADO_ROTULOS = {abrindo: "Abrindo o microfone…", ouvindo: "Ouvindo…", transcrevendo: "Transcrevendo…", pensando: "Seth pensando…", falando: "Seth falando…", parando: "Parando a fala…"};
++const CHAMADO_COMANDOS = new Map([["fale comigo", "ligar"], ["encerrar chamado", "desligar"], ["volte ao texto", "desligar"]]);
++const chamado = {ligado: false, estado: "desligado", sessao: 0, fluxo: null, audio: null, timer: null, gravador: null, vad: null,
++  ignorarAte: 0, paradaPedida: false, fala: null, turnosSemToque: 0, pausada: false, ultimaFala: ""};
++// Prazo de um pedido: aborta o fetch se passar de ms. fim() desarma o prazo quando o pedido termina.
++function comPrazo(ms) { const controle = new AbortController(); const t = setTimeout(() => controle.abort(), ms); return {sinal: controle.signal, fim: () => clearTimeout(t)}; }
++function gravacaoTipo() { return ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || ""; }
++// Detector de fala por energia (função pura, testada no node). Devolve a ação deste passo: "" (nada), "iniciar" (a voz
++// começou), "encerrar" (o trecho acabou e tem voz de sobra) ou "descartar" (voz curta demais para contar).
++function chamadoVadNovo() { return {emFala: false, inicio: 0, ultimaVoz: 0}; }
++function chamadoVad(vad, nivel, agora) {
++  if (!vad.emFala) {
++    if (nivel < CHAMADO_LIMIAR_FALA) return "";
++    vad.emFala = true; vad.inicio = agora; vad.ultimaVoz = agora;
++    return "iniciar";
++  }
++  if (nivel >= CHAMADO_LIMIAR_FALA) vad.ultimaVoz = agora;
++  const acabou = agora - vad.ultimaVoz >= CHAMADO_SILENCIO_MS || agora - vad.inicio >= DITADO_MAX_MS;
++  if (!acabou) return "";
++  const comVoz = vad.ultimaVoz - vad.inicio;
++  vad.emFala = false;
++  return comVoz >= CHAMADO_VOZ_MIN_MS ? "encerrar" : "descartar";
++}
++// Frase de comando, digitada ou falada: "ligar", "desligar" ou "" (não é comando). Sem distinção de maiúsculas.
++function chamadoComando(texto) {
++  const frase = String(texto || "").trim().toLowerCase().replace(/[.!?,;:]+$/, "").trim();
++  return CHAMADO_COMANDOS.get(frase) || "";
++}
++// Palavras do texto: minúsculas, sem pontuação. Usado pela comparação do eco.
++function chamadoPalavras(texto) { return String(texto || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean); }
++// Eco (função pura): a transcrição traz um trecho de pelo menos CHAMADO_ECO_FRACAO das palavras da última fala tocada.
++function chamadoEhEco(transcricao, fala) {
++  const alvo = chamadoPalavras(fala);
++  if (alvo.length < CHAMADO_ECO_MIN_PALAVRAS) return false;
++  const k = Math.ceil(CHAMADO_ECO_FRACAO * alvo.length);
++  const ouvido = chamadoPalavras(transcricao);
++  for (let i = 0; i + k <= alvo.length; i++) {
++    const trecho = alvo.slice(i, i + k).join(" ");
++    for (let j = 0; j + k <= ouvido.length; j++) if (ouvido.slice(j, j + k).join(" ") === trecho) return true;
++  }
++  return false;
++}
++function chamadoRotulo(estado, paradaPedida) {
++  return estado === "falando" && paradaPedida ? CHAMADO_ROTULOS.parando : (CHAMADO_ROTULOS[estado] || "");
++}
++function chamadoLigado() { return chamado.ligado; }
++function chamadoBotao(ligado) {
++  const b = byId("seth-chamado");
++  b.setAttribute("aria-pressed", ligado ? "true" : "false");
++  b.textContent = ligado ? "Parar conversa por voz" : "Conversa por voz";
++}
++// Estado sempre visível (Regra 0): o rótulo do estado e, se houver, o aviso. A linha é própria (não a da voz).
++function chamadoIr(estado, aviso = "", classe = "") {
++  chamado.estado = estado;
++  if (estado !== "falando") chamado.paradaPedida = false;
++  const linha = byId("seth-chamado-estado");
++  linha.hidden = false;
++  linha.textContent = chamadoRotulo(estado, chamado.paradaPedida) + (aviso ? " " + aviso : "");
++  linha.className = "seth-voz-estado seth-chamado-estado" + (classe ? " " + classe : "");
++}
++function chamadoVoltarAOuvir(aviso = "", classe = "") {
++  if (!chamado.ligado) return;
++  chamadoCortarTrecho();
++  chamado.vad = chamadoVadNovo();
++  chamadoIr("ouvindo", aviso, classe);
++}
++// Começa a fala (pelo navegador ou pela Máquina): a fala anterior do navegador, se ainda toca, para antes.
++function chamadoFalar() { chamadoPararFala(chamado.fala); chamadoCortarTrecho(); chamado.vad = chamadoVadNovo(); chamadoIr("falando"); }
++// Nova mensagem (digitada ou da conversa por voz): a fala para e o microfone não escuta até a resposta chegar.
++function chamadoPensar() {
++  chamadoPararFala(chamado.fala);
++  vozFila = null;
++  if (vozLendo) vozEnviarParar();
++  chamadoCortarTrecho(); chamado.vad = chamadoVadNovo();
++  chamadoIr("pensando");
++}
++// Fim da fala (naturalmente, ou pela Máquina): volta a ouvir e deixa a cauda do eco passar.
++function chamadoFimFala(aviso = "", classe = "", cauda = CHAMADO_POS_FALA_MS) {
++  if (!chamado.ligado || chamado.estado !== "falando") return;
++  chamado.fala = null;
++  chamado.ignorarAte = performance.now() + cauda;
++  chamadoVoltarAOuvir(aviso, classe);
++}
++// Resposta que não foi lida (erro, parada ou outra conversa): a conversa por voz volta a ouvir.
++function chamadoFimResposta(lida) {
++  if (chamado.ligado && chamado.estado === "pensando") chamadoVoltarAOuvir(lida ? "" : "Nada para ler desta vez.");
++}
++// Gravação do trecho do Humano. O evento de parada só envia se o trecho ainda é o atual (descartado não manda nada).
++function chamadoCortarTrecho() {
++  const gravador = chamado.gravador;
++  chamado.gravador = null;
++  if (gravador) { try { gravador.stop(); } catch (_) { /* já parou */ } }
++}
++function chamadoComecarTrecho() {
++  const tipo = gravacaoTipo();
++  let gravador;
++  try { gravador = new MediaRecorder(chamado.fluxo, tipo ? {mimeType: tipo, audioBitsPerSecond: 32000} : {audioBitsPerSecond: 32000}); }
++  catch (_) { chamadoVoltarAOuvir("Não consegui gravar neste navegador."); return; }
++  const pedacos = [];
++  const sessao = chamado.sessao;
++  gravador.addEventListener("dataavailable", (e) => { if (e.data && e.data.size) pedacos.push(e.data); });
++  gravador.addEventListener("stop", () => {
++    if (chamado.gravador !== gravador) return;
++    chamado.gravador = null;
++    chamadoTranscrever(new Blob(pedacos, {type: gravador.mimeType || tipo || "audio/webm"}), sessao);
++  });
++  chamado.gravador = gravador;
++  gravador.start(1000);
++}
++async function chamadoTranscrever(blob, sessao) {
++  const motivo = ditadoMotivoTamanho(blob);
++  if (motivo) { chamadoVoltarAOuvir(motivo, "erro"); return; }
++  chamadoIr("transcrevendo");
++  const r = await ditadoTexto(blob);
++  if (sessao !== chamado.sessao || !chamado.ligado) return; // desligou enquanto transcrevia
++  if (r.motivo) { chamadoVoltarAOuvir(r.motivo, "erro"); return; }
++  if (chamadoEhEco(r.texto, chamado.ultimaFala)) { chamadoVoltarAOuvir("Trecho descartado: parecia eco da resposta.", "erro"); return; }
++  chamadoEnviarTexto(r.texto);
++}
++// O texto falado segue o caminho do Enviar (o formulário). O rascunho digitado volta ao campo depois.
++function chamadoEnviarTexto(texto) {
++  const comando = chamadoComando(texto);
++  if (comando === "desligar") { chamadoDesligar("Conversa por voz desligada: você pediu para encerrar."); return; }
++  if (comando === "ligar") { chamadoVoltarAOuvir("A conversa por voz já está ligada."); return; }
++  const campo = byId("seth-input");
++  const deixarNoCampo = (aviso) => {
++    const atual = campo.value.trim();
++    campo.value = (atual ? atual + " " + texto : texto).slice(0, 4000);
++    chamadoVoltarAOuvir(aviso, "erro");
++  };
++  if (sethAnexosDoRascunho().length) { deixarNoCampo("Há anexo pendente: envie ou tire o anexo antes de falar. A fala ficou no campo."); return; }
++  if (sethEmCurso() || byId("seth-send").disabled) { deixarNoCampo("A Seth ainda está respondendo: a fala ficou no campo para enviar."); return; }
++  // Pausa: depois de CHAMADO_TURNOS_MAX turnos de voz sem tecla nem clique, a próxima fala não vai à Seth. Falar de novo retoma.
++  if (chamado.pausada) { chamado.pausada = false; chamado.turnosSemToque = 0; }
++  else if (chamado.turnosSemToque >= CHAMADO_TURNOS_MAX) {
++    chamado.pausada = true;
++    deixarNoCampo("Conversa pausada: diga algo ou toque para continuar.");
++    return;
++  }
++  chamado.turnosSemToque += 1;
++  const rascunho = campo.value;
++  campo.value = texto;
++  byId("seth-form").requestSubmit();
++  const enviou = sethEmCurso();
++  campo.value = rascunho;
++  sethGuardarTexto();
++  if (!enviou) chamadoVoltarAOuvir("Não enviei a fala: tente de novo.", "erro");
++}
++// Comando digitado no campo: "fale comigo" liga, "encerrar chamado" e "volte ao texto" desligam.
++function chamadoComandar(comando) {
++  if (comando === "ligar") { if (chamadoLigado()) vozEstado("A conversa por voz já está ligada.", ""); else chamadoLigar(); return; }
++  if (chamadoLigado()) chamadoDesligar("Conversa por voz desligada.");
++  else vozEstado("A conversa por voz já estava desligada.", "");
++}
++// Tecla ou clique do Humano: zera os turnos automáticos e tira a pausa. Só age com a conversa ligada e parada.
++function chamadoTocouHumano() {
++  chamado.turnosSemToque = 0;
++  if (chamado.pausada) { chamado.pausada = false; if (chamado.ligado && chamado.estado === "ouvindo") chamadoVoltarAOuvir(""); }
++}
++function chamadoAlternar() { if (chamado.ligado) chamadoDesligar(); else chamadoLigar(); }
++function chamadoAbrirAudio(fluxo) {
++  const Contexto = window.AudioContext || window.webkitAudioContext;
++  if (typeof Contexto !== "function") throw new Error("sem AudioContext");
++  const contexto = new Contexto();
++  const analisador = contexto.createAnalyser();
++  analisador.fftSize = 2048;
++  contexto.createMediaStreamSource(fluxo).connect(analisador); // só lê o microfone: não vai para a saída
++  return {contexto: contexto, analisador: analisador, buffer: new Float32Array(analisador.fftSize)};
++}
++function chamadoNivel(audio) {
++  audio.analisador.getFloatTimeDomainData(audio.buffer);
++  let soma = 0;
++  for (let i = 0; i < audio.buffer.length; i++) soma += audio.buffer[i] * audio.buffer[i];
++  return Math.sqrt(soma / audio.buffer.length);
++}
++async function chamadoLigar() {
++  if (chamado.ligado) { vozEstado("A conversa por voz já está ligada.", ""); return; }
++  if (ditadoGravador) { vozEstado("Pare a gravação do ditado antes de ligar a conversa por voz.", "erro"); return; }
++  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof window.MediaRecorder !== "function") {
++    vozEstado("Este navegador não tem conversa por voz aqui. Digite a mensagem.", "erro"); return;
++  }
++  const sessao = ++chamado.sessao;
++  chamado.ligado = true; chamadoBotao(true); chamadoIr("abrindo");
++  let fluxo;
++  try { fluxo = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
++  catch (erro) {
++    if (sessao !== chamado.sessao) return;
++    const negado = erro && (erro.name === "NotAllowedError" || erro.name === "SecurityError");
++    chamadoDesligar(negado ? "Permissão do microfone negada. Libere o microfone para este endereço no navegador e tente de novo." : "Não consegui abrir o microfone. Confira se ele está ligado e livre.");
++    return;
++  }
++  if (sessao !== chamado.sessao) { fluxo.getTracks().forEach((t) => t.stop()); return; }
++  let audio;
++  try { audio = chamadoAbrirAudio(fluxo); }
++  catch (_) { fluxo.getTracks().forEach((t) => t.stop()); chamadoDesligar("Não consegui ouvir o microfone neste navegador."); return; }
++  // Após resume(), se o contexto não ficou "running", o áudio não toca: desliga com aviso, sem deixar a escuta solta.
++  try { if (audio.contexto.state !== "running" && audio.contexto.resume) await audio.contexto.resume(); } catch (_) { /* a checagem abaixo decide */ }
++  if (sessao !== chamado.sessao) { fluxo.getTracks().forEach((t) => t.stop()); return; }
++  if (audio.contexto.state !== "running") {
++    fluxo.getTracks().forEach((t) => t.stop());
++    Promise.resolve(audio.contexto.close && audio.contexto.close()).catch(() => {});
++    chamadoDesligar("O navegador não deixou o áudio tocar: ligue a conversa por voz de novo.");
++    return;
++  }
++  chamado.fluxo = fluxo; chamado.audio = audio; chamado.vad = chamadoVadNovo(); chamado.ignorarAte = 0;
++  chamadoAgendar();
++  if (chamado.estado === "abrindo") chamadoIr("ouvindo");
++}
++function chamadoDesligar(aviso = "Conversa por voz desligada.") {
++  chamado.sessao += 1;
++  chamado.ligado = false; chamado.estado = "desligado"; chamado.paradaPedida = false;
++  if (chamado.timer) { clearTimeout(chamado.timer); chamado.timer = null; }
++  chamadoCortarTrecho();
++  chamadoPararFala(chamado.fala);
++  if (vozLendo) { vozFila = null; vozEnviarParar(); }
++  if (chamado.fluxo) { chamado.fluxo.getTracks().forEach((t) => t.stop()); chamado.fluxo = null; }
++  if (chamado.audio) { const contexto = chamado.audio.contexto; chamado.audio = null; Promise.resolve(contexto.close && contexto.close()).catch(() => {}); }
++  chamado.vad = null;
++  const linha = byId("seth-chamado-estado"); linha.hidden = true; linha.textContent = "";
++  chamadoBotao(false);
++  vozEstado(aviso, "");
++}
++// Um passo da leitura do microfone, a cada CHAMADO_PASSO_MS: um temporizador que se reagenda (o painel não ganha intervalo novo).
++function chamadoAgendar() { chamado.timer = setTimeout(chamadoPasso, CHAMADO_PASSO_MS); }
++function chamadoPasso() {
++  chamado.timer = null;
++  if (!chamado.ligado || !chamado.audio) return;
++  chamadoAvaliar();
++  if (chamado.ligado && chamado.audio) chamadoAgendar();
++}
++// Ouve, grava, encerra ou interrompe a fala, conforme o nível do microfone neste passo.
++function chamadoAvaliar() {
++  const agora = performance.now();
++  const nivel = chamadoNivel(chamado.audio);
++  if (chamado.estado === "falando") { if (chamado.fala) chamadoVigiarInterrupcao(chamado.fala, nivel, agora); return; }
++  if (chamado.estado !== "ouvindo" || agora < chamado.ignorarAte) return;
++  const acao = chamadoVad(chamado.vad, nivel, agora);
++  if (acao === "iniciar") chamadoComecarTrecho();
++  else if (acao === "descartar") chamadoCortarTrecho();
++  else if (acao === "encerrar") {
++    const gravador = chamado.gravador;
++    if (!gravador) { chamadoVoltarAOuvir(); return; }
++    chamadoIr("transcrevendo");
++    gravador.stop();
++  }
++}
++// Barge-in: voz sustentada acima do limiar de interrupção, com a fala tocando no navegador.
++function chamadoVigiarInterrupcao(fala, nivel, agora) {
++  if (nivel < CHAMADO_LIMIAR_INTERRUPCAO) { fala.acimaDesde = null; return; }
++  if (fala.acimaDesde === null) fala.acimaDesde = agora;
++  if (agora - fala.acimaDesde >= CHAMADO_INTERRUPCAO_MS) chamadoInterromper(fala, agora);
++}
++function chamadoInterromper(fala, agora) {
++  chamadoPararFala(fala);
++  chamado.ignorarAte = 0;
++  chamado.vad = {emFala: true, inicio: agora - CHAMADO_INTERRUPCAO_MS, ultimaVoz: agora};
++  chamadoIr("ouvindo", "Fala interrompida pela sua voz.");
++  chamadoComecarTrecho();
++}
++// Para o áudio que está tocando (na hora) e solta quem espera por ele.
++function chamadoPararFala(fala) {
++  if (!fala) return;
++  fala.parada = true;
++  fala.fontes.forEach((f) => { try { f.stop(); } catch (_) { /* já terminou */ } });
++  fala.pendentes.splice(0).forEach((acordar) => acordar());
++  if (chamado.fala === fala) chamado.fala = null;
++}
++// Esc com a conversa por voz ligada: fala tocando no navegador para na hora e volta a ouvir; fala pela Máquina pede a
++// parada (vale entre trechos) e a segunda vez desliga; Seth pensando interrompe a resposta e volta a ouvir; em silêncio, desliga.
++function chamadoEsc() {
++  const estado = chamado.estado;
++  if (estado === "falando" && chamado.fala) {
++    chamadoPararFala(chamado.fala);
++    chamado.ignorarAte = performance.now() + CHAMADO_POS_FALA_MS;
++    chamadoVoltarAOuvir("Fala interrompida.");
++    return;
++  }
++  if (estado === "falando") {
++    if (chamado.paradaPedida) { chamadoDesligar(); return; }
++    chamado.paradaPedida = true; vozFila = null; vozEnviarParar(); chamadoIr("falando");
++    return;
++  }
++  if (estado === "pensando") { sethParar(); chamadoVoltarAOuvir("Resposta interrompida."); return; }
++  chamadoDesligar();
++}
++// Resposta da Seth: lida pelo navegador (ou, se a síntese falhar, pela Máquina).
++function chamadoLerResposta(texto) { chamado.ultimaFala = texto; chamadoFalar(); chamadoLerNoNavegador(texto); }
++async function chamadoSintetizar(texto, indice) {
++  const prazo = comPrazo(SINTESE_PRAZO_MS);
++  try {
++    const resposta = await fetch("/api/seth/voz-audio", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texto: texto, trecho: indice}), signal: prazo.sinal});
++    if (!resposta.ok) throw Object.assign(new Error("voz do navegador"), {status: resposta.status, motivo: await vozErro(resposta)});
++    return {total: Math.max(1, Number(resposta.headers.get("X-Trechos")) || 1), bytes: await resposta.arrayBuffer()};
++  } finally { prazo.fim(); }
++}
++function chamadoTocar(fala, contexto, buffer) {
++  return new Promise((resolver) => {
++    const fonte = contexto.createBufferSource();
++    fonte.buffer = buffer;
++    fonte.connect(contexto.destination);
++    fala.fontes.push(fonte); fala.pendentes.push(resolver);
++    fonte.onended = () => { fala.pendentes = fala.pendentes.filter((f) => f !== resolver); resolver(); };
++    fonte.start();
++  });
++}
++// Fala pelo navegador, trecho a trecho. Se a síntese falha no primeiro trecho, a fala sai pela Máquina (meia-duplex)
++// e o aviso diz isso; se falha no meio, o resto não é falado (sem repetir o que já foi).
++async function chamadoLerNoNavegador(texto) {
++  const fala = {fontes: [], pendentes: [], parada: false, acimaDesde: null};
++  chamado.fala = fala;
++  let total = 1, indice = 0;
++  try {
++    while (indice < total && !fala.parada) {
++      const pacote = await chamadoSintetizar(texto, indice);
++      if (fala.parada) return;
++      total = pacote.total;
++      const buffer = await chamado.audio.contexto.decodeAudioData(pacote.bytes);
++      if (fala.parada) return;
++      await chamadoTocar(fala, chamado.audio.contexto, buffer);
++      indice += 1;
++    }
++  } catch (erro) {
++    if (fala.parada) return;
++    chamadoFalhouNaVoz(texto, indice, erro);
++    return;
++  }
++  if (!fala.parada) chamadoFimFala("");
++}
++function chamadoFalhouNaVoz(texto, indice, erro) {
++  chamado.fala = null;
++  if (erro && erro.status === 413) { chamadoFimFala("Resposta longa demais para falar.", "erro"); return; }
++  if (erro && erro.status === 400) { chamadoFimFala("Nada para falar nesta resposta."); return; }
++  if (indice > 0) { chamadoFimFala("A voz falhou no meio da fala: o resto não foi falado.", "erro"); return; }
++  vozEstado("A voz do navegador falhou: falo pela Máquina, sem interromper pela voz.", "erro");
++  ouvirResposta(texto, true);
+ }
+ /* Rascunho por conversa (C6): o texto do campo e os anexos pendentes ficam em sethRascunhos, por chave da conversa
+    ("conversa-<id>", ou uma chave própria da conversa nova). Cada digitação grava; trocar de conversa restaura. */
+@@ -2275,6 +2653,8 @@ function ligarConversaSeth() {
+   form.addEventListener("submit", (e) => {
+     e.preventDefault();
+     const texto = campo.value.trim();
++    const comando = chamadoComando(texto); // "fale comigo" liga sempre; desligar só com a conversa ligada; o resto vai à Seth
++    if (comando === "ligar" || (comando === "desligar" && chamadoLigado())) { campo.value = ""; sethGuardarTexto(); chamadoComandar(comando); return; }
+     if (!texto || byId("seth-send").disabled) return;
+     // Os anexos pendentes vão com esta pergunta; o rascunho da conversa é limpo ao enviar (C6, C9).
+     const anexos = sethAnexosDoRascunho().slice();
+@@ -2605,6 +2985,7 @@ async function sethResponder(op) {
+   const {modo, alvo = sethAtual, paiId = null, alvoId = null, novoUsuarioId = null, textoDoUsuario = "", anexos = []} = op;
+   const campo = byId("seth-input"); const log = byId("seth-transcript"); const botao = byId("seth-send");
+   const controle = new AbortController(); sethControle = controle; sethRespondendo = true;
++  if (chamadoLigado()) chamadoPensar(); // a conversa por voz para a fala e espera esta resposta (23/11)
+   sethUso = null; alvo.erro = null; // um pedido novo zera o uso anterior e a falha que estava na tela
+   botao.disabled = true; sethPintarParar(); sethStatus("PENSANDO", "partial");
+   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+@@ -2654,7 +3035,7 @@ async function sethResponder(op) {
+   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
+   if (conteudo !== null) {
+     sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: false}, alvo);
+-    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (vozModoLigado()) ouvirResposta(conteudo, true); }
++    if (alvo === sethAtual) { sethDesenhar(); sethMostrarAgataCode(log, parcial); sethStatus("PRONTA", "planned"); if (chamadoLigado()) chamadoLerResposta(conteudo); else if (vozModoLigado()) ouvirResposta(conteudo, true); }
+     await sethSalvar(alvo); // espera o salvar: o botão só volta quando a conversa está gravada (ou o aviso mostra o motivo)
+   } else if (parada) {
+     if (modo === "nova" || parcial.texto) sethAplicarResposta(modo, paiId, alvoId, {...info, interrompida: true}, alvo);
+@@ -2672,6 +3053,7 @@ async function sethResponder(op) {
+   }
+   sethRespondendo = false;
+   botao.disabled = false; sethPintarParar(); campo.focus();
++  chamadoFimResposta(conteudo !== null && alvo === sethAtual);
+ }
+ 
+ function sethComecarNova() {
+@@ -3208,7 +3590,7 @@ document.addEventListener("keydown", (e) => {
+   if (e.key === "Escape") {
+     if (menuAberto) { fecharMenuAberto(); return; }
+     if (gavetaAberta()) { setGaveta(false); byId("menu-abrir").focus(); return; }
+-    if (atalhosAbertos()) alternarAtalhos(false); else { if (sethEmCurso()) sethParar(); vozParar(); }
++    if (atalhosAbertos()) alternarAtalhos(false); else if (chamadoLigado()) chamadoEsc(); else { if (sethEmCurso()) sethParar(); vozParar(); }
+     return;
+   }
+   if (campoDeTexto(e.target)) return;
+diff --git a/redesign/painel_operacional/server.py b/redesign/painel_operacional/server.py
+index 53d22ca2..d56bfa9e 100644
+--- a/redesign/painel_operacional/server.py
++++ b/redesign/painel_operacional/server.py
+@@ -1947,6 +1947,8 @@ class Handler(BaseHTTPRequestHandler):
+             return self._seth_ouvir_parar()
+         if self.path == "/api/seth/ditado":
+             return self._seth_ditado()
++        if self.path == "/api/seth/voz-audio":
++            return self._seth_voz_audio()
+         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
+                          "/api/relay-council/decision"}:
+             return self._relay_council_human_post()
+@@ -2668,6 +2670,30 @@ class Handler(BaseHTTPRequestHandler):
+             return self._json_voz(erro.status, {"erro": erro.motivo})
+         return self._json_voz(200, dados)
+ 
++    def _seth_voz_audio(self) -> None:
++        """Conversa por voz (23/11/2026): o WAV de um trecho da resposta, com a voz do sistema, para o NAVEGADOR tocar.
++        Nada toca na Máquina. Escrita: só da origem do painel. Erro sai em JSON {erro}; sucesso em audio/wav, com
++        X-Trechos (quantos trechos tem o texto) e X-Trecho (o que veio)."""
++        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
++            return self._json_voz(403, {"erro": "pedido de outra origem recusado"})
++        tamanho = self.headers.get("Content-Length", "")
++        if not tamanho.isdecimal():
++            return self._json_voz(411, {"erro": "pedido sem tamanho (Content-Length)"})
++        if int(tamanho) > seth_voz.LIMITE_CORPO_BYTES:
++            return self._json_voz(413, {"erro": f"pedido acima de {seth_voz.LIMITE_CORPO_BYTES} bytes"})
++        try:
++            pedido = json.loads(self.rfile.read(int(tamanho)).decode("utf-8") or "{}")
++        except (ValueError, UnicodeDecodeError):
++            return self._json_voz(400, {"erro": "pedido com JSON inválido"})
++        if not isinstance(pedido, dict):
++            return self._json_voz(400, {"erro": "pedido com JSON inválido"})
++        trecho = pedido.get("trecho", 0)
++        try:
++            wav, total = seth_voz.sintetizar(pedido.get("texto"), trecho)
++        except seth_voz.ErroVoz as erro:
++            return self._json_voz(erro.status, {"erro": erro.motivo})
++        return self._send(200, "audio/wav", wav, (("X-Trechos", str(total)), ("X-Trecho", str(trecho))))
++
+     def _grafo(self) -> None:
+         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""
+         from urllib.parse import urlparse, parse_qs
+diff --git a/redesign/painel_operacional/seth_ditado.py b/redesign/painel_operacional/seth_ditado.py
+index 7fc1ed5c..6a7b2567 100644
+--- a/redesign/painel_operacional/seth_ditado.py
++++ b/redesign/painel_operacional/seth_ditado.py
+@@ -3,14 +3,22 @@
+ O navegador manda o áudio só para o próprio painel (mesma origem). Daí o módulo o repassa ao servidor_ouvido em
+ 127.0.0.1:20137 (redesign/sentidos/servidor_ouvido.py, POST /v1/audio/transcriptions, campo `file`). Nada sai da
+ Máquina. O texto volta para o campo, e o Humano revisa antes de enviar: este módulo nunca fala com a Seth.
+-O ouvido não é ligado aqui (decisão de 29/10: sob demanda). Se estiver parado, a resposta diz isso.
++O ouvido e a voz continuam desligados no boot (decisão de 29/10: sob demanda). Se o ouvido estiver parado quando o
++Humano dita (conexão recusada ou sem motor), o módulo liga `ouvido-agata.service` e `piper-tts.service` com
++`systemctl --user start` (sem enable, então o boot não muda), espera até 20 s a porta 20137 abrir e repete a
++transcrição uma vez. Só se falhar de novo a resposta é o 503 com o motivo. Só liga serviço quando o ouvido é local.
+ """
+ from __future__ import annotations
+ 
++import errno
+ import json
+ import os
++import socket
++import subprocess
+ import threading
++import time
+ import urllib.error
++import urllib.parse
+ import urllib.request
+ import uuid
+ 
+@@ -20,13 +28,21 @@ OUVIDO = os.environ.get("AGATA_OUVIDO_URL", "http://127.0.0.1:20137")
+ TEMPO_S = 120
+ TEXTO_MAX = 4000  # mesmo teto do campo de mensagem da Seth
+ EXTENSOES = {"audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/wav": "wav", "audio/x-wav": "wav"}
++SYSTEMCTL = "/usr/bin/systemctl"  # mesmo caminho que o painel usa nas outras chamadas
++UNIDADES_OUVIDO = ("ouvido-agata.service", "piper-tts.service")
++ESPERA_OUVIDO_S = 20  # tempo máximo para a porta do ouvido abrir depois do start
++INTERVALO_OUVIDO_S = 0.5
++HOSTS_LOCAIS = ("127.0.0.1", "localhost")
+ _TRANSCRICAO = threading.Lock()
++_PARTIDA = threading.Event()  # verdadeiro enquanto o ouvido está sendo ligado e a porta é esperada
++MSG_SUBINDO = "ouvido subindo, tente em alguns segundos"
+ 
+ 
+ class ErroDitado(Exception):
+-    def __init__(self, status: int, motivo: str):
++    def __init__(self, status: int, motivo: str, partida: bool = False):
+         super().__init__(motivo)
+         self.status, self.motivo = status, motivo
++        self.partida = partida  # True só para recusa de conexão e 503 do motor: os dois casos em que a partida se justifica
+ 
+ 
+ def transcrever(corpo: bytes, tipo: str, *, url: str | None = None) -> dict:
+@@ -38,10 +54,14 @@ def transcrever(corpo: bytes, tipo: str, *, url: str | None = None) -> dict:
+     base = (tipo or "").split(";")[0].strip().lower()
+     if not base.startswith("audio/"):
+         raise ErroDitado(415, "o navegador mandou um formato que não é áudio")
++    if _PARTIDA.is_set():
++        raise ErroDitado(503, MSG_SUBINDO)
+     if not _TRANSCRICAO.acquire(blocking=False):
++        if _PARTIDA.is_set():  # a partida começou entre a checagem e a trava
++            raise ErroDitado(503, MSG_SUBINDO)
+         raise ErroDitado(429, "já estou transcrevendo outro áudio; aguarde e tente de novo")
+     try:
+-        texto = _chamar_ouvido(corpo, base, url or OUVIDO)
++        texto = _transcrever_com_partida(corpo, base, url or OUVIDO)
+     finally:
+         _TRANSCRICAO.release()
+     texto = texto.strip()
+@@ -67,12 +87,17 @@ def _chamar_ouvido(corpo: bytes, tipo: str, base_url: str) -> str:
+         with urllib.request.urlopen(pedido, timeout=TEMPO_S) as resposta:
+             obj = json.loads(resposta.read(TEXTO_MAX * 8))
+     except urllib.error.HTTPError as erro:
+-        if erro.code == 503:
+-            raise ErroDitado(503, "o ouvido local não tem motor no ar: nada foi transcrito. Ligue o servidor do ouvido e tente de novo.")
++        erro.close()  # solta a resposta já lida: o erro pode ficar guardado enquanto a partida roda
++        if erro.code == 503:  # 503 explícito do motor: o ouvido está no ar sem motor
++            raise ErroDitado(503, "o ouvido local não tem motor no ar: nada foi transcrito. Ligue o servidor do ouvido e tente de novo.", partida=True)
+         if erro.code == 413:
+             raise ErroDitado(413, "gravação grande demais para o ouvido local. Grave menos.")
+         raise ErroDitado(422, "não consegui processar esse áudio: tente gravar de novo")
+-    except (urllib.error.URLError, OSError):
++    except (urllib.error.URLError, OSError) as erro:
++        if _demorou(erro):  # leitura ou conexão que estourou o prazo: erro direto, sem reenviar
++            raise ErroDitado(504, "o ouvido local demorou demais para responder: nada foi transcrito. Tente de novo.")
++        if _recusou_conexao(erro):  # ouvido parado: a partida liga e repete (só aí)
++            raise ErroDitado(503, "o ouvido local (127.0.0.1:20137) não respondeu: nada foi transcrito. Ligue o servidor do ouvido e tente de novo.", partida=True)
+         raise ErroDitado(503, "o ouvido local (127.0.0.1:20137) não respondeu: nada foi transcrito. Ligue o servidor do ouvido e tente de novo.")
+     except ValueError:
+         raise ErroDitado(502, "o ouvido local respondeu fora do formato esperado")
+@@ -80,3 +105,62 @@ def _chamar_ouvido(corpo: bytes, tipo: str, base_url: str) -> str:
+     if not isinstance(texto, str):
+         raise ErroDitado(502, "o ouvido local respondeu fora do formato esperado")
+     return texto
++
++
++def _recusou_conexao(erro: BaseException) -> bool:
++    """Recusa de conexão (ECONNREFUSED ou ConnectionRefusedError), direta ou dentro do URLError."""
++    motivo = erro.reason if isinstance(erro, urllib.error.URLError) else erro
++    return isinstance(motivo, ConnectionRefusedError) or getattr(motivo, "errno", None) == errno.ECONNREFUSED
++
++
++def _demorou(erro: BaseException) -> bool:
++    """Prazo de conexão ou de leitura estourado."""
++    motivo = erro.reason if isinstance(erro, urllib.error.URLError) else erro
++    return isinstance(motivo, (TimeoutError, socket.timeout))
++
++
++def _transcrever_com_partida(corpo: bytes, tipo: str, url: str) -> str:
++    """Ouvido parado (recusou a conexão ou tem motor desligado) e local: liga, espera a porta e repete uma vez.
++    Timeout, formato ruim ou outro erro: sai direto, sem partida e sem reenvio."""
++    try:
++        return _chamar_ouvido(corpo, tipo, url)
++    except ErroDitado as erro:
++        if not erro.partida or not _local(url):
++            raise
++    _PARTIDA.set()
++    try:
++        _ligar_ouvido()
++        _esperar_porta(url)
++    finally:
++        _PARTIDA.clear()
++    return _chamar_ouvido(corpo, tipo, url)
++
++
++def _local(url: str) -> bool:
++    """Só liga serviço local para o ouvido desta Máquina; URL de outro host não dispara systemctl."""
++    return (urllib.parse.urlsplit(url).hostname or "") in HOSTS_LOCAIS
++
++
++def _ligar_ouvido() -> None:
++    """`start` das unidades do ouvido e da voz (sob demanda, 29/10). Falha do comando não para o fluxo:
++    quem decide se o ouvido subiu é a espera pela porta."""
++    try:
++        subprocess.run([SYSTEMCTL, "--user", "start", *UNIDADES_OUVIDO], capture_output=True, timeout=15, check=False)
++    except (OSError, subprocess.SubprocessError):
++        pass
++
++
++def _esperar_porta(url: str) -> bool:
++    """Espera até ESPERA_OUVIDO_S a porta do ouvido aceitar conexão. True se abriu; False se o prazo acabou."""
++    partes = urllib.parse.urlsplit(url)
++    endereco = (partes.hostname or "127.0.0.1", partes.port or 80)
++    limite = time.monotonic() + ESPERA_OUVIDO_S
++    while True:
++        try:
++            with socket.create_connection(endereco, timeout=1):
++                return True
++        except OSError:
++            pass
++        if time.monotonic() >= limite:
++            return False
++        time.sleep(INTERVALO_OUVIDO_S)
+diff --git a/redesign/painel_operacional/seth_voz.py b/redesign/painel_operacional/seth_voz.py
+index 54a28d3c..0ceed828 100644
+--- a/redesign/painel_operacional/seth_voz.py
++++ b/redesign/painel_operacional/seth_voz.py
+@@ -9,7 +9,8 @@ Humano pede ou o modo conversa está ligado. Quem não fala diz que NÃO falou (
+ painel: a trava é a mesma da História (historia_painel._FALA_LOCK).
+ 
+ Interface: iniciar(texto) fala e só volta quando termina, para ou falha; parar() pede a parada, que vale entre
+-partes; estado() e resumo_voz() só leem. Nada disso grava o texto: o último motivo e o último uso ficam em memória.
++partes; sintetizar(texto, trecho) devolve o WAV de um trecho sem tocar (conversa por voz: o navegador toca, 23/11);
++estado() e resumo_voz() só leem. Nada disso grava o texto: o último motivo e o último uso ficam em memória.
+ """
+ from __future__ import annotations
+ 
+@@ -36,6 +37,8 @@ _ESTADO_LOCK = threading.Lock()
+ _PARAR = threading.Event()
+ _ESTADO = {"falando": False, "trecho": 0, "trechos": 0, "ultimo_uso": None, "ultimo_motivo": None}
+ _falar_mod = None
++_SINTESE = threading.BoundedSemaphore(1)  # uma síntese por vez: o piper atende uma de cada vez (23/11)
++ESPERA_SINTESE_S = 30  # o segundo pedido espera até isso; depois recebe 503
+ 
+ 
+ class ErroVoz(Exception):
+@@ -162,6 +165,43 @@ def parar() -> dict:
+     return {"schema_version": 1, "falando": True, "motivo": "parando: a leitura para depois do trecho que está tocando"}
+ 
+ 
++def sintetizar(texto, trecho: int = 0) -> tuple[bytes, int]:
++    """Conversa por voz (23/11/2026): o WAV de UM trecho do texto, com a voz do sistema, sem tocar. Quem toca é o
++    navegador, para o echoCancellation dele cancelar o eco. Devolve (wav, total de trechos do texto preparado).
++    Não grava o texto. Trecho por trecho, o mesmo corte da leitura (agata_falar.paragrafos).
++    O piper sobe sob demanda e não é desligado aqui: cada trecho pediria um ciclo de liga e desliga (segundos)."""
++    if not isinstance(texto, str) or not texto.strip():
++        raise ErroVoz(400, "texto vazio: nada para falar")
++    falar = _falar()
++    fala = falar.preparar(texto)
++    if not fala:
++        raise ErroVoz(400, "nada para falar depois de preparar o texto")
++    if len(fala) > falar.MAX_TOTAL:
++        raise ErroVoz(413, "resposta longa demais para falar. Peça um resumo.")
++    partes = falar.paragrafos(fala)
++    if isinstance(trecho, bool) or not isinstance(trecho, int) or not 0 <= trecho < len(partes):
++        raise ErroVoz(400, "trecho fora do texto")
++    if not _SINTESE.acquire(timeout=ESPERA_SINTESE_S):
++        raise ErroVoz(503, "a voz está ocupada com outro trecho; tente de novo em alguns segundos")
++    try:
++        h, _ligamos = falar.garantir_servico()
++        if not h or not str(h.get("model", "")).startswith(falar.MODELO_DO_SISTEMA):
++            raise ErroVoz(503, "NÃO falei: a voz do sistema não respondeu, ou carregou outro modelo. Não falo com outra voz.")
++        corpo = json.dumps({"model": "tts-1", "input": partes[trecho], "voice": "agata", "response_format": "wav"}).encode("utf-8")
++        try:
++            audio, _cabecalhos = falar._http("/v1/audio/speech", corpo, timeout=TEMPO_TRECHO_S)
++        except urllib.error.HTTPError as erro:
++            erro.close()  # o corpo do erro não interessa; fechar evita o aviso de recurso no GC
++            raise ErroVoz(502, "a voz do sistema falhou ao gerar o áudio: NÃO falei")
++        except (urllib.error.URLError, OSError):
++            raise ErroVoz(502, "a voz do sistema falhou ao gerar o áudio: NÃO falei")
++    finally:
++        _SINTESE.release()
++    if audio[:4] != b"RIFF":
++        raise ErroVoz(502, "a voz do sistema devolveu algo que não é WAV: NÃO falei")
++    return audio, len(partes)
++
++
+ def estado() -> dict:
+     """Só leitura: se está lendo, em que trecho, e o último uso e motivo (em memória, desde o início do painel)."""
+     with _ESTADO_LOCK:
+diff --git a/redesign/painel_operacional/spec/acceptance.json b/redesign/painel_operacional/spec/acceptance.json
+index 6c3b33d1..41e6652d 100644
+--- a/redesign/painel_operacional/spec/acceptance.json
++++ b/redesign/painel_operacional/spec/acceptance.json
+@@ -3097,5 +3097,87 @@
+       "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial"
+     ],
+     "cwd": null
++  },
++  {
++    "criterion": "o ditado liga `ouvido-agata.service` e `piper-tts.service` sob demanda só em recusa de conexão ou 503 do motor, espera a porta e repete uma vez; timeout sai direto (504) e, durante a partida, quem chega recebe 503 \"ouvido subindo, tente em alguns segundos\"",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_botao_liga_com_cancelamento_de_eco_e_mostra_ouvindo",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_fale_comigo_liga_sem_virar_mensagem",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_encerrar_chamado_desliga_sem_virar_mensagem",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_esc_com_fala_no_navegador_para_e_volta_a_ouvir_e_o_segundo_desliga",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_comando_falado_encerrar_desliga_e_nao_vai_a_seth",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_comando_digitado_so_e_comando_quando_a_conversa_esta_ligada"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a conversa por voz liga pelo botão ou pelo texto \"fale comigo\", desliga com \"encerrar chamado\", \"volte ao texto\" ou com o segundo Esc, e esses comandos não viram mensagem à Seth",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_vad_encerra_so_depois_de_1200_ms_de_silencio",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_vad_descarta_voz_curta_e_corta_trecho_longo_no_limite",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_fronteira_do_detector_400_ms_de_voz"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o detector de voz começa o trecho com voz, encerra após 1,2 s de silêncio e descarta trecho com menos de 0,4 s de voz (funções puras, testadas no node)",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_trecho_com_voz_e_transcrito_e_enviado_a_seth_e_a_resposta_e_tocada_no_navegador",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_resposta_em_dois_trechos_toca_os_dois_e_volta_a_ouvir",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_prazos_de_ditado_e_sintese_com_sinal_de_aborto_e_desarmados_ao_fim"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "o trecho transcrito segue para a Seth pelo caminho do Enviar, e a resposta é tocada no navegador por `/api/seth/voz-audio`, trecho a trecho, sem elemento de mídia",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_barge_in_para_a_fala_na_hora_e_grava_o_turno_do_humano",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_voz_normal_nao_interrompe_a_fala"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "com a fala tocando, voz sustentada por 0,3 s acima do limiar de interrupção para o áudio na hora e grava o turno do Humano; voz no nível normal não interrompe",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_sintese_que_falha_no_primeiro_trecho_cai_na_fala_pela_maquina_com_aviso",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_sintese_que_falha_no_meio_nao_repete_o_que_ja_foi_falado",
++      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_cauda_depois_da_fala_pela_maquina_e_de_800_ms"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "se a síntese falha, a fala sai pela Máquina com o aviso; se falha no meio, o resto não é falado",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_devolve_o_wav_de_um_trecho_e_os_cabecalhos",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_sem_origem_ou_de_outro_site_recebe_403_e_nao_chega_a_voz",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_texto_vazio_json_ruim_ou_corpo_grande_nao_sintetiza",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_com_falha_da_sintese_responde_502_em_json",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_com_outro_modelo_responde_503",
++      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_ouvir_continua_igual_ao_lado_da_voz_audio"
++    ],
++    "cwd": null
++  },
++  {
++    "criterion": "a rota `/api/seth/voz-audio` devolve `audio/wav` com `X-Trechos`, recusa origem cruzada com 403, texto vazio ou corpo grande, e responde 502 ou 503 quando a voz falha; o `/api/seth/ouvir` antigo segue igual",
++    "command": [
++      "pytest",
++      "-q",
++      "redesign/painel_operacional/test_seth_ditado.py::OuvidoParadoTests::test_ouvido_parado_e_ligado_e_a_transcricao_repete_uma_vez",
++      "redesign/painel_operacional/test_seth_ditado.py::PartidaRefinadaTests::test_timeout_de_leitura_vira_504_sem_partida_nem_reenvio",
++      "redesign/painel_operacional/test_seth_ditado.py::PartidaRefinadaTests::test_durante_a_partida_quem_chega_recebe_503_ouvido_subindo"
++    ],
++    "cwd": null
+   }
+ ]
+diff --git a/redesign/painel_operacional/spec/spec.md b/redesign/painel_operacional/spec/spec.md
+index 53324bff..e291bc57 100644
+--- a/redesign/painel_operacional/spec/spec.md
++++ b/redesign/painel_operacional/spec/spec.md
+@@ -35,7 +35,7 @@
+ - Lote 4 da Conversa (09/11/2026, pedido do Humano, paridade com o LibreChat): editar e reenviar, regenerar e ramificar, com ramos navegáveis ("< 1/2 >"); Parar; Continuar; feedback de boa e de ruim resposta; barra de contexto; atalhos de teclado; tema claro, escuro ou do sistema. Contrato em Rotas de API e critérios no fim desta seção. Nenhuma rota nova de API; o gateway não muda.
+ - Importantes (11/11/2026, pedido do Humano: "importantes no painel"): aba Importantes dentro de Panorama e cartão "Importantes: N abertos" no Panorama. Lista local de ideias e pendências que o Humano manda guardar: criar, marcar feito, descartar, reabrir e editar; nada é apagado de fato. Trazer as entradas marcadas com IMPORTANTE do cache do Conselho, só leitura. Contrato em Rotas de API e critérios no fim da seção de Critérios.
+ - História (11/11/2026, pedido do Humano): seção `historia` no `/prototipo`, com o índice de tomos e a leitura dos textos de `historia/` do checkout (só leitura), e o botão Ouvir, que lê o texto com a voz do sistema. Contrato em Rotas de API (bloco História) e critérios no fim da seção de Critérios.
+-- Voz da Seth (11/11/2026, pedido do Humano, paridade com o LibreChat): ler em voz alta (botão Ouvir em cada resposta e modo conversa), ditado pelo microfone e linha da voz na página Sentidos. Tudo com a voz do sistema (`pt_BR-agata-last`, pelo `scripts/agata_falar.py`, sem editar o script). Bloco Voz da Seth abaixo.
++- Voz da Seth (11/11/2026, pedido do Humano, paridade com o LibreChat): ler em voz alta (botão Ouvir em cada resposta e modo conversa), ditado pelo microfone, conversa por voz com interrupção pela voz (23/11/2026) e linha da voz na página Sentidos. Tudo com a voz do sistema (`pt_BR-agata-last`, pelo `scripts/agata_falar.py`, sem editar o script). Bloco Voz da Seth abaixo.
+ 
+ ## Fora desta versão
+ 
+@@ -123,9 +123,12 @@
+   - `POST /api/seth/ouvir/parar`: pede a parada, que vale entre trechos (o trecho que está tocando termina). Sem leitura, responde `falando` falso e não faz nada. Escrita: 403 sem origem do painel.
+   - `GET /api/seth/ouvir`: só leitura, com `falando`, `trecho`, `trechos`, `ultimo_uso` e `ultimo_motivo` (em memória, desde o início do painel). Origem cruzada: 403.
+   - Serviço: quem fala liga o `piper-tts.service` se estiver parado e desliga depois, só se foi ele que ligou. Piper com modelo diferente de `pt_BR-agata` não fala (`codigo` `voz`).
+-  - `POST /api/seth/ditado`: corpo cru do áudio do navegador (`Content-Type` de áudio, até 2 MB; o cliente para em 60 s). O painel repassa a `POST /v1/audio/transcriptions` do `servidor_ouvido` (127.0.0.1:20137) e responde `{texto}` (até 4000 caracteres). Erros em JSON `{erro}`: 403 origem, 411 sem tamanho, 413 grande, 415 não é áudio, 422 sem fala ou áudio não processado, 429 ocupado, 502 formato, 503 ouvido fora do ar ou sem motor. Não liga o ouvido.
++  - `POST /api/seth/ditado`: corpo cru do áudio do navegador (`Content-Type` de áudio, até 2 MB; o cliente para em 60 s). O painel repassa a `POST /v1/audio/transcriptions` do `servidor_ouvido` (127.0.0.1:20137) e responde `{texto}` (até 4000 caracteres). Erros em JSON `{erro}`: 403 origem, 411 sem tamanho, 413 grande, 415 não é áudio, 422 sem fala ou áudio não processado, 429 ocupado, 502 formato, 503 ouvido fora do ar, sem motor ou subindo, 504 o ouvido demorou demais. Se o ouvido local está parado e o endereço é local (127.0.0.1 ou localhost), liga `ouvido-agata.service` e `piper-tts.service` com `systemctl --user start` (sem enable: o boot não muda), espera até 20 s a porta 20137 e repete a transcrição uma vez, só para recusa de conexão ou 503 explícito do motor. Timeout responde 504 direto, sem reenvio. Quem chega durante a partida recebe 503 "ouvido subindo, tente em alguns segundos". Outro host não dispara o systemctl.
++  - `POST /api/seth/voz-audio` (23/11/2026, conversa por voz): corpo JSON `{texto, trecho}` (até 65536 bytes; `trecho` é o índice do parágrafo, 0 por padrão). Responde `audio/wav` do trecho pedido, com a voz do sistema (`pt_BR-agata-last`, pelo piper do `scripts/agata_falar.py`, sem tocar na Máquina), e os cabeçalhos `X-Trechos` (quantos trechos tem o texto) e `X-Trecho`. Quem toca é o navegador. Erros em JSON `{erro}`: 400 texto vazio, sem fala depois do preparo ou trecho fora do texto; 403 origem; 411 sem tamanho; 413 corpo ou texto acima do limite (12.000 caracteres depois do preparo); 502 falha da síntese ou resposta que não é WAV; 503 voz do sistema fora ou com outro modelo. O piper sobe sob demanda e não é desligado depois da síntese.
+   - Página Sentidos: a linha `voz` vem de `seth_voz.resumo_voz()`, que só lê o `/health` do piper e o último uso.
+ 
++- Conversa por voz (23/11/2026, pedido do Humano: falar com a Seth sem clique). Botão "Conversa por voz" na faixa da voz, ao lado do modo conversa; com a conversa ligada o rótulo vira "Parar conversa por voz". Liga o microfone com echoCancellation e noiseSuppression. Detector de energia no navegador (AnalyserNode, leitura a cada 50 ms): o trecho começa quando há voz (nível 0,02), encerra após 1,2 s de silêncio, e trecho com menos de 0,4 s de voz é descartado. O trecho vai a `/api/seth/ditado` e o texto segue para a Seth pelo caminho do Enviar, aparecendo na conversa. A resposta é lida por `/api/seth/voz-audio`, trecho a trecho, e tocada no navegador (AudioContext, sem elemento de mídia: a CSP segue igual). Barge-in: voz sustentada 0,3 s acima de 0,08 enquanto a fala toca para o áudio na hora, mostra "Fala interrompida pela sua voz." na linha do chamado e grava o turno do Humano. Estados na linha própria: "Abrindo o microfone…", "Ouvindo…", "Transcrevendo…", "Seth pensando…", "Seth falando…" e "Parando a fala…". Esc: com fala no navegador, para e volta a ouvir; com a fala pela Máquina, pede a parada e o segundo Esc desliga; com a Seth pensando, interrompe a resposta e volta a ouvir; em silêncio, desliga. Comandos, digitados ou falados: "fale comigo" liga e "encerrar chamado" ou "volte ao texto" desligam; não viram mensagem. Ditar fica recusado enquanto a conversa está ligada. Se a síntese falha no primeiro trecho, a fala sai pela Máquina (`/api/seth/ouvir`), sem interrupção pela voz, com o aviso; se falha no meio, o resto não é falado. Revisão de 23/11/2026: anexo pendente não vai pela voz (o texto fica no campo, com aviso); eco da última fala tocada (60% das palavras, sem pontuação) é descartado; seis turnos de voz sem tecla nem clique pausam a conversa ("Conversa pausada: diga algo ou toque para continuar."), e tecla ou clique zera a contagem; a cauda depois da fala pela Máquina é de 800 ms; se o áudio do navegador não fica "running" depois do resume, a conversa desliga com aviso; resposta longa demais diz "resposta longa demais para falar" e não cai na Máquina; pedidos de transcrição (130 s) e de trecho (60 s) têm prazo com AbortController; a síntese tem uma vaga só (o segundo pedido espera 30 s e recebe 503). Nenhum áudio sai da Máquina. Constantes nomeadas no `prototipo.js` (`CHAMADO_*`). Decisão em aberto para o Humano: o piper que a conversa sobe fica no ar até alguém desligar; hoje nada o desliga, para não pagar um ciclo de liga e desliga por trecho (o ditado também o deixa no ar).
++
+ ### Ativos servidos
+ 
+ - Ficam: `/prototipo`, `/prototipo.css`, `/prototipo.js`, `/nova_versao.js`, `/abrir.js`, `/conselho-rede/app.js`, `/operator_console/app.js`, `/assets/agata-portrait.png`, `/historia.js`.
+@@ -204,7 +207,7 @@ Lote `painel-conversa-16-11`. Descreve o contrato da tela (não o histórico). O
+ 
+ - Menu único. O menu lateral é a única lista de conversas. Em ordem: "Nova conversa", a busca, as oito seções, a lista de conversas (fixadas e depois por data: Hoje, Ontem, Últimos 7 dias, Mais antigas), e o rodapé fixo com Arquivadas, Lixeira, "Organizar conversas" e Serviços. Cada item tem um menu de ações (Renomear, Fixar, Arquivar, Apagar, Exportar JSON, Exportar Markdown, Pasta e marcadores). A janela "Organizar conversas" reúne pastas, marcadores e importação. A lista não se repete dentro da Conversa.
+ - Tela da conversa. Cabeçalho com título, status, seletor de modelo, "Temporária" (interruptor curto com aria-pressed; o texto explicativo vai para o title e para o aviso do rodapé), e "Mais" (Copiar última resposta, Instruções desta conversa, exportar; no celular também a Temporária). A coluna de leitura tem até 76 caracteres. Estado vazio: a saudação "O que você quer saber ou decidir?" com sugestões; some ao haver mensagem. O compositor fica na base: Ditar, Anexar, Enviar, e Parar resposta enquanto a Seth responde. "Ir para o fim" só aparece quando a transcrição não está no fim. A tela ocupa a altura da janela: o menu e a transcrição rolam por dentro; a página não rola.
+-- Faixa de baixo do compositor. Uma linha: "Contexto: X% · N de M mensagens", com barra fina. "Detalhes" guarda o texto completo (caracteres, limite de 256 KB, uso informado pelo gateway, ou "Medida: estimativa em caracteres") e o aviso do modelo (o padrão passa por filtro de segredos e dados pessoais). O modo conversa (ler cada resposta em voz alta) fica à direita. No celular, a faixa inteira ocupa no máximo duas linhas.
++- Faixa de baixo do compositor. Uma linha: "Contexto: X% · N de M mensagens", com barra fina. "Detalhes" guarda o texto completo (caracteres, limite de 256 KB, uso informado pelo gateway, ou "Medida: estimativa em caracteres") e o aviso do modelo (o padrão passa por filtro de segredos e dados pessoais). O modo conversa (ler cada resposta em voz alta) fica à direita, com o botão Conversa por voz e a linha de estado do chamado. No celular, a faixa inteira ocupa no máximo duas linhas.
+ - Mensagens. Hora curta, com a data completa no title; mensagem sem hora gravada não mostra hora. Ações: na pergunta, Editar e Copiar; na resposta, Copiar, Ouvir, Regenerar e Continuar (só na última), Ramificar aqui, e Útil ou Não útil. A transcrição é role="log", tem nome e entra na ordem de Tab (menu, cabeçalho, mensagens, compositor). Menus de ação fecham com Esc e devolvem o foco ao botão que os abriu.
+ - Markdown suportado: títulos (# em h3, ## em h4, ### em h5), listas com marcador ou número, listas aninhadas por dois espaços, citação, tabela em moldura com rolagem própria, linha horizontal, código com linguagem e botão Copiar, ênfase, negrito e código em linha. Um número inicial vira o atributo start; itens separados por linha em branco ou por sublista seguem na mesma lista. Texto entra só por textContent e sem HTML.
+ - Links. Endereço http ou https vira texto com o endereço visível e um botão Copiar link. Nada sai do painel por link: não há elemento a nem navegação externa. Outros esquemas (javascript:, etc.) viram texto puro.
+@@ -488,10 +491,17 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - [ ] o ditado grava o microfone pelo navegador, manda o áudio só à rota do painel, e o texto entra no campo sem ser enviado à Seth
+ - [ ] o ditado para em 60 segundos, recusa áudio acima de 2 MB e diz em português o erro de permissão, de microfone, de ouvido fora do ar e de áudio sem fala
+ - [ ] a rota de ditado repassa o áudio só ao `servidor_ouvido` local (127.0.0.1:20137), em multipart, e devolve `texto` limitado a 4000 caracteres
++- [ ] o ditado liga `ouvido-agata.service` e `piper-tts.service` sob demanda só em recusa de conexão ou 503 do motor, espera a porta e repete uma vez; timeout sai direto (504) e, durante a partida, quem chega recebe 503 "ouvido subindo, tente em alguns segundos"
+ - [ ] modo conversa vem desligado, guarda a preferência com try/catch, lê cada resposta concluída e, com leitura em curso, para a atual e lê a mais nova depois
+ - [ ] a linha `voz` da página Sentidos mostra piper no ar ou parado, o último uso e aviso se o modelo não é a voz do sistema; só lê
+ - [ ] a CSP do painel segue igual (sem `media-src`); o JS e o HTML da voz são externos ou de texto, sem HTML dinâmico, sem atributo inline e sem emoji
+ - [ ] a preferência do modo conversa fica fora do bloco da Conversa, e o bloco da Conversa não guarda nada em localStorage
++- [ ] a conversa por voz liga pelo botão ou pelo texto "fale comigo", desliga com "encerrar chamado", "volte ao texto" ou com o segundo Esc, e esses comandos não viram mensagem à Seth
++- [ ] o detector de voz começa o trecho com voz, encerra após 1,2 s de silêncio e descarta trecho com menos de 0,4 s de voz (funções puras, testadas no node)
++- [ ] o trecho transcrito segue para a Seth pelo caminho do Enviar, e a resposta é tocada no navegador por `/api/seth/voz-audio`, trecho a trecho, sem elemento de mídia
++- [ ] com a fala tocando, voz sustentada por 0,3 s acima do limiar de interrupção para o áudio na hora e grava o turno do Humano; voz no nível normal não interrompe
++- [ ] se a síntese falha, a fala sai pela Máquina com o aviso; se falha no meio, o resto não é falado
++- [ ] a rota `/api/seth/voz-audio` devolve `audio/wav` com `X-Trechos`, recusa origem cruzada com 403, texto vazio ou corpo grande, e responde 502 ou 503 quando a voz falha; o `/api/seth/ouvir` antigo segue igual
+ 
+ ### Painel funcional (16/11/2026)
+ 
+@@ -633,6 +643,7 @@ Origem: as 25 seções de `/prototipo`, mais `/frentes`, `/index.html`, `/operat
+ - MEDIDO, manual (sem comando; 16/11/2026): o Panorama de 1440 px mostra os três cartões alinhados no topo, e os mosaicos de 360 px ficam dois por linha, com o valor "Atenção" inteiro dentro do cartão.
+ - NÃO MEDIDO, manual: leitor de tela (role log e aria-live) não foi testado com leitor real; o foco que volta ao botão Mais ao escolher um item do menu não foi medido em navegador (só o Esc tem teste de comportamento).
+ - NÃO MEDIDO, manual: o modo conversa por voz e o ditado não foram medidos nesta rodada; a voz é a do sistema e depende da máquina.
++- NÃO MEDIDO, manual (23/11/2026): a conversa por voz não foi medida em navegador real com alto-falante e microfone. Não se sabe se o eco do alto-falante fica abaixo de 0,08 com o echoCancellation do navegador, nem se o limiar de fala 0,02 e o silêncio de 1,2 s servem à sala do Humano, nem a latência entre trechos. Os testes cobrem o detector como função, o fluxo com um navegador falso e a rota pelo servidor de teste.
+ - NÃO MEDIDO, manual: o que a via pública (seth-public) faz com as instruções da conversa. A tela diz que o gateway as descarta; isso vem do gateway e não foi medido aqui.
+ 
+ ### Critérios do lote 2b: listas únicas e telas de operação (17/11/2026)
+diff --git a/redesign/painel_operacional/test_seth_ditado.py b/redesign/painel_operacional/test_seth_ditado.py
+index 30e7be3b..9d30480b 100644
+--- a/redesign/painel_operacional/test_seth_ditado.py
++++ b/redesign/painel_operacional/test_seth_ditado.py
+@@ -7,11 +7,15 @@ import http.client
+ import importlib.util
+ import json
+ import socket
++import subprocess
+ import sys
+ import threading
++import time
+ import unittest
++import urllib.error
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
++from unittest import mock
+ 
+ HERE = Path(__file__).resolve().parent
+ sys.path.insert(0, str(HERE))
+@@ -56,6 +60,11 @@ def _porta_fechada() -> int:
+     return porta
+ 
+ 
++def _desliga(servidor):
++    servidor.shutdown()
++    servidor.server_close()
++
++
+ class DitadoFalsoTests(unittest.TestCase):
+     def setUp(self):
+         self.ouvido = ThreadingHTTPServer(("127.0.0.1", 0), _Ouvido)
+@@ -65,6 +74,14 @@ class DitadoFalsoTests(unittest.TestCase):
+         self.url = f"http://127.0.0.1:{self.ouvido.server_address[1]}"
+         self.salvo = seth_ditado.OUVIDO
+         seth_ditado.OUVIDO = self.url
++        # systemctl é sempre falso nos testes (nunca liga o ouvido ou a voz de verdade); por padrão o start não abre
++        # porta nenhuma. A espera é curta para o caso "ouvido não sobe" não levar 20 s.
++        partida = mock.patch("seth_ditado.subprocess.run", return_value=subprocess.CompletedProcess([], 0))
++        self.systemctl = partida.start()
++        self.addCleanup(partida.stop)
++        espera = mock.patch.multiple(seth_ditado, ESPERA_OUVIDO_S=0.2, INTERVALO_OUVIDO_S=0.01)
++        espera.start()
++        self.addCleanup(espera.stop)
+ 
+     def tearDown(self):
+         seth_ditado.OUVIDO = self.salvo
+@@ -77,6 +94,21 @@ class DitadoFalsoTests(unittest.TestCase):
+     def pedidos(self):
+         return self.ouvido.estado["pedidos"]
+ 
++    def porta_fechada_que_o_start_abre(self) -> str:
++        """URL de uma porta fechada. O systemctl falso, quando chamado, sobe o ouvido falso nessa porta (start com sucesso)."""
++        porta = _porta_fechada()
++
++        def sobe(args, **kwargs):
++            servidor = ThreadingHTTPServer(("127.0.0.1", porta), _Ouvido)
++            servidor.daemon_threads = True
++            servidor.estado = self.ouvido.estado
++            threading.Thread(target=servidor.serve_forever, daemon=True).start()
++            self.addCleanup(_desliga, servidor)
++            return subprocess.CompletedProcess(args, 0)
++
++        self.systemctl.side_effect = sobe
++        return f"http://127.0.0.1:{porta}"
++
+ 
+ class TranscreverTests(DitadoFalsoTests):
+     def test_manda_o_audio_como_multipart_e_devolve_o_texto(self):
+@@ -217,6 +249,178 @@ class RotaDitadoTests(DitadoFalsoTests):
+         self.assertIn("erro", dados)
+         self.assertEqual(self.pedidos(), [])
+ 
++    def test_rota_liga_o_ouvido_parado_e_devolve_o_texto(self):
++        seth_ditado.OUVIDO = self.porta_fechada_que_o_start_abre()
++        status, dados = self.pede(AUDIO, {"Origin": panel.ALLOWED_ORIGIN, "Sec-Fetch-Site": "same-origin", "Content-Type": "audio/webm"})
++        self.assertEqual(status, 200)
++        self.assertEqual(dados, {"schema_version": 1, "texto": "olá, Seth"})
++        self.systemctl.assert_called_once()
++
++
++class OuvidoParadoTests(DitadoFalsoTests):
++    """Ouvido parado (conexão recusada ou sem motor): o ditado liga as unidades, espera a porta e repete uma vez."""
++
++    ARGS_START = ["/usr/bin/systemctl", "--user", "start", "ouvido-agata.service", "piper-tts.service"]
++
++    def test_ouvido_parado_e_ligado_e_a_transcricao_repete_uma_vez(self):
++        url = self.porta_fechada_que_o_start_abre()
++        r = seth_ditado.transcrever(AUDIO, "audio/webm", url=url)
++        self.assertEqual(r, {"schema_version": 1, "texto": "olá, Seth"})
++        self.systemctl.assert_called_once_with(self.ARGS_START, capture_output=True, timeout=15, check=False)
++        self.assertEqual(len(self.pedidos()), 1)  # a primeira tentativa não chegou a ouvido nenhum
++
++    def test_start_que_nao_abre_a_porta_devolve_503_depois_da_espera(self):
++        url = f"http://127.0.0.1:{_porta_fechada()}"
++        self.systemctl.return_value = subprocess.CompletedProcess(self.ARGS_START, 1)  # uma das unidades falhou
++        with mock.patch.object(seth_ditado, "_esperar_porta", wraps=seth_ditado._esperar_porta) as espera:
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm", url=url)
++        self.assertEqual(c.exception.status, 503)
++        self.assertIn("nada foi transcrito", c.exception.motivo)
++        self.assertIn("Ligue o servidor do ouvido", c.exception.motivo)
++        self.systemctl.assert_called_once()
++        espera.assert_called_once_with(url)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_ouvido_no_ar_sem_motor_liga_repete_uma_vez_e_depois_devolve_503(self):
++        self.responde(503, {"error": "nenhum motor transcreveu"})
++        with self.assertRaises(seth_ditado.ErroDitado) as c:
++            seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(c.exception.status, 503)
++        self.assertIn("não tem motor no ar", c.exception.motivo)
++        self.systemctl.assert_called_once()
++        self.assertEqual(len(self.pedidos()), 2)  # a tentativa e a repetição, nada além disso
++
++    def test_systemctl_ausente_nao_quebra_o_ditado(self):
++        self.systemctl.side_effect = FileNotFoundError("systemctl")
++        url = f"http://127.0.0.1:{_porta_fechada()}"
++        with self.assertRaises(seth_ditado.ErroDitado) as c:
++            seth_ditado.transcrever(AUDIO, "audio/webm", url=url)
++        self.assertEqual(c.exception.status, 503)
++        self.systemctl.assert_called_once()
++
++    def test_ouvido_no_ar_nao_liga_nada(self):
++        r = seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(r["texto"], "olá, Seth")
++        self.systemctl.assert_not_called()
++        self.assertEqual(len(self.pedidos()), 1)
++
++    def test_erro_que_nao_e_ouvido_parado_nao_liga_nada(self):
++        self.responde(422, {"error": "áudio não processado"})
++        with self.assertRaises(seth_ditado.ErroDitado) as c:
++            seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(c.exception.status, 422)
++        self.systemctl.assert_not_called()
++        self.assertEqual(len(self.pedidos()), 1)
++
++    def test_ouvido_de_outro_host_parado_nao_dispara_systemctl_local(self):
++        self.assertTrue(seth_ditado._local("http://127.0.0.1:20137"))
++        self.assertTrue(seth_ditado._local("http://localhost:20137"))
++        self.assertFalse(seth_ditado._local("http://10.0.0.5:20137"))
++        with mock.patch.object(seth_ditado, "_chamar_ouvido", side_effect=seth_ditado.ErroDitado(503, "parado")) as chamada:
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm", url="http://10.0.0.5:20137")
++        self.assertEqual(c.exception.status, 503)
++        self.assertEqual(chamada.call_count, 1)
++        self.systemctl.assert_not_called()
++
++    def test_espera_a_porta_abrir_e_para_quando_ela_abre(self):
++        conexao = mock.MagicMock()
++        falha = OSError("conexão recusada")
++        with mock.patch("seth_ditado.socket.create_connection", side_effect=[falha, falha, conexao]) as conecta, \
++                mock.patch.object(seth_ditado, "INTERVALO_OUVIDO_S", 0.01):
++            self.assertTrue(seth_ditado._esperar_porta("http://127.0.0.1:20137"))
++        self.assertEqual(conecta.call_count, 3)
++        conecta.assert_called_with(("127.0.0.1", 20137), timeout=1)
++
++    def test_espera_desiste_no_prazo_e_nao_fica_girando(self):
++        with mock.patch("seth_ditado.socket.create_connection", side_effect=OSError("recusada")) as conecta, \
++                mock.patch.multiple(seth_ditado, ESPERA_OUVIDO_S=0.05, INTERVALO_OUVIDO_S=0.01):
++            self.assertFalse(seth_ditado._esperar_porta("http://127.0.0.1:20137"))
++        self.assertGreater(conecta.call_count, 1)
++
++
++class PartidaRefinadaTests(DitadoFalsoTests):
++    """Partida só em recusa de conexão ou 503 do motor; timeout sai direto; quem chega na partida recebe 503 'subindo'."""
++
++    def test_timeout_de_leitura_vira_504_sem_partida_nem_reenvio(self):
++        with mock.patch.object(seth_ditado.urllib.request, "urlopen", side_effect=TimeoutError("timed out")) as chamada:
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(c.exception.status, 504)
++        self.assertIn("demorou demais", c.exception.motivo)
++        self.assertEqual(chamada.call_count, 1, "timeout não reenvia")
++        self.systemctl.assert_not_called()
++
++    def test_timeout_de_conexao_dentro_do_urlerror_tambem_nao_liga(self):
++        with mock.patch.object(seth_ditado.urllib.request, "urlopen", side_effect=urllib.error.URLError(socket.timeout("conexão"))):
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(c.exception.status, 504)
++        self.systemctl.assert_not_called()
++
++    def test_erro_de_rede_que_nao_e_recusa_nao_liga_nem_repete(self):
++        with mock.patch.object(seth_ditado.urllib.request, "urlopen", side_effect=urllib.error.URLError(socket.gaierror("sem rota"))) as chamada:
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm")
++        self.assertEqual(c.exception.status, 503)
++        self.assertEqual(chamada.call_count, 1)
++        self.systemctl.assert_not_called()
++
++    def test_so_recusa_de_conexao_conta_como_recusa_mesmo_dentro_do_urlerror(self):
++        self.assertTrue(seth_ditado._recusou_conexao(urllib.error.URLError(ConnectionRefusedError(111, "recusada"))))
++        self.assertTrue(seth_ditado._recusou_conexao(ConnectionRefusedError()))
++        self.assertFalse(seth_ditado._recusou_conexao(urllib.error.URLError(socket.gaierror("sem rota"))))
++        self.assertFalse(seth_ditado._recusou_conexao(TimeoutError()))
++        self.assertTrue(seth_ditado._demorou(urllib.error.URLError(socket.timeout("x"))))
++        self.assertFalse(seth_ditado._demorou(ConnectionRefusedError()))
++
++    def test_durante_a_partida_quem_chega_recebe_503_ouvido_subindo(self):
++        url = f"http://127.0.0.1:{_porta_fechada()}"
++        soltar = threading.Event()
++
++        def espera_o_start(*args, **kwargs):
++            soltar.wait(5)
++            return subprocess.CompletedProcess(args, 0)
++
++        self.systemctl.side_effect = espera_o_start
++        resultado = {}
++
++        def primeiro():
++            try:
++                seth_ditado.transcrever(AUDIO, "audio/webm", url=url)
++            except seth_ditado.ErroDitado as erro:
++                resultado["erro"] = erro
++
++        fio = threading.Thread(target=primeiro, daemon=True)
++        fio.start()
++        for _ in range(500):
++            if seth_ditado._PARTIDA.is_set():
++                break
++            time.sleep(0.01)
++        self.assertTrue(seth_ditado._PARTIDA.is_set(), "a partida começou")
++        with self.assertRaises(seth_ditado.ErroDitado) as c:
++            seth_ditado.transcrever(AUDIO, "audio/webm", url=url)
++        self.assertEqual(c.exception.status, 503)
++        self.assertEqual(c.exception.motivo, "ouvido subindo, tente em alguns segundos")
++        soltar.set()
++        fio.join(10)
++        self.assertFalse(seth_ditado._PARTIDA.is_set(), "a partida termina e libera a janela")
++        self.assertIn("erro", resultado, "quem começou a partida recebe o 503 da porta que não abriu")
++
++    def test_fora_da_partida_ocupado_continua_429(self):
++        self.assertTrue(seth_ditado._TRANSCRICAO.acquire(blocking=False))
++        try:
++            with self.assertRaises(seth_ditado.ErroDitado) as c:
++                seth_ditado.transcrever(AUDIO, "audio/webm")
++            self.assertEqual(c.exception.status, 429)
++        finally:
++            seth_ditado._TRANSCRICAO.release()
++
++    def test_seth_parar_tambem_para_o_ouvido(self):
++        atalho = (HERE.parents[1] / "redesign" / "systemd" / "seth-parar").read_text(encoding="utf-8")
++        self.assertIn("systemctl --user stop ouvido-agata.service", atalho)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/painel_operacional/test_seth_voz.py b/redesign/painel_operacional/test_seth_voz.py
+index e512c44c..b3baf323 100644
+--- a/redesign/painel_operacional/test_seth_voz.py
++++ b/redesign/painel_operacional/test_seth_voz.py
+@@ -54,6 +54,8 @@ class _Piper(BaseHTTPRequestHandler):
+         st["pedidos"].append(pedido)
+         if st.get("falha_no_pedido") == len(st["pedidos"]):
+             return self._responde(500, b"falha de teste")
++        if st.get("nao_wav"):
++            return self._responde(200, b"isto nao e um wav", "audio/wav")
+         return self._responde(200, b"RIFF" + b"\0" * 40, "audio/wav")
+ 
+     def _responde(self, status, corpo, tipo="application/json"):
+@@ -258,6 +260,96 @@ class FalaTests(FalaFalsaTests):
+         self.assertIn("NÃO é a voz do sistema", seth_voz.resumo_voz())
+ 
+ 
++class VozAudioTests(FalaFalsaTests):
++    """Conversa por voz (23/11/2026): sintetizar() devolve o WAV de um trecho e não toca nada na Máquina."""
++
++    def test_sintetiza_um_trecho_com_a_voz_do_sistema_sem_tocar(self):
++        wav, total = seth_voz.sintetizar(PARAGRAFOS, 1)
++        self.assertTrue(wav.startswith(b"RIFF"))
++        self.assertEqual(total, 3)
++        self.assertEqual(self.pedidos()[-1]["input"], "Segundo parágrafo, com mais uma frase.")
++        self.assertEqual(self.pedidos()[-1]["voice"], "agata")
++        self.assertEqual(self.pedidos()[-1]["response_format"], "wav")
++        self.assertEqual(self.tocados(), [], "quem toca é o navegador: nada pode sair pelo player da Máquina")
++
++    def test_servico_parado_sobe_e_nao_e_desligado_depois_de_sintetizar(self):
++        self.no_ar.unlink()
++        seth_voz.sintetizar("Um trecho só.")
++        self.assertIn("start", self.systemctl_log())
++        self.assertNotIn("stop", self.systemctl_log(), "cada trecho pediria um ciclo de liga e desliga")
++
++    def test_texto_vazio_ou_so_codigo_nao_sintetiza(self):
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("   ")
++        self.assertEqual(c.exception.status, 400)
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("```\nprint(1)\n```")
++        self.assertEqual(c.exception.status, 400)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_texto_acima_do_limite_depois_de_preparado_e_413(self):
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("palavra " * 2000)
++        self.assertEqual(c.exception.status, 413)
++        self.assertEqual(c.exception.motivo, "resposta longa demais para falar. Peça um resumo.")
++        self.assertEqual(self.pedidos(), [])
++
++    def test_trecho_booleano_nao_vale_como_indice(self):
++        for trecho in (True, False):
++            with self.assertRaises(seth_voz.ErroVoz) as c:
++                seth_voz.sintetizar(PARAGRAFOS, trecho)
++            self.assertEqual(c.exception.status, 400, trecho)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_segunda_sintese_espera_a_primeira_e_depois_recebe_503(self):
++        """Semáforo de uma síntese: enquanto outra segura a vaga, o pedido espera o prazo e recebe 503."""
++        seth_voz._SINTESE.acquire()
++        try:
++            with mock.patch.object(seth_voz, "ESPERA_SINTESE_S", 0.2):
++                with self.assertRaises(seth_voz.ErroVoz) as c:
++                    seth_voz.sintetizar("Olá.")
++            self.assertEqual(c.exception.status, 503)
++            self.assertIn("ocupada", c.exception.motivo)
++            self.assertEqual(self.pedidos(), [], "o pedido que esperou não chegou ao piper")
++        finally:
++            seth_voz._SINTESE.release()
++        wav, _total = seth_voz.sintetizar("Olá.")
++        self.assertTrue(wav.startswith(b"RIFF"), "liberada a vaga, a síntese volta a funcionar")
++
++    def test_a_vaga_volta_mesmo_quando_a_sintese_falha(self):
++        self.piper.estado["falha_no_pedido"] = 1
++        with self.assertRaises(seth_voz.ErroVoz):
++            seth_voz.sintetizar("Olá.")
++        self.assertTrue(seth_voz._SINTESE.acquire(timeout=1), "a vaga é liberada no erro")
++        seth_voz._SINTESE.release()
++
++    def test_trecho_fora_do_texto_ou_que_nao_e_numero_e_400(self):
++        for trecho in (9, -1, "1"):
++            with self.assertRaises(seth_voz.ErroVoz) as c:
++                seth_voz.sintetizar(PARAGRAFOS, trecho)
++            self.assertEqual(c.exception.status, 400, trecho)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_outro_modelo_no_piper_nao_sintetiza(self):
++        self.piper.estado["modelo"] = MODELO_ERRADO
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("Olá.")
++        self.assertEqual(c.exception.status, 503)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_falha_da_sintese_e_502(self):
++        self.piper.estado["falha_no_pedido"] = 1
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("Olá.")
++        self.assertEqual(c.exception.status, 502)
++
++    def test_resposta_que_nao_e_wav_e_502(self):
++        self.piper.estado["nao_wav"] = True
++        with self.assertRaises(seth_voz.ErroVoz) as c:
++            seth_voz.sintetizar("Olá.")
++        self.assertEqual(c.exception.status, 502)
++
++
+ class RotasVozTests(FalaFalsaTests):
+     """As rotas do painel: origem, tamanho, formato e o que chega ao módulo. Sobe o painel numa porta livre."""
+ 
+@@ -335,6 +427,76 @@ class RotasVozTests(FalaFalsaTests):
+         self.assertEqual(status, 415)
+         self.assertIn("erro", dados)
+ 
++    def pede_bruto(self, corpo, cabecalhos):
++        """Pedido de voz-audio: devolve (status, cabeçalhos em minúsculas, corpo cru). O WAV não é JSON."""
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=60)
++        try:
++            cab = {"Content-Type": "application/json", **cabecalhos}
++            conn.request("POST", "/api/seth/voz-audio", body=corpo, headers=cab)
++            resposta = conn.getresponse()
++            return resposta.status, {k.lower(): v for k, v in resposta.getheaders()}, resposta.read()
++        finally:
++            conn.close()
++
++    def test_voz_audio_devolve_o_wav_de_um_trecho_e_os_cabecalhos(self):
++        corpo = json.dumps({"texto": PARAGRAFOS, "trecho": 2}).encode("utf-8")
++        status, cab, wav = self.pede_bruto(corpo, self.MESMA_ORIGEM)
++        self.assertEqual(status, 200)
++        self.assertEqual(cab["content-type"], "audio/wav")
++        self.assertEqual(cab["x-trechos"], "3")
++        self.assertEqual(cab["x-trecho"], "2")
++        self.assertTrue(wav.startswith(b"RIFF"))
++        self.assertEqual(self.pedidos()[-1]["input"], "Terceiro e último.")
++        self.assertEqual(self.tocados(), [], "a rota não toca na Máquina")
++
++    def test_voz_audio_manda_um_so_cabecalho_de_cache(self):
++        corpo = json.dumps({"texto": PARAGRAFOS}).encode("utf-8")
++        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=60)
++        try:
++            conn.request("POST", "/api/seth/voz-audio", body=corpo, headers={"Content-Type": "application/json", **self.MESMA_ORIGEM})
++            resposta = conn.getresponse()
++            resposta.read()
++            cabecalhos = [nome.lower() for nome, _valor in resposta.getheaders()]
++        finally:
++            conn.close()
++        self.assertEqual(cabecalhos.count("cache-control"), 1)
++
++    def test_voz_audio_sem_origem_ou_de_outro_site_recebe_403_e_nao_chega_a_voz(self):
++        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
++        self.assertEqual(self.pede_bruto(corpo, {})[0], 403)
++        self.assertEqual(self.pede_bruto(corpo, {"Origin": "http://evil.example", "Sec-Fetch-Site": "cross-site"})[0], 403)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_voz_audio_texto_vazio_json_ruim_ou_corpo_grande_nao_sintetiza(self):
++        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", json.dumps({"texto": ""}).encode(), self.MESMA_ORIGEM)[0], 400)
++        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", b"{nao-json", self.MESMA_ORIGEM)[0], 400)
++        pequeno = json.dumps({"texto": "x"}).encode("utf-8")
++        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", pequeno,
++                                   {**self.MESMA_ORIGEM, "Content-Length": str(seth_voz.LIMITE_CORPO_BYTES + 10)})[0], 413)
++        self.assertEqual(self.pedidos(), [])
++
++    def test_voz_audio_com_falha_da_sintese_responde_502_em_json(self):
++        self.piper.estado["falha_no_pedido"] = 1
++        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
++        status, dados = self.pede("/api/seth/voz-audio", "POST", corpo, self.MESMA_ORIGEM)
++        self.assertEqual(status, 502)
++        self.assertIn("erro", dados)
++
++    def test_voz_audio_com_outro_modelo_responde_503(self):
++        self.piper.estado["modelo"] = MODELO_ERRADO
++        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
++        status, dados = self.pede("/api/seth/voz-audio", "POST", corpo, self.MESMA_ORIGEM)
++        self.assertEqual(status, 503)
++        self.assertIn("NÃO falei", dados["erro"])
++        self.assertEqual(self.pedidos(), [])
++
++    def test_ouvir_continua_igual_ao_lado_da_voz_audio(self):
++        corpo = json.dumps({"texto": "Olá. Teste pela rota."}).encode("utf-8")
++        status, dados = self.pede("/api/seth/ouvir", "POST", corpo, self.MESMA_ORIGEM)
++        self.assertEqual(status, 200)
++        self.assertTrue(dados["falou"])
++        self.assertEqual(len(self.tocados()), 1, "o ouvir antigo continua tocando na Máquina, um trecho, pelo player")
++
+ 
+ class SentidosVozTests(unittest.TestCase):
+     """A linha 'voz' da página Sentidos vem do estado real (nova_versao_painel._estado_sentidos), só leitura."""
+diff --git a/redesign/painel_operacional/test_voz_ui.py b/redesign/painel_operacional/test_voz_ui.py
+index c260e8f1..d16c2796 100644
+--- a/redesign/painel_operacional/test_voz_ui.py
++++ b/redesign/painel_operacional/test_voz_ui.py
+@@ -40,6 +40,7 @@ class Elemento {
+   getAttribute(nome) { return Object.prototype.hasOwnProperty.call(this.attrs, nome) ? this.attrs[nome] : null; }
+   addEventListener(tipo, fn) { (this.ouvintes[tipo] = this.ouvintes[tipo] || []).push(fn); }
+   focus() { this.focado = true; } blur() {} remove() {} select() {}
++  requestSubmit() { (this.ouvintes.submit || []).forEach((f) => f({preventDefault() {}, target: this})); }
+   closest() { return null; }
+   querySelector(sel) { return buscar(this, sel)[0] || null; }
+   querySelectorAll(sel) { return buscar(this, sel); }
+@@ -58,8 +59,8 @@ function texto(no) {
+   return (no.textContent || '') + (no.children || []).map(texto).join('');
+ }
+ // Estado inicial do HTML que importa para a voz (o mock não lê o HTML).
+-const OCULTOS = ['atalhos-painel', 'seth-voz-parar', 'seth-parar'];
+-const INICIAIS = {'seth-ditado': {atributos: {'aria-pressed': 'false'}, texto: 'Ditar'}};
++const OCULTOS = ['atalhos-painel', 'seth-voz-parar', 'seth-parar', 'seth-chamado-estado'];
++const INICIAIS = {'seth-ditado': {atributos: {'aria-pressed': 'false'}, texto: 'Ditar'}, 'seth-chamado': {atributos: {'aria-pressed': 'false'}, texto: 'Conversa por voz'}};
+ const registro = new Map();
+ const ouvintesDoc = {};
+ const documento = {
+@@ -86,6 +87,7 @@ const armazenamento = Object.assign({}, cen.storage && cen.storage.inicial || {}
+ function cabecalhosDe(cab) { return {get: (nome) => (cab || {})[String(nome).toLowerCase()] ?? null}; }
+ function respostaJson(status, obj) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe({}), json: async () => obj, text: async () => JSON.stringify(obj)}; }
+ function respostaTexto(status, t) { return {ok: status >= 200 && status < 300, status, headers: cabecalhosDe({}), json: async () => { throw new Error('sem json'); }, text: async () => t}; }
++function respostaStreamTravado() { return {ok: true, status: 200, headers: cabecalhosDe({}), json: async () => ({}), text: async () => '', body: {getReader() { return {read: () => new Promise(() => {}), cancel: async () => {}}; }}}; }
+ function respostaStream(sse) {
+   const bytes = new TextEncoder().encode(sse); let lido = false;
+   return {ok: true, status: 200, headers: cabecalhosDe({}), json: async () => ({}), text: async () => '', body: {getReader() { return {
+@@ -132,21 +134,41 @@ class ControleFalso { constructor() { this.signal = {aborted: false, ouvintes: [
+ ctx.AbortController = ControleFalso;
+ ctx.setTimeout = (f, ms) => { timers.push({f, ms, cancelado: false}); return timers.length; };
+ ctx.clearTimeout = (id) => { if (timers[id - 1]) timers[id - 1].cancelado = true; };
+-ctx.setInterval = () => 0; ctx.clearInterval = () => {};
++const intervalos = []; const fontes = [];
++let relogio = cen.relogio !== undefined ? cen.relogio : 1000;
++const nivelMic = {valor: cen.nivel !== undefined ? cen.nivel : 0};
++ctx.setInterval = (f, ms) => { intervalos.push({f, ms, ativo: true}); return intervalos.length; };
++ctx.clearInterval = (id) => { if (intervalos[id - 1]) intervalos[id - 1].ativo = false; };
++ctx.performance = {now: () => relogio};
++ctx.AudioContext = class {
++  constructor() { this.destination = {}; this.state = (cen.audio && cen.audio.travado) ? 'suspended' : 'running'; }
++  resume() { if (!(cen.audio && cen.audio.travado)) this.state = 'running'; return Promise.resolve(); }
++  createMediaStreamSource() { return {connect() {}}; }
++  createAnalyser() { return {fftSize: 0, getFloatTimeDomainData(buf) { buf.fill(nivelMic.valor); }}; }
++  decodeAudioData(bytes) { return Promise.resolve({duracao: 1, bytes: bytes}); }
++  createBufferSource() {
++    const f = {buffer: null, tocando: false, acabou: false, onended: null, connect() {}, start() { this.tocando = true; },
++      stop() { if (!this.acabou) { this.acabou = true; if (this.onended) this.onended(); } }};
++    fontes.push(f); return f;
++  }
++  close() { return Promise.resolve(); }
++};
+ ctx.addEventListener = (tipo, fn) => { if (tipo === 'load') cargas.push(fn); };
+ ctx.fetch = async (url, opcoes = {}) => {
+   const metodo = String(opcoes.method || 'GET').toUpperCase();
+   let corpo = null;
+   if (typeof opcoes.body === 'string') corpo = opcoes.body;
+   else if (opcoes.body && typeof opcoes.body.size === 'number') corpo = {blob: true, tamanho: opcoes.body.size, tipo: opcoes.body.type};
+-  chamadas.push({url, metodo, corpo, cabecalhos: opcoes.headers || null});
++  chamadas.push({url, metodo, corpo, cabecalhos: opcoes.headers || null, temSinal: Boolean(opcoes.signal)});
+   if (url === '/api/seth/conversa' && metodo === 'POST') return respostaJson(200, {schema_version: 1, id: '0123456789ab', titulo: '', mensagens: []});
+   if (url === '/api/seth/conversas') return respostaJson(200, {schema_version: 1, state: 'ok', items: [], pastas: [], marcadores: [], total: 0, organizacao: 'ok', ilegiveis: 0});
+   if (url === '/api/seth/chat/stream') {
+     const r = proxima(url) || {};
++    if (r.travado) return respostaStreamTravado();
+     return respostaStream(r.sse !== undefined ? r.sse : 'data: {"tipo": "texto", "delta": "Resposta da Seth."}\n\ndata: {"tipo": "fim"}\n\n');
+   }
+   const r = proxima(url);
++  if (r && r.wav) return {ok: true, status: 200, headers: cabecalhosDe(r.cabecalhos), json: async () => ({}), text: async () => '', arrayBuffer: async () => new ArrayBuffer(8)};
+   if (r && r.pendente) return new Promise((resolver) => pendentes.push(resolver));
+   if (r) {
+     if (r.rede) throw new TypeError('Failed to fetch');
+@@ -168,18 +190,26 @@ ctx.__campo = (valor) => { documento.getElementById('seth-input').value = valor;
+ ctx.__enviar = (mensagem) => { documento.getElementById('seth-input').value = mensagem; const form = documento.getElementById('seth-form'); form.ouvintes.submit[0]({preventDefault() {}, target: form}); };
+ ctx.__resolverPendentes = (obj) => { pendentes.splice(0).forEach((f) => f(respostaJson(200, obj))); };
+ ctx.__disparar = (ms) => { const t = timers.find((x) => x.ms === ms && !x.cancelado); if (t) t.f(); return Boolean(t); };
++ctx.__relogio = () => relogio;
++ctx.__clicarDocumento = () => (ouvintesDoc.click || []).forEach((f) => f({target: {tagName: 'BODY', isContentEditable: false}}));
++ctx.__tick = () => { const t = timers.find((x) => x.ms === 50 && !x.cancelado && !x.disparado); if (t) { t.disparado = true; t.f(); } return Boolean(t); };
++ctx.__avanca = (ms) => { relogio += ms; };
++ctx.__nivel = (v) => { nivelMic.valor = v; };
++ctx.__terminarTrecho = () => { const f = fontes.find((x) => x.tocando && !x.acabou); if (!f) return false; f.acabou = true; if (f.onended) f.onended(); return true; };
+ ctx.__estado = () => {
+   const v = documento.getElementById('seth-voz-estado'); const d = documento.getElementById('seth-ditado');
+   return {voz: v.textContent, classe: v.className, pararVisivel: !documento.getElementById('seth-voz-parar').hidden,
+     ditado: d.textContent, pressionado: d.getAttribute('aria-pressed'), ditadoDesabilitado: d.disabled,
+-    campo: documento.getElementById('seth-input').value, modo: documento.getElementById('seth-modo-conversa').checked};
++    campo: documento.getElementById('seth-input').value, modo: documento.getElementById('seth-modo-conversa').checked,
++    chamadoBotao: documento.getElementById('seth-chamado').textContent, chamadoAria: documento.getElementById('seth-chamado').getAttribute('aria-pressed'),
++    chamadoTexto: documento.getElementById('seth-chamado-estado').textContent, chamadoOculta: documento.getElementById('seth-chamado-estado').hidden};
+ };
+ const esperar = async () => { for (let i = 0; i < 120; i++) await new Promise((r) => setImmediate(r)); };
+ (async () => {
+   try {
+     const fonte = fs.readFileSync(path.join(dir, 'prototipo.js'), 'utf8');
+     const fim = fonte.lastIndexOf('})();');
+-    const exposto = 'window.__voz = {ouvirResposta, vozParar, ditarPeloMicrofone, vozModoLigado, vozEstado, enviarDitado, vozLigarControles};\n';
++    const exposto = 'window.__voz = {ouvirResposta, vozParar, ditarPeloMicrofone, vozModoLigado, vozEstado, enviarDitado, vozLigarControles};\nwindow.__chamadoTeste = {chamado, chamadoVad, chamadoVadNovo, chamadoComando, chamadoRotulo, chamadoEhEco, chamadoPalavras, sethRascunhoDe, sethChaveRascunho, CHAMADO_LIMIAR_FALA, CHAMADO_LIMIAR_INTERRUPCAO, CHAMADO_INTERRUPCAO_MS, CHAMADO_SILENCIO_MS, CHAMADO_VOZ_MIN_MS, CHAMADO_POS_FALA_MS, CHAMADO_PASSO_MS, DITADO_MAX_MS};\n';
+     vm.createContext(ctx);
+     vm.runInContext(fonte.slice(0, fim) + exposto + fonte.slice(fim), ctx, {filename: 'prototipo.js'});
+   } catch (e) { console.log(JSON.stringify({erro: 'carga: ' + e.message})); return; }
+@@ -195,7 +225,7 @@ const esperar = async () => { for (let i = 0; i < 120; i++) await new Promise((r
+   }
+   console.log(JSON.stringify({resultados, estados, chamadas, gravacoes, armazenamento, microfone,
+     gravadores: gravadores.map((g) => ({estado: g.estado, opc: g.opc, mimeType: g.mimeType})),
+-    timers: timers.map((t) => ({ms: t.ms, cancelado: t.cancelado})), final: ctx.__estado(), contarOuvir: ctx.__contarOuvir()}));
++    timers: timers.map((t) => ({ms: t.ms, cancelado: t.cancelado})), final: ctx.__estado(), contarOuvir: ctx.__contarOuvir(), intervalos: intervalos.map((i) => ({ms: i.ms, ativo: i.ativo})), fontes: fontes.map((f) => ({tocando: f.tocando, acabou: f.acabou}))}));
+ })();
+ """
+ 
+@@ -382,6 +412,201 @@ class VozUiTests(unittest.TestCase):
+         self.assertIn("Não veio texto", m["final"]["voz"])
+ 
+ 
++LIGAR = [{"js": "__clicar('seth-chamado')"}]
++# Um trecho do Humano: voz por ~500 ms e silêncio de 1300 ms. Começa a gravar no primeiro tick e encerra no silêncio.
++TRECHO = [{"js": "__nivel(0.1)"}, {"js": "__avanca(50)"}, {"js": "__tick()"}, {"js": "__avanca(500)"}, {"js": "__tick()"},
++          {"js": "__nivel(0)"}, {"js": "__avanca(1300)"}, {"js": "__tick()"}]
++RESPOSTA = 'data: {"tipo": "texto", "delta": "Resposta da Seth."}\n\ndata: {"tipo": "fim"}\n\n'
++WAV = {"wav": True, "cabecalhos": {"x-trechos": "1"}}
++MENSAGEM_NAO_FALEI = "NÃO falei: a voz do sistema não respondeu, ou carregou outro modelo. Não falo com outra voz."
++
++
++class ChamadoVozTests(unittest.TestCase):
++    """Conversa por voz (23/11/2026): liga, ouve, grava o trecho, manda à Seth, toca a resposta no navegador, interrompe
++    pela voz (barge-in), Esc e comandos. O microfone e o áudio são simulados: o nível é um número que o teste escreve e o
++    relógio só anda quando o teste manda. Nenhum microfone real, nenhum som, nenhuma rede."""
++
++    def test_botao_liga_com_cancelamento_de_eco_e_mostra_ouvindo(self):
++        m = rodar(LIGAR)
++        self.assertEqual(m["microfone"]["pedidos"], [{"audio": {"echoCancellation": True, "noiseSuppression": True}}])
++        self.assertEqual(m["final"]["chamadoBotao"], "Parar conversa por voz")
++        self.assertEqual(m["final"]["chamadoAria"], "true")
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…")
++        self.assertFalse(m["final"]["chamadoOculta"])
++        self.assertEqual([t for t in m["timers"] if t["ms"] == 50 and not t["cancelado"]], [{"ms": 50, "cancelado": False}], "o microfone é lido a cada 50 ms, por um temporizador que se reagenda")
++
++    def test_botao_desliga_para_o_microfone_e_o_passo(self):
++        m = rodar(LIGAR + [{"js": "__clicar('seth-chamado')"}])
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertTrue(m["final"]["chamadoOculta"])
++        self.assertGreaterEqual(m["microfone"]["parados"], 1)
++        self.assertEqual([t for t in m["timers"] if t["ms"] == 50 and not t["cancelado"]], [], "desligar cancela o passo pendente")
++
++    def test_permissao_do_microfone_negada_nao_liga(self):
++        m = rodar([{"js": "__clicar('seth-chamado')"}], microfone={"negar": True})
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertIn("Permissão do microfone negada", m["final"]["voz"])
++        self.assertEqual(m["gravadores"], [])
++
++    def test_voz_curta_e_descartada_e_nao_vai_ao_painel(self):
++        m = rodar(LIGAR + [{"js": "__nivel(0.1)"}, {"js": "__avanca(50)"}, {"js": "__tick()"}, {"js": "__avanca(100)"}, {"js": "__tick()"},
++                           {"js": "__nivel(0)"}, {"js": "__avanca(1300)"}, {"js": "__tick()"}])
++        self.assertEqual(posts(m, "/api/seth/ditado"), [], "menos de 0,4 s de voz não vai à transcrição")
++        self.assertEqual(m["gravadores"][0]["estado"], "inactive")
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…")
++
++    def test_trecho_com_voz_e_transcrito_e_enviado_a_seth_e_a_resposta_e_tocada_no_navegador(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__terminarTrecho()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"schema_version": 1, "texto": "olá, Seth"}}],
++                             "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [WAV]})
++        self.assertEqual(len(posts(m, "/api/seth/ditado")), 1)
++        envio = posts(m, "/api/seth/chat/stream")
++        self.assertEqual(len(envio), 1, "o texto segue pelo caminho do Enviar")
++        self.assertIn("olá, Seth", envio[0]["corpo"])
++        pedido = posts(m, "/api/seth/voz-audio")
++        self.assertEqual(json.loads(pedido[0]["corpo"]), {"texto": "Resposta da Seth.", "trecho": 0})
++        self.assertEqual(posts(m, "/api/seth/ouvir"), [], "a fala do navegador não usa a rota que fala na Máquina")
++        self.assertEqual(m["estados"][len(LIGAR + TRECHO) - 1]["chamadoTexto"], "Seth falando…")
++        self.assertEqual(m["fontes"], [{"tocando": True, "acabou": True}])
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…", "terminada a fala, volta a ouvir sozinha")
++        self.assertEqual(m["final"]["campo"], "", "o rascunho do campo não é mexido pela voz")
++
++    def test_voz_normal_nao_interrompe_a_fala(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__nivel(0.05)"}, {"js": "__avanca(2000)"}, {"js": "__tick()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "olá, Seth"}}],
++                             "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
++        self.assertEqual(m["final"]["chamadoTexto"], "Seth falando…", "0,05 está abaixo do limiar de interrupção")
++        self.assertEqual(len(m["gravadores"]), 1, "com a fala tocando, o microfone não grava outro trecho")
++
++    def test_barge_in_para_a_fala_na_hora_e_grava_o_turno_do_humano(self):
++        base = len(LIGAR + TRECHO)
++        interromper = [{"js": "__nivel(0.5)"}, {"js": "__avanca(0)"}, {"js": "__tick()"},
++                       {"js": "__avanca(300)"}, {"js": "__tick()"},
++                       {"js": "__avanca(200)"}, {"js": "__tick()"},
++                       {"js": "__nivel(0)"}, {"js": "__avanca(1300)"}, {"js": "__tick()"}]
++        m = rodar(LIGAR + TRECHO + interromper,
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "pera ou maçã"}}],
++                             "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
++        self.assertEqual(m["estados"][base + 4]["chamadoTexto"], "Ouvindo… Fala interrompida pela sua voz.")
++        self.assertTrue(m["fontes"][0]["acabou"], "o áudio parou na hora")
++        self.assertEqual(len(posts(m, "/api/seth/ditado")), 2, "o turno do Humano foi gravado e transcrito")
++        self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 2, "e enviado à Seth")
++
++    def test_esc_com_fala_no_navegador_para_e_volta_a_ouvir_e_o_segundo_desliga(self):
++        base = len(LIGAR + TRECHO)
++        m = rodar(LIGAR + TRECHO + [{"js": "__tecla('Escape')"}, {"js": "__tecla('Escape')"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}],
++                             "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
++        self.assertEqual(m["estados"][base]["chamadoTexto"], "Ouvindo… Fala interrompida.")
++        self.assertTrue(m["fontes"][0]["acabou"])
++        self.assertEqual(m["estados"][base + 1]["chamadoBotao"], "Conversa por voz")
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++
++    def test_ouvir_com_a_fala_do_navegador_tocando_para_a_fala_antes_de_comecar_a_outra(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__ouvir(0)"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [WAV], "/api/seth/ouvir": [{"json": {"falou": True, "motivo": "falei a resposta inteira"}}]})
++        self.assertEqual(m["fontes"], [{"tocando": True, "acabou": True}], "o áudio do navegador não toca junto com a leitura da Máquina")
++        self.assertEqual(len(posts(m, "/api/seth/ouvir")), 1)
++
++    def test_esc_com_a_seth_pensando_interrompe_a_resposta_e_volta_a_ouvir(self):
++        m = rodar(LIGAR + [{"js": "__enviar('Oi.')"}, {"js": "__tecla('Escape')"}, {"js": "__tecla('Escape')"}],
++                  respostas={"/api/seth/chat/stream": [{"travado": True}]})
++        self.assertEqual(m["estados"][1]["chamadoTexto"], "Seth pensando…")
++        self.assertEqual(m["estados"][2]["chamadoTexto"], "Ouvindo… Resposta interrompida.")
++        self.assertEqual(m["estados"][3]["chamadoBotao"], "Conversa por voz")
++
++    def test_fale_comigo_liga_sem_virar_mensagem(self):
++        m = rodar([{"js": "__enviar('Fale comigo.')"}])
++        self.assertEqual(m["final"]["chamadoBotao"], "Parar conversa por voz")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [], "o comando não é mensagem para a Seth")
++        self.assertEqual(m["final"]["campo"], "")
++
++    def test_encerrar_chamado_desliga_sem_virar_mensagem(self):
++        m = rodar(LIGAR + [{"js": "__enviar('encerrar chamado')"}])
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [])
++
++    def test_ditar_com_a_conversa_ligada_e_recusado(self):
++        m = rodar(LIGAR + [{"js": "__clicar('seth-ditado')"}])
++        self.assertEqual(len(m["microfone"]["pedidos"]), 1, "o ditado não abre um segundo microfone")
++        self.assertIn("A conversa por voz já está ouvindo o microfone", m["final"]["voz"])
++
++    def test_ditado_com_erro_do_ouvido_volta_a_ouvir_com_o_motivo(self):
++        m = rodar(LIGAR + TRECHO,
++                  respostas={"/api/seth/ditado": [{"status": 503, "json": {"erro": "o ouvido local não tem motor no ar: nada foi transcrito."}}]})
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… o ouvido local não tem motor no ar: nada foi transcrito.")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [])
++
++    def test_desligar_durante_a_transcricao_descarta_o_texto_que_chegar_depois(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__clicar('seth-chamado')"}, {"js": "__resolverPendentes({schema_version: 1, texto: 'fala tardia'})"}],
++                  respostas={"/api/seth/ditado": [{"pendente": True}]})
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [], "depois de desligar, a fala não vai à Seth")
++
++    def test_sintese_que_falha_no_primeiro_trecho_cai_na_fala_pela_maquina_com_aviso(self):
++        m = rodar(LIGAR + TRECHO,
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"status": 503, "json": {"erro": MENSAGEM_NAO_FALEI}}]})
++        self.assertEqual(json.loads(posts(m, "/api/seth/ouvir")[0]["corpo"]), {"texto": "Resposta da Seth."})
++        self.assertEqual(m["final"]["voz"], "A voz do navegador falhou: falo pela Máquina, sem interromper pela voz.")
++        self.assertEqual(m["final"]["classe"], "seth-voz-estado erro")
++        self.assertEqual(m["gravadores"][0]["estado"], "inactive")
++
++    def test_fala_pela_maquina_nao_escuta_e_esc_pede_a_parada_e_o_segundo_desliga(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__nivel(0.5)"}, {"js": "__avanca(500)"}, {"js": "__tick()"},
++                                    {"js": "__tecla('Escape')"}, {"js": "__tecla('Escape')"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"status": 503, "json": {"erro": MENSAGEM_NAO_FALEI}}],
++                             "/api/seth/ouvir": [{"pendente": True}], "/api/seth/ouvir/parar": [{"json": {"falando": True}}]})
++        self.assertEqual(len(m["gravadores"]), 1, "com a fala pela Máquina, o microfone não grava (meia-duplex)")
++        # O primeiro Esc pede a parada (vale entre trechos); o segundo desliga e também pede, para a Máquina calar.
++        self.assertEqual(len(posts(m, "/api/seth/ouvir/parar")), 2)
++        self.assertEqual(m["estados"][len(LIGAR + TRECHO) + 3]["chamadoTexto"], "Parando a fala…")
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++
++    def test_sintese_que_falha_no_meio_nao_repete_o_que_ja_foi_falado(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__terminarTrecho()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"wav": True, "cabecalhos": {"x-trechos": "2"}}, {"status": 503, "json": {"erro": MENSAGEM_NAO_FALEI}}]})
++        self.assertEqual(posts(m, "/api/seth/ouvir"), [])
++        self.assertTrue(m["final"]["chamadoTexto"].endswith("A voz falhou no meio da fala: o resto não foi falado."))
++
++    def test_vad_encerra_so_depois_de_1200_ms_de_silencio(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; const v = T.chamadoVadNovo(); const saida = [];
++          for (const [t, n] of [[0, 0.5], [500, 0.5], [1000, 0], [1199, 0], [1700, 0]]) saida.push(T.chamadoVad(v, n, t)); return saida; })()"""}])
++        self.assertEqual(m["resultados"][0], ["iniciar", "", "", "", "encerrar"])
++
++    def test_vad_descarta_voz_curta_e_corta_trecho_longo_no_limite(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; const curto = T.chamadoVadNovo(); const longo = T.chamadoVadNovo();
++          const a = [[0, 0.5], [100, 0], [1300, 0]].map(([t, n]) => T.chamadoVad(curto, n, t));
++          const b = [[0, 0.5], [30000, 0.5], [59999, 0.5], [60000, 0.5]].map(([t, n]) => T.chamadoVad(longo, n, t));
++          return [a, b]; })()"""}])
++        self.assertEqual(m["resultados"][0], [["iniciar", "", "descartar"], ["iniciar", "", "", "encerrar"]])
++
++    def test_comandos_sem_distincao_de_maiusculas_nem_pontuacao(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; const casos = [["Fale comigo.", "ligar"], ["  ENCERRAR CHAMADO ", "desligar"],
++          ["volte ao texto!", "desligar"], ["fale com ela", ""], ["constructor", ""], ["", ""]];
++          return casos.map(([t, esperado]) => [T.chamadoComando(t), esperado]); })()"""}])
++        for obtido, esperado in m["resultados"][0]:
++            self.assertEqual(obtido, esperado)
++
++    def test_rotulos_dos_estados_em_portugues(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; return [T.chamadoRotulo("falando", false), T.chamadoRotulo("falando", true),
++          T.chamadoRotulo("transcrevendo", false), T.chamadoRotulo("pensando", false), T.chamadoRotulo("ouvindo", false),
++          T.chamadoRotulo("abrindo", false)]; })()"""}])
++        self.assertEqual(m["resultados"][0], ["Seth falando…", "Parando a fala…", "Transcrevendo…", "Seth pensando…", "Ouvindo…", "Abrindo o microfone…"])
++
++    def test_constantes_nomeadas_do_detector(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; return {limiar: T.CHAMADO_LIMIAR_FALA, interrupcao: T.CHAMADO_LIMIAR_INTERRUPCAO,
++          interrupcaoMs: T.CHAMADO_INTERRUPCAO_MS, silencio: T.CHAMADO_SILENCIO_MS, vozMin: T.CHAMADO_VOZ_MIN_MS,
++          posFala: T.CHAMADO_POS_FALA_MS, passo: T.CHAMADO_PASSO_MS, maximo: T.DITADO_MAX_MS}; })()"""}])
++        c = m["resultados"][0]
++        self.assertEqual((c["silencio"], c["vozMin"], c["interrupcaoMs"], c["passo"], c["maximo"]), (1200, 400, 300, 50, 60000))
++        self.assertLess(c["limiar"], c["interrupcao"], "a interrupção pela voz exige nível mais alto que o de fala normal")
++
++
+ class VozEstaticaTests(unittest.TestCase):
+     """Conferências de texto: o que entrou é texto, não HTML; a CSP segue igual; classes e emoji."""
+ 
+@@ -401,7 +626,7 @@ class VozEstaticaTests(unittest.TestCase):
+             self.assertNotIn("<script", trecho)
+ 
+     def test_classes_novas_tem_regra_de_estilo(self):
+-        for classe in ("seth-voz", "seth-voz-modo", "seth-voz-estado", "seth-ditar"):
++        for classe in ("seth-voz", "seth-voz-modo", "seth-voz-estado", "seth-ditar", "seth-chamar"):
+             self.assertRegex(CSS, r"\." + classe + r"[\s.{:\[]", classe)
+ 
+     def test_sem_emoji_nas_linhas_novas(self):
+@@ -432,5 +657,157 @@ class VozEstaticaTests(unittest.TestCase):
+         self.assertEqual(JS.count('vozParar();'), 1, "o Esc chama vozParar() direto; o botão Parar voz a recebe como ouvinte")
+ 
+ 
++class ChamadoVozRevisaoTests(unittest.TestCase):
++    """Correções da revisão independente (23/11/2026): anexo pendente, eco, pausa por turnos, prazos, cauda de 800 ms,
++    AudioContext que não roda, 413 próprio, comandos digitados e falados, fronteira do detector e dois trechos."""
++
++    TURNO = TRECHO + [{"js": "__terminarTrecho()"}, {"js": "__avanca(500)"}]
++    RESPOSTA_LONGA = 'data: {"tipo": "texto", "delta": "A resposta da Seth explica o que aconteceu."}\n\ndata: {"tipo": "fim"}\n\n'
++
++    def test_anexo_pendente_nao_vai_pela_voz_e_o_texto_fica_no_campo(self):
++        anexo = {"js": "__chamadoTeste.sethRascunhoDe(__chamadoTeste.sethChaveRascunho()).anexos.push({nome: 'a.txt', texto: 'abc', caracteres: 3})"}
++        m = rodar(LIGAR + [anexo] + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "olá, Seth"}}]})
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [], "com anexo pendente a fala não é enviada")
++        self.assertIn("Há anexo pendente", m["final"]["chamadoTexto"])
++        self.assertEqual(m["final"]["campo"], "olá, Seth")
++
++    def test_prazos_de_ditado_e_sintese_com_sinal_de_aborto_e_desarmados_ao_fim(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__terminarTrecho()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "olá, Seth"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [WAV]})
++        ditado = [c for c in m["chamadas"] if c["url"] == "/api/seth/ditado"]
++        voz = [c for c in m["chamadas"] if c["url"] == "/api/seth/voz-audio"]
++        self.assertTrue(ditado[0]["temSinal"])
++        self.assertTrue(voz[0]["temSinal"])
++        prazos = [t for t in m["timers"] if t["ms"] in (130000, 60000)]
++        self.assertEqual(sorted(t["ms"] for t in prazos), [60000, 130000])
++        self.assertTrue(all(t["cancelado"] for t in prazos), "o prazo é desarmado quando o pedido termina")
++
++    def test_eco_pura_compara_a_fracao_das_palavras_sem_pontuacao(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; const fala = "A resposta da Seth explica o que aconteceu hoje.";
++          return [T.chamadoEhEco("A resposta da Seth explica o que", fala), T.chamadoEhEco("Resposta, da Seth! explica o que aconteceu.", fala),
++                  T.chamadoEhEco("o que aconteceu", fala), T.chamadoEhEco("outra coisa", fala), T.chamadoEhEco("sim", "Sim."),
++                  T.chamadoEhEco("a resposta da seth", "A resposta da Seth.")]; })()"""}])
++        self.assertEqual(m["resultados"][0], [True, True, False, False, False, True])
++
++    def test_eco_da_ultima_fala_tocada_e_descartado_e_nao_vai_a_seth(self):
++        m = rodar(LIGAR + [{"js": "__enviar('Oi.')"}, {"js": "__terminarTrecho()"}, {"js": "__avanca(500)"}] + TRECHO,
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "a resposta da seth explica o que aconteceu"}}],
++                             "/api/seth/chat/stream": [{"sse": self.RESPOSTA_LONGA}], "/api/seth/voz-audio": [WAV]})
++        self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 1, "só a mensagem digitada foi à Seth")
++        self.assertTrue(m["final"]["chamadoTexto"].startswith("Ouvindo… Trecho descartado: parecia eco da resposta."))
++
++    def test_depois_de_seis_turnos_sem_tecla_pausa_e_tecla_retoma(self):
++        ditados = [{"json": {"texto": f"pergunta {n}"}} for n in ("um", "dois", "tres", "quatro", "cinco", "seis", "sete")]
++        m = rodar(LIGAR + self.TURNO * 6 + TRECHO + [{"js": "__tecla('a')"}] + TRECHO,
++                  respostas={"/api/seth/ditado": ditados, "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
++        indice_setimo = len(LIGAR) + 10 * 6 + 7  # silêncio do sétimo trecho
++        self.assertIn("Conversa pausada: diga algo ou toque para continuar.", m["estados"][indice_setimo]["chamadoTexto"])
++        self.assertEqual(m["final"]["campo"], "pergunta sete", "a fala pausada fica no campo: não se perde e não vai sozinha")
++        self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 7, "seis turnos foram à Seth, o sétimo ficou pausado, o oitavo (depois da tecla) foi")
++
++    def test_fronteira_do_detector_400_ms_de_voz(self):
++        m = rodar([{"js": """(() => { const T = __chamadoTeste; const abaixo = T.chamadoVadNovo(), exato = T.chamadoVadNovo();
++          const a = [[0, 0.5], [399, 0.5], [1599, 0]].map(([t, n]) => T.chamadoVad(abaixo, n, t));
++          const b = [[0, 0.5], [400, 0.5], [1599, 0], [1600, 0]].map(([t, n]) => T.chamadoVad(exato, n, t));
++          return [a, b]; })()"""}])
++        self.assertEqual(m["resultados"][0], [["iniciar", "", "descartar"], ["iniciar", "", "", "encerrar"]])
++
++    def test_resposta_em_dois_trechos_toca_os_dois_e_volta_a_ouvir(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__terminarTrecho()"}, {"js": "__terminarTrecho()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"wav": True, "cabecalhos": {"x-trechos": "2"}}]})
++        pedidos = [json.loads(c["corpo"])["trecho"] for c in posts(m, "/api/seth/voz-audio")]
++        self.assertEqual(pedidos, [0, 1])
++        self.assertEqual(len(m["fontes"]), 2)
++        self.assertTrue(all(f["acabou"] for f in m["fontes"]))
++        self.assertEqual(posts(m, "/api/seth/ouvir"), [], "com a síntese boa, nada cai na Máquina")
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…")
++
++    def test_comando_falado_encerrar_desliga_e_nao_vai_a_seth(self):
++        m = rodar(LIGAR + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "encerrar chamado"}}]})
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [])
++
++    def test_comando_falado_fale_comigo_com_a_conversa_ligada_nao_vai_a_seth(self):
++        m = rodar(LIGAR + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "fale comigo"}}]})
++        self.assertEqual(m["final"]["chamadoBotao"], "Parar conversa por voz")
++        self.assertEqual(posts(m, "/api/seth/chat/stream"), [])
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… A conversa por voz já está ligada.")
++
++    def test_comando_digitado_so_e_comando_quando_a_conversa_esta_ligada(self):
++        for frase in ("encerrar chamado", "volte ao texto"):
++            m = rodar([{"js": f"__enviar('{frase}')"}], respostas={"/api/seth/chat/stream": [{"sse": RESPOSTA}]})
++            self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 1, f"com a conversa desligada, '{frase}' vai à Seth")
++
++    def test_audio_que_nao_roda_depois_do_resume_desliga_com_aviso(self):
++        m = rodar(LIGAR, audio={"travado": True})
++        self.assertEqual(m["final"]["chamadoBotao"], "Conversa por voz")
++        self.assertIn("O navegador não deixou o áudio tocar", m["final"]["voz"])
++        self.assertEqual([t for t in m["timers"] if t["ms"] == 50], [], "a leitura do microfone nem começa")
++        self.assertGreaterEqual(m["microfone"]["parados"], 1)
++
++    def test_resposta_longa_demais_para_a_sintese_diz_isso_e_nao_cai_na_maquina(self):
++        m = rodar(LIGAR + TRECHO,
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"status": 413, "json": {"erro": "resposta longa demais para falar. Peça um resumo."}}]})
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… Resposta longa demais para falar.")
++        self.assertEqual(posts(m, "/api/seth/ouvir"), [])
++
++    def test_cauda_depois_da_fala_pela_maquina_e_de_800_ms(self):
++        m = rodar(LIGAR + TRECHO + [{"js": "__chamadoTeste.chamado.ignorarAte - __relogio()"}],
++                  respostas={"/api/seth/ditado": [{"json": {"texto": "oi"}}], "/api/seth/chat/stream": [{"sse": RESPOSTA}],
++                             "/api/seth/voz-audio": [{"status": 503, "json": {"erro": MENSAGEM_NAO_FALEI}}],
++                             "/api/seth/ouvir": [{"json": {"falou": True, "motivo": "falei a resposta inteira"}}]})
++        self.assertEqual(m["resultados"][-1], 800)
++
++
++class ConversaPorVozEstaticaTests(unittest.TestCase):
++    """Conferências de texto da conversa por voz: elementos, rota, áudio no navegador (sem elemento de mídia), CSP."""
++
++    BLOCO_CHAMADO = JS[JS.index("// Conversa por voz (23/11/2026"):JS.index("/* Rascunho por conversa (C6)")]
++
++    def test_elementos_do_chamado_existem_e_sao_de_texto(self):
++        self.assertIn('id="seth-chamado"', HTML)
++        self.assertIn('id="seth-chamado-estado"', HTML)
++        self.assertIn('aria-pressed="false"', HTML[HTML.index('id="seth-chamado"') - 80:HTML.index('id="seth-chamado"') + 90])
++        self.assertIn('hidden></p>', HTML[HTML.index('id="seth-chamado-estado"'):HTML.index('id="seth-chamado-estado"') + 120])
++        self.assertIsNone(re.search(r"\son[a-z]+=", HTML[HTML.index('id="seth-chamado"') - 80:HTML.index('id="seth-chamado-estado"') + 120]))
++
++    def test_constantes_e_funcoes_do_chamado_ficam_no_bloco_de_voz(self):
++        for nome in ("const CHAMADO_LIMIAR_FALA", "const CHAMADO_LIMIAR_INTERRUPCAO", "const CHAMADO_SILENCIO_MS",
++                     "function chamadoVad(", "function chamadoComando(", "async function chamadoLigar(", "function chamadoEsc(",
++                     "function chamadoPasso("):
++            self.assertIn(nome, self.BLOCO_CHAMADO, nome)
++
++    def test_fala_do_chamado_toca_no_navegador_sem_elemento_de_audio_nem_url(self):
++        """A fala sai pelo AudioContext (decodeAudioData + createBufferSource), que a CSP do painel não bloqueia.
++        Nada de <audio>, Audio(), blob: ou media-src: o eco é cancelado pelo navegador só se o som sai dele."""
++        self.assertIn("createBufferSource", self.BLOCO_CHAMADO)
++        self.assertIn("decodeAudioData", self.BLOCO_CHAMADO)
++        self.assertIn('"/api/seth/voz-audio"', self.BLOCO_CHAMADO)
++        for proibido in ("new Audio(", "createObjectURL", "HTMLAudioElement", "media-src"):
++            self.assertNotIn(proibido, self.BLOCO_CHAMADO + SERVIDOR, proibido)
++
++    def test_microfone_pede_cancelamento_de_eco_e_supressao_de_ruido(self):
++        self.assertIn("echoCancellation: true, noiseSuppression: true", self.BLOCO_CHAMADO)
++
++    def test_esc_e_comandos_entram_no_mesmo_caminho_do_painel(self):
++        self.assertEqual(JS.count("chamadoEsc();"), 1, "o Esc chama o chamado uma vez, no manipulador único")
++        self.assertIn("else if (chamadoLigado()) chamadoEsc();", JS)
++        self.assertIn("chamadoComando(texto)", JS)
++        self.assertIn("chamadoLerResposta(conteudo)", JS)
++        self.assertIn("chamadoFimResposta(conteudo !== null && alvo === sethAtual)", JS)
++
++    def test_rota_nova_de_voz_fica_fora_da_fala_antiga(self):
++        """O /api/seth/ouvir antigo continua falando na Máquina, e só o fallback do chamado chega a ele."""
++        self.assertNotIn('"/api/seth/ouvir"', self.BLOCO_CHAMADO, "o bloco do chamado não chama a rota antiga direto")
++        self.assertIn("ouvirResposta(texto, true)", self.BLOCO_CHAMADO)
++        self.assertIn('self.path == "/api/seth/voz-audio"', SERVIDOR)
++
++    def test_classe_chamar_tem_regra_de_estilo_e_estado_pressionado(self):
++        self.assertRegex(CSS, r"\.seth-chamar\[aria-pressed=\"true\"\]")
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/redesign/systemd/seth-parar b/redesign/systemd/seth-parar
+index a728b781..fdb5797e 100755
+--- a/redesign/systemd/seth-parar
++++ b/redesign/systemd/seth-parar
+@@ -18,6 +18,7 @@ if [ -n "$_pid" ] && grep -q 'chrom' "/proc/$_pid/comm" 2>/dev/null; then
+   kill -TERM -- "-$_pid" 2>/dev/null || kill -TERM "$_pid" 2>/dev/null || true
+ fi
+ systemctl --user stop piper-tts.service 2>/dev/null || true
++systemctl --user stop ouvido-agata.service 2>/dev/null || true
+ systemctl --user stop painel-operacional.service 2>/dev/null || true
+ systemctl --user stop seth-gateway.service seth-escriba.service seth-verificador.service 2>/dev/null || true
+ systemctl --user stop discord-mcp.service navegador-mcp.service 2>/dev/null || true
