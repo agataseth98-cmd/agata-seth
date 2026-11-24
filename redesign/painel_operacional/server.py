@@ -1947,6 +1947,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._seth_ouvir_parar()
         if self.path == "/api/seth/ditado":
             return self._seth_ditado()
+        if self.path == "/api/seth/voz-audio":
+            return self._seth_voz_audio()
         if self.path in {"/api/relay-council/actions", "/api/relay-council/groups",
                          "/api/relay-council/decision"}:
             return self._relay_council_human_post()
@@ -2667,6 +2669,30 @@ class Handler(BaseHTTPRequestHandler):
         except seth_ditado.ErroDitado as erro:
             return self._json_voz(erro.status, {"erro": erro.motivo})
         return self._json_voz(200, dados)
+
+    def _seth_voz_audio(self) -> None:
+        """Conversa por voz (23/11/2026): o WAV de um trecho da resposta, com a voz do sistema, para o NAVEGADOR tocar.
+        Nada toca na Máquina. Escrita: só da origem do painel. Erro sai em JSON {erro}; sucesso em audio/wav, com
+        X-Trechos (quantos trechos tem o texto) e X-Trecho (o que veio)."""
+        if not _escrita_permitida(self.headers.get("Sec-Fetch-Site"), self.headers.get("Origin")):
+            return self._json_voz(403, {"erro": "pedido de outra origem recusado"})
+        tamanho = self.headers.get("Content-Length", "")
+        if not tamanho.isdecimal():
+            return self._json_voz(411, {"erro": "pedido sem tamanho (Content-Length)"})
+        if int(tamanho) > seth_voz.LIMITE_CORPO_BYTES:
+            return self._json_voz(413, {"erro": f"pedido acima de {seth_voz.LIMITE_CORPO_BYTES} bytes"})
+        try:
+            pedido = json.loads(self.rfile.read(int(tamanho)).decode("utf-8") or "{}")
+        except (ValueError, UnicodeDecodeError):
+            return self._json_voz(400, {"erro": "pedido com JSON inválido"})
+        if not isinstance(pedido, dict):
+            return self._json_voz(400, {"erro": "pedido com JSON inválido"})
+        trecho = pedido.get("trecho", 0)
+        try:
+            wav, total = seth_voz.sintetizar(pedido.get("texto"), trecho)
+        except seth_voz.ErroVoz as erro:
+            return self._json_voz(erro.status, {"erro": erro.motivo})
+        return self._send(200, "audio/wav", wav, (("X-Trechos", str(total)), ("X-Trecho", str(trecho))))
 
     def _grafo(self) -> None:
         """Grafo do vault derivado, só leitura: modo 'citacoes' (cita/citada_por de uma entrada) ou 'regioes' (tags regiao/)."""

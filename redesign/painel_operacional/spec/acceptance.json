@@ -3097,5 +3097,87 @@
       "redesign/painel_operacional/test_painel.py::SobDemandaERecargaTests::test_cartao_de_capacidade_mostra_sob_demanda_e_nao_vira_partial"
     ],
     "cwd": null
+  },
+  {
+    "criterion": "o ditado liga `ouvido-agata.service` e `piper-tts.service` sob demanda só em recusa de conexão ou 503 do motor, espera a porta e repete uma vez; timeout sai direto (504) e, durante a partida, quem chega recebe 503 \"ouvido subindo, tente em alguns segundos\"",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_botao_liga_com_cancelamento_de_eco_e_mostra_ouvindo",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_fale_comigo_liga_sem_virar_mensagem",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_encerrar_chamado_desliga_sem_virar_mensagem",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_esc_com_fala_no_navegador_para_e_volta_a_ouvir_e_o_segundo_desliga",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_comando_falado_encerrar_desliga_e_nao_vai_a_seth",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_comando_digitado_so_e_comando_quando_a_conversa_esta_ligada"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a conversa por voz liga pelo botão ou pelo texto \"fale comigo\", desliga com \"encerrar chamado\", \"volte ao texto\" ou com o segundo Esc, e esses comandos não viram mensagem à Seth",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_vad_encerra_so_depois_de_1200_ms_de_silencio",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_vad_descarta_voz_curta_e_corta_trecho_longo_no_limite",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_fronteira_do_detector_400_ms_de_voz"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o detector de voz começa o trecho com voz, encerra após 1,2 s de silêncio e descarta trecho com menos de 0,4 s de voz (funções puras, testadas no node)",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_trecho_com_voz_e_transcrito_e_enviado_a_seth_e_a_resposta_e_tocada_no_navegador",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_resposta_em_dois_trechos_toca_os_dois_e_volta_a_ouvir",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_prazos_de_ditado_e_sintese_com_sinal_de_aborto_e_desarmados_ao_fim"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "o trecho transcrito segue para a Seth pelo caminho do Enviar, e a resposta é tocada no navegador por `/api/seth/voz-audio`, trecho a trecho, sem elemento de mídia",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_barge_in_para_a_fala_na_hora_e_grava_o_turno_do_humano",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_voz_normal_nao_interrompe_a_fala"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "com a fala tocando, voz sustentada por 0,3 s acima do limiar de interrupção para o áudio na hora e grava o turno do Humano; voz no nível normal não interrompe",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_sintese_que_falha_no_primeiro_trecho_cai_na_fala_pela_maquina_com_aviso",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozTests::test_sintese_que_falha_no_meio_nao_repete_o_que_ja_foi_falado",
+      "redesign/painel_operacional/test_voz_ui.py::ChamadoVozRevisaoTests::test_cauda_depois_da_fala_pela_maquina_e_de_800_ms"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "se a síntese falha, a fala sai pela Máquina com o aviso; se falha no meio, o resto não é falado",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_devolve_o_wav_de_um_trecho_e_os_cabecalhos",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_sem_origem_ou_de_outro_site_recebe_403_e_nao_chega_a_voz",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_texto_vazio_json_ruim_ou_corpo_grande_nao_sintetiza",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_com_falha_da_sintese_responde_502_em_json",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_voz_audio_com_outro_modelo_responde_503",
+      "redesign/painel_operacional/test_seth_voz.py::RotasVozTests::test_ouvir_continua_igual_ao_lado_da_voz_audio"
+    ],
+    "cwd": null
+  },
+  {
+    "criterion": "a rota `/api/seth/voz-audio` devolve `audio/wav` com `X-Trechos`, recusa origem cruzada com 403, texto vazio ou corpo grande, e responde 502 ou 503 quando a voz falha; o `/api/seth/ouvir` antigo segue igual",
+    "command": [
+      "pytest",
+      "-q",
+      "redesign/painel_operacional/test_seth_ditado.py::OuvidoParadoTests::test_ouvido_parado_e_ligado_e_a_transcricao_repete_uma_vez",
+      "redesign/painel_operacional/test_seth_ditado.py::PartidaRefinadaTests::test_timeout_de_leitura_vira_504_sem_partida_nem_reenvio",
+      "redesign/painel_operacional/test_seth_ditado.py::PartidaRefinadaTests::test_durante_a_partida_quem_chega_recebe_503_ouvido_subindo"
+    ],
+    "cwd": null
   }
 ]

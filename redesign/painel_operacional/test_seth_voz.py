@@ -54,6 +54,8 @@ class _Piper(BaseHTTPRequestHandler):
         st["pedidos"].append(pedido)
         if st.get("falha_no_pedido") == len(st["pedidos"]):
             return self._responde(500, b"falha de teste")
+        if st.get("nao_wav"):
+            return self._responde(200, b"isto nao e um wav", "audio/wav")
         return self._responde(200, b"RIFF" + b"\0" * 40, "audio/wav")
 
     def _responde(self, status, corpo, tipo="application/json"):
@@ -258,6 +260,96 @@ class FalaTests(FalaFalsaTests):
         self.assertIn("NÃO é a voz do sistema", seth_voz.resumo_voz())
 
 
+class VozAudioTests(FalaFalsaTests):
+    """Conversa por voz (23/11/2026): sintetizar() devolve o WAV de um trecho e não toca nada na Máquina."""
+
+    def test_sintetiza_um_trecho_com_a_voz_do_sistema_sem_tocar(self):
+        wav, total = seth_voz.sintetizar(PARAGRAFOS, 1)
+        self.assertTrue(wav.startswith(b"RIFF"))
+        self.assertEqual(total, 3)
+        self.assertEqual(self.pedidos()[-1]["input"], "Segundo parágrafo, com mais uma frase.")
+        self.assertEqual(self.pedidos()[-1]["voice"], "agata")
+        self.assertEqual(self.pedidos()[-1]["response_format"], "wav")
+        self.assertEqual(self.tocados(), [], "quem toca é o navegador: nada pode sair pelo player da Máquina")
+
+    def test_servico_parado_sobe_e_nao_e_desligado_depois_de_sintetizar(self):
+        self.no_ar.unlink()
+        seth_voz.sintetizar("Um trecho só.")
+        self.assertIn("start", self.systemctl_log())
+        self.assertNotIn("stop", self.systemctl_log(), "cada trecho pediria um ciclo de liga e desliga")
+
+    def test_texto_vazio_ou_so_codigo_nao_sintetiza(self):
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("   ")
+        self.assertEqual(c.exception.status, 400)
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("```\nprint(1)\n```")
+        self.assertEqual(c.exception.status, 400)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_texto_acima_do_limite_depois_de_preparado_e_413(self):
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("palavra " * 2000)
+        self.assertEqual(c.exception.status, 413)
+        self.assertEqual(c.exception.motivo, "resposta longa demais para falar. Peça um resumo.")
+        self.assertEqual(self.pedidos(), [])
+
+    def test_trecho_booleano_nao_vale_como_indice(self):
+        for trecho in (True, False):
+            with self.assertRaises(seth_voz.ErroVoz) as c:
+                seth_voz.sintetizar(PARAGRAFOS, trecho)
+            self.assertEqual(c.exception.status, 400, trecho)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_segunda_sintese_espera_a_primeira_e_depois_recebe_503(self):
+        """Semáforo de uma síntese: enquanto outra segura a vaga, o pedido espera o prazo e recebe 503."""
+        seth_voz._SINTESE.acquire()
+        try:
+            with mock.patch.object(seth_voz, "ESPERA_SINTESE_S", 0.2):
+                with self.assertRaises(seth_voz.ErroVoz) as c:
+                    seth_voz.sintetizar("Olá.")
+            self.assertEqual(c.exception.status, 503)
+            self.assertIn("ocupada", c.exception.motivo)
+            self.assertEqual(self.pedidos(), [], "o pedido que esperou não chegou ao piper")
+        finally:
+            seth_voz._SINTESE.release()
+        wav, _total = seth_voz.sintetizar("Olá.")
+        self.assertTrue(wav.startswith(b"RIFF"), "liberada a vaga, a síntese volta a funcionar")
+
+    def test_a_vaga_volta_mesmo_quando_a_sintese_falha(self):
+        self.piper.estado["falha_no_pedido"] = 1
+        with self.assertRaises(seth_voz.ErroVoz):
+            seth_voz.sintetizar("Olá.")
+        self.assertTrue(seth_voz._SINTESE.acquire(timeout=1), "a vaga é liberada no erro")
+        seth_voz._SINTESE.release()
+
+    def test_trecho_fora_do_texto_ou_que_nao_e_numero_e_400(self):
+        for trecho in (9, -1, "1"):
+            with self.assertRaises(seth_voz.ErroVoz) as c:
+                seth_voz.sintetizar(PARAGRAFOS, trecho)
+            self.assertEqual(c.exception.status, 400, trecho)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_outro_modelo_no_piper_nao_sintetiza(self):
+        self.piper.estado["modelo"] = MODELO_ERRADO
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("Olá.")
+        self.assertEqual(c.exception.status, 503)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_falha_da_sintese_e_502(self):
+        self.piper.estado["falha_no_pedido"] = 1
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("Olá.")
+        self.assertEqual(c.exception.status, 502)
+
+    def test_resposta_que_nao_e_wav_e_502(self):
+        self.piper.estado["nao_wav"] = True
+        with self.assertRaises(seth_voz.ErroVoz) as c:
+            seth_voz.sintetizar("Olá.")
+        self.assertEqual(c.exception.status, 502)
+
+
 class RotasVozTests(FalaFalsaTests):
     """As rotas do painel: origem, tamanho, formato e o que chega ao módulo. Sobe o painel numa porta livre."""
 
@@ -334,6 +426,76 @@ class RotasVozTests(FalaFalsaTests):
         status, dados = self.pede("/api/seth/ditado", "POST", b"\x00\x01", {**self.MESMA_ORIGEM, "Content-Type": "text/plain"})
         self.assertEqual(status, 415)
         self.assertIn("erro", dados)
+
+    def pede_bruto(self, corpo, cabecalhos):
+        """Pedido de voz-audio: devolve (status, cabeçalhos em minúsculas, corpo cru). O WAV não é JSON."""
+        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=60)
+        try:
+            cab = {"Content-Type": "application/json", **cabecalhos}
+            conn.request("POST", "/api/seth/voz-audio", body=corpo, headers=cab)
+            resposta = conn.getresponse()
+            return resposta.status, {k.lower(): v for k, v in resposta.getheaders()}, resposta.read()
+        finally:
+            conn.close()
+
+    def test_voz_audio_devolve_o_wav_de_um_trecho_e_os_cabecalhos(self):
+        corpo = json.dumps({"texto": PARAGRAFOS, "trecho": 2}).encode("utf-8")
+        status, cab, wav = self.pede_bruto(corpo, self.MESMA_ORIGEM)
+        self.assertEqual(status, 200)
+        self.assertEqual(cab["content-type"], "audio/wav")
+        self.assertEqual(cab["x-trechos"], "3")
+        self.assertEqual(cab["x-trecho"], "2")
+        self.assertTrue(wav.startswith(b"RIFF"))
+        self.assertEqual(self.pedidos()[-1]["input"], "Terceiro e último.")
+        self.assertEqual(self.tocados(), [], "a rota não toca na Máquina")
+
+    def test_voz_audio_manda_um_so_cabecalho_de_cache(self):
+        corpo = json.dumps({"texto": PARAGRAFOS}).encode("utf-8")
+        conn = http.client.HTTPConnection("127.0.0.1", panel.PORT, timeout=60)
+        try:
+            conn.request("POST", "/api/seth/voz-audio", body=corpo, headers={"Content-Type": "application/json", **self.MESMA_ORIGEM})
+            resposta = conn.getresponse()
+            resposta.read()
+            cabecalhos = [nome.lower() for nome, _valor in resposta.getheaders()]
+        finally:
+            conn.close()
+        self.assertEqual(cabecalhos.count("cache-control"), 1)
+
+    def test_voz_audio_sem_origem_ou_de_outro_site_recebe_403_e_nao_chega_a_voz(self):
+        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
+        self.assertEqual(self.pede_bruto(corpo, {})[0], 403)
+        self.assertEqual(self.pede_bruto(corpo, {"Origin": "http://evil.example", "Sec-Fetch-Site": "cross-site"})[0], 403)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_voz_audio_texto_vazio_json_ruim_ou_corpo_grande_nao_sintetiza(self):
+        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", json.dumps({"texto": ""}).encode(), self.MESMA_ORIGEM)[0], 400)
+        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", b"{nao-json", self.MESMA_ORIGEM)[0], 400)
+        pequeno = json.dumps({"texto": "x"}).encode("utf-8")
+        self.assertEqual(self.pede("/api/seth/voz-audio", "POST", pequeno,
+                                   {**self.MESMA_ORIGEM, "Content-Length": str(seth_voz.LIMITE_CORPO_BYTES + 10)})[0], 413)
+        self.assertEqual(self.pedidos(), [])
+
+    def test_voz_audio_com_falha_da_sintese_responde_502_em_json(self):
+        self.piper.estado["falha_no_pedido"] = 1
+        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
+        status, dados = self.pede("/api/seth/voz-audio", "POST", corpo, self.MESMA_ORIGEM)
+        self.assertEqual(status, 502)
+        self.assertIn("erro", dados)
+
+    def test_voz_audio_com_outro_modelo_responde_503(self):
+        self.piper.estado["modelo"] = MODELO_ERRADO
+        corpo = json.dumps({"texto": "Olá."}).encode("utf-8")
+        status, dados = self.pede("/api/seth/voz-audio", "POST", corpo, self.MESMA_ORIGEM)
+        self.assertEqual(status, 503)
+        self.assertIn("NÃO falei", dados["erro"])
+        self.assertEqual(self.pedidos(), [])
+
+    def test_ouvir_continua_igual_ao_lado_da_voz_audio(self):
+        corpo = json.dumps({"texto": "Olá. Teste pela rota."}).encode("utf-8")
+        status, dados = self.pede("/api/seth/ouvir", "POST", corpo, self.MESMA_ORIGEM)
+        self.assertEqual(status, 200)
+        self.assertTrue(dados["falou"])
+        self.assertEqual(len(self.tocados()), 1, "o ouvir antigo continua tocando na Máquina, um trecho, pelo player")
 
 
 class SentidosVozTests(unittest.TestCase):
