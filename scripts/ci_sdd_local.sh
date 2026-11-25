@@ -93,6 +93,8 @@ passo "voz do sistema (selftest)" python3 -I scripts/agata_falar.py --selftest
 passo "projeto SDD declarativo (selftest)" python3 -I redesign/sdd_flow/project.py --selftest
 passo "pacote mecânico: testes do turno" python3 scripts/testar_turno.py
 passo "pacote mecânico: selftest do turno" python3 scripts/turno.py --selftest
+passo "REA PE: wrapper e fixtures sintéticas" python3 -I scripts/testar_rea_pe.py
+passo "REA PE: selftest da allowlist" bash scripts/rea_leitura.sh --selftest
 passo "pacote mecânico: selftest da auditoria do turno" python3 redesign/router/auditoria_turno.py --selftest
 passo "pacote mecânico: testes dos mecanismos do Conselho" python3 scripts/testar_mecanismos.py
 passo "pacote mecânico: verificador de mecanismos do Conselho" python3 scripts/conselho_mecanismos.py --verificar

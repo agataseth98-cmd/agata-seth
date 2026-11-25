@@ -2,7 +2,7 @@
 
 ## Hoje, 25/11 (proposta rea-pe-linux-2026-11-25)
 
-Estado: proposta P-8 preparada/aguarda CI e assinatura. O REA ganha quatro comandos para inspecionar arquivos PE em modo estático e somente de leitura; as análises não confirmam sozinhas que um arquivo seja DLL ou driver. O CI local informado foi 95/95 e a revisão independente 10/10; falta o CI do PR e a assinatura do Humano. Comando: `bash scripts.aprovar.sh rea-pe-linux-2026-11-25`.
+Estado: proposta P-8 assinada e aplicada em worktree própria; CI local 95/95 e revisão independente 10/10. Aguarda PR de aplicação; a junção cabe ao Humano. O REA ganha quatro comandos para inspecionar arquivos PE em modo estático e somente de leitura; as análises não confirmam sozinhas que um arquivo seja DLL ou driver.
 
 Atualizado em 20/11/2026. Em 20/11 os 7 lotes que ainda constavam como "proposta" foram conferidos: todos estão em `propostas/superadas/`; o estado na tabela abaixo foi corrigido.
 
