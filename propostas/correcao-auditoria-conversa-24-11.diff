@@ -1,0 +1,87 @@
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index a1857a42..9179c1ef 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -298,6 +298,14 @@ O canon inteiro está no repositório; **não assuma o conteúdo**: peça o trec
+ 
+ **Entrada (N) não é linha N.** Para achar a entrada `(N)` de MEMÓRIAS, busque o marcador `(N)` com `query_canon` (grep); não peça o intervalo de linhas `N`: o argumento `linhas:` é número de linha física do arquivo, não de entrada.
+ **Conversa por voz** (lições de 20/11, skill `agata-voz-cerebro`; decisão do Humano: valem para todos os modelos): fala transcrita pode chegar cortada ou embaralhada. Frase cortada: diga "Ouvi até: <final>. Complete, por favor." Frase embaralhada: diga o que entendeu como hipótese e pergunte "é isso?" antes de agir. Nomes trocados pela transcrição ("CEF/SEF" = Seth; "Agatha Coach" = Agata Code; "Codec" = Codex): confirme quando mudar o sentido. Silêncio ou "está me ouvindo?": responda curto ("Estou ouvindo"); nunca fique muda. Visitante que diz que não entendeu: repita em três itens curtos, sem termo técnico. "Me fala de novo": repita o mesmo conteúdo, mais limpo. Decisão tomada por voz vai ao cache do Conselho (`cache_anotar`, tipo decisao) na hora.
++
++**Sem laço de impotência** (auditoria 25/11/2026): se você pediu algo ao Humano e a próxima mensagem dele não atende ao pedido, tente outra abordagem ou diga "não consigo sem X" uma vez. Não repita o mesmo pedido mais de duas vezes. "Continue", "tente novamente", "faça", "vá em frente" são comandos para prosseguir, não feedback — execute.
++
++**"Próximo passo" não é muleta:** só termine com "Próximo passo:" quando há ação real pendente do Humano. Resposta que encerra um assunto não precisa de "Próximo passo: diga o que quer fazer."
++
++**Ferramenta com falha repetida:** quando uma ferramenta retorna erro (`fetch failed`, `Connection refused`, timeout) mais de uma vez na conversa, não repita a chamada sem mudança. Diga: "O serviço de [nome] não respondeu. Diagnóstico: `maquina_verificar servicos` ou `ss -tlnp | grep <porta>`." A falha da ferramenta é lacuna de ferramenta, não ausência de conteúdo.
++
++**Janela de contexto e conversa longa:** em conversas longas, o início pode sair da sua janela. Se o Humano perguntar sobre algo do início da conversa e você não encontrar no contexto, diga "lacuna: o início da conversa pode ter saído da minha janela" — nunca afirme que algo não existe na conversa sem ter o contexto completo.
+ <!-- SETH-GATEWAY:FIM -->
+ 
+ ## Seth pública (rota sem ferramentas)
+diff --git a/redesign/router/seth_gateway.py b/redesign/router/seth_gateway.py
+index 1e63980b..15be920d 100644
+--- a/redesign/router/seth_gateway.py
++++ b/redesign/router/seth_gateway.py
+@@ -194,6 +194,27 @@ _HOP_BY_HOP = {
+ 
+ _CACHE: dict = {"mtime": None, "texto": ""}
+ 
++_RE_T_CABECALHO = re.compile(
++    r"^\s*\**\s*agata(?:-seth)?\s*·.*?\bt=(\d+)\b", re.I)
++
++
++def _max_turno_em_mensagens(msgs: list) -> int:
++    """Maior t= nos cabeçalhos injetados pela Máquina nas respostas anteriores.
++
++    Quando o frontend trunca mensagens antigas, a contagem por pares
++    usuário/assistente para de crescer. Este valor preserva a marca d'água
++    alta e garante que o próximo t= é pelo menos anterior + 1."""
++    maximo = 0
++    for m in msgs:
++        if not (isinstance(m, dict) and m.get("role") == "assistant"):
++            continue
++        c = m.get("content")
++        if isinstance(c, str):
++            match = _RE_T_CABECALHO.match(c[:400])
++            if match:
++                maximo = max(maximo, int(match.group(1)))
++    return maximo
++
+ 
+ _ESTADO_MEMO: dict = {"t": 0.0, "texto": ""}
+ 
+@@ -935,7 +956,9 @@ _NOME_CABECALHO = os.environ.get("SETH_NOME_CABECALHO", "agata-seth")
+ 
+ 
+ def _cabecalho_maquina(msgs: list, modelo: str | None) -> str:
+-    n = len(auditoria_turno._turnos(msgs)[0]) + 1
++    n_msgs = len(auditoria_turno._turnos(msgs)[0]) + 1
++    n_prev = _max_turno_em_mensagens(msgs)
++    n = max(n_msgs, n_prev + 1) if n_prev > 0 else n_msgs
+     hora = time.strftime("%Y-%m-%d %H:%M %z") + " (relógio da Máquina)"
+     if n > 1:
+         return f"{_NOME_CABECALHO} · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
+diff --git a/redesign/router/seth_verificador.py b/redesign/router/seth_verificador.py
+index 33074915..3ba817f0 100644
+--- a/redesign/router/seth_verificador.py
++++ b/redesign/router/seth_verificador.py
+@@ -160,6 +160,20 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
+         "`consulta` (a ação ou a pergunta, até 200 caracteres). Leva ~10-30 s. É "
+         "opinião de um modelo, não fato: cite como opinião dele (MEMÓRIAS (705)).",
+     ),
++    "saude_vault": (
++        ["bash", "-c",
++         'printf "obsidian-ro-proxy (:27125): "; '
++         'curl -sf -m 5 http://127.0.0.1:27125/health && echo " OK" || echo " FALHA"; '
++         'printf "openvino-embeddings (:20134): "; '
++         'curl -sf -m 5 -X POST http://127.0.0.1:20134/embed '
++         '-H "Content-Type: application/json" '
++         '-d \'{"input":"teste","model":"x"}\' >/dev/null && echo "OK" || echo "FALHA"; '
++         'systemctl --user is-active obsidian-ro-proxy.service openvino-embeddings.service 2>&1'
++         ], 15,
++        "Saúde do vault (obsidian-ro-proxy :27125) e do servidor de embeddings "
++        "(openvino-embeddings :20134). Diz se cada um responde e se a unit está ativa. "
++        "Use quando vault_consultar ou busca_semantica falham.",
++    ),
+ }
+ 
+ # `consulta` da busca por sentido (670): o texto da Seth vira DADO de um comando

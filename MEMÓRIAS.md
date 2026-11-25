@@ -26,14 +26,14 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): a6b4a7fe41da60af5b24c43acb5f203b52865fd8
-  Escrito em: 23/11/2026 21:36 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 7de09eb07efa297edf9bfe1b4289b752e084557d
+  Escrito em: 25/11/2026 16:04 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6b4a7fe41da60af5b24c43acb5f203b52865fd8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6b4a7fe41da60af5b24c43acb5f203b52865fd8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6b4a7fe41da60af5b24c43acb5f203b52865fd8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6b4a7fe41da60af5b24c43acb5f203b52865fd8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/a6b4a7fe41da60af5b24c43acb5f203b52865fd8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7de09eb07efa297edf9bfe1b4289b752e084557d/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7de09eb07efa297edf9bfe1b4289b752e084557d/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7de09eb07efa297edf9bfe1b4289b752e084557d/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7de09eb07efa297edf9bfe1b4289b752e084557d/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/7de09eb07efa297edf9bfe1b4289b752e084557d/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
