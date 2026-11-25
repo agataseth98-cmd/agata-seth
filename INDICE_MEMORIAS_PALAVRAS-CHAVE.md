@@ -7,6 +7,10 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
+  palavras-chave: aplicação, assinada, rea, linux, preparada
+(1124) DIÁRIO — 25/11/2026 · **Proposta P-8 de análise estática PE preparada.**
+  palavras-chave: proposta, análise, estática, preparada
 (1123) DIÁRIO — 23/11/2026 · **Aplicada conversa-voz-23-11 (assinada pelo Humano): conversa por voz sem cliques no painel.** O ditado liga ouvido e voz sob demanda; "fale comigo" ou um botão abre a conversa contínua com envio automático, fala da Seth tocada no navegador e interrupção pela voz; guardas contra eco, pausa após 6 turnos sem toque, anexo preservado; seth-parar também para o ouvido. Não medido: eco real no alto-falante e limiares com a voz do Humano. Depois de aplicar: restart do painel-operacional. Reverter: git apply -R propostas/aplicadas/conversa-voz-23-11.diff e restart.
   palavras-chave: aplicada, conversa, voz, assinada, humano, cliques, painel, ditado, liga, ouvido, sob, demanda, fale, comigo, botão, abre, contínua, envio, automático, fala, seth, tocada, navegador, interrupção, guardas, contra, eco, pausa, após, turnos, toque, anexo, preservado, parar, medido, real, alto, falante, limiares, aplicar, restart, operacional, reverter, git, apply, propostas, aplicadas, diff
 (1122) DIÁRIO — 23/11/2026 · **Aplicada capacidade-producao-23-11 (assinada pelo Humano).** Escolha de modelo por capacidade em produção na Seth e no Agata Code; Capivara única semeada por pesquisa e melhorada com o uso (estado em ~/.local/share/agata/capivara/); respostas só depois da conferência e refação, com progresso visível. Depois de aplicar: restart do seth-gateway e do painel. Reverter: git apply -R propostas/aplicadas/capacidade-producao-23-11.diff e restart, ou SETH_ESCOLHA_CAPACIDADE=0 / SETH_REFAZER=0.
@@ -63,10 +67,10 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, painel, ferramentas, seth, ganha, leitura, anota, cache, assinada, humano, prova, pedido, repetido, após, reiniciar, operacional
 (1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
   palavras-chave: proposta, painel, ferramentas, seth, ganha, leitura, máquina, vault, canon, anota, cache, pública, segue, lote, decisões, humano, voz, web, fica, próprio, sonnet, implementou, opus, revisou, mediu, assinatura, pendente, bash, scripts, aprovar
-(1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-cerebro no índice** Assinada pelo Humano em 20/11. Conversa por voz com o modelo da CLI como cérebro; verificador de skills sem problema.
-  palavras-chave: aplicada, voz, cerebro, cli, skill, agata, índice, assinada, humano, conversa, modelo, cérebro, verificador, skills, problema
-(1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-cerebro — conversa por voz em que o modelo da CLI é o cérebro (ouvido local, voz do sistema, som de espera), com as lições e ferramentas da conversa de 20/11.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-cerebro-cli-20-11.
-  palavras-chave: proposta, voz, cerebro, cli, skill, agata, conversa, modelo, cérebro, ouvido, local, sistema, som, espera, lições, ferramentas, ordem, humano, claude, opus, assinatura, pendente, bash, scripts, aprovar
+(1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-c …
+  palavras-chave: aplicada, voz, cerebro, cli, skill, agata
+(1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-c …
+  palavras-chave: proposta, voz, cerebro, cli, skill, agata
 (1093) DIÁRIO — 20/11/2026 · **Aplicada tool-call-json-20-11: chamada de ferrame …
   palavras-chave: aplicada, tool, call, json, chamada, ferrame
 (1092) DIÁRIO — 20/11/2026 · **Proposta tool-call-json-20-11: chamada de ferrame …

@@ -28,6 +28,10 @@ PERMITIDOS=(
   trace-web-source-location
   inspect-analysis-view
   inspect-evidence-bundle
+  inspect-pe-imports
+  inspect-pe-certificates
+  inspect-pe-resources
+  inspect-pe-load-config
 )
 
 # Flags globais que sobem servidor MCP ou atualizam o pacote, em qualquer posição.
@@ -53,6 +57,13 @@ subcomando_permitido() {
   return 1
 }
 
+comando_pe() {
+  case "$1" in
+    inspect-pe-imports|inspect-pe-certificates|inspect-pe-resources|inspect-pe-load-config) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 # checar <argumentos do rea>: retorna 0 se pode executar; 1 e mensagem em stderr se recusa.
 checar() {
   if [[ $# -eq 0 ]]; then
@@ -62,6 +73,13 @@ checar() {
   if ! subcomando_permitido "$1"; then
     echo "rea_leitura: recusado: '$1' não está na allowlist (ver a skill agata-engenharia-reversa)" >&2
     return 1
+  fi
+  if comando_pe "$1"; then
+    if [[ $# -ne 3 || "$3" != "--json" || "$2" != /* ]]; then
+      echo "rea_leitura: recusado: comando PE exige exatamente <caminho-absoluto> --json" >&2
+      return 1
+    fi
+    return 0
   fi
   local a f
   for a in "$@"; do
@@ -91,6 +109,54 @@ achar_bin() {
   return 1
 }
 
+validar_pe_basico() {
+  python3 - "$2" <<'PY'
+import struct
+import sys
+import os
+
+path = sys.argv[1]
+try:
+    with open(path, "rb") as artifact:
+        size = os.fstat(artifact.fileno()).st_size
+        dos = artifact.read(0x40)
+except OSError as exc:
+    print(f"rea_leitura: recusado: não foi possível ler o PE: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+if len(dos) < 0x40 or dos[:2] != b"MZ":
+    print("rea_leitura: recusado: cabeçalho DOS/PE ausente ou truncado", file=sys.stderr)
+    raise SystemExit(1)
+pe_offset = struct.unpack_from("<I", dos, 0x3C)[0]
+if pe_offset > size - 24:
+    print("rea_leitura: recusado: assinatura PE ausente ou cabeçalho truncado", file=sys.stderr)
+    raise SystemExit(1)
+with open(path, "rb") as artifact:
+    artifact.seek(pe_offset)
+    header = artifact.read(24)
+if len(header) != 24 or header[:4] != b"PE\0\0":
+    print("rea_leitura: recusado: assinatura PE ausente ou cabeçalho truncado", file=sys.stderr)
+    raise SystemExit(1)
+machine, _, _, _, _, optional_size, _ = struct.unpack_from("<HHIIIHH", header, 4)
+optional = pe_offset + 24
+if optional_size < 2 or optional + optional_size > size:
+    print("rea_leitura: recusado: cabeçalho opcional PE truncado", file=sys.stderr)
+    raise SystemExit(1)
+with open(path, "rb") as artifact:
+    artifact.seek(optional)
+    optional_prefix = artifact.read(2)
+magic = struct.unpack("<H", optional_prefix)[0]
+expected = {0x014C: 0x010B, 0x01C0: 0x010B, 0x01C2: 0x010B, 0x01C4: 0x010B,
+            0x8664: 0x020B, 0xAA64: 0x020B, 0xA641: 0x020B}.get(machine)
+minimum = {0x010B: 0x60, 0x020B: 0x70}.get(magic)
+if minimum is None or optional_size < minimum or magic not in (0x010B, 0x020B):
+    print("rea_leitura: recusado: optional-header não é PE32/PE32+ completo", file=sys.stderr)
+    raise SystemExit(1)
+if expected is not None and magic != expected:
+    print("rea_leitura: recusado: Machine não corresponde ao magic PE32/PE32+", file=sys.stderr)
+    raise SystemExit(1)
+PY
+}
+
 selftest() {
   local ok=0 total=0 p g ruim=""
 
@@ -117,6 +183,20 @@ selftest() {
   conferir recusa "sem argumento é recusado"
   conferir recusa "subcomando desconhecido é recusado" subcomando-inventado-xyz
   conferir recusa "flag --update é recusada mesmo com subcomando permitido" analyze-javascript-application /caminho --update
+  for p in inspect-pe-imports inspect-pe-certificates inspect-pe-resources inspect-pe-load-config; do
+    conferir passa "$p aceita path absoluto e --json" "$p" /tmp/amostra.exe --json
+    conferir recusa "$p recusa caminho relativo" "$p" amostra.exe --json
+    conferir recusa "$p recusa argumento extra" "$p" /tmp/amostra.exe --json --max-file-bytes 100
+    conferir recusa "$p exige --json" "$p" /tmp/amostra.exe
+  done
+
+  total=$((total + 1))
+  local total_esperado=18
+  if [[ "${#PERMITIDOS[@]}" -eq "$total_esperado" ]]; then
+    ok=$((ok + 1)); echo "ok     allowlist contém os 14 comandos JS/web e os 4 PE"
+  else
+    echo "FALHA  allowlist contém ${#PERMITIDOS[@]} comandos; esperado $total_esperado"
+  fi
 
   total=$((total + 1))
   for p in "${PERMITIDOS[@]}"; do
@@ -146,6 +226,9 @@ main() {
     exit 1
   fi
   if ! checar "$@"; then
+    exit 2
+  fi
+  if comando_pe "$1" && ! validar_pe_basico "$1" "$2"; then
     exit 2
   fi
   local bin
