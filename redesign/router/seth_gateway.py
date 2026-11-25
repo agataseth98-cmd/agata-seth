@@ -194,6 +194,27 @@ _HOP_BY_HOP = {
 
 _CACHE: dict = {"mtime": None, "texto": ""}
 
+_RE_T_CABECALHO = re.compile(
+    r"^\s*\**\s*agata(?:-seth)?\s*·.*?\bt=(\d+)\b", re.I)
+
+
+def _max_turno_em_mensagens(msgs: list) -> int:
+    """Maior t= nos cabeçalhos injetados pela Máquina nas respostas anteriores.
+
+    Quando o frontend trunca mensagens antigas, a contagem por pares
+    usuário/assistente para de crescer. Este valor preserva a marca d'água
+    alta e garante que o próximo t= é pelo menos anterior + 1."""
+    maximo = 0
+    for m in msgs:
+        if not (isinstance(m, dict) and m.get("role") == "assistant"):
+            continue
+        c = m.get("content")
+        if isinstance(c, str):
+            match = _RE_T_CABECALHO.match(c[:400])
+            if match:
+                maximo = max(maximo, int(match.group(1)))
+    return maximo
+
 
 _ESTADO_MEMO: dict = {"t": 0.0, "texto": ""}
 
@@ -935,7 +956,9 @@ _NOME_CABECALHO = os.environ.get("SETH_NOME_CABECALHO", "agata-seth")
 
 
 def _cabecalho_maquina(msgs: list, modelo: str | None) -> str:
-    n = len(auditoria_turno._turnos(msgs)[0]) + 1
+    n_msgs = len(auditoria_turno._turnos(msgs)[0]) + 1
+    n_prev = _max_turno_em_mensagens(msgs)
+    n = max(n_msgs, n_prev + 1) if n_prev > 0 else n_msgs
     hora = time.strftime("%Y-%m-%d %H:%M %z") + " (relógio da Máquina)"
     if n > 1:
         return f"{_NOME_CABECALHO} · {_descrever_modelo(modelo)} · t={n} (contador mecânico) · {hora}"
