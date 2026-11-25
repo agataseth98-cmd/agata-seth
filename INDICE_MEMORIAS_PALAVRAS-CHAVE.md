@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1126) DIÁRIO — 25/11/2026 · **Aplicada correcao-auditoria-conversa-24-11 (assinada pelo Humano): correção dos achados da auditoria da conversa Seth 24/11/2026.** Três mudanças: (1) contador `t=` persistente no gateway — marca d'água alta nos cabeçalhos anteriores sobrevive ao truncamento do frontend, corrige o `t=` travado em 10; (2) quatro instruções novas na seção SETH-GATEWAY de PROTOCOLOS.md — anti-loop de impotência, "Próximo passo" não é muleta, diagnóstico de ferramenta com falha repetida, janela de contexto em conversa longa; (3) comando `saude_vault` na lista fechada do verificador (health check do obsidian-ro-proxy :27125 e openvino-embeddings :20134). Depois de aplicar: restart do seth-gateway. Reverter: `git apply -R propostas/aplicadas/correcao-auditoria-conversa-24-11.diff` e restart.
+  palavras-chave: aplicada, correcao, auditoria, conversa, assinada, humano, correção, achados, seth, três, mudanças, contador, persistente, gateway, marca, água, alta, cabeçalhos, anteriores, sobrevive, truncamento, frontend, corrige, travado, quatro, instruções, novas, seção, protocolos, anti, loop, impotência, próximo, passo, muleta, diagnóstico, ferramenta, falha, repetida, janela, contexto, longa, comando, saude, vault, lista, fechada, verificador, health, check, obsidian, proxy, openvino, embeddings, aplicar, restart, reverter, git, apply, propostas, aplicadas, diff
 (1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
   palavras-chave: aplicação, assinada, rea, linux, preparada
 (1124) DIÁRIO — 25/11/2026 · **Proposta P-8 de análise estática PE preparada.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, agata, code, nasce, agente, opencode, mesmas, regras, worktree, descartável, seth, painel, passa, chamá, trabalho, visível, sob, demanda, lote, decisões, humano, voz, medição, real, respeitou, altere, errou, contagem, modelo, gratuito, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura e anota no cache do Conselho** Assinada pelo Humano em 20/11. Prova: pedido 4 repetido no painel após reiniciar painel-operacional.
   palavras-chave: aplicada, painel, ferramentas, seth, ganha, leitura, anota, cache, assinada, humano, prova, pedido, repetido, após, reiniciar, operacional
-(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
-  palavras-chave: proposta, painel, ferramentas, seth, ganha, leitura, máquina, vault, canon, anota, cache, pública, segue, lote, decisões, humano, voz, web, fica, próprio, sonnet, implementou, opus, revisou, mediu, assinatura, pendente, bash, scripts, aprovar
+(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do pain …
+  palavras-chave: proposta, painel, ferramentas, seth, pain
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-c …
   palavras-chave: aplicada, voz, cerebro, cli, skill, agata
 (1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-c …
