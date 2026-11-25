@@ -26,20 +26,23 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 00822badb84ccf6ebe451c0954e0aba1cd61cb8e
-  Escrito em: 25/11/2026 16:07 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 5aec8fbe32be1ce8572f89a1e07ec8069753476f
+  Escrito em: 25/11/2026 16:38 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00822badb84ccf6ebe451c0954e0aba1cd61cb8e/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00822badb84ccf6ebe451c0954e0aba1cd61cb8e/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00822badb84ccf6ebe451c0954e0aba1cd61cb8e/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00822badb84ccf6ebe451c0954e0aba1cd61cb8e/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/00822badb84ccf6ebe451c0954e0aba1cd61cb8e/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5aec8fbe32be1ce8572f89a1e07ec8069753476f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5aec8fbe32be1ce8572f89a1e07ec8069753476f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5aec8fbe32be1ce8572f89a1e07ec8069753476f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5aec8fbe32be1ce8572f89a1e07ec8069753476f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/5aec8fbe32be1ce8572f89a1e07ec8069753476f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1126) DIÁRIO — 25/11/2026 · **Aplicada correcao-auditoria-conversa-24-11 (assinada pelo Humano): correção dos achados da auditoria da conversa Seth 24/11/2026.** Três mudanças: (1) contador `t=` persistente no gateway — marca d'água alta nos cabeçalhos anteriores sobrevive ao truncamento do frontend, corrige o `t=` travado em 10; (2) quatro instruções novas na seção SETH-GATEWAY de PROTOCOLOS.md — anti-loop de impotência, "Próximo passo" não é muleta, diagnóstico de ferramenta com falha repetida, janela de contexto em conversa longa; (3) comando `saude_vault` na lista fechada do verificador (health check do obsidian-ro-proxy :27125 e openvino-embeddings :20134). Depois de aplicar: restart do seth-gateway. Reverter: `git apply -R propostas/aplicadas/correcao-auditoria-conversa-24-11.diff` e restart.
+Modelo: Claude Opus 4.6 (Claude Code, na Máquina) · vetor: auditoria de conversa exportada (1486 linhas), py_compile, selftest limpa_cabecalho 20/20 e limpa_laco 9/9, testes unitários do contador, CI local 93/93, CI remoto (fiscal-p8 + suite-adversarial + CodeQL) verde · Autorização: Humano — "Audite a última conversa que tive com a Seth ontem" + "pode seguir essa ordem pare apenas quando eu tiver que assinar" + `APROVADO-correcao-auditoria-conversa-24-11` assinado.
+
 (1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
 
 Assinatura P-8 verificada antes da aplicação; diff aplicado em worktree própria e reversão conferida. O CI local passou 95/95 depois da regeneração autorizada de `ESTADO.md`; os testes REA PE passaram e a revisão independente foi 10/10. PR de aplicação pendente, com junção reservada ao Humano.

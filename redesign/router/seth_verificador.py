@@ -160,6 +160,20 @@ COMANDOS: dict[str, tuple[list[str], int, str]] = {
         "`consulta` (a ação ou a pergunta, até 200 caracteres). Leva ~10-30 s. É "
         "opinião de um modelo, não fato: cite como opinião dele (MEMÓRIAS (705)).",
     ),
+    "saude_vault": (
+        ["bash", "-c",
+         'printf "obsidian-ro-proxy (:27125): "; '
+         'curl -sf -m 5 http://127.0.0.1:27125/health && echo " OK" || echo " FALHA"; '
+         'printf "openvino-embeddings (:20134): "; '
+         'curl -sf -m 5 -X POST http://127.0.0.1:20134/embed '
+         '-H "Content-Type: application/json" '
+         '-d \'{"input":"teste","model":"x"}\' >/dev/null && echo "OK" || echo "FALHA"; '
+         'systemctl --user is-active obsidian-ro-proxy.service openvino-embeddings.service 2>&1'
+         ], 15,
+        "Saúde do vault (obsidian-ro-proxy :27125) e do servidor de embeddings "
+        "(openvino-embeddings :20134). Diz se cada um responde e se a unit está ativa. "
+        "Use quando vault_consultar ou busca_semantica falham.",
+    ),
 }
 
 # `consulta` da busca por sentido (670): o texto da Seth vira DADO de um comando
