@@ -26,20 +26,25 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 0eccf8833e41b05461f43a9155f03c47f9863e34
-  Escrito em: 26/11/2026 12:09 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 6f7b2de125b77f28410260ff7184a750e34a7239
+  Escrito em: 26/11/2026 15:31 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eccf8833e41b05461f43a9155f03c47f9863e34/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eccf8833e41b05461f43a9155f03c47f9863e34/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eccf8833e41b05461f43a9155f03c47f9863e34/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eccf8833e41b05461f43a9155f03c47f9863e34/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/0eccf8833e41b05461f43a9155f03c47f9863e34/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f7b2de125b77f28410260ff7184a750e34a7239/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f7b2de125b77f28410260ff7184a750e34a7239/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f7b2de125b77f28410260ff7184a750e34a7239/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f7b2de125b77f28410260ff7184a750e34a7239/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/6f7b2de125b77f28410260ff7184a750e34a7239/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1126) DIÁRIO — 26/11/2026 · **Proposta P-8 ferramentas-unificadas-26-11: fonte única de ferramentas (MCP, skills, subagentes) para todos os modelos do Conselho + skill de arranque universal.**
+
+Lote atende 4 diretrizes do Humano (26/11): todos os modelos devem acessar as mesmas capacidades do sistema; skill de arranque carregada no início da sessão pacificando problemas recorrentes; tudo que um modelo pode usar fica disponível para os outros; fonte única de skills, memória e cache do Conselho. Mecanismo: overlay local em `~/agata-local/ferramentas.yml` (fora do repo, instalação com confirmação interativa de terminal do Humano) + canônico em `config/ferramentas/*.yml` (sob P-8); `scripts/ferramentas/sincronizar.py` lê canônico ∪ overlay e chama comandos nativos (`claude mcp add -s user`, `codex mcp add`, `opencode mcp add`) — não edita JSON/TOML. Manifest de entradas gerenciadas em `~/.local/share/agata/ferramentas/gerenciado.json` com hash guard; reversão por manifest; backups 600 em `~/.local/share/agata/ferramentas/backup/<ts>/`. Skill nova `.agents/skills/agata-arranque/` + hook SessionStart no Claude Code e no Codex. OpenCode medido com CLI real (não tem `remove`; L6 declarada). Lote 2 cobre migração física (symlinks/rules/automations), Gemini CLI, slash commands, subagentes sync (L2-A a L2-H declaradas em decision.md). Revisão independente contra spec achou 10 pontos; os 4 altos + 2 médios foram corrigidos; L7-L9 ficam para lote 2. CI local 95/95; 21 testes mecânicos do lote passam (15 de acceptance.json + 6 extras). R4 (claude-in-chrome): opção B original não funciona (deny vence allow, confirmado em doc oficial); Humano escolhe na assinatura entre E (ask global + allow projeto) ou C (desinstalar extensão).
+
+Modelo: Claude Opus 4.7 (Claude Code, na Máquina), orquestrando agata-inov-arquiteto, agata-dev e agata-revisor em haiku-5-5 (R2 do decision); parecer do Conselho pelo qwen3.5:9b local (Codex ocupado) · vetor: pytest 21/21, CI local 95/95, dry-run do sync no home real OK · Autorização: Humano — "faça", "pode fazer", "corrigir"
 (1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
 
 Assinatura P-8 verificada antes da aplicação; diff aplicado em worktree própria e reversão conferida. O CI local passou 95/95 depois da regeneração autorizada de `ESTADO.md`; os testes REA PE passaram e a revisão independente foi 10/10. PR de aplicação pendente, com junção reservada ao Humano.

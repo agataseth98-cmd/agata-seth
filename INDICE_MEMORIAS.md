@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1126) DIÁRIO — 26/11/2026 · **Proposta P-8 ferramentas-unificadas-26-11: fonte única de ferramentas (MCP, skills, subagentes) para todos os modelos do Conselho + skill de arranque universal.**
 (1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
 (1124) DIÁRIO — 25/11/2026 · **Proposta P-8 de análise estática PE preparada.**
 (1123) DIÁRIO — 23/11/2026 · **Aplicada conversa-voz-23-11 (assinada pelo Humano): conversa por voz sem cliques no painel.** O ditado liga ouvido e voz sob demanda; "fale comigo" ou um botão abre a conversa contínua com envio automático, fala da Seth tocada no navegador e interrupção pela voz; guardas contra eco, pausa após 6 turnos sem toque, anexo preservado; seth-parar também para o ouvido. Não medido: eco real no alto-falante e limiares com a voz do Humano. Depois de aplicar: restart do painel-operacional. Reverter: git apply -R propostas/aplicadas/conversa-voz-23-11.diff e restart.
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (agente do OpenCode, mesmas regras, worktree descartável) e a Seth do painel passa a chamá-lo, com o trabalho visível sob demanda.** Lote 2 das decisões do Humano por voz de 20/11. Medição real: respeitou 'não altere', mas errou contagem (modelo gratuito). Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-20-11.
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura e anota no cache do Conselho** Assinada pelo Humano em 20/11. Prova: pedido 4 repetido no painel após reiniciar painel-operacional.
-(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura (Máquina, vault, canon) e anota no cache do Conselho; Seth pública segue sem ferramentas.** Lote 1 das decisões do Humano por voz de 20/11. Web fica para lote próprio. Sonnet implementou, Opus revisou e mediu. Assinatura pendente: bash scripts/aprovar.sh painel-ferramentas-20-11.
+(1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do pain …
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-c …
 (1094) DIÁRIO — 20/11/2026 · **Proposta voz-cerebro-cli-20-11: skill agata-voz-c …
 (1093) DIÁRIO — 20/11/2026 · **Aplicada tool-call-json-20-11: chamada de ferrame …
