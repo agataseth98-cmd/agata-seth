@@ -1,0 +1,245 @@
+diff --git a/redesign/painel_operacional/prototipo.js b/redesign/painel_operacional/prototipo.js
+index 25a42698..547e5fca 100644
+--- a/redesign/painel_operacional/prototipo.js
++++ b/redesign/painel_operacional/prototipo.js
+@@ -2163,7 +2163,7 @@ const CHAMADO_ECO_FRACAO = 0.6;         // se a transcrição traz este trecho d
+ const CHAMADO_ECO_MIN_PALAVRAS = 4;     // fala mais curta que isso não serve de referência para o eco
+ const DITADO_PRAZO_MS = 130000;         // prazo do pedido de transcrição (o servidor do ouvido tem 120 s)
+ const SINTESE_PRAZO_MS = 60000;         // prazo do pedido de um trecho falado
+-const CHAMADO_ROTULOS = {abrindo: "Abrindo o microfone…", ouvindo: "Ouvindo…", transcrevendo: "Transcrevendo…", pensando: "Seth pensando…", falando: "Seth falando…", parando: "Parando a fala…"};
++const CHAMADO_ROTULOS = {abrindo: "Abrindo o microfone…", ouvindo: "Ouvindo…", transcrevendo: "Transcrevendo…", pensando: "Seth pensando…", falando: "Seth falando…", parando: "Parando a fala…", suavez: "Sua vez — fale ou aguarde."};
+ const CHAMADO_COMANDOS = new Map([["fale comigo", "ligar"], ["encerrar chamado", "desligar"], ["volte ao texto", "desligar"]]);
+ const chamado = {ligado: false, estado: "desligado", sessao: 0, fluxo: null, audio: null, timer: null, gravador: null, vad: null,
+   ignorarAte: 0, paradaPedida: false, fala: null, turnosSemToque: 0, pausada: false, ultimaFala: ""};
+@@ -2214,10 +2214,88 @@ function chamadoBotao(ligado) {
+   b.setAttribute("aria-pressed", ligado ? "true" : "false");
+   b.textContent = ligado ? "Parar conversa por voz" : "Conversa por voz";
+ }
++// Som de pensamento: composição generativa via AudioContext do chamado.
++// Crescendo com condução clássica: vozes entram em cânone, dinâmica evolui, imprevisível mas suave.
++let _somPensandoAtivo = null;
++let _somPensandoTimer = null;
++function _somPensandoAtualizar(estado) {
++  const ctx = chamado.audio && chamado.audio.contexto;
++  if (estado === "pensando" || estado === "transcrevendo") {
++    if (_somPensandoTimer) { clearTimeout(_somPensandoTimer); _somPensandoTimer = null; }
++    if (_somPensandoAtivo || !ctx || ctx.state !== "running") return;
++    try { _somPensandoAtivo = _somPensandoCriar(ctx); } catch (_) {}
++  } else {
++    if (_somPensandoAtivo && !_somPensandoTimer) {
++      _somPensandoTimer = setTimeout(() => { if (_somPensandoAtivo) { _somPensandoAtivo.parar(); _somPensandoAtivo = null; } _somPensandoTimer = null; }, 300);
++    }
++  }
++}
++function _somPensandoCriar(ctx) {
++  const nos = [];
++  const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
++  // Crescendo: 0 → 0.07 em 3s, depois respira entre 0.04 e 0.08
++  master.gain.setValueAtTime(0, ctx.currentTime);
++  master.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 3);
++  // Escala pentatônica em Dó (Cmaj9 aberto): meditativo, sem tensão
++  const notas = [261.6, 293.7, 329.6, 392.0, 440.0, 523.3, 587.3];
++  const vozes = [];
++  // Bordão grave: quinta justa C3-G3, sempre presente, ancora o ouvido
++  const bordao = _somPensandoVoz(ctx, master, 130.8, "sine", 0.6);
++  nos.push(bordao);
++  const bordao2 = _somPensandoVoz(ctx, master, 196.0, "sine", 0.3);
++  nos.push(bordao2);
++  // Vozes médias: entram em cânone com delays aleatórios (condução clássica)
++  for (let i = 0; i < 3; i++) {
++    const delay = 1.5 + Math.random() * 3;
++    const nota = notas[Math.floor(Math.random() * notas.length)];
++    const v = _somPensandoVoz(ctx, master, nota, "sine", 0, delay);
++    vozes.push(v);
++    nos.push(v);
++  }
++  // Dinâmica viva: cada voz muda de nota e volume a cada 2-5s (imprevisível mas suave)
++  let ativo = true;
++  const conduzir = () => {
++    if (!ativo) return;
++    vozes.forEach((v) => {
++      const novaNota = notas[Math.floor(Math.random() * notas.length)];
++      const novoVol = 0.15 + Math.random() * 0.4;
++      const transicao = 1.5 + Math.random() * 2;
++      v.osc.frequency.linearRampToValueAtTime(novaNota, ctx.currentTime + transicao);
++      v.ganho.gain.linearRampToValueAtTime(novoVol, ctx.currentTime + transicao);
++    });
++    // Respiração do master: sobe e desce suavemente (rubato)
++    const pico = 0.04 + Math.random() * 0.05;
++    const subida = 1 + Math.random() * 2;
++    const descida = 1 + Math.random() * 2;
++    master.gain.linearRampToValueAtTime(pico, ctx.currentTime + subida);
++    master.gain.linearRampToValueAtTime(pico * 0.6, ctx.currentTime + subida + descida);
++    setTimeout(conduzir, (2000 + Math.random() * 3000));
++  };
++  setTimeout(conduzir, 3500);
++  return {
++    parar() {
++      ativo = false;
++      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
++      setTimeout(() => { nos.forEach((n) => { try { n.osc.stop(); } catch (_) {} }); try { master.disconnect(); } catch (_) {} }, 600);
++    }
++  };
++}
++function _somPensandoVoz(ctx, destino, freq, tipo, vol, delay) {
++  const g = ctx.createGain(); g.gain.value = 0; g.connect(destino);
++  const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = freq; o.connect(g); o.start();
++  const entrada = delay || 0;
++  const transicao = 0.8 + Math.random() * 1.2;
++  g.gain.setValueAtTime(0, ctx.currentTime + entrada);
++  g.gain.linearRampToValueAtTime(vol || (0.2 + Math.random() * 0.3), ctx.currentTime + entrada + transicao);
++  return {osc: o, ganho: g};
++}
++const _INSTR_VOZ = "Você está em conversa por voz. ESCRITA: responda com informação técnica densa, precisa e completa — LLM first, como documentação viva. FALA: o sistema vai sintetizar sua resposta inteira, mas escolha o ângulo mais intrigante e surpreendente da informação para abrir. Faça o Humano querer ler o console e acompanhar o desenvolvimento. Nunca use markdown, listas, cabeçalhos ou formatação. Nunca diga que não pode falar, que não tem áudio ou que é uma IA: o sistema cuida da voz, e você é a Seth. Use contrações e expressões do português falado (tipo 'tá', 'olha', 'pois é', 'veja'). Se a pergunta for pessoal, responda com a personalidade da Seth: firme, lúcida, sem rodeios, mas com calor humano.";
++function _instrVoz(base) { return base ? base + "\n\n" + _INSTR_VOZ : _INSTR_VOZ; }
+ // Estado sempre visível (Regra 0): o rótulo do estado e, se houver, o aviso. A linha é própria (não a da voz).
+ function chamadoIr(estado, aviso = "", classe = "") {
+   chamado.estado = estado;
+   if (estado !== "falando") chamado.paradaPedida = false;
++  _somPensandoAtualizar(estado);
+   const linha = byId("seth-chamado-estado");
+   linha.hidden = false;
+   linha.textContent = chamadoRotulo(estado, chamado.paradaPedida) + (aviso ? " " + aviso : "");
+@@ -2244,7 +2322,7 @@ function chamadoFimFala(aviso = "", classe = "", cauda = CHAMADO_POS_FALA_MS) {
+   if (!chamado.ligado || chamado.estado !== "falando") return;
+   chamado.fala = null;
+   chamado.ignorarAte = performance.now() + cauda;
+-  chamadoVoltarAOuvir(aviso, classe);
++  chamadoVoltarAOuvir(aviso || CHAMADO_ROTULOS.suavez, classe);
+ }
+ // Resposta que não foi lida (erro, parada ou outra conversa): a conversa por voz volta a ouvir.
+ function chamadoFimResposta(lida) {
+@@ -2280,6 +2358,8 @@ async function chamadoTranscrever(blob, sessao) {
+   if (sessao !== chamado.sessao || !chamado.ligado) return; // desligou enquanto transcrevia
+   if (r.motivo) { chamadoVoltarAOuvir(r.motivo, "erro"); return; }
+   if (chamadoEhEco(r.texto, chamado.ultimaFala)) { chamadoVoltarAOuvir("Trecho descartado: parecia eco da resposta.", "erro"); return; }
++  // Guarda contra eco residual: transcrição muito curta logo após uma fala da Seth é descartada
++  if (chamado.ultimaFala && chamadoPalavras(r.texto).length <= 2 && performance.now() < chamado.ignorarAte + CHAMADO_CAUDA_MAQUINA_MS) { chamadoVoltarAOuvir("Trecho curto descartado: eco provável.", "erro"); return; }
+   chamadoEnviarTexto(r.texto);
+ }
+ // O texto falado segue o caminho do Enviar (o formulário). O rascunho digitado volta ao campo depois.
+@@ -2374,6 +2454,7 @@ async function chamadoLigar() {
+ function chamadoDesligar(aviso = "Conversa por voz desligada.") {
+   chamado.sessao += 1;
+   chamado.ligado = false; chamado.estado = "desligado"; chamado.paradaPedida = false;
++  _somPensandoAtualizar("desligado");
+   if (chamado.timer) { clearTimeout(chamado.timer); chamado.timer = null; }
+   chamadoCortarTrecho();
+   chamadoPararFala(chamado.fala);
+@@ -2419,7 +2500,7 @@ function chamadoInterromper(fala, agora) {
+   chamadoPararFala(fala);
+   chamado.ignorarAte = 0;
+   chamado.vad = {emFala: true, inicio: agora - CHAMADO_INTERRUPCAO_MS, ultimaVoz: agora};
+-  chamadoIr("ouvindo", "Fala interrompida pela sua voz.");
++  chamadoIr("ouvindo", "Fala interrompida — gravando sua vez.");
+   chamadoComecarTrecho();
+ }
+ // Para o áudio que está tocando (na hora) e solta quem espera por ele.
+@@ -2460,11 +2541,15 @@ async function chamadoSintetizar(texto, indice) {
+ }
+ function chamadoTocar(fala, contexto, buffer) {
+   return new Promise((resolver) => {
++    let resolvido = false;
++    const fechar = () => { if (resolvido) return; resolvido = true; fala.pendentes = fala.pendentes.filter((f) => f !== resolver); resolver(); };
+     const fonte = contexto.createBufferSource();
+     fonte.buffer = buffer;
+     fonte.connect(contexto.destination);
+     fala.fontes.push(fonte); fala.pendentes.push(resolver);
+-    fonte.onended = () => { fala.pendentes = fala.pendentes.filter((f) => f !== resolver); resolver(); };
++    fonte.onended = fechar;
++    const limite = setTimeout(fechar, (buffer.duration + 2) * 1000);
++    fala.pendentes.push(() => clearTimeout(limite));
+     fonte.start();
+   });
+ }
+@@ -2827,8 +2912,20 @@ function sethEmCurso() { return sethRespondendo; } // uma só trava: a mesma da
+ 
+ function sethParar() { if (sethControle) sethControle.abort(); }
+ 
++function _sethLimparCabecalho(texto) {
++  const linhas = texto.split("\n");
++  let i = 0;
++  while (i < linhas.length) {
++    const l = linhas[i].trim().toLowerCase();
++    if (!l) { i++; continue; }
++    if (l.startsWith("agata-seth ·") || l.startsWith("agata ·") || l.startsWith("última entrada:") || l.startsWith("pronto.") || l.startsWith("quebrado:")) { i++; continue; }
++    break;
++  }
++  return linhas.slice(i).join("\n").trimStart();
++}
+ function sethCorpo(no, destino) {
+-  const pontos = Array.from(String(no.content || ""));
++  const textoLimpo = _sethLimparCabecalho(String(no.content || ""));
++  const pontos = Array.from(textoLimpo);
+   const cortes = [...new Set(no.cortes || [])].filter((c) => c > 0 && c < pontos.length).sort((a, b) => a - b);
+   let inicio = 0;
+   [...cortes, pontos.length].forEach((fim, i) => {
+@@ -2988,6 +3085,7 @@ async function sethResponder(op) {
+   if (chamadoLigado()) chamadoPensar(); // a conversa por voz para a fala e espera esta resposta (23/11)
+   sethUso = null; alvo.erro = null; // um pedido novo zera o uso anterior e a falha que estava na tela
+   botao.disabled = true; sethPintarParar(); sethStatus("PENSANDO", "partial");
++  _somPensandoAtualizar("pensando");
+   const pensando = document.createElement("p"); pensando.className = "seth-vazio"; pensando.textContent = "A Seth está respondendo…";
+   const cursor = sethCursor(); pensando.append(cursor);
+   log.append(pensando);
+@@ -2996,6 +3094,7 @@ async function sethResponder(op) {
+     : sethMensagensParaEnvio(sethCaminhoDe(paiId, alvo));
+   const modelo = alvo.modelo; // o modelo do envio fica preso a ele, mesmo se o seletor mudar depois
+   const pedidoBase = sethPedidoBase(anexos, alvo); // instruções da conversa e anexos deste envio (C8, C9)
++  if (chamadoLigado()) pedidoBase.instrucoes_voz = true;
+   const janela = sethJanela(pedido, pedidoBase);
+   const aviso = sethAvisoJanela(janela);
+   const parcial = {texto: ""};
+@@ -3003,6 +3102,7 @@ async function sethResponder(op) {
+   const aoTexto = (delta) => {
+     const perto = sethNoFim(log);
+     if (!textoNo) {
++      _somPensandoAtualizar("falando");
+       pensando.remove();
+       const bolha = document.createElement("article"); bolha.className = "msg msg-assistant" + (modo === "continuar" ? " msg-continuacao" : "");
+       const corpo = document.createElement("div"); corpo.className = "msg-body";
+@@ -3017,12 +3117,14 @@ async function sethResponder(op) {
+   let conteudo = null, falha = null, parada = false;
+   try {
+     try {
+-      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal, alvo.instrucoes || "", pedidoBase.anexos, aoEstado);
++      const instrFinal = pedidoBase.instrucoes_voz ? _instrVoz(alvo.instrucoes) : (alvo.instrucoes || "");
++      conteudo = await sethLerStream(janela.mensagens, modelo, parcial, aoTexto, controle.signal, instrFinal, pedidoBase.anexos, aoEstado);
+     } catch (erro) {
+       if (controle.signal.aborted) throw erro;
+       const transporte = !erro.motivoStream && !parcial.texto && (erro.semStream || erro.status === undefined || erro.status === 404 || erro.status >= 500);
+       if (!transporte) throw erro;
+-      const dados = await sethChatInteiro(janela.mensagens, modelo, parcial, controle.signal, alvo.instrucoes || "", pedidoBase.anexos);
++      const instrFinal = pedidoBase.instrucoes_voz ? _instrVoz(alvo.instrucoes) : (alvo.instrucoes || "");
++      const dados = await sethChatInteiro(janela.mensagens, modelo, parcial, controle.signal, instrFinal, pedidoBase.anexos);
+       conteudo = dados.content;
+     }
+   } catch (erro) {
+@@ -3030,6 +3132,7 @@ async function sethResponder(op) {
+     else { falha = erro; if (parcial.texto) parada = true; }
+   }
+   sethControle = null;
++  _somPensandoAtualizar("pronta");
+   pensando.remove(); cursor.remove();
+   if (parcial.uso) sethUso = {alvo, entrada: parcial.uso.entrada, saida: parcial.uso.saida}; // C11
+   const info = {modelo, parcial, aviso, texto: conteudo !== null ? conteudo : parcial.texto};
+diff --git a/redesign/sentidos/ouvido.py b/redesign/sentidos/ouvido.py
+index 7ebc48cb..b6485171 100644
+--- a/redesign/sentidos/ouvido.py
++++ b/redesign/sentidos/ouvido.py
+@@ -47,10 +47,13 @@ def _post(url: str, corpo: dict, timeout: int) -> dict:
+ 
+ 
+ def para_16k(origem: Path, destino: Path) -> float | None:
+-    """Converte para wav mono 16 kHz (o que os dois motores esperam). Devolve a duração em segundos."""
++    """Converte para wav mono 16 kHz (o que os dois motores esperam). Devolve a duração em segundos.
++    Aplica normalização de volume e filtro de ruído para melhorar a transcrição de áudio capturado por microfone."""
+     if not shutil.which("ffmpeg"):
+         raise RuntimeError("ffmpeg ausente")
+-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(origem), "-ar", "16000", "-ac", "1", str(destino)],
++    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(origem),
++                    "-af", "highpass=f=80,afftdn=nf=-20,loudnorm=I=-16:TP=-1.5:LRA=11",
++                    "-ar", "16000", "-ac", "1", str(destino)],
+                    check=True, timeout=60, stdin=subprocess.DEVNULL)
+     try:
+         out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(destino)],
