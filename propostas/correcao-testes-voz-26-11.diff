@@ -1,0 +1,31 @@
+diff --git a/redesign/painel_operacional/test_voz_ui.py b/redesign/painel_operacional/test_voz_ui.py
+index d16c2796..b9254941 100644
+--- a/redesign/painel_operacional/test_voz_ui.py
++++ b/redesign/painel_operacional/test_voz_ui.py
+@@ -469,7 +469,7 @@ class ChamadoVozTests(unittest.TestCase):
+         self.assertEqual(posts(m, "/api/seth/ouvir"), [], "a fala do navegador não usa a rota que fala na Máquina")
+         self.assertEqual(m["estados"][len(LIGAR + TRECHO) - 1]["chamadoTexto"], "Seth falando…")
+         self.assertEqual(m["fontes"], [{"tocando": True, "acabou": True}])
+-        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…", "terminada a fala, volta a ouvir sozinha")
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… Sua vez — fale ou aguarde.", "terminada a fala, indica a vez do Humano")
+         self.assertEqual(m["final"]["campo"], "", "o rascunho do campo não é mexido pela voz")
+ 
+     def test_voz_normal_nao_interrompe_a_fala(self):
+@@ -488,7 +488,7 @@ class ChamadoVozTests(unittest.TestCase):
+         m = rodar(LIGAR + TRECHO + interromper,
+                   respostas={"/api/seth/ditado": [{"json": {"texto": "pera ou maçã"}}],
+                              "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
+-        self.assertEqual(m["estados"][base + 4]["chamadoTexto"], "Ouvindo… Fala interrompida pela sua voz.")
++        self.assertEqual(m["estados"][base + 4]["chamadoTexto"], "Ouvindo… Fala interrompida — gravando sua vez.")
+         self.assertTrue(m["fontes"][0]["acabou"], "o áudio parou na hora")
+         self.assertEqual(len(posts(m, "/api/seth/ditado")), 2, "o turno do Humano foi gravado e transcrito")
+         self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 2, "e enviado à Seth")
+@@ -722,7 +722,7 @@ class ChamadoVozRevisaoTests(unittest.TestCase):
+         self.assertEqual(len(m["fontes"]), 2)
+         self.assertTrue(all(f["acabou"] for f in m["fontes"]))
+         self.assertEqual(posts(m, "/api/seth/ouvir"), [], "com a síntese boa, nada cai na Máquina")
+-        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…")
++        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… Sua vez — fale ou aguarde.")
+ 
+     def test_comando_falado_encerrar_desliga_e_nao_vai_a_seth(self):
+         m = rodar(LIGAR + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "encerrar chamado"}}]})
