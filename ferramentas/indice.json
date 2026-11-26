@@ -136,6 +136,14 @@
   "resumo": "-"
  },
  {
+  "nome": "agata-arranque",
+  "tipo": "skill",
+  "fonte": "agata",
+  "tema": "agata",
+  "caminho": ".agents/skills/agata-arranque/SKILL.md",
+  "resumo": "-"
+ },
+ {
   "nome": "agata-conversar-com-seth",
   "tipo": "skill",
   "fonte": "agata",

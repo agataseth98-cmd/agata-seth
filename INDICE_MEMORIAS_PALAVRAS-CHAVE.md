@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1127) DIÁRIO — 26/11/2026 · **Aplicada ferramentas-unificadas-26-11: fonte única de ferramentas para todos os modelos do Conselho + skill de arranque universal.**
+  palavras-chave: aplicada, ferramentas, unificadas, fonte, única, modelos, skill, arranque, universal
 (1126) DIÁRIO — 26/11/2026 · **Proposta P-8 ferramentas-unificadas-26-11: fonte única de ferramentas (MCP, skills, subagentes) para todos os modelos do Conselho + skill de arranque universal.**
   palavras-chave: proposta, ferramentas, unificadas, fonte, única, mcp, skills, subagentes, modelos, skill, arranque, universal
 (1125) DIÁRIO — 25/11/2026 · **Aplicação assinada de rea-pe-linux-2026-11-25 preparada para PR.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, dinamica, voz, dinâmica, sessão, estado, auditoria, caminho, humano, decisão, registro, cache, lotes, pequenos, aplicação, prova, vira, procedimento, passos, skill, agata, cerebro, modelos, confederados, ordem, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (agente do OpenCode, mesmas regras, worktree descartável) e a Seth do painel passa a chamá-lo, com o trabalho visível sob demanda.** Lote 2 das decisões do Humano por voz de 20/11. Medição real: respeitou 'não altere', mas errou contagem (modelo gratuito). Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-20-11.
   palavras-chave: proposta, agata, code, nasce, agente, opencode, mesmas, regras, worktree, descartável, seth, painel, passa, chamá, trabalho, visível, sob, demanda, lote, decisões, humano, voz, medição, real, respeitou, altere, errou, contagem, modelo, gratuito, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
-(1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do painel ganha as ferramentas de leitura e anota no cache do Conselho** Assinada pelo Humano em 20/11. Prova: pedido 4 repetido no painel após reiniciar painel-operacional.
-  palavras-chave: aplicada, painel, ferramentas, seth, ganha, leitura, anota, cache, assinada, humano, prova, pedido, repetido, após, reiniciar, operacional
+(1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do pain …
+  palavras-chave: aplicada, painel, ferramentas, seth, pain
 (1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do pain …
   palavras-chave: proposta, painel, ferramentas, seth, pain
 (1095) DIÁRIO — 20/11/2026 · **Aplicada voz-cerebro-cli-20-11: skill agata-voz-c …

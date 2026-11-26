@@ -2,12 +2,13 @@
 
 Para qualquer modelo que trabalhe no Agata (Claude, Codex, Gemini, OpenCode, Seth ou outro). Comece por `agata-fluxo`: a tabela de escolha dele aponta a skill certa. Cada skill tem um dono e um escopo.
 
-Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`). São 13 skills próprias (`agata-*`) e 6 de terceiros (19 pastas + este índice no diretório). Os originais ficam em `extras/arquivo-skills-12-11/`.
+Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`). São 14 skills próprias (`agata-*`) e 6 de terceiros (20 pastas + este índice no diretório). Os originais ficam em `extras/arquivo-skills-12-11/`.
 
 ## Skills próprias do Agata (`agata-*`)
 
 | Skill | Use quando | Dono de fato | Aberta a todos? |
 |---|---|---|---|
+| `agata-arranque` | início de qualquer sessão: cabeçalho, memória do Conselho, mapa do Humano, P-8 e problemas recorrentes | todos os modelos | sim |
 | `agata-fluxo` | entrada de qualquer tarefa (guia Ma'at): medir o estado, conduta, escolha da skill, regras de lote, mudança no runtime da Máquina, afirmar com prova | agata-spec (dono); revisor agata-revisor (D4, 07/11/2026) | sim |
 | `agata-aplicar-proposta` | criar, verificar, propor e aplicar uma proposta P-8 ou um lote (CI local, âncora, assinatura, registro) | Claude (mantém) | sim |
 | `agata-adotar-skill` | adotar uma skill de terceiro comprovada no ledger (acima de 51%, ao menos 10 usos): reescrever em .agents/skills com licença e origem, por P-8 | Claude (mantém) | sim |

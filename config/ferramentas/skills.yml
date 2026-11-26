@@ -1,0 +1,8 @@
+# Fonte canônica de skills (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
+# Skill é ponteiro para .agents/skills/ do checkout principal: nada é copiado (H4). Índice: ponteiro abaixo.
+indice: .agents/skills/INDICE.md
+skills:
+  - nome: agata-arranque
+    origem: .agents/skills/agata-arranque
+    clis: [claude, codex]
+    descricao: "Arranque universal: cabeçalho, memória do Conselho, P-8 e problemas recorrentes."
