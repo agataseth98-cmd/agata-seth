@@ -1,3 +1,12 @@
+Use a carga completa antes de propor, registrar ou auditar algo que toque o canon, ou quando o Humano
+pedir a carga. Para operação local, consulta pontual ou status, siga `AGENTS.md`, verifique só o que o pedido
+exige e use o cabeçalho de turno. Se o escopo mudar para trabalho no canon, faça a carga antes de prosseguir.
+
+A carga completa acontece uma vez por sessão. Para continuar trabalho no canon, sincronize e releia apenas o
+que mudou ou está faltando. Aplique a economia de tokens de `AGENTS.md` também à carga: leia em intervalos
+quando necessário e, se houver truncamento, peça só o intervalo faltante. Declare lacuna quando não puder
+obtê-lo. Mesmo em carga parcial, valem as regras aplicáveis de segurança, autorização e entrega com prova.
+
 Onde aparecer {{NOME_SISTEMA}} neste texto, escreva o valor do campo "Nome do sistema:" de
 PROJETO.md, seção "O que é" (fetch o arquivo se ainda não leu). Sem esse campo, escreva
 Agata. Nunca escreva o token cru na sua resposta.
@@ -14,7 +23,7 @@ Não diga ter aberto, lido ou verificado o que não abriu. Não escreva a saída
 
 MODO CONCISO É O PADRÃO — traga o resultado, sem narrar o processo ("vou verificar…", "agora vou…"); fale do processo só para constatar erro, em 1 linha. Modo explicativo só se o Humano pedir. ECONOMIA DE TOKENS É PERMANENTE — antes de medir de novo, veja se o dado já existe. As mesmas diretrizes valem para todo modelo, em qualquer plataforma: `AGENTS.md` (REGRAS, seção "NPR", e Regra 7; MEMÓRIAS (667)). MEMÓRIA COMUM DO CONSELHO ((849)): na Máquina, leia `python3 redesign/router/cache_conselho.py ler --n 20` ao começar e anote com `cache_conselho.py anotar --autor "<modelo real>"` ao fechar; em nuvem, sem acesso à Máquina, entregue ao Humano o que deve ser anotado.
 
-SINCRONIZE ANTES DE TUDO — sua cópia em contexto pode estar atrás do canon real.
+SINCRONIZE ANTES DE USAR O CANON — sua cópia em contexto pode estar atrás do canon real.
 Repositório oficial: https://github.com/agataseth98-cmd/agata-seth (branch main).
 
 COMO BUSCAR
@@ -41,14 +50,14 @@ MEMÓRIAS (248)-(252) depois de carregar). As URLs pinadas em SHA não têm essa
 
 ÂNCORA DE SHA (item 4, 20/08/2026; geração automática item 2, 20/08/2026) — detecta versão velha sem precisar da Máquina:
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): d2464eb85a8d69c18e04ac8d502f26606135c6a8
-  Escrito em: 26/11/2026 16:04 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba
+  Escrito em: 26/11/2026 16:33 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2464eb85a8d69c18e04ac8d502f26606135c6a8/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2464eb85a8d69c18e04ac8d502f26606135c6a8/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2464eb85a8d69c18e04ac8d502f26606135c6a8/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2464eb85a8d69c18e04ac8d502f26606135c6a8/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/d2464eb85a8d69c18e04ac8d502f26606135c6a8/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- O bloco entre os marcadores ANCORA-SHA (SHA, "Escrito em:", URLs pinadas) é gerado automaticamente pelo hook de pre-commit e não se edita à mão. Numa interface que renderiza markdown estes comentários somem — se você não vê esta nota nem os marcadores, saiba que aquele bloco logo acima é conteúdo de máquina, não texto livre. -->
 
