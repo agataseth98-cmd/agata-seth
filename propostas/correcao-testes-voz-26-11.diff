@@ -1,5 +1,5 @@
 diff --git a/redesign/painel_operacional/test_voz_ui.py b/redesign/painel_operacional/test_voz_ui.py
-index d16c2796..b9254941 100644
+index d16c2796..579d1c69 100644
 --- a/redesign/painel_operacional/test_voz_ui.py
 +++ b/redesign/painel_operacional/test_voz_ui.py
 @@ -469,7 +469,7 @@ class ChamadoVozTests(unittest.TestCase):
@@ -29,3 +29,35 @@ index d16c2796..b9254941 100644
  
      def test_comando_falado_encerrar_desliga_e_nao_vai_a_seth(self):
          m = rodar(LIGAR + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "encerrar chamado"}}]})
+@@ -808,6 +808,31 @@ class ConversaPorVozEstaticaTests(unittest.TestCase):
+     def test_classe_chamar_tem_regra_de_estilo_e_estado_pressionado(self):
+         self.assertRegex(CSS, r"\.seth-chamar\[aria-pressed=\"true\"\]")
+ 
++    def test_rotulos_nos_testes_existem_no_js(self):
++        """Todo rótulo de chamadoTexto que os testes conferem deve existir como string literal no prototipo.js.
++        Impede que uma mudança de texto de UI no JS quebre testes sem aviso.
++        Exclui mensagens dinâmicas (vindas de respostas de API, não do JS)."""
++        strings_no_js = set(re.findall(r'"([^"\n]{2,80})"', self.BLOCO_CHAMADO))
++        texto_teste = Path(__file__).read_text(encoding="utf-8")
++        rotulos_nos_testes = set(re.findall(r'\["chamadoTexto"\],\s*"([^"]+)"', texto_teste))
++        respostas_api = set(re.findall(r'"(?:erro|motivo)":\s*"([^"]+)"', texto_teste))
++        sem_correspondencia = []
++        for rotulo in rotulos_nos_testes:
++            partes = rotulo.split("… ", 1)
++            if len(partes) == 2:
++                aviso = partes[1]
++                if aviso in respostas_api:
++                    continue
++                if partes[0] + "…" in strings_no_js and aviso in strings_no_js:
++                    continue
++                if partes[0] + "…" not in strings_no_js:
++                    sem_correspondencia.append(rotulo)
++                elif aviso not in strings_no_js:
++                    sem_correspondencia.append(rotulo)
++            elif rotulo not in strings_no_js:
++                sem_correspondencia.append(rotulo)
++        self.assertEqual(sem_correspondencia, [], f"Rótulos nos testes sem correspondência no JS: {sem_correspondencia}. Atualize os testes ou o JS.")
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
