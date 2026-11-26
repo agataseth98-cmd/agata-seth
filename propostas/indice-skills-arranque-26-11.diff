@@ -1,5 +1,5 @@
 diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
-index addf8174..fc43c17e 100644
+index addf8174..e9293484 100644
 --- a/.agents/skills/INDICE.md
 +++ b/.agents/skills/INDICE.md
 @@ -2,25 +2,45 @@
@@ -60,7 +60,7 @@ index addf8174..fc43c17e 100644
 +python3 redesign/router/auditoria_turno.py --verificar --sessao <ID>
 +```
 +
-+Para o fluxo completo: `agata-fluxo/SKILL.md`. Para proposta P-8: `agata-aplicar-proposta/SKILL.md`. Para o mapa do Humano (obrigatório): `agata-mapear-humano/SKILL.md`.
++Para o fluxo completo: `.agents/skills/agata-fluxo/SKILL.md`. Para proposta P-8: `.agents/skills/agata-aplicar-proposta/SKILL.md`. Para o mapa do Humano (obrigatório): `.agents/skills/agata-mapear-humano/SKILL.md`.
  
  ## Skills de terceiros (cópias fixas, não editar aqui)
  - `design-taste-frontend` (tasteskill v2, fonte: github.com/Leonxlnx/taste-skill): direção de arte e inspeção de páginas de frontend. Cópia fixa em `.agents/skills`; não editar aqui. Para o Claude Code carregá-la, crie o link local `ln -s ../../.agents/skills/design-taste-frontend .claude/skills/design-taste-frontend` (link não versionado: o P-8 não verifica symlink). Os scripts abrem um Chrome headless e `assets.mjs` acessa a rede; ver `propostas/design-taste-frontend-v2-20261031.md`.
