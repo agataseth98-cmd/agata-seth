@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1128) DIÁRIO — 26/11/2026 · **Proposta P-8 economia-contexto-24-11: carga conforme a tarefa + economia de tokens permanente.**
+  palavras-chave: proposta, economia, contexto, carga, conforme, tarefa, tokens, permanente
 (1127) DIÁRIO — 26/11/2026 · **Aplicada ferramentas-unificadas-26-11: fonte única de ferramentas para todos os modelos do Conselho + skill de arranque universal.**
   palavras-chave: aplicada, ferramentas, unificadas, fonte, única, modelos, skill, arranque, universal
 (1126) DIÁRIO — 26/11/2026 · **Proposta P-8 ferramentas-unificadas-26-11: fonte única de ferramentas (MCP, skills, subagentes) para todos os modelos do Conselho + skill de arranque universal.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, agata, code, nasce, seth, painel, passa, chamá, assinada, humano, prova, tarefa, leitura, após, reiniciar, operacional
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
   palavras-chave: proposta, dinamica, voz, dinâmica, sessão, estado, auditoria, caminho, humano, decisão, registro, cache, lotes, pequenos, aplicação, prova, vira, procedimento, passos, skill, agata, cerebro, modelos, confederados, ordem, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
-(1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (agente do OpenCode, mesmas regras, worktree descartável) e a Seth do painel passa a chamá-lo, com o trabalho visível sob demanda.** Lote 2 das decisões do Humano por voz de 20/11. Medição real: respeitou 'não altere', mas errou contagem (modelo gratuito). Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-20-11.
-  palavras-chave: proposta, agata, code, nasce, agente, opencode, mesmas, regras, worktree, descartável, seth, painel, passa, chamá, trabalho, visível, sob, demanda, lote, decisões, humano, voz, medição, real, respeitou, altere, errou, contagem, modelo, gratuito, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
+(1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (ag …
+  palavras-chave: proposta, agata, code, nasce
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do pain …
   palavras-chave: aplicada, painel, ferramentas, seth, pain
 (1096) DIÁRIO — 20/11/2026 · **Proposta painel-ferramentas-20-11: a Seth do pain …
