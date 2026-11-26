@@ -16,7 +16,7 @@ Quem escreve: a Seth, pelo diário (o escriba espelha cada /diario aqui); Claude
 Conselho Remoto por este CLI. Quem lê: todos — a Seth por `maquina_verificar cache_conselho`.
 
   cache_conselho.py anotar --autor NOME [--tipo nota|fato|decisao|pendencia|diario] [--fonte X] TEXTO
-  cache_conselho.py ler [--n 20] [--autor NOME]
+  cache_conselho.py ler [--n 20] [--autor NOME] [--tipo nota,fato,decisao,pendencia,diario]
   cache_conselho.py verificar
   cache_conselho.py --selftest
 """
@@ -154,10 +154,13 @@ def anotar(autor: str, texto: str, tipo: str = "nota", fonte: str | None = None,
     return receipt
 
 
-def ler(n: int = 20, autor: str | None = None) -> list[dict]:
+def ler(n: int = 20, autor: str | None = None, tipos: list[str] | None = None) -> list[dict]:
     regs = [json.loads(l) for l in _linhas()]
     if autor:
         regs = [r for r in regs if r.get("autor", "").lower() == autor.lower()]
+    if tipos:
+        aceitos = {t.strip().lower() for t in tipos}
+        regs = [r for r in regs if r.get("tipo", "").lower() in aceitos]
     return regs[-n:]
 
 
@@ -208,7 +211,9 @@ def _cli(argv: list[str]) -> int:
             return 2
     if argv[0] == "ler":
         n = int(opt("--n", "20"))
-        regs = ler(max(1, min(n, 50)), opt("--autor"))
+        tipo_raw = opt("--tipo")
+        tipos = [t.strip() for t in tipo_raw.split(",")] if tipo_raw else None
+        regs = ler(max(1, min(n, 50)), opt("--autor"), tipos)
         if not regs:
             print("cache do Conselho vazio")
         for r in regs:

@@ -469,7 +469,7 @@ class ChamadoVozTests(unittest.TestCase):
         self.assertEqual(posts(m, "/api/seth/ouvir"), [], "a fala do navegador não usa a rota que fala na Máquina")
         self.assertEqual(m["estados"][len(LIGAR + TRECHO) - 1]["chamadoTexto"], "Seth falando…")
         self.assertEqual(m["fontes"], [{"tocando": True, "acabou": True}])
-        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…", "terminada a fala, volta a ouvir sozinha")
+        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… Sua vez — fale ou aguarde.", "terminada a fala, indica a vez do Humano")
         self.assertEqual(m["final"]["campo"], "", "o rascunho do campo não é mexido pela voz")
 
     def test_voz_normal_nao_interrompe_a_fala(self):
@@ -488,7 +488,7 @@ class ChamadoVozTests(unittest.TestCase):
         m = rodar(LIGAR + TRECHO + interromper,
                   respostas={"/api/seth/ditado": [{"json": {"texto": "pera ou maçã"}}],
                              "/api/seth/chat/stream": [{"sse": RESPOSTA}], "/api/seth/voz-audio": [WAV]})
-        self.assertEqual(m["estados"][base + 4]["chamadoTexto"], "Ouvindo… Fala interrompida pela sua voz.")
+        self.assertEqual(m["estados"][base + 4]["chamadoTexto"], "Ouvindo… Fala interrompida — gravando sua vez.")
         self.assertTrue(m["fontes"][0]["acabou"], "o áudio parou na hora")
         self.assertEqual(len(posts(m, "/api/seth/ditado")), 2, "o turno do Humano foi gravado e transcrito")
         self.assertEqual(len(posts(m, "/api/seth/chat/stream")), 2, "e enviado à Seth")
@@ -722,7 +722,7 @@ class ChamadoVozRevisaoTests(unittest.TestCase):
         self.assertEqual(len(m["fontes"]), 2)
         self.assertTrue(all(f["acabou"] for f in m["fontes"]))
         self.assertEqual(posts(m, "/api/seth/ouvir"), [], "com a síntese boa, nada cai na Máquina")
-        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo…")
+        self.assertEqual(m["final"]["chamadoTexto"], "Ouvindo… Sua vez — fale ou aguarde.")
 
     def test_comando_falado_encerrar_desliga_e_nao_vai_a_seth(self):
         m = rodar(LIGAR + TRECHO, respostas={"/api/seth/ditado": [{"json": {"texto": "encerrar chamado"}}]})
@@ -807,6 +807,31 @@ class ConversaPorVozEstaticaTests(unittest.TestCase):
 
     def test_classe_chamar_tem_regra_de_estilo_e_estado_pressionado(self):
         self.assertRegex(CSS, r"\.seth-chamar\[aria-pressed=\"true\"\]")
+
+    def test_rotulos_nos_testes_existem_no_js(self):
+        """Todo rótulo de chamadoTexto que os testes conferem deve existir como string literal no prototipo.js.
+        Impede que uma mudança de texto de UI no JS quebre testes sem aviso.
+        Exclui mensagens dinâmicas (vindas de respostas de API, não do JS)."""
+        strings_no_js = set(re.findall(r'"([^"\n]{2,80})"', self.BLOCO_CHAMADO))
+        texto_teste = Path(__file__).read_text(encoding="utf-8")
+        rotulos_nos_testes = set(re.findall(r'\["chamadoTexto"\],\s*"([^"]+)"', texto_teste))
+        respostas_api = set(re.findall(r'"(?:erro|motivo)":\s*"([^"]+)"', texto_teste))
+        sem_correspondencia = []
+        for rotulo in rotulos_nos_testes:
+            partes = rotulo.split("… ", 1)
+            if len(partes) == 2:
+                aviso = partes[1]
+                if aviso in respostas_api:
+                    continue
+                if partes[0] + "…" in strings_no_js and aviso in strings_no_js:
+                    continue
+                if partes[0] + "…" not in strings_no_js:
+                    sem_correspondencia.append(rotulo)
+                elif aviso not in strings_no_js:
+                    sem_correspondencia.append(rotulo)
+            elif rotulo not in strings_no_js:
+                sem_correspondencia.append(rotulo)
+        self.assertEqual(sem_correspondencia, [], f"Rótulos nos testes sem correspondência no JS: {sem_correspondencia}. Atualize os testes ou o JS.")
 
 
 if __name__ == "__main__":

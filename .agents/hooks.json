@@ -1,0 +1,11 @@
+{
+  "agata-turno": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "PYTHONPATH=scripts python3 scripts/turno_gemini_hook.py",
+        "timeout": 10
+      }
+    ]
+  }
+}
