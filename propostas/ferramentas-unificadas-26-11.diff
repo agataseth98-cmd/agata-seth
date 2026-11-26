@@ -1,0 +1,2962 @@
+diff --git a/.agents/skills/INDICE.md b/.agents/skills/INDICE.md
+index e9293484..2c5763a7 100644
+--- a/.agents/skills/INDICE.md
++++ b/.agents/skills/INDICE.md
+@@ -2,12 +2,13 @@
+ 
+ Para qualquer modelo que trabalhe no Agata (Claude, Codex, Gemini, OpenCode, Seth ou outro). Comece por `agata-fluxo`: a tabela de escolha dele aponta a skill certa. Cada skill tem um dono e um escopo.
+ 
+-Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`). São 13 skills próprias (`agata-*`) e 6 de terceiros (19 pastas + este índice no diretório). Os originais ficam em `extras/arquivo-skills-12-11/`.
++Consolidado em 12/11/2026 (proposta `skills-consolidadas-12-11`). São 14 skills próprias (`agata-*`) e 6 de terceiros (20 pastas + este índice no diretório). Os originais ficam em `extras/arquivo-skills-12-11/`.
+ 
+ ## Skills próprias do Agata (`agata-*`)
+ 
+ | Skill | Use quando | Dono de fato | Aberta a todos? |
+ |---|---|---|---|
++| `agata-arranque` | início de qualquer sessão: cabeçalho, memória do Conselho, mapa do Humano, P-8 e problemas recorrentes | todos os modelos | sim |
+ | `agata-fluxo` | entrada de qualquer tarefa (guia Ma'at): medir o estado, conduta, escolha da skill, regras de lote, mudança no runtime da Máquina, afirmar com prova | agata-spec (dono); revisor agata-revisor (D4, 07/11/2026) | sim |
+ | `agata-aplicar-proposta` | criar, verificar, propor e aplicar uma proposta P-8 ou um lote (CI local, âncora, assinatura, registro) | Claude (mantém) | sim |
+ | `agata-adotar-skill` | adotar uma skill de terceiro comprovada no ledger (acima de 51%, ao menos 10 usos): reescrever em .agents/skills com licença e origem, por P-8 | Claude (mantém) | sim |
+diff --git a/.agents/skills/agata-arranque/SKILL.md b/.agents/skills/agata-arranque/SKILL.md
+new file mode 100644
+index 00000000..740d47e6
+--- /dev/null
++++ b/.agents/skills/agata-arranque/SKILL.md
+@@ -0,0 +1,56 @@
++---
++name: agata-arranque
++description: >-
++  Arranque universal do Agata para qualquer modelo (Claude Code, Codex, OpenCode ou outro). Use ao começar uma sessão
++  neste repositório: cabeçalho da Regra 1, memória do Conselho, mapa do Humano, índice de skills, fluxo P-8 e problemas recorrentes.
++---
++
++# Arranque Agata
++
++Esta skill é a mesma para todo modelo. O hook de início de sessão (SessionStart) a lê quando o Humano aplica o gerador (`scripts/ferramentas/instalar_hook_arranque.py --aplicar`). Sem o hook, leia-a à mão. Quem a instala é `scripts/ferramentas/sincronizar.py`, a partir de `config/ferramentas/`.
++
++## 1. Cabeçalho (Regra 1, toda resposta)
++- Abra a resposta com `agata · <modelo> · t=<n> (contador mecânico) · <hora + selo>`. A hora vem de `date`, medida agora, nunca copiada da resposta anterior.
++- Subagente usa `t=<n>.sub`. O `t=` vem do contador: `python3 scripts/turno.py proximo --sessao <id> --modelo <modelo>`.
++- Formato e voz: `PROTOCOLOS.md` (seção "Carregar e formatos").
++
++## 2. Memória do Conselho
++- Ao começar: `python3 redesign/router/cache_conselho.py ler --n 20`.
++- Ao fechar trabalho relevante: `python3 redesign/router/cache_conselho.py anotar --autor "<modelo real>" --tipo fato "<texto>"`. Tipos: fato, decisao, pendencia, nota. Segredo é recusado.
++- Antes de entregar afirmação verificável: `python3 redesign/router/auditoria_turno.py --verificar --cliente <nome>`.
++- Fala: só a voz `pt_BR-agata-last`, pelo `scripts/agata_falar.py`. Nenhum modelo usa outra voz.
++
++## 3. Mapa do Humano (obrigatório)
++- Leia `.agents/skills/agata-mapear-humano/SKILL.md` ao começar. Decisão ou correção do Humano vai ao cache com a fonte.
++
++## 4. Índice de skills
++- Lista e escolha: `.agents/skills/INDICE.md`. Comece por `.agents/skills/agata-fluxo/SKILL.md`.
++
++## 5. Fluxo P-8 em dez linhas
++1. Trabalho em worktree `.claude/worktrees/<nome>`, a partir de `origin/main`. Nunca no checkout principal.
++2. Medir o estado antes: `bash scripts/estado_para_eco.sh`.
++3. Mudança em arquivo protegido: proposta com `.diff` e registro em `propostas/`. Código entra só dentro do `.diff`.
++4. Antes de propor: `bash scripts/ci_sdd_local.sh`. Só siga com "CI LOCAL: TUDO OK".
++5. Quem assina é o Humano, com `scripts/aprovar.sh`. O modelo não roda `aprovar.sh`.
++6. Nada de `git push`, PR ou serviço externo sem aviso prévio e um "sim" para aquela ação.
++7. Não use `rm`. Para tirar algo do caminho, use `mv`. Remover só com ordem do Humano, pelo nome.
++8. Nada de sudo, de segredo nem de leitura de `.env`.
++9. Afirmação com número leva o rótulo: medido, inferido ou não medido.
++10. Detalhe e comandos: `.agents/skills/agata-aplicar-proposta/SKILL.md`.
++
++## 6. Problemas recorrentes (de `agata-fluxo`, seção 1)
++- Cabeçalho sem hora medida, ou com hora copiada.
++- Narrar o processo ("vou verificar..."). O modo conciso é o padrão: resultado primeiro; processo só para constatar erro, em uma linha.
++- Ação externa sem aviso: push, PR, Drive, Discord, Gmail ou reinício de serviço compartilhado.
++- Mexer em pasta de outro modelo ou pessoa sem conferir o dono.
++- Leitura declarada de forma vaga. Diga quais linhas leu.
++- Citação inventada: não repita o literal. Troque por `[citação inventada, expurgada em DATA por ordem do Humano]`.
++- Sudo, `aprovar.sh` ou segredo.
++- Afirmar sem medir.
++
++## 7. Ferramentas comuns
++- Ver o que está instalado em cada CLI: `python3 scripts/ferramentas/listar.py`.
++- Adicionar uma ferramenta: `python3 scripts/ferramentas/instalar.py <mcp|skill|agente> <nome> --params ...`. Pede "sim" do Humano.
++- Não edite à mão `~/.claude/settings.json`, `~/.codex/hooks.json` nem os arquivos nativos das CLIs.
++
++Regras completas: `AGENTS.md`.
+diff --git a/config/ferramentas/agentes.yml b/config/ferramentas/agentes.yml
+new file mode 100644
+index 00000000..b4bf95e2
+--- /dev/null
++++ b/config/ferramentas/agentes.yml
+@@ -0,0 +1,54 @@
++# Fonte canônica dos subagentes agata-* (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
++# Origem: .claude/agents/. Todos ficam fora do sync deste lote: o destino nativo de subagentes em
++# Claude e Codex não foi medido (lacuna L4). Quando for medido, a entrada vira gerenciado: true.
++agentes:
++  - nome: agata-ci
++    origem: .claude/agents/agata-ci.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-dev
++    origem: .claude/agents/agata-dev.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-inov-arquiteto
++    origem: .claude/agents/agata-inov-arquiteto.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-inov-critico
++    origem: .claude/agents/agata-inov-critico.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-inov-pesquisa
++    origem: .claude/agents/agata-inov-pesquisa.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-pesq-painel
++    origem: .claude/agents/agata-pesq-painel.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-pesq-processo
++    origem: .claude/agents/agata-pesq-processo.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-pesq-rea
++    origem: .claude/agents/agata-pesq-rea.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-revisor
++    origem: .claude/agents/agata-revisor.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
++  - nome: agata-spec
++    origem: .claude/agents/agata-spec.md
++    clis: [claude]
++    gerenciado: false
++    motivo: "L4: destino nativo de subagentes não medido"
+diff --git a/config/ferramentas/mcp.yml b/config/ferramentas/mcp.yml
+new file mode 100644
+index 00000000..56d65b99
+--- /dev/null
++++ b/config/ferramentas/mcp.yml
+@@ -0,0 +1,18 @@
++# Fonte canônica de servidores MCP (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
++# Em env entram só NOMES de variável; o valor vem do ambiente no momento do sync, nunca daqui (AC-13).
++# Entrada com gerenciado: false é conhecida, o sync não a adiciona, altera nem remove; motivo é obrigatório.
++mcp:
++  - nome: github-pat
++    transporte: http
++    url: https://api.githubcopilot.com/mcp/
++    clis: [claude, codex]
++    gerenciado: false
++    motivo: "Cabeçalho Authorization fica só no config nativo; o schema não declara cabeçalhos (medido em 26/11/2026, só estrutura)."
++    descricao: "MCP do GitHub do usuário, criado antes do sync."
++  - nome: agata-navegador
++    transporte: http
++    url: http://127.0.0.1:20136/mcp
++    clis: [claude]
++    gerenciado: false
++    motivo: "Escopo de projeto no Claude (projects do Agata); o sync deste lote só gerencia escopo de usuário."
++    descricao: "Navegador do Agata, registrado por projeto."
+diff --git a/config/ferramentas/skills.yml b/config/ferramentas/skills.yml
+new file mode 100644
+index 00000000..5a4e4dc4
+--- /dev/null
++++ b/config/ferramentas/skills.yml
+@@ -0,0 +1,8 @@
++# Fonte canônica de skills (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
++# Skill é ponteiro para .agents/skills/ do checkout principal: nada é copiado (H4). Índice: ponteiro abaixo.
++indice: .agents/skills/INDICE.md
++skills:
++  - nome: agata-arranque
++    origem: .agents/skills/agata-arranque
++    clis: [claude, codex]
++    descricao: "Arranque universal: cabeçalho, memória do Conselho, P-8 e problemas recorrentes."
+diff --git a/redesign/ferramentas_unificadas/acceptance.json b/redesign/ferramentas_unificadas/acceptance.json
+new file mode 100644
+index 00000000..c6bdf489
+--- /dev/null
++++ b/redesign/ferramentas_unificadas/acceptance.json
+@@ -0,0 +1,29 @@
++{
++  "lote": "ferramentas-unificadas-26-11",
++  "estado": "especificado; nada implementado; testes a escrever",
++  "criterios": [
++    {"id": "AC-01", "descricao": "fonte canônica valida contra o schema", "teste": "test_schema_canon_valido", "tipo": "mecanico"},
++    {"id": "AC-02", "descricao": "overlay com campo fora do schema é recusado", "teste": "test_schema_overlay_rejeita_campo_extra", "tipo": "mecanico"},
++    {"id": "AC-03", "descricao": "sincronizar duas vezes não muda arquivo nativo", "teste": "test_sync_duas_rodadas_zero_diff", "tipo": "mecanico"},
++    {"id": "AC-04", "descricao": "MCP do overlay aparece em claude, codex e opencode", "teste": "test_mcp_overlay_aparece_nos_tres_nativos", "tipo": "mecanico"},
++    {"id": "AC-05", "descricao": "entrada nativa fora da fonte e do manifest fica intacta", "teste": "test_sync_preserva_entrada_nao_gerenciada", "tipo": "mecanico"},
++    {"id": "AC-06", "descricao": "mesmo nome sem adotar: true não é adotado", "teste": "test_sync_nao_adota_sem_flag", "tipo": "mecanico"},
++    {"id": "AC-07", "descricao": "skill agata-arranque é ponteiro válido em Claude e Codex", "teste": "test_skill_arranque_ponteiro_claude_codex", "tipo": "mecanico"},
++    {"id": "AC-08", "descricao": "backup 600 existe antes da primeira escrita", "teste": "test_sync_backup_600_antes_de_escrever", "tipo": "mecanico"},
++    {"id": "AC-09", "descricao": "reverter devolve o estado pré-sync das entradas gerenciadas", "teste": "test_reverter_restaura_estado_pre_sync", "tipo": "mecanico"},
++    {"id": "AC-10", "descricao": "reverter recusa arquivo alterado depois do sync", "teste": "test_reverter_recusa_arquivo_alterado", "tipo": "mecanico"},
++    {"id": "AC-11", "descricao": "instalar grava só o overlay, sem tocar config/ nem o repo", "teste": "test_instalar_nao_toca_canon_nem_repo", "tipo": "mecanico"},
++    {"id": "AC-12", "descricao": "promover gera o diff e não aplica nada", "teste": "test_promover_gera_diff_sem_aplicar", "tipo": "mecanico"},
++    {"id": "AC-13", "descricao": "nenhum yml nem log contém valor de segredo", "teste": "test_sem_valor_de_segredo_em_yml_nem_log", "tipo": "mecanico"},
++    {"id": "AC-14", "descricao": "config nativa inválida aborta sem escrita", "teste": "test_sync_aborta_config_invalida_sem_escrita", "tipo": "mecanico"},
++    {"id": "AC-15", "descricao": "listar mostra categoria, CLI e origem, sem valores", "teste": "test_listar_categoria_cli_origem", "tipo": "mecanico"}
++  ],
++  "lacunas": [
++    {"id": "L1", "criterio": "skill carregada no início da sessão (H2)", "motivo": "sem SessionStart no lote 1 (D3)", "decisao": "C2"},
++    {"id": "L2", "criterio": "skill agata-arranque no OpenCode", "motivo": "pasta e formato de skill não medidos", "decisao": "medir"},
++    {"id": "L3", "criterio": "Gemini CLI", "motivo": "binário ausente; não medido", "decisao": "lote 2 (D2)"},
++    {"id": "L4", "criterio": "subagentes em Claude e Codex", "motivo": "pastas ausentes; formato não medido", "decisao": "medir"},
++    {"id": "L5", "criterio": "sync com CLI aberta na mesma config", "motivo": "concorrência não medida", "decisao": "medir"},
++    {"id": "L6", "criterio": "opencode mcp add sem prompt e remove no OpenCode", "motivo": "ajuda não lista remove; modo não interativo não medido", "decisao": "medir"}
++  ]
++}
+diff --git a/redesign/ferramentas_unificadas/brainstorm.md b/redesign/ferramentas_unificadas/brainstorm.md
+new file mode 100644
+index 00000000..20df17b6
+--- /dev/null
++++ b/redesign/ferramentas_unificadas/brainstorm.md
+@@ -0,0 +1,34 @@
++# Brainstorm: ferramentas-unificadas-26-11
++
++Exploração. Contrato em spec.md; decisões em decision.md.
++
++## Usuários
++- Humano: uma instalação aparece em todos os modelos [H3].
++- Claude Code, Codex e OpenCode: medidos (binário e config existem).
++- Gemini CLI: `~/.gemini/` residual, binário ausente. Não medido no runtime atual.
++
++## Estado que muda
++- Nativos: `~/.claude.json` (91 chaves; MCP de usuário: `github-pat`); `~/.codex/config.toml` (`mcp_servers.*`, plugins); `~/.config/opencode/opencode.jsonc` (2 linhas de comentário).
++- Ponteiros: `~/.claude/skills/` (2 entradas); `~/.codex/skills/` (vazio).
++
++## Memória comum por CLI
++- Claude Code: SessionStart em `~/.claude/settings.json` (medido). Codex: `session_start` em `~/.codex/hooks.json` (medido). OpenCode: não medido.
++- O cache continua em `redesign/router/cache_conselho.py`; muda só o ponto de entrada.
++
++## Erros e concorrência
++- Claude Code reescreve `~/.claude.json` na sessão; corrida não medida.
++- Config inválida aborta antes da primeira escrita.
++- Entrada de mesmo nome fora da fonte não é adotada sem marca.
++- O backup copia o segredo de `github-pat`: permissão 600, fora do repo.
++
++## Menor mecanismo
++- JSON, TOML ou JSONC à mão: descartado.
++- Comandos nativos de MCP: escolhido (reaproveitam o escritor de cada CLI).
++- Ponteiro para `.agents/skills/`: escolhido; nada é copiado.
++- Gerador de subagentes: só OpenCode, com formato medido (`.opencode/agent/agata-code.md`).
++
++## Migração, observabilidade, reversão, sucesso
++- Migração: dry-run, backup e escrita; nada removido na primeira rodada.
++- Observabilidade: `sincronizar.py --dry-run` e `listar.py`, só com nomes e contagens.
++- Reversão: spec.md, seção 6.
++- Sucesso: aparece nos três CLIs; rodar de novo não muda nada; reverter não apaga o que a CLI gravou depois.
+diff --git a/redesign/ferramentas_unificadas/decision.md b/redesign/ferramentas_unificadas/decision.md
+new file mode 100644
+index 00000000..c4391632
+--- /dev/null
++++ b/redesign/ferramentas_unificadas/decision.md
+@@ -0,0 +1,65 @@
++# Decisões: ferramentas-unificadas-26-11
++
++Escrito pelo especificador a partir do que o coordenador repassou. Não é resposta de entrevista do Humano. Se o Humano tiver respostas próprias, elas substituem D1–D6.
++
++## Recebido do Humano (26/11/2026, via coordenador)
++- H1. Todos os modelos, de qualquer origem, acessam as mesmas capacidades.
++- H2. Skill de arranque carregada no início da sessão.
++- H3. Tudo que um modelo pode usar fica disponível para os outros.
++- H4. Fonte única de skills, memória e cache do Conselho para todos.
++
++## Decidido pelo coordenador (o Humano pode reverter)
++- D1. Propagação mista. Overlay `~/agata-local/ferramentas.yml`, fora do repo. Canônico `config/ferramentas/*.yml`, sob P-8. Sync lê canônico ∪ overlay, com overlay sobrepondo por nome. `promover.py` gera o diff para o canônico. Motivo: H3 sem fricção; H4 com fonte única.
++- D2. Lote 1: Claude Code, Codex e OpenCode. Gemini CLI no lote 2.
++- D3. Lote 1: MCP, skills (ponteiro) e subagentes. Hooks e slash commands no lote 2.
++- D4. Skill `agata-arranque` em `.agents/skills/agata-arranque/SKILL.md`, por diff. Conteúdo: spec, seção 4.
++- D5. Compatibilidade por merge, nunca overwrite.
++- D6. Backup antes de escrever; `reverter.py <timestamp>`.
++
++## Ajustes do especificador (precisam de aprovação)
++- A1. MCP pelos comandos nativos (`claude mcp add -s user`, `codex mcp add`, `opencode mcp add`), não por edição de JSON ou TOML. Medido na ajuda. Motivo: `tomllib` só lê; os comandos preservam o que não nomeiam (D5). Não medido: `opencode mcp add` sem prompt.
++- A2. Manifest `~/.local/share/agata/ferramentas/gerenciado.json`, com o que o sync criou. Sem ele não há remoção segura (D5). Estado novo.
++- A3. Reversão pelo manifest. Arquivo inteiro só volta se o hash for o que o sync deixou. Motivo: Claude Code reescreve `~/.claude.json` na sessão.
++- A4. Backups em `~/.local/share/agata/ferramentas/backup/<ts>/`, permissão 600, e não `~/.claude.json.bak-<ts>` na raiz da home (ajusta D6). Motivo: o arquivo tem o segredo de `github-pat`.
++
++## Conflitos a decidir antes da implementação
++- C1. D1 (overlay sem assinatura) contra AGENTS.md, "Assinatura por tipo de mudança": ferramenta é "sistema", com assinatura; "na dúvida, é sistema". Padrão desta spec: `instalar.py` pede o "sim" do Humano a cada instalação. Dispensar a assinatura exige diff em AGENTS.md (P-8), decisão do Humano.
++- C2. D3 (hooks fora do lote 1) contra H2 e D4 (skill lida pelo SessionStart). Medido: SessionStart existe em `~/.claude/settings.json` e `~/.codex/hooks.json`; OpenCode não medido. Opções: incluir SessionStart de Claude e Codex no lote 1 (recomendado, por ser medido), ou aceitar a lacuna L1.
++
++## Decisões do Conselho (26/11/2026 14:15, resolvem C1/C2 e ajustes)
++
++Codex ocupado. Parecer pedido ao melhor modelo gratuito local (qwen3.5:9b via Ollama) + orquestração Claude Code. Anotado no cache_conselho em n=914, h=2de753168055.
++
++- **R1 (C1).** Overlay sem assinatura = **(a) overlay + confirmação interativa do Humano em cada install**. `instalar.py` pede "sim" no terminal antes de gravar. Dispensar a confirmação exige diff em AGENTS.md num lote futuro.
++- **R2 (C2).** SessionStart entra no lote 1 em **Claude e Codex** (medidos). OpenCode fica como L1 (lacuna documentada, lote 2).
++- **R3 (ajustes A1-A4).** Aprovados. MCP via `claude/codex/opencode mcp add`. Manifest `~/.local/share/agata/ferramentas/gerenciado.json`. Reversão por manifest com hash guard. Backups em `~/.local/share/agata/ferramentas/backup/<ts>/` permissão 600.
++- **R4 (/usage item 1).** claude-in-chrome. **A decisão original (B) não funciona:** documentação oficial (`code.claude.com/docs/en/permissions`, confirmada por teste externo Classmethod) diz que **deny sempre vence allow**; deny global bloqueia inclusive dentro do allow de projeto. Ressalva descoberta pelo `agata-dev` e confirmada pelo orquestrador via WebSearch. **Opções para o Humano decidir na assinatura:**
++  - **E (recomendada)** — `permissions.ask` em `~/.claude/settings.json` (user, global) + `permissions.allow` em `~/agata/.claude/settings.json` (projeto). Fora de agata o Claude pergunta a cada chamada; dentro de agata passa sem perguntar.
++  - **C** — desinstalar/desativar a extensão Chrome "Claude Code Browser". Elimina o custo em toda sessão; perde a capacidade.
++  - **B (original, não funciona)** — mantida só como registro. Se o Humano preferir, o par de arquivos fica como está mas sem efeito prático.
++  
++  O lote 1 entrega: (a) o script `aplicar_denylist_browser.py` (funciona para E trocando `deny` por `ask` ou para C numa variante que remova o plugin), (b) o `allow` já aplicado em `.claude/settings.json` do projeto. A edição em `~/.claude/settings.json` user-level fica **para o Humano aplicar manualmente** depois de escolher entre E/C (o script dá o comando pronto).
++- **R5 (/usage item 2).** haiku-5-5 mantém `effortLevel: xhigh`. Qualidade de revisor/arquiteto/dev medida nesta sessão justifica o custo.
++
++## Escopo do lote 2 (declarado agora, não implementado)
++
++Diretriz do Humano 26/11 14:10: "todos os modelos na Predator usando a pasta do sistema agata devem ter todos os seus arquivos no mesmo lugar refletindo alterações mútuas". Parcialmente atendida pelo lote 1 (fonte única de MCP, skills ponteiro, hook SessionStart, skill agata-arranque). Resta no lote 2:
++
++- **L2-A.** Symlinks dos CLIs para pastas canônicas: `~/.codex/skills → ~/agata/.agents/skills/` (ou flag de config apontando); OpenCode idem.
++- **L2-B.** Gerador de `~/.codex/rules/default.rules` a partir de `AGENTS.md` (fonte única de regras).
++- **L2-C.** Migração de `~/.claude/hooks/herdr-agent-state.sh` para `~/agata/scripts/hooks/` + symlink.
++- **L2-D.** Migração de `~/.codex/automations/` para `~/agata/.codex/automations/` + symlink.
++- **L2-E.** OpenCode: SessionStart equivalente (não medido), skill de arranque, mcp add sem prompt.
++- **L2-F.** Gemini CLI: binário ausente da PATH, retorna quando reinstalado.
++- **L2-G.** Subagentes neutros em `.agents/perfis/`, gerador por CLI.
++- **L2-H.** Slash commands onde a CLI suporta.
++
++## Escopo da escrita
++- Só documentos, nesta pasta. Fonte única e skill não foram criadas: entram pelo diff.
++- `REGRAS.md`, `PROTOCOLOS.md`, `MEMÓRIAS.md` e `PROJETO.md` não foram tocados.
++
++## Lacunas e riscos (declarados no lote 1, não implementados)
++Achados da revisão independente que não entram neste lote. Lote 2 trata.
++- **L7. Cobertura do AC-13 restrita.** A varredura de segredo cobre valor de env em overlay, canônico, manifest, log e saída do sync. Não varre `comando`, `motivo` e `descricao` como texto livre, nem `args` além da heurística de padrões (`token=`, `ghp_`, `sk-` etc.). Um segredo colado em um desses campos passa. Lote 2: varredura desses campos e recusa de valor colado em texto.
++- **L8. Retenção de backups.** `<base>/backup/<ts>/` guarda cópia 600 dos arquivos nativos, com valores de env. Não há limite de quantidade nem de idade, e cada rodada com escrita cria uma pasta. Lote 2: política de retenção, com o que sair indo para `~/agata-arquivo/` por mv (nunca rm).
++- **L9. Manifest sem caminho de backup e sem guarda de hash na adoção.** O manifest guarda hash e ts, mas não o caminho do backup (o registro fica em `backup/<ts>/sincronia.json`). A guarda de hash cobre entrada já gerenciada (`alterado_depois`). A adoção com `adotar: true` substitui o nativo sem conferir hash: quem lê e escreve (corrida com a CLI aberta, L5) não confere se o valor mudou entre as duas operações. Lote 2: caminho do backup no manifest e conferência de hash também na adoção.
+diff --git a/redesign/ferramentas_unificadas/spec.md b/redesign/ferramentas_unificadas/spec.md
+new file mode 100644
+index 00000000..6ce6411d
+--- /dev/null
++++ b/redesign/ferramentas_unificadas/spec.md
+@@ -0,0 +1,88 @@
++# Spec: ferramentas-unificadas-26-11
++
++Contrato. Decisões: [D1]–[D6] (coordenador, a partir de H1–H4), [A1]–[A4] (ajustes do especificador), [C1]–[C2] (conflitos). Tudo em decision.md. Nada implementado. Critérios em acceptance.json.
++
++## 1. Jornadas
++- J1 Instalar: `instalar.py mcp <nome> --params k=v` grava o overlay e roda o sync; `listar.py` mostra nas três CLIs. Sem o "sim" do Humano, nada é gravado [C1].
++- J2 Repetir: sync sem mudança não altera arquivo nativo.
++- J3 Primeira sessão: SessionStart lê `agata-arranque` [H2, C2].
++- J4 Promover: `promover.py` gera `propostas/<nome>.diff`; o Humano assina.
++- J5 Reverter: seção 6.
++
++## 2. Contrato
++- Fonte única (P-8): `config/ferramentas/{mcp,skills,agentes}.yml`. Hooks e comandos: lote 2 [D3]. YAML, pois `yaml` importa aqui (medido).
++- Overlay: `~/agata-local/ferramentas.yml`, mesmo schema; sobrepõe por nome [D1].
++- MCP: `nome`, `transporte` (stdio ou http), `comando` e `args` ou `url`, `env` só como nomes (`${VAR}`), `clis`. Valor de segredo nunca entra no yml.
++- Skill: `nome`, `origem` (em `.agents/skills/`), `clis`. Agente: `nome`, `origem`, `clis`, `adotar` (padrão false).
++- Comandos (Python, stdlib e PyYAML):
++  - `instalar.py <tipo> <nome> [--params k=v]`, tipo `mcp|skill|agente`. Grava o overlay e chama o sync. Código 2 se o schema falha; 3 sem confirmação do Humano.
++  - `sincronizar.py [--dry-run] [--cli C]`: canônico ∪ overlay vira MCP por comando nativo, skill por ponteiro, agente por arquivo. Código 2 se uma config nativa não lê; nada é escrito.
++  - `listar.py [--tipo T] [--cli C]`: só leitura; nome, tipo, CLI, origem, estado; sem valores.
++  - `promover.py <nome>`: gera o diff; não aplica.
++  - `reverter.py <ts> | --listar | --dry-run`: seção 6.
++- Nativos (escrita medida na ajuda; efeito não medido):
++  - Claude Code: `~/.claude.json` por `claude mcp add -s user`. Skill: ponteiro `~/.claude/skills/agata-arranque` para `~/agata/.agents/skills/agata-arranque` (checkout principal, não a worktree).
++  - Codex: `~/.codex/config.toml` por `codex mcp add`. Skill em `~/.codex/skills/agata-arranque`; formato não medido.
++  - OpenCode: `~/.config/opencode/opencode.jsonc` por `opencode mcp add` (sem prompt: não medido). Skill: L2. Agentes: `.opencode/agent/*.md`, formato medido.
++- Manifest [A2]: `~/.local/share/agata/ferramentas/gerenciado.json`, com CLI, tipo, nome, hash pós-sync e caminho do backup. Sem valores.
++- Memória comum [H4]: o cache continua em `redesign/router/cache_conselho.py`; a skill aponta para o comando.
++
++## 3. Critérios
++`acceptance.json`: AC-01 a AC-15, cada um com o nome do teste que o prova. Lacunas L1–L6, sem teste, marcadas.
++
++## 4. Desenho e alternativas
++Menor mecanismo: MCP pelos comandos nativos das três CLIs, que já escrevem e removem entradas [A1]. Skill por ponteiro para `.agents/skills/`; nada copiado [H4]. Subagentes: gerador só para OpenCode, formato medido [D3]; Claude e Codex: L4.
++
++Escolhas:
++- Overlay mais canônico [D1]: instalar não vira proposta; o canônico recebe só o que `promover.py` gera.
++- Merge pelo manifest [D5, A2]: o sync mexe só nos nomes que declara ou que estão no manifest.
++- Adoção [D5]: mesmo nome fora do manifest não é adotado sem `adotar: true`. Medido: `github-pat` está nos nativos de Claude e Codex e em nenhuma fonte; fica intacto.
++- Config inválida [D5]: aborta antes da primeira escrita.
++
++Descartadas:
++- JSON, TOML ou JSONC à mão: `tomllib` só lê (medido); um dump perde os comentários do `opencode.jsonc`; `~/.claude.json` muda na sessão. Substituída por [A1].
++- Restaurar o backup inteiro (D6 literal): desfaz o que a CLI gravou depois do sync. Substituída por [A3].
++- Tudo no canônico, sem overlay: cada ferramenta nova virava proposta assinada, contra [H3] e [D1].
++- Cópia da skill em cada CLI: as cópias divergem; [H4] pede fonte única.
++
++Skill `agata-arranque` [D4], conteúdo:
++- Cabeçalho da Regra 1 com hora medida por `date`; link a `PROTOCOLOS.md`.
++- Voz `pt_BR-agata-last` (piper-tts local), por `scripts/agata_falar.py`; nenhum modelo usa outra voz.
++- Memória: `cache_conselho.py ler --n 20` ao começar; `anotar` com `--tipo`.
++- Skills: `.agents/skills/INDICE.md`; entrada `agata-fluxo`.
++- P-8: worktree em `.claude/worktrees/<nome>` a partir de origin/main; `.diff` e registro; `scripts/ci_sdd_local.sh`; só o Humano assina.
++- `agata-mapear-humano` ao começar; link a `AGENTS.md`.
++- Problemas recorrentes (de `agata-fluxo`, seção 1): cabeçalho sem hora medida; narrar o processo; ação externa sem aviso; mexer em pasta alheia; leitura declarada de forma vaga; citação inventada; sudo, `aprovar.sh` ou segredo; afirmar sem medir.
++
++## 5. Implementação e testes
++Tocados (tudo por diff P-8):
++- `config/ferramentas/{mcp,skills,agentes}.yml` (novos).
++- `scripts/ferramentas/{instalar,sincronizar,listar,promover,reverter,schema}.py` e `test_ferramentas.py` (novos).
++- `.agents/skills/agata-arranque/SKILL.md` (novo); uma linha em `.agents/skills/INDICE.md`.
++- `AGENTS.md` e `CLAUDE.md`: só a citação da skill.
++- `propostas/ferramentas-unificadas-26-11.diff` e o registro.
++
++Fora do repo: `~/agata-local/ferramentas.yml`, `~/.local/share/agata/ferramentas/` e os nativos da seção 2.
++Fora de escopo: `REGRAS.md`, `PROTOCOLOS.md`, `MEMÓRIAS.md`, `PROJETO.md` (outro lote).
++Testes: unittest com HOME temporário; não tocam o ambiente real.
++
++## 6. Migração e reversão
++Migração (primeira rodada): dry-run, sem remover entrada não gerenciada; backup 600 em `~/.local/share/agata/ferramentas/backup/<ts>/` [A4]; escrita nativa e manifest com hash; `listar.py` confirma `github-pat` intacto.
++
++Reversão, passo a passo:
++1. `reverter.py --listar`; depois `reverter.py <ts> --dry-run`.
++2. Claude e Codex: `claude mcp remove <nome>` e `codex mcp remove <nome>` para as entradas do manifest. Entrada ausente é registrada, sem falhar.
++3. OpenCode (sem `remove` medido): se o hash do `opencode.jsonc` bate com o do manifest, restaura do backup; senão, para e pede ao Humano [A3].
++4. Ponteiros de skill e overlay: `mv` para `~/agata-arquivo/ferramentas-<ts>/`. Nunca `rm` [agata-fluxo, seção 0].
++5. `listar.py` confere que só ficou o que existia antes.
++
++Não quebra o que funciona: nada sai sem estar no manifest; nada volta se a CLI mudou o arquivo depois do sync.
++
++## 7. Riscos
++- C1 e C2: decisão antes da implementação.
++- R1 corrida com CLI aberta (L5): sync usa comando nativo e confere hash.
++- R2 segredo: `github-pat` tem valores que esta análise não leu. Backup 600, fora do repo; `listar.py` só mostra nomes.
++- R3 OpenCode: `remove` não medido; JSONC com comentários (L6).
++- R4 Gemini CLI: lote 2 [D2].
++- R5 Subagentes Claude e Codex: pastas ausentes; formato não medido (L4).
++- Dependências: um diff P-8 por parte; `scripts/ci_sdd_local.sh`; PyYAML (medido). Nenhuma dependência nova.
+diff --git a/scripts/ci_sdd_local.sh b/scripts/ci_sdd_local.sh
+index aaac785e..d4c0b50b 100755
+--- a/scripts/ci_sdd_local.sh
++++ b/scripts/ci_sdd_local.sh
+@@ -73,7 +73,7 @@ PATH_ORIGINAL="$PATH"
+ export PATH="$(dirname "$PYTEST"):$PATH"
+ 
+ _ci_passos() {
+-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
++passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py tests/ferramentas_unificadas redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
+ passo "gate de sincronia das specs (selftest)" python3 -I scripts/gate_spec_sync.py --selftest
+ passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" python3 -I scripts/gate_spec_sync.py
+ passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow
+diff --git a/scripts/ferramentas/estado.py b/scripts/ferramentas/estado.py
+new file mode 100644
+index 00000000..361ad37b
+--- /dev/null
++++ b/scripts/ferramentas/estado.py
+@@ -0,0 +1,154 @@
++#!/usr/bin/env python3
++"""Estado do sync: caminhos (Contexto), manifest, backups 600 e log sem valores (lote ferramentas-unificadas-26-11).
++
++Manifest: <base>/gerenciado.json (A2), só hashes. Backup: <base>/backup/<ts>/ (A4: pasta 700, arquivos 600).
++Log: <base>/log.jsonl (600), só nomes e códigos de ação. O único lugar com valor de env é a cópia 600 dos
++arquivos nativos e o campo `antes` do registro da execução, ambos dentro do backup.
++"""
++from __future__ import annotations
++
++import hashlib
++import stat
++import json
++import os
++import subprocess
++from dataclasses import dataclass
++from datetime import datetime
++from pathlib import Path
++from typing import Callable
++
++
++class ErroEstado(RuntimeError):
++    """Manifest, registro ou backup ilegível."""
++
++
++class ErroComando(RuntimeError):
++    """Comando nativo não rodou (ausente ou sem resposta no prazo). A mensagem nunca traz argv: o argv pode levar
++    valor de env (K=valor) e não pode ir para o stderr nem para o log."""
++
++
++def executar_cli(argv: list[str]):
++    """Roda um comando nativo sem stdin (um prompt não pode travar o sync). Exceções saem sem argv."""
++    try:
++        return subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120,
++                              check=False)
++    except subprocess.TimeoutExpired:
++        raise ErroComando("comando nativo sem resposta no prazo") from None
++    except OSError:
++        raise ErroComando("binário ausente ou não executável") from None
++
++
++def agora_ts() -> str:
++    return datetime.now().strftime("%Y%m%d-%H%M%S-%f")
++
++
++@dataclass
++class Contexto:
++    home: Path
++    raiz: Path  # repositório que contém config/ferramentas/
++    checkout: Path  # checkout principal: destino dos ponteiros de skill
++    overlay: Path  # ~/agata-local/ferramentas.yml
++    base: Path  # ~/.local/share/agata/ferramentas
++    claude_json: Path
++    codex_dir: Path
++    opencode_jsonc: Path
++    claude_skills: Path
++    codex_skills: Path
++    runner: Callable | None = None
++    agora: Callable[[], str] | None = None
++
++    def __post_init__(self) -> None:
++        if self.runner is None:
++            self.runner = executar_cli
++        if self.agora is None:
++            self.agora = agora_ts
++
++
++def contexto_padrao(home: Path | None = None) -> Contexto:
++    h = home or Path.home()
++    codex = Path(os.environ["CODEX_HOME"]) if os.environ.get("CODEX_HOME") else h / ".codex"
++    xdg = Path(os.environ["XDG_CONFIG_HOME"]) if os.environ.get("XDG_CONFIG_HOME") else h / ".config"
++    return Contexto(
++        home=h,
++        raiz=Path(__file__).resolve().parents[2],
++        checkout=h / "agata",
++        overlay=h / "agata-local" / "ferramentas.yml",
++        base=h / ".local" / "share" / "agata" / "ferramentas",
++        claude_json=h / ".claude.json",
++        codex_dir=codex,
++        opencode_jsonc=xdg / "opencode" / "opencode.jsonc",
++        claude_skills=h / ".claude" / "skills",
++        codex_skills=codex / "skills",
++    )
++
++
++MANIFESTO_VAZIO = {"versao": 1, "entradas": {}, "ponteiros": {}, "arquivos": {}}
++
++
++def ler_manifest(ctx: Contexto) -> dict:
++    p = ctx.base / "gerenciado.json"
++    if not p.exists():
++        return json.loads(json.dumps(MANIFESTO_VAZIO))
++    try:
++        dados = json.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        raise ErroEstado(f"manifest ilegível: {p}") from None
++    if not isinstance(dados, dict):
++        raise ErroEstado(f"manifest com formato inesperado: {p}")
++    for chave in ("entradas", "ponteiros", "arquivos"):
++        dados.setdefault(chave, {})
++    return dados
++
++
++def gravar_bytes(caminho: Path, dados: bytes, modo: int | None = None) -> None:
++    """Escrita atômica (tmp no mesmo diretório, depois os.replace). Modo: o do arquivo que existe, ou 600."""
++    caminho.parent.mkdir(parents=True, exist_ok=True)
++    if modo is None:
++        modo = stat.S_IMODE(caminho.stat().st_mode) if caminho.exists() else 0o600
++    tmp = caminho.with_name(f".{caminho.name}.{os.getpid()}.tmp")
++    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
++    with os.fdopen(fd, "wb") as f:
++        f.write(dados)
++    os.chmod(tmp, modo)
++    os.replace(tmp, caminho)
++
++
++def gravar_json(caminho: Path, obj) -> None:
++    gravar_bytes(caminho, (json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
++
++
++def criar_backup(ctx: Contexto, ts: str) -> Path:
++    """Cria <base>/backup/<ts>/ com modo 700. Se já existe, o nome ganha sufixo: quem chama usa o nome devolvido."""
++    raiz = ctx.base / "backup"
++    raiz.mkdir(parents=True, exist_ok=True)
++    os.chmod(ctx.base, 0o700)
++    os.chmod(raiz, 0o700)
++    d, n = raiz / ts, 1
++    while d.exists():
++        d = raiz / f"{ts}-{n}"
++        n += 1
++    d.mkdir(mode=0o700)
++    os.chmod(d, 0o700)
++    return d
++
++
++def area_arquivo(ctx: Contexto, ts: str) -> Path:
++    """Destino de mv para o que sai do lugar (nunca rm): ~/agata-arquivo/ferramentas-<ts>/."""
++    d = ctx.home / "agata-arquivo" / f"ferramentas-{ts}"
++    d.mkdir(parents=True, exist_ok=True)
++    return d
++
++
++def registrar(ctx: Contexto, evento: dict) -> None:
++    """Uma linha por ação, só com nomes e códigos. Quem chama não passa valor de segredo."""
++    ctx.base.mkdir(parents=True, exist_ok=True)
++    linha = json.dumps({"em": datetime.now().isoformat(timespec="seconds"), **evento}, ensure_ascii=False, sort_keys=True)
++    fd = os.open(ctx.base / "log.jsonl", os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
++    with os.fdopen(fd, "a", encoding="utf-8") as f:
++        f.write(linha + "\n")
++
++
++def hash_arquivo(p: Path) -> str | None:
++    if not p.is_file():
++        return None
++    return hashlib.sha256(p.read_bytes()).hexdigest()
+diff --git a/scripts/ferramentas/instalar.py b/scripts/ferramentas/instalar.py
+new file mode 100644
+index 00000000..b58f0ada
+--- /dev/null
++++ b/scripts/ferramentas/instalar.py
+@@ -0,0 +1,119 @@
++#!/usr/bin/env python3
++"""Instala uma ferramenta no overlay do Humano e roda o sync (lote ferramentas-unificadas-26-11; R1, AC-11).
++
++Uso: instalar.py <mcp|skill|agente> <nome> [--params k=v ...]
++  stdio:  --params transporte=stdio --params comando=npx --params args=-y --params args=<pacote> \
++          --params env=NOME_DA_VARIAVEL --params clis=claude,codex,opencode
++  http:   --params transporte=http --params url=https://... --params clis=claude,codex
++  skill:  --params origem=.agents/skills/<nome> --params clis=claude,codex
++  agente: --params origem=.claude/agents/<nome>.md --params clis=claude
++
++Grava SÓ o overlay (~/agata-local/ferramentas.yml) e chama o sync. Nunca config/ nem o repositório.
++Pede "sim" no terminal antes de gravar (R1). Sem "sim": nada é gravado.
++Códigos: 0 ok; 2 schema inválido ou sync com erro; 3 sem "sim".
++"""
++from __future__ import annotations
++
++import argparse
++import os
++import sys
++from pathlib import Path
++from urllib.parse import urlsplit
++
++import yaml
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++import schema as S  # noqa: E402
++import sincronizar as SYNC  # noqa: E402
++
++TIPO_FONTE = {"mcp": "mcp", "skill": "skills", "agente": "agentes"}
++LISTAS_ACUMULADAS = {"clis", "env"}  # aceitam vírgula e repetição
++LISTA_REPETIDA = {"args"}  # cada --params args=... é um argumento
++BOOLEANOS = {"adotar", "gerenciado"}
++
++
++def montar(nome: str, pares: list[str]) -> dict:
++    dados: dict = {"nome": nome}
++    for par in pares:
++        if "=" not in par:
++            raise S.ErroSchema("--params tem de ser chave=valor")
++        chave, valor = par.split("=", 1)
++        if chave in LISTAS_ACUMULADAS:
++            dados.setdefault(chave, []).extend(x for x in valor.split(",") if x)
++        elif chave in LISTA_REPETIDA:
++            dados.setdefault(chave, []).append(valor)
++        elif chave in BOOLEANOS:
++            if valor not in ("true", "false"):
++                raise S.ErroSchema(f"{chave} é true ou false")
++            dados[chave] = valor == "true"
++        else:
++            dados[chave] = valor
++    return dados
++
++
++def _resumo(tipo_fonte: str, e: dict) -> str:
++    linhas = [f"Vou gravar no overlay ({tipo_fonte}): {e['nome']}", f"  clis: {', '.join(e['clis'])}"]
++    if e.get("transporte"):
++        linhas.append(f"  transporte: {e['transporte']}")
++    if e.get("comando"):
++        linhas.append(f"  comando: {e['comando']} ({len(e['args'])} argumento(s))")
++    if e.get("url"):
++        linhas.append(f"  host: {urlsplit(e['url']).hostname}")
++    if e.get("env"):
++        linhas.append("  variáveis (o valor vem do ambiente, não do arquivo): " + ", ".join(e["env"]))
++    if e.get("origem"):
++        linhas.append(f"  origem: {e['origem']}")
++    return "\n".join(linhas)
++
++
++def instalar(ctx: E.Contexto, tipo: str, nome: str, pares: list[str], pedir=input, imprimir=print) -> int:
++    tipo_fonte = TIPO_FONTE[tipo]
++    try:
++        normal = S.validar_entrada(tipo_fonte, montar(nome, pares), f"{tipo} {nome}")
++        ov = S.carregar_overlay(ctx.overlay)
++    except (S.ErroSchema, E.ErroEstado) as e:
++        imprimir(f"ERRO: {e}")
++        return 2
++    ov[tipo_fonte][nome] = normal
++    imprimir(_resumo(tipo_fonte, normal))
++    try:
++        resposta = pedir("Digite sim para gravar no overlay e sincronizar: ")
++    except EOFError:
++        resposta = ""
++    if resposta.strip().lower() != "sim":
++        imprimir("nada gravado (sem \"sim\")")
++        return 3
++    if ctx.overlay.exists():
++        E.gravar_bytes(ctx.base / "backup-overlay" / ctx.agora() / "ferramentas.yml", ctx.overlay.read_bytes())
++    ctx.overlay.parent.mkdir(parents=True, exist_ok=True)
++    os.chmod(ctx.overlay.parent, 0o700)
++    texto = yaml.safe_dump(S.serializar_overlay(ov), sort_keys=False, allow_unicode=True)
++    E.gravar_bytes(ctx.overlay, texto.encode("utf-8"))
++    imprimir(f"overlay gravado: {ctx.overlay}")
++    return SYNC.sincronizar(ctx, None, False, imprimir)
++
++
++def _terminal() -> bool:
++    try:
++        return sys.stdin is not None and sys.stdin.isatty()
++    except (ValueError, OSError):
++        return False
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Instala uma ferramenta no overlay e sincroniza.")
++    p.add_argument("tipo", choices=list(TIPO_FONTE))
++    p.add_argument("nome")
++    p.add_argument("--params", action="append", default=[], metavar="k=v")
++    a = p.parse_args(argv)
++    # Gate (Alto 1, revisão independente): o "sim" tem de vir do Humano no terminal. Entrada pipeada ou
++    # automatizada não passa, antes de qualquer leitura ou gravação.
++    if not _terminal():
++        print("ERRO: instalação exige terminal interativo com o Humano; entrada automatizada foi recusada, nada gravado")
++        return 3
++    return instalar(E.contexto_padrao(), a.tipo, a.nome, a.params)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/ferramentas/instalar_hook_arranque.py b/scripts/ferramentas/instalar_hook_arranque.py
+new file mode 100644
+index 00000000..e986acad
+--- /dev/null
++++ b/scripts/ferramentas/instalar_hook_arranque.py
+@@ -0,0 +1,107 @@
++#!/usr/bin/env python3
++"""Gera o hook de início de sessão que lê a skill agata-arranque (R2, lote ferramentas-unificadas-26-11).
++
++Acrescenta um grupo SessionStart em ~/.claude/settings.json e em ~/.codex/hooks.json. Sem --aplicar, só mostra
++o que faria. Com --aplicar: copia o original para <base>/backup/<ts>/ (pasta 700, arquivo 600) e grava, mantendo
++o modo do arquivo. Idempotente: se o grupo já existe (marca agata-arranque/SKILL.md), não duplica.
++Não roda pelo sync: o Humano chama à mão. O repositório só traz este script, nunca os JSONs do home.
++Uso: python3 scripts/ferramentas/instalar_hook_arranque.py [--aplicar] [--home DIR]
++Códigos: 0 ok ou nada a fazer; 2 arquivo existente que não lê como JSON.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++
++MARCA = "agata-arranque/SKILL.md"
++COMANDO = {
++    "claude": 'cat "$HOME/.claude/skills/agata-arranque/SKILL.md" 2>/dev/null || true',
++    "codex": 'cat "$HOME/.codex/skills/agata-arranque/SKILL.md" 2>/dev/null || true',
++}
++# Formato medido: ~/.claude/settings.json tem hooks.SessionStart[] com matcher e hooks; ~/.codex/hooks.json tem o
++# mesmo esqueleto, sem matcher. Ambos com entradas {type, command, timeout}.
++GRUPO = {
++    "claude": {"matcher": "startup", "hooks": [{"type": "command", "command": COMANDO["claude"], "timeout": 10}]},
++    "codex": {"hooks": [{"type": "command", "command": COMANDO["codex"], "timeout": 10}]},
++}
++ALVOS = {"claude": ".claude/settings.json", "codex": ".codex/hooks.json"}
++
++
++class ErroHook(ValueError):
++    """Arquivo existente que não lê ou tem formato inesperado. Nada é gravado."""
++
++
++def ler(p: Path) -> dict:
++    if not p.exists():
++        return {}
++    try:
++        dados = json.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        raise ErroHook(f"{p.name} não lê como JSON") from None
++    if not isinstance(dados, dict):
++        raise ErroHook(f"{p.name}: o topo não é um mapa")
++    return dados
++
++
++def ja_presente(dados: dict) -> bool:
++    grupos = (dados.get("hooks") or {}).get("SessionStart") or []
++    return any(MARCA in h.get("command", "") for g in grupos for h in g.get("hooks", []) if isinstance(h, dict))
++
++
++def acrescentar(dados: dict, grupo: dict) -> dict:
++    hooks = dados.setdefault("hooks", {})
++    if not isinstance(hooks, dict):
++        raise ErroHook("hooks não é um mapa")
++    lista = hooks.setdefault("SessionStart", [])
++    if not isinstance(lista, list):
++        raise ErroHook("hooks.SessionStart não é lista")
++    lista.append(grupo)
++    return dados
++
++
++def executar(home: Path, aplicar: bool, imprimir=print) -> int:
++    ctx = E.contexto_padrao(home)
++    pendentes = []
++    for cli, rel in ALVOS.items():
++        alvo = home / rel
++        try:
++            dados = ler(alvo)
++        except ErroHook as e:
++            imprimir(f"ERRO: {e}")
++            return 2
++        if ja_presente(dados):
++            imprimir(f"{cli}: grupo agata-arranque já presente em {rel}; nada a fazer")
++            continue
++        pendentes.append((cli, alvo, acrescentar(dados, GRUPO[cli])))
++        imprimir(f"{cli}: acrescentaria SessionStart agata-arranque em {rel}")
++    if not pendentes:
++        return 0
++    if not aplicar:
++        imprimir("simulação: nada gravado (rode com --aplicar)")
++        return 0
++    backup = E.criar_backup(ctx, ctx.agora())
++    for cli, alvo, novo in pendentes:
++        if alvo.exists():
++            E.gravar_bytes(backup / f"{cli}.json", alvo.read_bytes())
++        E.gravar_bytes(alvo, (json.dumps(novo, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
++        imprimir(f"{cli}: gravado {ALVOS[cli]}")
++    imprimir(f"cópia do original em {backup}")
++    return 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Acrescenta o hook SessionStart que lê agata-arranque.")
++    p.add_argument("--aplicar", action="store_true", help="grava (sem isso, só simula)")
++    p.add_argument("--home", type=Path, default=None, help="diretório home (padrão: o seu)")
++    a = p.parse_args(argv)
++    home = a.home or Path.home()
++    return executar(home, a.aplicar)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/ferramentas/listar.py b/scripts/ferramentas/listar.py
+new file mode 100644
+index 00000000..c663a486
+--- /dev/null
++++ b/scripts/ferramentas/listar.py
+@@ -0,0 +1,111 @@
++#!/usr/bin/env python3
++"""Lista as ferramentas por categoria, CLI e origem (lote ferramentas-unificadas-26-11; AC-15).
++
++Só leitura. Mostra nomes e estados; nunca valores (env, cabeçalhos, argumentos).
++Origem: canonico (config/ferramentas/), overlay (~/agata-local/) ou nativo (existe na CLI e não na fonte).
++Uso: listar.py [--tipo mcp|skill|agente] [--cli claude|codex|opencode]
++Código: 0 ok; 2 fonte ou config nativa ilegível.
++"""
++from __future__ import annotations
++
++import argparse
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++import nativos as N  # noqa: E402
++import schema as S  # noqa: E402
++import sincronizar as SYNC  # noqa: E402
++
++CATEGORIA_CLI = {"mcp": "mcp", "skill": "skills", "agente": "agentes"}
++
++
++def linhas(ctx: E.Contexto, tipo: str | None = None, cli: str | None = None) -> tuple[list[tuple], str | None]:
++    fonte = S.carregar_fontes(ctx.raiz, ctx.overlay)
++    manifesto = E.ler_manifest(ctx)
++    nativos = {c: N.ler_mcp(c, ctx) for c in S.CLIS}
++    pastas = {"claude": ctx.claude_skills, "codex": ctx.codex_skills}
++    saida: list[tuple] = []
++    mostra = lambda t: tipo is None or tipo == t  # noqa: E731
++    cli_ok = lambda c: cli is None or cli == c  # noqa: E731
++
++    if mostra("mcp"):
++        conhecidos = set(fonte.entradas["mcp"])
++        for nome, e in fonte.entradas["mcp"].items():
++            origem = fonte.origem["mcp"][nome]
++            for c in e["clis"]:
++                if not cli_ok(c):
++                    continue
++                if not e["gerenciado"]:
++                    estado = f"fora do sync: {e['motivo']}"
++                elif nome not in nativos[c]:
++                    estado = "ausente no nativo (sync adiciona)"
++                else:
++                    reg = manifesto["entradas"].get(f"{c}|mcp|{nome}")
++                    if reg is None:
++                        estado = "no nativo, sem adotar (adotar: true toma)"
++                    elif reg["hash"] == N.hash_entrada(nativos[c][nome]):
++                        estado = "gerenciado"
++                    else:
++                        estado = "alterado depois do sync"
++                saida.append(("mcp", nome, c, origem, estado))
++        for c in S.CLIS:
++            if not cli_ok(c):
++                continue
++            for nome in nativos[c]:
++                if nome not in conhecidos:
++                    saida.append(("mcp", nome, c, "nativo", "fora da fonte; intacto"))
++
++    if mostra("skill"):
++        for nome, e in fonte.entradas["skills"].items():
++            origem = fonte.origem["skills"][nome]
++            for c in e["clis"]:
++                if not cli_ok(c):
++                    continue
++                if c not in pastas:
++                    estado = "L2: não medido nesta CLI"
++                elif not e["gerenciado"]:
++                    estado = f"fora do sync: {e['motivo']}"
++                else:
++                    link = pastas[c] / nome
++                    alvo = (ctx.checkout / e["origem"]).resolve()
++                    if link.is_symlink():
++                        estado = "ponteiro ok" if SYNC.destino_ponteiro(link) == alvo else "ponteiro aponta para outro lugar"
++                    elif link.exists():
++                        estado = "existe e não é ponteiro"
++                    else:
++                        estado = "sem ponteiro (sync cria)"
++                saida.append(("skill", nome, c, origem, estado))
++
++    if mostra("agente"):
++        for nome, e in fonte.entradas["agentes"].items():
++            origem = fonte.origem["agentes"][nome]
++            for c in e["clis"]:
++                if cli_ok(c):
++                    estado = f"fora do sync: {e['motivo']}" if not e["gerenciado"] else "L4: destino nativo não medido"
++                    saida.append(("agente", nome, c, origem, estado))
++    return saida, fonte.indice
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Lista ferramentas por categoria, CLI e origem (sem valores).")
++    p.add_argument("--tipo", choices=["mcp", "skill", "agente"])
++    p.add_argument("--cli", choices=S.CLIS)
++    a = p.parse_args(argv)
++    try:
++        linhas_, indice = linhas(E.contexto_padrao(), a.tipo, a.cli)
++    except (S.ErroSchema, E.ErroEstado, N.ErroConfig) as e:
++        print(f"ERRO: {e}")
++        return 2
++    print(f"{'categoria':<10}{'nome':<26}{'cli':<10}{'origem':<11}estado")
++    for cat, nome, c, origem, estado in linhas_:
++        print(f"{cat:<10}{nome:<26}{c:<10}{origem:<11}{estado}")
++    if indice:
++        print(f"índice de skills: {indice}")
++    print(f"{len(linhas_)} linha(s)")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/ferramentas/nativos.py b/scripts/ferramentas/nativos.py
+new file mode 100644
+index 00000000..d8ee8f2c
+--- /dev/null
++++ b/scripts/ferramentas/nativos.py
+@@ -0,0 +1,213 @@
++#!/usr/bin/env python3
++"""Leitura e escrita nativa das três CLIs (lote ferramentas-unificadas-26-11).
++
++Escrita de MCP só pelos comandos nativos (A1), que preservam o que não nomeiam (medido: o opencode
++mantém comentários e chaves; o claude recusa nome existente, por isso o sync remove antes):
++  claude:   claude mcp add -s user ... / claude mcp remove -s user <nome>   (~/.claude.json, mcpServers)
++  codex:    codex mcp add ... / codex mcp remove <nome>                    (config.toml, mcp_servers)
++  opencode: opencode mcp add ... (sobrescreve; sem remove: L6)             (opencode.jsonc, mcp)
++Leitura só para comparar e hashear. O hash guarda SHA-256 de cada valor de env, nunca o valor.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import tomllib
++from pathlib import Path
++
++
++class ErroConfig(ValueError):
++    """Config nativa não lê. O sync aborta antes da primeira escrita (AC-14)."""
++
++
++def _h(texto: str) -> str:
++    return hashlib.sha256(texto.encode("utf-8")).hexdigest()
++
++
++def sem_comentarios_jsonc(texto: str) -> str:
++    """Remove // e /* */ fora de strings e vírgula final antes de } ou ]."""
++    saida: list[str] = []
++    i, n, em_texto = 0, len(texto), False
++    while i < n:
++        c = texto[i]
++        if em_texto:
++            saida.append(c)
++            if c == "\\" and i + 1 < n:
++                saida.append(texto[i + 1])
++                i += 2
++                continue
++            if c == '"':
++                em_texto = False
++            i += 1
++            continue
++        if c == '"':
++            em_texto = True
++            saida.append(c)
++            i += 1
++            continue
++        if c == "/" and i + 1 < n and texto[i + 1] == "/":
++            fim = texto.find("\n", i)
++            i = n if fim < 0 else fim
++            continue
++        if c == "/" and i + 1 < n and texto[i + 1] == "*":
++            fim = texto.find("*/", i + 2)
++            if fim < 0:
++                raise ErroConfig("jsonc: comentário de bloco sem fechamento")
++            i = fim + 2
++            continue
++        if c == ",":
++            j = i + 1
++            while j < n and texto[j] in " \t\r\n":
++                j += 1
++            if j < n and texto[j] in "}]":
++                i += 1
++                continue
++        saida.append(c)
++        i += 1
++    return "".join(saida)
++
++
++def _json(caminho: Path, jsonc: bool = False) -> dict:
++    try:
++        texto = caminho.read_text(encoding="utf-8")
++        if jsonc:
++            texto = sem_comentarios_jsonc(texto)
++        dados = json.loads(texto) if texto.strip() else {}
++    except (OSError, ValueError):
++        raise ErroConfig(f"{caminho.name} não lê como {'JSONC' if jsonc else 'JSON'}") from None
++    if not isinstance(dados, dict):
++        raise ErroConfig(f"{caminho.name}: o topo não é um mapa")
++    return dados
++
++
++def _entrada(transporte: str, comando, args, url, env) -> dict:
++    return {
++        "transporte": transporte,
++        "comando": comando,
++        "args": [str(a) for a in (args or [])],
++        "url": url,
++        "env": {str(k): str(v) for k, v in (env or {}).items()},
++    }
++
++
++def _mapa(bruto, onde: str) -> dict:
++    if bruto is None:
++        return {}
++    if not isinstance(bruto, dict):
++        raise ErroConfig(f"{onde}: não é um mapa")
++    return bruto
++
++
++def _ler_claude(p: Path) -> dict:
++    if not p.exists():
++        return {}
++    servidores = _mapa(_json(p).get("mcpServers"), "claude: mcpServers")
++    saida = {}
++    for nome, s in servidores.items():
++        if not isinstance(s, dict):
++            raise ErroConfig("claude: uma entrada de mcpServers não é mapa")
++        tipo = s.get("type", "stdio")
++        if tipo == "stdio":
++            saida[nome] = _entrada("stdio", s.get("command"), s.get("args"), None, s.get("env"))
++        else:
++            saida[nome] = _entrada(str(tipo), None, None, s.get("url"), None)
++    return saida
++
++
++def _ler_codex(p: Path) -> dict:
++    if not p.exists():
++        return {}
++    try:
++        dados = tomllib.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        raise ErroConfig("codex: config.toml não lê como TOML") from None
++    servidores = _mapa(dados.get("mcp_servers"), "codex: mcp_servers")
++    saida = {}
++    for nome, s in servidores.items():
++        if not isinstance(s, dict):
++            raise ErroConfig("codex: uma entrada de mcp_servers não é tabela")
++        if "url" in s:
++            saida[nome] = _entrada("http", None, None, s.get("url"), None)
++        else:
++            saida[nome] = _entrada("stdio", s.get("command"), s.get("args"), None, s.get("env"))
++    return saida
++
++
++def _ler_opencode(p: Path) -> dict:
++    if not p.exists():
++        return {}
++    servidores = _mapa(_json(p, jsonc=True).get("mcp"), "opencode: mcp")
++    saida = {}
++    for nome, s in servidores.items():
++        if not isinstance(s, dict):
++            raise ErroConfig("opencode: uma entrada de mcp não é mapa")
++        if s.get("type") == "remote":
++            saida[nome] = _entrada("http", None, None, s.get("url"), None)
++        else:
++            cmd = s.get("command") or []
++            if not isinstance(cmd, list):
++                raise ErroConfig("opencode: command não é lista")
++            saida[nome] = _entrada(
++                "stdio", cmd[0] if cmd else None, cmd[1:], None, s.get("environment")
++            )
++    return saida
++
++
++def caminho_nativo(cli: str, ctx) -> Path:
++    if cli == "claude":
++        return ctx.claude_json
++    if cli == "codex":
++        return ctx.codex_dir / "config.toml"
++    if cli == "opencode":
++        return ctx.opencode_jsonc
++    raise ErroConfig(f"CLI desconhecida: {cli}")
++
++
++def ler_mcp(cli: str, ctx) -> dict:
++    """nome -> {transporte, comando, args, url, env}. O env traz valores: o chamador não os imprime."""
++    if cli == "claude":
++        return _ler_claude(ctx.claude_json)
++    if cli == "codex":
++        return _ler_codex(ctx.codex_dir / "config.toml")
++    if cli == "opencode":
++        return _ler_opencode(ctx.opencode_jsonc)
++    raise ErroConfig(f"CLI desconhecida: {cli}")
++
++
++def hash_entrada(e: dict) -> str:
++    """Compara só os campos que o sync controla. Valor de env entra como SHA-256 dele."""
++    base = {
++        "transporte": e.get("transporte"),
++        "comando": e.get("comando"),
++        "args": list(e.get("args") or []),
++        "url": e.get("url"),
++        "env": {k: _h(str(v)) for k, v in sorted((e.get("env") or {}).items())},
++    }
++    return _h(json.dumps(base, sort_keys=True, ensure_ascii=False))
++
++
++def argv_adicionar(cli: str, nome: str, e: dict) -> list[str]:
++    """`e` = {transporte, comando, args, url, env (valores resolvidos)}."""
++    if e["transporte"] == "http":
++        if cli == "claude":
++            return ["claude", "mcp", "add", "-s", "user", "-t", "http", nome, e["url"]]
++        if cli == "codex":
++            return ["codex", "mcp", "add", nome, "--url", e["url"]]
++        return ["opencode", "mcp", "add", nome, "--url", e["url"], "--pure", "--log-level", "ERROR"]
++    cmd = [e["comando"], *e["args"]]
++    env_claude = [y for k, v in e.get("env", {}).items() for y in ("-e", f"{k}={v}")]
++    env_outro = [y for k, v in e.get("env", {}).items() for y in ("--env", f"{k}={v}")]
++    if cli == "claude":
++        return ["claude", "mcp", "add", "-s", "user", nome, *env_claude, "--", *cmd]
++    if cli == "codex":
++        return ["codex", "mcp", "add", nome, *env_outro, "--", *cmd]
++    return ["opencode", "mcp", "add", nome, *env_outro, "--pure", "--log-level", "ERROR", "--", *cmd]
++
++
++def argv_remover(cli: str, nome: str) -> list[str] | None:
++    """None quando a CLI não tem remoção medida (opencode: L6)."""
++    if cli == "claude":
++        return ["claude", "mcp", "remove", "-s", "user", nome]
++    if cli == "codex":
++        return ["codex", "mcp", "remove", nome]
++    return None
+diff --git a/scripts/ferramentas/promover.py b/scripts/ferramentas/promover.py
+new file mode 100644
+index 00000000..6b6ae129
+--- /dev/null
++++ b/scripts/ferramentas/promover.py
+@@ -0,0 +1,75 @@
++#!/usr/bin/env python3
++"""Gera a proposta P-8 que leva uma entrada do overlay para a fonte canônica (lote ferramentas-unificadas-26-11; AC-12).
++
++Uso: promover.py <nome>
++Escreve SÓ propostas/<ts>-promover-<nome>.diff. Não aplica: config/ferramentas/ muda quando o Humano assina
++a proposta. O overlay não é alterado aqui. A entrada do overlay pode ficar até a proposta ser aplicada.
++Códigos: 0 ok; 2 nome fora do overlay, já na fonte canônica, ou schema inválido.
++"""
++from __future__ import annotations
++
++import argparse
++import difflib
++import sys
++from pathlib import Path
++
++import yaml
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++import schema as S  # noqa: E402
++
++
++def promover(ctx: E.Contexto, nome: str, imprimir=print) -> int:
++    try:
++        ov = S.carregar_overlay(ctx.overlay)
++        canon, _ = S.carregar_canonico(ctx.raiz)
++    except S.ErroSchema as e:
++        imprimir(f"ERRO: {e}")
++        return 2
++    achados = [t for t in S.TIPOS if nome in ov[t]]
++    if not achados:
++        imprimir(f"ERRO: {nome} não está no overlay")
++        return 2
++    tipo = achados[0]
++    if nome in canon[tipo]:
++        imprimir(f"ERRO: {nome} já está na fonte canônica ({tipo})")
++        return 2
++    arq = ctx.raiz / "config" / "ferramentas" / S.ARQUIVO_CANON[tipo]
++    antigo = arq.read_text(encoding="utf-8")
++    base = antigo if antigo.endswith("\n") else antigo + "\n"
++    item = yaml.safe_dump([S.para_yml(tipo, ov[tipo][nome])], sort_keys=False, allow_unicode=True)
++    novo = base + "".join("  " + linha if linha.strip() else linha for linha in item.splitlines(True))
++    # o texto novo tem de validar e ter exatamente uma entrada a mais
++    try:
++        dados = yaml.safe_load(novo)
++        lista = S._lista(tipo, dados.get(tipo), arq.name)
++    except (yaml.YAMLError, S.ErroSchema) as e:
++        imprimir(f"ERRO: a proposta não valida: {type(e).__name__}")
++        return 2
++    if len(lista) != len(canon[tipo]) + 1 or nome not in lista:
++        imprimir("ERRO: a proposta não acrescenta exatamente uma entrada")
++        return 2
++    rel = arq.relative_to(ctx.raiz).as_posix()
++    corpo = "".join(difflib.unified_diff(
++        antigo.splitlines(True), novo.splitlines(True), fromfile=f"a/{rel}", tofile=f"b/{rel}"))
++    destino = ctx.raiz / "propostas" / f"{ctx.agora()[:15]}-promover-{nome}.diff"
++    n = 1
++    while destino.exists():
++        destino = ctx.raiz / "propostas" / f"{ctx.agora()[:15]}-{n}-promover-{nome}.diff"
++        n += 1
++    destino.write_text(f"diff --git a/{rel} b/{rel}\n" + corpo, encoding="utf-8")
++    imprimir(f"proposta escrita: {destino}")
++    imprimir("nada aplicado: a assinatura do Humano decide (aprovar.sh)")
++    return 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Gera o .diff P-8 que promove uma entrada do overlay ao canônico.")
++    p.add_argument("nome")
++    a = p.parse_args(argv)
++    return promover(E.contexto_padrao(), a.nome)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/ferramentas/reverter.py b/scripts/ferramentas/reverter.py
+new file mode 100644
+index 00000000..61b6438e
+--- /dev/null
++++ b/scripts/ferramentas/reverter.py
+@@ -0,0 +1,235 @@
++#!/usr/bin/env python3
++"""Reverte uma execução do sync pelo registro (lote ferramentas-unificadas-26-11; A3, AC-09, AC-10).
++
++Uso:
++  reverter.py --listar                      lista as execuções com registro
++  reverter.py <ts> --dry-run                mostra o que voltaria, sem mexer
++  reverter.py <ts> [--com-overlay]          reverte; --com-overlay também move o overlay para ~/agata-arquivo/
++
++Regra: se alguma entrada, ponteiro ou o opencode.jsonc mudou depois do sync, nada é revertido (código 3).
++- Claude e Codex: remove a entrada, ou recoloca o valor anterior, pelo comando nativo. Ausente é registrado, sem falhar.
++- OpenCode (sem remove, L6): volta o arquivo do backup só se o hash ainda é o que o sync deixou; senão, pede ao Humano.
++- Ponteiros de skill: mv para ~/agata-arquivo/ferramentas-<ts>/ (nunca rm).
++- Manifest: volta ao que havia antes de cada ação (campo manifesto_antes do registro).
++Códigos: 0 ok; 2 execução inexistente, registro ou config ilegível, ou falha de comando; 3 recusa.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++import sys
++from datetime import datetime
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++import nativos as N  # noqa: E402
++import schema as S  # noqa: E402
++import sincronizar as SYNC  # noqa: E402
++
++NATIVAS = ("adicionar", "substituir", "remover")
++
++
++class ErroReversao(RuntimeError):
++    """Execução inexistente, já revertida ou com registro que não serve para reverter."""
++
++
++def listar(ctx: E.Contexto) -> list[dict]:
++    raiz = ctx.base / "backup"
++    if not raiz.is_dir():
++        return []
++    saida = []
++    for d in sorted(raiz.iterdir()):
++        reg = d / "sincronia.json"
++        if not reg.is_file():
++            continue
++        try:
++            r = json.loads(reg.read_text(encoding="utf-8"))
++        except (OSError, ValueError):
++            saida.append({"ts": d.name, "erro": "registro ilegível"})
++            continue
++        saida.append({"ts": d.name, "mcp": len(r.get("mcp", [])), "ponteiros": len(r.get("ponteiros", [])),
++                      "revertida_em": r.get("revertida_em")})
++    return saida
++
++
++def _carregar(ctx: E.Contexto, ts: str) -> dict:
++    p = ctx.base / "backup" / ts / "sincronia.json"
++    if not p.is_file():
++        raise ErroReversao(f"execução {ts} não encontrada")
++    try:
++        reg = json.loads(p.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        raise ErroReversao(f"registro de {ts} ilegível") from None
++    if reg.get("revertida_em"):
++        raise ErroReversao(f"execução {ts} já foi revertida em {reg['revertida_em']}")
++    return reg
++
++
++def _divergencias(ctx: E.Contexto, reg: dict, nativos: dict) -> list[str]:
++    out = []
++    for a in reg.get("mcp", []):
++        atual = nativos[a["cli"]].get(a["nome"])
++        h_atual = N.hash_entrada(atual) if atual is not None else None
++        if a["acao"] not in NATIVAS or h_atual == a.get("depois"):
++            continue
++        if a.get("estado") == "iniciado":
++            # a chamada nativa não terminou: aceita ausente (falhou antes) ou o valor de antes (não chegou a mudar)
++            if h_atual is None or (a.get("antes") is not None and h_atual == N.hash_entrada(a["antes"])):
++                continue
++        out.append(f"{a['cli']} {a['nome']}: mudou depois do sync")
++    info = reg.get("arquivos", {}).get("opencode")
++    if info and info.get("depois") is not None and E.hash_arquivo(ctx.opencode_jsonc) != info["depois"]:
++        out.append("opencode.jsonc mudou depois do sync; volta só com ordem do Humano (A3)")
++    for p in reg.get("ponteiros", []):
++        if p["acao"] in ("registrar_sem_escrita", "limpar_manifest"):
++            continue
++        atual = SYNC.destino_ponteiro(Path(p["link"]))
++        if p["acao"] == "ponteiro_remover":
++            if atual is not None:
++                out.append(f"skill {p['nome']} ({p['cli']}): ponteiro reapareceu depois do sync")
++        elif atual is None or str(atual) != p.get("depois"):
++            out.append(f"skill {p['nome']} ({p['cli']}): ponteiro mudou depois do sync")
++    return out
++
++
++def _restaurar(secao: dict, chave: str, antes) -> None:
++    if antes is None:
++        secao.pop(chave, None)
++    else:
++        secao[chave] = antes
++
++
++def _reverter_mcp(ctx: E.Contexto, reg: dict, nativos: dict, manifesto: dict, imprimir) -> None:
++    for a in reversed(reg.get("mcp", [])):
++        cli, nome = a["cli"], a["nome"]
++        if cli != "opencode" and a["acao"] in NATIVAS:
++            atual = nativos[cli].get(nome)
++            antes = a.get("antes")
++            if antes is None:
++                if atual is not None:
++                    SYNC.rodar_nativo(ctx, N.argv_remover(cli, nome), f"{cli} remover {nome}")
++                    imprimir(f"removida: {cli} {nome}")
++                else:
++                    imprimir(f"ausente: {cli} {nome} (registrada, sem falhar)")
++            elif atual is None or N.hash_entrada(atual) != N.hash_entrada(antes):
++                if antes.get("transporte") not in ("stdio", "http"):
++                    raise ErroReversao(f"{cli} {nome}: transporte anterior não restaurável pelo comando nativo")
++                if atual is not None:
++                    SYNC.rodar_nativo(ctx, N.argv_remover(cli, nome), f"{cli} remover {nome}")
++                antes_resolvido = {k: antes.get(k) for k in ("transporte", "comando", "args", "url", "env")}
++                SYNC.rodar_nativo(ctx, N.argv_adicionar(cli, nome, antes_resolvido), f"{cli} restaurar {nome}")
++                imprimir(f"restaurada: {cli} {nome}")
++        _restaurar(manifesto["entradas"], f"{cli}|mcp|{nome}", a.get("manifesto_antes"))
++
++
++def _reverter_opencode(ctx: E.Contexto, reg: dict, manifesto: dict, ts: str, imprimir) -> None:
++    info = reg.get("arquivos", {}).get("opencode")
++    if not info:
++        return
++    if info.get("depois") is not None:
++        pasta = ctx.base / "backup" / ts
++        if ctx.opencode_jsonc.exists():
++            E.gravar_bytes(pasta / "opencode-antes-de-reverter.jsonc", ctx.opencode_jsonc.read_bytes())
++        if info.get("backup"):
++            E.gravar_bytes(ctx.opencode_jsonc, (pasta / info["backup"]).read_bytes())
++            imprimir("restaurado: opencode.jsonc do backup (hash conferido antes)")
++        elif ctx.opencode_jsonc.exists():
++            os.rename(ctx.opencode_jsonc, E.area_arquivo(ctx, ts) / "opencode.jsonc")
++            imprimir("opencode.jsonc movido para ~/agata-arquivo (não existia antes do sync)")
++    _restaurar(manifesto["arquivos"], "opencode", info.get("manifesto_antes"))
++
++
++def _reverter_ponteiros(ctx: E.Contexto, reg: dict, manifesto: dict, ts: str, imprimir) -> None:
++    for p in reversed(reg.get("ponteiros", [])):
++        cli, nome, acao = p["cli"], p["nome"], p["acao"]
++        link = Path(p["link"])
++        if acao == "ponteiro_criar" and link.is_symlink():
++            os.rename(link, E.area_arquivo(ctx, ts) / f"{cli}-{nome}")
++            imprimir(f"ponteiro movido para o arquivo: {cli} {nome}")
++        elif acao == "ponteiro_atualizar":
++            if p.get("antes"):
++                tmp = link.with_name(f".{link.name}.{ts}.rev")
++                os.symlink(p["antes"], tmp)
++                os.replace(tmp, link)
++                imprimir(f"ponteiro voltou ao alvo anterior: {cli} {nome}")
++            elif link.is_symlink():
++                os.rename(link, E.area_arquivo(ctx, ts) / f"{cli}-{nome}")
++        elif acao == "ponteiro_remover" and p.get("arquivo") and os.path.lexists(p["arquivo"]):
++            os.rename(p["arquivo"], link)
++            imprimir(f"ponteiro restaurado: {cli} {nome}")
++        _restaurar(manifesto["ponteiros"], f"{cli}|skill|{nome}", p.get("manifesto_antes"))
++
++
++def reverter(ctx: E.Contexto, ts: str, dry_run: bool = False, com_overlay: bool = False, imprimir=print) -> int:
++    try:
++        reg = _carregar(ctx, ts)
++        manifesto = E.ler_manifest(ctx)
++        nativos = {cli: N.ler_mcp(cli, ctx) for cli in S.CLIS}
++    except (ErroReversao, E.ErroEstado, N.ErroConfig) as e:
++        imprimir(f"ERRO: {e}")
++        return 2
++    recusas = _divergencias(ctx, reg, nativos)
++    if recusas:
++        for r in recusas:
++            imprimir(f"RECUSA: {r}")
++        imprimir("nada revertido: volte só com o estado que o sync deixou")
++        return 3
++    prefixo = "(simulação, nada revertido) " if dry_run else ""
++    for a in reversed(reg.get("mcp", [])):
++        if a["acao"] in NATIVAS and a["cli"] != "opencode":
++            imprimir(f"{prefixo}{a['cli']} {a['nome']}: {'remover' if a.get('antes') is None else 'recolocar valor anterior'}")
++    if reg.get("arquivos", {}).get("opencode", {}).get("depois") is not None:
++        imprimir(f"{prefixo}opencode.jsonc: voltar ao backup (A3)")
++    for p in reversed(reg.get("ponteiros", [])):
++        if p["acao"] in ("ponteiro_criar", "ponteiro_atualizar", "ponteiro_remover"):
++            imprimir(f"{prefixo}skill {p['nome']} ({p['cli']}): {p['acao']} desfeito")
++    if dry_run:
++        return 0
++    try:
++        _reverter_mcp(ctx, reg, nativos, manifesto, imprimir)
++        _reverter_opencode(ctx, reg, manifesto, ts, imprimir)
++        _reverter_ponteiros(ctx, reg, manifesto, ts, imprimir)
++        if com_overlay and ctx.overlay.exists():
++            os.rename(ctx.overlay, E.area_arquivo(ctx, ts) / "ferramentas.yml")
++            imprimir("overlay movido para ~/agata-arquivo")
++    except (SYNC.ErroCli, ErroReversao, OSError) as e:
++        imprimir(f"ERRO: {e}")
++        imprimir("reversão parcial; rode de novo com o mesmo ts depois de olhar o erro")
++        return 2
++    finally:
++        E.gravar_json(ctx.base / "gerenciado.json", manifesto)
++    reg["revertida_em"] = datetime.now().isoformat(timespec="seconds")
++    E.gravar_json(ctx.base / "backup" / ts / "sincronia.json", reg)
++    E.registrar(ctx, {"ts": ts, "acao": "reverter", "cli": "-", "tipo": "-", "nome": "-"})
++    imprimir(f"execução {ts} revertida")
++    return 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Reverte uma execução do sync de ferramentas.")
++    p.add_argument("ts", nargs="?", help="nome da pasta em <base>/backup/")
++    p.add_argument("--listar", action="store_true")
++    p.add_argument("--dry-run", action="store_true")
++    p.add_argument("--com-overlay", action="store_true")
++    a = p.parse_args(argv)
++    ctx = E.contexto_padrao()
++    if a.listar:
++        execucoes = listar(ctx)
++        for e in execucoes:
++            if "erro" in e:
++                print(f"{e['ts']}  {e['erro']}")
++            else:
++                estado = f"revertida em {e['revertida_em']}" if e["revertida_em"] else "pode reverter"
++                print(f"{e['ts']}  mcp={e['mcp']}  ponteiros={e['ponteiros']}  {estado}")
++        if not execucoes:
++            print("nenhuma execução registrada")
++        return 0
++    if not a.ts:
++        p.error("informe a execução (ts) ou use --listar")
++    return reverter(ctx, a.ts, a.dry_run, a.com_overlay)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/ferramentas/schema.py b/scripts/ferramentas/schema.py
+new file mode 100644
+index 00000000..db57316e
+--- /dev/null
++++ b/scripts/ferramentas/schema.py
+@@ -0,0 +1,254 @@
++#!/usr/bin/env python3
++"""Schema e carga das fontes de ferramentas (lote ferramentas-unificadas-26-11).
++
++Fonte canônica: config/ferramentas/{mcp,skills,agentes}.yml (sob P-8). Overlay do Humano:
++~/agata-local/ferramentas.yml, mesmo schema, sobrepõe por nome. Nenhum campo guarda valor de segredo:
++`env` é lista de NOMES de variável, `url` não pode trazer usuário, senha nem query, e `args` passa por
++uma checagem de padrões de segredo (heurística, não prova). Erros nomeiam campo e arquivo, nunca valor.
++"""
++from __future__ import annotations
++
++import re
++from collections import OrderedDict
++from dataclasses import dataclass
++from pathlib import Path
++from urllib.parse import urlsplit
++
++import yaml
++
++CLIS = ("claude", "codex", "opencode")
++TIPOS = ("mcp", "skills", "agentes")
++CATEGORIA = {"mcp": "mcp", "skills": "skill", "agentes": "agente"}
++ARQUIVO_CANON = {"mcp": "mcp.yml", "skills": "skills.yml", "agentes": "agentes.yml"}
++PREFIXO_ORIGEM = {"skills": ".agents/skills/", "agentes": ".claude/agents/"}
++TOPO_CANON = {"mcp": {"mcp"}, "skills": {"skills", "indice"}, "agentes": {"agentes"}}
++OBRIGATORIOS = {
++    "mcp": {"nome", "transporte", "clis"},
++    "skills": {"nome", "origem", "clis"},
++    "agentes": {"nome", "origem", "clis"},
++}
++ESPECIFICOS = {"mcp": {"transporte", "comando", "args", "url", "env"}, "skills": set(), "agentes": set()}
++COMUNS = {"adotar", "gerenciado", "motivo", "descricao"}
++RE_NOME = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
++RE_VARIAVEL = re.compile(r"[A-Z_][A-Z0-9_]*")
++RE_CAMPO_SEGURO = re.compile(r"[a-z_]{1,32}")
++# Heurística: nome=valor de chave conhecida ou prefixo de token conhecido em args.
++RE_SEGREDO_ARG = re.compile(
++    r"(?i)(token|senha|secret|password|passwd|apikey|api_key)\s*[=:]|\b(ghp_|github_pat_|sk-|xox[bp]-)"
++)
++
++
++class ErroSchema(ValueError):
++    """Fonte fora do schema. A mensagem nomeia campo e arquivo; nunca traz valor."""
++
++
++@dataclass
++class Fonte:
++    entradas: dict  # tipo -> OrderedDict nome -> entrada normalizada (overlay sobrepõe por nome)
++    origem: dict  # tipo -> nome -> "canonico" | "overlay"
++    canonico: dict  # tipo -> OrderedDict nome -> entrada (só a fonte canônica)
++    indice: str | None
++
++
++def _erro(onde: str, msg: str) -> ErroSchema:
++    return ErroSchema(f"{onde}: {msg}")
++
++
++def _nomes_seguros(campos) -> str:
++    return ", ".join(c if isinstance(c, str) and RE_CAMPO_SEGURO.fullmatch(c) else "[campo não listável]" for c in campos)
++
++
++def _validar_mcp(dado: dict, onde: str) -> dict:
++    transporte = dado["transporte"]
++    if transporte not in ("stdio", "http"):
++        raise _erro(onde, "transporte tem de ser stdio ou http")
++    if transporte == "stdio":
++        if "url" in dado:
++            raise _erro(onde, "url só vale com transporte http")
++        comando = dado.get("comando")
++        if not isinstance(comando, str) or not comando.strip():
++            raise _erro(onde, "transporte stdio exige comando")
++        args = dado.get("args", [])
++        if not isinstance(args, list) or not all(isinstance(a, str) and "\n" not in a for a in args):
++            raise _erro(onde, "args é lista de texto, uma entrada por argumento")
++        for a in args:
++            if RE_SEGREDO_ARG.search(a):
++                raise _erro(onde, "args parece trazer segredo; passe a variável em env (só o nome)")
++        env = dado.get("env", [])
++        if not isinstance(env, list):
++            raise _erro(onde, "env é lista de nomes de variável")
++        for var in env:
++            if not isinstance(var, str) or not RE_VARIAVEL.fullmatch(var):
++                raise _erro(onde, "env lista só nomes de variável (maiúsculas, números e _); valor não entra na fonte")
++        return {"transporte": "stdio", "comando": comando, "args": list(args), "url": None, "env": list(env)}
++    for campo in ("comando", "args", "env"):
++        if campo in dado:
++            raise _erro(onde, f"{campo} só vale com transporte stdio")
++    url = dado.get("url")
++    if not isinstance(url, str):
++        raise _erro(onde, "transporte http exige url")
++    p = urlsplit(url)
++    if p.scheme not in ("http", "https") or not p.hostname or p.username or p.password or p.query or p.fragment:
++        raise _erro(onde, "url tem de ser http(s), sem usuário, senha, query ou fragmento")
++    return {"transporte": "http", "comando": None, "args": [], "url": url, "env": []}
++
++
++def validar_entrada(tipo: str, dado, onde: str = "entrada") -> dict:
++    """Valida uma entrada de um tipo e devolve a forma normalizada (com padrões preenchidos)."""
++    if not isinstance(dado, dict):
++        raise _erro(onde, "a entrada tem de ser um mapa")
++    permitidos = OBRIGATORIOS[tipo] | ESPECIFICOS[tipo] | COMUNS
++    fora = set(dado) - permitidos
++    if fora:
++        raise _erro(onde, "campo fora do schema: " + _nomes_seguros(sorted(fora, key=str)))
++    faltam = OBRIGATORIOS[tipo] - set(dado)
++    if faltam:
++        raise _erro(onde, "campo obrigatório ausente: " + _nomes_seguros(sorted(faltam)))
++    nome = dado["nome"]
++    if not isinstance(nome, str) or len(nome) > 64 or not RE_NOME.fullmatch(nome):
++        raise _erro(onde, "nome deve ser minúsculas, números e hífen (até 64 caracteres)")
++    clis = dado["clis"]
++    if not isinstance(clis, list) or not clis or len(set(clis)) != len(clis) or any(c not in CLIS for c in clis):
++        raise _erro(onde, "clis é lista não vazia, sem repetição, de: " + ", ".join(CLIS))
++    adotar = dado.get("adotar", False)
++    gerenciado = dado.get("gerenciado", True)
++    if not isinstance(adotar, bool) or not isinstance(gerenciado, bool):
++        raise _erro(onde, "adotar e gerenciado são true ou false")
++    motivo = dado.get("motivo", "")
++    if not isinstance(motivo, str):
++        raise _erro(onde, "motivo é texto")
++    if not gerenciado and not motivo.strip():
++        raise _erro(onde, "gerenciado: false exige motivo")
++    descricao = dado.get("descricao", "")
++    if not isinstance(descricao, str):
++        raise _erro(onde, "descricao é texto")
++    saida = {
++        "nome": nome,
++        "clis": list(clis),
++        "adotar": adotar,
++        "gerenciado": gerenciado,
++        "motivo": motivo,
++        "descricao": descricao,
++    }
++    if tipo == "mcp":
++        saida.update(_validar_mcp(dado, onde))
++        return saida
++    origem = dado["origem"]
++    prefixo = PREFIXO_ORIGEM[tipo]
++    partes = origem.split("/") if isinstance(origem, str) else []
++    if not isinstance(origem, str) or not origem.startswith(prefixo) or ".." in partes or origem.endswith("/"):
++        raise _erro(onde, f"origem tem de ficar em {prefixo}, sem '..'")
++    base = partes[-1]
++    if tipo == "skills" and base != nome:
++        raise _erro(onde, "em skills, o último trecho da origem é o nome da skill")
++    if tipo == "agentes" and base != nome + ".md":
++        raise _erro(onde, "em agentes, a origem é <nome>.md")
++    saida["origem"] = origem
++    return saida
++
++
++def _ler_yaml(caminho: Path, obrigatorio: bool) -> dict:
++    if not caminho.exists():
++        if obrigatorio:
++            raise ErroSchema(f"{caminho}: fonte ausente")
++        return {}
++    try:
++        dados = yaml.safe_load(caminho.read_text(encoding="utf-8")) or {}
++    except (OSError, yaml.YAMLError) as e:
++        # só o tipo do erro: a mensagem do PyYAML mostra trechos do arquivo
++        raise ErroSchema(f"{caminho}: YAML inválido ({type(e).__name__})") from None
++    if not isinstance(dados, dict):
++        raise ErroSchema(f"{caminho}: o topo tem de ser um mapa")
++    return dados
++
++
++def _checar_topo(dados: dict, permitidos: set, onde: str) -> None:
++    fora = set(dados) - permitidos
++    if fora:
++        raise _erro(onde, "chave de topo fora do schema: " + _nomes_seguros(sorted(fora, key=str)))
++
++
++def _lista(tipo: str, bruto, onde: str) -> OrderedDict:
++    if bruto is None:
++        bruto = []
++    if not isinstance(bruto, list):
++        raise _erro(onde, f"{tipo} tem de ser lista")
++    saida: OrderedDict = OrderedDict()
++    for i, item in enumerate(bruto):
++        e = validar_entrada(tipo, item, f"{onde} [{tipo}][{i}]")
++        if e["nome"] in saida:
++            raise _erro(onde, f"nome repetido em {tipo}: {e['nome']}")
++        saida[e["nome"]] = e
++    return saida
++
++
++def carregar_overlay(caminho: Path) -> dict:
++    """Overlay do Humano como tipo -> OrderedDict nome -> entrada. Arquivo ausente é overlay vazio."""
++    dados = _ler_yaml(caminho, obrigatorio=False)
++    _checar_topo(dados, set(TIPOS), str(caminho))
++    return {tipo: _lista(tipo, dados.get(tipo), str(caminho)) for tipo in TIPOS}
++
++
++def carregar_canonico(raiz: Path) -> tuple[dict, str | None]:
++    """Fonte canônica como tipo -> OrderedDict, e o ponteiro de índice de skills (se houver)."""
++    canon, indice = {}, None
++    for tipo in TIPOS:
++        arq = raiz / "config" / "ferramentas" / ARQUIVO_CANON[tipo]
++        dados = _ler_yaml(arq, obrigatorio=True)
++        _checar_topo(dados, TOPO_CANON[tipo], str(arq))
++        if tipo == "skills":
++            indice = dados.get("indice")
++            if indice is not None and not isinstance(indice, str):
++                raise _erro(str(arq), "indice é um caminho de texto")
++        canon[tipo] = _lista(tipo, dados.get(tipo), str(arq))
++    return canon, indice
++
++
++def carregar_fontes(raiz: Path, overlay: Path) -> Fonte:
++    """Canônico ∪ overlay; o overlay sobrepõe por nome e a origem de cada entrada fica registrada."""
++    canon, indice = carregar_canonico(raiz)
++    ov = carregar_overlay(overlay)
++    entradas, origem = {}, {}
++    for tipo in TIPOS:
++        mesclada: OrderedDict = OrderedDict()
++        origem_tipo: dict = {}
++        for nome, e in canon[tipo].items():
++            mesclada[nome] = e
++            origem_tipo[nome] = "canonico"
++        for nome, e in ov[tipo].items():
++            mesclada[nome] = e
++            origem_tipo[nome] = "overlay"
++        entradas[tipo] = mesclada
++        origem[tipo] = origem_tipo
++    return Fonte(entradas=entradas, origem=origem, canonico=canon, indice=indice)
++
++
++def para_yml(tipo: str, e: dict) -> dict:
++    """Forma de arquivo (só campos informados, sem padrões) para gravar no overlay ou propor no canônico."""
++    d: dict = {"nome": e["nome"]}
++    if tipo == "mcp":
++        d["transporte"] = e["transporte"]
++        if e["transporte"] == "stdio":
++            d["comando"] = e["comando"]
++            if e["args"]:
++                d["args"] = list(e["args"])
++            if e["env"]:
++                d["env"] = list(e["env"])
++        else:
++            d["url"] = e["url"]
++    else:
++        d["origem"] = e["origem"]
++    d["clis"] = list(e["clis"])
++    if e["adotar"]:
++        d["adotar"] = True
++    if not e["gerenciado"]:
++        d["gerenciado"] = False
++        d["motivo"] = e["motivo"]
++    if e["descricao"]:
++        d["descricao"] = e["descricao"]
++    return d
++
++
++def serializar_overlay(ov: dict) -> dict:
++    """Overlay (tipo -> OrderedDict) na forma de arquivo, pronta para yaml.safe_dump."""
++    return {tipo: [para_yml(tipo, e) for e in ov[tipo].values()] for tipo in TIPOS}
+diff --git a/scripts/ferramentas/sincronizar.py b/scripts/ferramentas/sincronizar.py
+new file mode 100644
+index 00000000..58dc6c23
+--- /dev/null
++++ b/scripts/ferramentas/sincronizar.py
+@@ -0,0 +1,367 @@
++#!/usr/bin/env python3
++"""Sincroniza as fontes (canônico ∪ overlay) para as três CLIs (lote ferramentas-unificadas-26-11).
++
++- MCP: comandos nativos de cada CLI (A1). Entrada nativa que não está na fonte nem no manifest fica intacta (AC-05).
++- Skill: ponteiro de pasta para .agents/skills/ do checkout principal; nada é copiado. Claude e Codex (OpenCode: L2).
++- Agente: fora do sync neste lote (L4); `listar.py` mostra.
++- Mesmo nome sem `adotar: true` não é adotado (AC-06, D5).
++- Antes da primeira escrita: backup 600 em <base>/backup/<ts>/ (AC-08). Config nativa que não lê: código 2, nada escrito (AC-14).
++- Entrada alterada no nativo depois do sync não é sobrescrita (guarda por hash; L5).
++- Variável de `env` ausente no ambiente: código 2, nada escrito; o erro diz o nome, nunca o valor.
++
++Uso: python3 scripts/ferramentas/sincronizar.py [--dry-run] [--cli claude|codex|opencode]
++Códigos: 0 ok; 2 fonte, config nativa, variável ausente ou falha de comando nativo.
++"""
++from __future__ import annotations
++
++import argparse
++import os
++import subprocess
++import sys
++from datetime import datetime
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import estado as E  # noqa: E402
++import nativos as N  # noqa: E402
++import schema as S  # noqa: E402
++
++# Ações que mudam algo (nativo, ponteiro ou manifest): exigem backup antes.
++ESCRITAS = {
++    "adicionar",
++    "substituir",
++    "remover",
++    "registrar_sem_escrita",
++    "limpar_manifest",
++    "ponteiro_criar",
++    "ponteiro_atualizar",
++    "ponteiro_remover",
++}
++ARQUIVO_COPIA = {"claude": "claude.json", "codex": "codex-config.toml", "opencode": "opencode.jsonc"}
++
++
++class ErroAmbiente(RuntimeError):
++    """Variável de env declarada na fonte e ausente no ambiente."""
++
++
++class ErroCli(RuntimeError):
++    """Comando nativo falhou; a execução para e o registro fica salvo."""
++
++
++def resolver(e: dict) -> dict:
++    """Valores de env vêm do ambiente no momento do sync. A fonte só tem os nomes."""
++    env = {}
++    for var in e["env"]:
++        valor = os.environ.get(var)
++        if valor is None:
++            raise ErroAmbiente(
++                f"{e['nome']}: variável {var} não definida no ambiente "
++                "(o sync lê o valor do ambiente, nunca da fonte)"
++            )
++        env[var] = valor
++    return {"transporte": e["transporte"], "comando": e["comando"], "args": list(e["args"]),
++            "url": e["url"], "env": env}
++
++
++def _acao(cli: str, tipo: str, nome: str, acao: str, motivo: str = "", **extra) -> dict:
++    return {"cli": cli, "tipo": tipo, "nome": nome, "acao": acao, "motivo": motivo, **extra}
++
++
++def _geridos(manifesto: dict, cli: str, secao: str, rotulo: str) -> dict:
++    prefixo = f"{cli}|{rotulo}|"
++    return {k[len(prefixo):]: v for k, v in manifesto[secao].items() if k.startswith(prefixo)}
++
++
++def _mcp(fonte: S.Fonte, cli: str, nativos: dict, manifesto: dict, resolvidos: dict) -> list[dict]:
++    acoes = []
++    geridos = _geridos(manifesto, cli, "entradas", "mcp")
++    decl = {n: e for n, e in fonte.entradas["mcp"].items() if e["gerenciado"] and cli in e["clis"]}
++    for nome, e in decl.items():
++        d = resolvidos[nome]
++        hd = N.hash_entrada(d)
++        base = {"e": d, "depois": hd, "origem": fonte.origem["mcp"][nome]}
++        if nome not in nativos:
++            acoes.append(_acao(cli, "mcp", nome, "adicionar", **base))
++            continue
++        antes = nativos[nome]
++        hn = N.hash_entrada(antes)
++        base["antes"] = antes
++        if nome in geridos:
++            if hn == hd:
++                acao = "sem_mudanca" if geridos[nome]["hash"] == hd else "registrar_sem_escrita"
++                acoes.append(_acao(cli, "mcp", nome, acao, **base))
++            elif hn == geridos[nome]["hash"]:
++                acoes.append(_acao(cli, "mcp", nome, "substituir", **base))
++            else:
++                acoes.append(_acao(cli, "mcp", nome, "alterado_depois",
++                                   "mudou no nativo depois do sync; não sobrescrito", **base))
++        elif e["adotar"]:
++            if hn == hd:
++                acoes.append(_acao(cli, "mcp", nome, "registrar_sem_escrita", "adotado sem mudança", **base))
++            else:
++                acoes.append(_acao(cli, "mcp", nome, "substituir", "adotado (adotar: true)", **base))
++        else:
++            acoes.append(_acao(cli, "mcp", nome, "nao_adotado",
++                               "já existe no nativo; sem adotar: true", **base))
++    for nome, reg in geridos.items():
++        if nome in decl:
++            continue
++        fonte_e = fonte.entradas["mcp"].get(nome)
++        if fonte_e is not None and not fonte_e["gerenciado"]:
++            acoes.append(_acao(cli, "mcp", nome, "limpar_manifest",
++                               "solto pela fonte (gerenciado: false); nativo mantido"))
++            continue
++        if nome not in nativos:
++            acoes.append(_acao(cli, "mcp", nome, "limpar_manifest", "já ausente no nativo"))
++            continue
++        antes = nativos[nome]
++        if N.hash_entrada(antes) != reg["hash"]:
++            acoes.append(_acao(cli, "mcp", nome, "alterado_depois",
++                               "mudou no nativo depois do sync; não removido", antes=antes))
++            continue
++        if N.argv_remover(cli, nome) is None:
++            acoes.append(_acao(cli, "mcp", nome, "lacuna",
++                               "sem remoção medida nesta CLI (L6); nativo mantido"))
++            continue
++        acoes.append(_acao(cli, "mcp", nome, "remover", antes=antes, depois=None))
++    return acoes
++
++
++def destino_ponteiro(link: Path) -> Path | None:
++    if not link.is_symlink():
++        return None
++    bruto = Path(os.readlink(link))
++    if not bruto.is_absolute():
++        bruto = link.parent / bruto
++    return bruto.resolve()
++
++
++def _ponteiros(ctx: E.Contexto, fonte: S.Fonte, cli: str, manifesto: dict) -> list[dict]:
++    acoes = []
++    pasta = {"claude": ctx.claude_skills, "codex": ctx.codex_skills}.get(cli)
++    geridos = _geridos(manifesto, cli, "ponteiros", "skill")
++    decl = {n: e for n, e in fonte.entradas["skills"].items() if e["gerenciado"] and cli in e["clis"]}
++    if pasta is None:
++        for nome in decl:
++            acoes.append(_acao(cli, "skill", nome, "lacuna", "skill neste CLI não medida (L2); nada escrito"))
++        return acoes
++    for nome, e in decl.items():
++        alvo = str((ctx.checkout / e["origem"]).resolve())
++        if not (Path(alvo) / "SKILL.md").is_file():
++            acoes.append(_acao(cli, "skill", nome, "alvo_ausente",
++                               "origem sem SKILL.md no checkout; ponteiro não criado"))
++            continue
++        link = pasta / nome
++        base = {"link": str(link), "depois": alvo, "origem": fonte.origem["skills"][nome]}
++        if link.is_symlink():
++            atual = destino_ponteiro(link)
++            base["antes"] = str(atual) if atual else None
++            if atual is not None and str(atual) == alvo:
++                if nome in geridos:
++                    acao = "sem_mudanca" if geridos[nome]["alvo"] == alvo else "registrar_sem_escrita"
++                elif e["adotar"]:
++                    acao = "registrar_sem_escrita"
++                else:
++                    acao = "nao_adotado"
++                acoes.append(_acao(cli, "skill", nome, acao, **base))
++            elif nome in geridos:
++                if str(atual) == geridos[nome]["alvo"]:
++                    acoes.append(_acao(cli, "skill", nome, "ponteiro_atualizar", **base))
++                else:
++                    acoes.append(_acao(cli, "skill", nome, "alterado_depois",
++                                       "ponteiro mudou depois do sync; não sobrescrito", **base))
++            elif e["adotar"]:
++                acoes.append(_acao(cli, "skill", nome, "ponteiro_atualizar", "adotado (adotar: true)", **base))
++            else:
++                acoes.append(_acao(cli, "skill", nome, "nao_adotado",
++                                   "já existe um link com esse nome; sem adotar: true", **base))
++        elif link.exists():
++            acoes.append(_acao(cli, "skill", nome, "nao_adotado",
++                               "já existe e não é ponteiro; não substituído", **base))
++        else:
++            acoes.append(_acao(cli, "skill", nome, "ponteiro_criar", **base))
++    for nome, reg in geridos.items():
++        if nome in decl:
++            continue
++        fonte_e = fonte.entradas["skills"].get(nome)
++        link = pasta / nome
++        if (fonte_e is not None and not fonte_e["gerenciado"]) or not link.is_symlink():
++            acoes.append(_acao(cli, "skill", nome, "limpar_manifest", "sem ponteiro a mexer"))
++            continue
++        atual = destino_ponteiro(link)
++        if atual is None or str(atual) != reg["alvo"]:
++            acoes.append(_acao(cli, "skill", nome, "alterado_depois",
++                               "ponteiro mudou depois do sync; não movido"))
++            continue
++        acoes.append(_acao(cli, "skill", nome, "ponteiro_remover", antes=str(atual), depois=None,
++                           link=str(link)))
++    return acoes
++
++
++def _executar_mcp(ctx, a, chave, manifesto, registro, ts, salvar) -> None:
++    cli, nome, acao = a["cli"], a["nome"], a["acao"]
++    onde = f"{cli} {acao} {nome}"
++    nativa = acao in ("adicionar", "substituir", "remover")
++    reg_item = {"cli": cli, "nome": nome, "acao": acao, "antes": a.get("antes"), "depois": a.get("depois"),
++                "manifesto_antes": manifesto["entradas"].get(chave), "estado": "iniciado" if nativa else "feito"}
++    registro["mcp"].append(reg_item)
++    if nativa:
++        salvar()  # antes da chamada nativa: se ela falhar no meio, a reversão sabe o que tinha
++    if acao in ("adicionar", "substituir"):
++        if acao == "substituir":
++            rem = N.argv_remover(cli, nome)
++            if rem is not None:
++                rodar_nativo(ctx, rem, onde)
++        rodar_nativo(ctx, N.argv_adicionar(cli, nome, a["e"]), onde)
++        manifesto["entradas"][chave] = {"hash": a["depois"], "origem": a["origem"], "ts": ts}
++    elif acao == "remover":
++        rodar_nativo(ctx, N.argv_remover(cli, nome), onde)
++        manifesto["entradas"].pop(chave, None)
++    elif acao == "registrar_sem_escrita":
++        manifesto["entradas"][chave] = {"hash": a["depois"], "origem": a["origem"], "ts": ts}
++    elif acao == "limpar_manifest":
++        manifesto["entradas"].pop(chave, None)
++    if nativa:
++        reg_item["estado"] = "feito"
++    if cli == "opencode" and nativa:
++        h = E.hash_arquivo(ctx.opencode_jsonc)
++        registro["arquivos"]["opencode"]["depois"] = h
++        if h:
++            manifesto["arquivos"]["opencode"] = {"hash": h, "ts": ts}
++
++
++def rodar_nativo(ctx, argv: list[str], onde: str) -> None:
++    try:
++        res = ctx.runner(argv)
++    except (OSError, E.ErroComando, subprocess.SubprocessError):
++        # sem argv na mensagem: o argv pode levar valor de env; a exceção original não é encadeada
++        raise ErroCli(f"{onde}: comando nativo não rodou (ausente, sem permissão ou sem resposta no prazo)") from None
++    if res.returncode != 0:
++        raise ErroCli(f"{onde}: comando nativo saiu com código {res.returncode}")
++
++
++def _executar_ponteiro(ctx, a, chave, manifesto, registro, ts) -> None:
++    cli, nome, acao = a["cli"], a["nome"], a["acao"]
++    link = Path(a["link"])
++    manifesto_antes = manifesto["ponteiros"].get(chave)
++    if acao == "ponteiro_criar":
++        link.parent.mkdir(parents=True, exist_ok=True)
++        os.symlink(a["depois"], link)
++        manifesto["ponteiros"][chave] = {"alvo": a["depois"], "ts": ts}
++    elif acao == "ponteiro_atualizar":
++        tmp = link.with_name(f".{link.name}.{ts}.tmp")
++        os.symlink(a["depois"], tmp)
++        os.replace(tmp, link)
++        manifesto["ponteiros"][chave] = {"alvo": a["depois"], "ts": ts}
++    elif acao == "ponteiro_remover":
++        destino = E.area_arquivo(ctx, ts) / f"{cli}-{nome}"
++        os.rename(link, destino)
++        a["arquivo"] = str(destino)
++        manifesto["ponteiros"].pop(chave, None)
++    elif acao == "registrar_sem_escrita":
++        manifesto["ponteiros"][chave] = {"alvo": a["depois"], "ts": ts}
++    elif acao == "limpar_manifest":
++        manifesto["ponteiros"].pop(chave, None)
++    registro["ponteiros"].append({"cli": cli, "nome": nome, "acao": acao, "antes": a.get("antes"),
++                                  "depois": a.get("depois"), "link": a["link"], "arquivo": a.get("arquivo"),
++                                  "manifesto_antes": manifesto_antes})
++
++
++def _executar(ctx, plano: list[dict], manifesto: dict, registro: dict, backup: Path, ts: str) -> None:
++    def salvar() -> None:
++        E.gravar_json(backup / "sincronia.json", registro)
++        E.gravar_json(ctx.base / "gerenciado.json", manifesto)
++
++    for a in plano:
++        if a["acao"] not in ESCRITAS:
++            continue
++        rotulo = "mcp" if a["tipo"] == "mcp" else "skill"
++        chave = f"{a['cli']}|{rotulo}|{a['nome']}"
++        try:
++            if a["tipo"] == "mcp":
++                _executar_mcp(ctx, a, chave, manifesto, registro, ts, salvar)
++            else:
++                _executar_ponteiro(ctx, a, chave, manifesto, registro, ts)
++        finally:
++            salvar()
++        E.registrar(ctx, {"ts": ts, "acao": a["acao"], "cli": a["cli"], "tipo": a["tipo"], "nome": a["nome"]})
++
++
++def _relatar(plano: list[dict], dry_run: bool, imprimir, fora: int) -> None:
++    prefixo = "(simulação, nada escrito) " if dry_run else ""
++    mudou = igual = aviso = 0
++    for a in plano:
++        if a["acao"] == "sem_mudanca":
++            igual += 1
++            continue
++        if a["acao"] in ESCRITAS:
++            mudou += 1
++        else:
++            aviso += 1
++        linha = f"{a['acao']:<22}{a['cli']:<10}{a['tipo']:<7}{a['nome']}"
++        if a.get("motivo"):
++            linha += f"  ({a['motivo']})"
++        imprimir(prefixo + linha)
++    imprimir(f"{mudou} mudança(s), {igual} sem mudança, {aviso} aviso(s); "
++             f"agentes fora do sync (L4): {fora}")
++
++
++def sincronizar(ctx: E.Contexto, clis: list[str] | None = None, dry_run: bool = False, imprimir=print) -> int:
++    escolhidas = [c for c in S.CLIS if not clis or c in clis]
++    try:
++        fonte = S.carregar_fontes(ctx.raiz, ctx.overlay)
++        manifesto = E.ler_manifest(ctx)
++        resolvidos = {}
++        for nome, e in fonte.entradas["mcp"].items():
++            if e["gerenciado"] and any(c in escolhidas for c in e["clis"]):
++                resolvidos[nome] = resolver(e)
++        nativos = {cli: N.ler_mcp(cli, ctx) for cli in S.CLIS}
++    except (S.ErroSchema, E.ErroEstado, ErroAmbiente, N.ErroConfig) as e:
++        imprimir(f"ERRO: {e}")
++        return 2
++    plano: list[dict] = []
++    for cli in escolhidas:
++        plano += _mcp(fonte, cli, nativos[cli], manifesto, resolvidos)
++        plano += _ponteiros(ctx, fonte, cli, manifesto)
++    fora = sum(1 for e in fonte.entradas["agentes"].values() if not e["gerenciado"])
++    _relatar(plano, dry_run, imprimir, fora)
++    if dry_run:
++        return 0
++    escritas = [a for a in plano if a["acao"] in ESCRITAS]
++    if not escritas:
++        return 0
++    backup = E.criar_backup(ctx, ctx.agora())
++    ts = backup.name
++    registro: dict = {"versao": 1, "ts": ts, "criado_em": datetime.now().isoformat(timespec="seconds"),
++                      "mcp": [], "ponteiros": [], "arquivos": {}}
++    for cli in S.CLIS:
++        if any(a["tipo"] == "mcp" and a["cli"] == cli and a["acao"] in ("adicionar", "substituir", "remover")
++               for a in escritas):
++            origem = N.caminho_nativo(cli, ctx)
++            tem = origem.exists()
++            if tem:
++                E.gravar_bytes(backup / ARQUIVO_COPIA[cli], origem.read_bytes())
++            registro["arquivos"][cli] = {"caminho": str(origem),
++                                         "backup": ARQUIVO_COPIA[cli] if tem else None, "depois": None,
++                                         "manifesto_antes": manifesto["arquivos"].get(cli)}
++    E.gravar_json(backup / "sincronia.json", registro)
++    try:
++        _executar(ctx, plano, manifesto, registro, backup, ts)
++    except (ErroCli, OSError) as e:
++        imprimir(f"ERRO: {e}")
++        imprimir(f"execução parcial registrada em {ts}; reverter.py {ts} --dry-run mostra como voltar")
++        return 2
++    imprimir(f"sincronia {ts}: {len(escritas)} ação(ões) gravada(s); backup em {backup}")
++    return 0
++
++
++def main(argv: list[str] | None = None) -> int:
++    p = argparse.ArgumentParser(description="Sincroniza as fontes de ferramentas para as CLIs.")
++    p.add_argument("--dry-run", action="store_true", help="mostra o plano e não escreve")
++    p.add_argument("--cli", choices=S.CLIS, help="só uma CLI")
++    a = p.parse_args(argv)
++    return sincronizar(E.contexto_padrao(), [a.cli] if a.cli else None, a.dry_run)
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/tests/ferramentas_unificadas/conftest.py b/tests/ferramentas_unificadas/conftest.py
+new file mode 100644
+index 00000000..dea05718
+--- /dev/null
++++ b/tests/ferramentas_unificadas/conftest.py
+@@ -0,0 +1,26 @@
++"""Fixtures do lote ferramentas-unificadas-26-11. Nenhum teste toca o home real nem o repositório.
++
++Os auxiliares ficam em ferr_helpers.py (nome próprio, sem colisão com outros conftest do CI).
++"""
++from __future__ import annotations
++
++import pytest
++
++# ferr_helpers põe scripts/ferramentas no sys.path antes de importar estado (E) e os fakes
++from ferr_helpers import E, entrada_teste, montar_ctx  # noqa: F401  (reexportados para quem quiser)
++from fakes import FakeCLIs
++
++
++def pytest_configure(config):
++    config.addinivalue_line("markers", "slow: roda a CLI real (opencode) em HOME descartável; mais lento")
++
++
++@pytest.fixture
++def ctx(tmp_path, monkeypatch) -> E.Contexto:
++    monkeypatch.setenv("AGATA_TESTE_VAR", "valor-de-teste-nao-vai-a-fonte")
++    return montar_ctx(tmp_path)
++
++
++@pytest.fixture
++def fake(ctx) -> FakeCLIs:
++    return ctx.runner
+diff --git a/tests/ferramentas_unificadas/fakes.py b/tests/ferramentas_unificadas/fakes.py
+new file mode 100644
+index 00000000..80ec5817
+--- /dev/null
++++ b/tests/ferramentas_unificadas/fakes.py
+@@ -0,0 +1,188 @@
++"""Imitação em memória das três CLIs, nos formatos medidos em 26/11/2026 numa HOME descartável.
++
++claude:   `claude mcp add -s user ...` grava mcpServers[nome] = {type, command, args, env} em ~/.claude.json;
++          recusa nome existente ("already exists"); `claude mcp remove -s user <nome>`.
++codex:    `codex mcp add <nome> --env K=V -- cmd` grava [mcp_servers.<nome>] em config.toml; `codex mcp remove`.
++opencode: `opencode mcp add <nome> ...` grava mcp[nome] em opencode.jsonc, preserva comentários, sobrescreve nome;
++          não tem remove (L6).
++Nenhum processo real é criado: o runner devolve código de retorno e escreve nos arquivos da HOME de teste.
++"""
++from __future__ import annotations
++
++import json
++import sys
++import tomllib
++from pathlib import Path
++from types import SimpleNamespace
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ferramentas"))
++import nativos as N  # noqa: E402
++
++
++def _rc(codigo: int = 0, texto: str = "") -> SimpleNamespace:
++    return SimpleNamespace(returncode=codigo, stdout="", stderr=texto)
++
++
++def _parse_claude_add(args: list[str]):
++    env: dict = {}
++    posicionais: list[str] = []
++    transporte, cmd = "stdio", None
++    i = 0
++    while i < len(args):
++        a = args[i]
++        if a == "-s":
++            i += 2
++            continue
++        if a == "-t":
++            transporte = args[i + 1]
++            i += 2
++            continue
++        if a == "-e":
++            k, v = args[i + 1].split("=", 1)
++            env[k] = v
++            i += 2
++            continue
++        if a == "--":
++            cmd = args[i + 1:]
++            break
++        posicionais.append(a)
++        i += 1
++    nome = posicionais[0]
++    url = posicionais[1] if len(posicionais) > 1 else None
++    return nome, transporte, env, url, cmd
++
++
++def _toml(d: dict, prefixo: tuple = ()) -> str:
++    def valor(v) -> str:
++        if isinstance(v, bool):
++            return "true" if v else "false"
++        if isinstance(v, (int, float)):
++            return str(v)
++        if isinstance(v, list):
++            return "[" + ", ".join(valor(x) for x in v) + "]"
++        return json.dumps(str(v), ensure_ascii=False)
++
++    linhas = []
++    if prefixo:
++        linhas.append(f"[{'.'.join(prefixo)}]")
++    for k, v in d.items():
++        if not isinstance(v, dict):
++            linhas.append(f"{k} = {valor(v)}")
++    texto = "\n".join(linhas) + ("\n" if linhas else "")
++    for k, v in d.items():
++        if isinstance(v, dict):
++            texto += "\n" + _toml(v, prefixo + (k,))
++    return texto
++
++
++class FakeCLIs:
++    def __init__(self, home: Path):
++        self.home = home
++        self.chamadas: list[list[str]] = []
++        self.escritas = 0
++        self.ao_chamar = None  # gancho: recebe o argv antes de cada chamada
++        self.claude_json = home / ".claude.json"
++        self.codex_toml = home / ".codex" / "config.toml"
++        self.opencode = home / ".config" / "opencode" / "opencode.jsonc"
++
++    def __call__(self, argv: list[str]):
++        self.chamadas.append(list(argv))
++        if self.ao_chamar:
++            self.ao_chamar(list(argv))
++        if argv[0] == "claude":
++            return self._claude(argv[1:])
++        if argv[0] == "codex":
++            return self._codex(argv[1:])
++        if argv[0] == "opencode":
++            return self._opencode(argv[1:])
++        return _rc(127, "binário desconhecido")
++
++    def _claude(self, args):
++        d = json.loads(self.claude_json.read_text(encoding="utf-8")) if self.claude_json.exists() else {}
++        servers = d.setdefault("mcpServers", {})
++        # args = ["mcp", "add"|"remove", ...]
++        if args[1] == "remove":
++            nome = args[-1]
++            if nome not in servers:
++                return _rc(1, "not found")
++            del servers[nome]
++        elif args[1] == "add":
++            nome, transporte, env, url, cmd = _parse_claude_add(args[2:])
++            if nome in servers:
++                return _rc(1, "already exists")
++            if transporte == "http":
++                servers[nome] = {"type": "http", "url": url}
++            else:
++                servers[nome] = {"type": "stdio", "command": cmd[0], "args": cmd[1:], "env": env}
++        self.claude_json.parent.mkdir(parents=True, exist_ok=True)
++        self.claude_json.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
++        self.escritas += 1
++        return _rc(0)
++
++    def _codex(self, args):
++        cfg = tomllib.loads(self.codex_toml.read_text(encoding="utf-8")) if self.codex_toml.exists() else {}
++        servers = cfg.setdefault("mcp_servers", {})
++        # args = ["mcp", "add"|"remove", nome, ...]
++        if args[1] == "remove":
++            nome = args[2]
++            if nome not in servers:
++                return _rc(1, "not found")
++            del servers[nome]
++        else:
++            nome, resto = args[2], args[3:]
++            if "--url" in resto:
++                servers[nome] = {"url": resto[resto.index("--url") + 1]}
++            else:
++                env: dict = {}
++                cmd = []
++                i = 0
++                while i < len(resto):
++                    if resto[i] == "--env":
++                        k, v = resto[i + 1].split("=", 1)
++                        env[k] = v
++                        i += 2
++                        continue
++                    if resto[i] == "--":
++                        cmd = resto[i + 1:]
++                        break
++                    i += 1
++                entrada = {"command": cmd[0], "args": cmd[1:]}
++                if env:
++                    entrada["env"] = env
++                servers[nome] = entrada
++        self.codex_toml.parent.mkdir(parents=True, exist_ok=True)
++        self.codex_toml.write_text(_toml(cfg), encoding="utf-8")
++        self.escritas += 1
++        return _rc(0)
++
++    def _opencode(self, args):
++        texto = self.opencode.read_text(encoding="utf-8") if self.opencode.exists() else '{"$schema": "x"}'
++        cabecalho = "".join(linha for linha in texto.splitlines(True) if linha.startswith("//"))
++        d = json.loads(N.sem_comentarios_jsonc(texto))
++        mcp = d.setdefault("mcp", {})
++        # args = ["mcp", "add", nome, ...]; sobrescreve nome existente, como a CLI medida
++        nome, resto = args[2], args[3:]
++        if "--url" in resto:
++            mcp[nome] = {"type": "remote", "url": resto[resto.index("--url") + 1]}
++        else:
++            env: dict = {}
++            cmd: list = []
++            i = 0
++            while i < len(resto):
++                if resto[i] == "--env":
++                    k, v = resto[i + 1].split("=", 1)
++                    env[k] = v
++                    i += 2
++                    continue
++                if resto[i] == "--":
++                    cmd = resto[i + 1:]
++                    break
++                i += 1
++            entrada = {"type": "local", "command": cmd}
++            if env:
++                entrada["environment"] = env
++            mcp[nome] = entrada
++        self.opencode.parent.mkdir(parents=True, exist_ok=True)
++        self.opencode.write_text(cabecalho + json.dumps(d, indent=2) + "\n", encoding="utf-8")
++        self.escritas += 1
++        return _rc(0)
+diff --git a/tests/ferramentas_unificadas/ferr_helpers.py b/tests/ferramentas_unificadas/ferr_helpers.py
+new file mode 100644
+index 00000000..f70ed058
+--- /dev/null
++++ b/tests/ferramentas_unificadas/ferr_helpers.py
+@@ -0,0 +1,65 @@
++"""Auxiliares dos testes do lote ferramentas-unificadas-26-11 (nome próprio, para não colidir com outros conftest).
++
++Cada contexto de teste: HOME temporária, raiz temporária com cópia de config/ferramentas/ e propostas/,
++as três CLIs imitadas em memória (fakes.FakeCLIs) e relógio determinístico. O checkout de skills aponta para o
++repositório real, só para leitura (o SKILL.md de agata-arranque).
++"""
++from __future__ import annotations
++
++import itertools
++import shutil
++import sys
++from pathlib import Path
++
++import yaml
++
++REPO = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(REPO / "scripts" / "ferramentas"))
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++
++import estado as E  # noqa: E402
++from fakes import FakeCLIs  # noqa: E402
++
++
++def _relogio():
++    contador = itertools.count(1)
++    return lambda: f"20261126-120000-{next(contador):06d}"
++
++
++def montar_ctx(tmp_path: Path, nome: str = "t") -> E.Contexto:
++    base = tmp_path / nome
++    home = base / "home"
++    raiz = base / "repo"
++    (raiz / "config" / "ferramentas").mkdir(parents=True)
++    for arq in (REPO / "config" / "ferramentas").glob("*.yml"):
++        shutil.copy(arq, raiz / "config" / "ferramentas" / arq.name)
++    (raiz / "propostas").mkdir()
++    home.mkdir(parents=True, exist_ok=True)
++    ctx = E.Contexto(
++        home=home,
++        raiz=raiz,
++        checkout=REPO,
++        overlay=home / "agata-local" / "ferramentas.yml",
++        base=home / ".local" / "share" / "agata" / "ferramentas",
++        claude_json=home / ".claude.json",
++        codex_dir=home / ".codex",
++        opencode_jsonc=home / ".config" / "opencode" / "opencode.jsonc",
++        claude_skills=home / ".claude" / "skills",
++        codex_skills=home / ".codex" / "skills",
++        agora=_relogio(),
++    )
++    ctx.runner = FakeCLIs(home)
++    return ctx
++
++
++def escrever_overlay(ctx: E.Contexto, dados: dict) -> None:
++    ctx.overlay.parent.mkdir(parents=True, exist_ok=True)
++    ctx.overlay.write_text(yaml.safe_dump(dados, sort_keys=False, allow_unicode=True), encoding="utf-8")
++
++
++def entrada_teste(**extra) -> dict:
++    """MCP stdio de teste, nas três CLIs, com uma variável de ambiente (só o nome vai à fonte)."""
++    base = {"nome": "agata-teste", "transporte": "stdio", "comando": "echo", "args": ["ola"],
++            "env": ["AGATA_TESTE_VAR"], "clis": ["claude", "codex", "opencode"]}
++    base.update(extra)
++    return base
+diff --git a/tests/ferramentas_unificadas/test_comandos.py b/tests/ferramentas_unificadas/test_comandos.py
+new file mode 100644
+index 00000000..86ec66c8
+--- /dev/null
++++ b/tests/ferramentas_unificadas/test_comandos.py
+@@ -0,0 +1,158 @@
++"""AC-11 (instalar), AC-12 (promover), AC-13 (segredo fora de yml e log), AC-15 (listar)."""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import shutil
++import subprocess
++import sys
++from pathlib import Path
++
++import pytest
++from ferr_helpers import REPO, entrada_teste, escrever_overlay, montar_ctx
++
++import estado as E
++import instalar as I
++import listar as LI
++import nativos as N
++import promover as P
++import sincronizar as SYNC
++
++PARES = ["transporte=stdio", "comando=echo", "args=ola", "env=AGATA_TESTE_VAR", "clis=claude,codex,opencode"]
++
++
++def _arvore(raiz: Path) -> dict:
++    return {str(p.relative_to(raiz)): hashlib.sha256(p.read_bytes()).hexdigest()
++            for p in sorted(raiz.rglob("*")) if p.is_file()}
++
++
++def _silencio(*_a, **_k):
++    return None
++
++
++def test_instalar_nao_toca_canon_nem_repo(ctx, fake):
++    antes = _arvore(ctx.raiz)
++    rc = I.instalar(ctx, "mcp", "agata-teste", PARES, pedir=lambda _: "sim", imprimir=_silencio)
++    assert rc == 0
++    assert _arvore(ctx.raiz) == antes, "instalar mexeu na raiz (config/, propostas/ ou outro arquivo)"
++    assert ctx.overlay.is_file()
++    assert "agata-teste" in ctx.overlay.read_text(encoding="utf-8")
++
++
++def test_instalar_sem_sim_nao_grava(ctx, fake):
++    antes = _arvore(ctx.raiz)
++    rc = I.instalar(ctx, "mcp", "agata-teste", PARES, pedir=lambda _: "nao", imprimir=_silencio)
++    assert rc == 3
++    assert not ctx.overlay.exists()
++    assert fake.chamadas == []
++    assert _arvore(ctx.raiz) == antes
++
++
++def test_promover_gera_diff_sem_aplicar(ctx, fake):
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    canonico = ctx.raiz / "config" / "ferramentas" / "mcp.yml"
++    canon_antes = canonico.read_bytes()
++    overlay_antes = ctx.overlay.read_bytes()
++    saida: list[str] = []
++    rc = P.promover(ctx, "agata-teste", imprimir=saida.append)
++    assert rc == 0, saida
++    assert canonico.read_bytes() == canon_antes, "promover aplicou a mudança na fonte canônica"
++    assert ctx.overlay.read_bytes() == overlay_antes, "promover mexeu no overlay"
++    diffs = sorted((ctx.raiz / "propostas").glob("*-promover-agata-teste.diff"))
++    assert len(diffs) == 1
++    texto = diffs[0].read_text(encoding="utf-8")
++    assert texto.startswith("diff --git a/config/ferramentas/mcp.yml b/config/ferramentas/mcp.yml\n")
++    assert "+  - nome: agata-teste" in texto
++    assert "valor-de-teste" not in texto
++    if shutil.which("git"):
++        # o diff tem de ser aplicável (checagem, sem aplicar): formato que o P-8 confere
++        verifica = subprocess.run(["git", "apply", "--check", str(diffs[0])], cwd=ctx.raiz,
++                                  capture_output=True, text=True, timeout=30)
++        assert verifica.returncode == 0, verifica.stderr
++
++
++def test_sem_valor_de_segredo_em_yml_nem_log(ctx, fake, monkeypatch):
++    segredo = "segredo-de-teste-9f8e7d6c"
++    monkeypatch.setenv("AGATA_TESTE_VAR", segredo)
++    saida: list[str] = []
++    assert I.instalar(ctx, "mcp", "agata-teste", PARES, pedir=lambda _: "sim", imprimir=saida.append) == 0
++    linhas, _ = LI.linhas(ctx)
++    saida += [" ".join(map(str, linha)) for linha in linhas]
++    # tentar gravar o valor pela própria CLI: recusado, e o valor não ecoa
++    rc = I.instalar(ctx, "mcp", "outro-teste", ["transporte=stdio", "comando=echo", f"env=CHAVE={segredo}",
++                                                "clis=claude"], pedir=lambda _: "sim", imprimir=saida.append)
++    assert rc == 2
++    assert segredo not in "\n".join(saida)
++    arquivos = [ctx.overlay, ctx.raiz / "config" / "ferramentas" / "mcp.yml",
++                ctx.base / "gerenciado.json", ctx.base / "log.jsonl"]
++    for arq in arquivos:
++        assert arq.exists(), arq
++        assert segredo.encode() not in arq.read_bytes(), arq.name
++
++
++def test_listar_categoria_cli_origem(ctx, fake):
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    assert SYNC.sincronizar(ctx, imprimir=_silencio) == 0
++    linhas, indice = LI.linhas(ctx)
++    chaves = {(cat, nome, cli, origem): estado for cat, nome, cli, origem, estado in linhas}
++    for cli in ("claude", "codex", "opencode"):
++        assert chaves[("mcp", "agata-teste", cli, "overlay")] == "gerenciado"
++    assert ("mcp", "github-pat", "claude", "canonico") in chaves
++    assert chaves[("skill", "agata-arranque", "claude", "canonico")] == "ponteiro ok"
++    assert ("agente", "agata-dev", "claude", "canonico") in chaves
++    assert indice == ".agents/skills/INDICE.md"
++    assert "valor-de-teste" not in "\n".join(" ".join(map(str, linha)) for linha in linhas)
++    # o nativo que não está na fonte aparece como nativo, sem valor
++    ctx.claude_json.write_text('{"mcpServers": {"intrusa": {"type": "stdio", "command": "x", "args": []}}}')
++    linhas2, _ = LI.linhas(ctx)
++    assert ("mcp", "intrusa", "claude", "nativo") in {(c, n, cl, o) for c, n, cl, o, _e in linhas2}
++
++
++def test_instalar_recusa_sem_tty(tmp_path):
++    """Alto 1 (revisão independente): entrada pipeada não passa como "sim" do Humano. Nada é gravado."""
++    home = tmp_path / "home"
++    home.mkdir()
++    env = {k: v for k, v in os.environ.items() if k not in ("XDG_CONFIG_HOME", "CODEX_HOME")}
++    env["HOME"] = str(home)  # contexto_padrao usa HOME: o teste não toca o home real
++    proc = subprocess.run(
++        [sys.executable, str(REPO / "scripts" / "ferramentas" / "instalar.py"), "mcp", "agata-teste",
++         "--params", "transporte=stdio", "--params", "comando=echo", "--params", "clis=claude"],
++        input="sim\n", capture_output=True, text=True, timeout=60, env=env)
++    assert proc.returncode != 0
++    assert "terminal" in proc.stdout
++    assert not (home / "agata-local" / "ferramentas.yml").exists()
++    assert not (home / ".local").exists(), "instalar criou pasta antes da recusa"
++
++
++@pytest.mark.slow
++def test_opencode_mcp_add_real(tmp_path):
++    """AC-04 com CLI real (Alto 3): o comando que nativos.py monta grava no opencode de verdade o formato que
++    fakes.py imita. Medido em 26/11/2026 numa HOME descartável; só configuração, nenhum modelo."""
++    if shutil.which("opencode") is None:
++        pytest.skip("opencode não está no PATH")
++    xdg = tmp_path / "xdg"
++    env = {**os.environ, "HOME": str(tmp_path / "home"), "XDG_CONFIG_HOME": str(xdg / "config"),
++           "XDG_DATA_HOME": str(xdg / "data"), "XDG_CACHE_HOME": str(xdg / "cache"),
++           "XDG_STATE_HOME": str(xdg / "state")}
++    ctx = montar_ctx(tmp_path, "opencode-real")
++    cfg = xdg / "config" / "opencode" / "opencode.jsonc"
++    ctx.opencode_jsonc = cfg
++
++    def real(argv):
++        return subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60, env=env)
++
++    e = {"transporte": "stdio", "comando": "echo", "args": ["ola"], "url": None,
++         "env": {"CHAVE_FICTICIA": "valor-ficticio-123"}}
++    r = real(N.argv_adicionar("opencode", "agata-ficticio", e))
++    assert r.returncode == 0, r.stderr[-300:]
++    assert N.ler_mcp("opencode", ctx) == {"agata-ficticio": e}
++    # formato real: mcp.<nome> = {type: local, command: [cmd, args...], environment: {...}}, igual ao que fakes.py grava
++    bruto = json.loads(N.sem_comentarios_jsonc(cfg.read_text(encoding="utf-8")))
++    assert bruto["mcp"]["agata-ficticio"] == {"type": "local", "command": ["echo", "ola"],
++                                              "environment": {"CHAVE_FICTICIA": "valor-ficticio-123"}}
++    # nome existente é sobrescrito (medido): a segunda rodada troca os argumentos
++    assert real(N.argv_adicionar("opencode", "agata-ficticio", {**e, "args": ["outro"]})).returncode == 0
++    assert N.ler_mcp("opencode", ctx)["agata-ficticio"]["args"] == ["outro"]
++    # sem remove medido no opencode (L6): o sync não tenta remover por comando
++    assert N.argv_remover("opencode", "agata-ficticio") is None
+diff --git a/tests/ferramentas_unificadas/test_geradores.py b/tests/ferramentas_unificadas/test_geradores.py
+new file mode 100644
+index 00000000..c854120d
+--- /dev/null
++++ b/tests/ferramentas_unificadas/test_geradores.py
+@@ -0,0 +1,45 @@
++"""Testes extra (fora dos AC-01 a AC-15): gerador de hook que edita o home do Humano, sempre com home temporária.
++
++O gerador só grava com --aplicar. Copia o original para backup 600 antes de gravar e não duplica.
++(O gerador da denylist saiu deste lote, Alto 2 da revisão: fica para o lote 2 junto com R4 final.)
++"""
++from __future__ import annotations
++
++import json
++import stat
++
++import instalar_hook_arranque as IH
++
++
++def _settings(home):
++    return home / ".claude" / "settings.json"
++
++
++def test_hook_arranque_idempotente_e_preserva(tmp_path):
++    home = tmp_path / "h"
++    _settings(home).parent.mkdir(parents=True)
++    original = {"model": "x", "hooks": {"SessionStart": [{"matcher": "startup", "hooks": [
++        {"type": "command", "command": "bash outro.sh", "timeout": 5}]}]}}
++    _settings(home).write_text(json.dumps(original), encoding="utf-8")
++    saida: list[str] = []
++    assert IH.executar(home, aplicar=False, imprimir=saida.append) == 0
++    assert json.loads(_settings(home).read_text()) == original, "sem --aplicar não pode gravar"
++
++    assert IH.executar(home, aplicar=True, imprimir=saida.append) == 0
++    novo = json.loads(_settings(home).read_text())
++    assert novo["model"] == "x"
++    grupos = novo["hooks"]["SessionStart"]
++    assert len(grupos) == 2 and grupos[0] == original["hooks"]["SessionStart"][0]
++    assert "agata-arranque/SKILL.md" in grupos[1]["hooks"][0]["command"]
++    codex = home / ".codex" / "hooks.json"
++    assert codex.exists() and "agata-arranque/SKILL.md" in codex.read_text()
++    backups = list((home / ".local" / "share" / "agata" / "ferramentas" / "backup").iterdir())
++    assert backups, "sem cópia do original"
++    copia = next(p for p in backups[0].iterdir() if p.name == "claude.json")
++    assert stat.S_IMODE(copia.stat().st_mode) == 0o600
++
++    # segunda rodada: nada a fazer, nada duplicado
++    assert IH.executar(home, aplicar=True, imprimir=saida.append) == 0
++    assert len(json.loads(_settings(home).read_text())["hooks"]["SessionStart"]) == 2
++
++
+diff --git a/tests/ferramentas_unificadas/test_reverter.py b/tests/ferramentas_unificadas/test_reverter.py
+new file mode 100644
+index 00000000..36d16d2b
+--- /dev/null
++++ b/tests/ferramentas_unificadas/test_reverter.py
+@@ -0,0 +1,90 @@
++"""AC-09 e AC-10: reversão pelo registro, com hash guard."""
++from __future__ import annotations
++
++import json
++
++from ferr_helpers import entrada_teste, escrever_overlay, montar_ctx
++
++import estado as E
++import nativos as N
++import reverter as R
++import sincronizar as SYNC
++
++
++def _estado_nativo(ctx) -> dict:
++    return {cli: N.ler_mcp(cli, ctx) for cli in ("claude", "codex", "opencode")}
++
++
++def _rodar(ctx, **kw):
++    saida: list[str] = []
++    rc = SYNC.sincronizar(ctx, imprimir=saida.append, **kw)
++    assert rc == 0, saida
++    return saida
++
++
++def _ts_da_execucao(ctx) -> str:
++    execs = R.listar(ctx)
++    assert execs, "nenhuma execução registrada"
++    return execs[-1]["ts"]
++
++
++def test_reverter_restaura_estado_pre_sync(tmp_path, monkeypatch):
++    monkeypatch.setenv("AGATA_TESTE_VAR", "valor-de-teste-reverter")
++    # cenário 1: entrada nova. O nativo tinha uma entrada alheia, que tem de continuar igual.
++    ctx = montar_ctx(tmp_path, "novo")
++    ctx.claude_json.write_text(json.dumps({"mcpServers": {"intrusa": {"type": "stdio", "command": "x", "args": []}}}))
++    # opencode.jsonc que já existia, com comentário: a reversão tem de devolver os bytes exatos (backup)
++    ctx.opencode_jsonc.parent.mkdir(parents=True, exist_ok=True)
++    ctx.opencode_jsonc.write_text('// meu comentário\n{"mcp": {}}\n', encoding="utf-8")
++    antes = _estado_nativo(ctx)
++    bytes_opencode_antes = ctx.opencode_jsonc.read_bytes()
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    _rodar(ctx)
++    assert "agata-teste" in _estado_nativo(ctx)["claude"]
++    assert (ctx.claude_skills / "agata-arranque").is_symlink(), "o sync deveria ter criado o ponteiro"
++    rc = R.reverter(ctx, _ts_da_execucao(ctx), imprimir=lambda *_: None)
++    assert rc == 0
++    depois = _estado_nativo(ctx)
++    assert depois["claude"] == antes["claude"]
++    assert depois["codex"] == antes["codex"]
++    assert depois["opencode"] == antes["opencode"]
++    assert ctx.opencode_jsonc.read_bytes() == bytes_opencode_antes, "opencode.jsonc não voltou aos bytes de antes"
++    assert "claude|mcp|agata-teste" not in E.ler_manifest(ctx)["entradas"]
++    # o ponteiro saiu do lugar por mv para ~/agata-arquivo, nunca por rm
++    assert not (ctx.claude_skills / "agata-arranque").is_symlink()
++    assert list((ctx.home / "agata-arquivo").glob("ferramentas-*/claude-agata-arranque")), "ponteiro não foi arquivado"
++
++    # cenário 2: entrada alheia com o mesmo nome. Com adotar: true, o sync a substitui; reverter devolve o valor anterior.
++    # Aqui o opencode.jsonc não existia antes: a reversão tira o arquivo do lugar, sem apagá-lo.
++    ctx2 = montar_ctx(tmp_path, "adotado")
++    ctx2.claude_json.write_text(json.dumps({"mcpServers": {"agata-teste": {"type": "stdio", "command": "antigo", "args": ["a"]}}}))
++    escrever_overlay(ctx2, {"mcp": [entrada_teste(adotar=True)]})
++    _rodar(ctx2)
++    assert _estado_nativo(ctx2)["claude"]["agata-teste"]["comando"] == "echo"
++    rc = R.reverter(ctx2, _ts_da_execucao(ctx2), imprimir=lambda *_: None)
++    assert rc == 0
++    recuperado = _estado_nativo(ctx2)["claude"]["agata-teste"]
++    assert recuperado["comando"] == "antigo" and recuperado["args"] == ["a"]
++    assert not ctx2.opencode_jsonc.exists(), "opencode.jsonc que não existia continuou no lugar"
++    assert list((ctx2.home / "agata-arquivo").glob("ferramentas-*/opencode.jsonc")), "arquivo não foi movido para o arquivo"
++
++
++def test_reverter_recusa_arquivo_alterado(tmp_path, monkeypatch):
++    monkeypatch.setenv("AGATA_TESTE_VAR", "valor-de-teste-reverter")
++    ctx = montar_ctx(tmp_path, "alterado")
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    _rodar(ctx)
++    ts = _ts_da_execucao(ctx)
++    # depois do sync, alguém muda a entrada no nativo do Claude
++    dados = json.loads(ctx.claude_json.read_text())
++    dados["mcpServers"]["agata-teste"]["command"] = "mudou-depois"
++    ctx.claude_json.write_text(json.dumps(dados, indent=2))
++    conteudo = ctx.claude_json.read_bytes()
++    chamadas_antes = len(ctx.runner.chamadas)
++    saida: list[str] = []
++    rc = R.reverter(ctx, ts, imprimir=saida.append)
++    assert rc == 3
++    assert any("mudou depois do sync" in linha for linha in saida)
++    assert len(ctx.runner.chamadas) == chamadas_antes, "reverter chamou comando nativo mesmo recusando"
++    assert ctx.claude_json.read_bytes() == conteudo
++    assert "claude|mcp|agata-teste" in E.ler_manifest(ctx)["entradas"], "manifest mudou numa recusa"
+diff --git a/tests/ferramentas_unificadas/test_schema.py b/tests/ferramentas_unificadas/test_schema.py
+new file mode 100644
+index 00000000..a137ad45
+--- /dev/null
++++ b/tests/ferramentas_unificadas/test_schema.py
+@@ -0,0 +1,53 @@
++"""AC-01 e AC-02: schema das fontes (canônico e overlay)."""
++from __future__ import annotations
++
++import pytest
++import yaml
++from ferr_helpers import REPO, entrada_teste, escrever_overlay, montar_ctx  # noqa: F401
++
++import schema as S
++
++
++def test_schema_canon_valido():
++    canon, indice = S.carregar_canonico(REPO)
++    assert set(canon["mcp"]) == {"github-pat", "agata-navegador"}
++    assert "agata-arranque" in canon["skills"]
++    assert len(canon["agentes"]) == 10
++    assert indice == ".agents/skills/INDICE.md"
++    for tipo in ("mcp", "skills", "agentes"):
++        for nome, e in canon[tipo].items():
++            assert e["clis"], nome
++            assert set(e["clis"]) <= set(S.CLIS), nome
++            if not e["gerenciado"]:
++                assert e["motivo"].strip(), nome
++    # nenhum valor de segredo na fonte: env, se houver, são só nomes de variável
++    for e in canon["mcp"].values():
++        assert all(S.RE_VARIAVEL.fullmatch(v) for v in e["env"])
++
++
++def test_schema_overlay_rejeita_campo_extra(tmp_path):
++    overlay = tmp_path / "ferramentas.yml"
++    overlay.write_text(yaml.safe_dump({"mcp": [entrada_teste(campo_inventado="x")]}), encoding="utf-8")
++    with pytest.raises(S.ErroSchema) as erro:
++        S.carregar_overlay(overlay)
++    assert "campo_inventado" in str(erro.value)
++
++    # chave de topo fora do schema também é recusada
++    overlay.write_text(yaml.safe_dump({"hooks": []}), encoding="utf-8")
++    with pytest.raises(S.ErroSchema):
++        S.carregar_overlay(overlay)
++
++    # valor de segredo no lugar de nome de variável: recusado, e o valor não aparece na mensagem
++    segredo = "segredo-de-teste-000111"
++    overlay.write_text(yaml.safe_dump({"mcp": [entrada_teste(env=[f"CHAVE={segredo}"])]}), encoding="utf-8")
++    with pytest.raises(S.ErroSchema) as erro:
++        S.carregar_overlay(overlay)
++    assert segredo not in str(erro.value)
++
++
++def test_schema_overlay_aceita_entrada_valida(tmp_path):
++    ctx = montar_ctx(tmp_path, "ov")
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    ov = S.carregar_overlay(ctx.overlay)
++    assert list(ov["mcp"]) == ["agata-teste"]
++    assert ov["mcp"]["agata-teste"]["env"] == ["AGATA_TESTE_VAR"]
+diff --git a/tests/ferramentas_unificadas/test_sync.py b/tests/ferramentas_unificadas/test_sync.py
+new file mode 100644
+index 00000000..b8f22481
+--- /dev/null
++++ b/tests/ferramentas_unificadas/test_sync.py
+@@ -0,0 +1,168 @@
++"""AC-03 a AC-08 e AC-14: sincronização (idempotência, merge, adoção, ponteiro, backup, config inválida)."""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import stat
++import subprocess
++
++import pytest
++from ferr_helpers import entrada_teste, escrever_overlay, montar_ctx
++
++import estado as E
++import nativos as N
++import sincronizar as SYNC
++
++
++def _estado_nativo(ctx) -> dict:
++    return {cli: N.ler_mcp(cli, ctx) for cli in ("claude", "codex", "opencode")}
++
++
++def _sha_nativos(ctx) -> dict:
++    arquivos = {"claude": ctx.claude_json, "codex": ctx.codex_dir / "config.toml", "opencode": ctx.opencode_jsonc}
++    return {k: (hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None) for k, p in arquivos.items()}
++
++
++def _sync(ctx, **kw) -> tuple[int, list[str]]:
++    saida: list[str] = []
++    rc = SYNC.sincronizar(ctx, imprimir=saida.append, **kw)
++    return rc, saida
++
++
++def test_sync_duas_rodadas_zero_diff(ctx, fake):
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    antes = _sha_nativos(ctx)
++    escritas_antes = fake.escritas
++    rc, saida = _sync(ctx)
++    assert rc == 0
++    assert fake.escritas == escritas_antes, "segunda rodada chamou comando nativo de escrita"
++    assert _sha_nativos(ctx) == antes, "segunda rodada alterou arquivo nativo"
++    assert any("0 mudança(s)" in linha for linha in saida)
++
++
++def test_mcp_overlay_aparece_nos_tres_nativos(ctx, fake):
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    estado = _estado_nativo(ctx)
++    for cli in ("claude", "codex", "opencode"):
++        assert "agata-teste" in estado[cli], cli
++        entrada = estado[cli]["agata-teste"]
++        assert entrada["comando"] == "echo" and entrada["args"] == ["ola"], cli
++        # o valor da variável foi ao nativo, pelo ambiente; não veio da fonte
++        assert entrada["env"] == {"AGATA_TESTE_VAR": "valor-de-teste-nao-vai-a-fonte"}, cli
++    assert "valor-de-teste" not in (ctx.raiz / "config" / "ferramentas" / "mcp.yml").read_text()
++
++
++def test_sync_preserva_entrada_nao_gerenciada(ctx, fake):
++    # entradas que o Humano já tinha nas três CLIs, fora da fonte e do manifest
++    ctx.claude_json.write_text(json.dumps({"mcpServers": {"intrusa": {"type": "stdio", "command": "x", "args": []}}}))
++    ctx.codex_dir.mkdir(parents=True, exist_ok=True)
++    ctx.codex_dir.joinpath("config.toml").write_text('[mcp_servers.intrusa-codex]\ncommand = "y"\nargs = []\n')
++    ctx.opencode_jsonc.parent.mkdir(parents=True, exist_ok=True)
++    ctx.opencode_jsonc.write_text('// meu comentário\n{"mcp": {"intrusa-oc": {"type": "remote", "url": "http://127.0.0.1:9/mcp"}}}\n')
++    antes = _estado_nativo(ctx)
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    depois = _estado_nativo(ctx)
++    assert depois["claude"]["intrusa"] == antes["claude"]["intrusa"]
++    assert depois["codex"]["intrusa-codex"] == antes["codex"]["intrusa-codex"]
++    assert depois["opencode"]["intrusa-oc"] == antes["opencode"]["intrusa-oc"]
++    assert "// meu comentário" in ctx.opencode_jsonc.read_text(), "comentário do opencode.jsonc se perdeu"
++
++
++def test_sync_nao_adota_sem_flag(ctx, fake):
++    # o nativo já tem agata-teste com outro comando, e nada no manifest diz que é nosso
++    ctx.claude_json.write_text(json.dumps({"mcpServers": {"agata-teste": {"type": "stdio", "command": "outro", "args": []}}}))
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    rc, saida = _sync(ctx)
++    assert rc == 0
++    assert _estado_nativo(ctx)["claude"]["agata-teste"]["comando"] == "outro", "sync adotou sem adotar: true"
++    assert "claude|mcp|agata-teste" not in E.ler_manifest(ctx)["entradas"]
++    assert any("nao_adotado" in linha for linha in saida)
++    # com adotar: true, a mesma entrada passa a ser gerenciada
++    escrever_overlay(ctx, {"mcp": [entrada_teste(adotar=True)]})
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    assert _estado_nativo(ctx)["claude"]["agata-teste"]["comando"] == "echo"
++    assert "claude|mcp|agata-teste" in json.loads((ctx.base / "gerenciado.json").read_text())["entradas"]
++
++
++def test_skill_arranque_ponteiro_claude_codex(ctx, fake):
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    alvo = (ctx.checkout / ".agents" / "skills" / "agata-arranque").resolve()
++    for pasta in (ctx.claude_skills, ctx.codex_skills):
++        link = pasta / "agata-arranque"
++        assert link.is_symlink(), pasta
++        assert os.path.realpath(link) == str(alvo), pasta
++        texto = (link / "SKILL.md").read_text(encoding="utf-8")
++        assert texto.startswith("---\nname: agata-arranque\n"), pasta
++    assert fake.chamadas == [], "skill é ponteiro: nenhum comando nativo de MCP deveria rodar"
++
++
++def test_sync_backup_600_antes_de_escrever(ctx, fake):
++    ctx.claude_json.write_text(json.dumps({"mcpServers": {}}))
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    visto = {}
++
++    def ao_chamar(argv):
++        if "backup" in visto:
++            return
++        raiz = ctx.base / "backup"
++        visto["backup"] = sorted(p.name for p in raiz.iterdir()) if raiz.exists() else []
++        if raiz.exists():
++            pasta = next(raiz.iterdir())
++            copia = pasta / "claude.json"
++            visto["copia_modo"] = stat.S_IMODE(copia.stat().st_mode) if copia.exists() else None
++            visto["pasta_modo"] = stat.S_IMODE(pasta.stat().st_mode)
++
++    fake.ao_chamar = ao_chamar
++    rc, _ = _sync(ctx)
++    assert rc == 0
++    assert visto["backup"], "nenhum backup existia quando a primeira escrita nativa começou"
++    assert visto["copia_modo"] == 0o600
++    assert visto["pasta_modo"] == 0o700
++
++
++def test_sync_aborta_config_invalida_sem_escrita(ctx, fake):
++    ctx.claude_json.write_text("{ isto nao e json")
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++    conteudo = ctx.claude_json.read_bytes()
++    rc, saida = _sync(ctx)
++    assert rc == 2
++    assert fake.chamadas == [], "comando nativo foi chamado com config inválida"
++    assert ctx.claude_json.read_bytes() == conteudo
++    assert not (ctx.base / "backup").exists(), "backup criado mesmo sem escrita"
++    assert any("ERRO" in linha and "claude.json" in linha for linha in saida)
++
++
++def test_timeout_nao_vaza_segredo(tmp_path, monkeypatch):
++    """Alto 4 (revisão independente): TimeoutExpired carrega o argv, e o argv leva K=valor de env.
++    Nada disso pode sair na saída do sync nem na mensagem da exceção."""
++    segredo = "segredo-timeout-5a4b3c2d"
++    monkeypatch.setenv("AGATA_TESTE_VAR", segredo)
++    ctx = montar_ctx(tmp_path, "timeout")
++    ctx.runner = E.executar_cli  # o runner de verdade; só o subprocess é trocado
++    escrever_overlay(ctx, {"mcp": [entrada_teste()]})
++
++    def estoura_prazo(argv, **kw):
++        raise subprocess.TimeoutExpired(cmd=argv, timeout=120)
++
++    monkeypatch.setattr(E.subprocess, "run", estoura_prazo)
++    argv_com_segredo = ["claude", "mcp", "add", "-s", "user", "agata-teste", "-e", f"AGATA_TESTE_VAR={segredo}",
++                        "--", "echo"]
++    with pytest.raises(E.ErroComando) as erro:
++        E.executar_cli(argv_com_segredo)
++    assert segredo not in str(erro.value)
++    saida: list[str] = []
++    rc = SYNC.sincronizar(ctx, imprimir=saida.append)
++    texto = "\n".join(saida)
++    assert rc == 2
++    assert "ERRO" in texto and "sem resposta no prazo" in texto
++    assert segredo not in texto
++    assert "AGATA_TESTE_VAR=" not in texto
