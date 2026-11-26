@@ -1,0 +1,54 @@
+# Fonte canônica dos subagentes agata-* (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
+# Origem: .claude/agents/. Todos ficam fora do sync deste lote: o destino nativo de subagentes em
+# Claude e Codex não foi medido (lacuna L4). Quando for medido, a entrada vira gerenciado: true.
+agentes:
+  - nome: agata-ci
+    origem: .claude/agents/agata-ci.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-dev
+    origem: .claude/agents/agata-dev.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-inov-arquiteto
+    origem: .claude/agents/agata-inov-arquiteto.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-inov-critico
+    origem: .claude/agents/agata-inov-critico.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-inov-pesquisa
+    origem: .claude/agents/agata-inov-pesquisa.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-pesq-painel
+    origem: .claude/agents/agata-pesq-painel.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-pesq-processo
+    origem: .claude/agents/agata-pesq-processo.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-pesq-rea
+    origem: .claude/agents/agata-pesq-rea.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-revisor
+    origem: .claude/agents/agata-revisor.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"
+  - nome: agata-spec
+    origem: .claude/agents/agata-spec.md
+    clis: [claude]
+    gerenciado: false
+    motivo: "L4: destino nativo de subagentes não medido"

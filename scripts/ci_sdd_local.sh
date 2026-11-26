@@ -73,7 +73,7 @@ PATH_ORIGINAL="$PATH"
 export PATH="$(dirname "$PYTEST"):$PATH"
 
 _ci_passos() {
-passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
+passo "testes SDD (pytest)" "$PYTEST" -q -p no:cacheprovider redesign/sdd_flow/tests redesign/review_mesh redesign/project_kit redesign/evidence_ledger redesign/painel_operacional redesign/obsidian redesign/nova_versao/tests redesign/alexandria/tests redesign/metacognicao/tests redesign/corpo/tests redesign/conexoes/tests redesign/avaliacao/tests redesign/sentidos/tests redesign/confiabilidade/tests redesign/rotas/tests redesign/mvp_autoaprimoramento/tests redesign/nucleo-desenvolvimento/tests ferramentas/test_ferramentas.py tests/ferramentas_unificadas redesign/router/test_seth_base.py redesign/router/test_rotas_locais.py
 passo "gate de sincronia das specs (selftest)" python3 -I scripts/gate_spec_sync.py --selftest
 passo "gate de sincronia das specs (antes dos ciclos, que regeneram o drift)" python3 -I scripts/gate_spec_sync.py
 passo "ciclo SDD sobre o próprio sdd_flow" python3 redesign/sdd_flow/runner.py "$TMP/state.json" cycle redesign/sdd_flow/spec redesign/sdd_flow/spec/acceptance.json --scope redesign/sdd_flow

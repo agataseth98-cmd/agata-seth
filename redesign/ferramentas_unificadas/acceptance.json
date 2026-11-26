@@ -1,0 +1,29 @@
+{
+  "lote": "ferramentas-unificadas-26-11",
+  "estado": "especificado; nada implementado; testes a escrever",
+  "criterios": [
+    {"id": "AC-01", "descricao": "fonte canônica valida contra o schema", "teste": "test_schema_canon_valido", "tipo": "mecanico"},
+    {"id": "AC-02", "descricao": "overlay com campo fora do schema é recusado", "teste": "test_schema_overlay_rejeita_campo_extra", "tipo": "mecanico"},
+    {"id": "AC-03", "descricao": "sincronizar duas vezes não muda arquivo nativo", "teste": "test_sync_duas_rodadas_zero_diff", "tipo": "mecanico"},
+    {"id": "AC-04", "descricao": "MCP do overlay aparece em claude, codex e opencode", "teste": "test_mcp_overlay_aparece_nos_tres_nativos", "tipo": "mecanico"},
+    {"id": "AC-05", "descricao": "entrada nativa fora da fonte e do manifest fica intacta", "teste": "test_sync_preserva_entrada_nao_gerenciada", "tipo": "mecanico"},
+    {"id": "AC-06", "descricao": "mesmo nome sem adotar: true não é adotado", "teste": "test_sync_nao_adota_sem_flag", "tipo": "mecanico"},
+    {"id": "AC-07", "descricao": "skill agata-arranque é ponteiro válido em Claude e Codex", "teste": "test_skill_arranque_ponteiro_claude_codex", "tipo": "mecanico"},
+    {"id": "AC-08", "descricao": "backup 600 existe antes da primeira escrita", "teste": "test_sync_backup_600_antes_de_escrever", "tipo": "mecanico"},
+    {"id": "AC-09", "descricao": "reverter devolve o estado pré-sync das entradas gerenciadas", "teste": "test_reverter_restaura_estado_pre_sync", "tipo": "mecanico"},
+    {"id": "AC-10", "descricao": "reverter recusa arquivo alterado depois do sync", "teste": "test_reverter_recusa_arquivo_alterado", "tipo": "mecanico"},
+    {"id": "AC-11", "descricao": "instalar grava só o overlay, sem tocar config/ nem o repo", "teste": "test_instalar_nao_toca_canon_nem_repo", "tipo": "mecanico"},
+    {"id": "AC-12", "descricao": "promover gera o diff e não aplica nada", "teste": "test_promover_gera_diff_sem_aplicar", "tipo": "mecanico"},
+    {"id": "AC-13", "descricao": "nenhum yml nem log contém valor de segredo", "teste": "test_sem_valor_de_segredo_em_yml_nem_log", "tipo": "mecanico"},
+    {"id": "AC-14", "descricao": "config nativa inválida aborta sem escrita", "teste": "test_sync_aborta_config_invalida_sem_escrita", "tipo": "mecanico"},
+    {"id": "AC-15", "descricao": "listar mostra categoria, CLI e origem, sem valores", "teste": "test_listar_categoria_cli_origem", "tipo": "mecanico"}
+  ],
+  "lacunas": [
+    {"id": "L1", "criterio": "skill carregada no início da sessão (H2)", "motivo": "sem SessionStart no lote 1 (D3)", "decisao": "C2"},
+    {"id": "L2", "criterio": "skill agata-arranque no OpenCode", "motivo": "pasta e formato de skill não medidos", "decisao": "medir"},
+    {"id": "L3", "criterio": "Gemini CLI", "motivo": "binário ausente; não medido", "decisao": "lote 2 (D2)"},
+    {"id": "L4", "criterio": "subagentes em Claude e Codex", "motivo": "pastas ausentes; formato não medido", "decisao": "medir"},
+    {"id": "L5", "criterio": "sync com CLI aberta na mesma config", "motivo": "concorrência não medida", "decisao": "medir"},
+    {"id": "L6", "criterio": "opencode mcp add sem prompt e remove no OpenCode", "motivo": "ajuda não lista remove; modo não interativo não medido", "decisao": "medir"}
+  ]
+}

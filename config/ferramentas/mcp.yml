@@ -1,0 +1,18 @@
+# Fonte canônica de servidores MCP (lote ferramentas-unificadas-26-11; alteração só por proposta P-8).
+# Em env entram só NOMES de variável; o valor vem do ambiente no momento do sync, nunca daqui (AC-13).
+# Entrada com gerenciado: false é conhecida, o sync não a adiciona, altera nem remove; motivo é obrigatório.
+mcp:
+  - nome: github-pat
+    transporte: http
+    url: https://api.githubcopilot.com/mcp/
+    clis: [claude, codex]
+    gerenciado: false
+    motivo: "Cabeçalho Authorization fica só no config nativo; o schema não declara cabeçalhos (medido em 26/11/2026, só estrutura)."
+    descricao: "MCP do GitHub do usuário, criado antes do sync."
+  - nome: agata-navegador
+    transporte: http
+    url: http://127.0.0.1:20136/mcp
+    clis: [claude]
+    gerenciado: false
+    motivo: "Escopo de projeto no Claude (projects do Agata); o sync deste lote só gerencia escopo de usuário."
+    descricao: "Navegador do Agata, registrado por projeto."
