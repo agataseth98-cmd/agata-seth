@@ -47,10 +47,13 @@ def _post(url: str, corpo: dict, timeout: int) -> dict:
 
 
 def para_16k(origem: Path, destino: Path) -> float | None:
-    """Converte para wav mono 16 kHz (o que os dois motores esperam). Devolve a duração em segundos."""
+    """Converte para wav mono 16 kHz (o que os dois motores esperam). Devolve a duração em segundos.
+    Aplica normalização de volume e filtro de ruído para melhorar a transcrição de áudio capturado por microfone."""
     if not shutil.which("ffmpeg"):
         raise RuntimeError("ffmpeg ausente")
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(origem), "-ar", "16000", "-ac", "1", str(destino)],
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(origem),
+                    "-af", "highpass=f=80,afftdn=nf=-20,loudnorm=I=-16:TP=-1.5:LRA=11",
+                    "-ar", "16000", "-ac", "1", str(destino)],
                    check=True, timeout=60, stdin=subprocess.DEVNULL)
     try:
         out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(destino)],
