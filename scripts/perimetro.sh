@@ -64,6 +64,7 @@ source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
 source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
 source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
 source "$_PERIMETRO_DIR/perimetro/p27_atalhos_fonte.sh"
+source "$_PERIMETRO_DIR/perimetro/p28_morno_orcamento.sh"
 
 cabecalho() {
   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
@@ -475,6 +476,11 @@ main() {
   cabecalho "P-27" "Atalho instalado em ~/.local/bin igual à fonte versionada que ele declara (aviso, nunca falha)" "decisão do Humano, 18/11/2026 (o sistema se atualiza sozinho); redesign/systemd/seth e seth-parar"
   PERIMETRO_ESTADO=""
   p27_atalhos_fonte; _perimetro_veredito "$?"
+  echo
+
+  cabecalho "P-28" "Morno (MEMORIAS-MORNO.md) acima do limite de novo congelamento (aviso; escalada pendente)" "proposta memoria-manutencao-26-11; cache 965; Fase 4 (357)"
+  PERIMETRO_ESTADO=""
+  p28_morno_orcamento; _perimetro_veredito "$?"
   echo
 
   cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"
