@@ -1,5 +1,7 @@
 # Onde estamos
 
+**Proposta nova 26/11/2026 (`memoria-manutencao-26-11`):** duas melhorias pedidas pelo Gemini no canal. Primeira: `PROTOCOLOS.md` passa a dizer que a guarda oficial do selo das primeiras 62 entradas é o comando `bash scripts/selar.sh --check` — o script antigo não acha mais o trecho porque ele saiu de `MEMÓRIAS.md` para a camada fria. Segunda: um controle novo (P-28) avisa quando `MEMORIAS-MORNO.md` passa de 1.000 KB, lembrando de rodar o próximo congelamento (hoje está em 1.173 KB). Só aviso, não bloqueia nada. Assinatura: `bash scripts/aprovar.sh memoria-manutencao-26-11`.
+
 **Aplicado 26/11/2026 (`ferramentas-unificadas-26-11`):** fonte única de ferramentas para todos os modelos do Conselho + skill de arranque universal. Instalar ferramenta nova: `python3 scripts/ferramentas/instalar.py <tipo> <nome> [--params k=v …]` (gate TTY + confirmação interativa, escreve só no overlay `~/agata-local/ferramentas.yml`). Sincronizar nativamente: `python3 scripts/ferramentas/sincronizar.py`. Reverter: `python3 scripts/ferramentas/reverter.py <ts>`. Promover overlay → canônico: `python3 scripts/ferramentas/promover.py <nome>` (gera `.diff` para P-8). Skill de arranque: `.agents/skills/agata-arranque/SKILL.md` (lida no SessionStart em Claude e Codex). R4 do `claude-in-chrome` fica para lote 2 (Humano decide E ou C); o lote 2 também cobre L2-A a L2-H (migração física, Gemini CLI, slash commands, subagentes sync, L7-L9).
 
 ## Hoje, 25/11 (proposta rea-pe-linux-2026-11-25)

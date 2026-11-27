@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba
-  Escrito em: 26/11/2026 16:33 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b32fe9e22afd85d55b20d8de6c26e5e10ccc838f
+  Escrito em: 27/11/2026 08:20 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/ecb4ca3bcbe7dec14f8c39eb3eae3321004c64ba/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
+
+Pedido do Humano via Gemini (cache 965, 26/11/2026 11:14), itens 1 e 2 de `gemini-2026-11-26-5b6c5808`. Dois arquivos de canon/comportamento tocados em 3 lugares: `PROTOCOLOS.md:345` ganha bullet novo apontando a guarda oficial do selo (1)-(62) para `bash scripts/selar.sh --check` contra `SELOS.txt` (o trecho migrou para `memoria/frio/MEMORIAS-FRIO-2026-09-06-com-migrado.md` pela Fase 4, (357), e o script histórico `scripts/achar_ancora_1_62.py` só varria o quente). Controle novo `scripts/perimetro/p28_morno_orcamento.sh` (AVISO PARCIAL, nunca FALHA; limite 1.024.000 bytes, ~10 blocos frios de ~90-110 KB), religado em `scripts/perimetro.sh` logo após o P-27, antes do P-17 — emite AVISO com o próximo passo (`migrar_periodo.py` + `selar.sh`) quando MORNO passa do limite. Medido agora: MORNO = 1.173.260 B, P-28 avisa; perímetro geral `21 OK · 2 SKIP · 5 PARCIAL · 0 FALHA`. Item 3 do pedido do Gemini (busca guiada + cache de SELOS em `gerar_obsidian.py`/`busca_semantica.py`/`gerar_indice_derivado.py`) fica para lote próprio — escopo maior, toca 3 scripts, R1. Script `achar_ancora_1_62.py` permanece como artefato histórico. PROTOCOLOS mantém o parágrafo original do selo intacto (requisito do `verificar_destinos.py` do projeto-indice); a nota nova vem em bullet separado.
+
+Modelo: Claude Opus 4.7 (Claude Code, na Máquina) · vetor: `scripts/ci_sdd_local.sh` 94/95 OK (pytest 9.2.0); única falha `[1/95] testes SDD (pytest)` é `ModuleNotFoundError: No module named 'yaml'` em `tests/ferramentas_unificadas/ferr_helpers.py`, PRÉ-EXISTENTE no `origin/main` b32fe9e2 e já registrada pelo Codex em cache 964; `python3 redesign/projeto_indice/verificar_destinos.py` OK; `pytest redesign/projeto_indice/tests/` 24/24 OK; `git apply --check` em worktree limpa de `origin/main` OK · Autorização: Humano — "Devolutiva para CODE: continuação indicada: agata-aplicar-proposta." (26/11/2026 22:07 e 22:14), respondendo à minha pergunta de recorte com opção 1.
+
 (1128) DIÁRIO — 26/11/2026 · **Proposta P-8 economia-contexto-24-11: carga conforme a tarefa + economia de tokens permanente.**
 
 Mudança em 3 arquivos canônicos: `AGENTS.md`, `PROMPT_CARREGAMENTO.md`, `.agents/skills/agata-fluxo/SKILL.md`. **Carga completa de PROMPT_CARREGAMENTO acontece uma vez por sessão**, antes de propor/registrar/auditar canon. Em trabalho posterior na mesma sessão, sincronize e atualize só o que mudou. Operação local, consulta pontual e pedido de status recebem só as verificações do pedido, sem carga completa nem eco. Se o escopo passar a tocar o canon, faça a carga antes de prosseguir. Regra 1 ajustada: bloco de prontidão só na carga completa; nas demais respostas, cabeçalho normal. Economia de tokens permanente (Regra 7, (654)) ganha detalhe operacional: reuse leituras válidas; em truncamento, retome do primeiro intervalo faltante; limite saída de ferramentas ao que a decisão exige; para logs longos, traga resultado+código+trechos; passe a cada agente só o que é pertinente. Trabalho vinha pendente em worktree própria desde 24/11/2026; retomado e aplicado ao main atual (desvio de 10 commits resolvido por reaplicação por Edit, não `git apply`, por conflito na linha nova "Índice de skills" do AGENTS.md).
