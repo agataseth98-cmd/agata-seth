@@ -3,6 +3,7 @@
 
 Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), depois morno (MEMORIAS-MORNO.md), depois os chunks frios selados (MEMORIAS-FRIO-*.md), mais recente primeiro em cada camada (Fase 4, MEMÓRIAS (357)). Números antes de (49) não são únicos globalmente — a história migrada reinicia numeração por origem; desambigue pela data junto ao número.
 
+(1130) DIÁRIO — 27/11/2026 · **Proposta P-8 memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
 (1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
 (1128) DIÁRIO — 26/11/2026 · **Proposta P-8 economia-contexto-24-11: carga conforme a tarefa + economia de tokens permanente.**
 (1127) DIÁRIO — 26/11/2026 · **Aplicada ferramentas-unificadas-26-11: fonte única de ferramentas para todos os modelos do Conselho + skill de arranque universal.**
@@ -32,7 +33,7 @@ Uma linha por entrada, da mais recente pra mais antiga: quente (MEMÓRIAS.md), d
 (1103) DIÁRIO — 21/11/2026 · **Proposta agata-code-verifica-21-11: a Seth recebe um selo dizendo se o Agata Code usou ferramenta (NÃO VERIFICADO / verificado por / sem resposta).** Diagnóstico: a trava do opencode run é stdin aberto (o módulo já usa /dev/null). Medido N=5: 4 sem ferramenta, acerto 0/5 — o modelo não serve ainda. Sonnet implementou, Opus revisou. Assinatura pendente: bash scripts/aprovar.sh agata-code-verifica-21-11.
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
 (1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
-(1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
+(1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a …
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão …
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (ag …
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do pain …

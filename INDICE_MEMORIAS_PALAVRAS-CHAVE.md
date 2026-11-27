@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1130) DIÁRIO — 27/11/2026 · **Proposta P-8 memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
+  palavras-chave: proposta, memoria, manutencao, teste, forward, declara, testar, perimetro
 (1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
   palavras-chave: proposta, memoria, manutencao, guarda, selo, controle, teto, memorias, morno
 (1128) DIÁRIO — 26/11/2026 · **Proposta P-8 economia-contexto-24-11: carga conforme a tarefa + economia de tokens permanente.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, voz, aprendizado, conversa, noite, fones, bluetooth, teste, memória, crítica, opinião, visitante, jargão, frase, embaralhada, entra, skill, agata, cerebro, ordem, humano, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
 (1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
   palavras-chave: aplicada, dinamica, voz, dinâmica, passos, skill, agata, cerebro, assinada, humano
-(1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
-  palavras-chave: aplicada, agata, code, nasce, seth, painel, passa, chamá, assinada, humano, prova, tarefa, leitura, após, reiniciar, operacional
+(1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a …
+  palavras-chave: aplicada, agata, code, nasce
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão …
   palavras-chave: proposta, dinamica, voz, dinâmica, sessão
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (ag …
