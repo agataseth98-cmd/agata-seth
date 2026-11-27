@@ -282,6 +282,7 @@ declare -A SEM_TESTE=(
   [P-17]="conta series ENTRE corridas; um caso de indice nao expressa 'decima corrida seguida'"
   [P-24]="so' emite linha 'AVISO (P-24): ...', que _acusacoes() nao conta (so' le SUSPEITO/FALHA na secao) -- mesma barreira estrutural de P-18/P-19: p24_quente_orcamento() foi medida isolada na aplicacao do pacote F1+F2 (21/10/2026): MEMORIAS.md com 1242050 caracteres contra orcamento de 25000 -> PARCIAL com a medida; escalada para FALHA e fase seguinte"
   [P-26]="so' emite linha 'AVISO (P-26): ...', que _acusacoes() nao conta -- mesma barreira estrutural de P-18/P-19: p26_frio_tag() foi medida isolada na aplicacao do pacote F1+F2 (21/10/2026): 11 chunks frios sem tag -> PARCIAL com a lista; o backfill de tags e fase seguinte, aprovada pelo Humano"
+  [P-28]="so' emite linha 'AVISO (P-28): ...', que _acusacoes() nao conta -- mesma barreira estrutural de P-24/P-26: p28_morno_orcamento() foi medida isolada na proposta memoria-manutencao-26-11 (26/11/2026): MEMORIAS-MORNO.md com 1173260 bytes contra limite de 1024000 -> PARCIAL com a medida; escalada para FALHA e fase seguinte"
 )
 
 # ---------------------------------------------------------- niveis (item 8) --

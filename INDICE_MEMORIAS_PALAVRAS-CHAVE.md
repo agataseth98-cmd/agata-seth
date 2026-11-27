@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1131) DIÁRIO — 27/11/2026 · **Aplicada memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
+  palavras-chave: aplicada, memoria, manutencao, teste, forward, declara, testar, perimetro
 (1130) DIÁRIO — 27/11/2026 · **Proposta P-8 memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
   palavras-chave: proposta, memoria, manutencao, teste, forward, declara, testar, perimetro
 (1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: proposta, agata, code, verifica, seth, recebe, selo, dizendo, usou, ferramenta, verificado, resposta, diagnóstico, trava, opencode, run, stdin, aberto, módulo, usa, dev, null, medido, acerto, modelo, serve, sonnet, implementou, opus, revisou, assinatura, pendente, bash, scripts, aprovar
 (1102) DIÁRIO — 20/11/2026 · **Proposta voz-aprendizado-20-11: o aprendizado da conversa por voz da noite de 20/11 (fones bluetooth, teste de memória, crítica e opinião, visitante sem jargão, frase embaralhada) entra na skill agata-voz-cerebro.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh voz-aprendizado-20-11.
   palavras-chave: proposta, voz, aprendizado, conversa, noite, fones, bluetooth, teste, memória, crítica, opinião, visitante, jargão, frase, embaralhada, entra, skill, agata, cerebro, ordem, humano, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
-(1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 em 13 passos na skill agata-voz-cerebro** Assinada pelo Humano em 20/11.
-  palavras-chave: aplicada, dinamica, voz, dinâmica, passos, skill, agata, cerebro, assinada, humano
+(1101) DIÁRIO — 20/11/2026 · **Aplicada dinamica-voz-20-11: a dinâmica de 20/11 …
+  palavras-chave: aplicada, dinamica, voz, dinâmica
 (1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a …
   palavras-chave: aplicada, agata, code, nasce
 (1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão …

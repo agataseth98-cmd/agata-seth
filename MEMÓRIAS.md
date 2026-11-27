@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 633aaab20f2c94dcb81356f1e5b1fd84148ba555
-  Escrito em: 27/11/2026 08:37 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b14bb32846aa9f98dd61f49c6f9f0d29769e284b
+  Escrito em: 27/11/2026 08:49 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b14bb32846aa9f98dd61f49c6f9f0d29769e284b/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b14bb32846aa9f98dd61f49c6f9f0d29769e284b/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b14bb32846aa9f98dd61f49c6f9f0d29769e284b/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b14bb32846aa9f98dd61f49c6f9f0d29769e284b/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b14bb32846aa9f98dd61f49c6f9f0d29769e284b/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1131) DIÁRIO — 27/11/2026 · **Aplicada memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
+
+Lote mínimo (1 arquivo, 1 linha) para desbloquear a aplicação de `memoria-manutencao-26-11` ((1129)), que o pre-commit barrou com P-16 FALHOU por falta de caso ou motivo para P-28. Entrada nova no mapa `SEM_TESTE` segue o mesmo texto estrutural de P-24/P-26: controle que só emite linha `AVISO (P-28): ...`, que `_acusacoes()` não conta; medida isolada já feita (MORNO 1.173.260 B contra limite 1.024.000 B). Escalada para FALHA fica para fase seguinte. Reversão: `git apply -R propostas/aplicadas/memoria-manutencao-sem-teste-26-11.diff`.
+
+Modelo: Claude Opus 4.7 (Claude Code, na Máquina) · vetor: `p8_verificar.sh memoria-manutencao-sem-teste-26-11` → `PODE APLICAR` (sha256 `8a4bc83221f6`, assinatura ED25519 de `agata-humano`); `git apply` limpo; `git apply --check -R` limpo; CI local 94/95 (única falha `yaml ausente` pré-existente, cache 964); CI do PR #1131 verde · Autorização: Humano — "OK: nenhum hunk toca bloco gerado pelo pre-commit (ANCORA-SHA) / ERRO: APROVADO-memoria-manutencao-26-11 já existe -- nada a fazer." (27/11/2026 08:43, confirmando as duas assinaturas).
+
 (1130) DIÁRIO — 27/11/2026 · **Proposta P-8 memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
 
 Correção de omissão no lote `memoria-manutencao-26-11` (PR #1130, mergeado em 27/11 08:25 -03). A aplicação daquele lote foi barrada pelo pre-commit com P-16 FALHOU ("controle sem caso na suíte e sem motivo escrito: P-28"). Mesmo padrão de P-24 e P-26: AVISO só, `_acusacoes()` não conta, medida isolada já feita (MORNO 1.173.260 B contra limite 1.024.000 B na própria memoria-manutencao-26-11). A proposta assinada pelo Humano (sha256 bff1eefc0cb4) não pode ser alterada sem invalidar a assinatura; separar como lote mínimo (1 arquivo, 1 linha) mantém o fluxo limpo. Depois da aplicação desta corretiva, a aplicação de `memoria-manutencao-26-11` passa no P-16.
