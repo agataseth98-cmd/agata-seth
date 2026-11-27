@@ -7,6 +7,8 @@ deduplica) -- scripts/extrair_palavras_chave.py, NUNCA embedding, decisão (115)
 Pensado pra `grep -i <termo>` achar entrada por assunto sem reler o índice
 inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
 
+(1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
+  palavras-chave: proposta, memoria, manutencao, guarda, selo, controle, teto, memorias, morno
 (1128) DIÁRIO — 26/11/2026 · **Proposta P-8 economia-contexto-24-11: carga conforme a tarefa + economia de tokens permanente.**
   palavras-chave: proposta, economia, contexto, carga, conforme, tarefa, tokens, permanente
 (1127) DIÁRIO — 26/11/2026 · **Aplicada ferramentas-unificadas-26-11: fonte única de ferramentas para todos os modelos do Conselho + skill de arranque universal.**
@@ -65,8 +67,8 @@ inteiro. NAO entra em .hidrata.md -- ver comentario em INDICE_CHAVES acima.
   palavras-chave: aplicada, dinamica, voz, dinâmica, passos, skill, agata, cerebro, assinada, humano
 (1100) DIÁRIO — 20/11/2026 · **Aplicada agata-code-20-11: nasce o Agata Code e a Seth do painel passa a chamá-lo** Assinada pelo Humano em 20/11. Prova: tarefa de leitura pela Seth no painel após reiniciar painel-operacional.
   palavras-chave: aplicada, agata, code, nasce, seth, painel, passa, chamá, assinada, humano, prova, tarefa, leitura, após, reiniciar, operacional
-(1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão de 20/11 (estado, auditoria pelo caminho do Humano, decisão por voz com registro no cache, lotes pequenos, proposta, aplicação, prova) vira procedimento de 13 passos na skill agata-voz-cerebro, para todos os modelos confederados.** Ordem do Humano por voz. Modelo: Claude Opus 5.5. Assinatura pendente: bash scripts/aprovar.sh dinamica-voz-20-11.
-  palavras-chave: proposta, dinamica, voz, dinâmica, sessão, estado, auditoria, caminho, humano, decisão, registro, cache, lotes, pequenos, aplicação, prova, vira, procedimento, passos, skill, agata, cerebro, modelos, confederados, ordem, modelo, claude, opus, assinatura, pendente, bash, scripts, aprovar
+(1099) DIÁRIO — 20/11/2026 · **Proposta dinamica-voz-20-11: a dinâmica da sessão …
+  palavras-chave: proposta, dinamica, voz, dinâmica, sessão
 (1098) DIÁRIO — 20/11/2026 · **Proposta agata-code-20-11: nasce o Agata Code (ag …
   palavras-chave: proposta, agata, code, nasce
 (1097) DIÁRIO — 20/11/2026 · **Aplicada painel-ferramentas-20-11: a Seth do pain …

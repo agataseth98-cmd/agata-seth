@@ -1,0 +1,61 @@
+diff --git a/PROTOCOLOS.md b/PROTOCOLOS.md
+index 9179c1ef..1ce88204 100644
+--- a/PROTOCOLOS.md
++++ b/PROTOCOLOS.md
+@@ -343,6 +343,7 @@ campo — só o nome falado muda.
+ - **Vault Obsidian derivado** (290): `memoria/obsidian/`, regerado a cada commit por `scripts/gerar_obsidian.py` (gitignorado, não editar); a fonte é o canon. Busca: vault primeiro (`vault_buscar`), `query_canon` para confirmar antes de citar. Ver `extras/projeto-detalhe/memoria-hidratacao.md`.
+ - **Busca:** sem RAG por embedding, de propósito (115)/(293)/(313); `scripts/busca_semantica.py` é ferramenta secundária, sob demanda, nunca injetada na hidratação. Ver `extras/projeto-detalhe/memoria-hidratacao.md`.
+ - **Âncora de integridade (1)-(62):** 128.671 B, sha256 `b26ac113f7a6f72c875391c2d07d94f6f6c827cc9d14c180ecc324b14ab4e03a`. Verificação por marcador de conteúdo (início/fim do trecho) + comprimento, nunca por offset ou número de linha (96)/(97). Script: `scripts/achar_ancora_1_62.py`.
++- **Atualização 26/11/2026 (proposta `memoria-manutencao-26-11`, pedido do Gemini via Humano, cache 965):** o trecho (1)-(62) migrou para `memoria/frio/MEMORIAS-FRIO-2026-09-06-com-migrado.md` pela Fase 4 (357); o script histórico varre só `MEMÓRIAS.md` e não localiza mais o trecho. A guarda oficial do selo passa a ser `bash scripts/selar.sh --check` contra o registro em `SELOS.txt` — o mesmo controle que P-14 e P-25 exercem sobre toda a camada fria. O script fica no repositório como artefato histórico; novas verificações usam `selar.sh --check`.
+ - **`memoria/missoes/`** — quarto pilar, local por desenho: um arquivo por missão + `INDICE.md`, repositório git próprio sem remote, gitignorado do repo principal (`*.bundle` coberto em toda a árvore (97)/(98)), nunca público, nunca na hidratação; pesquisado sob demanda por quem tem acesso à Máquina. Achável pelo vault via `memoria/obsidian/moc-missoes.md` (325), exceto `segunda-camada/` (esfera pessoal, mais estrita). Relação com o bg-review desligado: `INDICE.md` local e (91)-(95).
+ - **Repositório oficial:** `https://github.com/agataseth98-cmd/agata-seth` (branch `main`). Sincronize contra ele no início de **toda** sessão; em sessões autônomas a sincronização falha em silêncio com frequência — verifique, não presuma.
+ - **Fonte canônica (URLs) e atualização.** Preferir as URLs raw pinadas em SHA do bloco `ANCORA-SHA` (253); `git ls-remote` é o método 1 (`PROTOCOLOS.md`); `atualizar` nunca sobrescreve história. Ver `extras/projeto-detalhe/memoria-hidratacao.md`.
+diff --git a/scripts/perimetro.sh b/scripts/perimetro.sh
+index da28843d..b75eadf7 100755
+--- a/scripts/perimetro.sh
++++ b/scripts/perimetro.sh
+@@ -64,6 +64,7 @@ source "$_PERIMETRO_DIR/perimetro/p20_dado_pessoal.sh"
+ source "$_PERIMETRO_DIR/perimetro/p22_derivados_drift.sh"
+ source "$_PERIMETRO_DIR/perimetro/p23_portas_entrada.sh"
+ source "$_PERIMETRO_DIR/perimetro/p27_atalhos_fonte.sh"
++source "$_PERIMETRO_DIR/perimetro/p28_morno_orcamento.sh"
+ 
+ cabecalho() {
+   # PERIMETRO_CTRL: qual controle está correndo agora. Existe para o P-17
+@@ -477,6 +478,11 @@ main() {
+   p27_atalhos_fonte; _perimetro_veredito "$?"
+   echo
+ 
++  cabecalho "P-28" "Morno (MEMORIAS-MORNO.md) acima do limite de novo congelamento (aviso; escalada pendente)" "proposta memoria-manutencao-26-11; cache 965; Fase 4 (357)"
++  PERIMETRO_ESTADO=""
++  p28_morno_orcamento; _perimetro_veredito "$?"
++  echo
++
+   cabecalho "P-17" "Controle que pula sempre está desligado, não é dispensado" "MEMÓRIAS (422); a morte silenciosa do P-7 em (419)"
+   PERIMETRO_ESTADO=""
+   p17_skip_cronico; _perimetro_veredito "$?"
+diff --git a/scripts/perimetro/p28_morno_orcamento.sh b/scripts/perimetro/p28_morno_orcamento.sh
+new file mode 100755
+index 00000000..6d419250
+--- /dev/null
++++ b/scripts/perimetro/p28_morno_orcamento.sh
+@@ -0,0 +1,19 @@
++#!/usr/bin/env bash
++# P-28 (26/11/2026, proposta memoria-manutencao-26-11): morno (MEMORIAS-MORNO.md) acima do limite
++# de congelamento. Pedido do Gemini via Humano (cache 965); MORNO em 1,17 MB desde 23/10/2026 sem
++# ciclo novo de migrar_periodo.py + selar.sh. Estado: AVISO PARCIAL (nunca FALHA) — lembra o
++# Humano de disparar o próximo ciclo de camada fria; escalada para FALHA fica para fase seguinte,
++# como em P-24.
++p28_morno_orcamento() {
++  local orc=1024000 tam  # 1.000 KB; cada frio sela ~90-110 KB, então acima disto já cabem ~10 blocos.
++  [ -f MEMORIAS-MORNO.md ] || return 0
++  tam=$(wc -c < MEMORIAS-MORNO.md 2>/dev/null | tr -d '[:space:]')
++  [ -z "$tam" ] && return 0
++  if [ "$tam" -gt "$orc" ]; then
++    PERIMETRO_ESTADO="PARCIAL"
++    echo "AVISO (P-28): MEMORIAS-MORNO.md tem $tam bytes; limite para novo congelamento é $orc."
++    echo "  O que fazer: rode 'python3 scripts/migrar_periodo.py' para gerar um novo bloco frio e, em seguida, 'bash scripts/selar.sh <arquivo-novo>'."
++    echo "  Por que importa: MORNO cresce sem teto quando o ciclo frio não roda; busca e hidratação derivada ficam mais caras a cada commit."
++  fi
++  return 0
++}
