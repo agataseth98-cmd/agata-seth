@@ -26,20 +26,26 @@ Desde a entrada (271) (26/08/2026), entrada nova entra logo abaixo do marcador `
 **Correção sobre este preâmbulo (MEMÓRIAS (109)): a numeração NÃO é única globalmente antes de (49).** História migrada de mais de uma origem reinicia número por número — "(2)" sozinho aparece pelo menos 4 vezes, em datas diferentes. A partir de (49) a numeração é única e contínua; antes disso, cite por número **e data**. O bloco migrado (mais antigo, no fim físico deste arquivo) segue colado verbatim, sem editar uma vírgula — isso não muda; o que mudou nesta migração foi só a posição do corpo (49)+ e a direção de leitura.
 
 <!-- ANCORA-SHA:INICIO (gerado por .githooks/pre-commit -- não editar as linhas abaixo à mão, o resto do arquivo é livre) -->
-  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): b32fe9e22afd85d55b20d8de6c26e5e10ccc838f
-  Escrito em: 27/11/2026 08:20 -03
+  SHA do commit ANTERIOR a este arquivo (limite conhecido: normalmente 1 commit atrasado; se o hook que grava esta linha falhar, pode ser mais -- ver a nota logo abaixo deste bloco, e PROJETO.md, "Memória e hidratação"): 633aaab20f2c94dcb81356f1e5b1fd84148ba555
+  Escrito em: 27/11/2026 08:37 -03
   URLs raw pinadas neste SHA (preferir estas -- imutáveis, sem risco de cache velho; mesma defasagem máxima do SHA acima):
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/REGRAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/PROTOCOLOS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/FALHAS.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/PROJETO.md
-    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/b32fe9e22afd85d55b20d8de6c26e5e10ccc838f/MEMÓRIAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/REGRAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/PROTOCOLOS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/FALHAS.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/PROJETO.md
+    https://raw.githubusercontent.com/agataseth98-cmd/agata-seth/633aaab20f2c94dcb81356f1e5b1fd84148ba555/MEMÓRIAS.md
 <!-- ANCORA-SHA:FIM -->
 <!-- Bloco de máquina (MEMÓRIAS (378)): SHA do commit anterior + URLs raw pinadas. Fica ACIMA do marcador ENTRADAS-NOVAS, que o P-5 não policia (só o corpo de entradas). Um leitor OFFLINE compara este SHA entre REGRAS.md, PROJETO.md e MEMÓRIAS.md -- se os três não baterem, a cópia é inconsistente. Numa interface que renderiza markdown estes comentários somem. Limite: normalmente 1 commit atrasado; mais se o hook falhar. -->
 
 ---
 
 <!-- ENTRADAS-NOVAS:AQUI -- não editar esta linha à mão; ancora o controle P-5 em scripts/perimetro.sh; entrada nova sempre logo abaixo dela, nunca acima) -->
+(1130) DIÁRIO — 27/11/2026 · **Proposta P-8 memoria-manutencao-sem-teste-26-11: forward-declara SEM_TESTE[P-28] em `testar_perimetro.sh`.**
+
+Correção de omissão no lote `memoria-manutencao-26-11` (PR #1130, mergeado em 27/11 08:25 -03). A aplicação daquele lote foi barrada pelo pre-commit com P-16 FALHOU ("controle sem caso na suíte e sem motivo escrito: P-28"). Mesmo padrão de P-24 e P-26: AVISO só, `_acusacoes()` não conta, medida isolada já feita (MORNO 1.173.260 B contra limite 1.024.000 B na própria memoria-manutencao-26-11). A proposta assinada pelo Humano (sha256 bff1eefc0cb4) não pode ser alterada sem invalidar a assinatura; separar como lote mínimo (1 arquivo, 1 linha) mantém o fluxo limpo. Depois da aplicação desta corretiva, a aplicação de `memoria-manutencao-26-11` passa no P-16.
+
+Modelo: Claude Opus 4.7 (Claude Code, na Máquina) · vetor: `git apply --check` em worktree limpa de `origin/main` OK; CI local (ver PR) · Autorização: Humano — "sim" (27/11/2026 08:30), autorizando o caminho corretivo que propus depois da barragem do pre-commit.
+
 (1129) DIÁRIO — 26/11/2026 · **Proposta P-8 memoria-manutencao-26-11: guarda do selo (1)-(62) e controle P-28 de teto para MEMORIAS-MORNO.md.**
 
 Pedido do Humano via Gemini (cache 965, 26/11/2026 11:14), itens 1 e 2 de `gemini-2026-11-26-5b6c5808`. Dois arquivos de canon/comportamento tocados em 3 lugares: `PROTOCOLOS.md:345` ganha bullet novo apontando a guarda oficial do selo (1)-(62) para `bash scripts/selar.sh --check` contra `SELOS.txt` (o trecho migrou para `memoria/frio/MEMORIAS-FRIO-2026-09-06-com-migrado.md` pela Fase 4, (357), e o script histórico `scripts/achar_ancora_1_62.py` só varria o quente). Controle novo `scripts/perimetro/p28_morno_orcamento.sh` (AVISO PARCIAL, nunca FALHA; limite 1.024.000 bytes, ~10 blocos frios de ~90-110 KB), religado em `scripts/perimetro.sh` logo após o P-27, antes do P-17 — emite AVISO com o próximo passo (`migrar_periodo.py` + `selar.sh`) quando MORNO passa do limite. Medido agora: MORNO = 1.173.260 B, P-28 avisa; perímetro geral `21 OK · 2 SKIP · 5 PARCIAL · 0 FALHA`. Item 3 do pedido do Gemini (busca guiada + cache de SELOS em `gerar_obsidian.py`/`busca_semantica.py`/`gerar_indice_derivado.py`) fica para lote próprio — escopo maior, toca 3 scripts, R1. Script `achar_ancora_1_62.py` permanece como artefato histórico. PROTOCOLOS mantém o parágrafo original do selo intacto (requisito do `verificar_destinos.py` do projeto-indice); a nota nova vem em bullet separado.
