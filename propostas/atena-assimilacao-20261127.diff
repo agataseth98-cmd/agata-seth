@@ -49178,17 +49178,23 @@ index 00000000..cc932850
 \ No newline at end of file
 diff --git a/.reversa/_config/manifest.yaml b/.reversa/_config/manifest.yaml
 new file mode 100644
-index 00000000..ec741a40
+index 00000000..60d4766f
 --- /dev/null
 +++ b/.reversa/_config/manifest.yaml
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,93 @@
 +installation:
 +  version: 1.3.6
 +  installDate: 2026-11-27T14:54:21.448Z
 +  lastUpdated: 2026-11-27T14:54:21.448Z
 +
 +engines:
++  - agata
++  - claude-code
 +  - codex
++  - cursor
++  - gemini-cli
++  - opencode
++  - seth
 +
 +agents:
 +  - impeccable
@@ -50014,10 +50020,10 @@ index 00000000..6f96ed08
 +1.3.6
 \ No newline at end of file
 diff --git a/AGENTS.md b/AGENTS.md
-index c70604d6..55d46728 100644
+index c70604d6..ea3d2adc 100644
 --- a/AGENTS.md
 +++ b/AGENTS.md
-@@ -27,3 +27,44 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
+@@ -27,3 +27,55 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para
  - **Mapa do Humano** (decisão do Humano, 18/11/2026; PROTOCOLOS.md, "Protocolo de inserção humana continuado"): obrigatório. Ao começar, leia a skill `agata-mapear-humano`; ao receber decisão ou correção do Humano, anote no cache do Conselho.
  - **O mais caro orquestra, os mais baratos executam** (decisão do Humano, 17/11/2026): quando a tarefa se divide em partes, o modelo mais capaz da sessão planeja, distribui, revisa e responde pelo resultado; a execução operacional (ler, medir, pesquisar, implementar e testar dentro do que foi especificado) vai para o modelo mais barato que dá conta, como subagente ou membro da Equipe. Quem orquestra confere o resultado, não só o relatório, antes de afirmar. Tarefa curta, que custa menos fazer do que delegar, o orquestrador faz direto. Quem executa não decide escopo nem assina.
  - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
@@ -50038,6 +50044,8 @@ index c70604d6..55d46728 100644
 +- `reversa-forward` — implementar ou evoluir código a partir das specs
 +- `reversa-migrate` — planejar a migração de um sistema legado
 +- `reversa-docs` — gerar o mini-site visual da documentação
++- `reversa-sync` — atualizar as specs após uma evolução, preservando o histórico
++- `reversa-update` — atualizar a própria instalação do Reversa quando houver nova versão
 +- `impeccable` — design de front-end: criticar, auditar e polir interfaces (Impeccable, Apache 2.0)
 +- `reversa-agents-help` — consultar o catálogo completo de agentes
 +
@@ -50047,6 +50055,15 @@ index c70604d6..55d46728 100644
 +
 +1. Ative o skill `reversa` disponível em `.agents/skills/reversa/SKILL.md`
 +2. Leia o SKILL.md na íntegra e siga exatamente as instruções do Reversa
++
++## Atualização da Atena
++
++Atena é atualizada pelo próprio Reversa, em dois níveis:
++
++1. Para atualizar o framework e suas skills, execute `npx reversa update` em uma worktree de manutenção, revise o diff e submeta a atualização pelo fluxo P-8 do Agata.
++2. Para atualizar a compreensão do sistema depois de uma evolução, use `reversa-sync`; ele acrescenta adendos às specs e preserva o histórico anterior.
++
++Nenhuma atualização automática escreve no checkout principal. O comando apenas prepara a mudança; CI, revisão, assinatura humana e aplicação continuam obrigatórios. A versão instalada e os harnesses declarados ficam registrados em `.reversa/_config/manifest.yaml`.
 +
 +## Regra não-negociável
 +
@@ -50062,3 +50079,654 @@ index c70604d6..55d46728 100644
 +- `allowLegacyEdits: true` com `allowedPaths` vazio ou ausente: projeto liberado; avise uma vez por sessão que a liberação é irrestrita.
 +
 +Nunca crie nem edite `.reversa/reversa-config.json` por iniciativa própria: pedido na conversa não é liberação implícita, alterações nesse arquivo são ato exclusivo do usuário.
+diff --git a/ferramentas/INDICE.md b/ferramentas/INDICE.md
+index cbd4fb66..844312e7 100644
+--- a/ferramentas/INDICE.md
++++ b/ferramentas/INDICE.md
+@@ -5,10 +5,10 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por
+ 
+ | Tema | Peças | Observação |
+ |---|---|---|
+-| agata | 15 | skills próprias do sistema |
++| agata | 93 | skills próprias do sistema |
+ | meta-skills | 2 |  |
+ | planejamento-e-agentes | 5 |  |
+ | revisao-e-git | 4 |  |
+ | testes | 4 |  |
+ 
+-Total: 30 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
++Total: 108 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+diff --git a/ferramentas/indice.json b/ferramentas/indice.json
+index d861f00a..5d166c33 100644
+--- a/ferramentas/indice.json
++++ b/ferramentas/indice.json
+@@ -238,5 +238,629 @@
+   "tema": "agata",
+   "caminho": ".agents/skills/design-taste-frontend/SKILL.md",
+   "resumo": "-"
++ },
++ {
++  "nome": "impeccable",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/impeccable/SKILL.md",
++  "resumo": "Use when the user wants to design, redesign, shape, critique, audit, polish, simplify, harden, animate, or otherwise improve a frontend inte"
++ },
++ {
++  "nome": "reversa",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa/SKILL.md",
++  "resumo": "Ponto de entrada principal do Reversa. Orquestra a análise completa de um sistema legado, gerando especificações executáveis por agentes de "
++ },
++ {
++  "nome": "reversa-add",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-add/SKILL.md",
++  "resumo": "Emenda curta na feature ativa do ciclo forward: registra o ajuste no requirements.md, implementa e fecha a ação no mesmo passo. Para detalhe"
++ },
++ {
++  "nome": "reversa-agents-help",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-agents-help/SKILL.md",
++  "resumo": "Explica com analogias o que cada agente do Reversa faz e quando usá-lo. Ative com /reversa-agents-help."
++ },
++ {
++  "nome": "reversa-arbiter",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-arbiter/SKILL.md",
++  "resumo": "Agente Arbiter do Ideation Team. Pontua as opções contra os riscos levantados, recomenda uma com trade-off explícito e registra a escolha do"
++ },
++ {
++  "nome": "reversa-archaeologist",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-archaeologist/SKILL.md",
++  "resumo": "Analisa profundamente o código do projeto legado módulo a módulo — extrai algoritmos, fluxos de controle, estruturas de dados e dicionário d"
++ },
++ {
++  "nome": "reversa-architect",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-architect/SKILL.md",
++  "resumo": "Sintetiza a análise do projeto legado em documentação arquitetural completa — diagramas C4, ERD completo, mapa de integrações e Spec Impact "
++ },
++ {
++  "nome": "reversa-arquitetura-3d",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-arquitetura-3d/SKILL.md",
++  "resumo": "Cria visualizações 3D interativas de arquitetura de software com Three.js, gerando HTML standalone navegável por câmera livre a partir de JS"
++ },
++ {
++  "nome": "reversa-audit",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-audit/SKILL.md",
++  "resumo": "Auditoria leitora estrita. Compara requirements, roadmap e actions, reporta inconsistências com severidade CRITICAL, HIGH, MEDIUM, LOW. JAMA"
++ },
++ {
++  "nome": "reversa-autonomous",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-autonomous/SKILL.md",
++  "resumo": "Modo autônomo do Reversa: roda a sequência completa de agentes do /reversa de ponta a ponta, sem paradas, concentrando as perguntas numa ent"
++ },
++ {
++  "nome": "reversa-brainstorm",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-brainstorm/SKILL.md",
++  "resumo": "Orquestrador do Ideation Team do Reversa: clarifica uma ideia bruta antes de qualquer artefato de desenvolvimento, em greenfield ou em legad"
++ },
++ {
++  "nome": "reversa-challenger",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-challenger/SKILL.md",
++  "resumo": "Agente Challenger do Ideation Team. Roda premortem sobre cada caminho aberto pelo Explorer, expõe as premissas que matam o projeto e o custo"
++ },
++ {
++  "nome": "reversa-clarify",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-clarify/SKILL.md",
++  "resumo": "Gera até cinco perguntas dirigidas para resolver pontos ambíguos do requirements e integra as respostas no documento. Etapa opcional do cicl"
++ },
++ {
++  "nome": "reversa-code-express",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-code-express/SKILL.md",
++  "resumo": "Passagem única do ciclo forward: entrevista curta, spec fina, código e rastros de impacto num só passo, sem parada intermediária. Para delta"
++ },
++ {
++  "nome": "reversa-coding",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-coding/SKILL.md",
++  "resumo": "Executa o actions.md em código: marca checkboxes [X], escreve progress.jsonl e gera legacy-impact.md e regression-watch.md. Funciona ancorad"
++ },
++ {
++  "nome": "reversa-curator",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-curator/SKILL.md",
++  "resumo": "Segundo agente do Time de Migração. Decide o que migra, o que descarta e o que precisa de decisão humana, com base nas specs do legado, no c"
++ },
++ {
++  "nome": "reversa-data-master",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-data-master/SKILL.md",
++  "resumo": "Documenta completamente o banco de dados do projeto legado — tabelas, relacionamentos, constraints, triggers, procedures e ERD completo. Use"
++ },
++ {
++  "nome": "reversa-debugger",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-debugger/SKILL.md",
++  "resumo": "Registrador de bugs do Reversa: intake, triagem, dedupe, classificação e rastreabilidade SPEC↔CODE↔TEST↔BUG em `_reversa_bugs/contexto/`. Nu"
++ },
++ {
++  "nome": "reversa-debugger-debate",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-debugger-debate/SKILL.md",
++  "resumo": "Debate multiagente do time Bugs: N solvers em R rodadas com juiz isolado, para decidir diagnóstico, correção ou veredito de spec de um bug r"
++ },
++ {
++  "nome": "reversa-debugger-fix",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-debugger-fix/SKILL.md",
++  "resumo": "Corretor de bugs do Reversa: reproduz, investiga causa raiz, oferece debate opt-in, cria testes de reprodução e regressão, aplica o change s"
++ },
++ {
++  "nome": "reversa-debugger-graph",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-debugger-graph/SKILL.md",
++  "resumo": "Gerador de views do time Bugs: varre os bug.md, valida invariantes e regenera índice, catálogo, matriz de relações BUG↔BUG, grafo mermaid e "
++ },
++ {
++  "nome": "reversa-decouple",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-decouple/SKILL.md",
++  "resumo": "Desacoplamento: reduz dependências diretas (inversão, seams do Feathers, quebra de ciclo), com acoplamento medido antes/depois. Não redistri"
++ },
++ {
++  "nome": "reversa-depth-inspection",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-depth-inspection/SKILL.md",
++  "resumo": "Pente-fino do time Bugs: mapeia spec→código→testes→dados de uma feature e varre com lentes especializadas (conformidade, fluxo de dados, con"
++ },
++ {
++  "nome": "reversa-design-system",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-design-system/SKILL.md",
++  "resumo": "Extrai e documenta o sistema de design do projeto legado — paleta de cores, tipografia, espaçamentos, tokens e componentes a partir de CSS, "
++ },
++ {
++  "nome": "reversa-designer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-designer/SKILL.md",
++  "resumo": "Quarto agente do Time de Migração, em duas fases. Fase 1: detecta a topologia do legado, propõe uma moderna alternativa e produz topology_de"
++ },
++ {
++  "nome": "reversa-detective",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-detective/SKILL.md",
++  "resumo": "Extrai conhecimento de negócio implícito do projeto legado — regras de negócio, ADRs retroativos via Git, máquinas de estado e matriz de per"
++ },
++ {
++  "nome": "reversa-docs",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-docs/SKILL.md",
++  "resumo": "Orquestrador do Time Reversa Docs. Gera um mini-site HTML autocontido em _reversa_docs/ com arquitetura 3D, dashboards, glossário, deck e pá"
++ },
++ {
++  "nome": "reversa-docs-analyst",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-docs-analyst/SKILL.md",
++  "resumo": "Analista do Time Reversa Docs. Produz as páginas de dados quantitativos do mini-site: dashboard de métricas com Highcharts (treemap LOC, bar"
++ },
++ {
++  "nome": "reversa-docs-mapper",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-docs-mapper/SKILL.md",
++  "resumo": "Mapeador do Time Reversa Docs. Produz as páginas de estrutura espacial do mini-site: arquitetura 3D (Code City via Three.js), module map 2D "
++ },
++ {
++  "nome": "reversa-docs-publisher",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-docs-publisher/SKILL.md",
++  "resumo": "Editor-chefe do Time Reversa Docs. Gera index.html com hero e selo único do projeto, injeta mini-selo nas demais páginas, faz auto-discovery"
++ },
++ {
++  "nome": "reversa-docs-storyteller",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-docs-storyteller/SKILL.md",
++  "resumo": "Narrador do Time Reversa Docs. Produz glossário interativo (Concept Explainer com busca cliente-side), slide deck navegável (6 a 10 slides) "
++ },
++ {
++  "nome": "reversa-drafter",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-drafter/SKILL.md",
++  "resumo": "Agente Drafter do time Code New Project Agents. Sintetiza `ideation.md` e `personas.md` em um PRD completo (problema, métricas, escopo, não-"
++ },
++ {
++  "nome": "reversa-especialista-d3",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-especialista-d3/SKILL.md",
++  "resumo": "Engenheiro de Visualização de Dados Sênior especializado em D3.js (v7+). Gera HTML standalone com gráficos D3 (force-directed, hierárquicos,"
++ },
++ {
++  "nome": "reversa-explorer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-explorer/SKILL.md",
++  "resumo": "Agente Explorer do Ideation Team. Gera de 3 a 5 caminhos distintos para o problema enquadrado, incluindo obrigatoriamente \"não construir\" e "
++ },
++ {
++  "nome": "reversa-extract-soul",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-extract-soul/SKILL.md",
++  "resumo": "Extrai a alma do projeto legado em uma única Spec síntese (soul.md), reunindo propósito, entidades centrais e decisões fundadoras. Roda logo"
++ },
++ {
++  "nome": "reversa-forward",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-forward/SKILL.md",
++  "resumo": "Orquestrador do ciclo forward do Reversa: detecta o estágio da feature ativa em `_reversa_forward/` e roteia para o próximo agente (requirem"
++ },
++ {
++  "nome": "reversa-forward-autonomous",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-forward-autonomous/SKILL.md",
++  "resumo": "Modo autônomo do ciclo forward do Reversa: implementa uma fila de features (ex. \"features 10 a 20\") de ponta a ponta, requirements até sync,"
++ },
++ {
++  "nome": "reversa-framer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-framer/SKILL.md",
++  "resumo": "Agente Framer do Ideation Team. Separa problema de solução antes de qualquer exploração, apurando quem sente a dor, em que momento, o que ac"
++ },
++ {
++  "nome": "reversa-highcharts-visualizer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-highcharts-visualizer/SKILL.md",
++  "resumo": "Cria visualizações de dados interativas com Highcharts.js, gerando HTML standalone com gráficos animados, responsivos e acessíveis a partir "
++ },
++ {
++  "nome": "reversa-ideator",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-ideator/SKILL.md",
++  "resumo": "Agente Ideator do time Code New Project Agents. Conduz brainstorm estruturado a partir de um brief inicial, com 6 perguntas divergentes (pro"
++ },
++ {
++  "nome": "reversa-image-prompt-json",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-image-prompt-json/SKILL.md",
++  "resumo": "Cria prompts JSON estruturados para geração de imagens com estética luxuosa e cinematográfica (foto de produto, comida, cosmético, joia, mod"
++ },
++ {
++  "nome": "reversa-inspector",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-inspector/SKILL.md",
++  "resumo": "Quinto agente do Time de Migração. Define como provar que o sistema novo é comportamentalmente equivalente ao legado, com critérios adaptado"
++ },
++ {
++  "nome": "reversa-migrate",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-migrate/SKILL.md",
++  "resumo": "Orquestrador do Time de Migração do Reversa. Conduz o pipeline de migração após o `/reversa` ter populado o _reversa_sdd/. Coleta brief, inv"
++ },
++ {
++  "nome": "reversa-modularize",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-modularize/SKILL.md",
++  "resumo": "Modularização: divide um trecho grande em módulos coesos com responsabilidade definida, respeitando as fronteiras da alma. Não mexe na lógic"
++ },
++ {
++  "nome": "reversa-n8n",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-n8n/SKILL.md",
++  "resumo": "Gera specs SDD (workflow-overview, requirements, design) a partir de workflows do N8N exportados em JSON, preparando o terreno para reimplem"
++ },
++ {
++  "nome": "reversa-new",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-new/SKILL.md",
++  "resumo": "Orquestrador greenfield do Reversa: da ideia em linguagem natural a brainstorm, personas, PRD e specs SDD em `_reversa_sdd/`. Dois modos, gu"
++ },
++ {
++  "nome": "reversa-optimize",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-optimize/SKILL.md",
++  "resumo": "Otimização de desempenho: reduz tempo, memória e recursos com medição antes/depois, preservando a saída. Rejeita otimização prematura. Difer"
++ },
++ {
++  "nome": "reversa-paradigm-advisor",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-paradigm-advisor/SKILL.md",
++  "resumo": "Primeiro agente do Time de Migração. Detecta o paradigma do sistema legado a partir das specs, infere o paradigma natural da stack alvo, ale"
++ },
++ {
++  "nome": "reversa-plan",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-plan/SKILL.md",
++  "resumo": "Esboça a abordagem técnica como delta sobre o legado, gerando roadmap, investigation, data-delta, onboarding e interfaces da feature ativa. "
++ },
++ {
++  "nome": "reversa-pre-spec",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pre-spec/SKILL.md",
++  "resumo": "Agente Pre-Spec do Ideation Team. Converte a decisão da ideação no pacote mínimo que o próximo pipeline precisa, com `[DÚVIDA]` explícito no"
++ },
++ {
++  "nome": "reversa-pricing",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing/SKILL.md",
++  "resumo": "Orquestrador do time de precificacao do Reversa: detecta o estagio em `_reversa_sdd/_pricing/` e roteia para o proximo agente (advisor, prof"
++ },
++ {
++  "nome": "reversa-pricing-advisor",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-advisor/SKILL.md",
++  "resumo": "Conduz uma entrevista de seis perguntas sobre o software e o jeito de vender, aplica regras deterministicas de viabilidade e grava advisor.j"
++ },
++ {
++  "nome": "reversa-pricing-estimate",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-estimate/SKILL.md",
++  "resumo": "Combina profile de cobranca e size da feature ativa para produzir tres cenarios de preco lado a lado: Esforco, Valor e Faixa de Mercado. Rod"
++ },
++ {
++  "nome": "reversa-pricing-product",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-product/SKILL.md",
++  "resumo": "Calculadora de ponto de equilibrio para vender o software como produto (licenca perpetua, aluguel, assinatura ou loja de apps). Le advisor.j"
++ },
++ {
++  "nome": "reversa-pricing-profile",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-profile/SKILL.md",
++  "resumo": "Conduz uma entrevista guiada de ate dez perguntas e gera o perfil de cobranca do usuario, com pais, moeda, senioridade normalizada, taxa hor"
++ },
++ {
++  "nome": "reversa-pricing-research",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-research/SKILL.md",
++  "resumo": "Pesquisa na web referencias de preco para o time de precificacao: taxa hora por senioridade e regiao, precos de produtos comparaveis e comis"
++ },
++ {
++  "nome": "reversa-pricing-size",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-pricing-size/SKILL.md",
++  "resumo": "Mede o tamanho estrutural da feature ativa lendo requirements, duvidas, plan e tasks do ciclo forward, e gera size.json mais size.md com T-s"
++ },
++ {
++  "nome": "reversa-principles",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-principles/SKILL.md",
++  "resumo": "Cria ou atualiza os princípios duradouros do projeto e propaga sugestões de ajuste nos templates dependentes. Princípios são raros, mudam po"
++ },
++ {
++  "nome": "reversa-prune",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-prune/SKILL.md",
++  "resumo": "Remoção de código morto: só remove o que provar ser morto (sem referência estática nem entrada dinâmica), distinguindo morto de órfão suspei"
++ },
++ {
++  "nome": "reversa-quality",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-quality/SKILL.md",
++  "resumo": "Auditoria de clareza textual do requirements. Verifica se a prosa é boa o bastante para gerar plano sem ambiguidade. NÃO mistura com auditor"
++ },
++ {
++  "nome": "reversa-reconstructor",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-reconstructor/SKILL.md",
++  "resumo": "Gera um plano de reconstrução bottom-up a partir das specs do Reversa e executa cada tarefa sob demanda, uma por vez, preservando tokens. Us"
++ },
++ {
++  "nome": "reversa-refactor",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-refactor/SKILL.md",
++  "resumo": "Orquestrador do time Code Quality. Inventaria oportunidades de melhoria no código legado, prioriza por ROI real (hotpath, não estética) e ro"
++ },
++ {
++  "nome": "reversa-requirements",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-requirements/SKILL.md",
++  "resumo": "Transforma uma ideia em linguagem natural num documento de requisitos completo, ancorado nos artefatos da pipeline reversa. Primeiro skill d"
++ },
++ {
++  "nome": "reversa-researcher",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-researcher/SKILL.md",
++  "resumo": "Agente Researcher do time Code New Project Agents. A partir de `ideation.md`, aprofunda o público-alvo em 1 a 3 personas estruturadas com jo"
++ },
++ {
++  "nome": "reversa-restructure",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-restructure/SKILL.md",
++  "resumo": "Refatoração de estrutura interna (método/classe) via catálogo Fowler, em passos pequenos e reversíveis, preservando o comportamento. Não mov"
++ },
++ {
++  "nome": "reversa-resume",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-resume/SKILL.md",
++  "resumo": "Retoma uma feature pausada (listada em paused-features de active-requirements.json) e a torna ativa. NÃO cria features novas, apenas troca a"
++ },
++ {
++  "nome": "reversa-reviewer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-reviewer/SKILL.md",
++  "resumo": "Revisa criticamente as especificações geradas pelo reversa-writer — encontra inconsistências, reclassifica confiança e gera perguntas para v"
++ },
++ {
++  "nome": "reversa-scout",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-scout/SKILL.md",
++  "resumo": "Mapeia a superfície do projeto legado — estrutura de pastas, linguagens, frameworks, dependências e entry points. Use no início de uma análi"
++ },
++ {
++  "nome": "reversa-screen-translator",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-screen-translator/SKILL.md",
++  "resumo": "Quinto agente do Time de Migração, em duas fases. Fase 1: detecta plataforma origem/alvo, apresenta os modos (literal, modernizado, híbrido)"
++ },
++ {
++  "nome": "reversa-selo-generativo",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-selo-generativo/SKILL.md",
++  "resumo": "Cria selos visuais generativos seeded com p5.js, gerando HTML standalone com arte algorítmica reprodutível derivada de um hash ou string."
++ },
++ {
++  "nome": "reversa-simplify",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-simplify/SKILL.md",
++  "resumo": "Simplificação algorítmica: troca lógica complexa por solução mais simples e clara, sem mudar o resultado, com prova de equivalência. Foca cl"
++ },
++ {
++  "nome": "reversa-spec-sdd",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-spec-sdd/SKILL.md",
++  "resumo": "Agente final do time Code New Project: decompõe um PRD em componentes e gera specs SDD por componente com score de qualidade (0 a 100) e aná"
++ },
++ {
++  "nome": "reversa-standardize",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-standardize/SKILL.md",
++  "resumo": "Padronização: aplica convenções de nomenclatura, formatação e organização do padrão dominante do projeto (ou declarado), sem mudar semântica"
++ },
++ {
++  "nome": "reversa-strategist",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-strategist/SKILL.md",
++  "resumo": "Terceiro agente do Time de Migração. Propõe estratégias de migração com trade-offs explícitos, considerando brief, paradigma e apetite. Reco"
++ },
++ {
++  "nome": "reversa-sync",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-sync/SKILL.md",
++  "resumo": "Convergência pós-coding do Reversa: destila a feature entregue num adendo em `_reversa_sdd/addenda/`, mantendo a extração representativa ent"
++ },
++ {
++  "nome": "reversa-to-do",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-to-do/SKILL.md",
++  "resumo": "Decompõe o roadmap em ações atômicas com IDs sequenciais, dependências e marcador de paralelismo. Quarto skill do ciclo forward, depois de `"
++ },
++ {
++  "nome": "reversa-visor",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-visor/SKILL.md",
++  "resumo": "Documenta a interface do sistema legado a partir de screenshots — extrai componentes, layouts, fluxos de navegação e estados de tela. Use qu"
++ },
++ {
++  "nome": "reversa-writer",
++  "tipo": "skill",
++  "fonte": "agata",
++  "tema": "agata",
++  "caminho": ".agents/skills/reversa-writer/SKILL.md",
++  "resumo": "Gera especificações executáveis do sistema legado como contratos operacionais, em formato de pasta-por-unit com requirements.md, design.md e"
+  }
+ ]
