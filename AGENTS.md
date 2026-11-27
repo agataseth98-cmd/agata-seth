@@ -27,3 +27,55 @@ Você é um MODELO do sistema Agata, não um assistente genérico — vale para 
 - **Mapa do Humano** (decisão do Humano, 18/11/2026; PROTOCOLOS.md, "Protocolo de inserção humana continuado"): obrigatório. Ao começar, leia a skill `agata-mapear-humano`; ao receber decisão ou correção do Humano, anote no cache do Conselho.
 - **O mais caro orquestra, os mais baratos executam** (decisão do Humano, 17/11/2026): quando a tarefa se divide em partes, o modelo mais capaz da sessão planeja, distribui, revisa e responde pelo resultado; a execução operacional (ler, medir, pesquisar, implementar e testar dentro do que foi especificado) vai para o modelo mais barato que dá conta, como subagente ou membro da Equipe. Quem orquestra confere o resultado, não só o relatório, antes de afirmar. Tarefa curta, que custa menos fazer do que delegar, o orquestrador faz direto. Quem executa não decide escopo nem assina.
 - **Economia de tokens é permanente** (Regra 7, (654)): antes de medir de novo, veja se o dado já existe na sessão ou em MEMÓRIAS; o que vai em toda mensagem (ferramentas, histórico, instrução) só entra quando for preciso — plugins sob demanda.
+
+
+---
+
+# Reversa
+
+> Framework de Engenharia Reversa instalado neste projeto.
+
+## Como usar
+
+Use o fluxo adequado no chat:
+
+- `reversa` — descobrir e documentar um sistema existente
+- `reversa-new` — criar PRD e specs para um projeto novo
+- `reversa-forward` — implementar ou evoluir código a partir das specs
+- `reversa-migrate` — planejar a migração de um sistema legado
+- `reversa-docs` — gerar o mini-site visual da documentação
+- `reversa-sync` — atualizar as specs após uma evolução, preservando o histórico
+- `reversa-update` — atualizar a própria instalação do Reversa quando houver nova versão
+- `impeccable` — design de front-end: criticar, auditar e polir interfaces (Impeccable, Apache 2.0)
+- `reversa-agents-help` — consultar o catálogo completo de agentes
+
+## Comportamento ao ativar
+
+Quando o usuário digitar `reversa` sozinho em uma mensagem:
+
+1. Ative o skill `reversa` disponível em `.agents/skills/reversa/SKILL.md`
+2. Leia o SKILL.md na íntegra e siga exatamente as instruções do Reversa
+
+## Atualização da Atena
+
+Atena é atualizada pelo próprio Reversa, em dois níveis:
+
+1. Para atualizar o framework e suas skills, execute `npx reversa update` em uma worktree de manutenção, revise o diff e submeta a atualização pelo fluxo P-8 do Agata.
+2. Para atualizar a compreensão do sistema depois de uma evolução, use `reversa-sync`; ele acrescenta adendos às specs e preserva o histórico anterior.
+
+Nenhuma atualização automática escreve no checkout principal. O comando apenas prepara a mudança; CI, revisão, assinatura humana e aplicação continuam obrigatórios. A versão instalada e os harnesses declarados ficam registrados em `.reversa/_config/manifest.yaml`.
+
+## Regra não-negociável
+
+Por padrão, nunca apague, modifique ou sobrescreva arquivos pré-existentes do projeto legado:
+o Reversa escreve apenas em `.reversa/`, `_reversa_sdd/`, `_reversa_docs/`, `_reversa_forward/`, `_reversa_bugs/` e `_reversa_refactor/`.
+A única exceção é a política configurável abaixo, controlada exclusivamente pelo usuário.
+
+Antes de criar, modificar ou apagar qualquer arquivo fora das pastas próprias do Reversa, leia `.reversa/reversa-config.json` e obedeça ao resultado:
+
+- Arquivo ausente, JSON inválido ou campo com tipo errado: trate como `allowLegacyEdits: false` (falha segura, nenhuma escrita fora das pastas do Reversa).
+- `allowLegacyEdits: false`: recuse a escrita, informando o caminho recusado, o estado atual da config e o que o usuário deve editar para liberar.
+- `allowLegacyEdits: true` com `allowedPaths` não vazio: escreva apenas em caminhos que casem com algum glob da lista (globs relativos à raiz do projeto, com `/`, suportando `*` e `**`).
+- `allowLegacyEdits: true` com `allowedPaths` vazio ou ausente: projeto liberado; avise uma vez por sessão que a liberação é irrestrita.
+
+Nunca crie nem edite `.reversa/reversa-config.json` por iniciativa própria: pedido na conversa não é liberação implícita, alterações nesse arquivo são ato exclusivo do usuário.
