@@ -5,10 +5,10 @@ Para ler uma peça: `python3 ferramentas/ferramentas.py ver <nome>`. Gerado por 
 
 | Tema | Peças | Observação |
 |---|---|---|
-| agata | 15 | skills próprias do sistema |
+| agata | 93 | skills próprias do sistema |
 | meta-skills | 2 |  |
 | planejamento-e-agentes | 5 |  |
 | revisao-e-git | 4 |  |
 | testes | 4 |  |
 
-Total: 30 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
+Total: 108 peças. Fontes presas a commit: `fontes/*/COMMIT`; licenças: `fontes/*/LICENSE`.
